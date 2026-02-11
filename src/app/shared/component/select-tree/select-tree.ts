@@ -1,0 +1,11 @@
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-select-tree',
+  standalone: false,
+  templateUrl: './select-tree.html',
+  styleUrl: './select-tree.css',
+})
+export class SelectTree {
+
+}
