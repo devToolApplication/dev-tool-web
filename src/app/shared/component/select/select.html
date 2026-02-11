@@ -1,1 +1,8 @@
-<p>select works!</p>
+<p-select
+  [options]="options"
+  optionLabel="label"
+  optionValue="value"
+  [placeholder]="placeholder"
+  [(ngModel)]="value"
+  (ngModelChange)="valueChange.emit($event)"
+/>

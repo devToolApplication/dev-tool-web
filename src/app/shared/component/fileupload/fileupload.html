@@ -1,1 +1,8 @@
-<p>fileupload works!</p>
+<p-fileupload
+  [mode]="mode"
+  [chooseLabel]="chooseLabel"
+  [accept]="accept"
+  [multiple]="multiple"
+  [customUpload]="true"
+  (onSelect)="fileSelect.emit($event)"
+/>

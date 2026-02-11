@@ -1,1 +1,8 @@
-<p>select-multi works!</p>
+<p-multiselect
+  [options]="options"
+  optionLabel="label"
+  optionValue="value"
+  [placeholder]="placeholder"
+  [(ngModel)]="value"
+  (ngModelChange)="valueChange.emit($event)"
+/>

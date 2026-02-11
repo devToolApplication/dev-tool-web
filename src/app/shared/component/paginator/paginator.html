@@ -1,1 +1,7 @@
-<p>paginator works!</p>
+<p-paginator
+  [first]="first"
+  [rows]="rows"
+  [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="rowsPerPageOptions"
+  (onPageChange)="pageChange.emit($event)"
+/>

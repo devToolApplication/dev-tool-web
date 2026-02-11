@@ -1,26 +1,22 @@
-import {APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners} from '@angular/core';
+import { APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutes } from './app.routes';
 import { AppComponent } from './app.component';
-import {KeycloakService} from './core/auth/keycloak.service';
-import {HTTP_INTERCEPTORS} from '@angular/common/http';
-import {AuthInterceptor} from './core/auth/auth.service';
-import {providePrimeNG} from 'primeng/config';
+import { KeycloakService } from './core/auth/keycloak.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './core/auth/auth.service';
+import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { SharedModule } from './shared/shared.module';
 
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () => keycloak.init();
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutes
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, AppRoutes, SharedModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     {
@@ -42,4 +38,4 @@ export function initializeKeycloak(keycloak: KeycloakService) {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

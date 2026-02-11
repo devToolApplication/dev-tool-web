@@ -1,1 +1,7 @@
-<p>date-picker works!</p>
+<p-datepicker
+  [showIcon]="showIcon"
+  [placeholder]="placeholder"
+  [dateFormat]="dateFormat"
+  [(ngModel)]="value"
+  (ngModelChange)="valueChange.emit($event)"
+/>

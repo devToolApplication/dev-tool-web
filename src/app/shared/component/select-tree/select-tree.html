@@ -1,1 +1,6 @@
-<p>select-tree works!</p>
+<p-treeselect
+  [options]="options"
+  [placeholder]="placeholder"
+  [(ngModel)]="value"
+  (ngModelChange)="valueChange.emit($event)"
+/>

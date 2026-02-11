@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { TreeNode } from 'primeng/api';
 
 @Component({
   selector: 'app-select-tree',
   standalone: false,
   templateUrl: './select-tree.html',
-  styleUrl: './select-tree.css',
+  styleUrl: './select-tree.css'
 })
 export class SelectTree {
-
+  @Input() placeholder = 'Chọn node';
+  @Input() options: TreeNode[] = [];
+  @Input() value: string | null = null;
+  @Output() valueChange = new EventEmitter<string | null>();
 }
