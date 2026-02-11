@@ -1,0 +1,36 @@
+@if (field.visible()) {
+
+  <label>{{ field.path }}</label>
+
+  @if (!field.options()) {
+
+    <input
+      [value]="field.value()"
+      [disabled]="field.disabled()"
+      (input)="field.setValue($any($event.target).value)"
+      (blur)="field.markAsTouched()" />
+
+  } @else {
+
+    <select
+      [value]="field.value()"
+      [disabled]="field.disabled()"
+      (change)="field.setValue($any($event.target).value)">
+
+      @for (opt of field.options(); track opt.value) {
+        <option [value]="opt.value">
+          {{ opt.label }}
+        </option>
+      }
+
+    </select>
+
+  }
+
+  @if (field.touched() && field.errors()) {
+    <div>
+      {{ field.errors()?.custom }}
+    </div>
+  }
+
+}

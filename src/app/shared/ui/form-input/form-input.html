@@ -1,0 +1,9 @@
+<form (ngSubmit)="onSubmit()">
+
+  <ng-container *ngFor="let f of engine.fields">
+    <app-field-renderer [field]="f"></app-field-renderer>
+  </ng-container>
+
+  <button type="submit">Submit</button>
+
+</form>
