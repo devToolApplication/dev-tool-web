@@ -47,13 +47,69 @@ export class AppComponent {
   dateValue: Date | null = new Date();
   selectedValue: string | number | null = 'A';
   selectedMultiValues: Array<string | number> = ['A'];
-  selectedTreeNode: string | null = '0-0';
+  selectedTreeNode: TreeNode | null = null;
   selectedButton: string | number | null = 'A';
   checked = true;
   toggleChecked = false;
   radioValue = 'option-1';
 
   paginatorState = { first: 0, rows: 10, totalRecords: 100 };
+
+  config = {
+    fields: [
+
+      {
+        type: 'text',
+        name: 'name',
+        validation: [
+          {
+            expression: '!value',
+            message: 'Name is required'
+          }
+        ]
+      },
+
+      {
+        type: 'number',
+        name: 'age',
+        rules: {
+          disabled: 'model.name != null && model.name !== ""'
+        }
+      },
+
+      {
+        type: 'select',
+        name: 'branch',
+        optionsExpression: `
+        extra.branches
+          .filter(x => x.address === user.address)
+          .map(x => ({ label: x.name, value: x.id }))
+      `
+      }
+
+    ]
+  };
+
+  initialValue = {
+    name: '',
+    age: null,
+    branch: null
+  };
+
+  context = {
+    user: { address: 'HCM' },
+    extra: {
+      branches: [
+        { id: 1, name: 'CN HCM', address: 'HCM' },
+        { id: 2, name: 'CN HN', address: 'HN' }
+      ]
+    },
+    mode: 'create'
+  };
+
+  save(data: any) {
+    console.log('Submit:', data);
+  }
 
   onPageChange(event: PaginatorState): void {
     this.paginatorState = {

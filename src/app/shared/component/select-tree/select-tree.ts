@@ -10,6 +10,7 @@ import { TreeNode } from 'primeng/api';
 export class SelectTree {
   @Input() placeholder = 'Chọn node';
   @Input() options: TreeNode[] = [];
-  @Input() value: string | null = null;
-  @Output() valueChange = new EventEmitter<string | null>();
+
+  @Input() value: TreeNode | null = null;
+  @Output() valueChange = new EventEmitter<TreeNode | null>();
 }

@@ -94,6 +94,14 @@
       <app-fileupload mode="basic" accept=".png,.jpg,.pdf" />
     </article>
 
+    <article class="card">
+      <h2>Form input</h2>
+      <app-form-input [config]="config"
+                      [context]="context"
+                      [initialValue]="initialValue"
+                      (submit)="save($event)" />
+    </article>
+
     <article class="card full-width">
       <h2>Paginator</h2>
       <app-paginator

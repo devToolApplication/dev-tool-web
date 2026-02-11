@@ -40,6 +40,8 @@ import { SelectTree } from './component/select-tree/select-tree';
 import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
+import { FormInput } from './ui/form-input/form-input';
+import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -63,8 +65,12 @@ const COMPONENTS = [
   ToggleSwitch
 ];
 
+const UI = [
+  FormInput
+]
+
 @NgModule({
-  declarations: [...COMPONENTS],
+  declarations: [...COMPONENTS, ...UI],
   imports: [
     CommonModule,
     FormsModule,
@@ -86,8 +92,9 @@ const COMPONENTS = [
     ToggleButtonModule,
     ToggleSwitchModule,
     BreadcrumbModule,
-    TextareaModule
+    TextareaModule,
+    FieldRenderer
   ],
-  exports: [...COMPONENTS]
+  exports: [...COMPONENTS, ...UI]
 })
 export class SharedModule {}
