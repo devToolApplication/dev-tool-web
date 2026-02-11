@@ -1,1 +1,7 @@
-<p>input-number works!</p>
+<p-inputnumber
+  [placeholder]="placeholder"
+  [min]="min"
+  [max]="max"
+  [(ngModel)]="value"
+  (ngModelChange)="valueChange.emit($event)"
+/>

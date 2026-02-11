@@ -1,1 +1,8 @@
-<p>toggle-button works!</p>
+<p-togglebutton
+  [onLabel]="onLabel"
+  [offLabel]="offLabel"
+  [onIcon]="onIcon"
+  [offIcon]="offIcon"
+  [(ngModel)]="checked"
+  (ngModelChange)="checkedChange.emit($event)"
+/>

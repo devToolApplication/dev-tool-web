@@ -1,1 +1,9 @@
-<p>check-box works!</p>
+<div class="inline-field">
+  <p-checkbox
+    [inputId]="inputId"
+    [binary]="true"
+    [(ngModel)]="checked"
+    (ngModelChange)="checkedChange.emit($event)"
+  />
+  <label [for]="inputId">{{ label }}</label>
+</div>

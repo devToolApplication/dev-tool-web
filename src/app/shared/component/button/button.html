@@ -1,1 +1,7 @@
-<p-button label="Check" />
+<p-button
+  [label]="label"
+  [icon]="icon"
+  [severity]="severity"
+  [disabled]="disabled"
+  (onClick)="buttonClick.emit()"
+/>
