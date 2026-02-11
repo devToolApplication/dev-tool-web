@@ -19,12 +19,12 @@ export function initializeKeycloak(keycloak: KeycloakService) {
   imports: [BrowserModule, AppRoutes, SharedModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      multi: true,
-      deps: [KeycloakService]
-    },
+    // {
+    //   provide: APP_INITIALIZER,
+    //   useFactory: initializeKeycloak,
+    //   multi: true,
+    //   deps: [KeycloakService]
+    // },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
