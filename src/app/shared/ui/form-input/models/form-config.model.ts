@@ -1,3 +1,5 @@
+import {Signal, WritableSignal} from '@angular/core';
+
 export type FieldConfig =
   | SimpleFieldConfig
   | SelectFieldConfig
@@ -37,4 +39,53 @@ export interface ArrayFieldConfig extends BaseFieldConfig {
 export interface ValidationRule {
   expression: string;
   message: string;
+}
+
+export interface FormContext {
+  user: any;
+  extra?: any;
+  mode?: 'create' | 'edit' | 'view';
+}
+
+export interface FieldRules {
+  visible?: string;
+  disabled?: string;
+}
+
+export interface SelectOption {
+  label: string;
+  value: unknown;
+}
+
+export interface FormConfig {
+  fields: FieldConfig[];
+}
+
+export type FieldType =
+  | 'text'
+  | 'number'
+  | 'select'
+  | 'group'
+  | 'array';
+
+export interface FieldState<TModel = unknown> {
+  type: FieldType;
+  name: string;
+  label?: string;
+  path: string;
+  value: Signal<any>;
+  setValue(val: any): void;
+  touched: WritableSignal<boolean>;
+  dirty: WritableSignal<boolean>;
+  visible: Signal<boolean>;
+  disabled: Signal<boolean>;
+  options: Signal<SelectOption[] | null>;
+  errors: Signal<Record<string, string> | null>;
+  valid: Signal<boolean>;
+  markAsTouched(): void;
+}
+
+export interface ArrayState {
+  addItem(initialValue?: unknown): void;
+  removeItem(index: number): void;
 }

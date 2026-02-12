@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {createFormEngine} from './utils/form-engine';
+import {FormConfig, FormContext} from './models/form-config.model';
 
 @Component({
   selector: 'app-form-input',
@@ -8,9 +9,9 @@ import {createFormEngine} from './utils/form-engine';
   styleUrl: './form-input.css',
 })
 export class FormInput implements OnInit{
-  @Input() config: any;
-  @Input() context: any;
-  @Input() initialValue: any = {};
+  @Input() config!: FormConfig;
+  @Input() context!: FormContext;
+  @Input() initialValue!: any;
   @Output() submit = new EventEmitter<any>();
 
   engine: any;

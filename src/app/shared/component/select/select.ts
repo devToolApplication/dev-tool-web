@@ -15,5 +15,6 @@ export class Select {
   @Input() placeholder = 'Chọn giá trị';
   @Input() options: SelectOption[] = [];
   @Input() value: string | number | null = null;
+  @Input() disabled: boolean = false;
   @Output() valueChange = new EventEmitter<string | number | null>();
 }

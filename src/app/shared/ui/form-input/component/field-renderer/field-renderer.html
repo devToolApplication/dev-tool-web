@@ -2,9 +2,18 @@
 
   <label>{{ field.path }}</label>
 
-  @if (!field.options()) {
+  @if (field.type == 'text') {
 
-    <input
+    <app-input-text
+      [label]="field.label"
+      [value]="field.value()"
+      [disabled]="field.disabled()"
+      (input)="field.setValue($any($event.target).value)"
+      (blur)="field.markAsTouched()" />
+
+  }@else if (field.type == 'number') {
+
+    <app-input-number
       [value]="field.value()"
       [disabled]="field.disabled()"
       (input)="field.setValue($any($event.target).value)"
@@ -12,7 +21,7 @@
 
   } @else {
 
-    <select
+    <app-select
       [value]="field.value()"
       [disabled]="field.disabled()"
       (change)="field.setValue($any($event.target).value)">
@@ -23,13 +32,13 @@
         </option>
       }
 
-    </select>
+    </app-select>
 
   }
 
   @if (field.touched() && field.errors()) {
     <div>
-      {{ field.errors()?.custom }}
+      {{ field.errors()?.['custom'] }}
     </div>
   }
 

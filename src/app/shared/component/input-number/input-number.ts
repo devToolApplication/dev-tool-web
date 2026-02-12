@@ -11,5 +11,6 @@ export class InputNumber {
   @Input() min?: number;
   @Input() max?: number;
   @Input() value: number | null = null;
+  @Input() disabled = false;
   @Output() valueChange = new EventEmitter<number | null>();
 }

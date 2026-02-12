@@ -1,22 +1,23 @@
-import { signal, computed } from '@angular/core';
+import { signal, computed, WritableSignal, Signal } from '@angular/core';
 import { createFieldState } from './field-state';
 import { createArrayState } from './array-state';
 import { ExpressionEngine } from './expression.engine';
+import {ArrayState, FieldConfig, FieldState, FormConfig, FormContext} from '../models/form-config.model';
 
-export function createFormEngine(
-  config: any,
-  context: any,
-  initialValue: any = {}
+export function createFormEngine<TModel extends object>(
+  config: FormConfig,
+  context: FormContext,
+  initialValue: TModel
 ) {
 
-  const model = signal(initialValue);
-  const ctxSignal = signal(context);
+  const model: WritableSignal<TModel> = signal(initialValue);
+  const ctxSignal: WritableSignal<FormContext> = signal(context);
   const expr = new ExpressionEngine();
 
-  const fields: any[] = [];
-  const arrays: any = {};
+  const fields: FieldState<TModel>[] = [];
+  const arrays: Record<string, ArrayState> = {};
 
-  function process(list: any[], parentPath = '') {
+  function process(list: FieldConfig[], parentPath = '') {
 
     list.forEach(field => {
 
@@ -52,16 +53,16 @@ export function createFormEngine(
     fields.every(f => f.valid())
   );
 
-  function markAllAsTouched() {
+  function markAllAsTouched(): void {
     fields.forEach(f => f.markAsTouched());
   }
 
-  function reset(value: any = {}) {
+  function reset(value: TModel): void {
     model.set(value);
     fields.forEach(f => f.touched.set(false));
   }
 
-  function patchValue(value: any) {
+  function patchValue(value: Partial<TModel>): void {
     model.update(m => ({ ...m, ...value }));
   }
 

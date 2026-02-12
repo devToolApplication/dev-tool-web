@@ -1,1 +1,59 @@
-<input pInputText type="text" [placeholder]="placeholder" [(ngModel)]="value" (ngModelChange)="valueChange.emit($event)" />
+<div
+  class="input-wrapper"
+  [class.fluid]="fluid"
+  [class.small]="size === 'small'"
+  [class.large]="size === 'large'"
+>
+
+  @if (label) {
+
+    <p-floatlabel>
+
+      <input
+        pInputText
+        [id]="inputId"
+        type="text"
+        [(ngModel)]="value"
+        (ngModelChange)="valueChange.emit($event)"
+        [disabled]="disabled"
+        [placeholder]="placeholder"
+        [class.p-invalid]="invalid"
+        autocomplete="off"
+        [style.width.%]="fluid ? 100 : null"
+      />
+
+      <label [for]="inputId">
+        {{ label }}
+      </label>
+
+    </p-floatlabel>
+
+  } @else {
+
+    <input
+      pInputText
+      type="text"
+      [(ngModel)]="value"
+      (ngModelChange)="valueChange.emit($event)"
+      [disabled]="disabled"
+      [placeholder]="placeholder"
+      [class.p-invalid]="invalid"
+      autocomplete="off"
+      [style.width.%]="fluid ? 100 : null"
+    />
+
+  }
+
+  @if (helpText && !invalid) {
+    <small class="help-text">
+      {{ helpText }}
+    </small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="error-text">
+      {{ errorMessage }}
+    </small>
+  }
+
+</div>

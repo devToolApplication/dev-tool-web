@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from './shared/component/select/select';
+import {FormConfig, FormContext} from './shared/ui/form-input/models/form-config.model';
 
 @Component({
   selector: 'app-root',
@@ -55,12 +56,13 @@ export class AppComponent {
 
   paginatorState = { first: 0, rows: 10, totalRecords: 100 };
 
-  config = {
+  config: FormConfig = {
     fields: [
 
       {
         type: 'text',
         name: 'name',
+        label: 'Ten',
         validation: [
           {
             expression: '!value',
@@ -96,7 +98,7 @@ export class AppComponent {
     branch: null
   };
 
-  context = {
+  context : FormContext  = {
     user: { address: 'HCM' },
     extra: {
       branches: [

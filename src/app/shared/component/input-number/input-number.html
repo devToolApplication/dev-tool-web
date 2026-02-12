@@ -1,7 +1,8 @@
-<p-inputnumber
+<p-input-number
   [placeholder]="placeholder"
   [min]="min"
   [max]="max"
   [(ngModel)]="value"
   (ngModelChange)="valueChange.emit($event)"
+  [disabled]="disabled"
 />

@@ -42,6 +42,7 @@ import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { FormInput } from './ui/form-input/form-input';
 import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
+import {FloatLabel} from 'primeng/floatlabel';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -69,8 +70,12 @@ const UI = [
   FormInput
 ]
 
+const UI_COMPONENT = [
+  FieldRenderer
+]
+
 @NgModule({
-  declarations: [...COMPONENTS, ...UI],
+  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT],
   imports: [
     CommonModule,
     FormsModule,
@@ -93,8 +98,8 @@ const UI = [
     ToggleSwitchModule,
     BreadcrumbModule,
     TextareaModule,
-    FieldRenderer
+    FloatLabel,
   ],
-  exports: [...COMPONENTS, ...UI]
+  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
 })
 export class SharedModule {}
