@@ -4,10 +4,7 @@
   [class.small]="size === 'small'"
   [class.large]="size === 'large'"
 >
-
-  @if (label) {
-
-    <p-floatlabel>
+    <p-floatlabel [attr.variant]="variant">
 
       <input
         pInputText
@@ -16,33 +13,16 @@
         [(ngModel)]="value"
         (ngModelChange)="valueChange.emit($event)"
         [disabled]="disabled"
-        [placeholder]="placeholder"
-        [class.p-invalid]="invalid"
+        [attr.placeholder]="placeholder || null"
+        [invalid]="invalid"
         autocomplete="off"
         [style.width.%]="fluid ? 100 : null"
       />
-
-      <label [for]="inputId">
-        {{ label }}
+      <label [attr.for]="inputId">
+        {{label}}
       </label>
-
     </p-floatlabel>
-
-  } @else {
-
-    <input
-      pInputText
-      type="text"
-      [(ngModel)]="value"
-      (ngModelChange)="valueChange.emit($event)"
-      [disabled]="disabled"
-      [placeholder]="placeholder"
-      [class.p-invalid]="invalid"
-      autocomplete="off"
-      [style.width.%]="fluid ? 100 : null"
-    />
-
-  }
+   
 
   @if (helpText && !invalid) {
     <small class="help-text">

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type InputSize = 'small' | 'normal' | 'large';
+export type FloatLabelType = 'on' | 'in' | '';
 
 @Component({
   selector: 'app-input-text',
@@ -13,7 +14,7 @@ export class InputText {
   /* ========= Basic ========= */
 
   @Input() label?: string;
-  @Input() placeholder = 'Nhập nội dung';
+  @Input() placeholder: string | undefined | null;
   @Input() value = '';
   @Input() disabled = false;
 
@@ -22,6 +23,8 @@ export class InputText {
   @Input() size: InputSize = 'normal';
   @Input() fluid = true;
   @Input() helpText?: string;
+  @Input() variant: FloatLabelType = '';
+  @Input() tooltip?: string;
 
   /* ========= Validation ========= */
 

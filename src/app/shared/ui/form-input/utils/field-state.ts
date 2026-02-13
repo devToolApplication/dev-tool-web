@@ -13,6 +13,7 @@ export function createFieldState<TModel extends object>(
   const type = config.type;
   const name = config.name;
   const label = config.label;
+  const width = config.width;
 
   const touched = signal(false);
   const dirty = signal(false);
@@ -99,6 +100,7 @@ export function createFieldState<TModel extends object>(
     name,
     label,
     path,
+    width,
     value,
     setValue,
     touched,

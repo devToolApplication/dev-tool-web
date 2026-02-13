@@ -1,5 +1,7 @@
 import {Signal, WritableSignal} from '@angular/core';
 
+export type GridWidth = '1/2' | '1/3' | '1/4' | '1/5' | '1/6' | 'full';
+
 export type FieldConfig =
   | SimpleFieldConfig
   | SelectFieldConfig
@@ -9,6 +11,7 @@ export type FieldConfig =
 export interface BaseFieldConfig {
   name: string;
   label?: string;
+  width?: GridWidth;
   rules?: {
     visible?: string;
     disabled?: string;
@@ -73,6 +76,7 @@ export interface FieldState<TModel = unknown> {
   name: string;
   label?: string;
   path: string;
+  width?: GridWidth;
   value: Signal<any>;
   setValue(val: any): void;
   touched: WritableSignal<boolean>;

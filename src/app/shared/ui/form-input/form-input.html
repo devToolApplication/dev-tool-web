@@ -1,9 +1,16 @@
-<form (ngSubmit)="onSubmit()">
+<p-fluid>
+  <form (ngSubmit)="onSubmit()" class="grid grid-cols-12 gap-4">
 
-  <ng-container *ngFor="let f of engine.fields">
-    <app-field-renderer [field]="f"></app-field-renderer>
-  </ng-container>
+    @for (f of engine.fields; track f.path) {
+      <app-field-renderer
+        [ngClass]="getColClass(f.width)"
+        [field]="f">
+      </app-field-renderer>
+    }
 
-  <button type="submit">Submit</button>
+    <button type="submit" class="col-span-12">
+      Submit
+    </button>
 
-</form>
+  </form>
+</p-fluid>

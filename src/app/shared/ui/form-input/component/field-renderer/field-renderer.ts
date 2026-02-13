@@ -1,7 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {SharedModule} from '../../../../shared.module';
 import {SelectModule} from 'primeng/select';
-import {FieldState} from '../../models/form-config.model';
+import {FieldState, GridWidth} from '../../models/form-config.model';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-field-renderer',

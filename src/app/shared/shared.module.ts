@@ -43,6 +43,7 @@ import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { FormInput } from './ui/form-input/form-input';
 import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
 import {FloatLabel} from 'primeng/floatlabel';
+import { FluidModule } from 'primeng/fluid';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -99,6 +100,7 @@ const UI_COMPONENT = [
     BreadcrumbModule,
     TextareaModule,
     FloatLabel,
+    FluidModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
 })

@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {createFormEngine} from './utils/form-engine';
-import {FormConfig, FormContext} from './models/form-config.model';
+import {FormConfig, FormContext, GridWidth} from './models/form-config.model';
 
 @Component({
   selector: 'app-form-input',
@@ -29,4 +29,18 @@ export class FormInput implements OnInit{
     if (!this.engine.valid()) return;
     this.submit.emit(this.engine.model());
   }
+
+  getColClass(width?: GridWidth): string {
+    const map: Record<GridWidth, string> = {
+      '1/2': 'col-span-6',
+      '1/3': 'col-span-4',
+      '1/4': 'col-span-3',
+      '1/5': 'col-span-2', // gần đúng
+      '1/6': 'col-span-2',
+      'full': 'col-span-12'
+    };
+  
+    return map[width ?? 'full'];
+  }
+  
 }

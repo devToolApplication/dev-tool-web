@@ -63,6 +63,7 @@ export class AppComponent {
         type: 'text',
         name: 'name',
         label: 'Ten',
+        width: '1/2',
         validation: [
           {
             expression: '!value',
@@ -72,8 +73,9 @@ export class AppComponent {
       },
 
       {
-        type: 'number',
+        type: 'text',
         name: 'age',
+        width: '1/2',
         rules: {
           disabled: 'model.name != null && model.name !== ""'
         }
@@ -82,6 +84,7 @@ export class AppComponent {
       {
         type: 'select',
         name: 'branch',
+        width: '1/2',
         optionsExpression: `
         extra.branches
           .filter(x => x.address === user.address)

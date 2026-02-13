@@ -1,45 +1,46 @@
-@if (field.visible()) {
+<div>
+  @if (field.visible()) {
 
-  <label>{{ field.path }}</label>
+    @if (field.type == 'text') {
+      {{field.errors() | json}}
+      {{field.touched() | json}}
 
-  @if (field.type == 'text') {
+      <app-input-text
+        [invalid]="field.touched() && !!field.errors()"
+        [errorMessage]="field.errors()?.['custom']"
+        [label]="field.label"
+        [value]="field.value()"
+        [disabled]="field.disabled()"
+        (input)="field.setValue($any($event.target).value)"
+        (blur)="field.markAsTouched()" />
 
-    <app-input-text
-      [label]="field.label"
-      [value]="field.value()"
-      [disabled]="field.disabled()"
-      (input)="field.setValue($any($event.target).value)"
-      (blur)="field.markAsTouched()" />
+    }@else if (field.type == 'number') {
 
-  }@else if (field.type == 'number') {
+      <app-input-number
+        [value]="field.value()"
+        [disabled]="field.disabled()"
+        (input)="field.setValue($any($event.target).value)"
+        (blur)="field.markAsTouched()" />
 
-    <app-input-number
-      [value]="field.value()"
-      [disabled]="field.disabled()"
-      (input)="field.setValue($any($event.target).value)"
-      (blur)="field.markAsTouched()" />
+    } @else {
 
-  } @else {
+      <app-select
+        [label]="field.label"
+        [value]="field.value()"
+        [disabled]="field.disabled()"
+        [invalid]="field.touched() && !!field.errors()"
+        [errorMessage]="field.errors()?.['custom']"
+        (change)="field.setValue($any($event.target).value)">
 
-    <app-select
-      [value]="field.value()"
-      [disabled]="field.disabled()"
-      (change)="field.setValue($any($event.target).value)">
+        @for (opt of field.options(); track opt.value) {
+          <option [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        }
 
-      @for (opt of field.options(); track opt.value) {
-        <option [value]="opt.value">
-          {{ opt.label }}
-        </option>
-      }
+      </app-select>
 
-    </app-select>
+    }
 
   }
-
-  @if (field.touched() && field.errors()) {
-    <div>
-      {{ field.errors()?.['custom'] }}
-    </div>
-  }
-
-}
+</div>
