@@ -73,12 +73,19 @@ export class AppComponent {
       },
 
       {
-        type: 'text',
+        type: 'number',
+        label: 'Tuổi',
         name: 'age',
         width: '1/2',
         rules: {
           disabled: 'model.name != null && model.name !== ""'
-        }
+        },
+        validation: [
+          {
+            expression: 'value <= 0',
+            message: 'Tuoi khong duoc âm'
+          }
+        ]
       },
 
       {

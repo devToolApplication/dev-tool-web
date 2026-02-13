@@ -1,8 +1,39 @@
-<p-input-number
-  [placeholder]="placeholder"
-  [min]="min"
-  [max]="max"
-  [(ngModel)]="value"
-  (ngModelChange)="valueChange.emit($event)"
-  [disabled]="disabled"
-/>
+<div
+  class="input-wrapper"
+  [class.fluid]="fluid"
+  [class.small]="size === 'small'"
+  [class.large]="size === 'large'"
+>
+  <p-floatLabel>
+    <p-inputNumber
+      [inputId]="inputId"
+      [(ngModel)]="value"
+      (ngModelChange)="valueChange.emit($event)"
+      [disabled]="disabled"
+      [attr.placeholder]="placeholder || null"
+      [mode]="mode"
+      [currency]="currency"
+      [showClear]="showClear"
+      [minFractionDigits]="minFractionDigits"
+      [maxFractionDigits]="maxFractionDigits"
+      [invalid]="invalid"
+      autocomplete="off"
+      [style]="{ width: fluid ? '100%' : 'auto' }"
+      (onBlur)="blur.emit()"
+      (onFocus)="focus.emit()"
+    />
+    <label [attr.for]="inputId">{{label}}</label>
+  </p-floatLabel>
+
+  @if (helpText && !invalid) {
+    <small class="help-text">
+      {{ helpText }}
+    </small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="error-text">
+      {{ errorMessage }}
+    </small>
+  }
+</div>

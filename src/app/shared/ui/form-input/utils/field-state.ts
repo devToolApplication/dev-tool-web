@@ -10,24 +10,18 @@ export function createFieldState<TModel extends object>(
   contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine
 ): FieldState<TModel> {
-  const type = config.type;
-  const name = config.name;
-  const label = config.label;
-  const width = config.width;
+  const { type, name, label, width, ...rest } = config;
 
   const touched = signal(false);
   const dirty = signal(false);
+  const focusing = signal(false);
+  const blurred = signal(false);
 
   const value = computed(() =>
     getByPath(modelSignal(), path)
   );
 
   function setValue(val: unknown): void {
-
-    if (config.type === 'number') {
-      val = val !== null ? Number(val) : null;
-    }
-
     modelSignal.update((m: TModel) =>
       updateByPath(m, path, val)
     );
@@ -105,11 +99,13 @@ export function createFieldState<TModel extends object>(
     setValue,
     touched,
     dirty,
+    focusing,
+    blurred,
     visible,
     disabled,
     options,
     errors,
     valid,
-    markAsTouched: () => touched.set(true)
+    ...rest
   } as FieldState;
 }

@@ -2,8 +2,6 @@
   @if (field.visible()) {
 
     @if (field.type == 'text') {
-      {{field.errors() | json}}
-      {{field.touched() | json}}
 
       <app-input-text
         [invalid]="field.touched() && !!field.errors()"
@@ -12,15 +10,22 @@
         [value]="field.value()"
         [disabled]="field.disabled()"
         (input)="field.setValue($any($event.target).value)"
-        (blur)="field.markAsTouched()" />
+        (focus)="onFocus()"
+        (blur)="onBlur()" />
 
     }@else if (field.type == 'number') {
 
       <app-input-number
+        [invalid]="field.touched() && !!field.errors()"
+        [errorMessage]="field.errors()?.['custom']"
+        [label]="field.label"
         [value]="field.value()"
         [disabled]="field.disabled()"
-        (input)="field.setValue($any($event.target).value)"
-        (blur)="field.markAsTouched()" />
+        [min]="0"
+        [max]="100"
+        (valueChange)="field.setValue($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()" />
 
     } @else {
 
@@ -30,7 +35,9 @@
         [disabled]="field.disabled()"
         [invalid]="field.touched() && !!field.errors()"
         [errorMessage]="field.errors()?.['custom']"
-        (change)="field.setValue($any($event.target).value)">
+        (change)="field.setValue($any($event.target).value)"
+        (focus)="onFocus()"
+        (blur)="onBlur()">
 
         @for (opt of field.options(); track opt.value) {
           <option [value]="opt.value">

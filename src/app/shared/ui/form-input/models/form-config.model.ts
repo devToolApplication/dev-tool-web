@@ -80,6 +80,8 @@ export interface FieldState<TModel = unknown> {
   value: Signal<any>;
   setValue(val: any): void;
   touched: WritableSignal<boolean>;
+  focusing: WritableSignal<boolean>;
+  blurred: WritableSignal<boolean>;
   dirty: WritableSignal<boolean>;
   visible: Signal<boolean>;
   disabled: Signal<boolean>;
@@ -87,6 +89,8 @@ export interface FieldState<TModel = unknown> {
   errors: Signal<Record<string, string> | null>;
   valid: Signal<boolean>;
   markAsTouched(): void;
+  markAsFocused(): void;
+  markAsBlurred(): void;
 }
 
 export interface ArrayState {

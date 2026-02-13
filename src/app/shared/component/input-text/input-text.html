@@ -17,6 +17,8 @@
         [invalid]="invalid"
         autocomplete="off"
         [style.width.%]="fluid ? 100 : null"
+        (blur)="blur.emit()"
+        (focus)="focus.emit()"
       />
       <label [attr.for]="inputId">
         {{label}}
