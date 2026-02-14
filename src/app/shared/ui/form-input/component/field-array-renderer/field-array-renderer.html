@@ -1,12 +1,10 @@
 @if (field.visible()) {
-
+  
   <div class="col-span-12">
-
+    <p-fieldset 
+  [legend]="field.label || 'Thông tin'"
+  class="w-full">
     <div class="flex justify-between mb-4">
-      <label class="font-semibold text-lg">
-        {{ field.label }}
-      </label>
-
       <button
         type="button"
         (click)="addItem()"
@@ -44,7 +42,7 @@
       </div>
 
     }
-
+  </p-fieldset>
   </div>
-
+  
 }

@@ -1,0 +1,37 @@
+@if (field.visible()) {
+  <p-fieldset 
+    [legend]="field.label || 'Thông tin'"
+    class="w-full">
+
+    <div class="grid grid-cols-12 gap-4">
+
+      @for (f of field.children; track $index; let i = $index) {
+
+        @if (f.type === 'array') {
+
+          <!-- Nếu sau này cần array -->
+          <!--
+          <app-field-array-renderer
+            class="w-full h-full"
+            [ngClass]="getCol(f.width)"
+            [field]="f">
+          </app-field-array-renderer>
+          -->
+
+        } @else {
+
+          <app-field-renderer
+            class="w-full h-full"
+            [ngClass]="getCol(f.width)"
+            [field]="f">
+          </app-field-renderer>
+
+        }
+
+      }
+
+    </div>
+
+  </p-fieldset>
+
+}

@@ -208,7 +208,7 @@ export class AppComponent {
         type: 'date',
         name: 'dateOfBirth',
         label: 'Date of Birth',
-        width: '1/2',
+        width: 'full',
         validation: [
           Rules.required('Select date')
         ]

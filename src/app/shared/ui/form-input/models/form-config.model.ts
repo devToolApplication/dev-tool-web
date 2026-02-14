@@ -101,7 +101,7 @@ export type FieldType =
   | 'array';
 
 export interface FieldState<TModel = unknown> {
-  fieldConfig: FieldConfig;
+  fieldConfig: TModel;
   type: FieldType;
   name: string;
   label?: string;
@@ -131,4 +131,9 @@ export interface ArrayFieldState<TModel = unknown>
 
 export interface FormConfig {
   fields: FieldConfig[];
+}
+
+export interface GroupFieldState extends FieldState {
+  fieldConfig: GroupFieldConfig;
+  children: FieldState[] | ArrayFieldState[];
 }

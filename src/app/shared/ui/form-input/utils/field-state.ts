@@ -1,15 +1,21 @@
 import { signal, computed, WritableSignal } from '@angular/core';
 import { updateByPath, getByPath } from './form.utils';
 import { ExpressionEngine } from './expression.engine';
-import { FieldConfig, FieldState, FormContext, SelectOption } from '../models/form-config.model';
+import {
+  FieldConfig,
+  FieldState,
+  FormContext,
+  SelectOption,
+  GroupFieldState
+} from '../models/form-config.model';
 
-export function createFieldState<TModel extends object>(
+export function createFieldState<TFormModel extends object>(
   path: string,
   config: FieldConfig,
-  modelSignal: WritableSignal<TModel>,
+  modelSignal: WritableSignal<TFormModel>,
   contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine
-): FieldState<TModel> {
+): FieldState {
 
   const { type, name, label, width } = config;
 
@@ -18,72 +24,38 @@ export function createFieldState<TModel extends object>(
   const focusing = signal(false);
   const blurred = signal(false);
 
-  // ========================
-  // VALUE
-  // ========================
   const value = computed(() =>
     getByPath(modelSignal(), path)
   );
 
   function setValue(val: unknown): void {
-    modelSignal.update((m: TModel) =>
+    modelSignal.update((m: TFormModel) =>
       updateByPath(m, path, val)
     );
     dirty.set(true);
   }
 
-  function markAsTouched() {
-    touched.set(true);
-  }
+  function markAsTouched() { touched.set(true); }
+  function markAsFocused() { focusing.set(true); blurred.set(false); }
+  function markAsBlurred() { focusing.set(false); blurred.set(true); }
 
-  function markAsFocused() {
-    focusing.set(true);
-    blurred.set(false);
-  }
-
-  function markAsBlurred() {
-    focusing.set(false);
-    blurred.set(true);
-  }
-
-  // ========================
-  // CONTEXT BUILDER (QUAN TRỌNG)
-  // ========================
   const buildCtx = () => ({
     model: modelSignal(),
     context: contextSignal(),
     value: value()
   });
 
-  // ========================
-  // VISIBLE
-  // ========================
   const visible = computed(() => {
     if (!config.rules?.visible) return true;
-
-    return !!expr.evaluate(
-      config.rules.visible,
-      buildCtx()
-    );
+    return !!expr.evaluate(config.rules.visible, buildCtx());
   });
 
-  // ========================
-  // DISABLED
-  // ========================
   const disabled = computed(() => {
     if (!config.rules?.disabled) return false;
-
-    return !!expr.evaluate(
-      config.rules.disabled,
-      buildCtx()
-    );
+    return !!expr.evaluate(config.rules.disabled, buildCtx());
   });
 
-  // ========================
-  // OPTIONS
-  // ========================
   const options = computed<SelectOption[]>(() => {
-
     if (
       config.type !== 'select' &&
       config.type !== 'select-multi' &&
@@ -91,35 +63,19 @@ export function createFieldState<TModel extends object>(
     ) return [];
 
     if ('optionsExpression' in config && config.optionsExpression) {
-      return expr.evaluate(
-        config.optionsExpression,
-        buildCtx()
-      ) || [];
+      return expr.evaluate(config.optionsExpression, buildCtx()) || [];
     }
 
     return (config as any).options || [];
   });
 
-  // ========================
-  // VALIDATION
-  // ========================
   const errors = computed<Record<string, string> | null>(() => {
-
     const result: Record<string, string> = {};
 
     config.validation?.forEach(rule => {
-
-      const invalid = expr.evaluate(
-        rule.expression,
-        buildCtx()
-      );
-
+      const invalid = expr.evaluate(rule.expression, buildCtx());
       if (invalid) {
-        result["custom"] =
-          expr.renderTemplate(
-            rule.message,
-            buildCtx()
-          );
+        result["custom"] = expr.renderTemplate(rule.message, buildCtx());
       }
     });
 
@@ -128,10 +84,7 @@ export function createFieldState<TModel extends object>(
 
   const valid = computed(() => !errors());
 
-  // ========================
-  // RETURN
-  // ========================
-  return {
+  const baseState: FieldState = {
     fieldConfig: config,
     type,
     name,
@@ -153,5 +106,25 @@ export function createFieldState<TModel extends object>(
     markAsFocused,
     markAsBlurred
   };
-}
 
+  if (config.type === 'group') {
+
+    const children = config.children.map(child =>
+      createFieldState(
+        `${path}.${child.name}`,
+        child,
+        modelSignal,
+        contextSignal,
+        expr
+      )
+    );
+
+    return {
+      ...baseState,
+      fieldConfig: config,
+      children
+    } as GroupFieldState;
+  }
+
+  return baseState;
+}

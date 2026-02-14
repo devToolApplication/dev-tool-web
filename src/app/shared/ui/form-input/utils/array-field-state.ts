@@ -61,7 +61,7 @@ import {
     });
   
     return {
-      fieldConfig: config,
+      fieldConfig: config as any,
       type: 'array',
       name: config.name,
       label: config.label,

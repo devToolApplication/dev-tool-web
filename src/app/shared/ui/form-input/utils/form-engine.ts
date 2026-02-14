@@ -23,7 +23,7 @@ export function createFormEngine<TModel extends object>(
   const ctxSignal: WritableSignal<FormContext> = signal(context);
   const expr = new ExpressionEngine();
 
-  const fields: (FieldState<TModel> | ArrayFieldState<TModel>)[] = [];
+  const fields: (FieldState | ArrayFieldState<TModel>)[] = [];
   const arrays: Record<string, ArrayState> = {};
 
   function process(list: FieldConfig[], parentPath = '') {

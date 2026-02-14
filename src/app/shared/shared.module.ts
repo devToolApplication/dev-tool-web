@@ -21,6 +21,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
+import { FieldsetModule } from 'primeng/fieldset';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -46,6 +47,7 @@ import { FieldRenderer } from './ui/form-input/component/field-renderer/field-re
 import {FloatLabel} from 'primeng/floatlabel';
 import { FluidModule } from 'primeng/fluid';
 import { FieldArrayRenderer } from './ui/form-input/component/field-array-renderer/field-array-renderer';
+import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -75,7 +77,8 @@ const UI = [
 
 const UI_COMPONENT = [
   FieldRenderer,
-  FieldArrayRenderer
+  FieldArrayRenderer,
+  FieldGroupRenderer
 ]
 
 @NgModule({
@@ -104,7 +107,8 @@ const UI_COMPONENT = [
     TextareaModule,
     FloatLabel,
     FluidModule,
-    MessageModule
+    MessageModule,
+    FieldsetModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
 })
