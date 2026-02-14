@@ -1,5 +1,5 @@
 <div
-  class="flex items-center"
+  class="flex h-full w-full items-center"
   [ngClass]="{
     'flex-col gap-2': labelPosition === 'top',
     'flex-row items-start gap-4': labelPosition === 'left'
@@ -25,8 +25,11 @@
           [name]="groupdName"
           [value]="option.value"
           [(ngModel)]="value"
+          (ngModelChange)="onChange($event)"
           [disabled]="disabled || option.disabled || false"
-          (blur)="onBlur()">
+          (blur)="onBlur()"
+        
+          >
         </p-radioButton>
 
         <label

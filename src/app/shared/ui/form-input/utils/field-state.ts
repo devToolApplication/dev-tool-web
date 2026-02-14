@@ -14,7 +14,8 @@ export function createFieldState<TFormModel extends object>(
   config: FieldConfig,
   modelSignal: WritableSignal<TFormModel>,
   contextSignal: WritableSignal<FormContext>,
-  expr: ExpressionEngine
+  expr: ExpressionEngine,
+  groupName?: string
 ): FieldState {
 
   const { type, name, label, width } = config;
@@ -104,7 +105,8 @@ export function createFieldState<TFormModel extends object>(
     valid,
     markAsTouched,
     markAsFocused,
-    markAsBlurred
+    markAsBlurred,
+    groupName
   };
 
   if (config.type === 'group') {
@@ -115,7 +117,8 @@ export function createFieldState<TFormModel extends object>(
         child,
         modelSignal,
         contextSignal,
-        expr
+        expr,
+        config.name
       )
     );
 

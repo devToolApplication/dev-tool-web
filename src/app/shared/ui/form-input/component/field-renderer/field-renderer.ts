@@ -29,7 +29,18 @@ export class FieldRenderer implements OnChanges {
   get isArray() {
     return this.field.type === 'array';
   }
-  
+
+  onChangeValue(value: any) {
+    console.log(value);
+    
+    this.field.setValue(value);
+  }
+
+  onEnter() {
+    this.field.focusing.set(true);
+    this.field.blurred.set(false);
+  }
+
   onFocus() {
     this.field.focusing.set(true);
     this.field.blurred.set(false);

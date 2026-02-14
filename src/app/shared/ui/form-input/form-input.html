@@ -2,30 +2,41 @@
   <form (ngSubmit)="onSubmit()" class="grid grid-cols-12 gap-6 items-start">
 
     @for (f of engine.fields; track f.path) {
-  @if (f.type === 'array') {
+      @if (f.type === 'array') {
 
-    <app-field-array-renderer
-      class="w-full h-full"
-      [ngClass]="getCol(f.width)"
-      [field]="f">
-    </app-field-array-renderer>
+        <app-field-array-renderer
+          class="w-full h-full"
+          [ngClass]="getCol(f.width)"
+          [field]="f">
+        </app-field-array-renderer>
 
-  } @else if (f.type === 'group') {
-    <app-field-group-renderer
-      class="w-full h-full"
-      [ngClass]="getCol(f.width)"
-      [field]="f">
-    </app-field-group-renderer>
+      } @else if (f.type === 'group') {
 
-  } @else {
+        <app-field-group-renderer
+          class="w-full h-full"
+          [ngClass]="getCol(f.width)"
+          [field]="f">
+        </app-field-group-renderer>
 
-    <app-field-renderer
-    class="w-full h-full"
-    [ngClass]="getCol(f.width)"
-    [field]="f">
-  </app-field-renderer>
+      } @else {
 
-  }
-}
+        <app-field-renderer
+          class="w-full h-full"
+          [ngClass]="getCol(f.width)"
+          [field]="f">
+        </app-field-renderer>
+
+      }
+    }
+
+    <!-- Submit Button -->
+    <div class="col-span-12 flex justify-end">
+      <button 
+        type="submit"
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        Submit
+      </button>
+    </div>
+
   </form>
 </p-fluid>

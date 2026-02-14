@@ -12,6 +12,7 @@ import {
   FormConfig,
   FormContext
 } from '../models/form-config.model';
+import { createFieldGroupState } from './create-field-group-state';
 
 export function createFormEngine<TModel extends object>(
   config: FormConfig,
@@ -26,7 +27,7 @@ export function createFormEngine<TModel extends object>(
   const fields: (FieldState | ArrayFieldState<TModel>)[] = [];
   const arrays: Record<string, ArrayState> = {};
 
-  function process(list: FieldConfig[], parentPath = '') {
+  function process(list: FieldConfig[], parentPath = '', groupName ?: string) {
 
     list.forEach(field => {
 
@@ -34,10 +35,22 @@ export function createFormEngine<TModel extends object>(
         ? `${parentPath}.${field.name}`
         : field.name;
 
-      if (field.type === 'group') {
-        process(field.children, path);
-        return;
-      }
+      // ===== GROUP =====
+    if (field.type === 'group') {
+
+      fields.push(
+        createFieldGroupState(
+          path,
+          field,
+          model,
+          ctxSignal,
+          expr,
+          arrays
+        )
+      );
+
+      return;
+    }
 
       if (field.type === 'array') {
 
@@ -64,7 +77,8 @@ export function createFormEngine<TModel extends object>(
           field,
           model,
           ctxSignal,
-          expr
+          expr,
+          groupName
         )
       );
 

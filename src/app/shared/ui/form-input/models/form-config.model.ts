@@ -122,6 +122,7 @@ export interface FieldState<TModel = unknown> {
   markAsFocused(): void;
   markAsBlurred(): void;
   arrayState?: ArrayState;
+  groupName?: string;
 }
 
 export interface ArrayFieldState<TModel = unknown>

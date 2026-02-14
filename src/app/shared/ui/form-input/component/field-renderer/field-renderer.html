@@ -2,7 +2,6 @@
   @if (field.visible()) {
     @switch (field.type) {
       @case ('text') {
-        {{field | json}}
         <app-input-text
           [invalid]="showInvalid"
           [errorMessage]="field.errors()?.['custom']"
@@ -48,7 +47,7 @@
             [disabled]="field.disabled()"
             [invalid]="showInvalid"
             [errorMessage]="field.errors()?.['custom']"
-            (valueChange)="field.setValue($event)"
+            (valueChange)="onChangeValue($event)"
             (focus)="onFocus()"
             (blur)="onBlur()">
         </app-check-box>

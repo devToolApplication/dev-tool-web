@@ -26,6 +26,8 @@ export class FormInput implements OnInit{
   }
 
   onSubmit() {
+    console.log(this.engine.model());
+    
     this.engine.markAllAsTouched();
     if (!this.engine.valid()) return;
     this.submit.emit(this.engine.model());

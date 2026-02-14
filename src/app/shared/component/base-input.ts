@@ -31,4 +31,8 @@ export abstract class BaseInput<T> {
   @Output() focus = new EventEmitter<void>();
   @Output() select = new EventEmitter<void>();
 
+  onChange(value: any){
+    // console.log(value);
+    this.valueChange.emit(value);
+  }
 }
