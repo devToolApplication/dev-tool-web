@@ -1,8 +1,41 @@
-<p-multiselect
+<p-floatLabel [variant]="variant">
+  <p-multiselect
+  [size]="size"
+  [inputId]="inputId"
+  [emptyMessage]="'EMPTY'"
+  [display]="display"
+  showClear="true"
+  [filter]="enableFilter"
+  selectedItemsLabel="{0} ITEM SELECTED"
+  [maxSelectedLabels]="maxSelectedLabels"
+  [selectionLimit]="selectionLimit"
+  [loading]="loading"
+  class="w-full"
   [options]="options"
   optionLabel="label"
   optionValue="value"
-  [placeholder]="placeholder"
+  [attr.placeholder]="placeholder"
   [(ngModel)]="value"
+  [disabled]="disabled"
   (ngModelChange)="valueChange.emit($event)"
-/>
+  [invalid]="invalid"
+  (onBlur)="blur.emit()"
+  (onFocus)="focus.emit()"
+  />
+  <label [attr.for]="inputId">{{label}}</label>
+</p-floatLabel>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">
+    {{ helpText }}
+  </small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message 
+    severity="error" 
+    size="small" 
+    variant="simple">{{ errorMessage }}
+  </p-message>
+}
+

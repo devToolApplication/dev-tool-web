@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-check-box',
@@ -6,9 +7,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './check-box.html',
   styleUrl: './check-box.css'
 })
-export class CheckBox {
-  @Input() inputId = 'checkbox';
-  @Input() label = 'Checkbox';
-  @Input() checked = false;
-  @Output() checkedChange = new EventEmitter<boolean>();
+export class CheckBox extends BaseInput<boolean>{
+
 }

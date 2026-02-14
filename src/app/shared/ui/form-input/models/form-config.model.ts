@@ -1,12 +1,15 @@
 import {Signal, WritableSignal} from '@angular/core';
 
-export type GridWidth = '1/2' | '1/3' | '1/4' | '1/5' | '1/6' | 'full';
+export type GridWidth = '1/2' | '1/3' | '1/4' | '1/6' | 'full';
 
 export type FieldConfig =
   | TextFieldConfig
   | NumberFieldConfig
   | SelectFieldConfig
   | GroupFieldConfig
+  | CheckboxFieldConfig
+  | DateFieldConfig
+  | RadioFieldConfig
   | ArrayFieldConfig;
 
 export interface BaseFieldConfig {
@@ -21,7 +24,7 @@ export interface BaseFieldConfig {
 }
 
 export interface TextFieldConfig extends BaseFieldConfig {
-  type: 'text' | 'number';
+  type: 'text' | 'textarea';
 }
 
 export interface NumberFieldConfig extends BaseFieldConfig {
@@ -35,8 +38,14 @@ export interface NumberFieldConfig extends BaseFieldConfig {
 }
 
 export interface SelectFieldConfig extends BaseFieldConfig {
-  type: 'select';
+  type: 'select' | 'select-multi';
   options?: any[];
+  optionsExpression?: string;
+}
+
+export interface RadioFieldConfig extends BaseFieldConfig {
+  type: 'radio';
+  options?: SelectOption[];
   optionsExpression?: string;
 }
 
@@ -48,6 +57,14 @@ export interface GroupFieldConfig extends BaseFieldConfig {
 export interface ArrayFieldConfig extends BaseFieldConfig {
   type: 'array';
   itemConfig: FieldConfig[];
+}
+
+export interface CheckboxFieldConfig extends BaseFieldConfig {
+  type: 'checkbox';
+}
+
+export interface DateFieldConfig extends BaseFieldConfig {
+  type: 'date';
 }
 
 export interface ValidationRule {
@@ -68,7 +85,8 @@ export interface FieldRules {
 
 export interface SelectOption {
   label: string;
-  value: unknown;
+  value: string | number;
+  disabled?: boolean;
 }
 
 export interface FormConfig {
@@ -80,6 +98,11 @@ export type FieldType =
   | 'number'
   | 'select'
   | 'group'
+  | 'checkbox'
+  | 'date'
+  | 'radio'
+  | 'select-multi'
+  | 'textarea'
   | 'array';
 
 export interface FieldState<TModel = unknown> {
@@ -97,7 +120,7 @@ export interface FieldState<TModel = unknown> {
   dirty: WritableSignal<boolean>;
   visible: Signal<boolean>;
   disabled: Signal<boolean>;
-  options: Signal<SelectOption[] | null>;
+  options: Signal<SelectOption[]>;
   errors: Signal<Record<string, string> | null>;
   valid: Signal<boolean>;
   markAsTouched(): void;

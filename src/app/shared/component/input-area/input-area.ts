@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-input-area',
@@ -6,9 +7,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './input-area.html',
   styleUrl: './input-area.css'
 })
-export class InputArea {
+export class InputArea extends BaseInput<string> {
   @Input() rows = 4;
-  @Input() placeholder = 'Nhập nội dung';
-  @Input() value = '';
-  @Output() valueChange = new EventEmitter<string>();
+
+  constructor() {
+    super();
+  }
 }

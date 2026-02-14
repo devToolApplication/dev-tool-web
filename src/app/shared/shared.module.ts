@@ -20,6 +20,7 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TextareaModule } from 'primeng/textarea';
+import { MessageModule } from 'primeng/message';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -100,7 +101,8 @@ const UI_COMPONENT = [
     BreadcrumbModule,
     TextareaModule,
     FloatLabel,
-    FluidModule
+    FluidModule,
+    MessageModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
 })

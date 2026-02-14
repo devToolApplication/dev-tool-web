@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SelectOption } from '../select/select';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-select-multi',
@@ -7,9 +8,15 @@ import { SelectOption } from '../select/select';
   templateUrl: './select-multi.html',
   styleUrl: './select-multi.css'
 })
-export class SelectMulti {
-  @Input() placeholder = 'Chọn nhiều giá trị';
+export class SelectMulti extends BaseInput<Array<string | number>> {
   @Input() options: SelectOption[] = [];
-  @Input() value: Array<string | number> = [];
-  @Output() valueChange = new EventEmitter<Array<string | number>>();
+
+  @Input() display = 'chip';
+  @Input() enableFilter = false;
+  @Input() maxSelectedLabels: number | null | undefined;
+  @Input() selectionLimit: number | null | undefined;
+  @Input() loading = false;
+  constructor() {
+    super();
+  }
 }

@@ -1,10 +1,56 @@
-<div class="inline-field">
-  <p-radiobutton
-    [inputId]="inputId"
-    [name]="name"
-    [value]="optionValue"
-    [(ngModel)]="value"
-    (ngModelChange)="valueChange.emit($event)"
-  />
-  <label [for]="inputId">{{ label }}</label>
+<div
+  class="flex items-center"
+  [ngClass]="{
+    'flex-col gap-2': labelPosition === 'top',
+    'flex-row items-start gap-4': labelPosition === 'left'
+  }"
+>
+  @if (label) {
+    <label class="font-bold whitespace-nowrap">
+      {{ label }}
+    </label>
+  }
+
+  <div
+    class="flex"
+    [ngClass]="{
+      'flex-wrap gap-4': optionLayout === 'horizontal',
+      'flex-col gap-2': optionLayout === 'vertical'
+    }"
+  >
+    @for (option of options; track $index) {
+      <div class="flex items-center">
+        <p-radioButton
+          [inputId]="inputId + '-' + $index"
+          [name]="groupdName"
+          [value]="option.value"
+          [(ngModel)]="value"
+          [disabled]="disabled || option.disabled || false"
+          (blur)="onBlur()">
+        </p-radioButton>
+
+        <label
+          [for]="inputId + '-' + $index"
+          class="ml-2"
+        >
+          {{ option.label }}
+        </label>
+      </div>
+    }
+  </div>
 </div>
+
+@if (helpText && !invalid) {
+  <small class="mt-1 block">{{ helpText }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message
+    severity="error"
+    size="small"
+    variant="simple"
+    class="mt-1 block"
+  >
+    {{ errorMessage }}
+  </p-message>
+}

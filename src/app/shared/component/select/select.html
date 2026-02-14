@@ -1,15 +1,12 @@
-<div
-  class="input-wrapper"
-  [class.fluid]="fluid"
-  [class.small]="size === 'small'"
-  [class.large]="size === 'large'"
->
-  <p-floatLabel>
+  <p-floatLabel [variant]="variant">
     <p-select
+      [size]="size"
       [inputId]="inputId"
+      [emptyMessage]="'EMPTY'"
       class="w-full"
       [options]="options"
       optionLabel="label"
+      [loading]="loading"
       optionValue="value"
       [attr.placeholder]="placeholder"
       [(ngModel)]="value"
@@ -23,14 +20,15 @@
   </p-floatLabel>
 
   @if (helpText && !invalid) {
-    <small class="help-text">
+    <small [id]="inputId">
       {{ helpText }}
     </small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="error-text">
-      {{ errorMessage }}
-    </small>
+    <p-message 
+      severity="error" 
+      size="small" 
+      variant="simple">{{ errorMessage }}
+    </p-message>
   }
-</div>

@@ -35,7 +35,6 @@ export class FormInput implements OnInit{
       '1/2': 'col-span-6',
       '1/3': 'col-span-4',
       '1/4': 'col-span-3',
-      '1/5': 'col-span-2', // gần đúng
       '1/6': 'col-span-2',
       'full': 'col-span-12'
     };

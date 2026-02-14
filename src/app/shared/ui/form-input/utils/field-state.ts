@@ -10,7 +10,8 @@ export function createFieldState<TModel extends object>(
   contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine
 ): FieldState<TModel> {
-  const { type, name, label, width, ...rest } = config;
+
+  const { type, name, label, width } = config;
 
   const touched = signal(false);
   const dirty = signal(false);
@@ -25,8 +26,21 @@ export function createFieldState<TModel extends object>(
     modelSignal.update((m: TModel) =>
       updateByPath(m, path, val)
     );
-
     dirty.set(true);
+  }
+
+  function markAsTouched() {
+    touched.set(true);
+  }
+
+  function markAsFocused() {
+    focusing.set(true);
+    blurred.set(false);
+  }
+
+  function markAsBlurred() {
+    focusing.set(false);
+    blurred.set(true);
   }
 
   const visible = computed(() => {
@@ -49,8 +63,10 @@ export function createFieldState<TModel extends object>(
     });
   });
 
-  const options = computed<SelectOption[] | null>(() => {
-    if (config.type !== 'select') return null;
+  const options = computed<SelectOption[]>(() => {
+    if (config.type !== 'select' 
+      && config.type !== 'select-multi' 
+      && config.type !== 'radio') return [];
 
     const ctx = {
       ...contextSignal(),
@@ -66,7 +82,6 @@ export function createFieldState<TModel extends object>(
   });
 
   const errors = computed<Record<string, string> | null>(() => {
-
     const ctx = {
       ...contextSignal(),
       model: modelSignal(),
@@ -77,7 +92,6 @@ export function createFieldState<TModel extends object>(
 
     config.validation?.forEach(rule => {
       const invalid = expr.evaluate(rule.expression, ctx);
-
       if (invalid) {
         result["custom"] =
           expr.renderTemplate(rule.message, ctx);
@@ -88,10 +102,9 @@ export function createFieldState<TModel extends object>(
   });
 
   const valid = computed(() => !errors());
-  console.log(config);
-  
+
   return {
-    config,
+    fieldConfig: config,
     type,
     name,
     label,
@@ -100,14 +113,17 @@ export function createFieldState<TModel extends object>(
     value,
     setValue,
     touched,
-    dirty,
     focusing,
     blurred,
+    dirty,
     visible,
     disabled,
     options,
     errors,
     valid,
-    ...rest
-  } as unknown as FieldState;
+    markAsTouched,
+    markAsFocused,
+    markAsBlurred
+  };
 }
+

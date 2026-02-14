@@ -1,57 +1,107 @@
 <div>
   @if (field.visible()) {
-
-    @if (field.type == 'text') {
-
-      <app-input-text
-        [invalid]="field.touched() && !!field.errors()"
-        [errorMessage]="field.errors()?.['custom']"
-        [label]="field.label"
-        [value]="field.value()"
-        [disabled]="field.disabled()"
-        (input)="field.setValue($any($event.target).value)"
-        (focus)="onFocus()"
-        (blur)="onBlur()" />
-
-    }@else if (field.type == 'number') {
-
-      <app-input-number
-        [invalid]="field.touched() && !!field.errors()"
-        [errorMessage]="field.errors()?.['custom']"
-        [label]="field.label"
-        [value]="field.value()"
-        [disabled]="field.disabled()"
-    
-        [mode]="numberConfig?.mode"
-        [currency]="numberConfig?.currency"
-        [minFractionDigits]="numberConfig?.minFractionDigits"
-        [maxFractionDigits]="numberConfig?.maxFractionDigits"
-    
-        (valueChange)="field.setValue($event)"
-        (focus)="onFocus()"
-        (blur)="onBlur()" />
-        
-    } @else {
-
-      <app-select
-        [label]="field.label"
-        [value]="field.value()"
-        [disabled]="field.disabled()"
-        [invalid]="field.touched() && !!field.errors()"
-        [errorMessage]="field.errors()?.['custom']"
-        (change)="field.setValue($any($event.target).value)"
-        (focus)="onFocus()"
-        (blur)="onBlur()">
-
-        @for (opt of field.options(); track opt.value) {
-          <option [value]="opt.value">
-            {{ opt.label }}
-          </option>
-        }
-
-      </app-select>
-
+    @switch (field.type) {
+      @case ('text') {
+        <app-input-text
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          [label]="field.label"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()" />
+      }
+      @case ('number') {
+        <app-input-number
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          [label]="field.label"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [mode]="numberConfig?.mode"
+          [currency]="numberConfig?.currency"
+          [minFractionDigits]="numberConfig?.minFractionDigits"
+          [maxFractionDigits]="numberConfig?.maxFractionDigits"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()" />
+      }
+      @case ('select') {
+        <app-select
+          [label]="field.label"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-select>
+      }
+      @case ('checkbox') {
+        <app-check-box
+            [label]="field.label"
+            [value]="field.value()"
+            [disabled]="field.disabled()"
+            [invalid]="showInvalid"
+            [errorMessage]="field.errors()?.['custom']"
+            (valueChange)="field.setValue($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </app-check-box>
+      }
+       @case ('date') {
+        <app-date-picker
+            [label]="field.label"
+            [value]="field.value()"
+            [disabled]="field.disabled()"
+            [invalid]="showInvalid"
+            [errorMessage]="field.errors()?.['custom']"
+            (valueChange)="field.setValue($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </app-date-picker>
+      }
+      @case ('radio') {
+        <app-radio-button
+            [label]="field.label"
+            [value]="field.value()"
+            [options]="field.options()"
+            [disabled]="field.disabled()"
+            [invalid]="showInvalid"
+            [errorMessage]="field.errors()?.['custom']"
+            (valueChange)="field.setValue($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </app-radio-button>
+      }
+      @case ('select-multi') {
+        <app-select-multi
+          [label]="field.label"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-select-multi>
+      }
+      @case ('textarea') {
+        <app-input-area
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          [label]="field.label"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-input-area>
+      }
     }
-
   }
 </div>

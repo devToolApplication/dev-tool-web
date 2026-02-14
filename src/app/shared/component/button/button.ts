@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-button',
@@ -6,10 +7,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './button.html',
   styleUrl: './button.css'
 })
-export class Button {
-  @Input() label = 'Button';
+export class Button extends BaseInput<void> {
   @Input() icon?: string;
   @Input() severity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null = null;
-  @Input() disabled = false;
+
   @Output() buttonClick = new EventEmitter<void>();
 }

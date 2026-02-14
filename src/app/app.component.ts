@@ -100,15 +100,88 @@ export class AppComponent {
           .filter(x => x.address === user.address)
           .map(x => ({ label: x.name, value: x.id }))
       `
+      },
+      {
+        type: 'checkbox',
+        name: 'confirm',
+        label: 'Confirm this change',
+        width: '1/2',
+        validation: [
+          {
+            expression: 'value == false',
+            message: 'BAC'
+          }
+        ]
+      },
+      {
+        type: 'date',
+        name: 'dateOfBirth',
+        label: 'Date of Birth',
+        width: '1/2',
+        validation: [
+          {
+            expression: '!value',
+            message: 'Empty'
+          }
+        ]
+      },
+      {
+        type: 'radio',
+        name: 'gender',
+        label: 'Gender',
+        width: '1/2',
+        options: [
+          { label: 'Male', value: 'male' },
+          { label: 'Female', value: 'female' }
+        ],
+        validation: [
+          {
+            expression: '!value',
+            message: 'Gender is required'
+          }
+        ]
+      },
+      {
+        type: 'select-multi',
+        name: 'skills',
+        label: 'Skills',
+        width: 'full',
+        options: [
+          { label: 'Angular', value: 'angular' },
+          { label: 'React', value: 'react' },
+          { label: 'Vue', value: 'vue' }
+        ],
+        validation: [
+          {
+            expression: '!value || value.length === 0',
+            message: 'Please select at least one skill'
+          }
+        ]
+      },
+      {
+        type: 'textarea',
+        name: 'description',
+        label: 'Description',
+        width: 'full',
+        validation: [
+          {
+            expression: '!value',
+            message: 'Description is required.'
+          }
+        ]
       }
-
     ]
   };
 
   initialValue = {
     name: '',
     age: null,
-    branch: null
+    branch: null,
+    confirm: false,
+    dateOfBirth: null,
+    gender: null,
+    skills: [],
+    description: ''
   };
 
   context : FormContext  = {

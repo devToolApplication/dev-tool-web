@@ -1,15 +1,25 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, forwardRef, Input } from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-date-picker',
   standalone: false,
   templateUrl: './date-picker.html',
-  styleUrl: './date-picker.css'
+  styleUrls: ['./date-picker.css'],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => DatePicker),
+      multi: true
+    }
+  ]
 })
-export class DatePicker {
-  @Input() placeholder = 'Select date';
+export class DatePicker extends BaseInput<Date | null> {
   @Input() showIcon = true;
   @Input() dateFormat = 'dd/mm/yy';
-  @Input() value: Date | null = null;
-  @Output() valueChange = new EventEmitter<Date | null>();
+
+  constructor() {
+    super();
+  }
 }

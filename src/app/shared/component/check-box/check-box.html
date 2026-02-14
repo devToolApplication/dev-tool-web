@@ -1,9 +1,27 @@
 <div class="inline-field">
   <p-checkbox
     [inputId]="inputId"
+    [invalid]="invalid"
     [binary]="true"
-    [(ngModel)]="checked"
-    (ngModelChange)="checkedChange.emit($event)"
+    [(ngModel)]="value"
+    (ngModelChange)="valueChange.emit($event)"
+    (onBlur)="blur.emit()"
+    (onFocus)="focus.emit()"
+    [disabled]="disabled"
   />
-  <label [for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label }}</label>
 </div>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">
+    {{ helpText }}
+  </small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message 
+    severity="error" 
+    size="small" 
+    variant="simple">{{ errorMessage }}
+  </p-message>
+}

@@ -1,13 +1,9 @@
-<div
-  class="input-wrapper"
-  [class.fluid]="fluid"
-  [class.small]="size === 'small'"
-  [class.large]="size === 'large'"
->
+
     <p-floatlabel [variant]="variant">
 
       <input
         pInputText
+        [pSize]="size"
         [id]="inputId"
         type="text"
         [(ngModel)]="value"
@@ -26,16 +22,16 @@
     </p-floatlabel>
    
 
-  @if (helpText && !invalid) {
-    <small class="help-text">
-      {{ helpText }}
-    </small>
-  }
-
-  @if (invalid && errorMessage) {
-    <small class="error-text">
-      {{ errorMessage }}
-    </small>
-  }
-
-</div>
+    @if (helpText && !invalid) {
+      <small [id]="inputId">
+        {{ helpText }}
+      </small>
+    }
+  
+    @if (invalid && errorMessage) {
+      <p-message 
+        severity="error" 
+        size="small" 
+        variant="simple">{{ errorMessage }}
+      </p-message>
+    }

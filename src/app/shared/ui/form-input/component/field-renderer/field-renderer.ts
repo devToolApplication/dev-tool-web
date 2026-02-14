@@ -14,9 +14,7 @@ export class FieldRenderer implements OnChanges {
 
   numberConfig?: NumberFieldConfig;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.field);
-    
+  ngOnChanges(changes: SimpleChanges): void {    
     if (this.field?.type === 'number') {
       this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
     } else {
@@ -24,6 +22,9 @@ export class FieldRenderer implements OnChanges {
     }
   }
 
+  get showInvalid() {
+    return !this.field.focusing() && this.field.touched() && !!this.field.errors();
+  }
   onFocus() {
     this.field.focusing.set(true);
     this.field.blurred.set(false);
