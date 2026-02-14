@@ -3,7 +3,8 @@ import {Signal, WritableSignal} from '@angular/core';
 export type GridWidth = '1/2' | '1/3' | '1/4' | '1/5' | '1/6' | 'full';
 
 export type FieldConfig =
-  | SimpleFieldConfig
+  | TextFieldConfig
+  | NumberFieldConfig
   | SelectFieldConfig
   | GroupFieldConfig
   | ArrayFieldConfig;
@@ -19,8 +20,18 @@ export interface BaseFieldConfig {
   validation?: ValidationRule[];
 }
 
-export interface SimpleFieldConfig extends BaseFieldConfig {
+export interface TextFieldConfig extends BaseFieldConfig {
   type: 'text' | 'number';
+}
+
+export interface NumberFieldConfig extends BaseFieldConfig {
+  type: 'number';
+  mode?: 'decimal' | 'currency';
+  currency?: string;
+  minFractionDigits?: number;
+  maxFractionDigits?: number;
+  step?: number;
+
 }
 
 export interface SelectFieldConfig extends BaseFieldConfig {
@@ -72,6 +83,7 @@ export type FieldType =
   | 'array';
 
 export interface FieldState<TModel = unknown> {
+  fieldConfig: FieldConfig,
   type: FieldType;
   name: string;
   label?: string;

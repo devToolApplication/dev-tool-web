@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { FieldState } from '../../models/form-config.model';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { FieldState, NumberFieldConfig } from '../../models/form-config.model';
 
 @Component({
   selector: 'app-field-renderer',
@@ -7,10 +7,22 @@ import { FieldState } from '../../models/form-config.model';
   templateUrl: './field-renderer.html',
   styleUrl: './field-renderer.css'
 })
-export class FieldRenderer {
+export class FieldRenderer implements OnChanges {
 
   @Input({ required: true })
   field!: FieldState;
+
+  numberConfig?: NumberFieldConfig;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(this.field);
+    
+    if (this.field?.type === 'number') {
+      this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
+    } else {
+      this.numberConfig = undefined;
+    }
+  }
 
   onFocus() {
     this.field.focusing.set(true);
@@ -22,5 +34,4 @@ export class FieldRenderer {
     this.field.blurred.set(true);
     this.field.touched.set(true);
   }
-
 }

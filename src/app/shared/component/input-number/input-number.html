@@ -4,18 +4,20 @@
   [class.small]="size === 'small'"
   [class.large]="size === 'large'"
 >
-  <p-floatLabel>
+  <p-floatLabel [variant]="variant">
     <p-inputNumber
       [inputId]="inputId"
       [(ngModel)]="value"
       (ngModelChange)="valueChange.emit($event)"
       [disabled]="disabled"
       [attr.placeholder]="placeholder || null"
-      [mode]="mode"
-      [currency]="currency"
+      [attr.mode]="mode"
+      [attr.currency]="currency"
       [showClear]="showClear"
-      [minFractionDigits]="minFractionDigits"
-      [maxFractionDigits]="maxFractionDigits"
+      [attr.minFractionDigits]="minFractionDigits"
+      [attr.maxFractionDigits]="maxFractionDigits"
+      currencyDisplay="code"
+      locale="en-IN"
       [invalid]="invalid"
       autocomplete="off"
       [style]="{ width: fluid ? '100%' : 'auto' }"

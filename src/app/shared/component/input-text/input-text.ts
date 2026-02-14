@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type InputSize = 'small' | 'normal' | 'large';
-export type FloatLabelType = 'auto' | 'always';
+export type FloatLabelType = 'in' | 'over' | 'on';
 
 @Component({
   selector: 'app-input-text',
@@ -23,7 +23,7 @@ export class InputText {
   @Input() size: InputSize = 'normal';
   @Input() fluid = true;
   @Input() helpText?: string;
-  @Input() variant: FloatLabelType = 'auto';
+  @Input() variant: FloatLabelType = 'on';
   @Input() tooltip?: string;
 
   /* ========= Validation ========= */

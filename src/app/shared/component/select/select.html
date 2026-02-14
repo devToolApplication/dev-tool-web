@@ -1,14 +1,36 @@
-<label *ngIf="label">
-  {{ label }}
-</label>
+<div
+  class="input-wrapper"
+  [class.fluid]="fluid"
+  [class.small]="size === 'small'"
+  [class.large]="size === 'large'"
+>
+  <p-floatLabel>
+    <p-select
+      [inputId]="inputId"
+      class="w-full"
+      [options]="options"
+      optionLabel="label"
+      optionValue="value"
+      [attr.placeholder]="placeholder"
+      [(ngModel)]="value"
+      [disabled]="disabled"
+      (ngModelChange)="valueChange.emit($event)"
+      [invalid]="invalid"
+      (onBlur)="blur.emit()"
+      (onFocus)="focus.emit()"
+    />
+    <label [attr.for]="inputId">{{label}}</label>
+  </p-floatLabel>
 
-<p-select
-  class="w-full"
-  [options]="options"
-  optionLabel="label"
-  optionValue="value"
-  [placeholder]="placeholder"
-  [(ngModel)]="value"
-  [disabled]="disabled"
-  (ngModelChange)="valueChange.emit($event)"
-/>
+  @if (helpText && !invalid) {
+    <small class="help-text">
+      {{ helpText }}
+    </small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="error-text">
+      {{ errorMessage }}
+    </small>
+  }
+</div>

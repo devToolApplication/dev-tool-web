@@ -77,6 +77,8 @@ export class AppComponent {
         label: 'Tuổi',
         name: 'age',
         width: '1/2',
+        mode: 'currency',
+        currency: 'USD',
         rules: {
           disabled: 'model.name != null && model.name !== ""'
         },
@@ -90,6 +92,7 @@ export class AppComponent {
 
       {
         type: 'select',
+        label: 'Chi nhánh',
         name: 'branch',
         width: '1/2',
         optionsExpression: `

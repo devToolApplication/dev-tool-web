@@ -88,8 +88,10 @@ export function createFieldState<TModel extends object>(
   });
 
   const valid = computed(() => !errors());
-
+  console.log(config);
+  
   return {
+    config,
     type,
     name,
     label,
@@ -107,5 +109,5 @@ export function createFieldState<TModel extends object>(
     errors,
     valid,
     ...rest
-  } as FieldState;
+  } as unknown as FieldState;
 }

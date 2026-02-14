@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
+export type InputSize = 'small' | 'normal' | 'large';
+export type FloatLabelType = 'in' | 'over' | 'on';
+
 export interface SelectOption {
   label: string;
   value: string | number;
@@ -11,24 +14,33 @@ export interface SelectOption {
   standalone: false,
   templateUrl: './select.html',
   styleUrl: './select.css',
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: Select,
-      multi: true
-    }
-  ]
 })
 export class Select implements ControlValueAccessor {
-  @Input() label: string | null | undefined = null;
-  @Input() placeholder = 'Chọn giá trị';
-  @Input() options: SelectOption[] = [];
-  @Input() value: string | number | null = null;
-  @Input() disabled: boolean = false;
-  @Output() valueChange = new EventEmitter<string | number | null>();
 
-  @Input() invalid = false;
-  @Input() errorMessage?: string;
+  @Input() inputId = crypto.randomUUID();
+    /* ========= Basic ========= */
+  
+    @Input() label?: string;
+    @Input() placeholder: string | undefined | null;
+    @Input() value = '';
+    @Input() disabled = false;
+    @Input() options: SelectOption[] = [];
+    /* ========= UI Options ========= */
+  
+    @Input() size: InputSize = 'normal';
+    @Input() fluid = true;
+    @Input() helpText?: string;
+    @Input() variant: FloatLabelType = 'on';
+    @Input() tooltip?: string;
+  
+    /* ========= Validation ========= */
+  
+    @Input() invalid = false;
+    @Input() errorMessage?: string;
+  
+    @Output() valueChange = new EventEmitter<string>();
+    @Output() blur = new EventEmitter<void>();
+    @Output() focus = new EventEmitter<void>();
   
   onChange: any = () => {};
   onTouched: any = () => {};

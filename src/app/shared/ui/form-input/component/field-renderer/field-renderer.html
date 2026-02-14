@@ -21,12 +21,16 @@
         [label]="field.label"
         [value]="field.value()"
         [disabled]="field.disabled()"
-        [min]="0"
-        [max]="100"
+    
+        [mode]="numberConfig?.mode"
+        [currency]="numberConfig?.currency"
+        [minFractionDigits]="numberConfig?.minFractionDigits"
+        [maxFractionDigits]="numberConfig?.maxFractionDigits"
+    
         (valueChange)="field.setValue($event)"
         (focus)="onFocus()"
         (blur)="onBlur()" />
-
+        
     } @else {
 
       <app-select
