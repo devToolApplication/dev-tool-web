@@ -1,29 +1,38 @@
-import { updateByPath, getByPath } from './model.utils';
+import { WritableSignal } from '@angular/core';
+import { updateByPath, getByPath } from './form.utils';
 
-export function createArrayState(
+export function createArrayState<TModel extends object>(
   path: string,
-  modelSignal: any
+  modelSignal: WritableSignal<TModel>
 ) {
 
   function addItem(initialValue: any = {}) {
 
-    modelSignal.update((m: any) => {
+    modelSignal.update(m => {
 
-      const arr = getByPath(m, path) || [];
-      const newArr = [...arr, initialValue];
+      const arr = getByPath(m, path);
+      const safeArray = Array.isArray(arr) ? arr : [];
 
-      return updateByPath(m, path, newArr);
+      return updateByPath(
+        m,
+        path,
+        [...safeArray, initialValue]
+      );
     });
   }
 
   function removeItem(index: number) {
 
-    modelSignal.update((m: any) => {
+    modelSignal.update(m => {
 
-      const arr = getByPath(m, path) || [];
-      const newArr = arr.filter((_: any, i: number) => i !== index);
+      const arr = getByPath(m, path);
+      const safeArray = Array.isArray(arr) ? arr : [];
 
-      return updateByPath(m, path, newArr);
+      return updateByPath(
+        m,
+        path,
+        safeArray.filter((_, i) => i !== index)
+      );
     });
   }
 

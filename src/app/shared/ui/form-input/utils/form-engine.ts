@@ -1,8 +1,17 @@
-import { signal, computed, WritableSignal, Signal } from '@angular/core';
+import { signal, computed, WritableSignal } from '@angular/core';
 import { createFieldState } from './field-state';
 import { createArrayState } from './array-state';
+import { createArrayFieldState } from './array-field-state';
 import { ExpressionEngine } from './expression.engine';
-import {ArrayState, FieldConfig, FieldState, FormConfig, FormContext} from '../models/form-config.model';
+
+import {
+  ArrayState,
+  FieldConfig,
+  FieldState,
+  ArrayFieldState,
+  FormConfig,
+  FormContext
+} from '../models/form-config.model';
 
 export function createFormEngine<TModel extends object>(
   config: FormConfig,
@@ -14,7 +23,7 @@ export function createFormEngine<TModel extends object>(
   const ctxSignal: WritableSignal<FormContext> = signal(context);
   const expr = new ExpressionEngine();
 
-  const fields: FieldState<TModel>[] = [];
+  const fields: (FieldState<TModel> | ArrayFieldState<TModel>)[] = [];
   const arrays: Record<string, ArrayState> = {};
 
   function process(list: FieldConfig[], parentPath = '') {
@@ -27,23 +36,38 @@ export function createFormEngine<TModel extends object>(
 
       if (field.type === 'group') {
         process(field.children, path);
+        return;
       }
 
-      else if (field.type === 'array') {
-        arrays[path] = createArrayState(path, model);
-      }
+      if (field.type === 'array') {
 
-      else {
+        const arrayState = createArrayState(path, model);
+        arrays[path] = arrayState;
+
         fields.push(
-          createFieldState(
+          createArrayFieldState(
             path,
             field,
             model,
             ctxSignal,
-            expr
+            expr,
+            arrayState
           )
         );
+
+        return;
       }
+
+      fields.push(
+        createFieldState(
+          path,
+          field,
+          model,
+          ctxSignal,
+          expr
+        )
+      );
+
     });
   }
 
@@ -53,16 +77,16 @@ export function createFormEngine<TModel extends object>(
     fields.every(f => f.valid())
   );
 
-  function markAllAsTouched(): void {
+  function markAllAsTouched() {
     fields.forEach(f => f.markAsTouched());
   }
 
-  function reset(value: TModel): void {
+  function reset(value: TModel) {
     model.set(value);
     fields.forEach(f => f.touched.set(false));
   }
 
-  function patchValue(value: Partial<TModel>): void {
+  function patchValue(value: Partial<TModel>) {
     model.update(m => ({ ...m, ...value }));
   }
 

@@ -3,6 +3,7 @@ import { MenuItem, TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from './shared/component/select/select';
 import {FormConfig, FormContext} from './shared/ui/form-input/models/form-config.model';
+import { Rules } from './shared/ui/form-input/utils/validation-rules';
 
 @Component({
   selector: 'app-root',
@@ -58,73 +59,121 @@ export class AppComponent {
 
   config: FormConfig = {
     fields: [
-
+  
+      // ========================
+      // BASIC TEXT
+      // ========================
       {
         type: 'text',
         name: 'name',
-        label: 'Ten',
+        label: 'Full Name',
         width: '1/2',
         validation: [
-          {
-            expression: '!value',
-            message: 'Name is required'
-          }
+          Rules.required('Name is required')
         ]
       },
-
+  
       {
-        type: 'number',
-        label: 'Tuổi',
-        name: 'age',
+        type: 'textarea',
+        name: 'description',
+        label: 'Description',
         width: '1/2',
-        mode: 'currency',
-        currency: 'USD',
         rules: {
-          disabled: 'model.name != null && model.name !== ""'
+          disabled: 'model.name && model.name.length > 0'
         },
         validation: [
-          {
-            expression: 'value <= 0',
-            message: 'Tuoi khong duoc âm'
-          }
+          Rules.required('Description required')
         ]
       },
-
+  
+      // ========================
+      // NUMBER
+      // ========================
+      {
+        type: 'number',
+        name: 'salary',
+        label: 'Salary (Currency)',
+        width: '1/3',
+        mode: 'currency',
+        currency: 'USD',
+        minFractionDigits: 2,
+        maxFractionDigits: 2,
+        rules: {
+          disabled: 'context.mode === "view"'
+        },
+        validation: [
+          Rules.required(),
+          Rules.positive('Salary must be > 0')
+        ]
+      },
+  
+      {
+        type: 'number',
+        name: 'age',
+        label: 'Age (Decimal)',
+        width: '1/3',
+        mode: 'decimal',
+        step: 1,
+        validation: [
+          Rules.required(),
+          Rules.min(18, 'Must be >= 18')
+        ]
+      },
+  
+      // ========================
+      // SELECT (STATIC)
+      // ========================
       {
         type: 'select',
-        label: 'Chi nhánh',
+        name: 'status',
+        label: 'Status',
+        width: '1/3',
+        options: [
+          { label: 'Active', value: 'active' },
+          { label: 'Inactive', value: 'inactive' },
+          { label: 'Pending', value: 'pending', disabled: true }
+        ],
+        validation: [
+          Rules.required('Select status')
+        ]
+      },
+  
+      // ========================
+      // SELECT (DYNAMIC)
+      // ========================
+      {
+        type: 'select',
         name: 'branch',
+        label: 'Branch (Dynamic)',
         width: '1/2',
         optionsExpression: `
-        extra.branches
-          .filter(x => x.address === user.address)
-          .map(x => ({ label: x.name, value: x.id }))
-      `
+          context.extra.branches
+            .filter(x => x.address === context.user.address)
+            .map(x => ({ label: x.name, value: x.id }))
+        `
       },
+  
+      // ========================
+      // MULTI SELECT
+      // ========================
       {
-        type: 'checkbox',
-        name: 'confirm',
-        label: 'Confirm this change',
+        type: 'select-multi',
+        name: 'skills',
+        label: 'Skills',
         width: '1/2',
+        options: [
+          { label: 'Angular', value: 'angular' },
+          { label: 'React', value: 'react' },
+          { label: 'Vue', value: 'vue' }
+        ],
         validation: [
-          {
-            expression: 'value == false',
-            message: 'BAC'
-          }
+          Rules.requiredArray('Select at least one skill')
         ]
       },
-      {
-        type: 'date',
-        name: 'dateOfBirth',
-        label: 'Date of Birth',
-        width: '1/2',
-        validation: [
-          {
-            expression: '!value',
-            message: 'Empty'
-          }
-        ]
-      },
+  
+      // ========================
+      // RADIO
+      // ========================
       {
         type: 'radio',
         name: 'gender',
@@ -135,54 +184,122 @@ export class AppComponent {
           { label: 'Female', value: 'female' }
         ],
         validation: [
+          Rules.required('Gender required')
+        ]
+      },
+  
+      // ========================
+      // CHECKBOX
+      // ========================
+      {
+        type: 'checkbox',
+        name: 'confirm',
+        label: 'Confirm Information',
+        width: '1/2',
+        validation: [
+          Rules.requiredTrue('Must confirm')
+        ]
+      },
+  
+      // ========================
+      // DATE
+      // ========================
+      {
+        type: 'date',
+        name: 'dateOfBirth',
+        label: 'Date of Birth',
+        width: '1/2',
+        validation: [
+          Rules.required('Select date')
+        ]
+      },
+  
+      // ========================
+      // GROUP
+      // ========================
+      {
+        type: 'group',
+        name: 'address',
+        label: 'Address',
+        width: 'full',
+        children: [
           {
-            expression: '!value',
-            message: 'Gender is required'
+            type: 'text',
+            name: 'street',
+            label: 'Street',
+            width: '1/2',
+            validation: [
+              Rules.required('Street required')
+            ]
+          },
+          {
+            type: 'text',
+            name: 'city',
+            label: 'City',
+            width: '1/2',
+            validation: [
+              Rules.required('City required')
+            ]
           }
         ]
       },
+  
+      // ========================
+      // ARRAY
+      // ========================
       {
-        type: 'select-multi',
-        name: 'skills',
-        label: 'Skills',
-        width: 'full',
-        options: [
-          { label: 'Angular', value: 'angular' },
-          { label: 'React', value: 'react' },
-          { label: 'Vue', value: 'vue' }
-        ],
-        validation: [
+        type: 'array',
+        name: 'experiences',
+        label: 'Work Experiences',
+        width: '1/2',
+        itemConfig: [
           {
-            expression: '!value || value.length === 0',
-            message: 'Please select at least one skill'
-          }
-        ]
-      },
-      {
-        type: 'textarea',
-        name: 'description',
-        label: 'Description',
-        width: 'full',
-        validation: [
+            type: 'text',
+            name: 'company',
+            label: 'Company',
+            width: '1/2',
+            validation: [
+              Rules.required('Company required')
+            ]
+          },
           {
-            expression: '!value',
-            message: 'Description is required.'
+            type: 'number',
+            name: 'years',
+            label: 'Years',
+            width: '1/2',
+            mode: 'decimal',
+            step: 1,
+            validation: [
+              Rules.required(),
+              Rules.positive('Years must be > 0')
+            ]
           }
         ]
       }
+  
     ]
   };
+  
+  
 
   initialValue = {
     name: '',
+    description: '',
+    salary: null,
     age: null,
+    status: null,
     branch: null,
+    skills: [],
+    gender: null,
     confirm: false,
     dateOfBirth: null,
-    gender: null,
-    skills: [],
-    description: ''
+    address: {
+      street: '',
+      city: ''
+    },
+    experiences: []
   };
+  
 
   context : FormContext  = {
     user: { address: 'HCM' },

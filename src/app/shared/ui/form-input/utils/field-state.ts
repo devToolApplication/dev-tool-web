@@ -1,7 +1,7 @@
 import { signal, computed, WritableSignal } from '@angular/core';
-import { updateByPath, getByPath } from './model.utils';
+import { updateByPath, getByPath } from './form.utils';
 import { ExpressionEngine } from './expression.engine';
-import {FieldConfig, FieldState, FormContext, SelectOption} from '../models/form-config.model';
+import { FieldConfig, FieldState, FormContext, SelectOption } from '../models/form-config.model';
 
 export function createFieldState<TModel extends object>(
   path: string,
@@ -18,6 +18,9 @@ export function createFieldState<TModel extends object>(
   const focusing = signal(false);
   const blurred = signal(false);
 
+  // ========================
+  // VALUE
+  // ========================
   const value = computed(() =>
     getByPath(modelSignal(), path)
   );
@@ -43,58 +46,80 @@ export function createFieldState<TModel extends object>(
     blurred.set(true);
   }
 
+  // ========================
+  // CONTEXT BUILDER (QUAN TRỌNG)
+  // ========================
+  const buildCtx = () => ({
+    model: modelSignal(),
+    context: contextSignal(),
+    value: value()
+  });
+
+  // ========================
+  // VISIBLE
+  // ========================
   const visible = computed(() => {
     if (!config.rules?.visible) return true;
 
-    return !!expr.evaluate(config.rules.visible, {
-      ...contextSignal(),
-      model: modelSignal(),
-      value: value()
-    });
+    return !!expr.evaluate(
+      config.rules.visible,
+      buildCtx()
+    );
   });
 
+  // ========================
+  // DISABLED
+  // ========================
   const disabled = computed(() => {
     if (!config.rules?.disabled) return false;
 
-    return !!expr.evaluate(config.rules.disabled, {
-      ...contextSignal(),
-      model: modelSignal(),
-      value: value()
-    });
+    return !!expr.evaluate(
+      config.rules.disabled,
+      buildCtx()
+    );
   });
 
+  // ========================
+  // OPTIONS
+  // ========================
   const options = computed<SelectOption[]>(() => {
-    if (config.type !== 'select' 
-      && config.type !== 'select-multi' 
-      && config.type !== 'radio') return [];
 
-    const ctx = {
-      ...contextSignal(),
-      model: modelSignal(),
-      value: value()
-    };
+    if (
+      config.type !== 'select' &&
+      config.type !== 'select-multi' &&
+      config.type !== 'radio'
+    ) return [];
 
     if ('optionsExpression' in config && config.optionsExpression) {
-      return expr.evaluate(config.optionsExpression, ctx) || [];
+      return expr.evaluate(
+        config.optionsExpression,
+        buildCtx()
+      ) || [];
     }
 
     return (config as any).options || [];
   });
 
+  // ========================
+  // VALIDATION
+  // ========================
   const errors = computed<Record<string, string> | null>(() => {
-    const ctx = {
-      ...contextSignal(),
-      model: modelSignal(),
-      value: value()
-    };
 
     const result: Record<string, string> = {};
 
     config.validation?.forEach(rule => {
-      const invalid = expr.evaluate(rule.expression, ctx);
+
+      const invalid = expr.evaluate(
+        rule.expression,
+        buildCtx()
+      );
+
       if (invalid) {
         result["custom"] =
-          expr.renderTemplate(rule.message, ctx);
+          expr.renderTemplate(
+            rule.message,
+            buildCtx()
+          );
       }
     });
 
@@ -103,6 +128,9 @@ export function createFieldState<TModel extends object>(
 
   const valid = computed(() => !errors());
 
+  // ========================
+  // RETURN
+  // ========================
   return {
     fieldConfig: config,
     type,

@@ -25,6 +25,11 @@ export class FieldRenderer implements OnChanges {
   get showInvalid() {
     return !this.field.focusing() && this.field.touched() && !!this.field.errors();
   }
+
+  get isArray() {
+    return this.field.type === 'array';
+  }
+  
   onFocus() {
     this.field.focusing.set(true);
     this.field.blurred.set(false);

@@ -1,16 +1,28 @@
-import {Signal, WritableSignal} from '@angular/core';
+import { Signal, WritableSignal } from '@angular/core';
 
 export type GridWidth = '1/2' | '1/3' | '1/4' | '1/6' | 'full';
 
-export type FieldConfig =
-  | TextFieldConfig
-  | NumberFieldConfig
-  | SelectFieldConfig
-  | GroupFieldConfig
-  | CheckboxFieldConfig
-  | DateFieldConfig
-  | RadioFieldConfig
-  | ArrayFieldConfig;
+export interface FormContext {
+  user: any;
+  extra?: any;
+  mode?: 'create' | 'edit' | 'view';
+}
+
+export interface ValidationRule {
+  expression: string;
+  message: string;
+}
+
+export interface SelectOption {
+  label: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
+export interface ArrayState {
+  addItem(initialValue?: unknown): void;
+  removeItem(id: number): void;
+}
 
 export interface BaseFieldConfig {
   name: string;
@@ -34,7 +46,6 @@ export interface NumberFieldConfig extends BaseFieldConfig {
   minFractionDigits?: number;
   maxFractionDigits?: number;
   step?: number;
-
 }
 
 export interface SelectFieldConfig extends BaseFieldConfig {
@@ -67,31 +78,15 @@ export interface DateFieldConfig extends BaseFieldConfig {
   type: 'date';
 }
 
-export interface ValidationRule {
-  expression: string;
-  message: string;
-}
-
-export interface FormContext {
-  user: any;
-  extra?: any;
-  mode?: 'create' | 'edit' | 'view';
-}
-
-export interface FieldRules {
-  visible?: string;
-  disabled?: string;
-}
-
-export interface SelectOption {
-  label: string;
-  value: string | number;
-  disabled?: boolean;
-}
-
-export interface FormConfig {
-  fields: FieldConfig[];
-}
+export type FieldConfig =
+  | TextFieldConfig
+  | NumberFieldConfig
+  | SelectFieldConfig
+  | GroupFieldConfig
+  | CheckboxFieldConfig
+  | DateFieldConfig
+  | RadioFieldConfig
+  | ArrayFieldConfig;
 
 export type FieldType =
   | 'text'
@@ -106,7 +101,7 @@ export type FieldType =
   | 'array';
 
 export interface FieldState<TModel = unknown> {
-  fieldConfig: FieldConfig,
+  fieldConfig: FieldConfig;
   type: FieldType;
   name: string;
   label?: string;
@@ -126,9 +121,14 @@ export interface FieldState<TModel = unknown> {
   markAsTouched(): void;
   markAsFocused(): void;
   markAsBlurred(): void;
+  arrayState?: ArrayState;
 }
 
-export interface ArrayState {
-  addItem(initialValue?: unknown): void;
-  removeItem(index: number): void;
+export interface ArrayFieldState<TModel = unknown>
+  extends FieldState<TModel> {
+  children: Signal<FieldState[][]>;
+}
+
+export interface FormConfig {
+  fields: FieldConfig[];
 }

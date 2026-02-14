@@ -3,44 +3,86 @@ export class ExpressionEngine {
   private cache = new Map<string, Function>();
 
   private compile(expression: string) {
-    return new Function(
-      'model',
-      'user',
-      'extra',
-      'mode',
-      'value',
-      `return (${expression});`
-    );
+    let fn: Function;
+
+    try {
+      fn = new Function(
+        'model',
+        'context',
+        'value',
+        `return (${expression});`
+      );
+    } catch (err) {
+      console.error('[Compile Error]', {
+        expression,
+        error: err
+      });
+      return () => undefined;
+    }
+
+    return (model: any, context: any, value: any) => {
+      try {
+        return fn(model, context, value);
+      } catch (err) {
+        console.error('[Runtime Error]', {
+          expression,
+          model,
+          context,
+          value,
+          error: err
+        });
+        return undefined;
+      }
+    };
   }
 
-  evaluate(expression: string, ctx: any): any {
+  evaluate(expression: string, ctx: {
+    model: any;
+    context: any;
+    value?: any;
+  }): any {
 
     if (!this.cache.has(expression)) {
       this.cache.set(expression, this.compile(expression));
     }
 
-    return this.cache.get(expression)!(
+    const fn = this.cache.get(expression)!;
+
+    return fn(
       ctx.model,
-      ctx.user,
-      ctx.extra,
-      ctx.mode,
+      ctx.context,
       ctx.value
     );
   }
 
-  renderTemplate(template: string, ctx: any): string {
+  renderTemplate(template: string, ctx: {
+    model: any;
+    context: any;
+    value?: any;
+  }): string {
 
     return template.replace(/\$\{([^}]+)\}/g, (_, expr) => {
       try {
-        const fn = this.compile(expr);
-        return fn(
+
+        if (!this.cache.has(expr)) {
+          this.cache.set(expr, this.compile(expr));
+        }
+
+        const fn = this.cache.get(expr)!;
+
+        const result = fn(
           ctx.model,
-          ctx.user,
-          ctx.extra,
-          ctx.mode,
+          ctx.context,
           ctx.value
         );
-      } catch {
+
+        return result ?? '';
+
+      } catch (err) {
+        console.error('[Template Error]', {
+          expression: expr,
+          error: err
+        });
         return '';
       }
     });

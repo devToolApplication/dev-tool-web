@@ -45,6 +45,7 @@ import { FormInput } from './ui/form-input/form-input';
 import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
 import {FloatLabel} from 'primeng/floatlabel';
 import { FluidModule } from 'primeng/fluid';
+import { FieldArrayRenderer } from './ui/form-input/component/field-array-renderer/field-array-renderer';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -73,7 +74,8 @@ const UI = [
 ]
 
 const UI_COMPONENT = [
-  FieldRenderer
+  FieldRenderer,
+  FieldArrayRenderer
 ]
 
 @NgModule({

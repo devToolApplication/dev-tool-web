@@ -2,6 +2,9 @@
   @if (field.visible()) {
     @switch (field.type) {
       @case ('text') {
+        {{this.field.touched()}}
+        {{this.field.errors() | json}}
+        {{this.field.focusing()}}
         <app-input-text
           [invalid]="showInvalid"
           [errorMessage]="field.errors()?.['custom']"
@@ -13,6 +16,9 @@
           (blur)="onBlur()" />
       }
       @case ('number') {
+        {{this.field.touched()}}
+        {{this.field.errors() | json}}
+        {{this.field.focusing()}}
         <app-input-number
           [invalid]="showInvalid"
           [errorMessage]="field.errors()?.['custom']"
