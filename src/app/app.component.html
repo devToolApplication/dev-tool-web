@@ -3,4 +3,9 @@
                       [context]="context"
                       [initialValue]="initialValue"
                       (submit)="save($event)" />
+                      <app-table
+                      [config]="tableConfig"
+                      [data]="tableData">
+                    </app-table>
+                    
 </main>

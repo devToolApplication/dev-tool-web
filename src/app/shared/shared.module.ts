@@ -22,6 +22,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
 import { FieldsetModule } from 'primeng/fieldset';
+import { TableModule } from 'primeng/table';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -48,6 +49,8 @@ import {FloatLabel} from 'primeng/floatlabel';
 import { FluidModule } from 'primeng/fluid';
 import { FieldArrayRenderer } from './ui/form-input/component/field-array-renderer/field-array-renderer';
 import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
+import { TableComponent } from './ui/table/table';
+import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
 
 const COMPONENTS = [
   Breadcrumb,
@@ -72,13 +75,15 @@ const COMPONENTS = [
 ];
 
 const UI = [
-  FormInput
+  FormInput,
+  TableComponent
 ]
 
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,
-  FieldGroupRenderer
+  FieldGroupRenderer,
+  TableCellComponent
 ]
 
 @NgModule({
@@ -108,7 +113,8 @@ const UI_COMPONENT = [
     FloatLabel,
     FluidModule,
     MessageModule,
-    FieldsetModule
+    FieldsetModule,
+    TableModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
 })

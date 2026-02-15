@@ -4,6 +4,7 @@ import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from './shared/component/select/select';
 import {FormConfig, FormContext} from './shared/ui/form-input/models/form-config.model';
 import { Rules } from './shared/ui/form-input/utils/validation-rules';
+import { TableConfig } from './shared/ui/table/models/table-config.model';
 
 @Component({
   selector: 'app-root',
@@ -280,6 +281,49 @@ export class AppComponent {
     ]
   };
   
+  tableConfig: TableConfig = {
+    columns: [
+      { field: 'id', header: 'ID', type: 'number' },
+      { field: 'name', header: 'Name', type: 'text' },
+      { field: 'isActive', header: 'Active', type: 'boolean' },
+      { field: 'createdAt', header: 'Created Date', type: 'date', format: 'dd/MM/yyyy' },
+      { field: 'salary', header: 'Salary', type: 'currency', currencyCode: 'USD' },
+      { field: 'address.city', header: 'City', type: 'text' },
+      { field: 'skills', header: 'Skills', type: 'array' },
+      { field: 'address', header: 'Address Group', type: 'group' }
+    ],
+    pagination: true,
+    rows: 5
+  };
+  
+  
+
+  tableData = [
+    {
+      id: 1,
+      name: 'John',
+      isActive: true,
+      createdAt: new Date(2024, 5, 15),
+      salary: 1500,
+      skills: ['Angular', 'NodeJS'],
+      address: {
+        city: 'HCM',
+        street: 'Nguyen Hue'
+      }
+    },
+    {
+      id: 2,
+      name: 'Jane',
+      isActive: false,
+      createdAt: new Date(2023, 10, 1),
+      salary: 2200,
+      skills: ['React', 'TypeScript'],
+      address: {
+        city: 'HN',
+        street: 'Ba Dinh'
+      }
+    }
+  ];
   
 
   initialValue = {
