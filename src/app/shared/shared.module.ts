@@ -51,7 +51,13 @@ import { FieldArrayRenderer } from './ui/form-input/component/field-array-render
 import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
 import { TableComponent } from './ui/table/table';
 import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
+import { BaseLayoutComponent } from './layout/base/base.layout';
+import { RouterModule } from '@angular/router';
+import { DemoComponent } from '../features/demo/demo.component';
 
+const FEATURE = [
+  DemoComponent
+]
 const COMPONENTS = [
   Breadcrumb,
   ButtonSpeedDial,
@@ -86,10 +92,14 @@ const UI_COMPONENT = [
   TableCellComponent
 ]
 
+const LAYOUT = [
+  BaseLayoutComponent
+]
 @NgModule({
-  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT],
+  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE],
   imports: [
     CommonModule,
+    RouterModule,
     FormsModule,
     ButtonModule,
     SpeedDialModule,
@@ -116,6 +126,6 @@ const UI_COMPONENT = [
     FieldsetModule,
     TableModule
   ],
-  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT]
+  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
 })
 export class SharedModule {}
