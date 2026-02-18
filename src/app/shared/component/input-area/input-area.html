@@ -1,35 +1,30 @@
 <p-floatlabel [variant]="variant">
-
   <textarea
     pTextarea
     [id]="inputId"
-    type="text"
-    [(ngModel)]="value"
-    (ngModelChange)="valueChange.emit($event)"
+    [rows]="rows"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
     [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [autofocus]="autofocus"
     [attr.placeholder]="placeholder || null"
     [invalid]="invalid"
     autocomplete="off"
     [style.width.%]="fluid ? 100 : null"
-    (blur)="blur.emit()"
-    (focus)="focus.emit()">
-  </textarea>
-  <label [attr.for]="inputId">
-    {{label}}
-  </label>
+    [class]="styleClass"
+    [attr.title]="tooltip || null"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
+  ></textarea>
+  <label [attr.for]="inputId">{{ label }}</label>
 </p-floatlabel>
 
-
 @if (helpText && !invalid) {
-  <small [id]="inputId">
-    {{ helpText }}
-  </small>
+  <small [id]="inputId">{{ helpText }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message 
-    severity="error" 
-    size="small" 
-    variant="simple">{{ errorMessage }}
-  </p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
 }

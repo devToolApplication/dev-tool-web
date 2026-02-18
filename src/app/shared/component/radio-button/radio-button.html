@@ -6,9 +6,7 @@
   }"
 >
   @if (label) {
-    <label class="font-bold whitespace-nowrap">
-      {{ label }}
-    </label>
+    <label class="font-bold whitespace-nowrap">{{ label }}</label>
   }
 
   <div
@@ -22,22 +20,18 @@
       <div class="flex items-center">
         <p-radioButton
           [inputId]="inputId + '-' + $index"
-          [name]="groupdName"
+          [name]="groupName"
           [value]="option.value"
-          [(ngModel)]="value"
+          [ngModel]="value"
           (ngModelChange)="onChange($event)"
           [disabled]="disabled || option.disabled || false"
-          (blur)="onBlur()"
-        
-          >
-        </p-radioButton>
+          [required]="required"
+          [invalid]="invalid"
+          (onBlur)="onBlur()"
+          (onFocus)="onFocus()"
+        ></p-radioButton>
 
-        <label
-          [for]="inputId + '-' + $index"
-          class="ml-2"
-        >
-          {{ option.label }}
-        </label>
+        <label [for]="inputId + '-' + $index" class="ml-2">{{ option.label }}</label>
       </div>
     }
   </div>
@@ -48,12 +42,5 @@
 }
 
 @if (invalid && errorMessage) {
-  <p-message
-    severity="error"
-    size="small"
-    variant="simple"
-    class="mt-1 block"
-  >
-    {{ errorMessage }}
-  </p-message>
+  <p-message severity="error" size="small" variant="simple" class="mt-1 block">{{ errorMessage }}</p-message>
 }
