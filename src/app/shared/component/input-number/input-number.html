@@ -1,37 +1,37 @@
-  <p-floatLabel [variant]="variant">
-    <p-inputNumber
-      [inputId]="inputId"
-      [size]="size"
-      [(ngModel)]="value"
-      (ngModelChange)="valueChange.emit($event)"
-      [disabled]="disabled"
-      [attr.placeholder]="placeholder || null"
-      [attr.mode]="mode"
-      [attr.currency]="currency"
-      [showClear]="showClear"
-      [attr.minFractionDigits]="minFractionDigits"
-      [attr.maxFractionDigits]="maxFractionDigits"
-      currencyDisplay="code"
-      locale="en-IN"
-      [invalid]="invalid"
-      autocomplete="off"
-      [style]="{ width: fluid ? '100%' : 'auto' }"
-      (onBlur)="blur.emit()"
-      (onFocus)="focus.emit()"
-    />
-    <label [attr.for]="inputId">{{label}}</label>
-  </p-floatLabel>
+<p-floatlabel [variant]="variant">
+  <p-inputNumber
+    [inputId]="inputId"
+    [size]="size"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [autofocus]="autofocus"
+    [placeholder]="placeholder || ''"
+    [mode]="mode"
+    [currency]="currency"
+    [showClear]="showClear"
+    [min]="min"
+    [max]="max"
+    [minFractionDigits]="minFractionDigits"
+    [maxFractionDigits]="maxFractionDigits"
+    currencyDisplay="code"
+    locale="en-IN"
+    [invalid]="invalid"
+    autocomplete="off"
+    [style]="{ width: fluid ? '100%' : 'auto' }"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  />
+  <label [attr.for]="inputId">{{ label }}</label>
+</p-floatlabel>
 
-  @if (helpText && !invalid) {
-    <small [id]="inputId">
-      {{ helpText }}
-    </small>
-  }
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
 
-  @if (invalid && errorMessage) {
-    <p-message 
-      severity="error" 
-      size="small" 
-      variant="simple">{{ errorMessage }}
-    </p-message>
-  }
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

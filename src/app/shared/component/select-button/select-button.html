@@ -1,1 +1,26 @@
-<p-selectbutton [options]="options" optionLabel="label" optionValue="value" [(ngModel)]="value" (ngModelChange)="valueChange.emit($event)" />
+<div [class]="styleClass">
+  @if (label) {
+    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+  }
+
+  <p-selectbutton
+    [options]="options"
+    [optionLabel]="optionLabel"
+    [optionValue]="optionValue"
+    [multiple]="multiple"
+    [allowEmpty]="allowEmpty"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [invalid]="invalid"
+    (onOptionClick)="onSelect()"
+  />
+</div>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

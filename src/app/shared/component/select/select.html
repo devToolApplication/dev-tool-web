@@ -1,34 +1,29 @@
-  <p-floatLabel [variant]="variant">
-    <p-select
-      [size]="size"
-      [inputId]="inputId"
-      [emptyMessage]="'EMPTY'"
-      class="w-full"
-      [options]="options"
-      optionLabel="label"
-      [loading]="loading"
-      optionValue="value"
-      [attr.placeholder]="placeholder"
-      [(ngModel)]="value"
-      [disabled]="disabled"
-      (ngModelChange)="valueChange.emit($event)"
-      [invalid]="invalid"
-      (onBlur)="blur.emit()"
-      (onFocus)="focus.emit()"
-    />
-    <label [attr.for]="inputId">{{label}}</label>
-  </p-floatLabel>
+<p-floatlabel [variant]="variant">
+  <p-select
+    [size]="size"
+    [inputId]="inputId"
+    class="w-full"
+    [options]="options"
+    optionLabel="label"
+    optionValue="value"
+    [loading]="loading"
+    [placeholder]="placeholder || ''"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  />
+  <label [attr.for]="inputId">{{ label }}</label>
+</p-floatlabel>
 
-  @if (helpText && !invalid) {
-    <small [id]="inputId">
-      {{ helpText }}
-    </small>
-  }
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
 
-  @if (invalid && errorMessage) {
-    <p-message 
-      severity="error" 
-      size="small" 
-      variant="simple">{{ errorMessage }}
-    </p-message>
-  }
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

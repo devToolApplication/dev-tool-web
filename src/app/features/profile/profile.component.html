@@ -1,0 +1,35 @@
+<section class="crud-page">
+  <h2>Profile CRUD</h2>
+
+  <div class="crud-form">
+    <app-input-text label="Name" placeholder="Nhập tên" [(value)]="model.name"></app-input-text>
+    <app-input-text label="Email" placeholder="Nhập email" [(value)]="model.email"></app-input-text>
+
+    <div class="actions">
+      <app-button [label]="editingId ? 'Update' : 'Create'" icon="pi pi-save" (buttonClick)="submit()"></app-button>
+      <app-button label="Cancel" severity="secondary" icon="pi pi-times" (buttonClick)="cancelEdit()"></app-button>
+    </div>
+  </div>
+
+  <p-table [value]="items" [loading]="loading" [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th style="width: 180px">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.id }}</td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.email }}</td>
+        <td>
+          <button pButton type="button" icon="pi pi-pencil" class="p-button-text" (click)="startEdit(row)"></button>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-danger" (click)="remove(row)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

@@ -23,6 +23,9 @@ import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
 import { FieldsetModule } from 'primeng/fieldset';
 import { TableModule } from 'primeng/table';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { BadgeModule } from 'primeng/badge';
+import { RippleModule } from 'primeng/ripple';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -54,11 +57,17 @@ import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
 import { BaseLayoutComponent } from './layout/base/base.layout';
 import { RouterModule } from '@angular/router';
 import { DemoComponent } from '../features/demo/demo.component';
+import { MailComponent } from '../features/mail/mail.component';
+import { ReportsComponent } from '../features/reports/reports.component';
+import { ProfileComponent } from '../features/profile/profile.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
 
 const FEATURE = [
-  DemoComponent
+  DemoComponent,
+  MailComponent,
+  ReportsComponent,
+  ProfileComponent
 ]
 const COMPONENTS = [
   Breadcrumb,
@@ -128,7 +137,10 @@ const LAYOUT = [
     FluidModule,
     MessageModule,
     FieldsetModule,
-    TableModule
+    TableModule,
+    PanelMenuModule,
+    BadgeModule,
+    RippleModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
 })

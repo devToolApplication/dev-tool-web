@@ -1,8 +1,27 @@
-<p-togglebutton
-  [onLabel]="onLabel"
-  [offLabel]="offLabel"
-  [onIcon]="onIcon"
-  [offIcon]="offIcon"
-  [(ngModel)]="checked"
-  (ngModelChange)="checkedChange.emit($event)"
-/>
+<div [class]="styleClass">
+  @if (label) {
+    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+  }
+
+  <p-togglebutton
+    [inputId]="inputId"
+    [onLabel]="onLabel"
+    [offLabel]="offLabel"
+    [onIcon]="onIcon"
+    [offIcon]="offIcon"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [invalid]="invalid"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  />
+</div>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

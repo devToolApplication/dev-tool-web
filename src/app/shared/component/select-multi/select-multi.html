@@ -1,41 +1,35 @@
-<p-floatLabel [variant]="variant">
+<p-floatlabel [variant]="variant">
   <p-multiselect
-  [size]="size"
-  [inputId]="inputId"
-  [emptyMessage]="'EMPTY'"
-  [display]="display"
-  showClear="true"
-  [filter]="enableFilter"
-  selectedItemsLabel="{0} ITEM SELECTED"
-  [maxSelectedLabels]="maxSelectedLabels"
-  [selectionLimit]="selectionLimit"
-  [loading]="loading"
-  class="w-full"
-  [options]="options"
-  optionLabel="label"
-  optionValue="value"
-  [attr.placeholder]="placeholder"
-  [(ngModel)]="value"
-  [disabled]="disabled"
-  (ngModelChange)="valueChange.emit($event)"
-  [invalid]="invalid"
-  (onBlur)="blur.emit()"
-  (onFocus)="focus.emit()"
+    [size]="size"
+    [inputId]="inputId"
+    [display]="display"
+    [showClear]="true"
+    [filter]="enableFilter"
+    selectedItemsLabel="{0} ITEM SELECTED"
+    [maxSelectedLabels]="maxSelectedLabels"
+    [selectionLimit]="selectionLimit"
+    [loading]="loading"
+    class="w-full"
+    [options]="options"
+    optionLabel="label"
+    optionValue="value"
+    [placeholder]="placeholder || ''"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
   />
-  <label [attr.for]="inputId">{{label}}</label>
-</p-floatLabel>
+  <label [attr.for]="inputId">{{ label }}</label>
+</p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">
-    {{ helpText }}
-  </small>
+  <small [id]="inputId">{{ helpText }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message 
-    severity="error" 
-    size="small" 
-    variant="simple">{{ errorMessage }}
-  </p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
 }
-

@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TreeNode } from 'primeng/api';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-select-tree',
@@ -7,10 +8,13 @@ import { TreeNode } from 'primeng/api';
   templateUrl: './select-tree.html',
   styleUrl: './select-tree.css'
 })
-export class SelectTree {
-  @Input() placeholder = 'Chọn node';
+export class SelectTree extends BaseInput<string | string[] | null> {
   @Input() options: TreeNode[] = [];
+  @Input() selectionMode: 'single' | 'multiple' | 'checkbox' = 'single';
+  @Input() filter = false;
 
-  @Input() value: TreeNode | null = null;
-  @Output() valueChange = new EventEmitter<TreeNode | null>();
+  constructor() {
+    super();
+    this.placeholder = 'Chọn node';
+  }
 }

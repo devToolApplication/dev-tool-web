@@ -1,19 +1,33 @@
 .sidebar {
-    width: 220px;
-    height: 100%;
-    background: #0f172a;
-    color: white;
-    padding: 20px;
-  }
-  
-  .sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-  }
-  
+  width: 280px;
+  height: 100%;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px;
+}
+
+.card {
+  background: transparent;
+}
+
+:host ::ng-deep .sidebar .p-panelmenu {
+  border: none;
+  background: transparent;
+}
+
+:host ::ng-deep .sidebar .p-panelmenu-panel,
+:host ::ng-deep .sidebar .p-panelmenu-header,
+:host ::ng-deep .sidebar .p-panelmenu-content {
+  background: transparent;
+  border-color: #334155;
+}
+
+.menu-link {
+  color: #e2e8f0;
+  text-decoration: none;
+}
+
+.menu-link:hover {
+  background: #1e293b;
+  border-radius: 8px;
+}
