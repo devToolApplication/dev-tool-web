@@ -1,8 +1,6 @@
 .sidebar {
   width: 280px;
   height: 100%;
-  background: #0f172a;
-  color: #e2e8f0;
   padding: 16px;
 }
 
@@ -19,15 +17,10 @@
 :host ::ng-deep .sidebar .p-panelmenu-header,
 :host ::ng-deep .sidebar .p-panelmenu-content {
   background: transparent;
-  border-color: #334155;
+  border-color: var(--p-surface-400);
 }
 
 .menu-link {
-  color: #e2e8f0;
+  color: inherit;
   text-decoration: none;
-}
-
-.menu-link:hover {
-  background: #1e293b;
-  border-radius: 8px;
 }

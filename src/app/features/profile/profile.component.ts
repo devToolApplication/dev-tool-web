@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
-import { ProfileItem, ProfileService } from './profile.service';
+import { ProfileItem, ProfileService } from '../../core/services/profile.service';
 
 @Component({
   selector: 'app-profile',

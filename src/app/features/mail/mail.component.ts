@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
-import { MailItem, MailService } from './mail.service';
+import { MailItem, MailService } from '../../core/services/mail.service';
 
 @Component({
   selector: 'app-mail',
