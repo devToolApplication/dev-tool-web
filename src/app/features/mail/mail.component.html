@@ -1,0 +1,35 @@
+<section class="crud-page">
+  <h2>Mail CRUD</h2>
+
+  <div class="crud-form shadow-1">
+    <app-input-text label="Title" placeholder="Nhập tiêu đề" [(value)]="model.title"></app-input-text>
+    <app-input-area label="Content" placeholder="Nhập nội dung" [(value)]="model.content"></app-input-area>
+
+    <div class="actions">
+      <app-button [label]="editingId ? 'Update' : 'Create'" icon="pi pi-save" (buttonClick)="submit()"></app-button>
+      <app-button label="Cancel" severity="secondary" icon="pi pi-times" (buttonClick)="cancelEdit()"></app-button>
+    </div>
+  </div>
+
+  <p-table [value]="items" [loading]="loading" [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Content</th>
+        <th style="width: 180px">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.id }}</td>
+        <td>{{ row.title }}</td>
+        <td>{{ row.content }}</td>
+        <td>
+          <button pButton type="button" icon="pi pi-pencil" class="p-button-text" (click)="startEdit(row)"></button>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-danger" (click)="remove(row)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

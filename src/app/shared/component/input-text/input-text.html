@@ -1,37 +1,31 @@
+<p-floatlabel [variant]="variant">
+  <input
+    pInputText
+    [pSize]="size"
+    [id]="inputId"
+    type="text"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [autofocus]="autofocus"
+    [attr.placeholder]="placeholder || null"
+    [invalid]="invalid"
+    autocomplete="off"
+    [style.width.%]="fluid ? 100 : null"
+    [class]="styleClass"
+    [attr.title]="tooltip || null"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
+  />
+  <label [attr.for]="inputId">{{ label }}</label>
+</p-floatlabel>
 
-    <p-floatlabel [variant]="variant">
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
 
-      <input
-        pInputText
-        [pSize]="size"
-        [id]="inputId"
-        type="text"
-        [(ngModel)]="value"
-        (ngModelChange)="valueChange.emit($event)"
-        [disabled]="disabled"
-        [attr.placeholder]="placeholder || null"
-        [invalid]="invalid"
-        autocomplete="off"
-        [style.width.%]="fluid ? 100 : null"
-        (blur)="blur.emit()"
-        (focus)="focus.emit()"
-      />
-      <label [attr.for]="inputId">
-        {{label}}
-      </label>
-    </p-floatlabel>
-   
-
-    @if (helpText && !invalid) {
-      <small [id]="inputId">
-        {{ helpText }}
-      </small>
-    }
-  
-    @if (invalid && errorMessage) {
-      <p-message 
-        severity="error" 
-        size="small" 
-        variant="simple">{{ errorMessage }}
-      </p-message>
-    }
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

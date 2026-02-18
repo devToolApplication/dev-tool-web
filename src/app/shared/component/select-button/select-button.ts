@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { BaseInput } from '../base-input';
 import { SelectOption } from '../select/select';
 
 @Component({
@@ -7,8 +8,10 @@ import { SelectOption } from '../select/select';
   templateUrl: './select-button.html',
   styleUrl: './select-button.css'
 })
-export class SelectButton {
+export class SelectButton extends BaseInput<string | number> {
   @Input() options: SelectOption[] = [];
-  @Input() value: string | number | null = null;
-  @Output() valueChange = new EventEmitter<string | number | null>();
+  @Input() multiple = false;
+  @Input() allowEmpty = true;
+  @Input() optionLabel = 'label';
+  @Input() optionValue = 'value';
 }

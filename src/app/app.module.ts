@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutes } from './app.routes';
 import { AppComponent } from './app.component';
 import { KeycloakService } from './core/auth/keycloak.service';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './core/auth/auth.service';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -16,7 +16,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutes, SharedModule],
+  imports: [BrowserModule, HttpClientModule, AppRoutes, SharedModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     // {

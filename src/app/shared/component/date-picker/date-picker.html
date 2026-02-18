@@ -1,34 +1,28 @@
 <p-floatlabel [variant]="variant">
-
   <p-datepicker
-  class="w-full"
-  [id]="inputId"
-  [showIcon]="showIcon"
-  [showClear]="true"
-  [attr.placeholder]="placeholder"
-  [dateFormat]="dateFormat"
-  [invalid]="invalid"
-  [(ngModel)]="value"
-  (ngModelChange)="valueChange.emit($event)"
-  (onBlur)="blur.emit()"
-  (onFocus)="focus.emit()"
+    class="w-full"
+    [inputId]="inputId"
+    [showIcon]="showIcon"
+    [showClear]="true"
+    [placeholder]="placeholder || ''"
+    [dateFormat]="dateFormat"
+    [invalid]="invalid"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [readonlyInput]="readonly"
+    [required]="required"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
   />
-  <label [attr.for]="inputId">
-    {{label}}
-  </label>
+  <label [attr.for]="inputId">{{ label }}</label>
 </p-floatlabel>
 
-
 @if (helpText && !invalid) {
-  <small [id]="inputId">
-    {{ helpText }}
-  </small>
+  <small [id]="inputId">{{ helpText }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message 
-    severity="error" 
-    size="small" 
-    variant="simple">{{ errorMessage }}
-  </p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
 }

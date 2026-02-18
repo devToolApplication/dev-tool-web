@@ -1,6 +1,4 @@
-
 import { Directive, EventEmitter, Input, Output } from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
 
 export type InputSize = 'small' | 'large' | undefined;
 export type FloatLabelType = 'in' | 'on' | 'over';
@@ -8,12 +6,15 @@ export type FloatLabelType = 'in' | 'on' | 'over';
 @Directive()
 export abstract class BaseInput<T> {
   @Input() inputId = crypto.randomUUID();
-  
+
   /* ========= Basic ========= */
   @Input() label?: string;
-  @Input() placeholder: string | undefined;
+  @Input() placeholder?: string;
   @Input() value: T | null = null;
-  @Input() disabled : boolean = false;
+  @Input() disabled = false;
+  @Input() readonly = false;
+  @Input() required = false;
+  @Input() autofocus = false;
 
   /* ========= UI Options ========= */
   @Input() size: InputSize;
@@ -21,6 +22,7 @@ export abstract class BaseInput<T> {
   @Input() helpText?: string;
   @Input() variant: FloatLabelType = 'on';
   @Input() tooltip?: string;
+  @Input() styleClass?: string;
 
   /* ========= Validation ========= */
   @Input() invalid = false;
@@ -31,8 +33,20 @@ export abstract class BaseInput<T> {
   @Output() focus = new EventEmitter<void>();
   @Output() select = new EventEmitter<void>();
 
-  onChange(value: any){
-    // console.log(value);
+  onChange(value: T | null): void {
+    this.value = value;
     this.valueChange.emit(value);
+  }
+
+  onBlur(): void {
+    this.blur.emit();
+  }
+
+  onFocus(): void {
+    this.focus.emit();
+  }
+
+  onSelect(): void {
+    this.select.emit();
   }
 }

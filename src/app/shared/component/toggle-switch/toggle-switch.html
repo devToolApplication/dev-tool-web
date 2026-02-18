@@ -1,1 +1,23 @@
-<p-toggleswitch [inputId]="inputId" [(ngModel)]="checked" (ngModelChange)="checkedChange.emit($event)" />
+<div [class]="styleClass">
+  @if (label) {
+    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+  }
+
+  <p-toggleswitch
+    [inputId]="inputId"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [invalid]="invalid"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  />
+</div>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}
