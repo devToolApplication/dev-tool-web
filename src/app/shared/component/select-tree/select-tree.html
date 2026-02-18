@@ -1,6 +1,28 @@
-<p-tree-select
-  [options]="options"
-  [placeholder]="placeholder"
-  [(ngModel)]="value"
-  (ngModelChange)="valueChange.emit($event)"
-/>
+<div [class]="styleClass">
+  @if (label) {
+    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+  }
+
+  <p-tree-select
+    [inputId]="inputId"
+    [options]="options"
+    [placeholder]="placeholder || ''"
+    [selectionMode]="selectionMode"
+    [filter]="filter"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [invalid]="invalid"
+    [fluid]="fluid"
+    (onShow)="onFocus()"
+    (onHide)="onBlur()"
+  />
+</div>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+}

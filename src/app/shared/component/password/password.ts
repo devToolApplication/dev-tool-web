@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { BaseInput } from '../base-input';
 
 @Component({
   selector: 'app-password',
@@ -6,10 +7,16 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './password.html',
   styleUrl: './password.css'
 })
-export class Password {
-  @Input() placeholder = 'Password';
+export class Password extends BaseInput<string> {
   @Input() feedback = true;
   @Input() toggleMask = true;
-  @Input() value = '';
-  @Output() valueChange = new EventEmitter<string>();
+  @Input() promptLabel = 'Enter a password';
+  @Input() weakLabel = 'Weak';
+  @Input() mediumLabel = 'Medium';
+  @Input() strongLabel = 'Strong';
+
+  constructor() {
+    super();
+    this.value = '';
+  }
 }
