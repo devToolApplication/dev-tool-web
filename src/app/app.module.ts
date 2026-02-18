@@ -5,10 +5,10 @@ import { AppRoutes } from './app.routes';
 import { AppComponent } from './app.component';
 import { KeycloakService } from './core/auth/keycloak.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { AuthInterceptor } from './core/auth/auth.service';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { SharedModule } from './shared/shared.module';
+import { AuthInterceptor } from './core/http/auth.interceptor';
 
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () => keycloak.init();

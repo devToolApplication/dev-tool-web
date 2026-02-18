@@ -20,11 +20,11 @@ export class KeycloakService {
   }
 
   get token(): string | undefined {
-    return this.keycloak.token;
+    return this.keycloak?.token;
   }
 
   get userInfo() {
-    return this.keycloak.tokenParsed;
+    return this.keycloak?.tokenParsed;
   }
 
   logout() {
