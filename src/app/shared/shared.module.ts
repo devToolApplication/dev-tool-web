@@ -54,6 +54,8 @@ import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
 import { BaseLayoutComponent } from './layout/base/base.layout';
 import { RouterModule } from '@angular/router';
 import { DemoComponent } from '../features/demo/demo.component';
+import { SideMenuComponent } from './layout/side-menu/side-menu.component';
+import { HeaderComponent } from './layout/header/header.component';
 
 const FEATURE = [
   DemoComponent
@@ -93,7 +95,9 @@ const UI_COMPONENT = [
 ]
 
 const LAYOUT = [
-  BaseLayoutComponent
+  BaseLayoutComponent,
+  SideMenuComponent,
+  HeaderComponent
 ]
 @NgModule({
   declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE],

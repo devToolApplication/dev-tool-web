@@ -1,13 +1,13 @@
-<div class="base-layout">
-  <header>
-    123
-    <!-- Header content goes here -->
-  </header>
-  <main>
-    <router-outlet></router-outlet>
-  </main>
-  <footer>
-    345
-    <!-- Footer content goes here -->
-  </footer>
+<div class="layout">
+  
+  <app-side-menu></app-side-menu>
+
+  <div class="content-area">
+    <app-header></app-header>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
 </div>
