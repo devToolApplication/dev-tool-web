@@ -1,23 +1,33 @@
 .sidebar {
-  width: 260px;
+  width: 280px;
   height: 100%;
   background: #0f172a;
-  color: white;
+  color: #e2e8f0;
   padding: 16px;
 }
 
-:host ::ng-deep .sidebar .p-menu {
+.card {
   background: transparent;
+}
+
+:host ::ng-deep .sidebar .p-panelmenu {
   border: none;
+  background: transparent;
 }
 
-:host ::ng-deep .sidebar .p-menu-item-link,
-:host ::ng-deep .sidebar .p-submenu-header {
+:host ::ng-deep .sidebar .p-panelmenu-panel,
+:host ::ng-deep .sidebar .p-panelmenu-header,
+:host ::ng-deep .sidebar .p-panelmenu-content {
+  background: transparent;
+  border-color: #334155;
+}
+
+.menu-link {
   color: #e2e8f0;
+  text-decoration: none;
 }
 
-:host ::ng-deep .sidebar .p-menu-item-link-active,
-:host ::ng-deep .sidebar .p-menu-item-link:hover {
+.menu-link:hover {
   background: #1e293b;
-  color: #ffffff;
+  border-radius: 8px;
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { MenuItem } from 'primeng/api';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
+import { AppMenuItem } from '../side-menu/side-menu.component';
 
 @Component({
   selector: 'app-base-layout',
@@ -9,5 +9,5 @@ import { APP_LAYOUT_MENU } from '../config/menu.config';
   styleUrls: ['./base.layout.css']
 })
 export class BaseLayoutComponent {
-  readonly menuItems: MenuItem[] = APP_LAYOUT_MENU;
+  readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;
 }
