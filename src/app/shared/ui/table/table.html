@@ -7,29 +7,29 @@
   responsiveLayout="scroll"
 >
 
-  <!-- HEADER -->
   <ng-template pTemplate="header">
     <tr>
-      <th
-        *ngFor="let col of config.columns"
-        [pSortableColumn]="col.sortable ? col.field : undefined"
-      >
-        {{ col.header }}
-        <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
-      </th>
+      @for (col of config.columns; track col.field) {
+        <th [pSortableColumn]="col.sortable ? col.field : undefined">
+          {{ col.header }}
+          @if (col.sortable) {
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          }
+        </th>
+      }
     </tr>
   </ng-template>
 
-  <!-- BODY -->
   <ng-template pTemplate="body" let-row>
     <tr>
-      <td *ngFor="let col of config.columns">
-        <app-table-cell [column]="col" [rowData]="row"></app-table-cell>
-      </td>
+      @for (col of config.columns; track col.field) {
+        <td>
+          <app-table-cell [column]="col" [rowData]="row"></app-table-cell>
+        </td>
+      }
     </tr>
   </ng-template>
 
-  <!-- EMPTY -->
   <ng-template pTemplate="emptymessage">
     <tr>
       <td [attr.colspan]="config.columns.length" class="text-center">

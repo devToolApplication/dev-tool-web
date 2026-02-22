@@ -26,6 +26,8 @@ import { TableModule } from 'primeng/table';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
+import { ToastModule } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -60,6 +62,7 @@ import { DemoComponent } from '../features/demo/demo.component';
 import { MailComponent } from '../features/mail/mail.component';
 import { ReportsComponent } from '../features/reports/reports.component';
 import { ProfileComponent } from '../features/profile/profile.component';
+import { SettingsComponent } from '../features/settings/settings.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
 
@@ -67,7 +70,8 @@ const FEATURE = [
   DemoComponent,
   MailComponent,
   ReportsComponent,
-  ProfileComponent
+  ProfileComponent,
+  SettingsComponent
 ]
 const COMPONENTS = [
   Breadcrumb,
@@ -140,7 +144,9 @@ const LAYOUT = [
     TableModule,
     PanelMenuModule,
     BadgeModule,
-    RippleModule
+    RippleModule,
+    ToastModule,
+    ProgressSpinnerModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
 })

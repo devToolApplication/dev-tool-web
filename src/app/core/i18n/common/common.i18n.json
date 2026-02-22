@@ -1,0 +1,26 @@
+{
+  "vi": {
+    "app.title": "My App",
+    "app.settings": "Cài đặt",
+    "language.vi": "Tiếng Việt",
+    "language.en": "English",
+    "toast.loadError": "Tải dữ liệu thất bại",
+    "toast.saveError": "Lưu dữ liệu thất bại",
+    "toast.deleteError": "Xoá thất bại",
+    "toast.saveCreateSuccess": "Tạo mới thành công",
+    "toast.saveUpdateSuccess": "Cập nhật thành công",
+    "toast.deleteSuccess": "Đã xoá bản ghi"
+  },
+  "en": {
+    "app.title": "My App",
+    "app.settings": "Settings",
+    "language.vi": "Vietnamese",
+    "language.en": "English",
+    "toast.loadError": "Failed to load data",
+    "toast.saveError": "Failed to save data",
+    "toast.deleteError": "Failed to delete record",
+    "toast.saveCreateSuccess": "Created successfully",
+    "toast.saveUpdateSuccess": "Updated successfully",
+    "toast.deleteSuccess": "Record deleted"
+  }
+}
