@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
-import { LoadingService } from '../../core/services/loading.service';
-import { ToastService } from '../../core/services/toast.service';
+import { LoadingService } from '../../core/ui-services/loading.service';
+import { ToastService } from '../../core/ui-services/toast.service';
 import { ReportItem, ReportsService } from '../../core/services/reports.service';
 
 @Component({

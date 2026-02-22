@@ -12,7 +12,6 @@
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgb(0 0 0 / 35%);
   backdrop-filter: blur(1px);
   display: flex;
   align-items: center;
@@ -31,9 +30,6 @@
 .loading-box {
   width: 88px;
   height: 88px;
-  border: 1px solid;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 15%);
   display: flex;
   align-items: center;
   justify-content: center;
