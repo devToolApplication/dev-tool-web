@@ -1,10 +1,19 @@
 .header {
-    height: 60px;
-    background: #1e293b;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-  }
-  
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid;
+}
+
+.settings-link {
+  text-decoration: none;
+  color: inherit;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+}
+
+.settings-link:hover {
+  background: var(--app-surface-alt);
+}

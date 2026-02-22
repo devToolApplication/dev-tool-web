@@ -48,7 +48,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'Settings',
         icon: 'pi pi-cog',
         shortcut: '⌘+O',
-        routerLink: '/profile'
+        routerLink: '/settings'
       },
       {
         label: 'Privacy',
