@@ -1,0 +1,18 @@
+{
+  "vi": {
+    "settings.title": "Cài đặt giao diện",
+    "settings.description": "Bật/tắt Dark mode và chọn ngôn ngữ cho toàn bộ ứng dụng.",
+    "settings.darkMode.title": "Dark mode",
+    "settings.darkMode.description": "Đổi nhanh giữa giao diện sáng và tối.",
+    "settings.language.title": "Ngôn ngữ",
+    "settings.language.description": "Chọn ngôn ngữ hiển thị cho title và toast."
+  },
+  "en": {
+    "settings.title": "Appearance settings",
+    "settings.description": "Enable/disable dark mode and select app language.",
+    "settings.darkMode.title": "Dark mode",
+    "settings.darkMode.description": "Quickly switch between light and dark themes.",
+    "settings.language.title": "Language",
+    "settings.language.description": "Choose display language for titles and toasts."
+  }
+}

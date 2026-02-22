@@ -1,72 +1,29 @@
 import { Injectable, signal } from '@angular/core';
+import commonTranslations from '../i18n/common/common.i18n.json';
+import mailTranslations from '../i18n/features/mail.i18n.json';
+import profileTranslations from '../i18n/features/profile.i18n.json';
+import reportsTranslations from '../i18n/features/reports.i18n.json';
+import settingsTranslations from '../i18n/features/settings.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
-
-type I18nKey =
-  | 'app.title'
-  | 'app.settings'
-  | 'settings.title'
-  | 'settings.description'
-  | 'settings.darkMode.title'
-  | 'settings.darkMode.description'
-  | 'settings.language.title'
-  | 'settings.language.description'
-  | 'language.vi'
-  | 'language.en'
-  | 'mail.title'
-  | 'profile.title'
-  | 'reports.title'
-  | 'toast.loadError'
-  | 'toast.saveError'
-  | 'toast.deleteError'
-  | 'toast.saveCreateSuccess'
-  | 'toast.saveUpdateSuccess'
-  | 'toast.deleteSuccess';
+type TranslationMap = Record<AppLanguage, Record<string, string>>;
 
 const STORAGE_KEY = 'app-language';
 
-const TRANSLATIONS: Record<AppLanguage, Record<I18nKey, string>> = {
+const TRANSLATIONS: TranslationMap = {
   vi: {
-    'app.title': 'My App',
-    'app.settings': 'Cài đặt',
-    'settings.title': 'Cài đặt giao diện',
-    'settings.description': 'Bật/tắt Dark mode và chọn ngôn ngữ cho toàn bộ ứng dụng.',
-    'settings.darkMode.title': 'Dark mode',
-    'settings.darkMode.description': 'Đổi nhanh giữa giao diện sáng và tối.',
-    'settings.language.title': 'Ngôn ngữ',
-    'settings.language.description': 'Chọn ngôn ngữ hiển thị cho title và toast.',
-    'language.vi': 'Tiếng Việt',
-    'language.en': 'English',
-    'mail.title': 'Mail CRUD',
-    'profile.title': 'Profile CRUD',
-    'reports.title': 'Reports CRUD',
-    'toast.loadError': 'Tải dữ liệu thất bại',
-    'toast.saveError': 'Lưu dữ liệu thất bại',
-    'toast.deleteError': 'Xoá thất bại',
-    'toast.saveCreateSuccess': 'Tạo mới thành công',
-    'toast.saveUpdateSuccess': 'Cập nhật thành công',
-    'toast.deleteSuccess': 'Đã xoá bản ghi'
+    ...commonTranslations.vi,
+    ...settingsTranslations.vi,
+    ...mailTranslations.vi,
+    ...profileTranslations.vi,
+    ...reportsTranslations.vi
   },
   en: {
-    'app.title': 'My App',
-    'app.settings': 'Settings',
-    'settings.title': 'Appearance settings',
-    'settings.description': 'Enable/disable dark mode and select app language.',
-    'settings.darkMode.title': 'Dark mode',
-    'settings.darkMode.description': 'Quickly switch between light and dark themes.',
-    'settings.language.title': 'Language',
-    'settings.language.description': 'Choose display language for titles and toasts.',
-    'language.vi': 'Vietnamese',
-    'language.en': 'English',
-    'mail.title': 'Mail CRUD',
-    'profile.title': 'Profile CRUD',
-    'reports.title': 'Reports CRUD',
-    'toast.loadError': 'Failed to load data',
-    'toast.saveError': 'Failed to save data',
-    'toast.deleteError': 'Failed to delete record',
-    'toast.saveCreateSuccess': 'Created successfully',
-    'toast.saveUpdateSuccess': 'Updated successfully',
-    'toast.deleteSuccess': 'Record deleted'
+    ...commonTranslations.en,
+    ...settingsTranslations.en,
+    ...mailTranslations.en,
+    ...profileTranslations.en,
+    ...reportsTranslations.en
   }
 };
 
@@ -79,7 +36,7 @@ export class I18nService {
     localStorage.setItem(STORAGE_KEY, language);
   }
 
-  t(key: I18nKey): string {
-    return TRANSLATIONS[this.language()][key];
+  t(key: string): string {
+    return TRANSLATIONS[this.language()][key] ?? key;
   }
 }
