@@ -1,3 +1,18 @@
 <app-base-layout class="page">
   <router-outlet></router-outlet>
 </app-base-layout>
+
+<div class="loading-overlay" [class.visible]="isLoading">
+  <div class="loading-box bg-surface text-base-foreground border-default">Loading...</div>
+</div>
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast-item" [class]="'toast-item toast-' + toast.severity" (click)="removeToast(toast.id)">
+      <strong>{{ toast.summary }}</strong>
+      @if (toast.detail) {
+        <small>{{ toast.detail }}</small>
+      }
+    </div>
+  }
+</div>
