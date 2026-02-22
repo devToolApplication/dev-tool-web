@@ -1,0 +1,12 @@
+<section class="settings-page bg-surface text-base-foreground border-default">
+  <h2>Cài đặt giao diện</h2>
+  <p class="description">Bật/tắt Dark mode cho toàn bộ ứng dụng.</p>
+
+  <div class="setting-item border-default">
+    <div>
+      <h3>Dark mode</h3>
+      <p>Đổi nhanh giữa giao diện sáng và tối.</p>
+    </div>
+    <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
+  </div>
+</section>
