@@ -2,17 +2,10 @@
   <router-outlet></router-outlet>
 </app-base-layout>
 
-<div class="loading-overlay" [class.visible]="isLoading">
-  <div class="loading-box bg-surface text-base-foreground border-default">Loading...</div>
-</div>
+<p-toast position="top-right"></p-toast>
 
-<div class="toast-container">
-  @for (toast of toasts; track toast.id) {
-    <div class="toast-item" [class]="'toast-item toast-' + toast.severity" (click)="removeToast(toast.id)">
-      <strong>{{ toast.summary }}</strong>
-      @if (toast.detail) {
-        <small>{{ toast.detail }}</small>
-      }
-    </div>
-  }
+<div class="loading-overlay" [class.visible]="isLoading">
+  <div class="loading-box bg-surface border-default">
+    <p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+  </div>
 </div>

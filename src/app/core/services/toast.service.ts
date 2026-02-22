@@ -1,38 +1,19 @@
-import { Injectable, signal } from '@angular/core';
-
-export type ToastSeverity = 'success' | 'error' | 'info';
-
-export interface ToastMessage {
-  id: number;
-  summary: string;
-  detail?: string;
-  severity: ToastSeverity;
-}
+import { Injectable } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private nextId = 1;
-  readonly messages = signal<ToastMessage[]>([]);
+  constructor(private readonly messageService: MessageService) {}
 
   success(summary: string, detail?: string): void {
-    this.push('success', summary, detail);
+    this.messageService.add({ severity: 'success', summary, detail, life: 3000 });
   }
 
   error(summary: string, detail?: string): void {
-    this.push('error', summary, detail);
+    this.messageService.add({ severity: 'error', summary, detail, life: 3000 });
   }
 
   info(summary: string, detail?: string): void {
-    this.push('info', summary, detail);
-  }
-
-  remove(id: number): void {
-    this.messages.update((items) => items.filter((item) => item.id !== id));
-  }
-
-  private push(severity: ToastSeverity, summary: string, detail?: string): void {
-    const message: ToastMessage = { id: this.nextId++, severity, summary, detail };
-    this.messages.update((items) => [...items, message]);
-    setTimeout(() => this.remove(message.id), 3000);
+    this.messageService.add({ severity: 'info', summary, detail, life: 3000 });
   }
 }

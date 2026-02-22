@@ -29,30 +29,17 @@
 }
 
 .loading-box {
-  padding: 0.8rem 1.2rem;
+  width: 88px;
+  height: 88px;
   border: 1px solid;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 8px 20px rgb(0 0 0 / 15%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.toast-container {
-  position: fixed;
-  right: 1rem;
-  top: 1rem;
-  z-index: 2100;
-  display: grid;
-  gap: 0.5rem;
+:host ::ng-deep .loading-box .p-progressspinner {
+  width: 52px;
+  height: 52px;
 }
-
-.toast-item {
-  min-width: 220px;
-  border-radius: 8px;
-  padding: 0.6rem 0.75rem;
-  color: #fff;
-  display: grid;
-  cursor: pointer;
-}
-
-.toast-success { background: #16a34a; }
-.toast-error { background: #dc2626; }
-.toast-info { background: #2563eb; }

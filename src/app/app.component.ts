@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { LoadingService } from './core/services/loading.service';
 import { ThemeService } from './core/services/theme.service';
-import { ToastMessage, ToastService } from './core/services/toast.service';
 
 @Component({
   selector: 'app-root',
@@ -12,8 +11,7 @@ import { ToastMessage, ToastService } from './core/services/toast.service';
 export class AppComponent {
   constructor(
     private readonly themeService: ThemeService,
-    private readonly loadingService: LoadingService,
-    private readonly toastService: ToastService
+    private readonly loadingService: LoadingService
   ) {
     void this.themeService;
   }
@@ -22,11 +20,4 @@ export class AppComponent {
     return this.loadingService.isLoading();
   }
 
-  get toasts(): ToastMessage[] {
-    return this.toastService.messages();
-  }
-
-  removeToast(id: number): void {
-    this.toastService.remove(id);
-  }
 }

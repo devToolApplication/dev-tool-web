@@ -9,6 +9,9 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './core/http/auth.interceptor';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () => keycloak.init();
@@ -16,7 +19,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, HttpClientModule, AppRoutes, SharedModule],
+  imports: [BrowserModule, HttpClientModule, AppRoutes, SharedModule, ToastModule, ProgressSpinnerModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     // {
@@ -30,6 +33,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
       useClass: AuthInterceptor,
       multi: true
     },
+    MessageService,
     providePrimeNG({
       theme: {
         preset: Aura,
