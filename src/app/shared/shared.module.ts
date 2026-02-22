@@ -60,6 +60,7 @@ import { DemoComponent } from '../features/demo/demo.component';
 import { MailComponent } from '../features/mail/mail.component';
 import { ReportsComponent } from '../features/reports/reports.component';
 import { ProfileComponent } from '../features/profile/profile.component';
+import { SettingsComponent } from '../features/settings/settings.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
 
@@ -67,7 +68,8 @@ const FEATURE = [
   DemoComponent,
   MailComponent,
   ReportsComponent,
-  ProfileComponent
+  ProfileComponent,
+  SettingsComponent
 ]
 const COMPONENTS = [
   Breadcrumb,
