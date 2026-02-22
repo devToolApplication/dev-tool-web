@@ -2,6 +2,7 @@
   width: 280px;
   height: 100%;
   padding: 16px;
+  border-right: 1px solid;
 }
 
 .card {
@@ -17,7 +18,7 @@
 :host ::ng-deep .sidebar .p-panelmenu-header,
 :host ::ng-deep .sidebar .p-panelmenu-content {
   background: transparent;
-  border-color: var(--p-surface-400);
+  border-color: var(--app-border);
 }
 
 .menu-link {

@@ -34,7 +34,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
       theme: {
         preset: Aura,
         options: {
-          darkModeSelector: '.my-app-dark'
+          darkModeSelector: '.app-dark'
         }
       }
     })
