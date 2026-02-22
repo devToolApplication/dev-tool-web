@@ -1,12 +1,26 @@
 <section class="settings-page bg-surface text-base-foreground border-default">
-  <h2>Cài đặt giao diện</h2>
-  <p class="description">Bật/tắt Dark mode cho toàn bộ ứng dụng.</p>
+  <h2>{{ t('settings.title') }}</h2>
+  <p class="description">{{ t('settings.description') }}</p>
 
   <div class="setting-item border-default">
     <div>
-      <h3>Dark mode</h3>
-      <p>Đổi nhanh giữa giao diện sáng và tối.</p>
+      <h3>{{ t('settings.darkMode.title') }}</h3>
+      <p>{{ t('settings.darkMode.description') }}</p>
     </div>
     <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
+  </div>
+
+  <div class="setting-item border-default">
+    <div>
+      <h3>{{ t('settings.language.title') }}</h3>
+      <p>{{ t('settings.language.description') }}</p>
+    </div>
+    <p-selectbutton
+      [options]="languageOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="language"
+      (ngModelChange)="onLanguageChange($event)"
+    ></p-selectbutton>
   </div>
 </section>

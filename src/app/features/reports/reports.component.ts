@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
-import { LoadingService } from '../../core/ui-services/loading.service';
-import { ToastService } from '../../core/ui-services/toast.service';
+import { LoadingService } from '../../core/services/loading.service';
+import { ToastService } from '../../core/services/toast.service';
+import { I18nService } from '../../core/services/i18n.service';
 import { ReportItem, ReportsService } from '../../core/services/reports.service';
 
 @Component({
@@ -19,8 +20,13 @@ export class ReportsComponent implements OnInit {
   constructor(
     private readonly service: ReportsService,
     private readonly loadingService: LoadingService,
-    private readonly toastService: ToastService
+    private readonly toastService: ToastService,
+    private readonly i18nService: I18nService
   ) {}
+
+  title(): string {
+    return this.i18nService.t('reports.title');
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -35,7 +41,7 @@ export class ReportsComponent implements OnInit {
           this.items = rows;
         },
         error: () => {
-          this.toastService.error('Tải dữ liệu thất bại');
+          this.toastService.error(this.i18nService.t('toast.loadError'));
         }
       });
   }
@@ -51,12 +57,12 @@ export class ReportsComponent implements OnInit {
 
     this.loadingService.track(request$).subscribe({
       next: () => {
-        this.toastService.success(this.editingId ? 'Cập nhật thành công' : 'Tạo mới thành công');
+        this.toastService.success(this.editingId ? this.i18nService.t('toast.saveUpdateSuccess') : this.i18nService.t('toast.saveCreateSuccess'));
         this.cancelEdit();
         this.loadData();
       },
       error: () => {
-        this.toastService.error('Lưu dữ liệu thất bại');
+        this.toastService.error(this.i18nService.t('toast.saveError'));
       }
     });
   }
@@ -78,11 +84,11 @@ export class ReportsComponent implements OnInit {
 
     this.loadingService.track(this.service.delete(item.id)).subscribe({
       next: () => {
-        this.toastService.info('Đã xoá bản ghi');
+        this.toastService.info(this.i18nService.t('toast.deleteSuccess'));
         this.loadData();
       },
       error: () => {
-        this.toastService.error('Xoá thất bại');
+        this.toastService.error(this.i18nService.t('toast.deleteError'));
       }
     });
   }
