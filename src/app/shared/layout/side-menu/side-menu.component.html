@@ -1,24 +1,58 @@
-<aside class="sidebar bg-surface text-base-foreground border-default">
-  <div class="card">
-    <p-panel-menu [model]="items" styleClass="w-full">
-      <ng-template #item let-item>
-        <a
-          pRipple
-          class="flex items-center px-4 py-2 cursor-pointer group menu-link rounded-md transition-colors hover:bg-surface-alt"
-          [routerLink]="item.routerLink"
-          [queryParams]="item.queryParams"
-          [fragment]="item.fragment"
-        >
-          <i [class]="(item.icon || '') + ' text-primary group-hover:text-inherit'"></i>
-          <span class="ms-2">{{ item.label }}</span>
-          @if (item.badge) {
-            <p-badge class="ms-auto" [value]="item.badge"></p-badge>
-          }
-          @if (item.shortcut) {
-            <span class="ms-auto border-default rounded bg-surface-alt text-base-foreground text-xs p-1">{{ item.shortcut }}</span>
-          }
-        </a>
-      </ng-template>
-    </p-panel-menu>
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <i class="pi pi-prime"></i>
+    </div>
+    <div>
+      <p class="brand-name">Atlantis</p>
+      <small class="brand-sub">Static Menu</small>
+    </div>
   </div>
+
+  <nav class="menu-list" aria-label="Sidebar">
+    @for (group of items; track group.label) {
+      <section class="menu-group">
+        <p class="menu-group-title">{{ group.label }}</p>
+
+        @if (group.items?.length) {
+          <ng-container
+            [ngTemplateOutlet]="menuItemsTemplate"
+            [ngTemplateOutletContext]="{ items: group.items, parentPath: 'root/' + (group.label || 'group') }"
+          ></ng-container>
+        }
+      </section>
+    }
+  </nav>
 </aside>
+
+<ng-template #menuItemsTemplate let-items="items" let-parentPath="parentPath">
+  @for (item of items; track item.label) {
+    @let itemPath = parentPath + '/' + (item.label || 'item');
+
+    @if (item.items?.length) {
+      <button type="button" class="menu-link menu-link-parent" (click)="toggle(itemPath)">
+        <i [class]="item.icon || 'pi pi-circle'"></i>
+        <span>{{ item.label }}</span>
+        <i class="pi submenu-toggle" [class.pi-chevron-down]="isExpanded(itemPath)" [class.pi-chevron-right]="!isExpanded(itemPath)"></i>
+      </button>
+
+      @if (isExpanded(itemPath)) {
+        <div class="submenu-wrap">
+          <ng-container
+            [ngTemplateOutlet]="menuItemsTemplate"
+            [ngTemplateOutletContext]="{ items: item.items, parentPath: itemPath }"
+          ></ng-container>
+        </div>
+      }
+    } @else {
+      <a pRipple class="menu-link" [routerLink]="item.routerLink" routerLinkActive="active">
+        <i [class]="item.icon || 'pi pi-circle'"></i>
+        <span>{{ item.label }}</span>
+
+        @if (item.badge) {
+          <span class="menu-badge">{{ item.badge }}</span>
+        }
+      </a>
+    }
+  }
+</ng-template>

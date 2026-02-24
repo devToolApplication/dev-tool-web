@@ -1,8 +1,10 @@
-<div class="layout">
+<div class="layout" [class.sidebar-collapsed]="!sidebarVisible">
   <app-side-menu [items]="menuItems"></app-side-menu>
 
+  <div class="layout-mask" [class.visible]="sidebarVisible" (click)="closeSidebarOverlay()"></div>
+
   <div class="content-area">
-    <app-header></app-header>
+    <app-header (toggleSidebar)="onToggleSidebar()"></app-header>
 
     <main class="main-content">
       <router-outlet></router-outlet>

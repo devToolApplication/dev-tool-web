@@ -15,4 +15,23 @@ export interface AppMenuItem extends MenuItem {
 })
 export class SideMenuComponent {
   @Input() items: AppMenuItem[] = [];
+
+  readonly expandedState = new Set<string>();
+
+  constructor() {
+    this.expandedState.add('root/Reports/Analytics');
+  }
+
+  isExpanded(path: string): boolean {
+    return this.expandedState.has(path);
+  }
+
+  toggle(path: string): void {
+    if (this.expandedState.has(path)) {
+      this.expandedState.delete(path);
+      return;
+    }
+
+    this.expandedState.add(path);
+  }
 }

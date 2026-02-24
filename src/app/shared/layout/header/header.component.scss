@@ -1,19 +1,64 @@
-.header {
-  height: 60px;
+:host {
+  display: block;
+}
+
+.header-toolbar {
+  height: 62px;
+  border-bottom: 1px solid;
+  border-radius: 0;
+  padding-inline: 1rem;
+  box-shadow: var(--app-topbar-shadow);
+}
+
+.brand-wrap {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: 1px solid;
+  gap: 0.6rem;
 }
 
-.settings-link {
-  text-decoration: none;
-  color: inherit;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.5rem;
+
+.sidebar-toggle-button {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
-.settings-link:hover {
+.sidebar-toggle-button:hover {
   background: var(--app-surface-alt);
+}
+
+.app-logo {
+  font-size: 1.25rem;
+  color: var(--app-primary);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.avatar-button {
+  border: 0;
+  background: transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+}
+
+:host ::ng-deep .avatar-button .p-avatar {
+  background: color-mix(in srgb, var(--app-primary) 16%, transparent);
+  color: var(--app-primary);
+}
+
+:host ::ng-deep .p-tieredmenu {
+  min-width: 12rem;
 }

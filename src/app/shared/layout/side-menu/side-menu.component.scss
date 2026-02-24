@@ -1,27 +1,109 @@
 .sidebar {
   width: 280px;
   height: 100%;
-  padding: 16px;
-  border-right: 1px solid;
+  padding: 1rem 0.75rem;
+  border-right: 1px solid var(--app-sidebar-border);
+  background: var(--app-sidebar-bg);
+  color: var(--app-sidebar-text);
+  display: flex;
+  flex-direction: column;
 }
 
-.card {
-  background: transparent;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem 1rem;
+  border-bottom: 1px solid var(--app-sidebar-border);
+  margin-bottom: 0.5rem;
 }
 
-:host ::ng-deep .sidebar .p-panelmenu {
-  border: none;
-  background: transparent;
+.brand-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--app-sidebar-brand-bg);
+  color: var(--app-sidebar-brand-text);
 }
 
-:host ::ng-deep .sidebar .p-panelmenu-panel,
-:host ::ng-deep .sidebar .p-panelmenu-header,
-:host ::ng-deep .sidebar .p-panelmenu-content {
-  background: transparent;
-  border-color: var(--app-border);
+.brand-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.brand-sub {
+  color: var(--app-sidebar-muted);
+}
+
+.menu-list {
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.menu-group {
+  margin-top: 0.75rem;
+}
+
+.menu-group-title {
+  margin: 0 0 0.35rem;
+  padding: 0 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-sidebar-muted);
 }
 
 .menu-link {
-  color: inherit;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--app-sidebar-text);
   text-decoration: none;
+  border-radius: 10px;
+  padding: 0.65rem 0.6rem;
+  margin-bottom: 0.2rem;
+  transition: background-color 140ms ease, color 140ms ease;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-link:hover {
+  background: var(--app-sidebar-item-hover);
+}
+
+.menu-link.active {
+  background: var(--app-sidebar-item-active-bg);
+  color: var(--app-sidebar-item-active-text);
+}
+
+.submenu-wrap {
+  margin-left: 0.85rem;
+  padding-left: 0.55rem;
+  border-left: 1px dashed var(--app-sidebar-border);
+}
+
+.submenu-toggle {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--app-sidebar-muted);
+}
+
+.menu-badge {
+  margin-left: auto;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  background: var(--app-sidebar-badge-bg);
+  color: var(--app-sidebar-badge-text);
 }

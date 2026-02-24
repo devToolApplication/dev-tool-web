@@ -1,9 +1,29 @@
-<header class="header bg-surface text-base-foreground border-default">
-  <div class="left">
-    <h2>{{ t('app.title') }}</h2>
-  </div>
+<p-toolbar class="header-toolbar bg-surface text-base-foreground border-default">
+  <ng-template #start>
+    <div class="brand-wrap">
+      <button
+        type="button"
+        class="sidebar-toggle-button"
+        (click)="onToggleSidebar()"
+        aria-label="Ẩn hiện menu"
+      >
+        <i class="pi pi-bars"></i>
+      </button>
+      <i class="pi pi-prime app-logo" aria-hidden="true"></i>
+      <h2 class="app-title">{{ t('app.title') }}</h2>
+    </div>
+  </ng-template>
 
-  <div class="right">
-    <a routerLink="/settings" class="settings-link">{{ t('app.settings') }}</a>
-  </div>
-</header>
+  <ng-template #end>
+    <button
+      type="button"
+      class="avatar-button"
+      (click)="toggleAccountMenu($event)"
+      aria-label="Tài khoản"
+    >
+      <p-avatar icon="pi pi-user" shape="circle"></p-avatar>
+    </button>
+
+    <p-tieredMenu #userMenu [model]="accountMenuItems" [popup]="true"></p-tieredMenu>
+  </ng-template>
+</p-toolbar>
