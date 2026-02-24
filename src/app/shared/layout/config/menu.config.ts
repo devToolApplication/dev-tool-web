@@ -2,6 +2,49 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 
 export const APP_LAYOUT_MENU: AppMenuItem[] = [
   {
+    label: 'Admin',
+    icon: 'pi pi-shield',
+    items: [
+      {
+        label: 'Dashboard',
+        icon: 'pi pi-home',
+        routerLink: '/admin/dashboard'
+      },
+      {
+        label: 'Permissions Demo (403)',
+        icon: 'pi pi-lock',
+        routerLink: '/403'
+      },
+      {
+        label: 'Missing Page Demo (404)',
+        icon: 'pi pi-exclamation-triangle',
+        routerLink: '/404'
+      },
+      {
+        label: 'Operations',
+        icon: 'pi pi-briefcase',
+        items: [
+          { label: 'Queue Monitor', icon: 'pi pi-list-check', routerLink: '/reports' },
+          { label: 'Scheduler', icon: 'pi pi-calendar-clock', routerLink: '/reports' },
+          { label: 'Worker Nodes', icon: 'pi pi-server', routerLink: '/reports' },
+          { label: 'Exchange Connectors', icon: 'pi pi-sitemap', routerLink: '/reports' },
+          { label: 'Alert Rules', icon: 'pi pi-bell', routerLink: '/reports' },
+          { label: 'Webhook Logs', icon: 'pi pi-history', routerLink: '/reports' },
+          { label: 'API Keys', icon: 'pi pi-key', routerLink: '/reports' },
+          { label: 'System Audit', icon: 'pi pi-book', routerLink: '/reports' },
+          { label: 'Backups', icon: 'pi pi-database', routerLink: '/reports' },
+          { label: 'Incident Timeline', icon: 'pi pi-clock', routerLink: '/reports' },
+          { label: 'Region: APAC', icon: 'pi pi-globe', routerLink: '/reports' },
+          { label: 'Region: EU', icon: 'pi pi-globe', routerLink: '/reports' },
+          { label: 'Region: US', icon: 'pi pi-globe', routerLink: '/reports' },
+          { label: 'Cluster Alpha', icon: 'pi pi-microchip-ai', routerLink: '/reports' },
+          { label: 'Cluster Beta', icon: 'pi pi-microchip-ai', routerLink: '/reports' },
+          { label: 'Cluster Gamma', icon: 'pi pi-microchip-ai', routerLink: '/reports' }
+        ]
+      }
+    ]
+  },
+  {
     label: 'Mail',
     icon: 'pi pi-envelope',
     badge: '5',
