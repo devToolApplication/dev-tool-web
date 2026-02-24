@@ -10,13 +10,13 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'Compose',
         icon: 'pi pi-file-edit',
         shortcut: '⌘+N',
-        routerLink: '/mail'
+        routerLink: '/mail/compose'
       },
       {
         label: 'Inbox',
         icon: 'pi pi-inbox',
         badge: '5',
-        routerLink: '/mail'
+        routerLink: '/mail/inbox'
       }
     ]
   },
