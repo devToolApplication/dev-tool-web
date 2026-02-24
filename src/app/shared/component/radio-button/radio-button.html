@@ -6,7 +6,7 @@
   }"
 >
   @if (label) {
-    <label class="font-bold whitespace-nowrap">{{ label }}</label>
+    <label class="font-bold whitespace-nowrap">{{ label | appTranslate }}</label>
   }
 
   <div
@@ -31,16 +31,16 @@
           (onFocus)="onFocus()"
         ></p-radioButton>
 
-        <label [for]="inputId + '-' + $index" class="ml-2">{{ option.label }}</label>
+        <label [for]="inputId + '-' + $index" class="ml-2">{{ option.label | appTranslate }}</label>
       </div>
     }
   </div>
 </div>
 
 @if (helpText && !invalid) {
-  <small class="mt-1 block">{{ helpText }}</small>
+  <small class="mt-1 block">{{ helpText | appTranslate }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple" class="mt-1 block">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple" class="mt-1 block">{{ errorMessage | appTranslate }}</p-message>
 }

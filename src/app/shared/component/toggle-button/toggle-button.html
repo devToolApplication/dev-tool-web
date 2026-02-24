@@ -1,12 +1,12 @@
 <div [class]="styleClass">
   @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+    <label [attr.for]="inputId" class="mb-2 block">{{ label | appTranslate }}</label>
   }
 
   <p-togglebutton
     [inputId]="inputId"
-    [onLabel]="onLabel"
-    [offLabel]="offLabel"
+    [onLabel]="(onLabel | appTranslate)"
+    [offLabel]="(offLabel | appTranslate)"
     [onIcon]="onIcon"
     [offIcon]="offIcon"
     [ngModel]="value"
@@ -19,9 +19,9 @@
 </div>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | appTranslate }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | appTranslate }}</p-message>
 }

@@ -5,15 +5,15 @@
     [display]="display"
     [showClear]="true"
     [filter]="enableFilter"
-    selectedItemsLabel="{0} ITEM SELECTED"
+    [selectedItemsLabel]="'{0} ITEM SELECTED' | appTranslate"
     [maxSelectedLabels]="maxSelectedLabels"
     [selectionLimit]="selectionLimit"
     [loading]="loading"
     class="w-full"
-    [options]="options"
+    [options]="translatedOptions"
     optionLabel="label"
     optionValue="value"
-    [placeholder]="placeholder || ''"
+    [placeholder]="(placeholder | appTranslate) || ''"
     [ngModel]="value"
     (ngModelChange)="onChange($event)"
     [disabled]="disabled"
@@ -23,13 +23,13 @@
     (onBlur)="onBlur()"
     (onFocus)="onFocus()"
   />
-  <label [attr.for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label | appTranslate }}</label>
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | appTranslate }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | appTranslate }}</p-message>
 }

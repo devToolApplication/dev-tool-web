@@ -1,1 +1,1 @@
-<p-splitbutton [label]="label" [icon]="icon" [model]="model" (onClick)="buttonClick.emit()" />
+<p-splitbutton [label]="(label | appTranslate)" [icon]="icon" [model]="translatedModel" (onClick)="buttonClick.emit()" />

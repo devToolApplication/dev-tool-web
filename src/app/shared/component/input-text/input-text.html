@@ -10,22 +10,22 @@
     [readonly]="readonly"
     [required]="required"
     [autofocus]="autofocus"
-    [attr.placeholder]="placeholder || null"
+    [attr.placeholder]="(placeholder | appTranslate) || null"
     [invalid]="invalid"
     autocomplete="off"
     [style.width.%]="fluid ? 100 : null"
     [class]="styleClass"
-    [attr.title]="tooltip || null"
+    [attr.title]="(tooltip | appTranslate) || null"
     (blur)="onBlur()"
     (focus)="onFocus()"
   />
-  <label [attr.for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label | appTranslate }}</label>
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | appTranslate }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | appTranslate }}</p-message>
 }

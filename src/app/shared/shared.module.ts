@@ -31,6 +31,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToolbarModule } from 'primeng/toolbar';
 import { AvatarModule } from 'primeng/avatar';
 import { TieredMenuModule } from 'primeng/tieredmenu';
+import { TabsModule } from 'primeng/tabs';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -51,6 +52,7 @@ import { SelectTree } from './component/select-tree/select-tree';
 import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
+import { AppTranslatePipe } from './component/app-translate.pipe';
 import { FormInput } from './ui/form-input/form-input';
 import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
 import {FloatLabel} from 'primeng/floatlabel';
@@ -66,6 +68,12 @@ import { MailComponent } from '../features/mail/mail.component';
 import { ReportsComponent } from '../features/reports/reports.component';
 import { ProfileComponent } from '../features/profile/profile.component';
 import { SettingsComponent } from '../features/settings/settings.component';
+import { DashboardComponent } from '../features/dashboard/dashboard.component';
+import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
+import { TradeBotDashboardComponent } from '../features/dashboard/components/trade-bot-dashboard/trade-bot-dashboard.component';
+import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
+import { ForbiddenComponent } from '../features/error/forbidden/forbidden.component';
+import { NotFoundComponent } from '../features/error/not-found/not-found.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { PageComponent } from './layout/page/page.component';
@@ -75,7 +83,13 @@ const FEATURE = [
   MailComponent,
   ReportsComponent,
   ProfileComponent,
-  SettingsComponent
+  SettingsComponent,
+  DashboardComponent,
+  AiAgentDashboardComponent,
+  TradeBotDashboardComponent,
+  FileStorageDashboardComponent,
+  ForbiddenComponent,
+  NotFoundComponent
 ]
 const COMPONENTS = [
   Breadcrumb,
@@ -96,7 +110,8 @@ const COMPONENTS = [
   SelectTree,
   Select,
   ToggleButton,
-  ToggleSwitch
+  ToggleSwitch,
+  AppTranslatePipe
 ];
 
 const UI = [
@@ -154,7 +169,8 @@ const LAYOUT = [
     ProgressSpinnerModule,
     ToolbarModule,
     AvatarModule,
-    TieredMenuModule
+    TieredMenuModule,
+    TabsModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
 })

@@ -1,0 +1,31 @@
+.error-page {
+  min-height: calc(100vh - 8rem);
+  display: grid;
+  place-items: center;
+}
+
+.error-card {
+  width: min(720px, 100%);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.error-card h1 {
+  margin: 0 0 0.25rem;
+}
+
+.error-card p {
+  margin: 0 0 1rem;
+}
+
+.error-card a {
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  color: var(--app-primary);
+  text-decoration: none;
+  font-weight: 600;
+}

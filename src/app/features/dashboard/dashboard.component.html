@@ -1,0 +1,42 @@
+<section class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Chọn tab để gọi API và hiển thị dữ liệu tương ứng.</p>
+    </div>
+  </header>
+
+  <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
+    <p-tablist>
+      <p-tab value="ai-agent">AI Agent</p-tab>
+      <p-tab value="trade-bot">Trade Bot</p-tab>
+      <p-tab value="file-storage">File Storage</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="ai-agent">
+        @if (loading && activeTab === 'ai-agent') {
+          <div class="state-message">Đang tải dữ liệu...</div>
+        } @else if (activeTab === 'ai-agent') {
+          <app-ai-agent-dashboard [items]="items"></app-ai-agent-dashboard>
+        }
+      </p-tabpanel>
+
+      <p-tabpanel value="trade-bot">
+        @if (loading && activeTab === 'trade-bot') {
+          <div class="state-message">Đang tải dữ liệu...</div>
+        } @else if (activeTab === 'trade-bot') {
+          <app-trade-bot-dashboard [items]="items"></app-trade-bot-dashboard>
+        }
+      </p-tabpanel>
+
+      <p-tabpanel value="file-storage">
+        @if (loading && activeTab === 'file-storage') {
+          <div class="state-message">Đang tải dữ liệu...</div>
+        } @else if (activeTab === 'file-storage') {
+          <app-file-storage-dashboard [items]="items"></app-file-storage-dashboard>
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</section>

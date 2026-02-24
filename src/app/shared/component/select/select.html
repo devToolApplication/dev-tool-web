@@ -3,11 +3,11 @@
     [size]="size"
     [inputId]="inputId"
     class="w-full"
-    [options]="options"
+    [options]="translatedOptions"
     optionLabel="label"
     optionValue="value"
     [loading]="loading"
-    [placeholder]="placeholder || ''"
+    [placeholder]="(placeholder | appTranslate) || ''"
     [ngModel]="value"
     (ngModelChange)="onChange($event)"
     [disabled]="disabled"
@@ -17,13 +17,13 @@
     (onBlur)="onBlur()"
     (onFocus)="onFocus()"
   />
-  <label [attr.for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label | appTranslate }}</label>
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | appTranslate }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | appTranslate }}</p-message>
 }
