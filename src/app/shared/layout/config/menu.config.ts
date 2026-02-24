@@ -32,6 +32,22 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         routerLink: '/reports'
       },
       {
+        label: 'Analytics',
+        icon: 'pi pi-chart-scatter',
+        items: [
+          {
+            label: 'Overview',
+            icon: 'pi pi-chart-line',
+            routerLink: '/reports'
+          },
+          {
+            label: 'Traffic',
+            icon: 'pi pi-compass',
+            routerLink: '/reports'
+          }
+        ]
+      },
+      {
         label: 'Products',
         icon: 'pi pi-list',
         badge: '6',

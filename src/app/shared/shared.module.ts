@@ -28,6 +28,9 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ToolbarModule } from 'primeng/toolbar';
+import { AvatarModule } from 'primeng/avatar';
+import { TieredMenuModule } from 'primeng/tieredmenu';
 
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
@@ -146,7 +149,10 @@ const LAYOUT = [
     BadgeModule,
     RippleModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ToolbarModule,
+    AvatarModule,
+    TieredMenuModule
   ],
   exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
 })

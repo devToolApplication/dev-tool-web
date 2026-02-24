@@ -2,22 +2,55 @@
 @import "tailwindcss-primeui";
 
 :root {
-  --app-bg: #f3f4f6;
+  --app-bg: #f5f7fb;
   --app-surface: #ffffff;
-  --app-surface-alt: #e5e7eb;
+  --app-surface-alt: #eef2ff;
   --app-text: #111827;
-  --app-border: #d1d5db;
+  --app-border: #e2e8f0;
+  --app-primary: #4f46e5;
+
+  --app-topbar-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+
+  --app-sidebar-bg: #ffffff;
+  --app-sidebar-text: #334155;
+  --app-sidebar-muted: #94a3b8;
+  --app-sidebar-border: #e2e8f0;
+  --app-sidebar-brand-bg: rgb(79 70 229 / 14%);
+  --app-sidebar-brand-text: #4f46e5;
+  --app-sidebar-item-hover: #eef2ff;
+  --app-sidebar-item-active-bg: #4f46e5;
+  --app-sidebar-item-active-text: #ffffff;
+  --app-sidebar-badge-bg: #e2e8f0;
+  --app-sidebar-badge-text: #334155;
 }
 
 .app-dark {
-  --app-bg: #111827;
-  --app-surface: #1f2937;
-  --app-surface-alt: #374151;
-  --app-text: #f9fafb;
-  --app-border: #4b5563;
+  --app-bg: #0f172a;
+  --app-surface: #111827;
+  --app-surface-alt: #1f2937;
+  --app-text: #e2e8f0;
+  --app-border: #273245;
+  --app-primary: #818cf8;
+
+  --app-topbar-shadow: 0 2px 10px rgb(0 0 0 / 30%);
+
+  --app-sidebar-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  --app-sidebar-text: #cbd5e1;
+  --app-sidebar-muted: #94a3b8;
+  --app-sidebar-border: rgb(148 163 184 / 22%);
+  --app-sidebar-brand-bg: rgb(129 140 248 / 20%);
+  --app-sidebar-brand-text: #c7d2fe;
+  --app-sidebar-item-hover: rgb(129 140 248 / 20%);
+  --app-sidebar-item-active-bg: #6366f1;
+  --app-sidebar-item-active-text: #ffffff;
+  --app-sidebar-badge-bg: rgb(148 163 184 / 20%);
+  --app-sidebar-badge-text: #e2e8f0;
 }
 
+html,
 body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--app-bg);
   color: var(--app-text);
 }

@@ -10,4 +10,13 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 })
 export class BaseLayoutComponent {
   readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;
+  sidebarVisible = false;
+
+  onToggleSidebar(): void {
+    this.sidebarVisible = !this.sidebarVisible;
+  }
+
+  closeSidebarOverlay(): void {
+    this.sidebarVisible = false;
+  }
 }

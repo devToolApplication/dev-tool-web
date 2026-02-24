@@ -3,17 +3,50 @@
   height: 100vh;
   background: var(--app-bg);
   color: var(--app-text);
+  position: relative;
+}
+
+.layout app-side-menu {
+  width: 280px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin-left: -280px;
+  transition: margin-left 220ms ease;
+  z-index: 25;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 25%);
+}
+
+.layout:not(.sidebar-collapsed) app-side-menu {
+  margin-left: 0;
+}
+
+.layout-mask {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 23 42 / 42%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  z-index: 20;
+}
+
+.layout-mask.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .content-area {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 1.25rem;
   background: var(--app-bg);
   overflow: auto;
 }
