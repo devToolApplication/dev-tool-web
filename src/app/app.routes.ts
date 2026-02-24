@@ -5,6 +5,8 @@ import { mailRoutes } from './features/mail/mail-routing.module';
 import { reportsRoutes } from './features/reports/reports-routing.module';
 import { profileRoutes } from './features/profile/profile-routing.module';
 import { settingsRoutes } from './features/settings/settings-routing.module';
+import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
+import { errorRoutes } from './features/error/error-routing.module';
 
 const routes: Routes = [
   ...mailRoutes,
@@ -12,7 +14,10 @@ const routes: Routes = [
   ...profileRoutes,
   ...settingsRoutes,
   ...demoRouter,
-  { path: '**', redirectTo: 'mail' }
+  ...dashboardRoutes,
+  ...errorRoutes,
+  { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
+  { path: '**', redirectTo: '404' }
 ];
 
 @NgModule({

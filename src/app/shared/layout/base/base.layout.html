@@ -9,9 +9,13 @@
     <app-header [sidebarVisible]="sidebarVisible" (toggleSidebar)="onToggleSidebar()"></app-header>
 
     <main class="main-content">
-      <app-page>
+      @if (usePageWrapper) {
+        <app-page>
+          <router-outlet></router-outlet>
+        </app-page>
+      } @else {
         <router-outlet></router-outlet>
-      </app-page>
+      }
     </main>
   </div>
 </div>

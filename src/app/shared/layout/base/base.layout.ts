@@ -1,4 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
 import { AppMenuItem } from '../side-menu/side-menu.component';
 
@@ -11,11 +13,19 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 export class BaseLayoutComponent implements OnInit {
   readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;
   sidebarVisible = true;
+  usePageWrapper = true;
 
   private isMobileLayout = false;
 
+  constructor(private readonly router: Router) {}
+
   ngOnInit(): void {
     this.updateLayoutMode();
+    this.updatePageWrapper(this.router.url);
+
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => this.updatePageWrapper((event as NavigationEnd).urlAfterRedirects));
   }
 
   @HostListener('window:resize')
@@ -44,5 +54,9 @@ export class BaseLayoutComponent implements OnInit {
 
     this.isMobileLayout = nextIsMobile;
     this.sidebarVisible = !this.isMobileLayout;
+  }
+
+  private updatePageWrapper(url: string): void {
+    this.usePageWrapper = !url.startsWith('/admin/dashboard');
   }
 }
