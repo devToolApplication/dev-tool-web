@@ -1,16 +1,17 @@
-<p-toolbar class="header-toolbar bg-surface text-base-foreground border-default">
+<p-toolbar class="header-toolbar">
   <ng-template #start>
     <div class="brand-wrap">
       <button
         type="button"
         class="sidebar-toggle-button"
         (click)="onToggleSidebar()"
-        aria-label="Ẩn hiện menu"
+        [attr.aria-expanded]="sidebarVisible"
+        [attr.aria-label]="sidebarVisible ? 'Ẩn menu' : 'Hiện menu'"
       >
         <i class="pi pi-bars"></i>
       </button>
-      <i class="pi pi-prime app-logo" aria-hidden="true"></i>
-      <h2 class="app-title">{{ t('app.title') }}</h2>
+
+      <app-breadcrumb [home]="homeItem" [items]="breadcrumbItems"></app-breadcrumb>
     </div>
   </ng-template>
 

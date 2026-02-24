@@ -1,0 +1,11 @@
+.page-shell {
+  min-height: 100%;
+  background: var(--app-surface);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 30px rgb(221 224 255 / 54%);
+}
+
+:host-context(.app-dark) .page-shell {
+  box-shadow: 0 10px 24px rgb(0 0 0 / 25%);
+}

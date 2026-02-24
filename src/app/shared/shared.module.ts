@@ -68,6 +68,7 @@ import { ProfileComponent } from '../features/profile/profile.component';
 import { SettingsComponent } from '../features/settings/settings.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
+import { PageComponent } from './layout/page/page.component';
 
 const FEATURE = [
   DemoComponent,
@@ -113,7 +114,8 @@ const UI_COMPONENT = [
 const LAYOUT = [
   BaseLayoutComponent,
   SideMenuComponent,
-  HeaderComponent
+  HeaderComponent,
+  PageComponent
 ]
 @NgModule({
   declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE],
