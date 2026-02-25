@@ -9,22 +9,22 @@
     [readonly]="readonly"
     [required]="required"
     [autofocus]="autofocus"
-    [attr.placeholder]="placeholder || null"
+    [attr.placeholder]="(placeholder || null) | translateContent"
     [invalid]="invalid"
     autocomplete="off"
     [style.width.%]="fluid ? 100 : null"
     [class]="styleClass"
-    [attr.title]="tooltip || null"
+    [attr.title]="(tooltip || null) | translateContent"
     (blur)="onBlur()"
     (focus)="onFocus()"
   ></textarea>
-  <label [attr.for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
 }

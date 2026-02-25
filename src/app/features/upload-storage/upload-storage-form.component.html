@@ -1,0 +1,17 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>Upload Storage - {{ editId ? 'Edit' : 'Create' }}</h2>
+    <app-button label="Back to View" severity="secondary" icon="pi pi-arrow-left" (buttonClick)="backToView()"></app-button>
+  </div>
+
+  <div class="form-wrap shadow-1">
+    @if (formVisible) {
+      <app-form-input
+        [config]="formConfig"
+        [context]="formContext"
+        [initialValue]="formInitialValue"
+        (submit)="onSubmitForm($event)"
+      ></app-form-input>
+    }
+  </div>
+</section>

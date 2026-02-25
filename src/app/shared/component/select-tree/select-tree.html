@@ -1,12 +1,12 @@
 <div [class]="styleClass">
   @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block">{{ label }}</label>
+    <label [attr.for]="inputId" class="mb-2 block">{{ label | translateContent }}</label>
   }
 
   <p-tree-select
     [inputId]="inputId"
-    [options]="options"
-    [placeholder]="placeholder || ''"
+    [options]="options | translateContent"
+    [placeholder]="(placeholder || '') | translateContent"
     [selectionMode]="selectionMode"
     [filter]="filter"
     [ngModel]="value"
@@ -20,9 +20,9 @@
 </div>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
 }

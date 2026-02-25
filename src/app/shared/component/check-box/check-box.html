@@ -10,13 +10,13 @@
     [disabled]="disabled || readonly"
     [required]="required"
   />
-  <label [attr.for]="inputId">{{ label }}</label>
+  <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </div>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText }}</small>
+  <small [id]="inputId">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage }}</p-message>
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
 }

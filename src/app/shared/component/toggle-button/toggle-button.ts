@@ -8,8 +8,8 @@ import { BaseInput } from '../base-input';
   styleUrl: './toggle-button.css'
 })
 export class ToggleButton extends BaseInput<boolean> {
-  @Input() onLabel = 'Bật';
-  @Input() offLabel = 'Tắt';
+  @Input() onLabel = 'shared.toggle.on';
+  @Input() offLabel = 'shared.toggle.off';
   @Input() onIcon = 'pi pi-check';
   @Input() offIcon = 'pi pi-times';
 

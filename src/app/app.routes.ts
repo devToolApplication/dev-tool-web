@@ -7,6 +7,7 @@ import { profileRoutes } from './features/profile/profile-routing.module';
 import { settingsRoutes } from './features/settings/settings-routing.module';
 import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
 import { errorRoutes } from './features/error/error-routing.module';
+import { uploadStorageRoutes } from './features/upload-storage/upload-storage-routing.module';
 
 const routes: Routes = [
   ...mailRoutes,
@@ -15,6 +16,7 @@ const routes: Routes = [
   ...settingsRoutes,
   ...demoRouter,
   ...dashboardRoutes,
+  ...uploadStorageRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
   { path: '**', redirectTo: '404' }

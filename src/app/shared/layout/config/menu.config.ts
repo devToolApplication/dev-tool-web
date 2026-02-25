@@ -11,6 +11,11 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         routerLink: '/admin/dashboard'
       },
       {
+        label: 'Upload Storage',
+        icon: 'pi pi-cloud-upload',
+        routerLink: '/admin/upload-storage/storage'
+      },
+      {
         label: 'Permissions Demo (403)',
         icon: 'pi pi-lock',
         routerLink: '/403'
