@@ -19,7 +19,14 @@ export function initializeKeycloak(keycloak: KeycloakService) {
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutes, SharedModule, ToastModule, ProgressSpinnerModule],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    AppRoutes,
+    SharedModule,
+    ToastModule,
+    ProgressSpinnerModule
+  ],
   providers: [
     provideBrowserGlobalErrorListeners(),
     {
