@@ -7,7 +7,7 @@
   --app-surface-alt: var(--p-surface-100, #f1f5f9);
   --app-text: var(--p-text-color, #111827);
   --app-border: var(--p-content-border-color, #e2e8f0);
-  --app-primary: #4f46e5;
+  --app-primary: var(--p-primary-color, #4f46e5);
 
   --app-topbar-shadow: 0 2px 8px rgb(15 23 42 / 8%);
 
@@ -30,7 +30,7 @@
   --app-surface-alt: var(--p-surface-700, #1f2937);
   --app-text: var(--p-text-color, #e2e8f0);
   --app-border: var(--p-content-border-color, #273245);
-  --app-primary: #818cf8;
+  --app-primary: var(--p-primary-color, #818cf8);
 
   --app-topbar-shadow: 0 2px 10px rgb(0 0 0 / 30%);
 
@@ -60,6 +60,37 @@ body {
 .bg-surface-alt { background: var(--app-surface-alt); }
 .text-base-foreground { color: var(--app-text); }
 .border-default { border-color: var(--app-border); }
+
+
+:root {
+  --p-surface-0: #ffffff;
+  --p-surface-50: #f8fafc;
+  --p-surface-100: #f1f5f9;
+}
+
+:root .p-button {
+  --p-button-primary-background: var(--p-primary-color);
+  --p-button-primary-border-color: var(--p-primary-color);
+  --p-button-primary-hover-background: var(--p-primary-hover-color);
+  --p-button-primary-hover-border-color: var(--p-primary-hover-color);
+  --p-button-primary-active-background: var(--p-primary-active-color);
+  --p-button-primary-active-border-color: var(--p-primary-active-color);
+}
+
+:root .p-inputtext:enabled:hover,
+:root .p-inputtext:enabled:focus,
+:root .p-textarea:enabled:hover,
+:root .p-textarea:enabled:focus,
+:root .p-inputnumber-input:enabled:hover,
+:root .p-inputnumber-input:enabled:focus {
+  border-color: var(--p-primary-color);
+}
+
+:root .p-inputtext:enabled:focus,
+:root .p-textarea:enabled:focus,
+:root .p-inputnumber-input:enabled:focus {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--p-primary-color) 25%, transparent);
+}
 
 :root .p-component {
   color: var(--app-text);
