@@ -1,9 +1,8 @@
-<p-toast />
-
-<p-toolbar styleClass="mb-4 gap-2 table-toolbar">
+<p-toolbar class="mb-4 gap-2 table-toolbar">
   <ng-template pTemplate="left">
     @if (isButtonVisible(newButtonConfig)) {
       <app-button
+        [size]="'small'"
         [severity]="newButtonConfig.severity ?? 'success'"
         [label]="newButtonConfig.label ?? 'NEW'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
@@ -26,7 +25,7 @@
 
   <ng-template pTemplate="right">
     @if (isButtonVisible(importButtonConfig)) {
-      <p-fileUpload
+      <p-fileupload
         mode="basic"
         [accept]="importButtonConfig.accept ?? '*/*'"
         [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
