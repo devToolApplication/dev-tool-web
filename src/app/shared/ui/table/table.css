@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.table-toolbar :where(.p-toolbar-start, .p-toolbar-end) {
+  width: 100%;
+}
+
+.table-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

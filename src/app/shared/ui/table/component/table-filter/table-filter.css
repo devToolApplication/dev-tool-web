@@ -1,0 +1,26 @@
+.table-filter {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.filter-item {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
