@@ -1,17 +1,27 @@
 .table-filter {
-  display: grid;
+  width: 100%;
+}
+
+.filter-row {
+  display: flex;
+  align-items: flex-end;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex: 1;
+  flex-wrap: nowrap;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .filter-item {
   display: grid;
   gap: 0.35rem;
+  min-width: 180px;
+  flex: 1 1 200px;
 }
 
 .filter-label {
@@ -23,4 +33,68 @@
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.field-selector-wrapper {
+  position: relative;
+}
+
+.field-selector-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  min-width: 220px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  background: var(--app-surface);
+  box-shadow: 0 10px 30px rgb(15 23 42 / 18%);
+}
+
+.field-selector-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--app-text);
+  margin-bottom: 0.5rem;
+}
+
+.field-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .filter-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .filter-grid {
+    width: 100%;
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    min-width: min(220px, 100%);
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .field-selector-panel {
+    right: auto;
+    left: 0;
+  }
 }

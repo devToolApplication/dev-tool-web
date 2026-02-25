@@ -68,6 +68,7 @@
       @if ((config.filters ?? []).length > 0) {
         <app-table-filter
           [fields]="config.filters ?? []"
+          [options]="config.filterOptions ?? {}"
           [loading]="loading"
           (search)="onSearch($event)"
           (reset)="onResetFilter()"
