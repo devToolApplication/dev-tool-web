@@ -26,8 +26,8 @@
         <td>{{ row.name }}</td>
         <td>{{ row.email }}</td>
         <td>
-          <button pButton type="button" icon="pi pi-pencil" class="p-button-text" (click)="startEdit(row)"></button>
-          <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-danger" (click)="remove(row)"></button>
+          <app-button icon="pi pi-pencil" [text]="true" (buttonClick)="startEdit(row)"></app-button>
+          <app-button icon="pi pi-trash" severity="danger" [text]="true" (buttonClick)="remove(row)"></app-button>
         </td>
       </tr>
     </ng-template>

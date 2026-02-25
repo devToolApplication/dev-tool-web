@@ -8,7 +8,7 @@ import { SelectOption } from '../select/select';
   templateUrl: './select-button.html',
   styleUrl: './select-button.css'
 })
-export class SelectButton extends BaseInput<string | number> {
+export class SelectButton extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] = [];
   @Input() multiple = false;
   @Input() allowEmpty = true;

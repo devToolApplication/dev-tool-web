@@ -4,7 +4,7 @@ import { BaseInput } from '../base-input';
 
 export interface SelectOption {
   label: string;
-  value: string | number;
+  value: string | number | boolean | null;
 }
 
 @Component({
@@ -13,10 +13,12 @@ export interface SelectOption {
   templateUrl: './select.html',
   styleUrls: ['./select.css'],
 })
-export class Select extends BaseInput<string | number> {
+export class Select extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] | null = [];
 
   @Input() loading = false;
+  @Input() showClear = false;
+
   constructor() {
     super();
   }
