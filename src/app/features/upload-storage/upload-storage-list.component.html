@@ -1,8 +1,4 @@
 <section class="crud-page">
-  <div class="header-row">
-    <h2>Upload Storage - View</h2>
-  </div>
-
   <div class="toolbar shadow-1">
     <app-select
       label="Chọn bản ghi"
@@ -19,5 +15,11 @@
     </div>
   </div>
 
-  <app-table [config]="tableConfig" [data]="rows" [loading]="tableLoading"></app-table>
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [loading]="tableLoading"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+  ></app-table>
 </section>

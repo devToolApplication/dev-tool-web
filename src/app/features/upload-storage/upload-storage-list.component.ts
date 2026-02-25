@@ -17,6 +17,21 @@ import { TableConfig } from '../../shared/ui/table/models/table-config.model';
 })
 export class UploadStorageListComponent implements OnInit {
   readonly tableConfig: TableConfig = {
+    title: 'Upload Storage - View',
+    filters: [
+      { field: 'name', label: 'Name', placeholder: 'Nhập tên storage' },
+      {
+        field: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [
+          { label: 'ACTIVE', value: 'ACTIVE' },
+          { label: 'INACTIVE', value: 'INACTIVE' },
+          { label: 'DELETE', value: 'DELETE' }
+        ]
+      },
+      { field: 'defaultActive', label: 'Default', type: 'boolean' }
+    ],
     columns: [
       { field: 'id', header: 'ID', sortable: true },
       { field: 'name', header: 'Name', sortable: true },
@@ -24,7 +39,27 @@ export class UploadStorageListComponent implements OnInit {
       { field: 'status', header: 'Status' },
       { field: 'defaultActive', header: 'Default', type: 'boolean' },
       { field: 'apiDomain', header: 'API Domain' },
-      { field: 'apiPath', header: 'API Path' }
+      { field: 'apiPath', header: 'API Path' },
+      {
+        field: 'actions',
+        header: 'Action',
+        type: 'actions',
+        actions: [
+          {
+            label: 'Sửa',
+            icon: 'pi pi-pencil',
+            severity: 'info',
+            onClick: (row) => this.goEdit(row.id)
+          },
+          {
+            label: 'Xóa',
+            icon: 'pi pi-trash',
+            severity: 'danger',
+            disabled: () => this.loading,
+            onClick: (row) => this.removeById(row.id)
+          }
+        ]
+      }
     ],
     pagination: true,
     rows: 10,
@@ -39,6 +74,7 @@ export class UploadStorageListComponent implements OnInit {
 
   selectedStorageId: string | null = null;
   recordOptions: SelectOption[] = [];
+  filters: Record<string, any> = {};
 
   constructor(
     private readonly uploadStorageService: UploadStorageService,
@@ -55,7 +91,7 @@ export class UploadStorageListComponent implements OnInit {
     this.tableLoading = true;
 
     this.loadingService
-      .track(this.uploadStorageService.getPage(0, this.tableConfig.rows ?? 10))
+      .track(this.uploadStorageService.getPage(0, this.tableConfig.rows ?? 10, ['name,asc'], this.filters))
       .pipe(finalize(() => (this.tableLoading = false)))
       .subscribe({
         next: (res: BasePageResponse<UploadStorageResponse>) => {
@@ -73,6 +109,16 @@ export class UploadStorageListComponent implements OnInit {
       });
   }
 
+  onSearch(filters: Record<string, any>): void {
+    this.filters = filters;
+    this.loadPage();
+  }
+
+  onResetFilter(): void {
+    this.filters = {};
+    this.loadPage();
+  }
+
   goCreate(): void {
     void this.router.navigate(['/admin/upload-storage/storage/create']);
   }
@@ -83,7 +129,7 @@ export class UploadStorageListComponent implements OnInit {
       return;
     }
 
-    void this.router.navigate(['/admin/upload-storage/storage/edit', this.selectedStorageId]);
+    this.goEdit(this.selectedStorageId);
   }
 
   removeSelected(): void {
@@ -92,14 +138,24 @@ export class UploadStorageListComponent implements OnInit {
       return;
     }
 
+    this.removeById(this.selectedStorageId);
+  }
+
+  private goEdit(id: string): void {
+    void this.router.navigate(['/admin/upload-storage/storage/edit', id]);
+  }
+
+  private removeById(id: string): void {
     this.loading = true;
     this.loadingService
-      .track(this.uploadStorageService.delete(this.selectedStorageId))
+      .track(this.uploadStorageService.delete(id))
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
           this.toastService.info('Đã xoá upload storage');
-          this.selectedStorageId = null;
+          if (this.selectedStorageId === id) {
+            this.selectedStorageId = null;
+          }
           this.loadPage();
         },
         error: () => this.toastService.error('Xoá upload storage thất bại')

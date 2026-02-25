@@ -21,11 +21,20 @@ export class UploadStorageService {
       .pipe(map((res) => res.data ?? []));
   }
 
-  getPage(page = 0, size = 10, sort: string[] = ['name,asc']): Observable<BasePageResponse<UploadStorageResponse>> {
+  getPage(
+    page = 0,
+    size = 10,
+    sort: string[] = ['name,asc'],
+    filters: Record<string, string | number | boolean> = {}
+  ): Observable<BasePageResponse<UploadStorageResponse>> {
     let params = new HttpParams().set('page', page).set('size', size);
 
     sort.forEach((item) => {
       params = params.append('sort', item);
+    });
+
+    Object.entries(filters).forEach(([key, value]) => {
+      params = params.set(key, String(value));
     });
 
     return this.http

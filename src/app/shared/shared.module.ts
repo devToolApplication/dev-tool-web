@@ -60,6 +60,7 @@ import { FieldArrayRenderer } from './ui/form-input/component/field-array-render
 import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
 import { TableComponent } from './ui/table/table';
 import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
+import { TableFilterComponent } from './ui/table/component/table-filter/table-filter';
 import { BaseLayoutComponent } from './layout/base/base.layout';
 import { RouterModule } from '@angular/router';
 import { DemoComponent } from '../features/demo/demo.component';
@@ -130,7 +131,8 @@ const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,
   FieldGroupRenderer,
-  TableCellComponent
+  TableCellComponent,
+  TableFilterComponent
 ]
 
 const LAYOUT = [
