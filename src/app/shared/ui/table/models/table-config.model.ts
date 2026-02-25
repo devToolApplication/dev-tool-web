@@ -31,6 +31,12 @@ export interface TableFilterField {
   type?: TableFilterType;
   placeholder?: string;
   options?: TableFilterOption[];
+  hidden?: boolean;
+  defaultVisible?: boolean;
+}
+
+export interface TableFilterOptions {
+  defaultVisibleCount?: number;
 }
 
 export interface TableColumn {
@@ -49,6 +55,7 @@ export interface TableConfig {
   columns: TableColumn[];
   title?: string;
   filters?: TableFilterField[];
+  filterOptions?: TableFilterOptions;
   toolbar?: TableToolbarConfig;
 
   pagination?: boolean;
