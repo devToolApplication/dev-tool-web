@@ -75,6 +75,9 @@ body {
   --p-button-primary-hover-border-color: var(--p-primary-hover-color);
   --p-button-primary-active-background: var(--p-primary-active-color);
   --p-button-primary-active-border-color: var(--p-primary-active-color);
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-color: #ffffff;
+  --p-button-primary-active-color: #ffffff;
 }
 
 :root .p-inputtext:enabled:hover,

@@ -1,17 +1,28 @@
 .table-filter {
-  display: grid;
+  width: 100%;
+}
+
+.filter-row {
+  display: flex;
+  align-items: flex-end;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex: 1;
+  flex-wrap: nowrap;
   gap: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .filter-item {
   display: grid;
   gap: 0.35rem;
+  min-width: 180px;
+  flex: 1 1 200px;
 }
 
 .filter-label {
@@ -23,4 +34,28 @@
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .filter-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .filter-grid {
+    width: 100%;
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    min-width: min(220px, 100%);
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

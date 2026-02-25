@@ -18,19 +18,24 @@ export class UploadStorageListComponent implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'Upload Storage - View',
     filters: [
-      { field: 'name', label: 'Name', placeholder: 'Nhập tên storage' },
+      { field: 'name', label: 'Name', placeholder: 'Nhập tên storage', defaultVisible: true },
       {
         field: 'status',
         label: 'Status',
         type: 'select',
+        defaultVisible: true,
         options: [
           { label: 'ACTIVE', value: 'ACTIVE' },
           { label: 'INACTIVE', value: 'INACTIVE' },
           { label: 'DELETE', value: 'DELETE' }
         ]
       },
-      { field: 'defaultActive', label: 'Default', type: 'boolean' }
+      { field: 'defaultActive', label: 'Default', type: 'boolean' },
+      { field: 'storageType', label: 'Storage Type', hidden: true }
     ],
+    filterOptions: {
+      defaultVisibleCount: 2
+    },
     toolbar: {
       new: {
         visible: true,
