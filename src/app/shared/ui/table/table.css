@@ -6,6 +6,13 @@
   width: 100%;
 }
 
+.table-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .table-summary {
   display: flex;
   justify-content: space-between;

@@ -6,7 +6,6 @@ import { UploadStorageResponse } from '../../core/models/upload-storage.model';
 import { LoadingService } from '../../core/ui-services/loading.service';
 import { ToastService } from '../../core/ui-services/toast.service';
 import { UploadStorageService } from '../../core/services/upload-storage.service';
-import { FormContext, SelectOption } from '../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../shared/ui/table/models/table-config.model';
 
 @Component({
@@ -32,6 +31,33 @@ export class UploadStorageListComponent implements OnInit {
       },
       { field: 'defaultActive', label: 'Default', type: 'boolean' }
     ],
+    toolbar: {
+      new: {
+        visible: true,
+        label: 'NEW',
+        icon: 'pi pi-plus',
+        severity: 'success'
+      },
+      delete: {
+        visible: true,
+        label: 'DELETE',
+        icon: 'pi pi-trash',
+        severity: 'danger'
+      },
+      import: {
+        visible: true,
+        label: 'IMPORT',
+        chooseLabel: 'IMPORT',
+        accept: '*/*',
+        maxFileSize: 1000000
+      },
+      export: {
+        visible: true,
+        label: 'EXPORT',
+        icon: 'pi pi-upload',
+        severity: 'help'
+      }
+    },
     columns: [
       { field: 'id', header: 'ID', sortable: true },
       { field: 'name', header: 'Name', sortable: true },
@@ -66,14 +92,11 @@ export class UploadStorageListComponent implements OnInit {
     rowsPerPageOptions: [5, 10, 20, 50]
   };
 
-  readonly toolbarContext: FormContext = { user: null, mode: 'view' };
-
   rows: UploadStorageResponse[] = [];
   tableLoading = false;
   loading = false;
 
   selectedStorageId: string | null = null;
-  recordOptions: SelectOption[] = [];
   filters: Record<string, any> = {};
 
   constructor(
@@ -96,11 +119,6 @@ export class UploadStorageListComponent implements OnInit {
       .subscribe({
         next: (res: BasePageResponse<UploadStorageResponse>) => {
           this.rows = res.data ?? [];
-          this.recordOptions = this.rows.map((row) => ({
-            label: `${row.name} (${row.id})`,
-            value: row.id
-          }));
-
           if (this.selectedStorageId && !this.rows.some((row) => row.id === this.selectedStorageId)) {
             this.selectedStorageId = null;
           }
@@ -123,22 +141,29 @@ export class UploadStorageListComponent implements OnInit {
     void this.router.navigate(['/admin/upload-storage/storage/create']);
   }
 
-  goEditSelected(): void {
-    if (!this.selectedStorageId) {
-      this.toastService.info('Chọn 1 bản ghi để update');
-      return;
-    }
-
-    this.goEdit(this.selectedStorageId);
-  }
-
   removeSelected(): void {
     if (!this.selectedStorageId) {
-      this.toastService.info('Chọn 1 bản ghi để xoá');
+      this.toastService.info('Vui lòng chọn bản ghi cần xoá từ bảng');
       return;
     }
 
     this.removeById(this.selectedStorageId);
+  }
+
+  onCreate(): void {
+    this.goCreate();
+  }
+
+  onDelete(): void {
+    this.removeSelected();
+  }
+
+  onExport(): void {
+    this.toastService.info('Tính năng export đang được phát triển');
+  }
+
+  onImport(file: File): void {
+    this.toastService.info(`Đã chọn file import: ${file.name}`);
   }
 
   private goEdit(id: string): void {
