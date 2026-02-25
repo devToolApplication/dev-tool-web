@@ -39,12 +39,40 @@
     </div>
 
     <div class="filter-actions">
-      @if (hasCollapsedFilters) {
+      <div class="field-selector-wrapper">
         <app-button
-          [icon]="showAllFilters ? 'pi pi-chevron-up' : 'pi pi-sliders-h'"
+          icon="pi pi-sliders-h"
           severity="secondary"
           [text]="true"
           [disabled]="loading"
+          (buttonClick)="toggleFieldSelector()"
+        ></app-button>
+
+        @if (showFieldSelector) {
+          <div class="field-selector-panel">
+            <div class="field-selector-title">Hiển thị bộ lọc</div>
+
+            @for (field of selectableFields; track field.field) {
+              <label class="field-selector-item">
+                <input
+                  type="checkbox"
+                  [checked]="isFieldSelected(field.field)"
+                  (change)="toggleFieldSelection(field.field)"
+                />
+                <span>{{ field.label }}</span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      @if (hasCollapsedFilters) {
+        <app-button
+          [icon]="showAllFilters ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          severity="secondary"
+          [text]="true"
+          [disabled]="loading"
+          [label]="showAllFilters ? undefined : '+' + hiddenSelectedCount"
           (buttonClick)="toggleFilters()"
         ></app-button>
       }
