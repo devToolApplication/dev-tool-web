@@ -8,8 +8,8 @@ import {
   UploadStorageType,
   UploadStorageUpdateDto
 } from '../../core/models/upload-storage.model';
-import { LoadingService } from '../../core/services/loading.service';
-import { ToastService } from '../../core/services/toast.service';
+import { LoadingService } from '../../core/ui-services/loading.service';
+import { ToastService } from '../../core/ui-services/toast.service';
 import { UploadStorageService } from '../../core/services/upload-storage.service';
 import { FormConfig, FormContext } from '../../shared/ui/form-input/models/form-config.model';
 

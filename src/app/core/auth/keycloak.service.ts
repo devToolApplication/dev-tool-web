@@ -1,22 +1,28 @@
 import Keycloak from 'keycloak-js';
-import { Injectable } from '@angular/core';
-import {environment} from '../../../enviroment/environment';
+import { Injectable, NgZone } from '@angular/core';
+import { environment } from '../../../enviroment/environment';
 
 @Injectable({ providedIn: 'root' })
 export class KeycloakService {
+
   private keycloak!: Keycloak;
 
+  constructor(private zone: NgZone) {}
+
   init(): Promise<boolean> {
+
     this.keycloak = new Keycloak({
       url: environment.keycloak.url,
       realm: environment.keycloak.realm,
       clientId: environment.keycloak.clientId
     });
 
-    return this.keycloak.init({
-      onLoad: 'login-required',
-      checkLoginIframe: false
-    });
+    return this.zone.runOutsideAngular(() =>
+      this.keycloak.init({
+        onLoad: 'login-required',
+        checkLoginIframe: false
+      })
+    );
   }
 
   get token(): string | undefined {

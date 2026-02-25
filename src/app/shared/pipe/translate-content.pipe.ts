@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { I18nService } from '../../core/services/i18n.service';
+import { I18nService } from '../../core/ui-services/i18n.service';
 
 type TranslatableValue = string | Record<string, unknown> | Array<unknown> | null | undefined;
 

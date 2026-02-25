@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { LoadingService } from './core/services/loading.service';
-import { ThemeService } from './core/services/theme.service';
+import { LoadingService } from './core/ui-services/loading.service';
+import { ThemeService } from './core/ui-services/theme.service';
 
 @Component({
   selector: 'app-root',

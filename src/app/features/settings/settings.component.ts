@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ThemeService } from '../../core/services/theme.service';
-import { AppLanguage, I18nService } from '../../core/services/i18n.service';
+import { ThemeService } from '../../core/ui-services/theme.service';
+import { AppLanguage, I18nService } from '../../core/ui-services/i18n.service';
 
 @Component({
   selector: 'app-settings',

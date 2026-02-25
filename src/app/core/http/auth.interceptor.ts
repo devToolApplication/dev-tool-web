@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpEvent,
   HttpHandler,
@@ -11,10 +11,12 @@ import { KeycloakService } from '../auth/keycloak.service';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private keycloak: KeycloakService) {}
+  private keycloak = inject(KeycloakService);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler):
-    Observable<HttpEvent<any>> {
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
 
     const token = this.keycloak?.token;
 
