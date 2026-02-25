@@ -15,12 +15,12 @@
       <h3>{{ t('settings.language.title') }}</h3>
       <p>{{ t('settings.language.description') }}</p>
     </div>
-    <p-selectbutton
+    <app-select-button
       [options]="languageOptions"
       optionLabel="label"
       optionValue="value"
-      [ngModel]="language"
-      (ngModelChange)="onLanguageChange($event)"
-    ></p-selectbutton>
+      [value]="language"
+      (valueChange)="onLanguageChange($event)"
+    ></app-select-button>
   </div>
 </section>

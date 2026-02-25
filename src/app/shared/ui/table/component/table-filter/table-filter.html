@@ -5,28 +5,26 @@
         <label class="filter-label" [for]="field.field">{{ field.label }}</label>
 
         @if ((field.type ?? 'text') === 'select') {
-          <p-select
+          <app-select
             [inputId]="field.field"
             [options]="field.options ?? []"
-            optionLabel="label"
-            optionValue="value"
             [placeholder]="field.placeholder ?? ('Chọn ' + field.label.toLowerCase())"
-            [(ngModel)]="values[field.field]"
+            [(value)]="values[field.field]"
             [showClear]="true"
-          ></p-select>
+            variant="on"
+          ></app-select>
         } @else if ((field.type ?? 'text') === 'boolean') {
-          <p-select
+          <app-select
             [inputId]="field.field"
             [options]="[
               { label: 'Tất cả', value: null },
               { label: 'Có', value: true },
               { label: 'Không', value: false }
             ]"
-            optionLabel="label"
-            optionValue="value"
             [placeholder]="field.placeholder ?? 'Chọn giá trị'"
-            [(ngModel)]="values[field.field]"
-          ></p-select>
+            [(value)]="values[field.field]"
+            variant="on"
+          ></app-select>
         } @else {
           <input
             pInputText
@@ -40,18 +38,18 @@
   </div>
 
   <div class="filter-actions">
-    <p-button
+    <app-button
       label="Search"
       icon="pi pi-search"
       [disabled]="loading"
-      (onClick)="onSearch()"
-    ></p-button>
-    <p-button
+      (buttonClick)="onSearch()"
+    ></app-button>
+    <app-button
       label="Reset"
       icon="pi pi-refresh"
       severity="secondary"
       [disabled]="loading"
-      (onClick)="onReset()"
-    ></p-button>
+      (buttonClick)="onReset()"
+    ></app-button>
   </div>
 </div>

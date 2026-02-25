@@ -3,23 +3,23 @@
 <p-toolbar styleClass="mb-4 gap-2 table-toolbar">
   <ng-template pTemplate="left">
     @if (isButtonVisible(newButtonConfig)) {
-      <p-button
+      <app-button
         [severity]="newButtonConfig.severity ?? 'success'"
         [label]="newButtonConfig.label ?? 'NEW'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
-        class="mr-2"
+        styleClass="mr-2"
         [disabled]="newButtonConfig.disabled ?? false"
-        (onClick)="onCreate()"
+        (buttonClick)="onCreate()"
       />
     }
 
     @if (isButtonVisible(deleteButtonConfig)) {
-      <p-button
+      <app-button
         [severity]="deleteButtonConfig.severity ?? 'danger'"
         [label]="deleteButtonConfig.label ?? 'DELETE'"
         [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
         [disabled]="deleteButtonConfig.disabled ?? false"
-        (onClick)="onDelete()"
+        (buttonClick)="onDelete()"
       />
     }
   </ng-template>
@@ -39,12 +39,12 @@
     }
 
     @if (isButtonVisible(exportButtonConfig)) {
-      <p-button
+      <app-button
         [severity]="exportButtonConfig.severity ?? 'help'"
         [label]="exportButtonConfig.label ?? 'EXPORT'"
         [icon]="exportButtonConfig.icon ?? 'pi pi-upload'"
         [disabled]="exportButtonConfig.disabled ?? false"
-        (onClick)="onExport()"
+        (buttonClick)="onExport()"
       />
     }
   </ng-template>

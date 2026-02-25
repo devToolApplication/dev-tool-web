@@ -5,7 +5,7 @@ export type FloatLabelType = 'in' | 'on' | 'over';
 
 @Directive()
 export abstract class BaseInput<T> {
-  @Input() inputId = crypto.randomUUID();
+  @Input() inputId: string = crypto.randomUUID();
 
   /* ========= Basic ========= */
   @Input() label?: string;

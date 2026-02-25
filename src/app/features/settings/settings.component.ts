@@ -43,7 +43,9 @@ export class SettingsComponent {
     this.themeService.setDarkMode(value);
   }
 
-  onLanguageChange(language: AppLanguage): void {
-    this.i18nService.setLanguage(language);
+  onLanguageChange(language: string | number | boolean | null): void {
+    if (language === "vi" || language === "en") {
+      this.i18nService.setLanguage(language);
+    }
   }
 }
