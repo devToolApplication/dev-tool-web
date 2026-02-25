@@ -9,7 +9,7 @@ import { FileSelectEvent } from 'primeng/fileupload';
 })
 export class Fileupload {
   @Input() mode: 'basic' | 'advanced' = 'basic';
-  @Input() chooseLabel = 'Choose';
+  @Input() chooseLabel = 'shared.fileUpload.choose';
   @Input() accept?: string;
   @Input() multiple = false;
   @Output() fileSelect = new EventEmitter<FileSelectEvent>();

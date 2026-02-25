@@ -1,0 +1,23 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>Upload Storage - View</h2>
+  </div>
+
+  <div class="toolbar shadow-1">
+    <app-select
+      label="Chọn bản ghi"
+      [options]="recordOptions"
+      placeholder="Chọn bản ghi để update / delete"
+      [(value)]="selectedStorageId"
+    ></app-select>
+
+    <div class="toolbar-actions">
+      <app-button label="Create" icon="pi pi-plus" (buttonClick)="goCreate()"></app-button>
+      <app-button label="Go Edit" icon="pi pi-pencil" (buttonClick)="goEditSelected()"></app-button>
+      <app-button label="Delete" severity="danger" icon="pi pi-trash" [disabled]="loading" (buttonClick)="removeSelected()"></app-button>
+      <app-button label="Refresh" severity="info" icon="pi pi-refresh" (buttonClick)="loadPage()"></app-button>
+    </div>
+  </div>
+
+  <app-table [config]="tableConfig" [data]="rows" [loading]="tableLoading"></app-table>
+</section>

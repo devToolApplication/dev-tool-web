@@ -73,9 +73,16 @@ import { TradeBotDashboardComponent } from '../features/dashboard/components/tra
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
 import { ForbiddenComponent } from '../features/error/forbidden/forbidden.component';
 import { NotFoundComponent } from '../features/error/not-found/not-found.component';
+import { UploadStorageListComponent } from '../features/upload-storage/upload-storage-list.component';
+import { UploadStorageFormComponent } from '../features/upload-storage/upload-storage-form.component';
 import { SideMenuComponent } from './layout/side-menu/side-menu.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { PageComponent } from './layout/page/page.component';
+import { TranslateContentPipe } from './pipe/translate-content.pipe';
+
+const PIPE = [
+  TranslateContentPipe
+]
 
 const FEATURE = [
   DemoComponent,
@@ -88,7 +95,9 @@ const FEATURE = [
   TradeBotDashboardComponent,
   FileStorageDashboardComponent,
   ForbiddenComponent,
-  NotFoundComponent
+  NotFoundComponent,
+  UploadStorageListComponent,
+  UploadStorageFormComponent
 ]
 const COMPONENTS = [
   Breadcrumb,
@@ -131,7 +140,7 @@ const LAYOUT = [
   PageComponent
 ]
 @NgModule({
-  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE],
+  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE, ...PIPE],
   imports: [
     CommonModule,
     RouterModule,
@@ -170,6 +179,6 @@ const LAYOUT = [
     TieredMenuModule,
     TabsModule
   ],
-  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE]
+  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE, ...PIPE]
 })
 export class SharedModule {}

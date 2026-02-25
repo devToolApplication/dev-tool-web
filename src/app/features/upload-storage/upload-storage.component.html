@@ -1,0 +1,37 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>Upload Storage Management</h2>
+    <div class="mode-chip" [class.edit]="!!editId">
+      {{ editId ? 'Update mode' : 'Create mode' }}
+    </div>
+  </div>
+
+  <div class="toolbar shadow-1">
+    <app-select
+      label="Chọn bản ghi"
+      [options]="recordOptions"
+      placeholder="Chọn bản ghi để update / delete"
+      [(value)]="selectedStorageId"
+    ></app-select>
+
+    <div class="toolbar-actions">
+      <app-button label="Load Update" icon="pi pi-pencil" (buttonClick)="loadSelectedForEdit()"></app-button>
+      <app-button label="Delete" severity="danger" icon="pi pi-trash" (buttonClick)="removeSelected()"></app-button>
+      <app-button label="New Create" severity="secondary" icon="pi pi-plus" (buttonClick)="enterCreateMode()"></app-button>
+      <app-button label="Refresh" severity="info" icon="pi pi-refresh" (buttonClick)="loadPage()"></app-button>
+    </div>
+  </div>
+
+  <div class="form-wrap shadow-1">
+    @if (formVisible) {
+      <app-form-input
+        [config]="formConfig"
+        [context]="formContext"
+        [initialValue]="formInitialValue"
+        (submit)="onSubmitForm($event)"
+      ></app-form-input>
+    }
+  </div>
+
+  <app-table [config]="tableConfig" [data]="rows" [loading]="tableLoading"></app-table>
+</section>

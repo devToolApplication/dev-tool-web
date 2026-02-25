@@ -9,7 +9,17 @@
     "toast.deleteError": "Xoá thất bại",
     "toast.saveCreateSuccess": "Tạo mới thành công",
     "toast.saveUpdateSuccess": "Cập nhật thành công",
-    "toast.deleteSuccess": "Đã xoá bản ghi"
+    "toast.deleteSuccess": "Đã xoá bản ghi",
+    "shared.buttonSplit.actions": "Thao tác",
+    "shared.fileUpload.choose": "Chọn tệp",
+    "shared.password.prompt": "Nhập mật khẩu",
+    "shared.password.weak": "Yếu",
+    "shared.password.medium": "Trung bình",
+    "shared.password.strong": "Mạnh",
+    "shared.selectTree.placeholder": "Chọn node",
+    "shared.selectMulti.selectedItemsLabel": "{0} mục đã chọn",
+    "shared.toggle.on": "Bật",
+    "shared.toggle.off": "Tắt"
   },
   "en": {
     "app.title": "My App",
@@ -21,6 +31,16 @@
     "toast.deleteError": "Failed to delete record",
     "toast.saveCreateSuccess": "Created successfully",
     "toast.saveUpdateSuccess": "Updated successfully",
-    "toast.deleteSuccess": "Record deleted"
+    "toast.deleteSuccess": "Record deleted",
+    "shared.buttonSplit.actions": "Actions",
+    "shared.fileUpload.choose": "Choose",
+    "shared.password.prompt": "Enter a password",
+    "shared.password.weak": "Weak",
+    "shared.password.medium": "Medium",
+    "shared.password.strong": "Strong",
+    "shared.selectTree.placeholder": "Choose node",
+    "shared.selectMulti.selectedItemsLabel": "{0} item selected",
+    "shared.toggle.on": "On",
+    "shared.toggle.off": "Off"
   }
 }

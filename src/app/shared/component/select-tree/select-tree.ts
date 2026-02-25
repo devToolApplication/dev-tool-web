@@ -15,6 +15,6 @@ export class SelectTree extends BaseInput<string | string[] | null> {
 
   constructor() {
     super();
-    this.placeholder = 'Chọn node';
+    this.placeholder = 'shared.selectTree.placeholder';
   }
 }

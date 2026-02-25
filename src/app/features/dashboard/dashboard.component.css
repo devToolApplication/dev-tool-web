@@ -5,12 +5,6 @@
   min-height: calc(100vh - 6rem);
 }
 
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
 .dashboard-header h1 {
   margin: 0;
   font-size: 1.6rem;
@@ -19,6 +13,77 @@
 .dashboard-header p {
   margin: 0.35rem 0 0;
   color: color-mix(in srgb, var(--app-text) 65%, transparent);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.metric-card,
+.panel-card {
+  border: 1px solid var(--app-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: var(--app-surface);
+}
+
+.metric-card p {
+  margin: 0;
+  color: color-mix(in srgb, var(--app-text) 65%, transparent);
+  font-size: 0.86rem;
+}
+
+.metric-card h3 {
+  margin: 0.35rem 0;
+  font-size: 1.25rem;
+}
+
+.metric-card span {
+  color: var(--app-primary);
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.panel-card h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+}
+
+.panel-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.panel-card li {
+  margin-bottom: 0.45rem;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.action-list button {
+  border: 1px solid var(--app-border);
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--app-text);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action-list button:hover {
+  border-color: var(--app-primary);
 }
 
 .state-message {

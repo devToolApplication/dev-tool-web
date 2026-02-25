@@ -1,10 +1,40 @@
 <section class="dashboard-page">
   <header class="dashboard-header">
     <div>
-      <h1>Admin Dashboard</h1>
-      <p>Chọn tab để gọi API và hiển thị dữ liệu tương ứng.</p>
+      <h1>Admin Dashboard (Mockup)</h1>
+      <p>Dữ liệu demo để duyệt nhanh giao diện quản trị.</p>
     </div>
   </header>
+
+  <section class="metrics-grid">
+    @for (metric of metrics; track metric.label) {
+      <article class="metric-card">
+        <p>{{ metric.label }}</p>
+        <h3>{{ metric.value }}</h3>
+        <span>{{ metric.change }}</span>
+      </article>
+    }
+  </section>
+
+  <section class="overview-grid">
+    <article class="panel-card">
+      <h2>Hoạt động gần nhất</h2>
+      <ul>
+        @for (activity of activities; track activity) {
+          <li>{{ activity }}</li>
+        }
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <h2>Quick actions</h2>
+      <div class="action-list">
+        <button type="button">Tạo agent mới</button>
+        <button type="button">Mở cấu hình bot</button>
+        <button type="button">Xem báo cáo lưu trữ</button>
+      </div>
+    </article>
+  </section>
 
   <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
     <p-tablist>
