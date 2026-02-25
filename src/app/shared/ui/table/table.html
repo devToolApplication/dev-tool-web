@@ -2,17 +2,50 @@
 
 <p-toolbar styleClass="mb-4 gap-2 table-toolbar">
   <ng-template pTemplate="left">
-    <h5 class="m-0">{{ config.title ?? 'Data Table' }}</h5>
+    @if (isButtonVisible(newButtonConfig)) {
+      <p-button
+        [severity]="newButtonConfig.severity ?? 'success'"
+        [label]="newButtonConfig.label ?? 'NEW'"
+        [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
+        class="mr-2"
+        [disabled]="newButtonConfig.disabled ?? false"
+        (onClick)="onCreate()"
+      />
+    }
+
+    @if (isButtonVisible(deleteButtonConfig)) {
+      <p-button
+        [severity]="deleteButtonConfig.severity ?? 'danger'"
+        [label]="deleteButtonConfig.label ?? 'DELETE'"
+        [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
+        [disabled]="deleteButtonConfig.disabled ?? false"
+        (onClick)="onDelete()"
+      />
+    }
   </ng-template>
 
   <ng-template pTemplate="right">
-    @if ((config.filters ?? []).length > 0) {
-      <app-table-filter
-        [fields]="config.filters ?? []"
-        [loading]="loading"
-        (search)="onSearch($event)"
-        (reset)="onResetFilter()"
-      ></app-table-filter>
+    @if (isButtonVisible(importButtonConfig)) {
+      <p-fileUpload
+        mode="basic"
+        [accept]="importButtonConfig.accept ?? '*/*'"
+        [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
+        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'IMPORT'"
+        class="mr-2 inline-block"
+        [customUpload]="true"
+        [auto]="true"
+        (uploadHandler)="onImport($event.files[0])"
+      />
+    }
+
+    @if (isButtonVisible(exportButtonConfig)) {
+      <p-button
+        [severity]="exportButtonConfig.severity ?? 'help'"
+        [label]="exportButtonConfig.label ?? 'EXPORT'"
+        [icon]="exportButtonConfig.icon ?? 'pi pi-upload'"
+        [disabled]="exportButtonConfig.disabled ?? false"
+        (onClick)="onExport()"
+      />
     }
   </ng-template>
 </p-toolbar>
@@ -29,6 +62,21 @@
   [showCurrentPageReport]="true"
   responsiveLayout="scroll"
 >
+  <ng-template pTemplate="caption">
+    <div class="table-caption">
+      <h5 class="m-0">{{ config.title ?? 'Data Table' }}</h5>
+
+      @if ((config.filters ?? []).length > 0) {
+        <app-table-filter
+          [fields]="config.filters ?? []"
+          [loading]="loading"
+          (search)="onSearch($event)"
+          (reset)="onResetFilter()"
+        ></app-table-filter>
+      }
+    </div>
+  </ng-template>
+
   <ng-template pTemplate="header">
     <tr>
       @for (col of config.columns; track col.field) {

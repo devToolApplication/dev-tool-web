@@ -49,8 +49,30 @@ export interface TableConfig {
   columns: TableColumn[];
   title?: string;
   filters?: TableFilterField[];
+  toolbar?: TableToolbarConfig;
 
   pagination?: boolean;
   rows?: number;
   rowsPerPageOptions?: number[];
+}
+
+export interface TableToolbarButtonConfig {
+  visible?: boolean;
+  label?: string;
+  icon?: string;
+  severity?: TableActionSeverity;
+  disabled?: boolean;
+}
+
+export interface TableToolbarImportConfig extends TableToolbarButtonConfig {
+  accept?: string;
+  maxFileSize?: number;
+  chooseLabel?: string;
+}
+
+export interface TableToolbarConfig {
+  new?: TableToolbarButtonConfig;
+  delete?: TableToolbarButtonConfig;
+  import?: TableToolbarImportConfig;
+  export?: TableToolbarButtonConfig;
 }
