@@ -18,6 +18,17 @@
   <ng-template #end>
     <button
       type="button"
+      class="theme-toggle-button"
+      (click)="toggleDarkMode()"
+      [attr.aria-pressed]="darkModeEnabled"
+      [attr.aria-label]="darkModeEnabled ? 'Bật giao diện sáng' : 'Bật giao diện tối'"
+      [title]="darkModeEnabled ? 'Light mode' : 'Dark mode'"
+    >
+      <i class="pi" [ngClass]="darkModeEnabled ? 'pi-sun' : 'pi-moon'"></i>
+    </button>
+
+    <button
+      type="button"
       class="avatar-button"
       (click)="toggleAccountMenu($event)"
       aria-label="Tài khoản"

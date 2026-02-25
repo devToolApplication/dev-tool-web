@@ -4,6 +4,7 @@ import { filter, Subject, takeUntil } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { TieredMenu } from 'primeng/tieredmenu';
 import { KeycloakService } from '../../../core/auth/keycloak.service';
+import { ThemeService } from '../../../core/ui-services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -39,7 +40,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
-    private readonly keycloakService: KeycloakService
+    private readonly keycloakService: KeycloakService,
+    private readonly themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +66,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleAccountMenu(event: Event): void {
     this.userMenu.toggle(event);
+  }
+
+  get darkModeEnabled(): boolean {
+    return this.themeService.isDarkMode;
+  }
+
+  toggleDarkMode(): void {
+    this.themeService.toggleDarkMode();
   }
 
   private updateBreadcrumb(): void {
