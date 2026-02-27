@@ -1,0 +1,30 @@
+.demo-page {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.description {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.preview-card {
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--app-surface);
+}
+
+.button-preview {
+  display: flex;
+  justify-content: center;
+}

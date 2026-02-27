@@ -16,6 +16,15 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         routerLink: '/admin/upload-storage/storage'
       },
       {
+        label: 'Component Demo',
+        icon: 'pi pi-box',
+        items: [
+          { label: 'Input Demo', icon: 'pi pi-pencil', routerLink: '/admin/component-demo/input' },
+          { label: 'Select Demo', icon: 'pi pi-list', routerLink: '/admin/component-demo/select' },
+          { label: 'Button Demo', icon: 'pi pi-stop', routerLink: '/admin/component-demo/button' }
+        ]
+      },
+      {
         label: 'Permissions Demo (403)',
         icon: 'pi pi-lock',
         routerLink: '/403'

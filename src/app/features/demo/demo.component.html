@@ -1,8 +1,73 @@
-<app-form-input [config]="config"
-    [context]="context"
-    [initialValue]="initialValue"
-    (submit)="save($event)" />
-    <app-table
-    [config]="tableConfig"
-    [data]="tableData">
-  </app-table>
+<section class="demo-page bg-surface text-base-foreground border-default">
+  <h2>{{ title }}</h2>
+  <p class="description">Cấu hình tham số component bằng các nút preset bên dưới.</p>
+
+  @if (section === 'input') {
+    <div class="preset-actions">
+      <app-button label="Default" severity="secondary" (buttonClick)="applyInputPreset('default')"></app-button>
+      <app-button label="Required" severity="info" (buttonClick)="applyInputPreset('required')"></app-button>
+      <app-button label="Readonly" severity="help" (buttonClick)="applyInputPreset('readonly')"></app-button>
+      <app-button label="Error" severity="danger" (buttonClick)="applyInputPreset('error')"></app-button>
+    </div>
+
+    <div class="preview-card border-default">
+      <app-input-text
+        [label]="inputConfig.label"
+        [placeholder]="inputConfig.placeholder"
+        [value]="inputValue"
+        (valueChange)="inputValue = $event || ''"
+        [disabled]="inputConfig.disabled"
+        [readonly]="inputConfig.readonly"
+        [required]="inputConfig.required"
+        [invalid]="inputConfig.invalid"
+        [errorMessage]="inputConfig.errorMessage"
+        [helpText]="inputConfig.helpText"
+      ></app-input-text>
+    </div>
+  }
+
+  @if (section === 'select') {
+    <div class="preset-actions">
+      <app-button label="Default" severity="secondary" (buttonClick)="applySelectPreset('default')"></app-button>
+      <app-button label="Show Clear" severity="info" (buttonClick)="applySelectPreset('clearable')"></app-button>
+      <app-button label="Required" severity="help" (buttonClick)="applySelectPreset('required')"></app-button>
+      <app-button label="Error" severity="danger" (buttonClick)="applySelectPreset('error')"></app-button>
+    </div>
+
+    <div class="preview-card border-default">
+      <app-select
+        [label]="selectConfig.label"
+        [placeholder]="selectConfig.placeholder"
+        [options]="selectConfig.options"
+        [value]="selectValue"
+        (valueChange)="selectValue = $any($event)"
+        [showClear]="selectConfig.showClear"
+        [disabled]="selectConfig.disabled"
+        [required]="selectConfig.required"
+        [invalid]="selectConfig.invalid"
+        [errorMessage]="selectConfig.invalid ? 'Please choose valid option' : undefined"
+      ></app-select>
+    </div>
+  }
+
+  @if (section === 'button') {
+    <div class="preset-actions">
+      <app-button label="Primary" severity="secondary" (buttonClick)="applyButtonPreset('primary')"></app-button>
+      <app-button label="Success" severity="success" (buttonClick)="applyButtonPreset('success')"></app-button>
+      <app-button label="Danger" severity="danger" (buttonClick)="applyButtonPreset('danger')"></app-button>
+      <app-button label="Text" severity="help" (buttonClick)="applyButtonPreset('text')"></app-button>
+      <app-button label="Disabled" severity="warn" (buttonClick)="applyButtonPreset('disabled')"></app-button>
+    </div>
+
+    <div class="preview-card border-default button-preview">
+      <app-button
+        [label]="buttonConfig.label"
+        [severity]="buttonConfig.severity"
+        [text]="buttonConfig.text"
+        [disabled]="buttonConfig.disabled"
+        [icon]="buttonConfig.icon"
+        (buttonClick)="onDemoButtonClick()"
+      ></app-button>
+    </div>
+  }
+</section>
