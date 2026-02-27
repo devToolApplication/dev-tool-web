@@ -1,0 +1,135 @@
+@layer components {
+  :root .p-component {
+    color: var(--app-text);
+  }
+
+  :root .p-button {
+    --p-button-primary-background: var(--app-primary);
+    --p-button-primary-border-color: var(--app-primary);
+    --p-button-primary-hover-background: var(--app-primary-hover);
+    --p-button-primary-hover-border-color: var(--app-primary-hover);
+    --p-button-primary-active-background: var(--app-primary-active);
+    --p-button-primary-active-border-color: var(--app-primary-active);
+    --p-button-primary-color: #ffffff;
+    --p-button-primary-hover-color: #ffffff;
+    --p-button-primary-active-color: #ffffff;
+  }
+
+  :root .p-inputtext,
+  :root .p-inputnumber-input,
+  :root .p-textarea,
+  :root .p-password-input,
+  :root .p-select,
+  :root .p-multiselect,
+  :root .p-datepicker-input,
+  :root .p-select-label,
+  :root .p-multiselect-label {
+    background: var(--app-input-bg);
+    color: var(--app-input-text);
+    border-color: var(--app-input-border);
+  }
+
+  :root .p-inputtext:enabled:hover,
+  :root .p-inputtext:enabled:focus,
+  :root .p-textarea:enabled:hover,
+  :root .p-textarea:enabled:focus,
+  :root .p-inputnumber-input:enabled:hover,
+  :root .p-inputnumber-input:enabled:focus {
+    border-color: var(--app-primary);
+  }
+
+  :root .p-inputtext:enabled:focus,
+  :root .p-textarea:enabled:focus,
+  :root .p-inputnumber-input:enabled:focus {
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--app-primary) 25%, transparent);
+  }
+
+  :root .p-select-overlay,
+  :root .p-multiselect-overlay,
+  :root .p-select-panel,
+  :root .p-multiselect-panel,
+  :root .p-datepicker-panel,
+  :root .p-dialog,
+  :root .p-popover,
+  :root .p-tooltip {
+    background: var(--app-overlay-bg);
+    color: var(--app-overlay-text);
+    border-color: var(--app-border);
+    box-shadow: var(--app-shadow-overlay);
+  }
+
+  :root .p-select-option,
+  :root .p-multiselect-option,
+  :root .p-datepicker-day,
+  :root .p-datepicker-month,
+  :root .p-datepicker-year {
+    color: var(--app-overlay-text);
+  }
+
+  :root .p-select-option:hover,
+  :root .p-multiselect-option:hover,
+  :root .p-datepicker-day:hover,
+  :root .p-datepicker-month:hover,
+  :root .p-datepicker-year:hover {
+    background: color-mix(in srgb, var(--app-overlay-bg) 82%, var(--app-primary) 18%);
+  }
+
+  :root .p-datepicker-dropdown,
+  :root .p-datepicker-dropdown .p-button-icon,
+  :root .p-datepicker-trigger,
+  :root .p-datepicker-trigger .p-button-icon {
+    color: var(--app-input-text);
+  }
+
+  :root .p-selectbutton .p-togglebutton {
+    background: var(--app-input-bg);
+    color: var(--app-input-text);
+    border-color: var(--app-input-border);
+  }
+
+  :root .p-selectbutton .p-togglebutton:hover {
+    background: color-mix(in srgb, var(--app-input-bg) 78%, var(--app-primary) 22%);
+    border-color: var(--app-primary);
+  }
+
+  :root .p-selectbutton .p-togglebutton.p-togglebutton-checked {
+    background: var(--app-primary);
+    color: #ffffff;
+    border-color: var(--app-primary);
+  }
+
+  :root .p-tabs {
+    background: transparent;
+    color: var(--app-text);
+  }
+
+  :root .p-tablist {
+    background: var(--app-tab-list-bg);
+    border: 1px solid var(--app-tab-list-border);
+    border-radius: 12px;
+    padding: 0.25rem;
+  }
+
+  :root .p-tab {
+    border-radius: 8px;
+    color: var(--app-tab-text);
+  }
+
+  :root .p-tab.p-tab-active {
+    color: var(--app-tab-text-active);
+    background: var(--app-tab-active-bg);
+  }
+
+  :root .p-tabpanels {
+    margin-top: 0.75rem;
+    background: var(--app-tab-panels-bg);
+    border: 1px solid var(--app-tab-panels-border);
+    border-radius: 12px;
+    color: var(--app-tab-panel-text);
+  }
+
+  :root .p-tabpanel {
+    background: transparent;
+    color: var(--app-tab-panel-text);
+  }
+}

@@ -34,10 +34,10 @@ export class KeycloakService {
   }
 
   logout() {
-    this.keycloak.logout();
+    this.keycloak?.logout();
   }
 
   hasRole(role: string): boolean {
-    return this.keycloak.hasRealmRole(role);
+    return this.keycloak?.hasRealmRole(role) ?? false;
   }
 }

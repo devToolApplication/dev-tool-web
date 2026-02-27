@@ -2,49 +2,34 @@
 @import "tailwindcss-primeui";
 
 :root {
-  --app-bg: var(--p-surface-50, #f8fafc);
-  --app-surface: var(--p-surface-0, #ffffff);
-  --app-surface-alt: var(--p-surface-100, #f1f5f9);
-  --app-text: var(--p-text-color, #111827);
-  --app-border: var(--p-content-border-color, #e2e8f0);
-  --app-primary: var(--p-primary-color, #4f46e5);
+  --app-bg: var(--p-surface-0);
+  --app-surface: var(--p-surface-100);
+  --app-surface-alt: var(--p-surface-200);
+  --app-text: var(--p-text-color);
+  --app-border: var(--p-content-border-color);
+  --app-primary: var(--p-primary-color);
 
-  --app-topbar-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+  --app-topbar-shadow: 0 2px 8px color-mix(in srgb, var(--p-surface-900) 8%, transparent);
 
-  --app-sidebar-bg: #ffffff;
-  --app-sidebar-text: #334155;
-  --app-sidebar-muted: #94a3b8;
-  --app-sidebar-border: #e2e8f0;
-  --app-sidebar-brand-bg: rgb(79 70 229 / 14%);
-  --app-sidebar-brand-text: #4f46e5;
-  --app-sidebar-item-hover: #eef2ff;
-  --app-sidebar-item-active-bg: #4f46e5;
+  --app-sidebar-bg: var(--p-surface-0);
+  --app-sidebar-text: var(--p-text-color);
+  --app-sidebar-muted: var(--p-text-muted-color);
+  --app-sidebar-border: var(--p-content-border-color);
+  --app-sidebar-brand-bg: color-mix(in srgb, var(--p-primary-color) 14%, transparent);
+  --app-sidebar-brand-text: var(--p-primary-color);
+  --app-sidebar-item-hover: color-mix(in srgb, var(--p-primary-color) 14%, transparent);
+  --app-sidebar-item-active-bg: var(--p-primary-color);
   --app-sidebar-item-active-text: #ffffff;
-  --app-sidebar-badge-bg: #e2e8f0;
-  --app-sidebar-badge-text: #334155;
-}
+  --app-sidebar-badge-bg: var(--p-surface-200);
+  --app-sidebar-badge-text: var(--p-text-muted-color);
 
-.app-dark {
-  --app-bg: var(--p-surface-900, #0f172a);
-  --app-surface: var(--p-surface-800, #111827);
-  --app-surface-alt: var(--p-surface-700, #1f2937);
-  --app-text: var(--p-text-color, #e2e8f0);
-  --app-border: var(--p-content-border-color, #273245);
-  --app-primary: var(--p-primary-color, #818cf8);
+  --app-page-shell-shadow: 0 10px 24px color-mix(in srgb, var(--p-surface-900) 18%, transparent);
 
-  --app-topbar-shadow: 0 2px 10px rgb(0 0 0 / 30%);
-
-  --app-sidebar-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  --app-sidebar-text: #cbd5e1;
-  --app-sidebar-muted: #94a3b8;
-  --app-sidebar-border: rgb(148 163 184 / 22%);
-  --app-sidebar-brand-bg: rgb(129 140 248 / 20%);
-  --app-sidebar-brand-text: #c7d2fe;
-  --app-sidebar-item-hover: rgb(129 140 248 / 20%);
-  --app-sidebar-item-active-bg: #6366f1;
-  --app-sidebar-item-active-text: #ffffff;
-  --app-sidebar-badge-bg: rgb(148 163 184 / 20%);
-  --app-sidebar-badge-text: #e2e8f0;
+  --app-custom-select-bg: var(--p-content-background);
+  --app-custom-select-text: var(--p-content-color);
+  --app-custom-input-bg: var(--p-form-field-background);
+  --app-custom-input-text: var(--p-form-field-color);
+  --app-custom-text: var(--p-text-color);
 }
 
 html,
@@ -60,13 +45,6 @@ body {
 .bg-surface-alt { background: var(--app-surface-alt); }
 .text-base-foreground { color: var(--app-text); }
 .border-default { border-color: var(--app-border); }
-
-
-:root {
-  --p-surface-0: #ffffff;
-  --p-surface-50: #f8fafc;
-  --p-surface-100: #f1f5f9;
-}
 
 :root .p-button {
   --p-button-primary-background: var(--p-primary-color);
@@ -96,5 +74,115 @@ body {
 }
 
 :root .p-component {
-  color: var(--app-text);
+  color: var(--app-custom-text);
+}
+
+:root .p-selectbutton .p-togglebutton {
+  background: var(--app-custom-input-bg);
+  color: var(--app-custom-input-text);
+  border-color: var(--p-form-field-border-color);
+}
+
+:root .p-selectbutton .p-togglebutton:hover {
+  background: color-mix(in srgb, var(--app-custom-input-bg) 78%, var(--p-primary-color) 22%);
+  border-color: var(--p-primary-color);
+}
+
+:root .p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  background: var(--p-primary-color);
+  color: #ffffff;
+  border-color: var(--p-primary-color);
+}
+
+/* Shared components contrast fixes in dark mode (Aura and other presets) */
+:root.app-dark .p-inputtext,
+:root.app-dark .p-inputnumber-input,
+:root.app-dark .p-textarea,
+:root.app-dark .p-password-input,
+:root.app-dark .p-select,
+:root.app-dark .p-multiselect,
+:root.app-dark .p-datepicker-input {
+  background: var(--p-form-field-background);
+  color: var(--p-form-field-color);
+  border-color: var(--p-form-field-border-color);
+}
+
+:root.app-dark .p-select-overlay,
+:root.app-dark .p-multiselect-overlay,
+:root.app-dark .p-datepicker-panel,
+:root.app-dark .p-tieredmenu,
+:root.app-dark .p-menu,
+:root.app-dark .p-dialog,
+:root.app-dark .p-popover,
+:root.app-dark .p-tooltip {
+  background: var(--p-content-background);
+  color: var(--p-content-color);
+  border-color: var(--p-content-border-color);
+}
+
+:root.app-dark .p-select-option,
+:root.app-dark .p-multiselect-option,
+:root.app-dark .p-datepicker-day,
+:root.app-dark .p-datepicker-month,
+:root.app-dark .p-datepicker-year {
+  color: var(--p-text-color);
+}
+
+:root.app-dark .p-select-option:hover,
+:root.app-dark .p-multiselect-option:hover,
+:root.app-dark .p-datepicker-day:hover,
+:root.app-dark .p-datepicker-month:hover,
+:root.app-dark .p-datepicker-year:hover {
+  background: var(--p-content-hover-background);
+}
+
+
+:root.app-dark .p-inputtext,
+:root.app-dark .p-inputnumber-input,
+:root.app-dark .p-textarea,
+:root.app-dark .p-password-input,
+:root.app-dark .p-select,
+:root.app-dark .p-multiselect,
+:root.app-dark .p-datepicker-input,
+:root.app-dark .p-select-label,
+:root.app-dark .p-multiselect-label {
+  background: var(--app-custom-input-bg) !important;
+  color: var(--app-custom-input-text) !important;
+}
+
+:root.app-dark .p-select-overlay,
+:root.app-dark .p-multiselect-overlay,
+:root.app-dark .p-select-panel,
+:root.app-dark .p-multiselect-panel {
+  background: var(--app-custom-select-bg) !important;
+  color: var(--app-custom-select-text) !important;
+}
+
+:root.app-dark .p-select-option,
+:root.app-dark .p-multiselect-option {
+  color: var(--app-custom-select-text) !important;
+}
+
+:root.app-dark .p-datepicker-dropdown,
+:root.app-dark .p-datepicker-dropdown .p-button-icon,
+:root.app-dark .p-datepicker-trigger,
+:root.app-dark .p-datepicker-trigger .p-button-icon {
+  color: var(--app-custom-input-text) !important;
+}
+
+:root.app-dark .p-selectbutton .p-togglebutton {
+  background: var(--app-custom-input-bg) !important;
+  color: var(--app-custom-input-text) !important;
+  border-color: var(--p-form-field-border-color) !important;
+}
+
+:root.app-dark .p-selectbutton .p-togglebutton:hover {
+  background: color-mix(in srgb, var(--app-custom-input-bg) 78%, var(--p-primary-color) 22%) !important;
+  border-color: var(--p-primary-color) !important;
+}
+
+:root.app-dark .p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  background: var(--p-primary-color) !important;
+  color: #ffffff !important;
+  border-color: var(--p-primary-color) !important;
 }
