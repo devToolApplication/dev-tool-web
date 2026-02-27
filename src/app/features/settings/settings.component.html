@@ -2,25 +2,124 @@
   <h2>{{ t('settings.title') }}</h2>
   <p class="description">{{ t('settings.description') }}</p>
 
-  <div class="setting-item border-default">
-    <div>
-      <h3>{{ t('settings.darkMode.title') }}</h3>
-      <p>{{ t('settings.darkMode.description') }}</p>
-    </div>
-    <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
-  </div>
+  <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
+    <p-tablist>
+      <p-tab value="general">{{ t('settings.tabs.general') }}</p-tab>
+      <p-tab value="theme">{{ t('settings.tabs.theme') }}</p-tab>
+    </p-tablist>
 
-  <div class="setting-item border-default">
-    <div>
-      <h3>{{ t('settings.language.title') }}</h3>
-      <p>{{ t('settings.language.description') }}</p>
-    </div>
-    <app-select-button
-      [options]="languageOptions"
-      optionLabel="label"
-      optionValue="value"
-      [value]="language"
-      (valueChange)="onLanguageChange($event)"
-    ></app-select-button>
-  </div>
+    <p-tabpanels>
+      <p-tabpanel value="general">
+        <div class="settings-section">
+          <div class="setting-item border-default">
+            <div>
+              <h3>{{ t('settings.darkMode.title') }}</h3>
+              <p>{{ t('settings.darkMode.description') }}</p>
+            </div>
+            <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
+          </div>
+
+          <div class="setting-item border-default setting-item-column">
+            <div>
+              <h3>{{ t('settings.theme.mode.title') }}</h3>
+              <p>{{ t('settings.theme.mode.description') }}</p>
+            </div>
+            <app-select-button
+              [options]="themeModeOptions"
+              [value]="themeMode"
+              (valueChange)="onThemeModeChange($event)"
+            ></app-select-button>
+          </div>
+
+          <div class="setting-item border-default setting-item-column">
+            <div>
+              <h3>{{ t('settings.theme.preset.title') }}</h3>
+              <p>{{ t('settings.theme.preset.description') }}</p>
+            </div>
+            <app-select
+              [options]="themePresetOptions"
+              [value]="themePreset"
+              (valueChange)="onThemePresetChange($event)"
+            ></app-select>
+          </div>
+
+          <div class="setting-item border-default">
+            <div>
+              <h3>{{ t('settings.language.title') }}</h3>
+              <p>{{ t('settings.language.description') }}</p>
+            </div>
+            <app-select-button
+              [options]="languageOptions"
+              [value]="language"
+              (valueChange)="onLanguageChange($event)"
+            ></app-select-button>
+          </div>
+        </div>
+      </p-tabpanel>
+
+      <p-tabpanel value="theme">
+        <div class="settings-section">
+          <div class="setting-item border-default setting-item-column">
+            <div>
+              <h3>{{ t('settings.theme.custom.title') }}</h3>
+              <p>{{ t('settings.theme.custom.description') }}</p>
+            </div>
+
+            <div class="theme-grid">
+              <div class="theme-grid-item">
+                <label>{{ t('settings.theme.custom.selectBackground') }}</label>
+                <app-select
+                  [options]="themeTokenOptions.selectBackground"
+                  [value]="themeTokenValue.selectBackground"
+                  (valueChange)="onThemeTokenChange('selectBackground', $event)"
+                ></app-select>
+              </div>
+
+              <div class="theme-grid-item">
+                <label>{{ t('settings.theme.custom.selectText') }}</label>
+                <app-select
+                  [options]="themeTokenOptions.selectText"
+                  [value]="themeTokenValue.selectText"
+                  (valueChange)="onThemeTokenChange('selectText', $event)"
+                ></app-select>
+              </div>
+
+              <div class="theme-grid-item">
+                <label>{{ t('settings.theme.custom.inputBackground') }}</label>
+                <app-select
+                  [options]="themeTokenOptions.inputBackground"
+                  [value]="themeTokenValue.inputBackground"
+                  (valueChange)="onThemeTokenChange('inputBackground', $event)"
+                ></app-select>
+              </div>
+
+              <div class="theme-grid-item">
+                <label>{{ t('settings.theme.custom.inputText') }}</label>
+                <app-select
+                  [options]="themeTokenOptions.inputText"
+                  [value]="themeTokenValue.inputText"
+                  (valueChange)="onThemeTokenChange('inputText', $event)"
+                ></app-select>
+              </div>
+
+              <div class="theme-grid-item">
+                <label>{{ t('settings.theme.custom.appText') }}</label>
+                <app-select
+                  [options]="themeTokenOptions.appText"
+                  [value]="themeTokenValue.appText"
+                  (valueChange)="onThemeTokenChange('appText', $event)"
+                ></app-select>
+              </div>
+            </div>
+
+            <app-button
+              severity="secondary"
+              [label]="t('settings.theme.custom.reset')"
+              (buttonClick)="onResetThemeConfig()"
+            ></app-button>
+          </div>
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
 </section>

@@ -1,0 +1,66 @@
+:root {
+  /* Surface */
+  --app-bg: var(--p-surface-0);
+  --app-surface: var(--p-surface-100);
+  --app-surface-alt: var(--p-surface-200);
+
+  /* Text */
+  --app-text: var(--p-text-color);
+  --app-text-muted: var(--p-text-muted-color);
+
+  /* Border */
+  --app-border: var(--p-content-border-color);
+
+  /* Primary */
+  --app-primary: var(--p-primary-color);
+  --app-primary-hover: var(--p-primary-hover-color);
+  --app-primary-active: var(--p-primary-active-color);
+
+  /* Input */
+  --app-input-bg: var(--p-form-field-background);
+  --app-input-text: var(--p-form-field-color);
+  --app-input-border: var(--p-form-field-border-color);
+
+  /* Overlay */
+  --app-overlay-bg: var(--p-content-background);
+  --app-overlay-text: var(--p-content-color);
+
+  /* Tabs */
+  --app-tab-list-bg: var(--app-surface-alt);
+  --app-tab-list-border: var(--app-border);
+  --app-tab-text: var(--app-text-muted);
+  --app-tab-text-active: var(--app-text);
+  --app-tab-active-bg: var(--app-surface);
+  --app-tab-panels-bg: var(--app-surface);
+  --app-tab-panels-border: var(--app-border);
+  --app-tab-panel-text: var(--app-text);
+
+  /* Layout */
+  --app-sidebar-bg: var(--p-surface-0);
+  --app-sidebar-text: var(--app-text);
+  --app-sidebar-muted: var(--app-text-muted);
+  --app-sidebar-border: var(--app-border);
+  --app-sidebar-brand-bg: color-mix(in srgb, var(--app-primary) 14%, transparent);
+  --app-sidebar-brand-text: var(--app-primary);
+  --app-sidebar-item-hover: color-mix(in srgb, var(--app-primary) 14%, transparent);
+  --app-sidebar-item-active-bg: var(--app-primary);
+  --app-sidebar-item-active-text: #ffffff;
+  --app-sidebar-badge-bg: var(--p-surface-200);
+  --app-sidebar-badge-text: var(--app-text-muted);
+
+  /* Shadow scale */
+  --app-shadow-xs: 0 1px 2px rgb(15 23 42 / 6%);
+  --app-shadow-sm: 0 2px 8px rgb(15 23 42 / 8%);
+  --app-shadow-md: 0 6px 14px rgb(15 23 42 / 12%);
+  --app-shadow-lg: 0 10px 24px rgb(15 23 42 / 16%);
+  --app-shadow-xl: 0 16px 36px rgb(15 23 42 / 20%);
+  --app-shadow-overlay: 0 18px 42px rgb(2 8 23 / 24%);
+}
+
+@layer utilities {
+  .bg-base { background: var(--app-bg); }
+  .bg-surface { background: var(--app-surface); }
+  .bg-surface-alt { background: var(--app-surface-alt); }
+  .text-base-foreground { color: var(--app-text); }
+  .border-default { border-color: var(--app-border); }
+}

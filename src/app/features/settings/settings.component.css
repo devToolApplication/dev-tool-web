@@ -11,6 +11,12 @@
   opacity: 0.8;
 }
 
+.settings-section {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
 .setting-item {
   border: 1px solid;
   border-radius: 10px;
@@ -23,4 +29,30 @@
 .setting-item h3,
 .setting-item p {
   margin: 0;
+}
+
+.setting-item-column {
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.setting-item-column app-select,
+.setting-item-column app-select-button {
+  min-width: 16rem;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.theme-grid-item {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.theme-grid-item label {
+  font-size: 0.86rem;
+  opacity: 0.85;
 }

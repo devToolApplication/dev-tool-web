@@ -1,0 +1,12 @@
+:root {
+  --app-topbar-shadow: var(--app-shadow-sm);
+  --app-page-shell-shadow: var(--app-shadow-lg);
+}
+
+html,
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
