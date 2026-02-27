@@ -19,13 +19,15 @@
     "settings.tabs.general": "Cài đặt chung",
     "settings.tabs.theme": "Theme settings",
     "settings.theme.custom.title": "Tuỳ chỉnh màu component",
-    "settings.theme.custom.description": "Chọn nhanh token màu cho select/input/text (không nhập tay).",
+    "settings.theme.custom.description": "Tuỳ chỉnh token cho Light/Dark và cho phép nhập giá trị CSS tuỳ ý (hex, rgb, var(...)).",
     "settings.theme.custom.selectBackground": "Màu nền Select",
     "settings.theme.custom.selectText": "Màu chữ Select",
     "settings.theme.custom.inputBackground": "Màu nền Input",
     "settings.theme.custom.inputText": "Màu chữ Input",
     "settings.theme.custom.appText": "Màu chữ toàn cục",
-    "settings.theme.custom.reset": "Reset về mặc định"
+    "settings.theme.custom.reset": "Reset về mặc định",
+    "settings.theme.custom.mode": "Đang cấu hình cho mode",
+    "settings.theme.custom.customValue": "Nhập giá trị CSS tuỳ chỉnh"
   },
   "en": {
     "settings.title": "Appearance settings",
@@ -47,12 +49,14 @@
     "settings.tabs.general": "General",
     "settings.tabs.theme": "Theme settings",
     "settings.theme.custom.title": "Component color customization",
-    "settings.theme.custom.description": "Pick predefined color tokens for select/input/text (no manual input).",
+    "settings.theme.custom.description": "Customize tokens for Light/Dark and enter any CSS value (hex, rgb, var(...)).",
     "settings.theme.custom.selectBackground": "Select background",
     "settings.theme.custom.selectText": "Select text",
     "settings.theme.custom.inputBackground": "Input background",
     "settings.theme.custom.inputText": "Input text",
     "settings.theme.custom.appText": "Global text color",
-    "settings.theme.custom.reset": "Reset to default"
+    "settings.theme.custom.reset": "Reset to default",
+    "settings.theme.custom.mode": "Customize mode",
+    "settings.theme.custom.customValue": "Enter custom CSS value"
   }
 }

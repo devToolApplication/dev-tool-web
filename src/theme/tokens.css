@@ -25,6 +25,25 @@
   --app-overlay-bg: var(--p-content-background);
   --app-overlay-text: var(--p-content-color);
 
+  /* Custom theme token per mode */
+  --app-custom-light-select-bg: var(--p-content-background);
+  --app-custom-light-select-text: var(--p-content-color);
+  --app-custom-light-input-bg: var(--p-form-field-background);
+  --app-custom-light-input-text: var(--p-form-field-color);
+  --app-custom-light-text: var(--p-text-color);
+
+  --app-custom-dark-select-bg: #111827;
+  --app-custom-dark-select-text: #e5e7eb;
+  --app-custom-dark-input-bg: #0f172a;
+  --app-custom-dark-input-text: #e5e7eb;
+  --app-custom-dark-text: #e5e7eb;
+
+  --app-custom-select-bg: var(--app-custom-light-select-bg);
+  --app-custom-select-text: var(--app-custom-light-select-text);
+  --app-custom-input-bg: var(--app-custom-light-input-bg);
+  --app-custom-input-text: var(--app-custom-light-input-text);
+  --app-custom-text: var(--app-custom-light-text);
+
   /* Tabs */
   --app-tab-list-bg: var(--app-surface-alt);
   --app-tab-list-border: var(--app-border);

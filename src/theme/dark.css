@@ -15,6 +15,12 @@
   --app-overlay-bg: #111827;
   --app-overlay-text: #e5e7eb;
 
+  --app-custom-select-bg: var(--app-custom-dark-select-bg);
+  --app-custom-select-text: var(--app-custom-dark-select-text);
+  --app-custom-input-bg: var(--app-custom-dark-input-bg);
+  --app-custom-input-text: var(--app-custom-dark-input-text);
+  --app-custom-text: var(--app-custom-dark-text);
+
   --app-tab-list-bg: #1b2438;
   --app-tab-list-border: #2c364b;
   --app-tab-text: #94a3b8;
