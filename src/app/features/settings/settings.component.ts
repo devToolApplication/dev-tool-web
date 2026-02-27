@@ -12,6 +12,7 @@ import { ThemeCustomToken, ThemeCustomizerService } from '../../core/ui-services
 })
 export class SettingsComponent {
   activeTab = 'general';
+  customThemeMode: ThemeMode = 'light';
 
   constructor(
     private readonly themeService: ThemeService,
@@ -56,6 +57,13 @@ export class SettingsComponent {
     ];
   }
 
+  get customModeOptions(): { label: string; value: ThemeMode }[] {
+    return [
+      { label: this.i18nService.t('settings.theme.mode.light'), value: 'light' },
+      { label: this.i18nService.t('settings.theme.mode.dark'), value: 'dark' }
+    ];
+  }
+
   get themeTokenOptions(): Record<ThemeCustomToken, { label: string; value: string }[]> {
     return {
       selectBackground: this.themeCustomizerService.getOptions('selectBackground'),
@@ -67,7 +75,7 @@ export class SettingsComponent {
   }
 
   get themeTokenValue(): Record<ThemeCustomToken, string> {
-    return this.themeCustomizerService.current;
+    return this.themeCustomizerService.getModeState(this.customThemeMode);
   }
 
   t(key:
@@ -91,11 +99,13 @@ export class SettingsComponent {
     | 'settings.tabs.theme'
     | 'settings.theme.custom.title'
     | 'settings.theme.custom.description'
+    | 'settings.theme.custom.mode'
     | 'settings.theme.custom.selectBackground'
     | 'settings.theme.custom.selectText'
     | 'settings.theme.custom.inputBackground'
     | 'settings.theme.custom.inputText'
     | 'settings.theme.custom.appText'
+    | 'settings.theme.custom.customValue'
     | 'settings.theme.custom.reset'): string {
     return this.i18nService.t(key);
   }
@@ -126,13 +136,26 @@ export class SettingsComponent {
     }
   }
 
+  onCustomModeChange(mode: string | number | boolean | null): void {
+    if (mode === 'light' || mode === 'dark') {
+      this.customThemeMode = mode;
+    }
+  }
+
   onThemeTokenChange(token: ThemeCustomToken, value: string | number | boolean | null): void {
     if (typeof value === 'string') {
-      this.themeCustomizerService.set(token, value);
+      this.themeCustomizerService.set(this.customThemeMode, token, value);
+    }
+  }
+
+  onThemeTokenManualInput(token: ThemeCustomToken, value: string): void {
+    const trimmed = value.trim();
+    if (trimmed.length > 0) {
+      this.themeCustomizerService.set(this.customThemeMode, token, trimmed);
     }
   }
 
   onResetThemeConfig(): void {
-    this.themeCustomizerService.reset();
+    this.themeCustomizerService.reset(this.customThemeMode);
   }
 }

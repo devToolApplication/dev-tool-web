@@ -1,9 +1,36 @@
 import { Component } from '@angular/core';
-import { MenuItem, TreeNode } from 'primeng/api';
-import { PaginatorState } from 'primeng/paginator';
-import { FormConfig, FormContext } from '../../shared/ui/form-input/models/form-config.model';
-import { Rules } from '../../shared/ui/form-input/utils/validation-rules';
-import { TableConfig } from '../../shared/ui/table/models/table-config.model';
+import { ActivatedRoute } from '@angular/router';
+
+export type DemoSection = 'input' | 'select' | 'button';
+
+type InputPreset = {
+  label: string;
+  placeholder: string;
+  disabled: boolean;
+  readonly: boolean;
+  required: boolean;
+  invalid: boolean;
+  errorMessage?: string;
+  helpText?: string;
+};
+
+type SelectPreset = {
+  label: string;
+  placeholder: string;
+  showClear: boolean;
+  disabled: boolean;
+  required: boolean;
+  invalid: boolean;
+  options: { label: string; value: string | number | boolean | null }[];
+};
+
+type ButtonPreset = {
+  label: string;
+  severity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null;
+  text: boolean;
+  disabled: boolean;
+  icon?: string;
+};
 
 @Component({
   selector: 'app-demo',
@@ -12,305 +39,198 @@ import { TableConfig } from '../../shared/ui/table/models/table-config.model';
   styleUrls: ['./demo.component.css']
 })
 export class DemoComponent {
-  config: FormConfig = {
-    fields: [
-  
-      // ========================
-      // BASIC TEXT
-      // ========================
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Full Name',
-        width: '1/2',
-        validation: [
-          Rules.required('Name is required')
-        ]
+  section: DemoSection = 'input';
+
+  inputValue = '';
+  inputConfig: InputPreset = {
+    label: 'Username',
+    placeholder: 'Type your username',
+    disabled: false,
+    readonly: false,
+    required: false,
+    invalid: false,
+    helpText: 'Try changing presets with the buttons below.'
+  };
+
+  selectValue: string | null = null;
+  selectConfig: SelectPreset = {
+    label: 'Status',
+    placeholder: 'Select status',
+    showClear: false,
+    disabled: false,
+    required: false,
+    invalid: false,
+    options: [
+      { label: 'Active', value: 'active' },
+      { label: 'Inactive', value: 'inactive' },
+      { label: 'Pending', value: 'pending' }
+    ]
+  };
+
+  buttonConfig: ButtonPreset = {
+    label: 'Save',
+    severity: null,
+    text: false,
+    disabled: false,
+    icon: 'pi pi-check'
+  };
+
+  constructor(private readonly route: ActivatedRoute) {
+    this.route.paramMap.subscribe((params) => {
+      const section = params.get('section');
+      this.section = section === 'select' || section === 'button' ? section : 'input';
+    });
+  }
+
+  get title(): string {
+    if (this.section === 'select') return 'Select Demo';
+    if (this.section === 'button') return 'Button Demo';
+    return 'Input Demo';
+  }
+
+  applyInputPreset(type: 'default' | 'required' | 'readonly' | 'error'): void {
+    const presets: Record<typeof type, InputPreset> = {
+      default: {
+        label: 'Username',
+        placeholder: 'Type your username',
+        disabled: false,
+        readonly: false,
+        required: false,
+        invalid: false,
+        helpText: 'Normal input mode'
       },
-  
-      {
-        type: 'textarea',
-        name: 'description',
-        label: 'Description',
-        width: '1/2',
-        rules: {
-          disabled: 'model.name && model.name.length > 0'
-        },
-        validation: [
-          Rules.required('Description required')
-        ]
+      required: {
+        label: 'Email',
+        placeholder: 'name@company.com',
+        disabled: false,
+        readonly: false,
+        required: true,
+        invalid: false,
+        helpText: 'This field is required'
       },
-  
-      // ========================
-      // NUMBER
-      // ========================
-      {
-        type: 'number',
-        name: 'salary',
-        label: 'Salary (Currency)',
-        width: '1/3',
-        mode: 'currency',
-        currency: 'USD',
-        minFractionDigits: 2,
-        maxFractionDigits: 2,
-        rules: {
-          disabled: 'context.mode === "view"'
-        },
-        validation: [
-          Rules.required(),
-          Rules.positive('Salary must be > 0')
-        ]
+      readonly: {
+        label: 'Employee ID',
+        placeholder: '',
+        disabled: false,
+        readonly: true,
+        required: false,
+        invalid: false,
+        helpText: 'Readonly value for display'
       },
-  
-      {
-        type: 'number',
-        name: 'age',
-        label: 'Age (Decimal)',
-        width: '1/3',
-        mode: 'decimal',
-        step: 1,
-        validation: [
-          Rules.required(),
-          Rules.min(18, 'Must be >= 18')
-        ]
-      },
-  
-      // ========================
-      // SELECT (STATIC)
-      // ========================
-      {
-        type: 'select',
-        name: 'status',
+      error: {
+        label: 'Phone',
+        placeholder: 'Enter phone number',
+        disabled: false,
+        readonly: false,
+        required: true,
+        invalid: true,
+        errorMessage: 'Phone format is invalid'
+      }
+    };
+
+    this.inputConfig = presets[type];
+  }
+
+  applySelectPreset(type: 'default' | 'clearable' | 'required' | 'error'): void {
+    const presets: Record<typeof type, SelectPreset> = {
+      default: {
         label: 'Status',
-        width: '1/3',
+        placeholder: 'Select status',
+        showClear: false,
+        disabled: false,
+        required: false,
+        invalid: false,
         options: [
           { label: 'Active', value: 'active' },
           { label: 'Inactive', value: 'inactive' },
-          { label: 'Pending', value: 'pending', disabled: true }
-        ],
-        validation: [
-          Rules.required('Select status')
+          { label: 'Pending', value: 'pending' }
         ]
       },
-  
-      // ========================
-      // SELECT (DYNAMIC)
-      // ========================
-      {
-        type: 'select',
-        name: 'branch',
-        label: 'Branch (Dynamic)',
-        width: '1/2',
-        optionsExpression: `
-          context.extra.branches
-            .filter(x => x.address === context.user.address)
-            .map(x => ({ label: x.name, value: x.id }))
-        `
-      },
-  
-      // ========================
-      // MULTI SELECT
-      // ========================
-      {
-        type: 'select-multi',
-        name: 'skills',
-        label: 'Skills',
-        width: '1/2',
+      clearable: {
+        label: 'Priority',
+        placeholder: 'Select priority',
+        showClear: true,
+        disabled: false,
+        required: false,
+        invalid: false,
         options: [
-          { label: 'Angular', value: 'angular' },
-          { label: 'React', value: 'react' },
-          { label: 'Vue', value: 'vue' }
-        ],
-        validation: [
-          Rules.requiredArray('Select at least one skill')
+          { label: 'High', value: 'high' },
+          { label: 'Medium', value: 'medium' },
+          { label: 'Low', value: 'low' }
         ]
       },
-  
-      // ========================
-      // RADIO
-      // ========================
-      {
-        type: 'radio',
-        name: 'gender',
-        label: 'Gender',
-        width: '1/2',
+      required: {
+        label: 'Branch',
+        placeholder: 'Branch is required',
+        showClear: false,
+        disabled: false,
+        required: true,
+        invalid: false,
         options: [
-          { label: 'Male', value: 'male' },
-          { label: 'Female', value: 'female' }
-        ],
-        validation: [
-          Rules.required('Gender required')
+          { label: 'HCM', value: 'hcm' },
+          { label: 'Ha Noi', value: 'hn' }
         ]
       },
-  
-      // ========================
-      // CHECKBOX
-      // ========================
-      {
-        type: 'checkbox',
-        name: 'confirm',
-        label: 'Confirm Information',
-        width: '1/2',
-        validation: [
-          Rules.requiredTrue('Must confirm')
-        ]
-      },
-  
-      // ========================
-      // DATE
-      // ========================
-      {
-        type: 'date',
-        name: 'dateOfBirth',
-        label: 'Date of Birth',
-        width: 'full',
-        validation: [
-          Rules.required('Select date')
-        ]
-      },
-  
-      // ========================
-      // GROUP
-      // ========================
-      {
-        type: 'group',
-        name: 'address',
-        label: 'Address',
-        width: 'full',
-        children: [
-          {
-            type: 'text',
-            name: 'street',
-            label: 'Street',
-            width: '1/2',
-            validation: [
-              Rules.required('Street required')
-            ]
-          },
-          {
-            type: 'text',
-            name: 'city',
-            label: 'City',
-            width: '1/2',
-            validation: [
-              Rules.required('City required')
-            ]
-          }
-        ]
-      },
-  
-      // ========================
-      // ARRAY
-      // ========================
-      {
-        type: 'array',
-        name: 'experiences',
-        label: 'Work Experiences',
-        width: '1/2',
-        itemConfig: [
-          {
-            type: 'text',
-            name: 'company',
-            label: 'Company',
-            width: '1/2',
-            validation: [
-              Rules.required('Company required')
-            ]
-          },
-          {
-            type: 'number',
-            name: 'years',
-            label: 'Years',
-            width: '1/2',
-            mode: 'decimal',
-            step: 1,
-            validation: [
-              Rules.required(),
-              Rules.positive('Years must be > 0')
-            ]
-          }
+      error: {
+        label: 'Role',
+        placeholder: 'Select role',
+        showClear: true,
+        disabled: false,
+        required: true,
+        invalid: true,
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'User', value: 'user' }
         ]
       }
-  
-    ]
-  };
-  
-  tableConfig: TableConfig = {
-    columns: [
-      { field: 'id', header: 'ID', type: 'number' },
-      { field: 'name', header: 'Name', type: 'text' },
-      { field: 'isActive', header: 'Active', type: 'boolean' },
-      { field: 'createdAt', header: 'Created Date', type: 'date', format: 'dd/MM/yyyy' },
-      { field: 'salary', header: 'Salary', type: 'currency', currencyCode: 'USD' },
-      { field: 'address.city', header: 'City', type: 'text' },
-      { field: 'skills', header: 'Skills', type: 'array' },
-      { field: 'address', header: 'Address Group', type: 'group' }
-    ],
-    pagination: true,
-    rows: 5
-  };
-  
-  
+    };
 
-  tableData = [
-    {
-      id: 1,
-      name: 'John',
-      isActive: true,
-      createdAt: new Date(2024, 5, 15),
-      salary: 1500,
-      skills: ['Angular', 'NodeJS'],
-      address: {
-        city: 'HCM',
-        street: 'Nguyen Hue'
+    this.selectConfig = presets[type];
+  }
+
+  applyButtonPreset(type: 'primary' | 'success' | 'danger' | 'text' | 'disabled'): void {
+    const presets: Record<typeof type, ButtonPreset> = {
+      primary: {
+        label: 'Save',
+        severity: null,
+        text: false,
+        disabled: false,
+        icon: 'pi pi-check'
+      },
+      success: {
+        label: 'Approve',
+        severity: 'success',
+        text: false,
+        disabled: false,
+        icon: 'pi pi-thumbs-up'
+      },
+      danger: {
+        label: 'Delete',
+        severity: 'danger',
+        text: false,
+        disabled: false,
+        icon: 'pi pi-trash'
+      },
+      text: {
+        label: 'View detail',
+        severity: 'secondary',
+        text: true,
+        disabled: false,
+        icon: 'pi pi-eye'
+      },
+      disabled: {
+        label: 'Processing',
+        severity: 'warn',
+        text: false,
+        disabled: true,
+        icon: 'pi pi-spin pi-spinner'
       }
-    },
-    {
-      id: 2,
-      name: 'Jane',
-      isActive: false,
-      createdAt: new Date(2023, 10, 1),
-      salary: 2200,
-      skills: ['React', 'TypeScript'],
-      address: {
-        city: 'HN',
-        street: 'Ba Dinh'
-      }
-    }
-  ];
-  
+    };
 
-  initialValue = {
-    name: '',
-    description: '',
-    salary: null,
-    age: null,
-    status: null,
-    branch: null,
-    skills: [],
-    gender: null,
-    confirm: false,
-    dateOfBirth: null,
-    address: {
-      street: '',
-      city: ''
-    },
-    experiences: []
-  };
-  
+    this.buttonConfig = presets[type];
+  }
 
-  context : FormContext  = {
-    user: { address: 'HCM' },
-    extra: {
-      branches: [
-        { id: 1, name: 'CN HCM', address: 'HCM' },
-        { id: 2, name: 'CN HN', address: 'HN' }
-      ]
-    },
-    mode: 'create'
-  };
-
-  save(data: any) {
-    console.log('Submit:', data);
+  onDemoButtonClick(): void {
+    console.log('Demo button clicked', this.buttonConfig);
   }
 }
