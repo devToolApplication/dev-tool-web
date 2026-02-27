@@ -65,6 +65,15 @@
               <p>{{ t('settings.theme.custom.description') }}</p>
             </div>
 
+            <div class="theme-mode-row">
+              <label>{{ t('settings.theme.custom.mode') }}</label>
+              <app-select-button
+                [options]="customModeOptions"
+                [value]="customThemeMode"
+                (valueChange)="onCustomModeChange($event)"
+              ></app-select-button>
+            </div>
+
             <div class="theme-grid">
               <div class="theme-grid-item">
                 <label>{{ t('settings.theme.custom.selectBackground') }}</label>
@@ -73,6 +82,13 @@
                   [value]="themeTokenValue.selectBackground"
                   (valueChange)="onThemeTokenChange('selectBackground', $event)"
                 ></app-select>
+                <input
+                  class="theme-manual-input"
+                  type="text"
+                  [value]="themeTokenValue.selectBackground"
+                  [placeholder]="t('settings.theme.custom.customValue')"
+                  (change)="onThemeTokenManualInput('selectBackground', $any($event.target).value)"
+                />
               </div>
 
               <div class="theme-grid-item">
@@ -82,6 +98,13 @@
                   [value]="themeTokenValue.selectText"
                   (valueChange)="onThemeTokenChange('selectText', $event)"
                 ></app-select>
+                <input
+                  class="theme-manual-input"
+                  type="text"
+                  [value]="themeTokenValue.selectText"
+                  [placeholder]="t('settings.theme.custom.customValue')"
+                  (change)="onThemeTokenManualInput('selectText', $any($event.target).value)"
+                />
               </div>
 
               <div class="theme-grid-item">
@@ -91,6 +114,13 @@
                   [value]="themeTokenValue.inputBackground"
                   (valueChange)="onThemeTokenChange('inputBackground', $event)"
                 ></app-select>
+                <input
+                  class="theme-manual-input"
+                  type="text"
+                  [value]="themeTokenValue.inputBackground"
+                  [placeholder]="t('settings.theme.custom.customValue')"
+                  (change)="onThemeTokenManualInput('inputBackground', $any($event.target).value)"
+                />
               </div>
 
               <div class="theme-grid-item">
@@ -100,6 +130,13 @@
                   [value]="themeTokenValue.inputText"
                   (valueChange)="onThemeTokenChange('inputText', $event)"
                 ></app-select>
+                <input
+                  class="theme-manual-input"
+                  type="text"
+                  [value]="themeTokenValue.inputText"
+                  [placeholder]="t('settings.theme.custom.customValue')"
+                  (change)="onThemeTokenManualInput('inputText', $any($event.target).value)"
+                />
               </div>
 
               <div class="theme-grid-item">
@@ -109,6 +146,13 @@
                   [value]="themeTokenValue.appText"
                   (valueChange)="onThemeTokenChange('appText', $event)"
                 ></app-select>
+                <input
+                  class="theme-manual-input"
+                  type="text"
+                  [value]="themeTokenValue.appText"
+                  [placeholder]="t('settings.theme.custom.customValue')"
+                  (change)="onThemeTokenManualInput('appText', $any($event.target).value)"
+                />
               </div>
             </div>
 

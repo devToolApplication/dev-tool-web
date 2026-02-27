@@ -1,8 +1,189 @@
-<app-form-input [config]="config"
-    [context]="context"
-    [initialValue]="initialValue"
-    (submit)="save($event)" />
-    <app-table
-    [config]="tableConfig"
-    [data]="tableData">
-  </app-table>
+<section class="demo-page bg-surface text-base-foreground border-default">
+  <h2>{{ title }} Demo</h2>
+  <p class="description">Mỗi demo có các nút preset để thay đổi tham số component.</p>
+
+  @switch (section) {
+    @case ('input-text') {
+      <div class="preset-actions">
+        <app-button label="Normal" severity="secondary" (buttonClick)="setTextPreset('normal')"></app-button>
+        <app-button label="Error" severity="danger" (buttonClick)="setTextPreset('error')"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-input-text label="Input text" [placeholder]="textPlaceholder" [value]="textValue" (valueChange)="textValue = $event || ''" [invalid]="textInvalid" [errorMessage]="textInvalid ? 'Invalid value' : undefined"></app-input-text>
+      </div>
+    }
+
+    @case ('input-area') {
+      <div class="preset-actions">
+        <app-button label="Rows 3" severity="secondary" (buttonClick)="areaRows = 3"></app-button>
+        <app-button label="Rows 6" severity="info" (buttonClick)="areaRows = 6"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-input-area label="Input area" placeholder="Write your note" [rows]="areaRows" [value]="areaValue" (valueChange)="areaValue = $event || ''"></app-input-area>
+      </div>
+    }
+
+    @case ('input-number') {
+      <div class="preset-actions">
+        <app-button label="Decimal" severity="secondary" (buttonClick)="setNumberPreset('decimal')"></app-button>
+        <app-button label="Currency" severity="success" (buttonClick)="setNumberPreset('currency')"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-input-number label="Amount" placeholder="Enter amount" [mode]="numberMode" currency="USD" [showClear]="true" [value]="numberValue" (valueChange)="numberValue = $event"></app-input-number>
+      </div>
+    }
+
+    @case ('password') {
+      <div class="preset-actions">
+        <app-button label="Feedback On" severity="secondary" (buttonClick)="passwordFeedback = true"></app-button>
+        <app-button label="Feedback Off" severity="warn" (buttonClick)="passwordFeedback = false"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-password label="Password" placeholder="Enter password" [feedback]="passwordFeedback" [value]="passwordValue" (valueChange)="passwordValue = $event || ''"></app-password>
+      </div>
+    }
+
+    @case ('check-box') {
+      <div class="preset-actions">
+        <app-button label="Checked" severity="success" (buttonClick)="checkboxValue = true"></app-button>
+        <app-button label="Unchecked" severity="secondary" (buttonClick)="checkboxValue = false"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-check-box label="Enable notifications" [value]="checkboxValue" (valueChange)="checkboxValue = $event || false"></app-check-box>
+      </div>
+    }
+
+    @case ('radio-button') {
+      <div class="preview-card border-default">
+        <app-radio-button
+          label="Role"
+          [value]="radioValue"
+          (valueChange)="radioValue = $any($event)"
+          [options]="[{label:'Admin',value:'admin'},{label:'Editor',value:'editor'},{label:'Viewer',value:'viewer'}]"
+        ></app-radio-button>
+      </div>
+    }
+
+    @case ('date-picker') {
+      <div class="preset-actions">
+        <app-button label="dd/mm/yy" severity="secondary" (buttonClick)="dateFormat = 'dd/mm/yy'"></app-button>
+        <app-button label="mm-dd-yy" severity="info" (buttonClick)="dateFormat = 'mm-dd-yy'"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-date-picker label="Start date" [dateFormat]="dateFormat" [value]="dateValue" (valueChange)="dateValue = $event"></app-date-picker>
+      </div>
+    }
+
+    @case ('select') {
+      <div class="preset-actions">
+        <app-button label="Normal" severity="secondary" (buttonClick)="setSelectPreset('normal')"></app-button>
+        <app-button label="Show Clear" severity="info" (buttonClick)="setSelectPreset('clear')"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-select label="Status" placeholder="Select status" [showClear]="selectShowClear" [options]="selectOptions" [value]="selectValue" (valueChange)="selectValue = $any($event)"></app-select>
+      </div>
+    }
+
+    @case ('select-multi') {
+      <div class="preset-actions">
+        <app-button label="Filter On" severity="secondary" (buttonClick)="multiEnableFilter = true"></app-button>
+        <app-button label="Filter Off" severity="warn" (buttonClick)="multiEnableFilter = false"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-select-multi
+          label="Framework"
+          placeholder="Select frameworks"
+          [enableFilter]="multiEnableFilter"
+          [options]="[{label:'Angular',value:'angular'},{label:'React',value:'react'},{label:'Vue',value:'vue'}]"
+          [value]="multiValue"
+          (valueChange)="multiValue = $any($event) || []"
+        ></app-select-multi>
+      </div>
+    }
+
+    @case ('select-tree') {
+      <div class="preset-actions">
+        <app-button label="Single" severity="secondary" (buttonClick)="setTreeMode('single')"></app-button>
+        <app-button label="Multiple" severity="info" (buttonClick)="setTreeMode('multiple')"></app-button>
+        <app-button label="Checkbox" severity="help" (buttonClick)="setTreeMode('checkbox')"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-select-tree label="Department" [options]="treeOptions" [selectionMode]="treeSelectionMode" [value]="treeValue" (valueChange)="treeValue = $any($event)"></app-select-tree>
+      </div>
+    }
+
+    @case ('select-button') {
+      <div class="preset-actions">
+        <app-button label="Single" severity="secondary" (buttonClick)="selectButtonMultiple = false"></app-button>
+        <app-button label="Multiple" severity="info" (buttonClick)="selectButtonMultiple = true"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-select-button label="Range" [multiple]="selectButtonMultiple" [options]="selectButtonOptions" [value]="selectButtonValue" (valueChange)="selectButtonValue = $any($event)"></app-select-button>
+      </div>
+    }
+
+    @case ('toggle-button') {
+      <div class="preview-card border-default">
+        <app-toggle-button label="Status" onLabel="On" offLabel="Off" [value]="toggleButtonValue" (valueChange)="toggleButtonValue = $event || false"></app-toggle-button>
+      </div>
+    }
+
+    @case ('toggle-switch') {
+      <div class="preview-card border-default">
+        <app-toggle-switch label="Notifications" [value]="toggleSwitchValue" (valueChange)="toggleSwitchValue = $event || false"></app-toggle-switch>
+      </div>
+    }
+
+    @case ('button') {
+      <div class="preset-actions">
+        <app-button label="Normal" severity="secondary" (buttonClick)="setButtonPreset('normal')"></app-button>
+        <app-button label="Success" severity="success" (buttonClick)="setButtonPreset('success')"></app-button>
+        <app-button label="Danger" severity="danger" (buttonClick)="setButtonPreset('danger')"></app-button>
+        <app-button label="Text" severity="help" (buttonClick)="setButtonPreset('text')"></app-button>
+      </div>
+      <div class="preview-card border-default button-preview">
+        <app-button label="Action" [severity]="buttonSeverity" [text]="buttonText"></app-button>
+      </div>
+    }
+
+    @case ('button-split') {
+      <div class="preview-card border-default button-preview">
+        <app-button-split label="Actions" [model]="splitItems"></app-button-split>
+      </div>
+    }
+
+    @case ('button-speed-dial') {
+      <div class="preset-actions">
+        <app-button label="Linear" severity="secondary" (buttonClick)="setSpeedDialPreset('linear')"></app-button>
+        <app-button label="Circle" severity="info" (buttonClick)="setSpeedDialPreset('circle')"></app-button>
+      </div>
+      <div class="preview-card border-default speed-dial-preview">
+        <app-button-speed-dial [model]="speedDialItems" [direction]="speedDialDirection" [type]="speedDialType"></app-button-speed-dial>
+      </div>
+    }
+
+    @case ('breadcrumb') {
+      <div class="preview-card border-default">
+        <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+      </div>
+    }
+
+    @case ('paginator') {
+      <div class="preview-card border-default">
+        <app-paginator [first]="paginatorFirst" [rows]="paginatorRows" [totalRecords]="paginatorTotal" [rowsPerPageOptions]="[5,10,20]" (pageChange)="onPageChange($event)"></app-paginator>
+      </div>
+    }
+
+    @case ('fileupload') {
+      <div class="preset-actions">
+        <app-button label="Basic" severity="secondary" (buttonClick)="fileUploadMode = 'basic'"></app-button>
+        <app-button label="Advanced" severity="info" (buttonClick)="fileUploadMode = 'advanced'"></app-button>
+        <app-button label="Single" severity="help" (buttonClick)="fileUploadMultiple = false"></app-button>
+        <app-button label="Multiple" severity="warn" (buttonClick)="fileUploadMultiple = true"></app-button>
+      </div>
+      <div class="preview-card border-default">
+        <app-fileupload [mode]="fileUploadMode" [multiple]="fileUploadMultiple" accept=".png,.jpg,.pdf"></app-fileupload>
+      </div>
+    }
+  }
+</section>
