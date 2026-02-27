@@ -7,7 +7,7 @@ import Material from '@primeuix/themes/material';
 
 export type ThemePresetId = 'aura' | 'lara' | 'nora' | 'material';
 
-type DarkSurfaceScale = {
+type SurfaceScale = {
   0: string;
   50: string;
   100: string;
@@ -22,7 +22,7 @@ type DarkSurfaceScale = {
   950: string;
 };
 
-const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
+const withAppColorScheme = (basePreset: Preset, darkSurface: SurfaceScale) =>
   definePreset(basePreset, {
     semantic: {
       primary: {
@@ -39,7 +39,49 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
         950: '{indigo.950}'
       },
       colorScheme: {
+        light: {
+          primary: {
+            color: '{primary.600}',
+            inverseColor: '#ffffff'
+          },
+          surface: {
+            0: '#ffffff',
+            50: '#f8fafc',
+            100: '#f1f5f9',
+            200: '#e2e8f0',
+            300: '#cbd5e1',
+            400: '#94a3b8',
+            500: '#64748b',
+            600: '#475569',
+            700: '#334155',
+            800: '#1e293b',
+            900: '#0f172a',
+            950: '#020617'
+          },
+          text: {
+            color: '{surface.700}',
+            mutedColor: '{surface.500}'
+          },
+          content: {
+            background: '{surface.0}',
+            hoverBackground: '{surface.50}',
+            borderColor: '{surface.200}',
+            color: '{surface.700}'
+          },
+          formField: {
+            background: '{surface.0}',
+            borderColor: '{surface.300}',
+            hoverBorderColor: '{primary.color}',
+            focusBorderColor: '{primary.color}',
+            color: '{surface.700}',
+            placeholderColor: '{surface.400}'
+          }
+        },
         dark: {
+          primary: {
+            color: '{primary.300}',
+            inverseColor: '#000000'
+          },
           surface: darkSurface,
           text: {
             color: '{surface.950}',
@@ -82,7 +124,7 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
   });
 
 export const APP_THEME_PRESETS: Record<ThemePresetId, Preset> = {
-  aura: withPrimaryIndigo(Aura, {
+  aura: withAppColorScheme(Aura, {
     0: '#0d1438',
     50: '#151f4f',
     100: '#212f79',
@@ -96,7 +138,7 @@ export const APP_THEME_PRESETS: Record<ThemePresetId, Preset> = {
     900: '#eef2ff',
     950: '#ffffff'
   }),
-  lara: withPrimaryIndigo(Lara, {
+  lara: withAppColorScheme(Lara, {
     0: '#111437',
     50: '#1b2052',
     100: '#2a317d',
@@ -110,7 +152,7 @@ export const APP_THEME_PRESETS: Record<ThemePresetId, Preset> = {
     900: '#f2f4ff',
     950: '#ffffff'
   }),
-  nora: withPrimaryIndigo(Nora, {
+  nora: withAppColorScheme(Nora, {
     0: '#0b261f',
     50: '#10362d',
     100: '#184c3f',
@@ -124,7 +166,7 @@ export const APP_THEME_PRESETS: Record<ThemePresetId, Preset> = {
     900: '#eafbf4',
     950: '#ffffff'
   }),
-  material: withPrimaryIndigo(Material, {
+  material: withAppColorScheme(Material, {
     0: '#0c1733',
     50: '#12224b',
     100: '#1c3373',

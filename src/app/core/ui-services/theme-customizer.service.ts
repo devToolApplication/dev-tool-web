@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+export type ThemeMode = 'light' | 'dark';
+
 export type ThemeCustomToken =
   | 'selectBackground'
   | 'selectText'
@@ -12,30 +14,47 @@ export interface ThemeCustomOption {
   value: string;
 }
 
+export type ThemeCustomTokenState = Record<ThemeCustomToken, string>;
+
 export interface ThemeCustomState {
-  selectBackground: string;
-  selectText: string;
-  inputBackground: string;
-  inputText: string;
-  appText: string;
+  light: ThemeCustomTokenState;
+  dark: ThemeCustomTokenState;
 }
 
 const STORAGE_KEY = 'app-theme-custom';
 
 const DEFAULT_STATE: ThemeCustomState = {
-  selectBackground: 'var(--p-content-background)',
-  selectText: 'var(--p-content-color)',
-  inputBackground: 'var(--p-form-field-background)',
-  inputText: 'var(--p-form-field-color)',
-  appText: 'var(--p-text-color)'
+  light: {
+    selectBackground: 'var(--p-content-background)',
+    selectText: 'var(--p-content-color)',
+    inputBackground: 'var(--p-form-field-background)',
+    inputText: 'var(--p-form-field-color)',
+    appText: 'var(--p-text-color)'
+  },
+  dark: {
+    selectBackground: 'var(--p-content-background)',
+    selectText: 'var(--p-content-color)',
+    inputBackground: 'var(--p-form-field-background)',
+    inputText: 'var(--p-form-field-color)',
+    appText: 'var(--p-text-color)'
+  }
 };
 
-const CSS_VAR_MAP: Record<ThemeCustomToken, string> = {
-  selectBackground: '--app-overlay-bg',
-  selectText: '--app-overlay-text',
-  inputBackground: '--app-input-bg',
-  inputText: '--app-input-text',
-  appText: '--app-text'
+const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
+  light: {
+    selectBackground: '--app-custom-light-select-bg',
+    selectText: '--app-custom-light-select-text',
+    inputBackground: '--app-custom-light-input-bg',
+    inputText: '--app-custom-light-input-text',
+    appText: '--app-custom-light-text'
+  },
+  dark: {
+    selectBackground: '--app-custom-dark-select-bg',
+    selectText: '--app-custom-dark-select-text',
+    inputBackground: '--app-custom-dark-input-bg',
+    inputText: '--app-custom-dark-input-text',
+    appText: '--app-custom-dark-text'
+  }
 };
 
 const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
@@ -74,7 +93,7 @@ const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
 @Injectable({ providedIn: 'root' })
 export class ThemeCustomizerService {
   private readonly root = document.documentElement;
-  private state: ThemeCustomState = DEFAULT_STATE;
+  private state: ThemeCustomState = this.cloneDefaultState();
 
   constructor() {
     this.load();
@@ -85,25 +104,40 @@ export class ThemeCustomizerService {
     return this.state;
   }
 
+  getModeState(mode: ThemeMode): ThemeCustomTokenState {
+    return this.state[mode];
+  }
+
   getOptions(token: ThemeCustomToken): ThemeCustomOption[] {
     return OPTIONS[token];
   }
 
-  set(token: ThemeCustomToken, value: string): void {
-    this.state = { ...this.state, [token]: value };
+  set(mode: ThemeMode, token: ThemeCustomToken, value: string): void {
+    this.state = {
+      ...this.state,
+      [mode]: {
+        ...this.state[mode],
+        [token]: value
+      }
+    };
     this.apply();
     this.save();
   }
 
-  reset(): void {
-    this.state = { ...DEFAULT_STATE };
+  reset(mode?: ThemeMode): void {
+    this.state = mode
+      ? { ...this.state, [mode]: { ...DEFAULT_STATE[mode] } }
+      : this.cloneDefaultState();
+
     this.apply();
     this.save();
   }
 
   private apply(): void {
-    (Object.keys(CSS_VAR_MAP) as ThemeCustomToken[]).forEach((token) => {
-      this.root.style.setProperty(CSS_VAR_MAP[token], this.state[token]);
+    (Object.keys(CSS_VAR_MAP) as ThemeMode[]).forEach((mode) => {
+      (Object.keys(CSS_VAR_MAP[mode]) as ThemeCustomToken[]).forEach((token) => {
+        this.root.style.setProperty(CSS_VAR_MAP[mode][token], this.state[mode][token]);
+      });
     });
   }
 
@@ -114,15 +148,31 @@ export class ThemeCustomizerService {
     try {
       const parsed = JSON.parse(raw) as Partial<ThemeCustomState>;
       this.state = {
-        selectBackground: parsed.selectBackground ?? DEFAULT_STATE.selectBackground,
-        selectText: parsed.selectText ?? DEFAULT_STATE.selectText,
-        inputBackground: parsed.inputBackground ?? DEFAULT_STATE.inputBackground,
-        inputText: parsed.inputText ?? DEFAULT_STATE.inputText,
-        appText: parsed.appText ?? DEFAULT_STATE.appText
+        light: {
+          selectBackground: parsed.light?.selectBackground ?? DEFAULT_STATE.light.selectBackground,
+          selectText: parsed.light?.selectText ?? DEFAULT_STATE.light.selectText,
+          inputBackground: parsed.light?.inputBackground ?? DEFAULT_STATE.light.inputBackground,
+          inputText: parsed.light?.inputText ?? DEFAULT_STATE.light.inputText,
+          appText: parsed.light?.appText ?? DEFAULT_STATE.light.appText
+        },
+        dark: {
+          selectBackground: parsed.dark?.selectBackground ?? DEFAULT_STATE.dark.selectBackground,
+          selectText: parsed.dark?.selectText ?? DEFAULT_STATE.dark.selectText,
+          inputBackground: parsed.dark?.inputBackground ?? DEFAULT_STATE.dark.inputBackground,
+          inputText: parsed.dark?.inputText ?? DEFAULT_STATE.dark.inputText,
+          appText: parsed.dark?.appText ?? DEFAULT_STATE.dark.appText
+        }
       };
     } catch {
-      this.state = { ...DEFAULT_STATE };
+      this.state = this.cloneDefaultState();
     }
+  }
+
+  private cloneDefaultState(): ThemeCustomState {
+    return {
+      light: { ...DEFAULT_STATE.light },
+      dark: { ...DEFAULT_STATE.dark }
+    };
   }
 
   private save(): void {

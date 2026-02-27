@@ -1,6 +1,6 @@
 @layer components {
   :root .p-component {
-    color: var(--app-text);
+    color: var(--app-custom-text);
   }
 
   :root .p-button {
@@ -24,8 +24,8 @@
   :root .p-datepicker-input,
   :root .p-select-label,
   :root .p-multiselect-label {
-    background: var(--app-input-bg);
-    color: var(--app-input-text);
+    background: var(--app-custom-input-bg);
+    color: var(--app-custom-input-text);
     border-color: var(--app-input-border);
   }
 
@@ -52,8 +52,8 @@
   :root .p-dialog,
   :root .p-popover,
   :root .p-tooltip {
-    background: var(--app-overlay-bg);
-    color: var(--app-overlay-text);
+    background: var(--app-custom-select-bg);
+    color: var(--app-custom-select-text);
     border-color: var(--app-border);
     box-shadow: var(--app-shadow-overlay);
   }
@@ -63,7 +63,7 @@
   :root .p-datepicker-day,
   :root .p-datepicker-month,
   :root .p-datepicker-year {
-    color: var(--app-overlay-text);
+    color: var(--app-custom-select-text);
   }
 
   :root .p-select-option:hover,
@@ -71,24 +71,24 @@
   :root .p-datepicker-day:hover,
   :root .p-datepicker-month:hover,
   :root .p-datepicker-year:hover {
-    background: color-mix(in srgb, var(--app-overlay-bg) 82%, var(--app-primary) 18%);
+    background: color-mix(in srgb, var(--app-custom-select-bg) 82%, var(--app-primary) 18%);
   }
 
   :root .p-datepicker-dropdown,
   :root .p-datepicker-dropdown .p-button-icon,
   :root .p-datepicker-trigger,
   :root .p-datepicker-trigger .p-button-icon {
-    color: var(--app-input-text);
+    color: var(--app-custom-input-text);
   }
 
   :root .p-selectbutton .p-togglebutton {
-    background: var(--app-input-bg);
-    color: var(--app-input-text);
+    background: var(--app-custom-input-bg);
+    color: var(--app-custom-input-text);
     border-color: var(--app-input-border);
   }
 
   :root .p-selectbutton .p-togglebutton:hover {
-    background: color-mix(in srgb, var(--app-input-bg) 78%, var(--app-primary) 22%);
+    background: color-mix(in srgb, var(--app-custom-input-bg) 78%, var(--app-primary) 22%);
     border-color: var(--app-primary);
   }
 

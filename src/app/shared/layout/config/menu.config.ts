@@ -16,6 +16,31 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         routerLink: '/admin/upload-storage/storage'
       },
       {
+        label: 'Component Demo',
+        icon: 'pi pi-box',
+        items: [
+          { label: 'Input Text', icon: 'pi pi-pencil', routerLink: '/admin/component-demo/input-text' },
+          { label: 'Input Area', icon: 'pi pi-align-left', routerLink: '/admin/component-demo/input-area' },
+          { label: 'Input Number', icon: 'pi pi-hashtag', routerLink: '/admin/component-demo/input-number' },
+          { label: 'Password', icon: 'pi pi-key', routerLink: '/admin/component-demo/password' },
+          { label: 'Checkbox', icon: 'pi pi-check-square', routerLink: '/admin/component-demo/check-box' },
+          { label: 'Radio Button', icon: 'pi pi-circle', routerLink: '/admin/component-demo/radio-button' },
+          { label: 'Date Picker', icon: 'pi pi-calendar', routerLink: '/admin/component-demo/date-picker' },
+          { label: 'Select', icon: 'pi pi-list', routerLink: '/admin/component-demo/select' },
+          { label: 'Select Multi', icon: 'pi pi-list-check', routerLink: '/admin/component-demo/select-multi' },
+          { label: 'Select Tree', icon: 'pi pi-sitemap', routerLink: '/admin/component-demo/select-tree' },
+          { label: 'Select Button', icon: 'pi pi-sliders-h', routerLink: '/admin/component-demo/select-button' },
+          { label: 'Toggle Button', icon: 'pi pi-check-circle', routerLink: '/admin/component-demo/toggle-button' },
+          { label: 'Toggle Switch', icon: 'pi pi-power-off', routerLink: '/admin/component-demo/toggle-switch' },
+          { label: 'Button', icon: 'pi pi-stop', routerLink: '/admin/component-demo/button' },
+          { label: 'Button Split', icon: 'pi pi-angle-double-down', routerLink: '/admin/component-demo/button-split' },
+          { label: 'Button Speed Dial', icon: 'pi pi-send', routerLink: '/admin/component-demo/button-speed-dial' },
+          { label: 'Breadcrumb', icon: 'pi pi-angle-right', routerLink: '/admin/component-demo/breadcrumb' },
+          { label: 'Paginator', icon: 'pi pi-ellipsis-h', routerLink: '/admin/component-demo/paginator' },
+          { label: 'File Upload', icon: 'pi pi-upload', routerLink: '/admin/component-demo/fileupload' }
+        ]
+      },
+      {
         label: 'Permissions Demo (403)',
         icon: 'pi pi-lock',
         routerLink: '/403'

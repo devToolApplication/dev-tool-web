@@ -41,6 +41,11 @@
   min-width: 16rem;
 }
 
+.theme-mode-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -55,4 +60,19 @@
 .theme-grid-item label {
   font-size: 0.86rem;
   opacity: 0.85;
+}
+
+.theme-manual-input {
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  background: var(--app-input-bg);
+  color: var(--app-input-text);
+  padding: 0 0.75rem;
+}
+
+.theme-manual-input:focus {
+  outline: none;
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--app-primary) 25%, transparent);
 }
