@@ -1,9 +1,29 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
-import { FormConfig, FormContext } from '../../shared/ui/form-input/models/form-config.model';
-import { Rules } from '../../shared/ui/form-input/utils/validation-rules';
-import { TableConfig } from '../../shared/ui/table/models/table-config.model';
+import { SelectOption } from '../../shared/component/select/select';
+
+export type DemoSection =
+  | 'input-text'
+  | 'input-area'
+  | 'input-number'
+  | 'password'
+  | 'check-box'
+  | 'radio-button'
+  | 'date-picker'
+  | 'select'
+  | 'select-multi'
+  | 'select-tree'
+  | 'select-button'
+  | 'toggle-button'
+  | 'toggle-switch'
+  | 'button'
+  | 'button-split'
+  | 'button-speed-dial'
+  | 'breadcrumb'
+  | 'paginator'
+  | 'fileupload';
 
 @Component({
   selector: 'app-demo',
@@ -12,305 +32,159 @@ import { TableConfig } from '../../shared/ui/table/models/table-config.model';
   styleUrls: ['./demo.component.css']
 })
 export class DemoComponent {
-  config: FormConfig = {
-    fields: [
-  
-      // ========================
-      // BASIC TEXT
-      // ========================
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Full Name',
-        width: '1/2',
-        validation: [
-          Rules.required('Name is required')
-        ]
-      },
-  
-      {
-        type: 'textarea',
-        name: 'description',
-        label: 'Description',
-        width: '1/2',
-        rules: {
-          disabled: 'model.name && model.name.length > 0'
-        },
-        validation: [
-          Rules.required('Description required')
-        ]
-      },
-  
-      // ========================
-      // NUMBER
-      // ========================
-      {
-        type: 'number',
-        name: 'salary',
-        label: 'Salary (Currency)',
-        width: '1/3',
-        mode: 'currency',
-        currency: 'USD',
-        minFractionDigits: 2,
-        maxFractionDigits: 2,
-        rules: {
-          disabled: 'context.mode === "view"'
-        },
-        validation: [
-          Rules.required(),
-          Rules.positive('Salary must be > 0')
-        ]
-      },
-  
-      {
-        type: 'number',
-        name: 'age',
-        label: 'Age (Decimal)',
-        width: '1/3',
-        mode: 'decimal',
-        step: 1,
-        validation: [
-          Rules.required(),
-          Rules.min(18, 'Must be >= 18')
-        ]
-      },
-  
-      // ========================
-      // SELECT (STATIC)
-      // ========================
-      {
-        type: 'select',
-        name: 'status',
-        label: 'Status',
-        width: '1/3',
-        options: [
-          { label: 'Active', value: 'active' },
-          { label: 'Inactive', value: 'inactive' },
-          { label: 'Pending', value: 'pending', disabled: true }
-        ],
-        validation: [
-          Rules.required('Select status')
-        ]
-      },
-  
-      // ========================
-      // SELECT (DYNAMIC)
-      // ========================
-      {
-        type: 'select',
-        name: 'branch',
-        label: 'Branch (Dynamic)',
-        width: '1/2',
-        optionsExpression: `
-          context.extra.branches
-            .filter(x => x.address === context.user.address)
-            .map(x => ({ label: x.name, value: x.id }))
-        `
-      },
-  
-      // ========================
-      // MULTI SELECT
-      // ========================
-      {
-        type: 'select-multi',
-        name: 'skills',
-        label: 'Skills',
-        width: '1/2',
-        options: [
-          { label: 'Angular', value: 'angular' },
-          { label: 'React', value: 'react' },
-          { label: 'Vue', value: 'vue' }
-        ],
-        validation: [
-          Rules.requiredArray('Select at least one skill')
-        ]
-      },
-  
-      // ========================
-      // RADIO
-      // ========================
-      {
-        type: 'radio',
-        name: 'gender',
-        label: 'Gender',
-        width: '1/2',
-        options: [
-          { label: 'Male', value: 'male' },
-          { label: 'Female', value: 'female' }
-        ],
-        validation: [
-          Rules.required('Gender required')
-        ]
-      },
-  
-      // ========================
-      // CHECKBOX
-      // ========================
-      {
-        type: 'checkbox',
-        name: 'confirm',
-        label: 'Confirm Information',
-        width: '1/2',
-        validation: [
-          Rules.requiredTrue('Must confirm')
-        ]
-      },
-  
-      // ========================
-      // DATE
-      // ========================
-      {
-        type: 'date',
-        name: 'dateOfBirth',
-        label: 'Date of Birth',
-        width: 'full',
-        validation: [
-          Rules.required('Select date')
-        ]
-      },
-  
-      // ========================
-      // GROUP
-      // ========================
-      {
-        type: 'group',
-        name: 'address',
-        label: 'Address',
-        width: 'full',
-        children: [
-          {
-            type: 'text',
-            name: 'street',
-            label: 'Street',
-            width: '1/2',
-            validation: [
-              Rules.required('Street required')
-            ]
-          },
-          {
-            type: 'text',
-            name: 'city',
-            label: 'City',
-            width: '1/2',
-            validation: [
-              Rules.required('City required')
-            ]
-          }
-        ]
-      },
-  
-      // ========================
-      // ARRAY
-      // ========================
-      {
-        type: 'array',
-        name: 'experiences',
-        label: 'Work Experiences',
-        width: '1/2',
-        itemConfig: [
-          {
-            type: 'text',
-            name: 'company',
-            label: 'Company',
-            width: '1/2',
-            validation: [
-              Rules.required('Company required')
-            ]
-          },
-          {
-            type: 'number',
-            name: 'years',
-            label: 'Years',
-            width: '1/2',
-            mode: 'decimal',
-            step: 1,
-            validation: [
-              Rules.required(),
-              Rules.positive('Years must be > 0')
-            ]
-          }
-        ]
-      }
-  
-    ]
-  };
-  
-  tableConfig: TableConfig = {
-    columns: [
-      { field: 'id', header: 'ID', type: 'number' },
-      { field: 'name', header: 'Name', type: 'text' },
-      { field: 'isActive', header: 'Active', type: 'boolean' },
-      { field: 'createdAt', header: 'Created Date', type: 'date', format: 'dd/MM/yyyy' },
-      { field: 'salary', header: 'Salary', type: 'currency', currencyCode: 'USD' },
-      { field: 'address.city', header: 'City', type: 'text' },
-      { field: 'skills', header: 'Skills', type: 'array' },
-      { field: 'address', header: 'Address Group', type: 'group' }
-    ],
-    pagination: true,
-    rows: 5
-  };
-  
-  
+  section: DemoSection = 'input-text';
 
-  tableData = [
-    {
-      id: 1,
-      name: 'John',
-      isActive: true,
-      createdAt: new Date(2024, 5, 15),
-      salary: 1500,
-      skills: ['Angular', 'NodeJS'],
-      address: {
-        city: 'HCM',
-        street: 'Nguyen Hue'
-      }
-    },
-    {
-      id: 2,
-      name: 'Jane',
-      isActive: false,
-      createdAt: new Date(2023, 10, 1),
-      salary: 2200,
-      skills: ['React', 'TypeScript'],
-      address: {
-        city: 'HN',
-        street: 'Ba Dinh'
-      }
-    }
+  textValue = '';
+  textPlaceholder = 'Type something...';
+  textInvalid = false;
+
+  areaValue = '';
+  areaRows = 4;
+
+  numberValue: number | null = null;
+  numberMode: 'decimal' | 'currency' = 'decimal';
+
+  passwordValue = '';
+  passwordFeedback = true;
+
+  checkboxValue = false;
+  radioValue: string | number | null = null;
+
+  dateValue: Date | null = null;
+  dateFormat = 'dd/mm/yy';
+
+  selectValue: string | null = null;
+  selectShowClear = false;
+  selectOptions: SelectOption[] = [
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
+    { label: 'Pending', value: 'pending' }
   ];
-  
 
-  initialValue = {
-    name: '',
-    description: '',
-    salary: null,
-    age: null,
-    status: null,
-    branch: null,
-    skills: [],
-    gender: null,
-    confirm: false,
-    dateOfBirth: null,
-    address: {
-      street: '',
-      city: ''
-    },
-    experiences: []
-  };
-  
+  multiValue: Array<string | number> = [];
+  multiEnableFilter = false;
 
-  context : FormContext  = {
-    user: { address: 'HCM' },
-    extra: {
-      branches: [
-        { id: 1, name: 'CN HCM', address: 'HCM' },
-        { id: 2, name: 'CN HN', address: 'HN' }
+  treeValue: string | string[] | null = null;
+  treeSelectionMode: 'single' | 'multiple' | 'checkbox' = 'single';
+  treeOptions: TreeNode[] = [
+    {
+      key: 'dev',
+      label: 'Development',
+      children: [
+        { key: 'dev-fe', label: 'Frontend' },
+        { key: 'dev-be', label: 'Backend' }
       ]
     },
-    mode: 'create'
-  };
+    {
+      key: 'ops',
+      label: 'Operations',
+      children: [
+        { key: 'ops-devops', label: 'DevOps' },
+        { key: 'ops-sre', label: 'SRE' }
+      ]
+    }
+  ];
 
-  save(data: any) {
-    console.log('Submit:', data);
+  selectButtonValue: string | number | boolean | null = null;
+  selectButtonMultiple = false;
+  selectButtonOptions: SelectOption[] = [
+    { label: 'Day', value: 'day' },
+    { label: 'Week', value: 'week' },
+    { label: 'Month', value: 'month' }
+  ];
+
+  toggleButtonValue = false;
+  toggleSwitchValue = false;
+
+  buttonSeverity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null = null;
+  buttonText = false;
+
+  splitItems: MenuItem[] = [
+    { label: 'Save Draft', icon: 'pi pi-save' },
+    { label: 'Publish', icon: 'pi pi-send' }
+  ];
+
+  speedDialDirection: 'up' | 'down' | 'left' | 'right' = 'up';
+  speedDialType: 'linear' | 'circle' | 'semi-circle' | 'quarter-circle' = 'linear';
+  speedDialItems: MenuItem[] = [
+    { label: 'Copy', icon: 'pi pi-copy' },
+    { label: 'Delete', icon: 'pi pi-trash' },
+    { label: 'Share', icon: 'pi pi-share-alt' }
+  ];
+
+  breadcrumbItems: MenuItem[] = [
+    { label: 'Admin' },
+    { label: 'Component Demo' },
+    { label: 'Breadcrumb' }
+  ];
+
+  paginatorFirst = 0;
+  paginatorRows = 10;
+  paginatorTotal = 135;
+
+  fileUploadMode: 'basic' | 'advanced' = 'basic';
+  fileUploadMultiple = false;
+
+  private readonly validSections: DemoSection[] = [
+    'input-text', 'input-area', 'input-number', 'password', 'check-box', 'radio-button', 'date-picker',
+    'select', 'select-multi', 'select-tree', 'select-button', 'toggle-button', 'toggle-switch', 'button',
+    'button-split', 'button-speed-dial', 'breadcrumb', 'paginator', 'fileupload'
+  ];
+
+  constructor(private readonly route: ActivatedRoute) {
+    this.route.paramMap.subscribe((params) => {
+      const section = params.get('section') as DemoSection | null;
+      this.section = section && this.validSections.includes(section) ? section : 'input-text';
+    });
+  }
+
+  get title(): string {
+    return this.section.replace('-', ' ').replace(/\b\w/g, (x) => x.toUpperCase());
+  }
+
+  setTextPreset(mode: 'normal' | 'error'): void {
+    this.textInvalid = mode === 'error';
+    this.textPlaceholder = mode === 'error' ? 'Invalid input demo' : 'Type something...';
+  }
+
+  setNumberPreset(mode: 'decimal' | 'currency'): void {
+    this.numberMode = mode;
+    this.numberValue = null;
+  }
+
+  setSelectPreset(mode: 'normal' | 'clear'): void {
+    this.selectShowClear = mode === 'clear';
+  }
+
+  setTreeMode(mode: 'single' | 'multiple' | 'checkbox'): void {
+    this.treeSelectionMode = mode;
+    this.treeValue = null;
+  }
+
+  setButtonPreset(mode: 'normal' | 'success' | 'danger' | 'text'): void {
+    if (mode === 'normal') {
+      this.buttonSeverity = null;
+      this.buttonText = false;
+      return;
+    }
+
+    if (mode === 'text') {
+      this.buttonSeverity = 'secondary';
+      this.buttonText = true;
+      return;
+    }
+
+    this.buttonSeverity = mode;
+    this.buttonText = false;
+  }
+
+  setSpeedDialPreset(mode: 'linear' | 'circle'): void {
+    this.speedDialType = mode;
+    this.speedDialDirection = mode === 'linear' ? 'up' : 'right';
+  }
+
+  onPageChange(state: PaginatorState): void {
+    this.paginatorFirst = state.first ?? 0;
+    this.paginatorRows = state.rows ?? 10;
   }
 }
