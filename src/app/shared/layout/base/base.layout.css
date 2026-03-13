@@ -28,7 +28,7 @@
 .layout-mask {
   position: fixed;
   inset: 0;
-  background: rgb(15 23 42 / 45%);
+  background: color-mix(in srgb, var(--app-text) 45%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity 220ms ease;

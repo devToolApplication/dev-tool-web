@@ -1,50 +1,39 @@
-<div class="table-filter">
-  <div class="filter-row">
-    <div class="filter-grid">
-      @for (field of visibleFields; track field.field) {
-        <div class="filter-item">
-          <label class="filter-label" [for]="field.field">{{ field.label }}</label>
-
-          @if ((field.type ?? 'text') === 'select') {
-            <app-select
-              [inputId]="field.field"
-              [options]="field.options ?? []"
-              [placeholder]="field.placeholder ?? ('Chọn ' + field.label.toLowerCase())"
-              [(value)]="values[field.field]"
-              [showClear]="true"
-              variant="on"
-            ></app-select>
-          } @else if ((field.type ?? 'text') === 'boolean') {
-            <app-select
-              [inputId]="field.field"
-              [options]="[
-                { label: 'Tất cả', value: null },
-                { label: 'Có', value: true },
-                { label: 'Không', value: false }
-              ]"
-              [placeholder]="field.placeholder ?? 'Chọn giá trị'"
-              [(value)]="values[field.field]"
-              variant="on"
-            ></app-select>
-          } @else {
-            <input
-              pInputText
-              [id]="field.field"
-              [(ngModel)]="values[field.field]"
-              [placeholder]="field.placeholder ?? ('Nhập ' + field.label.toLowerCase())"
-            />
-          }
-        </div>
+<div class="table-filter" [class.compact]="!shouldCollapseByDefault">
+  <div class="filter-header">
+    <button
+      type="button"
+      class="filter-collapse"
+      (click)="togglePanel()"
+      [attr.aria-expanded]="panelExpanded"
+      [disabled]="loading"
+    >
+      <i class="pi" [ngClass]="panelExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+      <span>Bộ lọc</span>
+      <small>{{ selectedFields.length }} trường</small>
+      @if (activeFilterCount > 0) {
+        <span class="active-badge">{{ activeFilterCount }}</span>
       }
-    </div>
+    </button>
 
-    <div class="filter-actions">
+    <div class="filter-header-actions">
+      @if (hasCollapsedFilters && panelExpanded) {
+        <app-button
+          [icon]="showAllFilters ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          severity="secondary"
+          [text]="true"
+          [disabled]="loading"
+          [label]="showAllFilters ? 'Thu gọn' : 'Hiện thêm +' + hiddenSelectedCount"
+          (buttonClick)="toggleFilters()"
+        ></app-button>
+      }
+
       <div class="field-selector-wrapper">
         <app-button
           icon="pi pi-sliders-h"
           severity="secondary"
           [text]="true"
           [disabled]="loading"
+          [label]="'Tùy chọn trường'"
           (buttonClick)="toggleFieldSelector()"
         ></app-button>
 
@@ -65,29 +54,64 @@
           </div>
         }
       </div>
-
-      @if (hasCollapsedFilters) {
-        <app-button
-          [icon]="showAllFilters ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-          severity="secondary"
-          [text]="true"
-          [disabled]="loading"
-          [label]="showAllFilters ? undefined : '+' + hiddenSelectedCount"
-          (buttonClick)="toggleFilters()"
-        ></app-button>
-      }
-
-      <app-button
-        icon="pi pi-search"
-        [disabled]="loading"
-        (buttonClick)="onSearch()"
-      ></app-button>
-      <app-button
-        icon="pi pi-refresh"
-        severity="secondary"
-        [disabled]="loading"
-        (buttonClick)="onReset()"
-      ></app-button>
     </div>
   </div>
+
+  @if (panelExpanded) {
+    <div class="filter-content">
+      <div class="filter-grid">
+        @for (field of visibleFields; track field.field) {
+          <div class="filter-item">
+            <label class="filter-label" [for]="field.field">{{ field.label }}</label>
+
+            @if ((field.type ?? 'text') === 'select') {
+              <app-select
+                [inputId]="field.field"
+                [options]="field.options ?? []"
+                [placeholder]="field.placeholder ?? 'Chọn ' + field.label.toLowerCase()"
+                [(value)]="values[field.field]"
+                [showClear]="true"
+                variant="on"
+              ></app-select>
+            } @else if ((field.type ?? 'text') === 'boolean') {
+              <app-select
+                [inputId]="field.field"
+                [options]="[
+                  { label: 'Tất cả', value: null },
+                  { label: 'Có', value: true },
+                  { label: 'Không', value: false },
+                ]"
+                [placeholder]="field.placeholder ?? 'Chọn giá trị'"
+                [(value)]="values[field.field]"
+                variant="on"
+              ></app-select>
+            } @else {
+              <input
+                pInputText
+                [id]="field.field"
+                [(ngModel)]="values[field.field]"
+                [placeholder]="field.placeholder ?? 'Nhập ' + field.label.toLowerCase()"
+              />
+            }
+          </div>
+        }
+      </div>
+
+      <div class="filter-actions">
+        <app-button
+          icon="pi pi-search"
+          label="Tìm"
+          [disabled]="loading"
+          (buttonClick)="onSearch()"
+        ></app-button>
+        <app-button
+          icon="pi pi-refresh"
+          label="Đặt lại"
+          severity="secondary"
+          [disabled]="loading || !hasAnyValue"
+          (buttonClick)="onReset()"
+        ></app-button>
+      </div>
+    </div>
+  }
 </div>

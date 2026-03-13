@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from '../../shared/component/select/select';
+import { CandleChartConfig } from '../../shared/component/candle-chart/candle-chart';
 
 export type DemoSection =
   | 'input-text'
@@ -23,13 +24,14 @@ export type DemoSection =
   | 'button-speed-dial'
   | 'breadcrumb'
   | 'paginator'
-  | 'fileupload';
+  | 'fileupload'
+  | 'candle-chart';
 
 @Component({
   selector: 'app-demo',
   standalone: false,
   templateUrl: './demo.component.html',
-  styleUrls: ['./demo.component.css']
+  styleUrls: ['./demo.component.css'],
 })
 export class DemoComponent {
   section: DemoSection = 'input-text';
@@ -58,7 +60,7 @@ export class DemoComponent {
   selectOptions: SelectOption[] = [
     { label: 'Active', value: 'active' },
     { label: 'Inactive', value: 'inactive' },
-    { label: 'Pending', value: 'pending' }
+    { label: 'Pending', value: 'pending' },
   ];
 
   multiValue: Array<string | number> = [];
@@ -72,17 +74,17 @@ export class DemoComponent {
       label: 'Development',
       children: [
         { key: 'dev-fe', label: 'Frontend' },
-        { key: 'dev-be', label: 'Backend' }
-      ]
+        { key: 'dev-be', label: 'Backend' },
+      ],
     },
     {
       key: 'ops',
       label: 'Operations',
       children: [
         { key: 'ops-devops', label: 'DevOps' },
-        { key: 'ops-sre', label: 'SRE' }
-      ]
-    }
+        { key: 'ops-sre', label: 'SRE' },
+      ],
+    },
   ];
 
   selectButtonValue: string | number | boolean | null = null;
@@ -90,18 +92,26 @@ export class DemoComponent {
   selectButtonOptions: SelectOption[] = [
     { label: 'Day', value: 'day' },
     { label: 'Week', value: 'week' },
-    { label: 'Month', value: 'month' }
+    { label: 'Month', value: 'month' },
   ];
 
   toggleButtonValue = false;
   toggleSwitchValue = false;
 
-  buttonSeverity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null = null;
+  buttonSeverity:
+    | 'secondary'
+    | 'success'
+    | 'info'
+    | 'warn'
+    | 'help'
+    | 'danger'
+    | 'contrast'
+    | null = null;
   buttonText = false;
 
   splitItems: MenuItem[] = [
     { label: 'Save Draft', icon: 'pi pi-save' },
-    { label: 'Publish', icon: 'pi pi-send' }
+    { label: 'Publish', icon: 'pi pi-send' },
   ];
 
   speedDialDirection: 'up' | 'down' | 'left' | 'right' = 'up';
@@ -109,13 +119,13 @@ export class DemoComponent {
   speedDialItems: MenuItem[] = [
     { label: 'Copy', icon: 'pi pi-copy' },
     { label: 'Delete', icon: 'pi pi-trash' },
-    { label: 'Share', icon: 'pi pi-share-alt' }
+    { label: 'Share', icon: 'pi pi-share-alt' },
   ];
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Admin' },
     { label: 'Component Demo' },
-    { label: 'Breadcrumb' }
+    { label: 'Breadcrumb' },
   ];
 
   paginatorFirst = 0;
@@ -125,10 +135,35 @@ export class DemoComponent {
   fileUploadMode: 'basic' | 'advanced' = 'basic';
   fileUploadMultiple = false;
 
+  candleMode: 'once' | 'polling' | 'ws' = 'once';
+  candleConfig: CandleChartConfig = {
+    showCandles: true,
+    showLines: true,
+    showBoxAreas: true,
+    showPoints: true,
+  };
+
   private readonly validSections: DemoSection[] = [
-    'input-text', 'input-area', 'input-number', 'password', 'check-box', 'radio-button', 'date-picker',
-    'select', 'select-multi', 'select-tree', 'select-button', 'toggle-button', 'toggle-switch', 'button',
-    'button-split', 'button-speed-dial', 'breadcrumb', 'paginator', 'fileupload'
+    'input-text',
+    'input-area',
+    'input-number',
+    'password',
+    'check-box',
+    'radio-button',
+    'date-picker',
+    'select',
+    'select-multi',
+    'select-tree',
+    'select-button',
+    'toggle-button',
+    'toggle-switch',
+    'button',
+    'button-split',
+    'button-speed-dial',
+    'breadcrumb',
+    'paginator',
+    'fileupload',
+    'candle-chart',
   ];
 
   constructor(private readonly route: ActivatedRoute) {
@@ -186,5 +221,16 @@ export class DemoComponent {
   onPageChange(state: PaginatorState): void {
     this.paginatorFirst = state.first ?? 0;
     this.paginatorRows = state.rows ?? 10;
+  }
+
+  toggleCandleLayer(layer: keyof CandleChartConfig): void {
+    this.candleConfig = {
+      ...this.candleConfig,
+      [layer]: !this.candleConfig[layer],
+    };
+  }
+
+  setCandleMode(mode: 'once' | 'polling' | 'ws'): void {
+    this.candleMode = mode;
   }
 }

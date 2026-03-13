@@ -31,7 +31,7 @@ export class ThemeService {
 
   setThemeMode(mode: ThemeMode): void {
     this.mode = mode;
-    this.root.classList.toggle('app-dark', mode === 'dark');
+    this.root.dataset['theme'] = mode;
     localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
   }
 

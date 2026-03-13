@@ -5,7 +5,7 @@
   </div>
 
   <div class="form-wrap shadow-1">
-    @if (formVisible) {
+    @if (formVisible()) {
       <app-form-input
         [config]="formConfig"
         [context]="formContext"
