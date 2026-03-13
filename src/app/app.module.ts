@@ -47,7 +47,7 @@ import { KeycloakService } from './core/auth/keycloak.service';
       theme: {
         preset: APP_THEME_PRESETS.aura,
         options: {
-          darkModeSelector: '.app-dark'
+          darkModeSelector: '[data-theme="dark"]'
         }
       }
     })

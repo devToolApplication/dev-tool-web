@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
@@ -67,9 +67,12 @@ export class UploadStorageFormComponent implements OnInit {
         width: 'full'
       },
       {
-        type: 'textarea',
-        name: 'metadataText',
-        label: 'Metadata JSON',
+        type: 'record',
+        name: 'metadata',
+        label: 'Metadata',
+        keyLabel: 'Metadata Key',
+        valueLabel: 'Metadata Value',
+        addButtonLabel: 'Add metadata',
         width: 'full'
       }
     ]
@@ -78,7 +81,7 @@ export class UploadStorageFormComponent implements OnInit {
   loading = false;
   editId: string | null = null;
   formInitialValue = this.createInitialFormValue();
-  formVisible = true;
+  readonly formVisible = signal(true);
 
   constructor(
     private readonly uploadStorageService: UploadStorageService,
@@ -106,11 +109,7 @@ export class UploadStorageFormComponent implements OnInit {
   }
 
   onSubmitForm(rawModel: Record<string, unknown>): void {
-    const metadata = this.parseMetadata(String(rawModel['metadataText'] ?? ''));
-    if (metadata == null) {
-      this.toastService.info('Metadata phải là JSON object hợp lệ');
-      return;
-    }
+    const metadata = this.normalizeMetadata(rawModel['metadata']);
 
     const request$ = this.editId
       ? this.uploadStorageService.update(this.editId, this.buildUpdatePayload(rawModel, metadata))
@@ -148,7 +147,7 @@ export class UploadStorageFormComponent implements OnInit {
             defaultActive: detail.defaultActive,
             apiDomain: detail.apiDomain ?? '',
             apiPath: detail.apiPath ?? '',
-            metadataText: JSON.stringify(detail.metadata ?? {}, null, 2)
+            metadata: detail.metadata ?? {}
           };
           this.rerenderForm();
         },
@@ -160,10 +159,8 @@ export class UploadStorageFormComponent implements OnInit {
   }
 
   private rerenderForm(): void {
-    this.formVisible = false;
-    setTimeout(() => {
-      this.formVisible = true;
-    });
+    this.formVisible.set(false);
+    queueMicrotask(() => this.formVisible.set(true));
   }
 
   private buildCreatePayload(model: Record<string, unknown>, metadata: Record<string, string>): UploadStorageCreateDto {
@@ -196,26 +193,19 @@ export class UploadStorageFormComponent implements OnInit {
     return text ? text : undefined;
   }
 
-  private parseMetadata(value: string): Record<string, string> | null {
-    if (!value.trim()) {
+  private normalizeMetadata(value: unknown): Record<string, string> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
       return {};
     }
 
-    try {
-      const parsed = JSON.parse(value) as unknown;
-      if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
-        return null;
-      }
-
-      const result: Record<string, string> = {};
-      for (const [key, item] of Object.entries(parsed)) {
-        result[key] = typeof item === 'string' ? item : JSON.stringify(item);
-      }
-
-      return result;
-    } catch {
-      return null;
+    const result: Record<string, string> = {};
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      const normalizedKey = key.trim();
+      if (!normalizedKey) continue;
+      result[normalizedKey] = String(item ?? '');
     }
+
+    return result;
   }
 
   private createInitialFormValue(): Record<string, unknown> {
@@ -227,7 +217,9 @@ export class UploadStorageFormComponent implements OnInit {
       status: 'ACTIVE',
       apiDomain: '',
       apiPath: '',
-      metadataText: '{\n  "apiKey": ""\n}'
+      metadata: {
+        apiKey: ''
+      }
     };
   }
 }

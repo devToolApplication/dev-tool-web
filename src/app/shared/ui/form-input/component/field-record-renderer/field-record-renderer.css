@@ -1,0 +1,21 @@
+.record-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.record-field__header,
+.record-field__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.record-field__header {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.record-field.disabled {
+  opacity: 0.65;
+}

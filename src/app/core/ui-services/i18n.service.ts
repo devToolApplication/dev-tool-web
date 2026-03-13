@@ -36,7 +36,11 @@ export class I18nService {
     localStorage.setItem(STORAGE_KEY, language);
   }
 
-  t(key: string): string {
+  t(key: unknown): string {
+    if (typeof key !== 'string' || !key.trim()) {
+      return '';
+    }
+
     return TRANSLATIONS[this.language()][key] ?? key;
   }
 }

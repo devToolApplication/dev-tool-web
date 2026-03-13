@@ -78,6 +78,13 @@ export interface DateFieldConfig extends BaseFieldConfig {
   type: 'date';
 }
 
+export interface RecordFieldConfig extends BaseFieldConfig {
+  type: 'record';
+  keyLabel?: string;
+  valueLabel?: string;
+  addButtonLabel?: string;
+}
+
 export type FieldConfig =
   | TextFieldConfig
   | NumberFieldConfig
@@ -86,7 +93,8 @@ export type FieldConfig =
   | CheckboxFieldConfig
   | DateFieldConfig
   | RadioFieldConfig
-  | ArrayFieldConfig;
+  | ArrayFieldConfig
+  | RecordFieldConfig;
 
 export type FieldType =
   | 'text'
@@ -98,7 +106,8 @@ export type FieldType =
   | 'radio'
   | 'select-multi'
   | 'textarea'
-  | 'array';
+  | 'array'
+  | 'record';
 
 export interface FieldState<TModel = unknown> {
   fieldConfig: TModel;

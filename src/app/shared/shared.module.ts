@@ -52,12 +52,14 @@ import { SelectTree } from './component/select-tree/select-tree';
 import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
+import { CandleChart } from './component/candle-chart/candle-chart';
 import { FormInput } from './ui/form-input/form-input';
 import { FieldRenderer } from './ui/form-input/component/field-renderer/field-renderer';
-import {FloatLabel} from 'primeng/floatlabel';
+import { FloatLabel } from 'primeng/floatlabel';
 import { FluidModule } from 'primeng/fluid';
 import { FieldArrayRenderer } from './ui/form-input/component/field-array-renderer/field-array-renderer';
 import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
+import { FieldRecordRenderer } from './ui/form-input/component/field-record-renderer/field-record-renderer';
 import { TableComponent } from './ui/table/table';
 import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table-filter/table-filter';
@@ -81,9 +83,7 @@ import { HeaderComponent } from './layout/header/header.component';
 import { PageComponent } from './layout/page/page.component';
 import { TranslateContentPipe } from './pipe/translate-content.pipe';
 
-const PIPE = [
-  TranslateContentPipe
-]
+const PIPE = [TranslateContentPipe];
 
 const FEATURE = [
   DemoComponent,
@@ -98,8 +98,8 @@ const FEATURE = [
   ForbiddenComponent,
   NotFoundComponent,
   UploadStorageListComponent,
-  UploadStorageFormComponent
-]
+  UploadStorageFormComponent,
+];
 const COMPONENTS = [
   Breadcrumb,
   ButtonSpeedDial,
@@ -119,28 +119,22 @@ const COMPONENTS = [
   SelectTree,
   Select,
   ToggleButton,
-  ToggleSwitch
+  ToggleSwitch,
+  CandleChart,
 ];
 
-const UI = [
-  FormInput,
-  TableComponent
-]
+const UI = [FormInput, TableComponent];
 
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,
   FieldGroupRenderer,
+  FieldRecordRenderer,
   TableCellComponent,
-  TableFilterComponent
-]
+  TableFilterComponent,
+];
 
-const LAYOUT = [
-  BaseLayoutComponent,
-  SideMenuComponent,
-  HeaderComponent,
-  PageComponent
-]
+const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageComponent];
 @NgModule({
   declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE, ...PIPE],
   imports: [
@@ -179,8 +173,8 @@ const LAYOUT = [
     ToolbarModule,
     AvatarModule,
     TieredMenuModule,
-    TabsModule
+    TabsModule,
   ],
-  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE, ...PIPE]
+  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...FEATURE, ...PIPE],
 })
 export class SharedModule {}

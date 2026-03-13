@@ -90,6 +90,11 @@
           (blur)="onBlur()">
         </app-select-multi>
       }
+
+      @case ('record') {
+        <app-field-record-renderer [field]="field"></app-field-record-renderer>
+      }
+
       @case ('textarea') {
         <app-input-area
           [invalid]="showInvalid"

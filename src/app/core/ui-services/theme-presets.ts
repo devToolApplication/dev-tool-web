@@ -24,6 +24,51 @@ type DarkSurfaceScale = {
 
 const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
   definePreset(basePreset, {
+    components: {
+      selectbutton: {
+        root: {
+          borderRadius: '10px'
+        }
+      },
+      togglebutton: {
+        root: {
+          background: 'var(--app-custom-input-bg)',
+          checkedBackground: 'var(--app-primary)',
+          hoverBackground: 'color-mix(in srgb, var(--app-custom-input-bg) 78%, var(--app-primary) 22%)',
+          borderColor: 'var(--app-input-border)',
+          checkedBorderColor: 'var(--app-primary)',
+          color: 'var(--app-custom-input-text)',
+          hoverColor: 'var(--app-custom-input-text)',
+          checkedColor: '#ffffff'
+        },
+        content: {
+          checkedBackground: 'transparent'
+        },
+        icon: {
+          color: 'var(--app-custom-input-text)',
+          hoverColor: 'var(--app-custom-input-text)',
+          checkedColor: '#ffffff'
+        }
+      },
+      tabs: {
+        tablist: {
+          background: 'var(--app-surface-alt)',
+          borderColor: 'var(--app-border)'
+        },
+        tab: {
+          activeBackground: 'var(--app-surface)',
+          borderColor: 'color-mix(in srgb, var(--app-border) 85%, var(--app-primary) 15%)',
+          hoverBorderColor: 'color-mix(in srgb, var(--app-border) 70%, var(--app-primary) 30%)',
+          color: 'var(--app-text-muted)',
+          hoverColor: 'var(--app-text)',
+          activeColor: 'var(--app-primary)'
+        },
+        tabpanel: {
+          background: 'color-mix(in srgb, var(--app-surface) 92%, var(--app-surface-alt) 8%)',
+          color: 'var(--app-text)'
+        }
+      }
+    },
     semantic: {
       primary: {
         50: '{indigo.50}',
