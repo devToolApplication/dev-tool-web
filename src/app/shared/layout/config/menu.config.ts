@@ -16,6 +16,16 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         routerLink: '/admin/upload-storage/storage',
       },
       {
+        label: 'AI Agent Stream',
+        icon: 'pi pi-sparkles',
+        routerLink: '/admin/ai-agent-stream',
+      },
+      {
+        label: 'MCP Tool Config',
+        icon: 'pi pi-wrench',
+        routerLink: '/admin/mcp-tool-config/tool',
+      },
+      {
         label: 'Component Demo',
         icon: 'pi pi-box',
         items: [

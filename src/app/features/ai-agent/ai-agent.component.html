@@ -1,0 +1,73 @@
+<section class="agent-page">
+  <header>
+    <h1>AI Agent Stream (Fake SSE)</h1>
+    <p>Mô phỏng luồng MCP realtime, tách riêng khỏi Dashboard.</p>
+  </header>
+
+  <section class="input-panel">
+    <textarea
+      [(ngModel)]="prompt"
+      rows="3"
+      [disabled]="loading"
+      placeholder="Nhập yêu cầu cho AI Agent"
+    ></textarea>
+
+    <div class="actions">
+      <button type="button" (click)="run()" [disabled]="loading || !prompt.trim()">Run</button>
+      <button type="button" class="retry" (click)="retry()" [disabled]="loading">Retry</button>
+    </div>
+  </section>
+
+  <section class="timeline" #timelineContainer>
+    @if (!steps.length) {
+      <p class="empty">Chưa có timeline event.</p>
+    }
+
+    @for (step of steps; track step.id) {
+      <article class="step-card">
+        <h3>{{ step.id }}</h3>
+
+        @for (event of step.events; track $index) {
+          @if (event.type === 'thinking') {
+            <div class="thinking-skeleton">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          }
+
+          @if (event.type === 'tool_call') {
+            <div class="event tool-call">
+              <strong>🔧 {{ event.tool }}</strong>
+              <pre>{{ event.args | json }}</pre>
+            </div>
+          }
+
+          @if (event.type === 'tool_result') {
+            <details class="event tool-result">
+              <summary>📦 {{ event.tool }} result</summary>
+              <pre>{{ event.data | json }}</pre>
+            </details>
+          }
+        }
+      </article>
+    }
+  </section>
+
+  <section class="final-panel">
+    <h3>Final Answer</h3>
+    <p>{{ finalText || 'Đang chờ text chunk...' }}</p>
+
+    @if (streamStatus === 'running') {
+      <div class="streaming-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    }
+
+    @if (streamStatus === 'done') {
+      <div class="done">✅ Stream completed</div>
+    }
+  </section>
+</section>

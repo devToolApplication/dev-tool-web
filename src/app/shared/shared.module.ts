@@ -71,6 +71,9 @@ import { ReportsComponent } from '../features/reports/reports.component';
 import { ProfileComponent } from '../features/profile/profile.component';
 import { SettingsComponent } from '../features/settings/settings.component';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
+import { AiAgentComponent } from '../features/ai-agent/ai-agent.component';
+import { McpToolListComponent } from '../features/mcp-tool-config/mcp-tool-list.component';
+import { McpToolFormComponent } from '../features/mcp-tool-config/mcp-tool-form.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
 import { TradeBotDashboardComponent } from '../features/dashboard/components/trade-bot-dashboard/trade-bot-dashboard.component';
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
@@ -92,6 +95,9 @@ const FEATURE = [
   ProfileComponent,
   SettingsComponent,
   DashboardComponent,
+  AiAgentComponent,
+  McpToolListComponent,
+  McpToolFormComponent,
   AiAgentDashboardComponent,
   TradeBotDashboardComponent,
   FileStorageDashboardComponent,

@@ -8,6 +8,8 @@ import { settingsRoutes } from './features/settings/settings-routing.module';
 import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
 import { errorRoutes } from './features/error/error-routing.module';
 import { uploadStorageRoutes } from './features/upload-storage/upload-storage-routing.module';
+import { aiAgentRoutes } from './features/ai-agent/ai-agent-routing.module';
+import { mcpToolConfigRoutes } from './features/mcp-tool-config/mcp-tool-config-routing.module';
 
 const routes: Routes = [
   ...mailRoutes,
@@ -17,6 +19,8 @@ const routes: Routes = [
   ...demoRouter,
   ...dashboardRoutes,
   ...uploadStorageRoutes,
+  ...aiAgentRoutes,
+  ...mcpToolConfigRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
   { path: '**', redirectTo: '404' }
