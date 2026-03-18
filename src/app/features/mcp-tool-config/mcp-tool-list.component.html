@@ -1,0 +1,10 @@
+<section class="crud-page">
+  <app-table
+    [config]="tableConfig"
+    [data]="filteredTools"
+    [loading]="loading"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="createTool()"
+  ></app-table>
+</section>
