@@ -5,6 +5,7 @@ import { BasePageResponse } from '../../core/models/base-response.model';
 import { UploadStorageResponse } from '../../core/models/upload-storage.model';
 import { LoadingService } from '../../core/ui-services/loading.service';
 import { ToastService } from '../../core/ui-services/toast.service';
+import { I18nService } from '../../core/ui-services/i18n.service';
 import { UploadStorageService } from '../../core/services/upload-storage.service';
 import { TableConfig } from '../../shared/ui/table/models/table-config.model';
 
@@ -16,22 +17,22 @@ import { TableConfig } from '../../shared/ui/table/models/table-config.model';
 })
 export class UploadStorageListComponent implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'Upload Storage - View',
+    title: 'uploadStorage.viewTitle',
     filters: [
-      { field: 'name', label: 'Name', placeholder: 'Nhập tên storage', defaultVisible: true },
+      { field: 'name', label: 'name', placeholder: 'uploadStorage.namePlaceholder', defaultVisible: true },
       {
         field: 'status',
-        label: 'Status',
+        label: 'status',
         type: 'select',
         defaultVisible: true,
         options: [
-          { label: 'ACTIVE', value: 'ACTIVE' },
-          { label: 'INACTIVE', value: 'INACTIVE' },
-          { label: 'DELETE', value: 'DELETE' }
+          { label: 'active', value: 'ACTIVE' },
+          { label: 'inactive', value: 'INACTIVE' },
+          { label: 'delete', value: 'DELETE' }
         ]
       },
-      { field: 'defaultActive', label: 'Default', type: 'boolean' },
-      { field: 'storageType', label: 'Storage Type', hidden: true }
+      { field: 'defaultActive', label: 'default', type: 'boolean' },
+      { field: 'storageType', label: 'storageType', hidden: true }
     ],
     filterOptions: {
       defaultVisibleCount: 2
@@ -39,51 +40,51 @@ export class UploadStorageListComponent implements OnInit {
     toolbar: {
       new: {
         visible: true,
-        label: 'NEW',
+        label: 'new',
         icon: 'pi pi-plus',
         severity: 'success'
       },
       delete: {
         visible: true,
-        label: 'DELETE',
+        label: 'delete',
         icon: 'pi pi-trash',
         severity: 'danger'
       },
       import: {
         visible: true,
-        label: 'IMPORT',
-        chooseLabel: 'IMPORT',
+        label: 'import',
+        chooseLabel: 'import',
         accept: '*/*',
         maxFileSize: 1000000
       },
       export: {
         visible: true,
-        label: 'EXPORT',
+        label: 'export',
         icon: 'pi pi-upload',
         severity: 'help'
       }
     },
     columns: [
-      { field: 'id', header: 'ID', sortable: true },
-      { field: 'name', header: 'Name', sortable: true },
-      { field: 'storageType', header: 'Storage Type' },
-      { field: 'status', header: 'Status' },
-      { field: 'defaultActive', header: 'Default', type: 'boolean' },
-      { field: 'apiDomain', header: 'API Domain' },
-      { field: 'apiPath', header: 'API Path' },
+      { field: 'id', header: 'id', sortable: true },
+      { field: 'name', header: 'name', sortable: true },
+      { field: 'storageType', header: 'storageType' },
+      { field: 'status', header: 'status' },
+      { field: 'defaultActive', header: 'default', type: 'boolean' },
+      { field: 'apiDomain', header: 'apiDomain' },
+      { field: 'apiPath', header: 'apiPath' },
       {
         field: 'actions',
-        header: 'Action',
+        header: 'action',
         type: 'actions',
         actions: [
           {
-            label: 'Sửa',
+            label: 'edit',
             icon: 'pi pi-pencil',
             severity: 'info',
             onClick: (row) => this.goEdit(row.id)
           },
           {
-            label: 'Xóa',
+            label: 'delete',
             icon: 'pi pi-trash',
             severity: 'danger',
             disabled: () => this.loading,
@@ -108,7 +109,8 @@ export class UploadStorageListComponent implements OnInit {
     private readonly uploadStorageService: UploadStorageService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly i18nService: I18nService
   ) {}
 
   ngOnInit(): void {
@@ -128,7 +130,7 @@ export class UploadStorageListComponent implements OnInit {
             this.selectedStorageId = null;
           }
         },
-        error: () => this.toastService.error('Tải danh sách upload storage thất bại')
+        error: () => this.toastService.error(this.i18nService.t('uploadStorage.loadListError'))
       });
   }
 
@@ -148,7 +150,7 @@ export class UploadStorageListComponent implements OnInit {
 
   removeSelected(): void {
     if (!this.selectedStorageId) {
-      this.toastService.info('Vui lòng chọn bản ghi cần xoá từ bảng');
+      this.toastService.info(this.i18nService.t('uploadStorage.selectDeleteRecord'));
       return;
     }
 
@@ -164,11 +166,11 @@ export class UploadStorageListComponent implements OnInit {
   }
 
   onExport(): void {
-    this.toastService.info('Tính năng export đang được phát triển');
+    this.toastService.info(this.i18nService.t('uploadStorage.exportDeveloping'));
   }
 
   onImport(file: File): void {
-    this.toastService.info(`Đã chọn file import: ${file.name}`);
+    this.toastService.info(this.i18nService.t('uploadStorage.importSelectedFile').replace('{{name}}', file.name));
   }
 
   private goEdit(id: string): void {
@@ -182,13 +184,13 @@ export class UploadStorageListComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
-          this.toastService.info('Đã xoá upload storage');
+          this.toastService.info(this.i18nService.t('uploadStorage.deleteSuccess'));
           if (this.selectedStorageId === id) {
             this.selectedStorageId = null;
           }
           this.loadPage();
         },
-        error: () => this.toastService.error('Xoá upload storage thất bại')
+        error: () => this.toastService.error(this.i18nService.t('uploadStorage.deleteError'))
       });
   }
 }

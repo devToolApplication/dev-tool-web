@@ -1,7 +1,7 @@
 <section class="agent-page">
   <header>
-    <h1>AI Agent Stream (Fake SSE)</h1>
-    <p>Mô phỏng luồng MCP realtime, tách riêng khỏi Dashboard.</p>
+    <h1>{{ 'aiAgent.title' | translateContent }}</h1>
+    <p>{{ 'aiAgent.description' | translateContent }}</p>
   </header>
 
   <section class="input-panel">
@@ -9,18 +9,18 @@
       [(ngModel)]="prompt"
       rows="3"
       [disabled]="loading"
-      placeholder="Nhập yêu cầu cho AI Agent"
+      [placeholder]="'aiAgent.promptPlaceholder' | translateContent"
     ></textarea>
 
     <div class="actions">
-      <button type="button" (click)="run()" [disabled]="loading || !prompt.trim()">Run</button>
-      <button type="button" class="retry" (click)="retry()" [disabled]="loading">Retry</button>
+      <button type="button" (click)="run()" [disabled]="loading || !prompt.trim()">{{ 'aiAgent.run' | translateContent }}</button>
+      <button type="button" class="retry" (click)="retry()" [disabled]="loading">{{ 'aiAgent.retry' | translateContent }}</button>
     </div>
   </section>
 
   <section class="timeline" #timelineContainer>
     @if (!steps.length) {
-      <p class="empty">Chưa có timeline event.</p>
+      <p class="empty">{{ 'aiAgent.emptyTimeline' | translateContent }}</p>
     }
 
     @for (step of steps; track step.id) {
@@ -45,7 +45,7 @@
 
           @if (event.type === 'tool_result') {
             <details class="event tool-result">
-              <summary>📦 {{ event.tool }} result</summary>
+              <summary>📦 {{ event.tool }} {{ 'aiAgent.result' | translateContent }}</summary>
               <pre>{{ event.data | json }}</pre>
             </details>
           }
@@ -55,8 +55,8 @@
   </section>
 
   <section class="final-panel">
-    <h3>Final Answer</h3>
-    <p>{{ finalText || 'Đang chờ text chunk...' }}</p>
+    <h3>{{ 'aiAgent.finalAnswer' | translateContent }}</h3>
+    <p>{{ finalText || ('aiAgent.waitingText' | translateContent) }}</p>
 
     @if (streamStatus === 'running') {
       <div class="streaming-indicator">
@@ -67,7 +67,7 @@
     }
 
     @if (streamStatus === 'done') {
-      <div class="done">✅ Stream completed</div>
+      <div class="done">{{ 'aiAgent.streamCompleted' | translateContent }}</div>
     }
   </section>
 </section>

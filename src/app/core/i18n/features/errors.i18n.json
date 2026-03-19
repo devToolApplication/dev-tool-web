@@ -1,0 +1,16 @@
+{
+  "vi": {
+    "errors.forbiddenTitle": "Forbidden",
+    "errors.forbiddenDescription": "Bạn không có quyền truy cập tài nguyên này.",
+    "errors.notFoundTitle": "Not Found",
+    "errors.notFoundDescription": "Trang bạn truy cập không tồn tại hoặc đã được di chuyển.",
+    "errors.backToDashboard": "Quay về Dashboard"
+  },
+  "en": {
+    "errors.forbiddenTitle": "Forbidden",
+    "errors.forbiddenDescription": "You do not have permission to access this resource.",
+    "errors.notFoundTitle": "Not Found",
+    "errors.notFoundDescription": "The page you requested does not exist or has been moved.",
+    "errors.backToDashboard": "Back to Dashboard"
+  }
+}

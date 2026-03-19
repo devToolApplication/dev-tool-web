@@ -13,6 +13,9 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { APP_THEME_PRESETS } from './core/ui-services/theme-presets';
 import { KeycloakService } from './core/auth/keycloak.service';
 
+// DEV NOTE: Keycloak APP_INITIALIZER đang được comment để bypass login
+// trong môi trường dev/demo. Khi cần bật lại, bỏ comment hàm này và
+// block APP_INITIALIZER ở providers bên dưới.
 // export function initializeKeycloak(keycloak: KeycloakService) {
 //   return () => keycloak.init();
 // }

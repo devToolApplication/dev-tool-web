@@ -4,6 +4,7 @@ import { filter, Subject, takeUntil } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { TieredMenu } from 'primeng/tieredmenu';
 import { KeycloakService } from '../../../core/auth/keycloak.service';
+import { I18nService } from '../../../core/ui-services/i18n.service';
 
 @Component({
   selector: 'app-header',
@@ -22,24 +23,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
   };
   breadcrumbItems: MenuItem[] = [];
 
-  readonly accountMenuItems: MenuItem[] = [
-    {
-      label: 'Cài đặt',
-      icon: 'pi pi-cog',
-      command: () => this.router.navigate(['/settings'])
-    },
-    {
-      label: 'Đăng xuất',
-      icon: 'pi pi-sign-out',
-      command: () => this.keycloakService.logout()
-    }
-  ];
+  get accountMenuItems(): MenuItem[] {
+    return [
+      {
+        label: this.i18nService.t('layout.settings'),
+        icon: 'pi pi-cog',
+        command: () => this.router.navigate(['/settings'])
+      },
+      {
+        label: this.i18nService.t('layout.logout'),
+        icon: 'pi pi-sign-out',
+        command: () => this.keycloakService.logout()
+      }
+    ];
+  }
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly router: Router,
-    private readonly keycloakService: KeycloakService
+    private readonly keycloakService: KeycloakService,
+    private readonly i18nService: I18nService
   ) {}
 
   ngOnInit(): void {

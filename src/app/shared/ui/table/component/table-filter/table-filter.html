@@ -1,117 +1,226 @@
-<div class="table-filter" [class.compact]="!shouldCollapseByDefault">
-  <div class="filter-header">
-    <button
-      type="button"
-      class="filter-collapse"
-      (click)="togglePanel()"
-      [attr.aria-expanded]="panelExpanded"
-      [disabled]="loading"
-    >
-      <i class="pi" [ngClass]="panelExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-      <span>Bộ lọc</span>
-      <small>{{ selectedFields.length }} trường</small>
-      @if (activeFilterCount > 0) {
-        <span class="active-badge">{{ activeFilterCount }}</span>
-      }
-    </button>
+<section class="table-filter-shell">
+  <div class="filter-page-header">
+    <div>
+      <p class="filter-eyebrow">{{ 'filters' | translateContent }}</p>
+      <h3>{{ (options.drawerTitle ?? 'filters') | translateContent }}</h3>
+    </div>
 
     <div class="filter-header-actions">
-      @if (hasCollapsedFilters && panelExpanded) {
-        <app-button
-          [icon]="showAllFilters ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-          severity="secondary"
-          [text]="true"
-          [disabled]="loading"
-          [label]="showAllFilters ? 'Thu gọn' : 'Hiện thêm +' + hiddenSelectedCount"
-          (buttonClick)="toggleFilters()"
-        ></app-button>
-      }
-
-      <div class="field-selector-wrapper">
-        <app-button
-          icon="pi pi-sliders-h"
-          severity="secondary"
-          [text]="true"
-          [disabled]="loading"
-          [label]="'Tùy chọn trường'"
-          (buttonClick)="toggleFieldSelector()"
-        ></app-button>
-
-        @if (showFieldSelector) {
-          <div class="field-selector-panel">
-            <div class="field-selector-title">Hiển thị bộ lọc</div>
-
-            @for (field of selectableFields; track field.field) {
-              <label class="field-selector-item">
-                <input
-                  type="checkbox"
-                  [checked]="isFieldSelected(field.field)"
-                  (change)="toggleFieldSelection(field.field)"
-                />
-                <span>{{ field.label }}</span>
-              </label>
-            }
-          </div>
-        }
-      </div>
+      <app-button
+        styleClass="filter-trigger"
+        icon="pi pi-sliders-h"
+        severity="secondary"
+        [text]="true"
+        [label]="options.filterLabel ?? 'filters'"
+        (buttonClick)="openDrawer()"
+      ></app-button>
     </div>
   </div>
 
-  @if (panelExpanded) {
-    <div class="filter-content">
-      <div class="filter-grid">
-        @for (field of visibleFields; track field.field) {
-          <div class="filter-item">
-            <label class="filter-label" [for]="field.field">{{ field.label }}</label>
+  <div class="quick-filter-grid">
+    @for (field of quickFields(); track trackField($index, field)) {
+      <div class="quick-filter-item" [class.invalid]="!!errorOf(field.field)">
+        <label>{{ field.label | translateContent }}</label>
 
-            @if ((field.type ?? 'text') === 'select') {
-              <app-select
-                [inputId]="field.field"
-                [options]="field.options ?? []"
-                [placeholder]="field.placeholder ?? 'Chọn ' + field.label.toLowerCase()"
-                [(value)]="values[field.field]"
-                [showClear]="true"
-                variant="on"
-              ></app-select>
-            } @else if ((field.type ?? 'text') === 'boolean') {
-              <app-select
-                [inputId]="field.field"
-                [options]="[
-                  { label: 'Tất cả', value: null },
-                  { label: 'Có', value: true },
-                  { label: 'Không', value: false },
-                ]"
-                [placeholder]="field.placeholder ?? 'Chọn giá trị'"
-                [(value)]="values[field.field]"
-                variant="on"
-              ></app-select>
-            } @else {
-              <input
-                pInputText
-                [id]="field.field"
-                [(ngModel)]="values[field.field]"
-                [placeholder]="field.placeholder ?? 'Nhập ' + field.label.toLowerCase()"
-              />
+        @switch (field.type ?? 'text') {
+          @case ('select') {
+            <app-select
+              [options]="optionsOf(field.field)"
+              [value]="valueOf(field.field)"
+              [placeholder]="field.placeholder ?? field.label"
+              [showClear]="true"
+              [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
+              (valueChange)="onValueChange(field, $event)"
+            ></app-select>
+          }
+          @case ('multi-select') {
+            <app-select-multi
+              [options]="optionsOf(field.field)"
+              [value]="valueOf(field.field)"
+              [placeholder]="field.placeholder ?? field.label"
+              [enableFilter]="true"
+              [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
+              (valueChange)="onValueChange(field, $event)"
+            ></app-select-multi>
+          }
+          @case ('date') {
+            <app-date-picker
+              [value]="valueOf(field.field)"
+              [placeholder]="field.placeholder ?? field.label"
+              [disabled]="isFieldDisabled(field)"
+              (valueChange)="onValueChange(field, $event)"
+            ></app-date-picker>
+          }
+          @case ('date-range') {
+            <div class="date-range-grid">
+              <app-date-picker
+                [value]="valueOf(field.field)?.start"
+                [placeholder]="'fromDate'"
+                [disabled]="isFieldDisabled(field)"
+                (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), start: $event })"
+              ></app-date-picker>
+              <app-date-picker
+                [value]="valueOf(field.field)?.end"
+                [placeholder]="'toDate'"
+                [disabled]="isFieldDisabled(field)"
+                (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), end: $event })"
+              ></app-date-picker>
+            </div>
+          }
+          @default {
+            <app-input-text
+              [value]="valueOf(field.field)"
+              [placeholder]="field.placeholder ?? field.label"
+              [disabled]="isFieldDisabled(field)"
+              (valueChange)="onValueChange(field, $event)"
+            ></app-input-text>
+          }
+        }
+
+        @if (errorOf(field.field)) {
+          <small class="filter-error">{{ errorOf(field.field) }}</small>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="quick-filter-actions">
+    <app-button
+      icon="pi pi-check"
+      [label]="options.applyLabel ?? 'apply'"
+      [disabled]="!canApply()"
+      (buttonClick)="onApply()"
+    ></app-button>
+    <app-button
+      icon="pi pi-refresh"
+      severity="secondary"
+      [label]="options.resetLabel ?? 'reset'"
+      [disabled]="loading"
+      (buttonClick)="onResetToDefaults()"
+    ></app-button>
+    <app-button
+      styleClass="filter-trigger"
+      icon="pi pi-filter"
+      severity="secondary"
+      [text]="true"
+      [label]="options.filterLabel ?? 'filter'"
+      (buttonClick)="openDrawer()"
+    ></app-button>
+  </div>
+
+  @if (activeChips().length) {
+    <div class="active-chip-row">
+      @for (chip of activeChips(); track chip.field) {
+        <button type="button" class="filter-chip" (click)="onRemoveChip(chip.field)">
+          <span>{{ chip.label | translateContent }}: {{ chip.value }}</span>
+          <i class="pi pi-times"></i>
+        </button>
+      }
+    </div>
+  }
+</section>
+
+@if (drawerOpen()) {
+  <div class="drawer-backdrop" (click)="onCancelDrawer()"></div>
+  <aside class="filter-drawer" role="dialog" aria-modal="true">
+    <header class="drawer-header">
+      <div>
+        <p class="filter-eyebrow">{{ 'filters' | translateContent }}</p>
+        <h3>{{ (options.drawerTitle ?? 'advancedFilters') | translateContent }}</h3>
+      </div>
+      <button type="button" class="drawer-close" (click)="onCancelDrawer()">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <div class="drawer-content">
+      <div class="drawer-grid">
+        @for (field of advancedFields(); track trackField($index, field)) {
+          <div class="drawer-field" [class.full-span]="(field.type ?? 'text') === 'date-range'" [class.invalid]="!!errorOf(field.field)">
+            <label>{{ field.label | translateContent }}</label>
+
+            @switch (field.type ?? 'text') {
+              @case ('select') {
+                <app-select
+                  [options]="optionsOf(field.field)"
+                  [value]="valueOf(field.field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [showClear]="true"
+                  [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
+                  (valueChange)="onValueChange(field, $event)"
+                ></app-select>
+              }
+              @case ('multi-select') {
+                <app-select-multi
+                  [options]="optionsOf(field.field)"
+                  [value]="valueOf(field.field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [enableFilter]="true"
+                  [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
+                  (valueChange)="onValueChange(field, $event)"
+                ></app-select-multi>
+              }
+              @case ('date') {
+                <app-date-picker
+                  [value]="valueOf(field.field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [disabled]="isFieldDisabled(field)"
+                  (valueChange)="onValueChange(field, $event)"
+                ></app-date-picker>
+              }
+              @case ('date-range') {
+                <div class="date-range-grid">
+                  <app-date-picker
+                    [value]="valueOf(field.field)?.start"
+                    [placeholder]="'fromDate'"
+                    [disabled]="isFieldDisabled(field)"
+                    (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), start: $event })"
+                  ></app-date-picker>
+                  <app-date-picker
+                    [value]="valueOf(field.field)?.end"
+                    [placeholder]="'toDate'"
+                    [disabled]="isFieldDisabled(field)"
+                    (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), end: $event })"
+                  ></app-date-picker>
+                </div>
+              }
+              @default {
+                <app-input-text
+                  [value]="valueOf(field.field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [disabled]="isFieldDisabled(field)"
+                  (valueChange)="onValueChange(field, $event)"
+                ></app-input-text>
+              }
+            }
+
+            @if (errorOf(field.field)) {
+              <small class="filter-error">{{ errorOf(field.field) }}</small>
             }
           </div>
         }
       </div>
+    </div>
 
-      <div class="filter-actions">
+    <footer class="drawer-footer">
+      <app-button
+        severity="secondary"
+        [text]="true"
+        [label]="options.cancelLabel ?? 'cancel'"
+        (buttonClick)="onCancelDrawer()"
+      ></app-button>
+      <div class="drawer-footer-actions">
         <app-button
-          icon="pi pi-search"
-          label="Tìm"
-          [disabled]="loading"
-          (buttonClick)="onSearch()"
+          severity="secondary"
+          [label]="options.resetLabel ?? 'reset'"
+          (buttonClick)="onResetToDefaults()"
         ></app-button>
         <app-button
-          icon="pi pi-refresh"
-          label="Đặt lại"
-          severity="secondary"
-          [disabled]="loading || !hasAnyValue"
-          (buttonClick)="onReset()"
+          [label]="options.applyLabel ?? 'apply'"
+          [disabled]="!canApply()"
+          (buttonClick)="onApply()"
         ></app-button>
       </div>
-    </div>
-  }
-</div>
+    </footer>
+  </aside>
+}

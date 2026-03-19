@@ -1,0 +1,34 @@
+{
+  "vi": {
+    "uploadStorage.title": "Upload Storage Management",
+    "uploadStorage.viewTitle": "Upload Storage - View",
+    "uploadStorage.namePlaceholder": "Nhập tên storage",
+    "uploadStorage.loadListError": "Tải danh sách upload storage thất bại",
+    "uploadStorage.selectDeleteRecord": "Vui lòng chọn bản ghi cần xoá từ bảng",
+    "uploadStorage.exportDeveloping": "Tính năng export đang được phát triển",
+    "uploadStorage.importSelectedFile": "Đã chọn file import: {{name}}",
+    "uploadStorage.deleteSuccess": "Đã xoá upload storage",
+    "uploadStorage.deleteError": "Xoá upload storage thất bại",
+    "uploadStorage.nameRequired": "Tên storage là bắt buộc",
+    "uploadStorage.createSuccess": "Tạo upload storage thành công",
+    "uploadStorage.updateSuccess": "Cập nhật upload storage thành công",
+    "uploadStorage.saveError": "Lưu upload storage thất bại",
+    "uploadStorage.detailError": "Không lấy được chi tiết upload storage"
+  },
+  "en": {
+    "uploadStorage.title": "Upload Storage Management",
+    "uploadStorage.viewTitle": "Upload Storage - View",
+    "uploadStorage.namePlaceholder": "Enter storage name",
+    "uploadStorage.loadListError": "Failed to load upload storage list",
+    "uploadStorage.selectDeleteRecord": "Please select a record to delete from the table",
+    "uploadStorage.exportDeveloping": "Export feature is under development",
+    "uploadStorage.importSelectedFile": "Selected import file: {{name}}",
+    "uploadStorage.deleteSuccess": "Upload storage deleted",
+    "uploadStorage.deleteError": "Failed to delete upload storage",
+    "uploadStorage.nameRequired": "Storage name is required",
+    "uploadStorage.createSuccess": "Upload storage created successfully",
+    "uploadStorage.updateSuccess": "Upload storage updated successfully",
+    "uploadStorage.saveError": "Failed to save upload storage",
+    "uploadStorage.detailError": "Unable to load upload storage details"
+  }
+}

@@ -41,7 +41,7 @@ export class MailComponent implements OnInit {
           this.items = rows;
         },
         error: () => {
-          this.toastService.error(this.i18nService.t('toast.loadError'));
+          this.toastService.error(this.i18nService.t('loadError'));
         }
       });
   }
@@ -57,12 +57,12 @@ export class MailComponent implements OnInit {
 
     this.loadingService.track(request$).subscribe({
       next: () => {
-        this.toastService.success(this.editingId ? this.i18nService.t('toast.saveUpdateSuccess') : this.i18nService.t('toast.saveCreateSuccess'));
+        this.toastService.success(this.editingId ? this.i18nService.t('updateSuccess') : this.i18nService.t('createSuccess'));
         this.cancelEdit();
         this.loadData();
       },
       error: () => {
-        this.toastService.error(this.i18nService.t('toast.saveError'));
+        this.toastService.error(this.i18nService.t('saveError'));
       }
     });
   }
@@ -84,11 +84,11 @@ export class MailComponent implements OnInit {
 
     this.loadingService.track(this.service.delete(item.id)).subscribe({
       next: () => {
-        this.toastService.info(this.i18nService.t('toast.deleteSuccess'));
+        this.toastService.info(this.i18nService.t('deleteSuccess'));
         this.loadData();
       },
       error: () => {
-        this.toastService.error(this.i18nService.t('toast.deleteError'));
+        this.toastService.error(this.i18nService.t('deleteError'));
       }
     });
   }

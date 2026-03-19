@@ -1,15 +1,15 @@
 <section class="dashboard-page">
   <header class="dashboard-header">
     <div>
-      <h1>Admin Dashboard (Mockup)</h1>
-      <p>Dữ liệu demo để duyệt nhanh giao diện quản trị.</p>
+      <h1>{{ 'dashboard.title' | translateContent }}</h1>
+      <p>{{ 'dashboard.description' | translateContent }}</p>
     </div>
   </header>
 
   <section class="metrics-grid">
     @for (metric of metrics; track metric.label) {
       <article class="metric-card">
-        <p>{{ metric.label }}</p>
+        <p>{{ metric.label | translateContent }}</p>
         <h3>{{ metric.value }}</h3>
         <span>{{ metric.change }}</span>
       </article>
@@ -18,35 +18,35 @@
 
   <section class="overview-grid">
     <article class="panel-card">
-      <h2>Hoạt động gần nhất</h2>
+      <h2>{{ 'dashboard.latestActivities' | translateContent }}</h2>
       <ul>
         @for (activity of activities; track activity) {
-          <li>{{ activity }}</li>
+          <li>{{ activity | translateContent }}</li>
         }
       </ul>
     </article>
 
     <article class="panel-card">
-      <h2>Quick actions</h2>
+      <h2>{{ 'dashboard.quickActions' | translateContent }}</h2>
       <div class="action-list">
-        <button type="button">Tạo agent mới</button>
-        <button type="button">Mở cấu hình bot</button>
-        <button type="button">Xem báo cáo lưu trữ</button>
+        <button type="button">{{ 'dashboard.createAgent' | translateContent }}</button>
+        <button type="button">{{ 'dashboard.openBotConfig' | translateContent }}</button>
+        <button type="button">{{ 'dashboard.viewStorageReport' | translateContent }}</button>
       </div>
     </article>
   </section>
 
   <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
     <p-tablist>
-      <p-tab value="ai-agent">AI Agent</p-tab>
-      <p-tab value="trade-bot">Trade Bot</p-tab>
-      <p-tab value="file-storage">File Storage</p-tab>
+      <p-tab value="ai-agent">{{ 'dashboard.tab.aiAgent' | translateContent }}</p-tab>
+      <p-tab value="trade-bot">{{ 'dashboard.tab.tradeBot' | translateContent }}</p-tab>
+      <p-tab value="file-storage">{{ 'dashboard.tab.fileStorage' | translateContent }}</p-tab>
     </p-tablist>
 
     <p-tabpanels>
       <p-tabpanel value="ai-agent">
         @if (loading && activeTab === 'ai-agent') {
-          <div class="state-message">Đang tải dữ liệu...</div>
+          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
         } @else if (activeTab === 'ai-agent') {
           <app-ai-agent-dashboard [items]="items"></app-ai-agent-dashboard>
         }
@@ -54,7 +54,7 @@
 
       <p-tabpanel value="trade-bot">
         @if (loading && activeTab === 'trade-bot') {
-          <div class="state-message">Đang tải dữ liệu...</div>
+          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
         } @else if (activeTab === 'trade-bot') {
           <app-trade-bot-dashboard [items]="items"></app-trade-bot-dashboard>
         }
@@ -62,7 +62,7 @@
 
       <p-tabpanel value="file-storage">
         @if (loading && activeTab === 'file-storage') {
-          <div class="state-message">Đang tải dữ liệu...</div>
+          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
         } @else if (activeTab === 'file-storage') {
           <app-file-storage-dashboard [items]="items"></app-file-storage-dashboard>
         }

@@ -1,8 +1,8 @@
 <section class="error-page">
   <div class="error-card">
     <div class="error-code">403</div>
-    <h1>Forbidden</h1>
-    <p>Bạn không có quyền truy cập tài nguyên này.</p>
-    <a routerLink="/admin/dashboard">Quay về Dashboard</a>
+    <h1>{{ 'errors.forbiddenTitle' | translateContent }}</h1>
+    <p>{{ 'errors.forbiddenDescription' | translateContent }}</p>
+    <a routerLink="/admin/dashboard">{{ 'errors.backToDashboard' | translateContent }}</a>
   </div>
 </section>

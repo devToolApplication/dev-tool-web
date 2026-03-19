@@ -22,75 +22,75 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
       {
         type: 'select',
         name: 'category',
-        label: 'Category',
+        label: 'category',
         width: '1/2',
         options: [
-          { label: 'JIRA', value: 'jira' },
-          { label: 'GITHUB', value: 'github' },
-          { label: 'CODE', value: 'code' },
-          { label: 'SLACK', value: 'slack' },
-          { label: 'CUSTOM', value: 'custom' }
+          { label: 'jira', value: 'jira' },
+          { label: 'github', value: 'github' },
+          { label: 'code', value: 'code' },
+          { label: 'slack', value: 'slack' },
+          { label: 'custom', value: 'custom' }
         ],
-        validation: [{ expression: '!!model.category', message: 'Category là bắt buộc' }]
+        validation: [{ expression: '!!model.category', message: 'mcpTool.categoryRequired' }]
       },
       {
         type: 'text',
         name: 'name',
-        label: 'Name',
+        label: 'name',
         width: '1/2',
-        validation: [{ expression: '!!model.name?.trim()', message: 'Name là bắt buộc' }]
+        validation: [{ expression: '!!model.name?.trim()', message: 'mcpTool.nameRequired' }]
       },
       {
         type: 'text',
         name: 'endpoint',
-        label: 'Endpoint',
+        label: 'endpoint',
         width: '1/2',
-        validation: [{ expression: '!!model.endpoint?.trim()', message: 'Endpoint là bắt buộc' }]
+        validation: [{ expression: '!!model.endpoint?.trim()', message: 'mcpTool.endpointRequired' }]
       },
       {
         type: 'select',
         name: 'authType',
-        label: 'Auth Type',
+        label: 'authType',
         width: '1/2',
         options: [
-          { label: 'API KEY', value: 'api_key' },
-          { label: 'OAUTH', value: 'oauth' },
-          { label: 'NONE', value: 'none' }
+          { label: 'apiKey', value: 'api_key' },
+          { label: 'oauth', value: 'oauth' },
+          { label: 'none', value: 'none' }
         ]
       },
       {
         type: 'number',
         name: 'timeoutMs',
-        label: 'Timeout (ms)',
+        label: 'timeout',
         width: '1/2',
-        validation: [{ expression: 'Number(model.timeoutMs) >= 1000', message: 'Timeout tối thiểu là 1000ms' }]
+        validation: [{ expression: 'Number(model.timeoutMs) >= 1000', message: 'mcpTool.timeoutMin' }]
       },
       {
         type: 'number',
         name: 'retryCount',
-        label: 'Retry Count',
+        label: 'retryCount',
         width: '1/2',
-        validation: [{ expression: 'Number(model.retryCount) >= 0', message: 'Retry count phải lớn hơn hoặc bằng 0' }]
+        validation: [{ expression: 'Number(model.retryCount) >= 0', message: 'mcpTool.retryMin' }]
       },
       {
         type: 'checkbox',
         name: 'enabled',
-        label: 'Enabled',
+        label: 'enabled',
         width: '1/2'
       },
       {
         type: 'textarea',
         name: 'description',
-        label: 'Description',
+        label: 'description',
         width: 'full'
       },
       {
         type: 'record',
         name: 'scopes',
-        label: 'Scopes',
-        keyLabel: 'Scope',
-        valueLabel: 'Description',
-        addButtonLabel: 'Add scope',
+        label: 'scopes',
+        keyLabel: 'mcpTool.scope',
+        valueLabel: 'description',
+        addButtonLabel: 'mcpTool.addScope',
         width: 'full'
       }
     ]

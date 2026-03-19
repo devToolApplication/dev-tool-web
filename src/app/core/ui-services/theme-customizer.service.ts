@@ -59,34 +59,34 @@ const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
 
 const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
   selectBackground: [
-    { label: 'Content background', value: 'var(--p-content-background)' },
-    { label: 'Surface 0', value: 'var(--p-surface-0)' },
-    { label: 'Surface 50', value: 'var(--p-surface-50)' },
-    { label: 'Surface 100', value: 'var(--p-surface-100)' }
+    { label: 'contentBackground', value: 'var(--p-content-background)' },
+    { label: 'surface0', value: 'var(--p-surface-0)' },
+    { label: 'surface50', value: 'var(--p-surface-50)' },
+    { label: 'surface100', value: 'var(--p-surface-100)' }
   ],
   selectText: [
-    { label: 'Content color', value: 'var(--p-content-color)' },
-    { label: 'Text color', value: 'var(--p-text-color)' },
-    { label: 'Surface 900', value: 'var(--p-surface-900)' },
-    { label: 'Surface 950', value: 'var(--p-surface-950)' }
+    { label: 'contentColor', value: 'var(--p-content-color)' },
+    { label: 'textColor', value: 'var(--p-text-color)' },
+    { label: 'surface900', value: 'var(--p-surface-900)' },
+    { label: 'surface950', value: 'var(--p-surface-950)' }
   ],
   inputBackground: [
-    { label: 'Form field background', value: 'var(--p-form-field-background)' },
-    { label: 'Surface 0', value: 'var(--p-surface-0)' },
-    { label: 'Surface 50', value: 'var(--p-surface-50)' },
-    { label: 'Surface 100', value: 'var(--p-surface-100)' }
+    { label: 'formFieldBackground', value: 'var(--p-form-field-background)' },
+    { label: 'surface0', value: 'var(--p-surface-0)' },
+    { label: 'surface50', value: 'var(--p-surface-50)' },
+    { label: 'surface100', value: 'var(--p-surface-100)' }
   ],
   inputText: [
-    { label: 'Form field color', value: 'var(--p-form-field-color)' },
-    { label: 'Text color', value: 'var(--p-text-color)' },
-    { label: 'Surface 900', value: 'var(--p-surface-900)' },
-    { label: 'Surface 950', value: 'var(--p-surface-950)' }
+    { label: 'formFieldColor', value: 'var(--p-form-field-color)' },
+    { label: 'textColor', value: 'var(--p-text-color)' },
+    { label: 'surface900', value: 'var(--p-surface-900)' },
+    { label: 'surface950', value: 'var(--p-surface-950)' }
   ],
   appText: [
-    { label: 'Text color', value: 'var(--p-text-color)' },
-    { label: 'Content color', value: 'var(--p-content-color)' },
-    { label: 'Surface 900', value: 'var(--p-surface-900)' },
-    { label: 'Surface 950', value: 'var(--p-surface-950)' }
+    { label: 'textColor', value: 'var(--p-text-color)' },
+    { label: 'contentColor', value: 'var(--p-content-color)' },
+    { label: 'surface900', value: 'var(--p-surface-900)' },
+    { label: 'surface950', value: 'var(--p-surface-950)' }
   ]
 };
 

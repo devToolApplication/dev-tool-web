@@ -1,0 +1,26 @@
+{
+  "vi": {
+    "mcpTool.viewTitle": "MCP Tool Config - View",
+    "mcpTool.newTool": "NEW TOOL",
+    "mcpTool.toolNamePlaceholder": "Nhập tên tool",
+    "mcpTool.categoryRequired": "Category là bắt buộc",
+    "mcpTool.nameRequired": "Name là bắt buộc",
+    "mcpTool.endpointRequired": "Endpoint là bắt buộc",
+    "mcpTool.timeoutMin": "Timeout tối thiểu là 1000ms",
+    "mcpTool.retryMin": "Retry count phải lớn hơn hoặc bằng 0",
+    "mcpTool.scope": "Scope",
+    "mcpTool.addScope": "Add scope"
+  },
+  "en": {
+    "mcpTool.viewTitle": "MCP Tool Config - View",
+    "mcpTool.newTool": "NEW TOOL",
+    "mcpTool.toolNamePlaceholder": "Enter tool name",
+    "mcpTool.categoryRequired": "Category is required",
+    "mcpTool.nameRequired": "Name is required",
+    "mcpTool.endpointRequired": "Endpoint is required",
+    "mcpTool.timeoutMin": "Timeout must be at least 1000ms",
+    "mcpTool.retryMin": "Retry count must be greater than or equal to 0",
+    "mcpTool.scope": "Scope",
+    "mcpTool.addScope": "Add scope"
+  }
+}

@@ -10,10 +10,10 @@ import { BaseInput } from '../base-input';
 export class Password extends BaseInput<string> {
   @Input() feedback = true;
   @Input() toggleMask = true;
-  @Input() promptLabel = 'shared.password.prompt';
-  @Input() weakLabel = 'shared.password.weak';
-  @Input() mediumLabel = 'shared.password.medium';
-  @Input() strongLabel = 'shared.password.strong';
+  @Input() promptLabel = 'passwordPrompt';
+  @Input() weakLabel = 'weak';
+  @Input() mediumLabel = 'medium';
+  @Input() strongLabel = 'strong';
 
   constructor() {
     super();

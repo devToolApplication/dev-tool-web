@@ -19,17 +19,17 @@ export class DashboardComponent {
   items: DashboardItem[] = [];
 
   readonly metrics: DashboardMetric[] = [
-    { label: 'Yêu cầu hôm nay', value: '12,840', change: '+18%' },
-    { label: 'Bot đang chạy', value: '27', change: '+4' },
-    { label: 'Tỉ lệ thành công', value: '99.2%', change: '+0.7%' },
-    { label: 'Dung lượng đã dùng', value: '1.8 TB', change: '+120 GB' }
+    { label: 'dashboard.metric.requestsToday', value: '12,840', change: '+18%' },
+    { label: 'dashboard.metric.runningBots', value: '27', change: '+4' },
+    { label: 'dashboard.metric.successRate', value: '99.2%', change: '+0.7%' },
+    { label: 'dashboard.metric.storageUsed', value: '1.8 TB', change: '+120 GB' }
   ];
 
   readonly activities = [
-    'AI Agent #A-193 vừa deploy prompt v2.4',
-    'Trade Bot ETH scalping chốt lời +4.3%',
-    'File Storage node eu-central đã đồng bộ xong',
-    'Cảnh báo: 2 tác vụ cần xác nhận quyền truy cập'
+    'dashboard.activity.agentDeploy',
+    'dashboard.activity.tradeBot',
+    'dashboard.activity.fileSync',
+    'dashboard.activity.accessWarning'
   ];
 
   private readonly mockItemsByTab: Record<DashboardTabType, DashboardItem[]> = {
