@@ -1,4 +1,4 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutes } from './app.routes';
@@ -16,9 +16,9 @@ import { KeycloakService } from './core/auth/keycloak.service';
 // DEV NOTE: Keycloak APP_INITIALIZER đang được comment để bypass login
 // trong môi trường dev/demo. Khi cần bật lại, bỏ comment hàm này và
 // block APP_INITIALIZER ở providers bên dưới.
-// export function initializeKeycloak(keycloak: KeycloakService) {
-//   return () => keycloak.init();
-// }
+export function initializeKeycloak(keycloak: KeycloakService) {
+  return () => keycloak.init();
+}
 
 @NgModule({
   declarations: [AppComponent],
@@ -34,12 +34,12 @@ import { KeycloakService } from './core/auth/keycloak.service';
     provideBrowserGlobalErrorListeners(),
     // Để bypass login Keycloak khi dev/demo.
     // Khi cần bật lại, chỉ cần bỏ comment block APP_INITIALIZER bên dưới.
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: initializeKeycloak,
-    //   multi: true,
-    //   deps: [KeycloakService]
-    // },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService]
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

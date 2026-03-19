@@ -1,0 +1,53 @@
+<p-fieldset [legend]="(field.label || 'mcpTool.tags') | translateContent" class="tag-fieldset">
+  <div class="tag-field" [class.disabled]="field.disabled()">
+    @if (tags.length) {
+      <div class="tag-field__chips">
+        @for (tag of tags; track tag) {
+          <button type="button" class="tag-chip" [disabled]="field.disabled()" (click)="onRemoveTag(tag)">
+            <span>{{ tag }}</span>
+            <i class="pi pi-times"></i>
+          </button>
+        }
+      </div>
+    }
+
+    <div class="tag-field__input-row">
+      <input
+        pInputText
+        type="text"
+        [value]="draft"
+        [disabled]="field.disabled()"
+        [attr.list]="datalistId"
+        [attr.placeholder]="'mcpTool.tagPlaceholder' | translateContent"
+        (input)="onDraftChange($any($event.target).value)"
+        (keydown.enter)="onEnter($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+      />
+
+      <button
+        pButton
+        type="button"
+        icon="pi pi-plus"
+        severity="secondary"
+        [label]="'mcpTool.addTag' | translateContent"
+        [disabled]="field.disabled()"
+        (click)="onAddClick()">
+      </button>
+    </div>
+
+    <datalist [id]="datalistId">
+      @for (suggestion of filteredSuggestions; track suggestion) {
+        <option [value]="suggestion"></option>
+      }
+    </datalist>
+
+    <small class="tag-field__help">{{ 'mcpTool.tagsHint' | translateContent }}</small>
+
+    @if (showInvalid) {
+      <p-message severity="error" size="small" variant="simple">
+        {{ field.errors()?.['custom'] | translateContent }}
+      </p-message>
+    }
+  </div>
+</p-fieldset>

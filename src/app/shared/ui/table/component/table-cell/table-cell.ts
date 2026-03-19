@@ -27,5 +27,9 @@ export class TableCellComponent {
   onActionClick(action: TableAction): void {
     action.onClick(this.rowData);
   }
+
+  formatArrayValue(value: unknown): string {
+    return Array.isArray(value) ? value.join(', ') : String(value ?? '');
+  }
 }
 

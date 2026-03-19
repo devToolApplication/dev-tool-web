@@ -24,6 +24,10 @@
     }
   }
 
+  @case ('array') {
+    {{ formatArrayValue(value) }}
+  }
+
   @case ('actions') {
     <div class="table-actions">
       @for (action of actions; track action.label) {

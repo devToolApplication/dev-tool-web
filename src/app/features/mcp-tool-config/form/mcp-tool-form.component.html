@@ -10,6 +10,8 @@
         [config]="formConfig"
         [context]="formContext"
         [initialValue]="formInitialValue"
+        [submitting]="loading"
+        (valueChange)="onFormValueChange($event)"
         (submit)="onSubmitForm($event)"
       ></app-form-input>
     }

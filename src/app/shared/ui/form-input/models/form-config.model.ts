@@ -85,6 +85,14 @@ export interface RecordFieldConfig extends BaseFieldConfig {
   addButtonLabel?: string;
 }
 
+export interface TagsFieldConfig extends BaseFieldConfig {
+  type: 'tags';
+  options?: SelectOption[];
+  optionsExpression?: string;
+  placeholder?: string;
+  helpText?: string;
+}
+
 export type FieldConfig =
   | TextFieldConfig
   | NumberFieldConfig
@@ -94,7 +102,8 @@ export type FieldConfig =
   | DateFieldConfig
   | RadioFieldConfig
   | ArrayFieldConfig
-  | RecordFieldConfig;
+  | RecordFieldConfig
+  | TagsFieldConfig;
 
 export type FieldType =
   | 'text'
@@ -107,7 +116,8 @@ export type FieldType =
   | 'select-multi'
   | 'textarea'
   | 'array'
-  | 'record';
+  | 'record'
+  | 'tags';
 
 export interface FieldState<TModel = unknown> {
   fieldConfig: TModel;

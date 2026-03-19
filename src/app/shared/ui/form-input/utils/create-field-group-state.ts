@@ -63,8 +63,21 @@ export function createFieldGroupState<TFormModel extends object>(
     );
   });
 
-  const visible = computed(() => true);
-  const disabled = computed(() => false);
+  const buildCtx = () => ({
+    model: modelSignal(),
+    context: contextSignal(),
+    value: null
+  });
+
+  const visible = computed(() => {
+    if (!config.rules?.visible) return true;
+    return !!expr.evaluate(config.rules.visible, buildCtx());
+  });
+
+  const disabled = computed(() => {
+    if (!config.rules?.disabled) return false;
+    return !!expr.evaluate(config.rules.disabled, buildCtx());
+  });
   const value = computed(() => null);
   const options = computed(() => []);
   const errors = computed(() => null);

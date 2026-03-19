@@ -1,79 +1,104 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, of } from 'rxjs';
-import { McpToolConfig, McpToolUpsertPayload } from './mcp-tool.models';
+import { map, Observable } from 'rxjs';
+import { environment } from '../../../enviroment/environment';
+import { BasePageResponse, BaseResponse } from '../../core/models/base-response.model';
+import {
+  McpCollectionField,
+  McpToolConfig,
+  McpToolUpsertPayload
+} from './mcp-tool.models';
 
 @Injectable({ providedIn: 'root' })
 export class McpToolConfigService {
-  private readonly store$ = new BehaviorSubject<McpToolConfig[]>([
-    {
-      id: 'tool_1',
-      category: 'jira',
-      name: 'jira-ticket-sync',
-      endpoint: 'https://jira.internal.company/api',
-      authType: 'oauth',
-      enabled: true,
-      timeoutMs: 12000,
-      retryCount: 2,
-      description: 'Đồng bộ issue, sprint, board metadata cho AI agent.',
-      scopes: ['read:issue', 'read:sprint'],
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'tool_2',
-      category: 'github',
-      name: 'github-repo-insight',
-      endpoint: 'https://api.github.com',
-      authType: 'api_key',
-      enabled: true,
-      timeoutMs: 9000,
-      retryCount: 3,
-      description: 'Đọc commit, PR, release để hỗ trợ code reasoning.',
-      scopes: ['repo:read', 'pull_request:read'],
-      updatedAt: new Date().toISOString()
-    }
-  ]);
+  private readonly apiUrl = `${environment.apiUrl.adminAiGenerator}/mcp-tools`;
 
-  list(): Observable<McpToolConfig[]> {
-    return this.store$.asObservable();
+  constructor(private readonly http: HttpClient) {}
+
+  getAll(filters: Record<string, string | number | boolean> = {}): Observable<McpToolConfig[]> {
+    let params = new HttpParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      params = params.set(key, String(value));
+    });
+
+    return this.http
+      .get<BaseResponse<McpToolConfig[]>>(this.apiUrl, { params })
+      .pipe(map((res) => res.data ?? []));
   }
 
-  getById(id: string): Observable<McpToolConfig | undefined> {
-    return this.store$.pipe(map((rows) => rows.find((row) => row.id === id)));
+  getPage(
+    page = 0,
+    size = 10,
+    sort: string[] = ['updatedAt,desc'],
+    filters: Record<string, string | number | boolean> = {}
+  ): Observable<BasePageResponse<McpToolConfig>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    sort.forEach((item) => {
+      params = params.append('sort', item);
+    });
+
+    Object.entries(filters).forEach(([key, value]) => {
+      params = params.set(key, String(value));
+    });
+
+    return this.http
+      .get<BaseResponse<BasePageResponse<McpToolConfig>>>(`${this.apiUrl}/page`, { params })
+      .pipe(
+        map((res) => ({
+          data: res.data?.data ?? [],
+          metadata: res.data?.metadata ?? {
+            pageNumber: page,
+            pageSize: size,
+            totalElements: 0,
+            totalPages: 0
+          }
+        }))
+      );
+  }
+
+  getById(id: string): Observable<McpToolConfig> {
+    return this.http
+      .get<BaseResponse<McpToolConfig>>(`${this.apiUrl}/${id}`)
+      .pipe(map((res) => res.data));
   }
 
   create(payload: McpToolUpsertPayload): Observable<McpToolConfig> {
-    const next: McpToolConfig = {
-      id: `tool_${Date.now()}`,
-      ...payload,
-      updatedAt: new Date().toISOString()
-    };
-
-    this.store$.next([next, ...this.store$.value]);
-    return of(next);
+    return this.http
+      .post<BaseResponse<McpToolConfig>>(this.apiUrl, payload)
+      .pipe(map((res) => res.data));
   }
 
-  update(id: string, payload: McpToolUpsertPayload): Observable<McpToolConfig | undefined> {
-    let updated: McpToolConfig | undefined;
-    const rows = this.store$.value.map((row) => {
-      if (row.id !== id) {
-        return row;
-      }
-
-      updated = {
-        ...row,
-        ...payload,
-        updatedAt: new Date().toISOString()
-      };
-
-      return updated;
-    });
-
-    this.store$.next(rows);
-    return of(updated);
+  update(id: string, payload: McpToolUpsertPayload): Observable<McpToolConfig> {
+    return this.http
+      .put<BaseResponse<McpToolConfig>>(`${this.apiUrl}/${id}`, payload)
+      .pipe(map((res) => res.data));
   }
 
-  remove(id: string): Observable<void> {
-    this.store$.next(this.store$.value.filter((row) => row.id !== id));
-    return of(void 0);
+  remove(id: string): Observable<McpToolConfig> {
+    return this.http
+      .delete<BaseResponse<McpToolConfig>>(`${this.apiUrl}/${id}`)
+      .pipe(map((res) => res.data));
+  }
+
+  getCollections(databaseName: string): Observable<string[]> {
+    const params = new HttpParams().set('databaseName', databaseName);
+    return this.http
+      .get<BaseResponse<string[]>>(`${this.apiUrl}/metadata/collections`, { params })
+      .pipe(map((res) => res.data ?? []));
+  }
+
+  getDatabases(): Observable<string[]> {
+    return this.http
+      .get<BaseResponse<string[]>>(`${this.apiUrl}/metadata/databases`)
+      .pipe(map((res) => res.data ?? []));
+  }
+
+  getFields(databaseName: string, collectionName: string): Observable<McpCollectionField[]> {
+    const params = new HttpParams().set('databaseName', databaseName).set('collectionName', collectionName);
+    return this.http
+      .get<BaseResponse<McpCollectionField[]>>(`${this.apiUrl}/metadata/fields`, { params })
+      .pipe(map((res) => res.data ?? []));
   }
 }

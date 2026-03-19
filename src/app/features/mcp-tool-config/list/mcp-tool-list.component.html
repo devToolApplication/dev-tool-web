@@ -1,8 +1,8 @@
 <section class="crud-page">
   <app-table
     [config]="tableConfig"
-    [data]="filteredTools"
-    [loading]="loading"
+    [data]="rows"
+    [loading]="tableLoading || loading"
     (search)="onSearch($event)"
     (resetFilter)="onResetFilter()"
     (create)="createTool()"

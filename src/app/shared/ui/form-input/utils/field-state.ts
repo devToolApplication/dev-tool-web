@@ -60,7 +60,8 @@ export function createFieldState<TFormModel extends object>(
     if (
       config.type !== 'select' &&
       config.type !== 'select-multi' &&
-      config.type !== 'radio'
+      config.type !== 'radio' &&
+      config.type !== 'tags'
     ) return [];
 
     if ('optionsExpression' in config && config.optionsExpression) {

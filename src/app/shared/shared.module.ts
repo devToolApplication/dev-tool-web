@@ -60,6 +60,7 @@ import { FluidModule } from 'primeng/fluid';
 import { FieldArrayRenderer } from './ui/form-input/component/field-array-renderer/field-array-renderer';
 import { FieldGroupRenderer } from './ui/form-input/component/field-group-renderer/field-group-renderer';
 import { FieldRecordRenderer } from './ui/form-input/component/field-record-renderer/field-record-renderer';
+import { FieldTagRendererComponent } from './ui/form-input/component/field-tag-renderer/field-tag-renderer';
 import { TableComponent } from './ui/table/table';
 import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table-filter/table-filter';
@@ -72,8 +73,8 @@ import { ProfileComponent } from '../features/profile/profile.component';
 import { SettingsComponent } from '../features/settings/settings.component';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
 import { AiAgentComponent } from '../features/ai-agent/ai-agent.component';
-import { McpToolListComponent } from '../features/mcp-tool-config/mcp-tool-list.component';
-import { McpToolFormComponent } from '../features/mcp-tool-config/mcp-tool-form.component';
+import { McpToolListComponent } from '../features/mcp-tool-config/list/mcp-tool-list.component';
+import { McpToolFormComponent } from '../features/mcp-tool-config/form/mcp-tool-form.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
 import { TradeBotDashboardComponent } from '../features/dashboard/components/trade-bot-dashboard/trade-bot-dashboard.component';
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
@@ -136,6 +137,7 @@ const UI_COMPONENT = [
   FieldArrayRenderer,
   FieldGroupRenderer,
   FieldRecordRenderer,
+  FieldTagRendererComponent,
   TableCellComponent,
   TableFilterComponent,
 ];

@@ -95,6 +95,10 @@
         <app-field-record-renderer [field]="field"></app-field-record-renderer>
       }
 
+      @case ('tags') {
+        <app-field-tag-renderer [field]="field"></app-field-tag-renderer>
+      }
+
       @case ('textarea') {
         <app-input-area
           [invalid]="showInvalid"
