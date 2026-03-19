@@ -30,8 +30,8 @@ export class SettingsComponent {
 
   get themeModeOptions(): { label: string; value: ThemeMode }[] {
     return [
-      { label: this.i18nService.t('settings.theme.mode.light'), value: 'light' },
-      { label: this.i18nService.t('settings.theme.mode.dark'), value: 'dark' }
+      { label: this.i18nService.t('light'), value: 'light' },
+      { label: this.i18nService.t('dark'), value: 'dark' }
     ];
   }
 
@@ -41,7 +41,7 @@ export class SettingsComponent {
 
   get themePresetOptions(): { label: string; value: ThemePresetId }[] {
     return this.themeService.availablePresets.map((preset) => ({
-      label: this.i18nService.t(`settings.theme.preset.${preset}`),
+      label: this.i18nService.t(`settings.${preset}`),
       value: preset
     }));
   }
@@ -52,15 +52,15 @@ export class SettingsComponent {
 
   get languageOptions(): { label: string; value: AppLanguage }[] {
     return [
-      { label: this.i18nService.t('language.vi'), value: 'vi' },
-      { label: this.i18nService.t('language.en'), value: 'en' }
+      { label: this.i18nService.t('vietnamese'), value: 'vi' },
+      { label: this.i18nService.t('english'), value: 'en' }
     ];
   }
 
   get customModeOptions(): { label: string; value: ThemeMode }[] {
     return [
-      { label: this.i18nService.t('settings.theme.mode.light'), value: 'light' },
-      { label: this.i18nService.t('settings.theme.mode.dark'), value: 'dark' }
+      { label: this.i18nService.t('light'), value: 'light' },
+      { label: this.i18nService.t('dark'), value: 'dark' }
     ];
   }
 
@@ -81,32 +81,32 @@ export class SettingsComponent {
   t(key:
     | 'settings.title'
     | 'settings.description'
-    | 'settings.darkMode.title'
-    | 'settings.darkMode.description'
-    | 'settings.theme.mode.title'
-    | 'settings.theme.mode.description'
-    | 'settings.theme.preset.title'
-    | 'settings.theme.preset.description'
-    | 'settings.theme.mode.light'
-    | 'settings.theme.mode.dark'
-    | 'settings.theme.preset.aura'
-    | 'settings.theme.preset.lara'
-    | 'settings.theme.preset.nora'
-    | 'settings.theme.preset.material'
-    | 'settings.language.title'
-    | 'settings.language.description'
-    | 'settings.tabs.general'
-    | 'settings.tabs.theme'
-    | 'settings.theme.custom.title'
-    | 'settings.theme.custom.description'
-    | 'settings.theme.custom.mode'
-    | 'settings.theme.custom.selectBackground'
-    | 'settings.theme.custom.selectText'
-    | 'settings.theme.custom.inputBackground'
-    | 'settings.theme.custom.inputText'
-    | 'settings.theme.custom.appText'
-    | 'settings.theme.custom.customValue'
-    | 'settings.theme.custom.reset'): string {
+    | 'settings.darkModeTitle'
+    | 'settings.darkModeDescription'
+    | 'settings.themeModeTitle'
+    | 'settings.themeModeDescription'
+    | 'settings.themePresetTitle'
+    | 'settings.themePresetDescription'
+    | 'light'
+    | 'dark'
+    | 'settings.aura'
+    | 'settings.lara'
+    | 'settings.nora'
+    | 'settings.material'
+    | 'settings.languageTitle'
+    | 'settings.languageDescription'
+    | 'general'
+    | 'themeSettings'
+    | 'settings.customThemeTitle'
+    | 'settings.customThemeDescription'
+    | 'settings.customThemeMode'
+    | 'settings.selectBackground'
+    | 'settings.selectText'
+    | 'settings.inputBackground'
+    | 'settings.inputText'
+    | 'settings.appText'
+    | 'customCssValue'
+    | 'reset'): string {
     return this.i18nService.t(key);
   }
 

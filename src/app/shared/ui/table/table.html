@@ -4,7 +4,7 @@
       <app-button
         [size]="'small'"
         [severity]="newButtonConfig.severity ?? 'success'"
-        [label]="newButtonConfig.label ?? 'NEW'"
+        [label]="newButtonConfig.label ?? 'new'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
         styleClass="mr-2"
         [disabled]="newButtonConfig.disabled ?? false"
@@ -15,7 +15,7 @@
     @if (isButtonVisible(deleteButtonConfig)) {
       <app-button
         [severity]="deleteButtonConfig.severity ?? 'danger'"
-        [label]="deleteButtonConfig.label ?? 'DELETE'"
+        [label]="deleteButtonConfig.label ?? 'delete'"
         [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
         [disabled]="deleteButtonConfig.disabled ?? false"
         (buttonClick)="onDelete()"
@@ -29,7 +29,7 @@
         mode="basic"
         [accept]="importButtonConfig.accept ?? '*/*'"
         [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
-        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'IMPORT'"
+        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import'"
         class="mr-2 inline-block"
         [customUpload]="true"
         [auto]="true"
@@ -40,7 +40,7 @@
     @if (isButtonVisible(exportButtonConfig)) {
       <app-button
         [severity]="exportButtonConfig.severity ?? 'help'"
-        [label]="exportButtonConfig.label ?? 'EXPORT'"
+        [label]="exportButtonConfig.label ?? 'export'"
         [icon]="exportButtonConfig.icon ?? 'pi pi-upload'"
         [disabled]="exportButtonConfig.disabled ?? false"
         (buttonClick)="onExport()"
@@ -57,13 +57,13 @@
   [loading]="loading"
   [tableStyle]="{ 'min-width': '75rem' }"
   [rowHover]="true"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  [currentPageReportTemplate]="'showingEntries' | translateContent"
   [showCurrentPageReport]="true"
   responsiveLayout="scroll"
 >
   <ng-template pTemplate="caption">
     <div class="table-caption">
-      <h5 class="m-0">{{ config.title ?? 'Data Table' }}</h5>
+      <h5 class="m-0">{{ (config.title ?? 'dataTable') | translateContent }}</h5>
 
       @if ((config.filters ?? []).length > 0) {
         <app-table-filter
@@ -81,7 +81,7 @@
     <tr>
       @for (col of config.columns; track col.field) {
         <th [pSortableColumn]="col.sortable ? col.field : undefined">
-          {{ col.header }}
+          {{ col.header | translateContent }}
           @if (col.sortable) {
             <p-sortIcon [field]="col.field"></p-sortIcon>
           }
@@ -103,14 +103,14 @@
   <ng-template pTemplate="emptymessage">
     <tr>
       <td [attr.colspan]="config.columns.length" class="text-center">
-        No data found
+        {{ 'noDataFound' | translateContent }}
       </td>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="summary">
     <div class="table-summary">
-      In total there are {{ data.length }} records.
+      {{ (('totalRecords' | translateContent).replace('{{count}}', data.length.toString())) }}
     </div>
   </ng-template>
 </p-table>

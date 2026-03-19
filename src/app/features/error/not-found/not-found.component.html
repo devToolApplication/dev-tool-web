@@ -1,8 +1,8 @@
 <section class="error-page">
   <div class="error-card">
     <div class="error-code">404</div>
-    <h1>Not Found</h1>
-    <p>Trang bạn truy cập không tồn tại hoặc đã được di chuyển.</p>
-    <a routerLink="/admin/dashboard">Quay về Dashboard</a>
+    <h1>{{ 'errors.notFoundTitle' | translateContent }}</h1>
+    <p>{{ 'errors.notFoundDescription' | translateContent }}</p>
+    <a routerLink="/admin/dashboard">{{ 'errors.backToDashboard' | translateContent }}</a>
   </div>
 </section>

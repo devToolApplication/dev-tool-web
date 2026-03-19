@@ -6,7 +6,7 @@
         class="sidebar-toggle-button"
         (click)="onToggleSidebar()"
         [attr.aria-expanded]="sidebarVisible"
-        [attr.aria-label]="sidebarVisible ? 'Ẩn menu' : 'Hiện menu'"
+        [attr.aria-label]="sidebarVisible ? ('layout.hideMenu' | translateContent) : ('layout.showMenu' | translateContent)"
       >
         <i class="pi pi-bars"></i>
       </button>
@@ -20,7 +20,7 @@
       type="button"
       class="avatar-button"
       (click)="toggleAccountMenu($event)"
-      aria-label="Tài khoản"
+      [attr.aria-label]="'layout.account' | translateContent"
     >
       <p-avatar icon="pi pi-user" shape="circle"></p-avatar>
     </button>

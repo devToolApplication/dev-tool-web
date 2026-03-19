@@ -4,15 +4,15 @@
       <i class="pi pi-prime"></i>
     </div>
     <div>
-      <p class="brand-name">Atlantis</p>
-      <small class="brand-sub">Static Menu</small>
+      <p class="brand-name">{{ 'layout.brandName' | translateContent }}</p>
+      <small class="brand-sub">{{ 'layout.brandSub' | translateContent }}</small>
     </div>
   </div>
 
-  <nav class="menu-list" aria-label="Sidebar">
+  <nav class="menu-list" [attr.aria-label]="'layout.sidebar' | translateContent">
     @for (group of items; track group.label) {
       <section class="menu-group">
-        <p class="menu-group-title">{{ group.label }}</p>
+        <p class="menu-group-title">{{ group.label | translateContent }}</p>
 
         @if (group.items?.length) {
           <ng-container
@@ -32,7 +32,7 @@
     @if (item.items?.length) {
       <button type="button" class="menu-link menu-link-parent" (click)="toggle(itemPath)">
         <i [class]="item.icon || 'pi pi-circle'"></i>
-        <span>{{ item.label }}</span>
+        <span>{{ item.label | translateContent }}</span>
         <i class="pi submenu-toggle" [class.pi-chevron-down]="isExpanded(itemPath)" [class.pi-chevron-right]="!isExpanded(itemPath)"></i>
       </button>
 
@@ -47,7 +47,7 @@
     } @else {
       <a pRipple class="menu-link" [routerLink]="item.routerLink" routerLinkActive="active">
         <i [class]="item.icon || 'pi pi-circle'"></i>
-        <span>{{ item.label }}</span>
+        <span>{{ item.label | translateContent }}</span>
 
         @if (item.badge) {
           <span class="menu-badge">{{ item.badge }}</span>

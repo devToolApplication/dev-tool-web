@@ -1,8 +1,8 @@
-<p-fieldset [legend]="(field.label || 'Record') | translateContent" class="record-fieldset">
+<p-fieldset [legend]="(field.label || 'record') | translateContent" class="record-fieldset">
   <div class="record-field" [class.disabled]="field.disabled()">
     <div class="record-field__header">
-      <span>{{ (recordConfig?.keyLabel || 'Key') | translateContent }}</span>
-      <span>{{ (recordConfig?.valueLabel || 'Value') | translateContent }}</span>
+      <span>{{ (recordConfig?.keyLabel || 'key') | translateContent }}</span>
+      <span>{{ (recordConfig?.valueLabel || 'value') | translateContent }}</span>
       <span></span>
     </div>
 
@@ -39,7 +39,7 @@
       type="button"
       icon="pi pi-plus"
       severity="secondary"
-      [label]="(recordConfig?.addButtonLabel || 'Add row') | translateContent"
+      [label]="(recordConfig?.addButtonLabel || 'addRow') | translateContent"
       [disabled]="field.disabled()"
       (click)="onRecordAdd()">
     </button>

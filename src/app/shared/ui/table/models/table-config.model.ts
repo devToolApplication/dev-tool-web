@@ -1,3 +1,6 @@
+import { Observable } from 'rxjs';
+import { ValidationRule } from '../../form-input/models/form-config.model';
+
 export type TableColumnType =
   | 'text'
   | 'number'
@@ -8,7 +11,15 @@ export type TableColumnType =
   | 'boolean'
   | 'actions';
 
-export type TableActionSeverity = 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null;
+export type TableActionSeverity =
+  | 'secondary'
+  | 'success'
+  | 'info'
+  | 'warn'
+  | 'help'
+  | 'danger'
+  | 'contrast'
+  | null;
 
 export interface TableAction {
   label: string;
@@ -18,12 +29,23 @@ export interface TableAction {
   onClick: (rowData: any) => void;
 }
 
-export type TableFilterType = 'text' | 'select' | 'boolean';
+export type TableFilterType = 'text' | 'select' | 'multi-select' | 'boolean' | 'date' | 'date-range';
 
 export interface TableFilterOption {
   label: string;
   value: string | number | boolean;
+  disabled?: boolean;
 }
+
+export interface TableFilterContext {
+  values: Record<string, any>;
+  field: TableFilterField;
+}
+
+export type TableFilterOptionsLoader =
+  | ((context: TableFilterContext) => TableFilterOption[])
+  | ((context: TableFilterContext) => Promise<TableFilterOption[]>)
+  | ((context: TableFilterContext) => Observable<TableFilterOption[]>);
 
 export interface TableFilterField {
   field: string;
@@ -31,23 +53,40 @@ export interface TableFilterField {
   type?: TableFilterType;
   placeholder?: string;
   options?: TableFilterOption[];
+  optionsLoader?: TableFilterOptionsLoader;
+  optionsExpression?: string;
   hidden?: boolean;
   defaultVisible?: boolean;
+  quick?: boolean;
+  defaultValue?: any;
+  dependsOn?: string[];
+  queryParam?: string;
+  queryParamStart?: string;
+  queryParamEnd?: string;
+  rules?: {
+    visible?: string;
+    disabled?: string;
+  };
+  validation?: ValidationRule[];
 }
 
 export interface TableFilterOptions {
   defaultVisibleCount?: number;
+  enableUrlSync?: boolean;
+  drawerTitle?: string;
+  applyLabel?: string;
+  resetLabel?: string;
+  filterLabel?: string;
+  cancelLabel?: string;
 }
 
 export interface TableColumn {
   field: string;
   header: string;
-  type?: TableColumnType;   // mặc định là text
+  type?: TableColumnType;
   sortable?: boolean;
-
-  // optional config theo type
-  format?: string;          // date format
-  currencyCode?: string;    // currency
+  format?: string;
+  currencyCode?: string;
   actions?: TableAction[];
 }
 
@@ -57,7 +96,6 @@ export interface TableConfig {
   filters?: TableFilterField[];
   filterOptions?: TableFilterOptions;
   toolbar?: TableToolbarConfig;
-
   pagination?: boolean;
   rows?: number;
   rowsPerPageOptions?: number[];

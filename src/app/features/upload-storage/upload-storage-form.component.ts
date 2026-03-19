@@ -10,6 +10,7 @@ import {
 } from '../../core/models/upload-storage.model';
 import { LoadingService } from '../../core/ui-services/loading.service';
 import { ToastService } from '../../core/ui-services/toast.service';
+import { I18nService } from '../../core/ui-services/i18n.service';
 import { UploadStorageService } from '../../core/services/upload-storage.service';
 import { FormConfig, FormContext } from '../../shared/ui/form-input/models/form-config.model';
 
@@ -30,49 +31,49 @@ export class UploadStorageFormComponent implements OnInit {
       {
         type: 'text',
         name: 'name',
-        label: 'Name',
+        label: 'name',
         width: '1/2',
-        validation: [{ expression: '!!model.name?.trim()', message: 'Tên storage là bắt buộc' }]
+        validation: [{ expression: '!!model.name?.trim()', message: 'uploadStorage.nameRequired' }]
       },
       {
         type: 'select',
         name: 'storageType',
-        label: 'Storage Type',
+        label: 'storageType',
         width: '1/2',
-        options: [{ label: 'PINATA', value: 'PINATA' }]
+        options: [{ label: 'pinata', value: 'PINATA' }]
       },
-      { type: 'text', name: 'apiDomain', label: 'API Domain', width: '1/2' },
-      { type: 'text', name: 'apiPath', label: 'API Path', width: '1/2' },
+      { type: 'text', name: 'apiDomain', label: 'apiDomain', width: '1/2' },
+      { type: 'text', name: 'apiPath', label: 'apiPath', width: '1/2' },
       {
         type: 'select',
         name: 'status',
-        label: 'Status',
+        label: 'status',
         width: '1/2',
         options: [
-          { label: 'ACTIVE', value: 'ACTIVE' },
-          { label: 'INACTIVE', value: 'INACTIVE' },
+          { label: 'active', value: 'ACTIVE' },
+          { label: 'inactive', value: 'INACTIVE' },
           { label: 'DELETE', value: 'DELETE' }
         ]
       },
       {
         type: 'checkbox',
         name: 'defaultActive',
-        label: 'Default Active',
+        label: 'defaultActive',
         width: '1/2'
       },
       {
         type: 'textarea',
         name: 'description',
-        label: 'Description',
+        label: 'description',
         width: 'full'
       },
       {
         type: 'record',
         name: 'metadata',
-        label: 'Metadata',
-        keyLabel: 'Metadata Key',
-        valueLabel: 'Metadata Value',
-        addButtonLabel: 'Add metadata',
+        label: 'metadata',
+        keyLabel: 'metadataKey',
+        valueLabel: 'metadataValue',
+        addButtonLabel: 'addMetadata',
         width: 'full'
       }
     ]
@@ -88,7 +89,8 @@ export class UploadStorageFormComponent implements OnInit {
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly i18nService: I18nService
   ) {}
 
   ngOnInit(): void {
@@ -121,10 +123,10 @@ export class UploadStorageFormComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
-          this.toastService.success(this.editId ? 'Cập nhật upload storage thành công' : 'Tạo upload storage thành công');
+          this.toastService.success(this.editId ? this.i18nService.t('uploadStorage.updateSuccess') : this.i18nService.t('uploadStorage.createSuccess'));
           void this.router.navigate(['/admin/upload-storage/storage']);
         },
-        error: () => this.toastService.error('Lưu upload storage thất bại')
+        error: () => this.toastService.error(this.i18nService.t('uploadStorage.saveError'))
       });
   }
 
@@ -152,7 +154,7 @@ export class UploadStorageFormComponent implements OnInit {
           this.rerenderForm();
         },
         error: () => {
-          this.toastService.error('Không lấy được chi tiết upload storage');
+          this.toastService.error(this.i18nService.t('uploadStorage.detailError'));
           void this.router.navigate(['/admin/upload-storage/storage']);
         }
       });

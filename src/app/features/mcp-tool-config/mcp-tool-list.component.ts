@@ -13,11 +13,11 @@ import { McpToolConfig } from './mcp-tool.models';
 })
 export class McpToolListComponent implements OnInit, OnDestroy {
   readonly tableConfig: TableConfig = {
-    title: 'MCP Tool Config - View',
+    title: 'mcpTool.viewTitle',
     toolbar: {
       new: {
         visible: true,
-        label: 'NEW TOOL',
+        label: 'mcpTool.newTool',
         icon: 'pi pi-plus',
         severity: 'success'
       }
@@ -25,26 +25,26 @@ export class McpToolListComponent implements OnInit, OnDestroy {
     filters: [
       {
         field: 'name',
-        label: 'Name',
-        placeholder: 'Nhập tên tool',
+        label: 'name',
+        placeholder: 'mcpTool.toolNamePlaceholder',
         defaultVisible: true
       },
       {
         field: 'category',
-        label: 'Category',
+        label: 'category',
         type: 'select',
         defaultVisible: true,
         options: [
-          { label: 'JIRA', value: 'jira' },
-          { label: 'GITHUB', value: 'github' },
-          { label: 'CODE', value: 'code' },
-          { label: 'SLACK', value: 'slack' },
-          { label: 'CUSTOM', value: 'custom' }
+          { label: 'jira', value: 'jira' },
+          { label: 'github', value: 'github' },
+          { label: 'code', value: 'code' },
+          { label: 'slack', value: 'slack' },
+          { label: 'custom', value: 'custom' }
         ]
       },
       {
         field: 'enabled',
-        label: 'Enabled',
+        label: 'enabled',
         type: 'boolean'
       }
     ],
@@ -52,27 +52,27 @@ export class McpToolListComponent implements OnInit, OnDestroy {
       defaultVisibleCount: 3
     },
     columns: [
-      { field: 'name', header: 'Name', sortable: true },
-      { field: 'category', header: 'Category', sortable: true },
-      { field: 'endpoint', header: 'Endpoint' },
-      { field: 'authType', header: 'Auth Type' },
-      { field: 'enabled', header: 'Enabled', type: 'boolean' },
-      { field: 'timeoutMs', header: 'Timeout', type: 'number' },
-      { field: 'retryCount', header: 'Retry Count', type: 'number' },
-      { field: 'updatedAt', header: 'Updated At', type: 'date', format: 'dd/MM/yyyy HH:mm' },
+      { field: 'name', header: 'name', sortable: true },
+      { field: 'category', header: 'category', sortable: true },
+      { field: 'endpoint', header: 'endpoint' },
+      { field: 'authType', header: 'authType' },
+      { field: 'enabled', header: 'enabled', type: 'boolean' },
+      { field: 'timeoutMs', header: 'timeout', type: 'number' },
+      { field: 'retryCount', header: 'retryCount', type: 'number' },
+      { field: 'updatedAt', header: 'updatedAt', type: 'date', format: 'dd/MM/yyyy HH:mm' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         actions: [
           {
-            label: 'Sửa',
+            label: 'edit',
             icon: 'pi pi-pencil',
             severity: 'info',
             onClick: (row) => this.editTool(row.id)
           },
           {
-            label: 'Xóa',
+            label: 'delete',
             icon: 'pi pi-trash',
             severity: 'danger',
             onClick: (row) => this.deleteTool(row.id)

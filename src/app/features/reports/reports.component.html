@@ -2,12 +2,12 @@
   <h2>{{ title() }}</h2>
 
   <div class="crud-form shadow-1">
-    <app-input-text label="Report name" placeholder="Nhập tên report" [(value)]="model.name"></app-input-text>
-    <app-toggle-switch label="Completed" [(value)]="model.done"></app-toggle-switch>
+    <app-input-text label="reportName" placeholder="reportName" [(value)]="model.name"></app-input-text>
+    <app-toggle-switch label="completed" [(value)]="model.done"></app-toggle-switch>
 
     <div class="actions">
-      <app-button [label]="editingId ? 'Update' : 'Create'" icon="pi pi-save" (buttonClick)="submit()"></app-button>
-      <app-button label="Cancel" severity="secondary" icon="pi pi-times" (buttonClick)="cancelEdit()"></app-button>
+      <app-button [label]="editingId ? 'update' : 'create'" icon="pi pi-save" (buttonClick)="submit()"></app-button>
+      <app-button label="cancel" severity="secondary" icon="pi pi-times" (buttonClick)="cancelEdit()"></app-button>
     </div>
   </div>
 
@@ -15,16 +15,16 @@
     <ng-template pTemplate="header">
       <tr>
         <th>ID</th>
-        <th>Name</th>
-        <th>Done</th>
-        <th style="width: 180px">Action</th>
+        <th>{{ 'name' | translateContent }}</th>
+        <th>{{ 'completed' | translateContent }}</th>
+        <th style="width: 180px">{{ 'action' | translateContent }}</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-row>
       <tr>
         <td>{{ row.id }}</td>
         <td>{{ row.name }}</td>
-        <td>{{ row.done ? 'Yes' : 'No' }}</td>
+        <td>{{ row.done ? ('yes' | translateContent) : ('no' | translateContent) }}</td>
         <td>
           <app-button icon="pi pi-pencil" [text]="true" (buttonClick)="startEdit(row)"></app-button>
           <app-button icon="pi pi-trash" severity="danger" [text]="true" (buttonClick)="remove(row)"></app-button>

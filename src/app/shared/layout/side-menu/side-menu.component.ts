@@ -19,7 +19,7 @@ export class SideMenuComponent {
   readonly expandedState = new Set<string>();
 
   constructor() {
-    this.expandedState.add('root/Reports/Analytics');
+    this.expandedState.add('root/layout.menu.reports/layout.menu.analytics');
   }
 
   isExpanded(path: string): boolean {

@@ -4,8 +4,8 @@
 
   <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
     <p-tablist>
-      <p-tab value="general">{{ t('settings.tabs.general') }}</p-tab>
-      <p-tab value="theme">{{ t('settings.tabs.theme') }}</p-tab>
+      <p-tab value="general">{{ t('general') }}</p-tab>
+      <p-tab value="theme">{{ t('themeSettings') }}</p-tab>
     </p-tablist>
 
     <p-tabpanels>
@@ -13,16 +13,16 @@
         <div class="settings-section">
           <div class="setting-item border-default">
             <div>
-              <h3>{{ t('settings.darkMode.title') }}</h3>
-              <p>{{ t('settings.darkMode.description') }}</p>
+              <h3>{{ t('settings.darkModeTitle') }}</h3>
+              <p>{{ t('settings.darkModeDescription') }}</p>
             </div>
             <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
           </div>
 
           <div class="setting-item border-default setting-item-column">
             <div>
-              <h3>{{ t('settings.theme.mode.title') }}</h3>
-              <p>{{ t('settings.theme.mode.description') }}</p>
+              <h3>{{ t('settings.themeModeTitle') }}</h3>
+              <p>{{ t('settings.themeModeDescription') }}</p>
             </div>
             <app-select-button
               [options]="themeModeOptions"
@@ -33,8 +33,8 @@
 
           <div class="setting-item border-default setting-item-column">
             <div>
-              <h3>{{ t('settings.theme.preset.title') }}</h3>
-              <p>{{ t('settings.theme.preset.description') }}</p>
+              <h3>{{ t('settings.themePresetTitle') }}</h3>
+              <p>{{ t('settings.themePresetDescription') }}</p>
             </div>
             <app-select
               [options]="themePresetOptions"
@@ -45,8 +45,8 @@
 
           <div class="setting-item border-default">
             <div>
-              <h3>{{ t('settings.language.title') }}</h3>
-              <p>{{ t('settings.language.description') }}</p>
+              <h3>{{ t('settings.languageTitle') }}</h3>
+              <p>{{ t('settings.languageDescription') }}</p>
             </div>
             <app-select-button
               [options]="languageOptions"
@@ -61,12 +61,12 @@
         <div class="settings-section">
           <div class="setting-item border-default setting-item-column">
             <div>
-              <h3>{{ t('settings.theme.custom.title') }}</h3>
-              <p>{{ t('settings.theme.custom.description') }}</p>
+              <h3>{{ t('settings.customThemeTitle') }}</h3>
+              <p>{{ t('settings.customThemeDescription') }}</p>
             </div>
 
             <div class="theme-mode-row">
-              <label>{{ t('settings.theme.custom.mode') }}</label>
+              <label>{{ t('settings.customThemeMode') }}</label>
               <app-select-button
                 [options]="customModeOptions"
                 [value]="customThemeMode"
@@ -76,7 +76,7 @@
 
             <div class="theme-grid">
               <div class="theme-grid-item">
-                <label>{{ t('settings.theme.custom.selectBackground') }}</label>
+                <label>{{ t('settings.selectBackground') }}</label>
                 <app-select
                   [options]="themeTokenOptions.selectBackground"
                   [value]="themeTokenValue.selectBackground"
@@ -86,13 +86,13 @@
                   class="theme-manual-input"
                   type="text"
                   [value]="themeTokenValue.selectBackground"
-                  [placeholder]="t('settings.theme.custom.customValue')"
+                  [placeholder]="t('customCssValue')"
                   (change)="onThemeTokenManualInput('selectBackground', $any($event.target).value)"
                 />
               </div>
 
               <div class="theme-grid-item">
-                <label>{{ t('settings.theme.custom.selectText') }}</label>
+                <label>{{ t('settings.selectText') }}</label>
                 <app-select
                   [options]="themeTokenOptions.selectText"
                   [value]="themeTokenValue.selectText"
@@ -102,13 +102,13 @@
                   class="theme-manual-input"
                   type="text"
                   [value]="themeTokenValue.selectText"
-                  [placeholder]="t('settings.theme.custom.customValue')"
+                  [placeholder]="t('customCssValue')"
                   (change)="onThemeTokenManualInput('selectText', $any($event.target).value)"
                 />
               </div>
 
               <div class="theme-grid-item">
-                <label>{{ t('settings.theme.custom.inputBackground') }}</label>
+                <label>{{ t('settings.inputBackground') }}</label>
                 <app-select
                   [options]="themeTokenOptions.inputBackground"
                   [value]="themeTokenValue.inputBackground"
@@ -118,13 +118,13 @@
                   class="theme-manual-input"
                   type="text"
                   [value]="themeTokenValue.inputBackground"
-                  [placeholder]="t('settings.theme.custom.customValue')"
+                  [placeholder]="t('customCssValue')"
                   (change)="onThemeTokenManualInput('inputBackground', $any($event.target).value)"
                 />
               </div>
 
               <div class="theme-grid-item">
-                <label>{{ t('settings.theme.custom.inputText') }}</label>
+                <label>{{ t('settings.inputText') }}</label>
                 <app-select
                   [options]="themeTokenOptions.inputText"
                   [value]="themeTokenValue.inputText"
@@ -134,13 +134,13 @@
                   class="theme-manual-input"
                   type="text"
                   [value]="themeTokenValue.inputText"
-                  [placeholder]="t('settings.theme.custom.customValue')"
+                  [placeholder]="t('customCssValue')"
                   (change)="onThemeTokenManualInput('inputText', $any($event.target).value)"
                 />
               </div>
 
               <div class="theme-grid-item">
-                <label>{{ t('settings.theme.custom.appText') }}</label>
+                <label>{{ t('settings.appText') }}</label>
                 <app-select
                   [options]="themeTokenOptions.appText"
                   [value]="themeTokenValue.appText"
@@ -150,7 +150,7 @@
                   class="theme-manual-input"
                   type="text"
                   [value]="themeTokenValue.appText"
-                  [placeholder]="t('settings.theme.custom.customValue')"
+                  [placeholder]="t('customCssValue')"
                   (change)="onThemeTokenManualInput('appText', $any($event.target).value)"
                 />
               </div>
@@ -158,7 +158,7 @@
 
             <app-button
               severity="secondary"
-              [label]="t('settings.theme.custom.reset')"
+              [label]="t('reset')"
               (buttonClick)="onResetThemeConfig()"
             ></app-button>
           </div>
