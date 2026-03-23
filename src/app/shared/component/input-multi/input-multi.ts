@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { AutoComplete } from 'primeng/autocomplete';
 import { BaseInput } from '../base-input';
 import { SelectOption } from '../select/select';
 
@@ -10,6 +11,8 @@ import { SelectOption } from '../select/select';
 })
 export class InputMulti extends BaseInput<string[]> implements OnChanges {
   @Input() options: SelectOption[] = [];
+  @ViewChild(AutoComplete) autoComplete?: AutoComplete;
+
   currentQuery = '';
   model: string[] = [];
   suggestions: string[] = [];
@@ -17,6 +20,7 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
       this.model = this.normalizeItems(Array.isArray(this.value) ? this.value : []);
+      this.syncAutoCompleteModel();
     }
   }
 
@@ -35,24 +39,23 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
     }
 
     const nextItems = this.normalizeItems(value);
-    const isRemoval = nextItems.length < this.model.length && nextItems.every((item) => this.model.includes(item));
     const isSame = nextItems.length === this.model.length && nextItems.every((item, index) => item === this.model[index]);
+    const isSubset = nextItems.length < this.model.length && nextItems.every((item) => this.model.includes(item));
 
     if (isSame) {
       this.debug('ngModelChange same', this.model);
       return;
     }
 
-    if (isRemoval) {
-      this.model = nextItems;
-      this.debug('ngModelChange removal sync', this.model);
-      this.onChange(this.model);
+    if (isSubset) {
+      this.debug('ngModelChange skip subset', { current: this.model, incoming: nextItems });
+      this.syncAutoCompleteModel();
       return;
     }
 
-    const mergedItems = this.normalizeItems([...this.model, ...nextItems]);
-    this.model = mergedItems;
-    this.debug('ngModelChange merge sync', { current: this.model, incoming: nextItems });
+    this.model = nextItems;
+    this.debug('ngModelChange sync', this.model);
+    this.syncAutoCompleteModel();
     this.onChange(this.model);
   }
 
@@ -95,6 +98,7 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
     this.debug('onSelect', { selected: item, before: this.model });
     this.appendItem(item);
     this.currentQuery = '';
+    this.syncAutoCompleteModel();
   }
 
   onItemUnselect(value: unknown): void {
@@ -105,6 +109,7 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
 
     this.model = this.model.filter((current) => current !== item);
     this.debug('onUnselect', { removed: item, after: this.model });
+    this.syncAutoCompleteModel();
     this.onChange(this.model);
   }
 
@@ -122,12 +127,24 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   private appendItem(value: string): void {
     if (this.items.includes(value)) {
       this.debug('append skip duplicate', value);
+      this.syncAutoCompleteModel();
       return;
     }
 
     this.model = [...this.items, value];
     this.debug('append item', this.model);
+    this.syncAutoCompleteModel();
     this.onChange(this.model);
+  }
+
+  private syncAutoCompleteModel(): void {
+    if (!this.autoComplete) {
+      return;
+    }
+
+    this.autoComplete.value = this.model;
+    this.autoComplete.writeModelValue(this.model);
+    this.autoComplete.updateInputValue();
   }
 
   private normalizeItems(values: unknown[]): string[] {
