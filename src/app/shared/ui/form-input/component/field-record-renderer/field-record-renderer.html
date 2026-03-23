@@ -8,40 +8,34 @@
 
     @for (entry of recordEntries; track $index; let i = $index) {
       <div class="record-field__row">
-        <input
-          pInputText
-          type="text"
-          [disabled]="field.disabled()"
+        <app-input-text
+          [label]="recordConfig?.keyLabel || 'key'"
           [value]="entry.key"
-          (input)="onRecordKeyChange(i, $any($event.target).value)"
-        />
-        <input
-          pInputText
-          type="text"
           [disabled]="field.disabled()"
+          (valueChange)="onRecordKeyChange(i, $any($event))">
+        </app-input-text>
+        <app-input-text
+          [label]="recordConfig?.valueLabel || 'value'"
           [value]="entry.value"
-          (input)="onRecordValueChange(i, $any($event.target).value)"
-        />
-        <button
-          pButton
-          type="button"
-          icon="pi pi-times"
-          severity="secondary"
-          text
           [disabled]="field.disabled()"
-          (click)="onRecordRemove(i)">
-        </button>
+          (valueChange)="onRecordValueChange(i, $any($event))">
+        </app-input-text>
+        <app-button
+          type="button"
+          severity="danger"
+          [label]="'delete'"
+          [disabled]="field.disabled()"
+          (buttonClick)="onRecordRemove(i)">
+        </app-button>
       </div>
     }
 
-    <button
-      pButton
+    <app-button
       type="button"
-      icon="pi pi-plus"
       severity="secondary"
       [label]="(recordConfig?.addButtonLabel || 'addRow') | translateContent"
       [disabled]="field.disabled()"
-      (click)="onRecordAdd()">
-    </button>
+      (buttonClick)="onRecordAdd()">
+    </app-button>
   </div>
 </p-fieldset>

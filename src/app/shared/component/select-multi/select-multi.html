@@ -1,28 +1,58 @@
 <p-floatlabel [variant]="variant">
-  <p-multiselect
-    [size]="size"
-    [inputId]="inputId"
-    [display]="display"
-    [showClear]="true"
-    [filter]="enableFilter"
-    [selectedItemsLabel]="'selectedItems' | translateContent"
-    [maxSelectedLabels]="maxSelectedLabels"
-    [selectionLimit]="selectionLimit"
-    [loading]="loading"
-    class="w-full"
-    [options]="options | translateContent"
-    optionLabel="label"
-    optionValue="value"
-    [placeholder]="(placeholder || '') | translateContent"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [required]="required"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+  @if (iconClass) {
+    <p-iconfield class="w-full">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <p-multiselect
+        [size]="size"
+        [inputId]="inputId"
+        [display]="display"
+        [showClear]="true"
+        [filter]="enableFilter"
+        [selectedItemsLabel]="'selectedItems' | translateContent"
+        [maxSelectedLabels]="maxSelectedLabels"
+        [selectionLimit]="selectionLimit"
+        [loading]="loading"
+        class="w-full"
+        [options]="options | translateContent"
+        optionLabel="label"
+        optionValue="value"
+        [placeholder]="(placeholder || '') | translateContent"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [required]="required"
+        [invalid]="invalid"
+        [styleClass]="styleClass"
+        (onBlur)="onBlur()"
+        (onFocus)="onFocus()"
+      />
+    </p-iconfield>
+  } @else {
+    <p-multiselect
+      [size]="size"
+      [inputId]="inputId"
+      [display]="display"
+      [showClear]="true"
+      [filter]="enableFilter"
+      [selectedItemsLabel]="'selectedItems' | translateContent"
+      [maxSelectedLabels]="maxSelectedLabels"
+      [selectionLimit]="selectionLimit"
+      [loading]="loading"
+      class="w-full"
+      [options]="options | translateContent"
+      optionLabel="label"
+      optionValue="value"
+      [placeholder]="(placeholder || '') | translateContent"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [required]="required"
+      [invalid]="invalid"
+      [styleClass]="styleClass"
+      (onBlur)="onBlur()"
+      (onFocus)="onFocus()"
+    />
+  }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 

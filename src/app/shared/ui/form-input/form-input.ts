@@ -11,11 +11,12 @@ import {getColClass} from './utils/form.utils'
 })
 export class FormInput implements OnInit, OnChanges {
   private readonly injector = inject(Injector);
+  private suppressValueChange = true;
   @Input() config!: FormConfig;
   @Input() context!: FormContext;
   @Input() initialValue!: any;
   @Input() submitting = false;
-  @Output() submit = new EventEmitter<any>();
+  @Output() formSubmit = new EventEmitter<any>();
   @Output() valueChange = new EventEmitter<any>();
 
   engine: any;
@@ -28,7 +29,13 @@ export class FormInput implements OnInit, OnChanges {
     );
 
     effect(() => {
-      this.valueChange.emit(this.engine.model());
+      const model = this.engine.model();
+      if (this.suppressValueChange) {
+        this.suppressValueChange = false;
+        return;
+      }
+
+      this.valueChange.emit(model);
     }, { injector: this.injector });
   }
 
@@ -42,6 +49,7 @@ export class FormInput implements OnInit, OnChanges {
     }
 
     if (changes['initialValue']?.currentValue) {
+      this.suppressValueChange = true;
       this.engine.reset(this.initialValue);
     }
   }
@@ -53,11 +61,11 @@ export class FormInput implements OnInit, OnChanges {
 
     this.engine.markAllAsTouched();
     if (!this.engine.valid()) return;
-    this.submit.emit(this.engine.model());
+    this.formSubmit.emit(this.engine.model());
   }
 
   getCol(width?: GridWidth): string {
     return getColClass(width)
   }
-  
+
 }

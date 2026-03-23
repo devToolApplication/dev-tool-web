@@ -3,12 +3,12 @@ import { ExpressionEngine } from './expression.engine';
 import {
   GroupFieldConfig,
   GroupFieldState,
-  FormContext,
-  FieldState
+  FieldState,
+  ArrayFieldState,
+  ArrayState,
+  TreeFieldConfig
 } from '../models/form-config.model';
-import { createFieldState } from './field-state';
-import { createArrayFieldState } from './array-field-state';
-import { createArrayState } from './array-state';
+import { createNestedFieldState } from './create-nested-field-state';
 
 export function createFieldGroupState<TFormModel extends object>(
   path: string,
@@ -16,7 +16,8 @@ export function createFieldGroupState<TFormModel extends object>(
   modelSignal: any,
   contextSignal: any,
   expr: ExpressionEngine,
-  arrays: Record<string, any>
+  arrays: Record<string, ArrayState>,
+  treeTemplate?: TreeFieldConfig
 ): GroupFieldState {
 
   const touched = signal(false);
@@ -24,44 +25,18 @@ export function createFieldGroupState<TFormModel extends object>(
   const blurred = signal(false);
   const dirty = signal(false);
 
-  const children: FieldState[] = config.children.map((child) => {
-
-    const childPath = `${path}.${child.name}`;
-
-    if (child.type === 'group') {
-      return createFieldGroupState(
-        childPath,
-        child,
-        modelSignal,
-        contextSignal,
-        expr,
-        arrays
-      );
-    }
-
-    if (child.type === 'array') {
-      const arrayState = createArrayState(childPath, modelSignal);
-      arrays[childPath] = arrayState;
-
-      return createArrayFieldState(
-        childPath,
-        child,
-        modelSignal,
-        contextSignal,
-        expr,
-        arrayState
-      );
-    }
-
-    return createFieldState(
-      childPath,
+  const children: Array<FieldState | ArrayFieldState> = config.children.map((child) =>
+    createNestedFieldState(
+      `${path}.${child.name}`,
       child,
       modelSignal,
       contextSignal,
       expr,
-      config.name
-    );
-  });
+      arrays,
+      config.name,
+      treeTemplate
+    )
+  );
 
   const buildCtx = () => ({
     model: modelSignal(),

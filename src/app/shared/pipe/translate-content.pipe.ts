@@ -15,10 +15,6 @@ export class TranslateContentPipe implements PipeTransform {
     'label',
     'placeholder',
     'title',
-    'promptLabel',
-    'weakLabel',
-    'mediumLabel',
-    'strongLabel',
     'selectedItemsLabel',
     'emptyMessage'
   ]);

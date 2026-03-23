@@ -1,23 +1,48 @@
 <p-floatlabel [variant]="variant">
-  <p-select
-    [size]="size"
-    [inputId]="inputId"
-    class="w-full"
-    [options]="options | translateContent"
-    optionLabel="label"
-    optionValue="value"
-    [loading]="loading"
-    [showClear]="showClear"
-    [placeholder]="(placeholder || '') | translateContent"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [required]="required"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+  @if (iconClass) {
+    <p-iconfield class="w-full">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <p-select
+        [size]="size"
+        [inputId]="inputId"
+        class="w-full"
+        [options]="options | translateContent"
+        optionLabel="label"
+        optionValue="value"
+        [loading]="loading"
+        [showClear]="showClear"
+        [placeholder]="(placeholder || '') | translateContent"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [required]="required"
+        [invalid]="invalid"
+        [styleClass]="styleClass"
+        (onBlur)="onBlur()"
+        (onFocus)="onFocus()"
+      />
+    </p-iconfield>
+  } @else {
+    <p-select
+      [size]="size"
+      [inputId]="inputId"
+      class="w-full"
+      [options]="options | translateContent"
+      optionLabel="label"
+      optionValue="value"
+      [loading]="loading"
+      [showClear]="showClear"
+      [placeholder]="(placeholder || '') | translateContent"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [required]="required"
+      [invalid]="invalid"
+      [styleClass]="styleClass"
+      (onBlur)="onBlur()"
+      (onFocus)="onFocus()"
+    />
+  }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 

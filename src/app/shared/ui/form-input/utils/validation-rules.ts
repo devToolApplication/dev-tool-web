@@ -20,7 +20,7 @@ export const Rules = {
   // =========================
   required(message = 'This field is required'): ValidationRule {
     return rule(
-      'value == null || value === ""',
+      'value == null || (typeof value === "string" ? value.trim() === "" : value === "")',
       message
     );
   },

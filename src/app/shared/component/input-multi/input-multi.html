@@ -1,0 +1,35 @@
+<p-floatlabel [variant]="variant">
+  <p-auto-complete
+    [inputId]="inputId"
+    [multiple]="true"
+    [suggestions]="suggestions"
+    [ngModel]="model"
+    (ngModelChange)="onModelChange($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [forceSelection]="false"
+    [typeahead]="enableTypeahead"
+    [addOnBlur]="false"
+    [addOnTab]="false"
+    [separator]="','"
+    [fluid]="fluid"
+    [placeholder]="(placeholder || '') | translateContent"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (completeMethod)="onSearch($any($event.query || ''))"
+    (onSelect)="onItemSelect($any($event.value))"
+    (onUnselect)="onItemUnselect($any($event.value))"
+    (onInputKeydown)="onInputKeydown($event)"
+    (onFocus)="onFocus()"
+    (onBlur)="onBlur()">
+  </p-auto-complete>
+  <label [attr.for]="inputId">{{ label | translateContent }}</label>
+</p-floatlabel>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText | translateContent }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+}

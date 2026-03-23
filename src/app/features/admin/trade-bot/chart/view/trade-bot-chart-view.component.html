@@ -1,0 +1,52 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>{{ 'tradeBot.chartTitle' | translateContent }}</h2>
+  </div>
+
+  <div class="card chart-toolbar-card mb-4">
+    <div class="chart-toolbar-top">
+      <div class="chart-field chart-field--fixed">
+        <label class="chart-label">{{ 'tradeBot.symbol' | translateContent }}</label>
+        <input type="text" pInputText class="w-full" [value]="syncConfig?.symbol ?? ''" disabled />
+      </div>
+      <div class="chart-field chart-field--fixed">
+        <label class="chart-label">{{ 'tradeBot.intervals' | translateContent }}</label>
+        <select class="w-full p-inputtext p-component" [(ngModel)]="selectedInterval" [disabled]="!syncConfig">
+          @for (interval of syncConfig?.intervals ?? []; track interval) {
+            <option [value]="interval">{{ interval }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="chart-range-row">
+      <label class="chart-label chart-range-label">{{ 'tradeBot.timeRange' | translateContent }}</label>
+      <div class="chart-range-controls">
+        <div class="chart-field chart-field--grow">
+          <label class="chart-sub-label">{{ 'tradeBot.dateRange' | translateContent }}</label>
+          <p-datepicker
+            appendTo="body"
+            inputStyleClass="w-full"
+            styleClass="w-full"
+            [showTime]="true"
+            hourFormat="24"
+            selectionMode="range"
+            [(ngModel)]="dateRange"
+          ></p-datepicker>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-toolbar-actions">
+      <div class="flex gap-2 flex-wrap">
+        <app-button label="tradeBot.loadChart" icon="pi pi-refresh" severity="info" [disabled]="!syncConfig" (buttonClick)="onLoadChart()"></app-button>
+        <app-button label="tradeBot.back" icon="pi pi-arrow-left" severity="secondary" (buttonClick)="onBack()"></app-button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
+  </div>
+</section>

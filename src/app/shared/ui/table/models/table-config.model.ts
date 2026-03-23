@@ -8,6 +8,7 @@ export type TableColumnType =
   | 'currency'
   | 'array'
   | 'group'
+  | 'textarea'
   | 'boolean'
   | 'actions';
 
@@ -56,7 +57,6 @@ export interface TableFilterField {
   optionsLoader?: TableFilterOptionsLoader;
   optionsExpression?: string;
   hidden?: boolean;
-  defaultVisible?: boolean;
   quick?: boolean;
   defaultValue?: any;
   dependsOn?: string[];
@@ -71,7 +71,7 @@ export interface TableFilterField {
 }
 
 export interface TableFilterOptions {
-  defaultVisibleCount?: number;
+  primaryField?: string;
   enableUrlSync?: boolean;
   drawerTitle?: string;
   applyLabel?: string;

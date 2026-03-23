@@ -1,0 +1,17 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>MCP Category - {{ editId ? 'Edit' : 'Create' }}</h2>
+  </div>
+
+  <div class="form-wrap shadow-1">
+    @if (formVisible()) {
+      <app-form-input
+        [config]="formConfig"
+        [context]="formContext"
+        [initialValue]="formInitialValue"
+        [submitting]="loading"
+        (formSubmit)="onSubmitForm($event)"
+      ></app-form-input>
+    }
+  </div>
+</section>

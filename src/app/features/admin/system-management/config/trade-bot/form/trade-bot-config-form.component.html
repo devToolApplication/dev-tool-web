@@ -1,0 +1,12 @@
+<div class="card">
+  @if (formVisible()) {
+    <app-form-input
+      [config]="formConfig"
+      [context]="formContext"
+      [initialValue]="formInitialValue"
+      [submitting]="loading"
+      submitLabel="Save"
+      (formSubmit)="onSubmitForm($event)"
+    ></app-form-input>
+  }
+</div>

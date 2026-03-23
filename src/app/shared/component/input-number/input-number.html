@@ -1,30 +1,62 @@
 <p-floatlabel [variant]="variant">
-  <p-inputNumber
-    [inputId]="inputId"
-    [size]="size"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [readonly]="readonly"
-    [required]="required"
-    [autofocus]="autofocus"
-    [placeholder]="(placeholder || '') | translateContent"
-    [mode]="mode"
-    [currency]="currency"
-    [showClear]="showClear"
-    [min]="min"
-    [max]="max"
-    [minFractionDigits]="minFractionDigits"
-    [maxFractionDigits]="maxFractionDigits"
-    currencyDisplay="code"
-    locale="en-IN"
-    [invalid]="invalid"
-    autocomplete="off"
-    [style]="{ width: fluid ? '100%' : 'auto' }"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+  @if (iconClass) {
+    <p-iconfield [style.width.%]="fluid ? 100 : null">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <p-inputNumber
+        [inputId]="inputId"
+        [size]="size"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [readonly]="readonly"
+        [required]="required"
+        [autofocus]="autofocus"
+        [placeholder]="(placeholder || '') | translateContent"
+        [mode]="mode"
+        [currency]="currency"
+        [showClear]="showClear"
+        [min]="min"
+        [max]="max"
+        [minFractionDigits]="minFractionDigits"
+        [maxFractionDigits]="maxFractionDigits"
+        currencyDisplay="code"
+        locale="en-IN"
+        [invalid]="invalid"
+        autocomplete="off"
+        [style]="{ width: fluid ? '100%' : 'auto' }"
+        [styleClass]="styleClass"
+        (onBlur)="onBlur()"
+        (onFocus)="onFocus()"
+      />
+    </p-iconfield>
+  } @else {
+    <p-inputNumber
+      [inputId]="inputId"
+      [size]="size"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [required]="required"
+      [autofocus]="autofocus"
+      [placeholder]="(placeholder || '') | translateContent"
+      [mode]="mode"
+      [currency]="currency"
+      [showClear]="showClear"
+      [min]="min"
+      [max]="max"
+      [minFractionDigits]="minFractionDigits"
+      [maxFractionDigits]="maxFractionDigits"
+      currencyDisplay="code"
+      locale="en-IN"
+      [invalid]="invalid"
+      autocomplete="off"
+      [style]="{ width: fluid ? '100%' : 'auto' }"
+      [styleClass]="styleClass"
+      (onBlur)="onBlur()"
+      (onFocus)="onFocus()"
+    />
+  }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 

@@ -1,5 +1,4 @@
 import { signal, computed, WritableSignal } from '@angular/core';
-import { createFieldState } from './field-state';
 import { createArrayState } from './array-state';
 import { createArrayFieldState } from './array-field-state';
 import { ExpressionEngine } from './expression.engine';
@@ -12,7 +11,7 @@ import {
   FormConfig,
   FormContext
 } from '../models/form-config.model';
-import { createFieldGroupState } from './create-field-group-state';
+import { createNestedFieldState } from './create-nested-field-state';
 
 export function createFormEngine<TModel extends object>(
   config: FormConfig,
@@ -35,23 +34,6 @@ export function createFormEngine<TModel extends object>(
         ? `${parentPath}.${field.name}`
         : field.name;
 
-      // ===== GROUP =====
-    if (field.type === 'group') {
-
-      fields.push(
-        createFieldGroupState(
-          path,
-          field,
-          model,
-          ctxSignal,
-          expr,
-          arrays
-        )
-      );
-
-      return;
-    }
-
       if (field.type === 'array') {
 
         const arrayState = createArrayState(path, model);
@@ -64,23 +46,15 @@ export function createFormEngine<TModel extends object>(
             model,
             ctxSignal,
             expr,
-            arrayState
+            arrayState,
+            arrays
           )
         );
 
         return;
       }
 
-      fields.push(
-        createFieldState(
-          path,
-          field,
-          model,
-          ctxSignal,
-          expr,
-          groupName
-        )
-      );
+      fields.push(createNestedFieldState(path, field, model, ctxSignal, expr, arrays, groupName));
 
     });
   }

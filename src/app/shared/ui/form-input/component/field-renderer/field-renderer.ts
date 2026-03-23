@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { FieldState, NumberFieldConfig } from '../../models/form-config.model';
+import { AutoCompleteFieldConfig, FieldState, InputMultiFieldConfig, NumberFieldConfig } from '../../models/form-config.model';
 
 
 @Component({
@@ -13,12 +13,26 @@ export class FieldRenderer implements OnChanges {
   field!: FieldState;
 
   numberConfig?: NumberFieldConfig;
+  inputMultiConfig?: InputMultiFieldConfig;
+  autoCompleteConfig?: AutoCompleteFieldConfig;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.field?.type === 'number') {
       this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
+      this.inputMultiConfig = undefined;
+      this.autoCompleteConfig = undefined;
+    } else if (this.field?.type === 'auto-complete') {
+      this.numberConfig = undefined;
+      this.inputMultiConfig = undefined;
+      this.autoCompleteConfig = this.field.fieldConfig as AutoCompleteFieldConfig;
+    } else if (this.field?.type === 'input-multi') {
+      this.numberConfig = undefined;
+      this.inputMultiConfig = this.field.fieldConfig as InputMultiFieldConfig;
+      this.autoCompleteConfig = undefined;
     } else {
       this.numberConfig = undefined;
+      this.inputMultiConfig = undefined;
+      this.autoCompleteConfig = undefined;
     }
   }
 
@@ -30,15 +44,9 @@ export class FieldRenderer implements OnChanges {
     return this.field.type === 'array';
   }
 
-
-
   onChangeValue(value: any) {
     this.field.setValue(value);
   }
-
-
-
-
 
   onEnter() {
     this.field.focusing.set(true);

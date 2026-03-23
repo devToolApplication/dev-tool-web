@@ -1,21 +1,44 @@
 <p-floatlabel [variant]="variant">
-  <p-datepicker
-    class="w-full"
-    [inputId]="inputId"
-    [showIcon]="showIcon"
-    [showClear]="true"
-    [placeholder]="(placeholder || '') | translateContent"
-    [dateFormat]="dateFormat"
-    [invalid]="invalid"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [readonlyInput]="readonly"
-    [required]="required"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+  @if (iconClass) {
+    <p-iconfield class="w-full">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <p-datepicker
+        class="w-full"
+        [inputId]="inputId"
+        [showIcon]="showIcon"
+        [showClear]="true"
+        [placeholder]="(placeholder || '') | translateContent"
+        [dateFormat]="dateFormat"
+        [invalid]="invalid"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [readonlyInput]="readonly"
+        [required]="required"
+        [styleClass]="styleClass"
+        (onBlur)="onBlur()"
+        (onFocus)="onFocus()"
+      />
+    </p-iconfield>
+  } @else {
+    <p-datepicker
+      class="w-full"
+      [inputId]="inputId"
+      [showIcon]="showIcon"
+      [showClear]="true"
+      [placeholder]="(placeholder || '') | translateContent"
+      [dateFormat]="dateFormat"
+      [invalid]="invalid"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [readonlyInput]="readonly"
+      [required]="required"
+      [styleClass]="styleClass"
+      (onBlur)="onBlur()"
+      (onFocus)="onFocus()"
+    />
+  }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 

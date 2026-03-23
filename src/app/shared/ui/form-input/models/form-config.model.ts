@@ -54,6 +54,14 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   optionsExpression?: string;
 }
 
+export interface AutoCompleteFieldConfig extends BaseFieldConfig {
+  type: 'auto-complete';
+  options?: SelectOption[];
+  optionsExpression?: string;
+  placeholder?: string;
+  helpText?: string;
+}
+
 export interface RadioFieldConfig extends BaseFieldConfig {
   type: 'radio';
   options?: SelectOption[];
@@ -63,6 +71,11 @@ export interface RadioFieldConfig extends BaseFieldConfig {
 export interface GroupFieldConfig extends BaseFieldConfig {
   type: 'group';
   children: FieldConfig[];
+}
+
+export interface TreeFieldConfig extends BaseFieldConfig {
+  type: 'tree';
+  children?: FieldConfig[];
 }
 
 export interface ArrayFieldConfig extends BaseFieldConfig {
@@ -93,17 +106,42 @@ export interface TagsFieldConfig extends BaseFieldConfig {
   helpText?: string;
 }
 
+export interface InputMultiFieldConfig extends BaseFieldConfig {
+  type: 'input-multi';
+  options?: SelectOption[];
+  optionsExpression?: string;
+  placeholder?: string;
+  helpText?: string;
+}
+
+export interface SecretMetadataFieldConfig extends BaseFieldConfig {
+  type: 'secret-metadata';
+  service?: 'ai-agent-mcrs' | 'file-mcrs';
+  options?: SelectOption[];
+  optionsExpression?: string;
+  typeOptions?: SelectOption[];
+  addButtonLabel?: string;
+  keyPlaceholder?: string;
+  typePlaceholder?: string;
+  valuePlaceholder?: string;
+  secretPlaceholder?: string;
+}
+
 export type FieldConfig =
   | TextFieldConfig
   | NumberFieldConfig
   | SelectFieldConfig
+  | AutoCompleteFieldConfig
   | GroupFieldConfig
   | CheckboxFieldConfig
   | DateFieldConfig
   | RadioFieldConfig
   | ArrayFieldConfig
   | RecordFieldConfig
-  | TagsFieldConfig;
+  | TagsFieldConfig
+  | InputMultiFieldConfig
+  | SecretMetadataFieldConfig
+  | TreeFieldConfig;
 
 export type FieldType =
   | 'text'
@@ -114,10 +152,14 @@ export type FieldType =
   | 'date'
   | 'radio'
   | 'select-multi'
+  | 'auto-complete'
   | 'textarea'
   | 'array'
   | 'record'
-  | 'tags';
+  | 'tags'
+  | 'input-multi'
+  | 'secret-metadata'
+  | 'tree';
 
 export interface FieldState<TModel = unknown> {
   fieldConfig: TModel;
@@ -155,5 +197,10 @@ export interface FormConfig {
 
 export interface GroupFieldState extends FieldState {
   fieldConfig: GroupFieldConfig;
+  children: FieldState[] | ArrayFieldState[];
+}
+
+export interface TreeFieldState extends FieldState {
+  fieldConfig: TreeFieldConfig;
   children: FieldState[] | ArrayFieldState[];
 }

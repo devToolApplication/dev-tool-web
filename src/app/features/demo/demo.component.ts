@@ -138,6 +138,7 @@ export class DemoComponent {
   candleMode: 'once' | 'polling' | 'ws' = 'once';
   candleConfig: CandleChartConfig = {
     showCandles: true,
+    showVolume: true,
     showLines: true,
     showBoxAreas: true,
     showPoints: true,

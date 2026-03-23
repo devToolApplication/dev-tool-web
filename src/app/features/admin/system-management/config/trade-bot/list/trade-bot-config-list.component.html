@@ -1,0 +1,8 @@
+<app-table
+  [config]="tableConfig"
+  [data]="rows"
+  [loading]="loading"
+  (create)="onCreate()"
+  (search)="onSearch($event)"
+  (resetFilter)="onResetFilter()"
+></app-table>

@@ -1,0 +1,29 @@
+<p-floatlabel [variant]="variant">
+  <p-autocomplete
+    [inputId]="inputId"
+    [suggestions]="suggestions"
+    [ngModel]="value"
+    (ngModelChange)="onInput($any($event) || '')"
+    [disabled]="disabled"
+    [required]="required"
+    [forceSelection]="false"
+    [typeahead]="enableTypeahead"
+    [fluid]="fluid"
+    [placeholder]="(placeholder || '') | translateContent"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (completeMethod)="onSearch($any($event.query || ''))"
+    (onInputKeydown)="onEnter($event)"
+    (onFocus)="onFocus()"
+    (onBlur)="onBlur()">
+  </p-autocomplete>
+  <label [attr.for]="inputId">{{ label | translateContent }}</label>
+</p-floatlabel>
+
+@if (helpText && !invalid) {
+  <small [id]="inputId">{{ helpText | translateContent }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+}

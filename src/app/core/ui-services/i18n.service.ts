@@ -9,6 +9,7 @@ import mcpToolConfigTranslations from '../i18n/features/mcp-tool-config.i18n.jso
 import profileTranslations from '../i18n/features/profile.i18n.json';
 import reportsTranslations from '../i18n/features/reports.i18n.json';
 import settingsTranslations from '../i18n/features/settings.i18n.json';
+import tradeBotTranslations from '../i18n/features/trade-bot.i18n.json';
 import uploadStorageTranslations from '../i18n/features/upload-storage.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
@@ -28,6 +29,7 @@ const TRANSLATIONS: TranslationMap = {
     ...profileTranslations.vi,
     ...reportsTranslations.vi,
     ...mcpToolConfigTranslations.vi,
+    ...tradeBotTranslations.vi,
     ...uploadStorageTranslations.vi
   },
   en: {
@@ -41,6 +43,7 @@ const TRANSLATIONS: TranslationMap = {
     ...profileTranslations.en,
     ...reportsTranslations.en,
     ...mcpToolConfigTranslations.en,
+    ...tradeBotTranslations.en,
     ...uploadStorageTranslations.en
   }
 };

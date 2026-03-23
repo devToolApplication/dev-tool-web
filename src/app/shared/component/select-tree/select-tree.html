@@ -3,20 +3,40 @@
     <label [attr.for]="inputId" class="mb-2 block">{{ label | translateContent }}</label>
   }
 
-  <p-tree-select
-    [inputId]="inputId"
-    [options]="options | translateContent"
-    [placeholder]="(placeholder || '') | translateContent"
-    [selectionMode]="selectionMode"
-    [filter]="filter"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [invalid]="invalid"
-    [fluid]="fluid"
-    (onShow)="onFocus()"
-    (onHide)="onBlur()"
-  />
+  @if (iconClass) {
+    <p-iconfield [style.width.%]="fluid ? 100 : null">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <p-tree-select
+        [inputId]="inputId"
+        [options]="options | translateContent"
+        [placeholder]="(placeholder || '') | translateContent"
+        [selectionMode]="selectionMode"
+        [filter]="filter"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [invalid]="invalid"
+        [fluid]="fluid"
+        (onShow)="onFocus()"
+        (onHide)="onBlur()"
+      />
+    </p-iconfield>
+  } @else {
+    <p-tree-select
+      [inputId]="inputId"
+      [options]="options | translateContent"
+      [placeholder]="(placeholder || '') | translateContent"
+      [selectionMode]="selectionMode"
+      [filter]="filter"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [invalid]="invalid"
+      [fluid]="fluid"
+      (onShow)="onFocus()"
+      (onHide)="onBlur()"
+    />
+  }
 </div>
 
 @if (helpText && !invalid) {

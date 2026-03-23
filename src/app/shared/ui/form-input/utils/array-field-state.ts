@@ -10,12 +10,13 @@ import {
     ArrayFieldState,
     FieldState,
     FormContext,
-    ArrayState
+    ArrayState,
+    TreeFieldConfig
   } from '../models/form-config.model';
   
   import { getByPath } from './form.utils';
-  import { createFieldState } from './field-state';
   import { ExpressionEngine } from './expression.engine';
+  import { createNestedFieldState } from './create-nested-field-state';
   
   export function createArrayFieldState<TModel extends object>(
     path: string,
@@ -23,7 +24,9 @@ import {
     modelSignal: WritableSignal<TModel>,
     contextSignal: WritableSignal<FormContext>,
     expr: ExpressionEngine,
-    arrayState: ArrayState
+    arrayState: ArrayState,
+    arrays: Record<string, ArrayState>,
+    treeTemplate?: TreeFieldConfig
   ): ArrayFieldState<TModel> {
   
     const touched = signal(false);
@@ -42,18 +45,21 @@ import {
       return Array.from({ length }, (_, index) => {
   
         return config.itemConfig.map(childConfig => {
-  
+
           const childPath =
             `${path}.${index}.${childConfig.name}`;
-  
-          return createFieldState(
+
+          return createNestedFieldState(
             childPath,
             childConfig,
             modelSignal,
             contextSignal,
-            expr
+            expr,
+            arrays,
+            undefined,
+            treeTemplate
           );
-  
+
         });
   
       });

@@ -23,6 +23,7 @@ export abstract class BaseInput<T> {
   @Input() variant: FloatLabelType = 'on';
   @Input() tooltip?: string;
   @Input() styleClass?: string;
+  @Input() iconClass?: string;
 
   /* ========= Validation ========= */
   @Input() invalid = false;

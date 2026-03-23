@@ -18,6 +18,14 @@
           [field]="f">
         </app-field-group-renderer>
 
+      } @else if (f.type === 'tree') {
+
+        <app-field-tree-renderer
+          class="w-full h-full"
+          [ngClass]="getCol(f.width)"
+          [field]="f">
+        </app-field-tree-renderer>
+
       } @else {
 
         <app-field-renderer
@@ -29,13 +37,15 @@
       }
     }
 
+    <ng-content></ng-content>
+
     <div class="col-span-12 flex justify-end">
-      <button 
+      <app-button
         type="submit"
+        severity="success"
         [disabled]="submitting"
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-        {{ 'submit' | translateContent }}
-      </button>
+        [label]="'submit'">
+      </app-button>
     </div>
 
   </form>

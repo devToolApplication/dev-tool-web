@@ -46,6 +46,10 @@
     {{ value | json }}
   }
 
+  @case ('textarea') {
+    <textarea pTextarea [ngModel]="formatTextareaValue(value)" rows="6" [disabled]="true" class="w-full"></textarea>
+  }
+
   @default {
     {{ value }}
   }

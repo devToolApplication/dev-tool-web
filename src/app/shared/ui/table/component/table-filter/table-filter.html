@@ -1,201 +1,117 @@
 <section class="table-filter-shell">
-  <div class="filter-page-header">
-    <div>
-      <p class="filter-eyebrow">{{ 'filters' | translateContent }}</p>
-      <h3>{{ (options.drawerTitle ?? 'filters') | translateContent }}</h3>
-    </div>
+  <div class="filter-search-row">
+    <app-input-text
+      iconClass="pi pi-search"
+      [value]="searchValue()"
+      [placeholder]="inputPlaceholder"
+      [disabled]="loading || !primaryFieldConfig"
+      (valueChange)="onInputChange($event)"
+      (keyup.enter)="onSearch()"
+    ></app-input-text>
 
-    <div class="filter-header-actions">
+    <div class="filter-search-actions">
       <app-button
-        styleClass="filter-trigger"
         icon="pi pi-sliders-h"
         severity="secondary"
         [text]="true"
-        [label]="options.filterLabel ?? 'filters'"
+        [label]="''"
+        [disabled]="loading || !primaryFieldConfig"
+        [disabled]="loading || !visibleAdvancedFields().length"
         (buttonClick)="openDrawer()"
+      ></app-button>
+      <app-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        [label]="''"
+        [disabled]="loading"
+        (buttonClick)="onReset()"
       ></app-button>
     </div>
   </div>
-
-  <div class="quick-filter-grid">
-    @for (field of quickFields(); track trackField($index, field)) {
-      <div class="quick-filter-item" [class.invalid]="!!errorOf(field.field)">
-        <label>{{ field.label | translateContent }}</label>
-
-        @switch (field.type ?? 'text') {
-          @case ('select') {
-            <app-select
-              [options]="optionsOf(field.field)"
-              [value]="valueOf(field.field)"
-              [placeholder]="field.placeholder ?? field.label"
-              [showClear]="true"
-              [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
-              (valueChange)="onValueChange(field, $event)"
-            ></app-select>
-          }
-          @case ('multi-select') {
-            <app-select-multi
-              [options]="optionsOf(field.field)"
-              [value]="valueOf(field.field)"
-              [placeholder]="field.placeholder ?? field.label"
-              [enableFilter]="true"
-              [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
-              (valueChange)="onValueChange(field, $event)"
-            ></app-select-multi>
-          }
-          @case ('date') {
-            <app-date-picker
-              [value]="valueOf(field.field)"
-              [placeholder]="field.placeholder ?? field.label"
-              [disabled]="isFieldDisabled(field)"
-              (valueChange)="onValueChange(field, $event)"
-            ></app-date-picker>
-          }
-          @case ('date-range') {
-            <div class="date-range-grid">
-              <app-date-picker
-                [value]="valueOf(field.field)?.start"
-                [placeholder]="'fromDate'"
-                [disabled]="isFieldDisabled(field)"
-                (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), start: $event })"
-              ></app-date-picker>
-              <app-date-picker
-                [value]="valueOf(field.field)?.end"
-                [placeholder]="'toDate'"
-                [disabled]="isFieldDisabled(field)"
-                (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), end: $event })"
-              ></app-date-picker>
-            </div>
-          }
-          @default {
-            <app-input-text
-              [value]="valueOf(field.field)"
-              [placeholder]="field.placeholder ?? field.label"
-              [disabled]="isFieldDisabled(field)"
-              (valueChange)="onValueChange(field, $event)"
-            ></app-input-text>
-          }
-        }
-
-        @if (errorOf(field.field)) {
-          <small class="filter-error">{{ errorOf(field.field) }}</small>
-        }
-      </div>
-    }
-  </div>
-
-  <div class="quick-filter-actions">
-    <app-button
-      icon="pi pi-check"
-      [label]="options.applyLabel ?? 'apply'"
-      [disabled]="!canApply()"
-      (buttonClick)="onApply()"
-    ></app-button>
-    <app-button
-      icon="pi pi-refresh"
-      severity="secondary"
-      [label]="options.resetLabel ?? 'reset'"
-      [disabled]="loading"
-      (buttonClick)="onResetToDefaults()"
-    ></app-button>
-    <app-button
-      styleClass="filter-trigger"
-      icon="pi pi-filter"
-      severity="secondary"
-      [text]="true"
-      [label]="options.filterLabel ?? 'filter'"
-      (buttonClick)="openDrawer()"
-    ></app-button>
-  </div>
-
-  @if (activeChips().length) {
-    <div class="active-chip-row">
-      @for (chip of activeChips(); track chip.field) {
-        <button type="button" class="filter-chip" (click)="onRemoveChip(chip.field)">
-          <span>{{ chip.label | translateContent }}: {{ chip.value }}</span>
-          <i class="pi pi-times"></i>
-        </button>
-      }
-    </div>
-  }
 </section>
 
 @if (drawerOpen()) {
-  <div class="drawer-backdrop" (click)="onCancelDrawer()"></div>
+  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+
   <aside class="filter-drawer" role="dialog" aria-modal="true">
     <header class="drawer-header">
       <div>
-        <p class="filter-eyebrow">{{ 'filters' | translateContent }}</p>
+        <p class="drawer-eyebrow">{{ 'filters' | translateContent }}</p>
         <h3>{{ (options.drawerTitle ?? 'advancedFilters') | translateContent }}</h3>
       </div>
-      <button type="button" class="drawer-close" (click)="onCancelDrawer()">
-        <i class="pi pi-times"></i>
-      </button>
+
+      <app-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        [label]="options.cancelLabel ?? 'close'"
+        (buttonClick)="closeDrawer()"
+      ></app-button>
     </header>
 
     <div class="drawer-content">
       <div class="drawer-grid">
-        @for (field of advancedFields(); track trackField($index, field)) {
-          <div class="drawer-field" [class.full-span]="(field.type ?? 'text') === 'date-range'" [class.invalid]="!!errorOf(field.field)">
+        @for (field of visibleAdvancedFields(); track field.field) {
+          <div class="drawer-field" [class.full-span]="field.type === 'date-range'">
             <label>{{ field.label | translateContent }}</label>
 
             @switch (field.type ?? 'text') {
               @case ('select') {
                 <app-select
-                  [options]="optionsOf(field.field)"
-                  [value]="valueOf(field.field)"
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
                   [placeholder]="field.placeholder ?? field.label"
                   [showClear]="true"
-                  [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
-                  (valueChange)="onValueChange(field, $event)"
+                  (valueChange)="onFieldChange(field, $event)"
                 ></app-select>
               }
               @case ('multi-select') {
                 <app-select-multi
-                  [options]="optionsOf(field.field)"
-                  [value]="valueOf(field.field)"
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
                   [placeholder]="field.placeholder ?? field.label"
                   [enableFilter]="true"
-                  [disabled]="isFieldDisabled(field) || isFieldLoading(field.field)"
-                  (valueChange)="onValueChange(field, $event)"
+                  (valueChange)="onFieldChange(field, $event)"
                 ></app-select-multi>
+              }
+              @case ('boolean') {
+                <app-select
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [showClear]="true"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-select>
               }
               @case ('date') {
                 <app-date-picker
-                  [value]="valueOf(field.field)"
+                  [value]="valueOf(field)"
                   [placeholder]="field.placeholder ?? field.label"
-                  [disabled]="isFieldDisabled(field)"
-                  (valueChange)="onValueChange(field, $event)"
+                  (valueChange)="onFieldChange(field, $event)"
                 ></app-date-picker>
               }
               @case ('date-range') {
                 <div class="date-range-grid">
                   <app-date-picker
-                    [value]="valueOf(field.field)?.start"
+                    [value]="valueOf(field)?.start"
                     [placeholder]="'fromDate'"
-                    [disabled]="isFieldDisabled(field)"
-                    (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), start: $event })"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
                   ></app-date-picker>
                   <app-date-picker
-                    [value]="valueOf(field.field)?.end"
+                    [value]="valueOf(field)?.end"
                     [placeholder]="'toDate'"
-                    [disabled]="isFieldDisabled(field)"
-                    (valueChange)="onValueChange(field, { ...(valueOf(field.field) ?? {}), end: $event })"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
                   ></app-date-picker>
                 </div>
               }
               @default {
                 <app-input-text
-                  [value]="valueOf(field.field)"
+                  [value]="valueOf(field)"
                   [placeholder]="field.placeholder ?? field.label"
-                  [disabled]="isFieldDisabled(field)"
-                  (valueChange)="onValueChange(field, $event)"
+                  (valueChange)="onFieldChange(field, $event)"
                 ></app-input-text>
               }
-            }
-
-            @if (errorOf(field.field)) {
-              <small class="filter-error">{{ errorOf(field.field) }}</small>
             }
           </div>
         }
@@ -207,18 +123,18 @@
         severity="secondary"
         [text]="true"
         [label]="options.cancelLabel ?? 'cancel'"
-        (buttonClick)="onCancelDrawer()"
+        (buttonClick)="closeDrawer()"
       ></app-button>
+
       <div class="drawer-footer-actions">
         <app-button
           severity="secondary"
           [label]="options.resetLabel ?? 'reset'"
-          (buttonClick)="onResetToDefaults()"
+          (buttonClick)="onReset()"
         ></app-button>
         <app-button
           [label]="options.applyLabel ?? 'apply'"
-          [disabled]="!canApply()"
-          (buttonClick)="onApply()"
+          (buttonClick)="onApplyAdvanced()"
         ></app-button>
       </div>
     </footer>

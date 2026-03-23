@@ -1,5 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { ArrayFieldState, GridWidth } from '../../models/form-config.model';
+import {
+  ArrayFieldState,
+  FieldState,
+  GridWidth,
+  GroupFieldState,
+  TreeFieldState
+} from '../../models/form-config.model';
 import { getColClass } from '../../utils/form.utils';
 
 @Component({
@@ -22,5 +28,17 @@ export class FieldArrayRenderer {
 
   getCol(width?: GridWidth): string {
     return getColClass(width)
+  }
+
+  isArrayField(field: FieldState | ArrayFieldState): field is ArrayFieldState {
+    return field.type === 'array';
+  }
+
+  isGroupField(field: FieldState | ArrayFieldState): field is GroupFieldState {
+    return field.type === 'group';
+  }
+
+  isTreeField(field: FieldState | ArrayFieldState): field is TreeFieldState {
+    return field.type === 'tree';
   }
 }

@@ -1,0 +1,36 @@
+.metadata-editor {
+  display: grid;
+}
+
+.metadata-header,
+.metadata-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(10rem, 0.8fr) minmax(0, 1.4fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.metadata-header {
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--app-text) 80%, transparent);
+}
+
+.metadata-row + .metadata-row {
+  margin-top: 0.75rem;
+}
+
+.metadata-actions {
+  margin-top: 1rem;
+}
+
+@media (max-width: 960px) {
+  .metadata-header {
+    display: none;
+  }
+
+  .metadata-row {
+    grid-template-columns: 1fr;
+  }
+}

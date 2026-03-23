@@ -1,0 +1,16 @@
+<section class="crud-page">
+  <div class="header-row">
+    <h2>MCP Tool Config - {{ formContext.mode === 'edit' ? 'Edit' : 'Create' }}</h2>
+  </div>
+
+  <div class="form-wrap shadow-1">
+    <app-form-input
+      [config]="formConfig"
+      [context]="formContext"
+      [initialValue]="formInitialValue"
+      [submitting]="submitting"
+      (valueChange)="onFormValueChange($event)"
+      (formSubmit)="onSubmitForm($event)"
+    ></app-form-input>
+  </div>
+</section>

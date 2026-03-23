@@ -60,8 +60,11 @@ export function createFieldState<TFormModel extends object>(
     if (
       config.type !== 'select' &&
       config.type !== 'select-multi' &&
+      config.type !== 'auto-complete' &&
+      config.type !== 'input-multi' &&
       config.type !== 'radio' &&
-      config.type !== 'tags'
+      config.type !== 'tags' &&
+      config.type !== 'secret-metadata'
     ) return [];
 
     if ('optionsExpression' in config && config.optionsExpression) {
@@ -72,6 +75,10 @@ export function createFieldState<TFormModel extends object>(
   });
 
   const errors = computed<Record<string, string> | null>(() => {
+    if (!visible()) {
+      return null;
+    }
+
     const result: Record<string, string> = {};
 
     config.validation?.forEach(rule => {

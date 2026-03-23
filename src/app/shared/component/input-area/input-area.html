@@ -1,23 +1,48 @@
 <p-floatlabel [variant]="variant">
-  <textarea
-    pTextarea
-    [id]="inputId"
-    [rows]="rows"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [readonly]="readonly"
-    [required]="required"
-    [autofocus]="autofocus"
-    [attr.placeholder]="(placeholder || null) | translateContent"
-    [invalid]="invalid"
-    autocomplete="off"
-    [style.width.%]="fluid ? 100 : null"
-    [class]="styleClass"
-    [attr.title]="(tooltip || null) | translateContent"
-    (blur)="onBlur()"
-    (focus)="onFocus()"
-  ></textarea>
+  @if (iconClass) {
+    <p-iconfield [style.width.%]="fluid ? 100 : null">
+      <p-inputicon [class]="iconClass"></p-inputicon>
+      <textarea
+        pTextarea
+        [id]="inputId"
+        [rows]="rows"
+        [ngModel]="value"
+        (ngModelChange)="onChange($event)"
+        [disabled]="disabled"
+        [readonly]="readonly"
+        [required]="required"
+        [autofocus]="autofocus"
+        [attr.placeholder]="(placeholder || null) | translateContent"
+        [invalid]="invalid"
+        autocomplete="off"
+        [style.width.%]="fluid ? 100 : null"
+        [class]="styleClass"
+        [attr.title]="(tooltip || null) | translateContent"
+        (blur)="onBlur()"
+        (focus)="onFocus()"
+      ></textarea>
+    </p-iconfield>
+  } @else {
+    <textarea
+      pTextarea
+      [id]="inputId"
+      [rows]="rows"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [required]="required"
+      [autofocus]="autofocus"
+      [attr.placeholder]="(placeholder || null) | translateContent"
+      [invalid]="invalid"
+      autocomplete="off"
+      [style.width.%]="fluid ? 100 : null"
+      [class]="styleClass"
+      [attr.title]="(tooltip || null) | translateContent"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+    ></textarea>
+  }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 

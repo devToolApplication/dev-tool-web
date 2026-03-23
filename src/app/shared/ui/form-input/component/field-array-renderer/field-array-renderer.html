@@ -1,48 +1,63 @@
 @if (field.visible()) {
-  
   <div class="col-span-12">
-    <p-fieldset 
-  [legend]="field.label || 'Thông tin'"
-  class="w-full">
-    <div class="flex justify-between mb-4">
-      <button
-        type="button"
-        (click)="addItem()"
-        class="px-3 py-1 bg-blue-600 text-white rounded">
-        + Thêm
-      </button>
-    </div>
-
-    @for (item of field.value(); track $index; let i = $index) {
-
-      <div class="border p-4 rounded mb-4 bg-gray-50">
-
-        <div class="flex justify-end mb-2">
-          <button
-            type="button"
-            (click)="removeItem(i)"
-            class="text-red-600 text-sm">
-            Xóa
-          </button>
-        </div>
-
-        <div class="grid grid-cols-12 gap-4">
-
-          @for (child of field.children()[i]; track child.path) {
-            <app-field-renderer
-              class="w-full h-full"
-              [ngClass]="getCol(child.width)"
-              [field]="child">
-            </app-field-renderer>
-
-          }
-
-        </div>
-
+    <p-fieldset
+      [legend]="field.label || 'Thong tin'"
+      class="w-full">
+      <div class="flex justify-between mb-4">
+        <app-button
+          type="button"
+          severity="secondary"
+          [label]="'addRow'"
+          [disabled]="field.disabled()"
+          (buttonClick)="addItem()">
+        </app-button>
       </div>
 
-    }
-  </p-fieldset>
+      @for (item of field.value(); track $index; let i = $index) {
+        <p-fieldset
+          [legend]="(field.label || 'Thong tin') + ' ' + (i + 1)"
+          class="w-full mb-4">
+          <div class="flex justify-end mb-2">
+            <app-button
+              type="button"
+              severity="danger"
+              [label]="'delete'"
+              [disabled]="field.disabled()"
+              (buttonClick)="removeItem(i)">
+            </app-button>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4">
+            @for (child of field.children()[i]; track child.path) {
+              @if (isArrayField(child)) {
+                <app-field-array-renderer
+                  class="w-full h-full"
+                  [ngClass]="getCol(child.width)"
+                  [field]="child">
+                </app-field-array-renderer>
+              } @else if (isGroupField(child)) {
+                <app-field-group-renderer
+                  class="w-full h-full"
+                  [ngClass]="getCol(child.width)"
+                  [field]="child">
+                </app-field-group-renderer>
+              } @else if (isTreeField(child)) {
+                <app-field-tree-renderer
+                  class="w-full h-full"
+                  [ngClass]="getCol(child.width)"
+                  [field]="child">
+                </app-field-tree-renderer>
+              } @else {
+                <app-field-renderer
+                  class="w-full h-full"
+                  [ngClass]="getCol(child.width)"
+                  [field]="child">
+                </app-field-renderer>
+              }
+            }
+          </div>
+        </p-fieldset>
+      }
+    </p-fieldset>
   </div>
-  
 }

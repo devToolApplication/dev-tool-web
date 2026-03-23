@@ -91,12 +91,44 @@
         </app-select-multi>
       }
 
+      @case ('auto-complete') {
+        <app-auto-complete
+          [label]="field.label"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          [placeholder]="autoCompleteConfig?.placeholder"
+          [helpText]="autoCompleteConfig?.helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-auto-complete>
+      }
+
       @case ('record') {
         <app-field-record-renderer [field]="field"></app-field-record-renderer>
       }
 
-      @case ('tags') {
-        <app-field-tag-renderer [field]="field"></app-field-tag-renderer>
+      @case ('input-multi') {
+        <app-input-multi
+          [label]="field.label"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="field.errors()?.['custom']"
+          [placeholder]="inputMultiConfig?.placeholder"
+          [helpText]="inputMultiConfig?.helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-input-multi>
+      }
+
+      @case ('secret-metadata') {
+        <app-field-secret-metadata-renderer [field]="field"></app-field-secret-metadata-renderer>
       }
 
       @case ('textarea') {
