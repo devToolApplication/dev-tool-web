@@ -1,5 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { AutoComplete } from 'primeng/autocomplete';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BaseInput } from '../base-input';
 import { SelectOption } from '../select/select';
 
@@ -11,21 +10,24 @@ import { SelectOption } from '../select/select';
 })
 export class InputMulti extends BaseInput<string[]> implements OnChanges {
   @Input() options: SelectOption[] = [];
-  @ViewChild(AutoComplete) autoComplete?: AutoComplete;
 
   currentQuery = '';
   model: string[] = [];
-  suggestions: string[] = [];
+  selectedOptions: SelectOption[] = [];
+  suggestions: SelectOption[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
       this.model = this.normalizeItems(Array.isArray(this.value) ? this.value : []);
-      this.syncAutoCompleteModel();
+      this.selectedOptions = this.model.map((item) => this.toOption(item));
+      this.syncSuggestions();
+      this.debugLog('ngOnChanges:value', {
+        value: this.value,
+        model: this.model,
+        selectedOptions: this.selectedOptions,
+        suggestions: this.suggestions
+      });
     }
-  }
-
-  get items(): string[] {
-    return this.model;
   }
 
   get enableTypeahead(): boolean {
@@ -33,49 +35,41 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   }
 
   onModelChange(value: unknown): void {
+    this.debugLog('ngModelChange:before', { value, model: this.model, currentQuery: this.currentQuery });
     if (!Array.isArray(value)) {
-      this.debug('ngModelChange ignored', value);
+      this.debugLog('ngModelChange:ignored-non-array', { value });
       return;
     }
 
-    const nextItems = this.normalizeItems(value);
-    const isSame = nextItems.length === this.model.length && nextItems.every((item, index) => item === this.model[index]);
-    const isSubset = nextItems.length < this.model.length && nextItems.every((item) => this.model.includes(item));
-
-    if (isSame) {
-      this.debug('ngModelChange same', this.model);
-      return;
-    }
-
-    if (isSubset) {
-      this.debug('ngModelChange skip subset', { current: this.model, incoming: nextItems });
-      this.syncAutoCompleteModel();
-      return;
-    }
-
-    this.model = nextItems;
-    this.debug('ngModelChange sync', this.model);
-    this.syncAutoCompleteModel();
+    this.selectedOptions = this.normalizeOptions(value);
+    this.model = this.selectedOptions.map((option) => String(option.value));
+    this.syncSuggestions();
+    this.debugLog('ngModelChange:after', {
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
     this.onChange(this.model);
   }
 
   onSearch(query: string): void {
     this.currentQuery = query;
-    const normalizedQuery = query.trim();
-    const keyword = normalizedQuery.toLowerCase();
-    const optionSuggestions = this.options
-      .map((option) => String(option.value ?? option.label ?? '').trim())
-      .filter(Boolean)
-      .filter((item, index, items) => items.indexOf(item) === index)
-      .filter((item) => !this.items.includes(item))
-      .filter((item) => !keyword || item.toLowerCase().includes(keyword));
-
-    this.suggestions = normalizedQuery && !this.items.includes(normalizedQuery)
-      ? [normalizedQuery, ...optionSuggestions.filter((item) => item !== normalizedQuery)]
-      : optionSuggestions;
+    this.syncSuggestions(query);
+    this.debugLog('completeMethod', {
+      query,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
   }
 
   onInputKeydown(event: KeyboardEvent): void {
+    this.debugLog('onInputKeydown', {
+      key: event.key,
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions
+    });
     if (event.key !== 'Enter') {
       return;
     }
@@ -85,66 +79,80 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   }
 
   override onBlur(): void {
+    this.debugLog('onBlur:before', {
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
     this.commitCurrentQuery();
+    this.debugLog('onBlur:after-commit', {
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
     super.onBlur();
   }
 
-  onItemSelect(value: unknown): void {
-    const item = String(value ?? '').trim();
-    if (!item) {
-      return;
-    }
-
-    this.debug('onSelect', { selected: item, before: this.model });
-    this.appendItem(item);
-    this.currentQuery = '';
-    this.syncAutoCompleteModel();
+  override onFocus(): void {
+    this.debugLog('onFocus', {
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
+    super.onFocus();
   }
 
-  onItemUnselect(value: unknown): void {
-    const item = String(value ?? '').trim();
-    if (!item) {
-      return;
-    }
+  onSelectItem(event: unknown): void {
+    this.debugLog('onSelect', {
+      event,
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
+  }
 
-    this.model = this.model.filter((current) => current !== item);
-    this.debug('onUnselect', { removed: item, after: this.model });
-    this.syncAutoCompleteModel();
-    this.onChange(this.model);
+  onUnselectItem(event: unknown): void {
+    this.debugLog('onUnselect', {
+      event,
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
   }
 
   private commitCurrentQuery(): void {
     const value = this.currentQuery.trim();
-    if (!value) {
+    if (!value || this.model.includes(value)) {
+      this.debugLog('commitCurrentQuery:skip', {
+        currentQuery: this.currentQuery,
+        model: this.model
+      });
       this.currentQuery = '';
+      this.syncSuggestions();
       return;
     }
 
-    this.appendItem(value);
-    this.currentQuery = '';
-  }
-
-  private appendItem(value: string): void {
-    if (this.items.includes(value)) {
-      this.debug('append skip duplicate', value);
-      this.syncAutoCompleteModel();
-      return;
-    }
-
-    this.model = [...this.items, value];
-    this.debug('append item', this.model);
-    this.syncAutoCompleteModel();
+    this.model = [...this.model, value];
+    this.selectedOptions = [...this.selectedOptions, this.toOption(value)];
+    this.debugLog('commitCurrentQuery:add', {
+      addedValue: value,
+      model: this.model,
+      selectedOptions: this.selectedOptions
+    });
     this.onChange(this.model);
-  }
-
-  private syncAutoCompleteModel(): void {
-    if (!this.autoComplete) {
-      return;
-    }
-
-    this.autoComplete.value = this.model;
-    this.autoComplete.writeModelValue(this.model);
-    this.autoComplete.updateInputValue();
+    this.currentQuery = '';
+    this.syncSuggestions();
+    this.debugLog('commitCurrentQuery:after', {
+      currentQuery: this.currentQuery,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
   }
 
   private normalizeItems(values: unknown[]): string[] {
@@ -154,7 +162,48 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
       .filter((item, index, list) => list.indexOf(item) === index);
   }
 
-  private debug(message: string, payload: unknown): void {
-    console.log('[InputMulti]', message, payload);
+  private syncSuggestions(query = this.currentQuery): void {
+    const normalizedQuery = query.trim();
+    const keyword = normalizedQuery.toLowerCase();
+    const optionSuggestions = this.options
+      .map((option) => this.toOption(String(option.value ?? option.label ?? '').trim()))
+      .filter((option) => option.value)
+      .filter((option, index, items) => items.findIndex((item) => item.value === option.value) === index)
+      .filter((option) => !this.model.includes(String(option.value)))
+      .filter((option) => !keyword || option.label.toLowerCase().includes(keyword));
+
+    const suggestions = [...this.selectedOptions, ...optionSuggestions];
+    if (normalizedQuery && !suggestions.some((option) => option.value === normalizedQuery)) {
+      suggestions.unshift(this.toOption(normalizedQuery));
+    }
+
+    this.suggestions = suggestions.filter((option, index, items) => items.findIndex((item) => item.value === option.value) === index);
+    this.debugLog('syncSuggestions', {
+      query,
+      model: this.model,
+      selectedOptions: this.selectedOptions,
+      suggestions: this.suggestions
+    });
+  }
+
+  private normalizeOptions(values: unknown[]): SelectOption[] {
+    return this.normalizeItems(values.map((item) => this.extractValue(item))).map((item) => this.toOption(item));
+  }
+
+  private extractValue(item: unknown): string {
+    if (item && typeof item === 'object' && !Array.isArray(item)) {
+      const record = item as Record<string, unknown>;
+      return String(record['value'] ?? record['label'] ?? '').trim();
+    }
+
+    return String(item ?? '').trim();
+  }
+
+  private toOption(value: string): SelectOption {
+    return { label: value, value };
+  }
+
+  private debugLog(eventName: string, payload: Record<string, unknown>): void {
+    console.log('[InputMulti]', eventName, payload);
   }
 }

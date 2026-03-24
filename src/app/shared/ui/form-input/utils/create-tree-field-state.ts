@@ -77,7 +77,13 @@ export function createFieldTreeState<TFormModel extends object>(
     setValue: () => {},
     options: computed(() => []),
     errors: computed(() => null),
-    valid: computed(() => children.every((child) => child.valid())),
+    valid: computed(() => {
+      if (!visible()) {
+        return true;
+      }
+
+      return children.every((child) => child.valid());
+    }),
     markAsTouched() {
       touched.set(true);
       children.forEach((child) => child.markAsTouched());

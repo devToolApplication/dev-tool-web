@@ -6,8 +6,10 @@
           [invalid]="showInvalid"
           [errorMessage]="field.errors()?.['custom']"
           [label]="field.label"
+          [placeholder]="textConfig?.placeholder"
           [value]="field.value()"
           [disabled]="field.disabled()"
+          [helpText]="textConfig?.helpText"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
           (blur)="onBlur()" />
@@ -136,8 +138,10 @@
           [invalid]="showInvalid"
           [errorMessage]="field.errors()?.['custom']"
           [label]="field.label"
+          [placeholder]="textConfig?.placeholder"
           [value]="field.value()"
           [disabled]="field.disabled()"
+          [helpText]="textConfig?.helpText"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
           (blur)="onBlur()">

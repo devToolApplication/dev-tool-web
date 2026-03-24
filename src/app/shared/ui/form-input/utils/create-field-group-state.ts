@@ -56,9 +56,13 @@ export function createFieldGroupState<TFormModel extends object>(
   const value = computed(() => null);
   const options = computed(() => []);
   const errors = computed(() => null);
-  const valid = computed(() =>
-    children.every(c => c.valid())
-  );
+  const valid = computed(() => {
+    if (!visible()) {
+      return true;
+    }
+
+    return children.every(c => c.valid());
+  });
 
   function setValue(_: unknown) {}
   function markAsTouched() {

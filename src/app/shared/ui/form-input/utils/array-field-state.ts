@@ -65,6 +65,22 @@ import {
       });
   
     });
+
+    const buildCtx = () => ({
+      model: modelSignal(),
+      context: contextSignal(),
+      value: value()
+    });
+
+    const visible = computed(() => {
+      if (!config.rules?.visible) return true;
+      return !!expr.evaluate(config.rules.visible, buildCtx());
+    });
+
+    const disabled = computed(() => {
+      if (!config.rules?.disabled) return false;
+      return !!expr.evaluate(config.rules.disabled, buildCtx());
+    });
   
     return {
       fieldConfig: config as any,
@@ -79,15 +95,19 @@ import {
       focusing: signal(false),
       blurred: signal(false),
       dirty,
-      visible: computed(() => true),
-      disabled: computed(() => false),
+      visible,
+      disabled,
       options: computed(() => []),
       errors: computed(() => null),
-      valid: computed(() =>
-        children().every(group =>
+      valid: computed(() => {
+        if (!visible()) {
+          return true;
+        }
+
+        return children().every(group =>
           group.every(f => f.valid())
-        )
-      ),
+        );
+      }),
       markAsTouched() {
         touched.set(true);
       },

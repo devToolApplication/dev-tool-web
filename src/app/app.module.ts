@@ -34,12 +34,12 @@ export function initializeKeycloak(keycloak: KeycloakService) {
     provideBrowserGlobalErrorListeners(),
     // Để bypass login Keycloak khi dev/demo.
     // Khi cần bật lại, chỉ cần bỏ comment block APP_INITIALIZER bên dưới.
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: initializeKeycloak,
-    //   multi: true,
-    //   deps: [KeycloakService]
-    // },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService]
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

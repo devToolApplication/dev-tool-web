@@ -37,6 +37,8 @@ export interface BaseFieldConfig {
 
 export interface TextFieldConfig extends BaseFieldConfig {
   type: 'text' | 'textarea';
+  placeholder?: string;
+  helpText?: string;
 }
 
 export interface NumberFieldConfig extends BaseFieldConfig {

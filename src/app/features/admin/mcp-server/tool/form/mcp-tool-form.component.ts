@@ -38,6 +38,7 @@ interface DbConditionRowNode {
 })
 export class McpToolFormComponent implements OnInit, OnDestroy {
   private readonly defaultCategoryCode = 'custom';
+  private readonly filterPlaceholderPattern = /^\{\{\s*([^{}]+?)\s*\}\}$/;
   private readonly conditionLogicOptions = [
     { label: 'mcpTool.conditionAnd', value: 'and' },
     { label: 'mcpTool.conditionOr', value: 'or' }
@@ -231,8 +232,10 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
           {
             type: 'text',
             name: 'value',
-            label: 'mcpTool.mappingField',
-            width: '1/3'
+            label: 'mcpTool.conditionValue',
+            width: '1/3',
+            placeholder: 'mcpTool.conditionValuePlaceholder',
+            helpText: 'mcpTool.conditionValueHint'
           }
         ]
       },
@@ -644,6 +647,14 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
   }
 
   private parseConditionValue(operator: DbConditionOperator, rawValue: string): unknown {
+    const placeholder = this.toFilterPlaceholder(rawValue);
+    if (placeholder !== null) {
+      if (operator === 'in' || operator === 'nin') {
+        return [placeholder];
+      }
+      return placeholder;
+    }
+
     if (operator === 'exists') {
       return rawValue.trim().toLowerCase() !== 'false';
     }
@@ -676,6 +687,34 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     if (!Number.isNaN(numericValue) && normalized !== '') {
       return numericValue;
     }
+    return normalized;
+  }
+
+  private toFilterPlaceholder(rawValue: string): string | null {
+    const normalized = rawValue.trim();
+    if (!normalized) {
+      return null;
+    }
+
+    const matched = normalized.match(this.filterPlaceholderPattern);
+    if (matched) {
+      return `{{${matched[1].trim()}}}`;
+    }
+
+    return `{{${normalized}}}`;
+  }
+
+  private fromStoredConditionValue(value: unknown): string {
+    if (Array.isArray(value) && value.length === 1) {
+      return this.fromStoredConditionValue(value[0]);
+    }
+
+    const normalized = String(value ?? '').trim();
+    const matched = normalized.match(this.filterPlaceholderPattern);
+    if (matched) {
+      return matched[1].trim();
+    }
+
     return normalized;
   }
 
@@ -799,12 +838,12 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
         nodes.push({
           field,
           operator,
-          value: Array.isArray(operatorValue) ? operatorValue.join(', ') : String(operatorValue ?? '')
+          value: this.fromStoredConditionValue(operatorValue)
         });
         return;
       }
 
-      nodes.push({ field, operator: 'eq', value: String(definition ?? '') });
+      nodes.push({ field, operator: 'eq', value: this.fromStoredConditionValue(definition) });
     });
 
     return nodes;

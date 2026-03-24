@@ -3,7 +3,9 @@
     [inputId]="inputId"
     [multiple]="true"
     [suggestions]="suggestions"
-    [ngModel]="model"
+    optionLabel="label"
+    optionValue="value"
+    [ngModel]="selectedOptions"
     (ngModelChange)="onModelChange($event)"
     [disabled]="disabled"
     [required]="required"
@@ -17,9 +19,9 @@
     [invalid]="invalid"
     [styleClass]="styleClass"
     (completeMethod)="onSearch($any($event.query || ''))"
-    (onSelect)="onItemSelect($any($event.value))"
-    (onUnselect)="onItemUnselect($any($event.value))"
     (onInputKeydown)="onInputKeydown($event)"
+    (onSelect)="onSelectItem($event)"
+    (onUnselect)="onUnselectItem($event)"
     (onFocus)="onFocus()"
     (onBlur)="onBlur()">
   </p-auto-complete>
