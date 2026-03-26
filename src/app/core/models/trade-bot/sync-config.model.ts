@@ -1,6 +1,6 @@
-export type TradeBotDataResource = 'BINANCE';
+export type TradeBotDataResource = 'BINANCE' | 'OANDA';
 
-export type TradeBotSymbol = 'BTCUSDT' | 'ETHUSDT';
+export type TradeBotSymbol = string;
 
 export type TradeBotStatus = 'ACTIVE' | 'INACTIVE' | 'DELETE';
 

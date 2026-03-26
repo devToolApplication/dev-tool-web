@@ -39,14 +39,16 @@
 
     <ng-content></ng-content>
 
-    <div class="col-span-12 flex justify-end">
-      <app-button
-        type="submit"
-        severity="success"
-        [disabled]="submitting"
-        [label]="'submit'">
-      </app-button>
-    </div>
+    @if (showSubmit) {
+      <div class="col-span-12 flex justify-end">
+        <app-button
+          type="submit"
+          severity="success"
+          [disabled]="submitting"
+          [label]="'submit'">
+        </app-button>
+      </div>
+    }
 
   </form>
 </p-fluid>

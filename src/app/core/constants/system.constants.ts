@@ -1,7 +1,7 @@
 export const SYSTEM_STATUS_OPTIONS = [
-  { label: 'ACTIVE', value: 'ACTIVE' },
-  { label: 'INACTIVE', value: 'INACTIVE' },
-  { label: 'DELETE', value: 'DELETE' }
+  { label: 'active', value: 'ACTIVE' },
+  { label: 'inactive', value: 'INACTIVE' },
+  { label: 'delete', value: 'DELETE' }
 ] as const;
 
 export const DEFAULT_TABLE_ROWS = 10;

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AvatarModule } from 'primeng/avatar';
 import { AutoCompleteModule } from 'primeng/autocomplete';
@@ -16,8 +17,10 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { PanelModule } from 'primeng/panel';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { PaginatorModule } from 'primeng/paginator';
 import { PasswordModule } from 'primeng/password';
@@ -26,8 +29,10 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { RippleModule } from 'primeng/ripple';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
+import { SliderModule } from 'primeng/slider';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { SplitButtonModule } from 'primeng/splitbutton';
+import { TagModule } from 'primeng/tag';
 import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
@@ -39,6 +44,8 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
+import { BasePopupComponent } from './component/base-popup/base-popup.component';
+import { BaseReplayControlsComponent } from './component/base-replay-controls/base-replay-controls.component';
 import { AutoComplete } from './component/auto-complete/auto-complete';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
 import { ButtonSplit } from './component/button-split/button-split';
@@ -116,6 +123,8 @@ const FEATURE = [
 ];
 
 const COMPONENTS = [
+  BasePopupComponent,
+  BaseReplayControlsComponent,
   Breadcrumb,
   AutoComplete,
   ButtonSpeedDial,
@@ -159,6 +168,7 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     CommonModule,
     RouterModule,
     FormsModule,
+    ReactiveFormsModule,
     AutoCompleteModule,
     ButtonModule,
     SpeedDialModule,
@@ -168,13 +178,16 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     FileUploadModule,
     InputNumberModule,
     InputTextModule,
+    DialogModule,
     PaginatorModule,
     PasswordModule,
     RadioButtonModule,
     SelectButtonModule,
     MultiSelectModule,
+    PanelModule,
     TreeSelectModule,
     SelectModule,
+    SliderModule,
     ToggleButtonModule,
     ToggleSwitchModule,
     BreadcrumbModule,
@@ -189,6 +202,7 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     RippleModule,
     ToastModule,
     ProgressSpinnerModule,
+    TagModule,
     ToolbarModule,
     AvatarModule,
     TieredMenuModule,

@@ -13,12 +13,15 @@ export class ChartQueryService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getCandle(symbol: string, interval: string, startTime: number, endTime: number): Observable<TradeBotCandleResponse> {
-    const params = new HttpParams()
+  getCandle(symbol: string, interval: string, startTime: number, endTime: number, dataResource?: string): Observable<TradeBotCandleResponse> {
+    let params = new HttpParams()
       .set('symbol', symbol)
       .set('interval', interval)
       .set('startTime', startTime)
       .set('endTime', endTime);
+    if (dataResource) {
+      params = params.set('dataResource', dataResource);
+    }
 
     return this.http
       .get<BaseResponse<TradeBotCandleResponse>>(`${this.apiUrl}/data`, { params })

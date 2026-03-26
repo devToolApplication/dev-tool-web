@@ -99,6 +99,9 @@ export interface TableConfig {
   pagination?: boolean;
   rows?: number;
   rowsPerPageOptions?: number[];
+  scrollable?: boolean;
+  scrollHeight?: string;
+  minWidth?: string;
 }
 
 export interface TableToolbarButtonConfig {

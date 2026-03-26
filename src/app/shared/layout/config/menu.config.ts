@@ -15,7 +15,8 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
             icon: 'pi pi-key',
             items: [
               { label: 'He thong luu tru', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-secrets' },
-              { label: 'He thong AI Agent', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-secrets' }
+              { label: 'He thong AI Agent', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-secrets' },
+              { label: 'Trade Bot MCRS', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-secrets' }
             ]
           },
           {
@@ -45,7 +46,11 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
       {
         label: 'Quan ly trade bot',
         icon: 'pi pi-chart-line',
-        items: [{ label: 'Nguon du lieu', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' }]
+        items: [
+          { label: 'Nguon du lieu', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' },
+          { label: 'Trade Strategy Binding', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/strategy-binding' },
+          { label: 'Backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
+        ]
       },
       { label: 'AI Agent Stream', icon: 'pi pi-sparkles', routerLink: '/admin/ai-agent-stream' }
     ]

@@ -1,0 +1,23 @@
+<p-panel>
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-3">
+      <div>
+        <div class="text-base font-semibold">{{ TEXT.AutoPause | translateContent }}</div>
+        <div class="text-sm text-surface-500">{{ TEXT.AutoPauseDesc | translateContent }}</div>
+      </div>
+      <p-toggleSwitch [ngModel]="enabled" (ngModelChange)="enabledChange.emit($event)"></p-toggleSwitch>
+    </div>
+  </ng-template>
+
+  <div class="grid grid-cols-2 gap-3">
+    <label *ngFor="let item of autoPauseOptions | translateContent" class="flex items-center gap-2 rounded-xl border border-surface-200 p-3">
+      <p-checkbox
+        [binary]="true"
+        [disabled]="!enabled"
+        [ngModel]="selectedTypes.includes(item.value)"
+        (ngModelChange)="toggleType.emit(item.value)"
+      ></p-checkbox>
+      <span class="text-sm">{{ item.label }}</span>
+    </label>
+  </div>
+</p-panel>

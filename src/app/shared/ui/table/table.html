@@ -50,15 +50,18 @@
 </p-toolbar>
 
 <p-table
+  styleClass="app-table-scrollable"
   [value]="data"
   [rows]="config.rows ?? 10"
   [paginator]="config.pagination ?? true"
   [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
   [loading]="loading"
-  [tableStyle]="{ 'min-width': '75rem' }"
+  [tableStyle]="{ 'min-width': tableMinWidth }"
   [rowHover]="true"
   [currentPageReportTemplate]="'showingEntries' | translateContent"
   [showCurrentPageReport]="true"
+  [scrollable]="scrollable"
+  [scrollHeight]="scrollHeight"
   responsiveLayout="scroll"
 >
   <ng-template pTemplate="caption">

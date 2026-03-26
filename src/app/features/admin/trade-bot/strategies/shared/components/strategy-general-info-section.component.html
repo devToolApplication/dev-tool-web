@@ -1,0 +1,60 @@
+<p-panel [toggleable]="false">
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-3">
+      <div>
+        <div class="text-base font-semibold">{{ TEXT.GeneralInformation | translateContent }}</div>
+        <div class="text-sm text-surface-500">{{ TEXT.GeneralInformationDesc | translateContent }}</div>
+      </div>
+      <p-tag [value]="form.controls.strategyCode.getRawValue()" severity="contrast"></p-tag>
+    </div>
+  </ng-template>
+
+  <div class="grid grid-cols-12 gap-4" [formGroup]="form">
+    <div class="col-span-12 md:col-span-6">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.BindingName | translateContent }}</label>
+      <input pInputText class="w-full" formControlName="name" />
+      <small class="text-red-500" *ngIf="form.controls.name.touched && form.controls.name.invalid">
+        {{ TEXT.BindingName | translateContent }} {{ 'tradeBot.validation.requiredSuffix' | translateContent }}
+      </small>
+    </div>
+    <div class="col-span-12 md:col-span-3">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyCode | translateContent }}</label>
+      <input pInputText class="w-full" [value]="form.controls.strategyCode.getRawValue()" readonly />
+    </div>
+    <div class="col-span-12 md:col-span-3">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyName | translateContent }}</label>
+      <input pInputText class="w-full" [value]="form.controls.strategyName.getRawValue()" readonly />
+    </div>
+
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.Exchange | translateContent }}</label>
+      <p-select class="w-full" [options]="exchangeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="exchangeCode"></p-select>
+    </div>
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.Symbol | translateContent }}</label>
+      <p-select class="w-full" [options]="symbolOptions | translateContent" optionLabel="label" optionValue="value" formControlName="symbolCode"></p-select>
+    </div>
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.MarketType | translateContent }}</label>
+      <p-select class="w-full" [options]="marketTypeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="marketType"></p-select>
+    </div>
+
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.TradeSideMode | translateContent }}</label>
+      <p-select class="w-full" [options]="tradeSideModeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="tradeSideMode"></p-select>
+    </div>
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.ProviderSymbol | translateContent }}</label>
+      <input pInputText class="w-full" formControlName="providerSymbol" />
+    </div>
+    <div class="col-span-12 md:col-span-4">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.Status | translateContent }}</label>
+      <p-select class="w-full" [options]="statusOptions | translateContent" optionLabel="label" optionValue="value" formControlName="status"></p-select>
+    </div>
+
+    <div class="col-span-12">
+      <label class="mb-2 block text-sm font-medium">{{ TEXT.Description | translateContent }}</label>
+      <textarea pTextarea class="w-full" rows="3" formControlName="description"></textarea>
+    </div>
+  </div>
+</p-panel>

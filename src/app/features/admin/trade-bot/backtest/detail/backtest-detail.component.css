@@ -1,0 +1,42 @@
+.detail-header {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.detail-subtitle {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.metric-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.metric-label {
+  display: block;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.metric-value {
+  display: block;
+  margin-top: 0.5rem;
+  color: #0f172a;
+  font-size: 1.5rem;
+}
+
+.detail-orders-card {
+  min-width: 0;
+  overflow: hidden;
+}

@@ -9,6 +9,8 @@ import { AiAgentSecretFormComponent } from './secret/ai-agent/form/ai-agent-secr
 import { AiAgentSecretListComponent } from './secret/ai-agent/list/ai-agent-secret-list.component';
 import { StorageSecretFormComponent } from './secret/storage/form/storage-secret-form.component';
 import { StorageSecretListComponent } from './secret/storage/list/storage-secret-list.component';
+import { TradeBotSecretFormComponent } from './secret/trade-bot/form/trade-bot-secret-form.component';
+import { TradeBotSecretListComponent } from './secret/trade-bot/list/trade-bot-secret-list.component';
 
 export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   StorageSecretListComponent,
@@ -17,6 +19,8 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   StorageConfigFormComponent,
   AiAgentSecretListComponent,
   AiAgentSecretFormComponent,
+  TradeBotSecretListComponent,
+  TradeBotSecretFormComponent,
   AiAgentConfigListComponent,
   AiAgentConfigFormComponent,
   TradeBotConfigListComponent,
@@ -46,6 +50,14 @@ export const systemManagementRoutes: Routes = [
       { path: '', component: AiAgentSecretListComponent },
       { path: 'create', component: AiAgentSecretFormComponent },
       { path: 'edit/:id', component: AiAgentSecretFormComponent }
+    ]
+  },
+  {
+    path: 'admin/system-management/trade-bot-secrets',
+    children: [
+      { path: '', component: TradeBotSecretListComponent },
+      { path: 'create', component: TradeBotSecretFormComponent },
+      { path: 'edit/:id', component: TradeBotSecretFormComponent }
     ]
   },
   {

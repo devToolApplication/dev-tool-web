@@ -1,0 +1,12 @@
+<section class="crud-page">
+  <app-strategy-type-picker-popup
+    [visible]="visible"
+    [loading]="loading"
+    [keyword]="keyword"
+    [items]="filteredItems"
+    (visibleChange)="onVisibleChange($event)"
+    (keywordChange)="onKeywordChange($event)"
+    (select)="onSelect($event)"
+    (cancel)="onCancel()"
+  ></app-strategy-type-picker-popup>
+</section>

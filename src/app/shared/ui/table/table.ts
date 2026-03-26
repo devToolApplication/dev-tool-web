@@ -39,6 +39,18 @@ export class TableComponent {
     return this.toolbarConfig.export ?? {};
   }
 
+  get scrollable(): boolean {
+    return this.config.scrollable ?? true;
+  }
+
+  get scrollHeight(): string {
+    return this.config.scrollHeight ?? 'flex';
+  }
+
+  get tableMinWidth(): string {
+    return this.config.minWidth ?? '75rem';
+  }
+
   isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean {
     return buttonConfig?.visible === true;
   }
@@ -62,6 +74,9 @@ export class TableComponent {
   }
 
   onSearch(filters: Record<string, any>): void {
+    if (this.loading) {
+      return;
+    }
     this.search.emit(filters);
   }
 

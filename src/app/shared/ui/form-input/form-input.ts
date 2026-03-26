@@ -16,6 +16,7 @@ export class FormInput implements OnInit, OnChanges {
   @Input() context!: FormContext;
   @Input() initialValue!: any;
   @Input() submitting = false;
+  @Input() showSubmit = true;
   @Output() formSubmit = new EventEmitter<any>();
   @Output() valueChange = new EventEmitter<any>();
 
@@ -62,6 +63,18 @@ export class FormInput implements OnInit, OnChanges {
     this.engine.markAllAsTouched();
     if (!this.engine.valid()) return;
     this.formSubmit.emit(this.engine.model());
+  }
+
+  markAllAsTouched(): void {
+    this.engine?.markAllAsTouched();
+  }
+
+  isValid(): boolean {
+    return Boolean(this.engine?.valid?.());
+  }
+
+  getModel<TModel = any>(): TModel {
+    return this.engine?.model?.() as TModel;
   }
 
   getCol(width?: GridWidth): string {
