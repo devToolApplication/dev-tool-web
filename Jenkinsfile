@@ -23,12 +23,14 @@ pipeline {
     stages {
         stage('Build Angular App') {
             steps {
-                sh '''
-                echo "Installing dependencies..."
-                npm ci
-                echo "Building Angular..."
-                npm run build-prod
-                '''
+                container('node') {
+                    sh '''
+                    echo "Installing dependencies..."
+                    npm ci
+                    echo "Building Angular..."
+                    npm run build-prod
+                    '''
+                }
             }
         }
 

@@ -7,7 +7,9 @@ spec:
   containers:
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
-      command: ["cat"]
+      command: ["/busybox/sh", "-c"]
+      args:
+        - sleep 1500
       tty: true
       volumeMounts:
         - name: docker-config
@@ -17,7 +19,9 @@ spec:
 
     - name: kubectl
       image: lamld2510/kubectl
-      command: ["cat"]
+      command: ["/bin/sh", "-c"]
+      args:
+        - sleep infinity
       tty: true
       volumeMounts:
         - name: kubeconfig
@@ -27,7 +31,9 @@ spec:
 
     - name: node
       image: node:20-alpine
-      command: ["cat"]
+      command: ["/bin/sh", "-c"]
+      args:
+        - sleep infinity
       tty: true
       volumeMounts:
         - name: workspace-volume
