@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { StrategyReplayEventType } from '../../../../../../core/models/trade-bot/strategy-replay.model';
-import { REPLAY_EVENT_TYPE_OPTIONS, TradeBotTextKey } from '../../shared/strategy-ui.enums';
+import { StrategyReplayEventType } from '../../../../../../../core/models/trade-bot/strategy-replay.model';
+import { REPLAY_EVENT_TYPE_OPTIONS, TradeBotTextKey } from '../../../shared/strategy-ui.enums';
 
 @Component({
   selector: 'app-replay-auto-pause-panel',

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { StrategyTypePickerItem } from '../../../../../core/models/trade-bot/strategy-ui.model';
-import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
-import { I18nService } from '../../../../../core/ui-services/i18n.service';
-import { LoadingService } from '../../../../../core/ui-services/loading.service';
-import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { STRATEGY_MANAGEMENT_ROUTES } from '../strategy-management.constants';
-import { TradeBotTextKey } from '../shared/strategy-ui.enums';
-import { STRATEGY_UI_REGISTRY } from '../shared/strategy-ui.registry';
+import { StrategyTypePickerItem } from '../../../../../../core/models/trade-bot/strategy-ui.model';
+import { ReferenceDataService } from '../../../../../../core/services/trade-bot-service/reference-data.service';
+import { I18nService } from '../../../../../../core/ui-services/i18n.service';
+import { LoadingService } from '../../../../../../core/ui-services/loading.service';
+import { ToastService } from '../../../../../../core/ui-services/toast.service';
+import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategy-management.constants';
+import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
+import { STRATEGY_UI_REGISTRY } from '../../shared/strategy-ui.registry';
 
 @Component({
   selector: 'app-strategy-create-entry',
@@ -39,12 +39,12 @@ export class StrategyCreateEntryComponent implements OnInit {
         next: (strategies) => {
           const mappedItems = strategies
             .map((strategy) => {
-              const metadata = STRATEGY_UI_REGISTRY.find((item) => item.code === strategy.code);
+              const metadata = STRATEGY_UI_REGISTRY.find((item) => item.serviceName === strategy.serviceName);
               if (!metadata) {
                 return null;
               }
               return {
-                code: strategy.code,
+                serviceName: strategy.serviceName,
                 name: strategy.name,
                 description: strategy.description,
                 routePath: metadata.routePath,
@@ -70,7 +70,7 @@ export class StrategyCreateEntryComponent implements OnInit {
     if (!normalized) {
       return this.items;
     }
-    return this.items.filter((item) => [item.code, item.name, item.description].some((part) => String(part ?? '').toLowerCase().includes(normalized)));
+    return this.items.filter((item) => [item.serviceName, item.name, item.description].some((part) => String(part ?? '').toLowerCase().includes(normalized)));
   }
 
   onKeywordChange(keyword: string): void {

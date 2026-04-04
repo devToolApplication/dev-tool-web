@@ -1,0 +1,11 @@
+<app-base-crud-page
+  [pageConfig]="pageConfig"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="saving"
+  (actionClick)="onPageAction($event)"
+  (formSubmit)="onSubmitForm($event)"
+  (valueChange)="onFormValueChange($event)"
+></app-base-crud-page>

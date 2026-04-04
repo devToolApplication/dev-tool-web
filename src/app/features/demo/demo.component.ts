@@ -142,6 +142,7 @@ export class DemoComponent {
     showLines: true,
     showBoxAreas: true,
     showPoints: true,
+    showIndicators: true,
   };
 
   private readonly validSections: DemoSection[] = [

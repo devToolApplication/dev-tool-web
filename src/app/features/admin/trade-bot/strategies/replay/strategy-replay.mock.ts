@@ -298,7 +298,7 @@ export function buildMockReplayPayload(
 
   return {
     jobId: job.id,
-    strategyCode: job.strategyCode,
+    strategyServiceName: job.strategyServiceName,
     symbolCode: job.symbolCode,
     exchangeCode: job.exchangeCode,
     steps,

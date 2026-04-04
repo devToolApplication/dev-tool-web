@@ -8,7 +8,7 @@
     </div>
   </ng-template>
 
-  <ng-container *ngIf="visible()">
+  @if (visible()) {
     <app-form-input
       #configForm
       [config]="config"
@@ -17,5 +17,5 @@
       [showSubmit]="false"
       (valueChange)="configChange.emit($event)"
     ></app-form-input>
-  </ng-container>
+  }
 </p-panel>

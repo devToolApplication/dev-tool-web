@@ -43,7 +43,7 @@ export class UploadStorageFormComponent implements OnInit {
       {
         type: 'secret-metadata',
         name: 'metadata',
-        label: 'Secret Metadata',
+        label: 'secretMetadata',
         width: 'full',
         service: 'file-mcrs'
       },

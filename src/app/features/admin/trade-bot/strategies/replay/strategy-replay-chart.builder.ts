@@ -248,7 +248,7 @@ export function buildChartReplayPayload(
   if (steps.length === 0) {
     return {
       jobId: job.id,
-      strategyCode: job.strategyCode,
+      strategyServiceName: job.strategyServiceName,
       symbolCode: job.symbolCode,
       exchangeCode: job.exchangeCode,
       steps: [],
@@ -260,7 +260,7 @@ export function buildChartReplayPayload(
 
   return {
     jobId: job.id,
-    strategyCode: job.strategyCode,
+    strategyServiceName: job.strategyServiceName,
     symbolCode: job.symbolCode,
     exchangeCode: job.exchangeCode,
     steps,

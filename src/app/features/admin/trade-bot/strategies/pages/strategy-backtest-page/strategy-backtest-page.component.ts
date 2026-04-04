@@ -2,21 +2,22 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of, switchMap } from 'rxjs';
-import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
-import { CandleChartPayload, ChartBoxArea, ChartLine, ChartPoint } from '../../../../../shared/component/candle-chart/candle-chart';
-import { BacktestJobResponse, BacktestMetricResponse, BacktestOrderResponse, BacktestRunDto } from '../../../../../core/models/trade-bot/backtest.model';
-import { ReplayStepEvent, ReplayTradeTimelineItem, StrategyReplayEventType, StrategyReplayPayload } from '../../../../../core/models/trade-bot/strategy-replay.model';
-import { TradeStrategyBindingResponse } from '../../../../../core/models/trade-bot/trade-strategy-binding.model';
-import { BacktestService } from '../../../../../core/services/trade-bot-service/backtest.service';
-import { ChartQueryService } from '../../../../../core/services/trade-bot-service/chart-query.service';
-import { TradeStrategyBindingService } from '../../../../../core/services/trade-bot-service/trade-strategy-binding.service';
-import { I18nService } from '../../../../../core/ui-services/i18n.service';
-import { LoadingService } from '../../../../../core/ui-services/loading.service';
-import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { STRATEGY_MANAGEMENT_ROUTES } from '../strategy-management.constants';
-import { StrategyReplayFacade } from '../replay/strategy-replay.facade';
-import { buildChartReplayPayload } from '../replay/strategy-replay-chart.builder';
-import { TradeBotTextKey } from '../shared/strategy-ui.enums';
+import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
+import { CandleChartPayload, ChartBoxArea, ChartIndicatorSeries, ChartLine, ChartPoint } from '../../../../../../shared/component/candle-chart/candle-chart';
+import { BacktestJobResponse, BacktestMetricResponse, BacktestOrderResponse, BacktestRunDto } from '../../../../../../core/models/trade-bot/backtest.model';
+import { TradeBotAreaData, TradeBotCandleResponse, TradeBotIndicatorData, TradeBotLineData } from '../../../../../../core/models/trade-bot/chart-query.model';
+import { ReplayStepEvent, ReplayTradeTimelineItem, StrategyReplayEventType, StrategyReplayPayload } from '../../../../../../core/models/trade-bot/strategy-replay.model';
+import { TradeStrategyBindingResponse } from '../../../../../../core/models/trade-bot/trade-strategy-binding.model';
+import { BacktestService } from '../../../../../../core/services/trade-bot-service/backtest.service';
+import { ChartQueryService } from '../../../../../../core/services/trade-bot-service/chart-query.service';
+import { TradeStrategyBindingService } from '../../../../../../core/services/trade-bot-service/trade-strategy-binding.service';
+import { I18nService } from '../../../../../../core/ui-services/i18n.service';
+import { LoadingService } from '../../../../../../core/ui-services/loading.service';
+import { ToastService } from '../../../../../../core/ui-services/toast.service';
+import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategy-management.constants';
+import { StrategyReplayFacade } from '../../replay/strategy-replay.facade';
+import { buildChartReplayPayload } from '../../replay/strategy-replay-chart.builder';
+import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
 
 type BacktestRunFormGroup = FormGroup<{
   fromDate: FormControl<Date | null>;
@@ -41,7 +42,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     showVolume: true,
     showLines: true,
     showBoxAreas: true,
-    showPoints: true
+    showPoints: true,
+    showIndicators: true
   };
 
   readonly orderTableConfig: TableConfig = {
@@ -68,6 +70,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   metric: BacktestMetricResponse | null = null;
   orders: BacktestOrderResponse[] = [];
   replayPayload: StrategyReplayPayload | null = null;
+  previewChartData: TradeBotCandleResponse | null = null;
   running = false;
   loadingOrders = false;
 
@@ -136,13 +139,20 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
 
     return {
       candles: steps.map((step) => step.candle),
-      lines: activeOverlays
-        .filter((overlay) => ['entry', 'stop-loss', 'take-profit', 'indicator-line', 'bos', 'choch'].includes(overlay.type))
-        .map((overlay) => this.toChartLine(overlay.payload, overlay.label)),
-      boxAreas: activeOverlays
-        .filter((overlay) => ['session-zone', 'area-zone', 'order-block', 'fvg', 'liquidity'].includes(overlay.type))
-        .map((overlay) => this.toChartBoxArea(overlay.payload, overlay.label)),
-      points: visibleEvents.map((event) => this.toChartPoint(event))
+      lines: [
+        ...activeOverlays
+          .filter((overlay) => ['entry', 'stop-loss', 'take-profit', 'indicator-line', 'bos', 'choch'].includes(overlay.type))
+          .map((overlay) => this.toChartLine(overlay.payload, overlay.label)),
+        ...this.toPreviewLines(this.replay.currentStep()?.candleTime)
+      ],
+      boxAreas: [
+        ...activeOverlays
+          .filter((overlay) => ['session-zone', 'area-zone', 'order-block', 'fvg', 'liquidity'].includes(overlay.type))
+          .map((overlay) => this.toChartBoxArea(overlay.payload, overlay.label)),
+        ...this.toPreviewAreas(this.replay.currentStep()?.candleTime)
+      ],
+      points: visibleEvents.map((event) => this.toChartPoint(event)),
+      indicators: this.toPreviewIndicators(steps.length)
     };
   }
 
@@ -200,20 +210,23 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
         }).pipe(
           switchMap(({ job, metric, orders }) =>
             this.chartQueryService
-              .getCandle(
+              .getStrategyPreview(
                 job.providerSymbol || job.symbolCode,
                 this.resolveReplayInterval(binding),
                 this.resolveReplayStartTime(job, orders.data ?? []),
                 this.resolveReplayEndTime(job, orders.data ?? []),
+                binding.strategyServiceName ?? job.strategyServiceName,
+                binding.configJson ?? {},
                 this.resolveDataResource(job.exchangeCode)
               )
               .pipe(
-                catchError(() => of({ candlestickData: [], lineData: [], areaData: [], pointData: [] })),
+                catchError(() => of({ candlestickData: [], lineData: [], areaData: [], pointData: [], indicatorData: [] })),
                 switchMap((chartData) =>
                   of({
                     job,
                     metric,
                     orders,
+                    chartData,
                     replay: buildChartReplayPayload(job, chartData, orders.data ?? [], metric)
                   })
                 )
@@ -223,10 +236,11 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       )
       .pipe(finalize(() => (this.loadingOrders = false)))
       .subscribe({
-        next: ({ job, metric, orders, replay }) => {
+        next: ({ job, metric, orders, chartData, replay }) => {
           this.job = job;
           this.metric = metric;
           this.orders = orders.data ?? [];
+          this.previewChartData = chartData;
           this.replayPayload = replay;
           this.replay.setPayload(this.replayPayload);
         },
@@ -237,9 +251,10 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private buildRunPayload(binding: TradeStrategyBindingResponse): BacktestRunDto {
     const formValue = this.runForm.getRawValue();
     return {
-      exchangeCode: binding.exchangeCode,
-      symbolCode: binding.symbolCode,
-      strategyCode: binding.strategyCode,
+      bindingId: binding.id,
+      exchangeId: binding.exchangeId ?? '',
+      symbolId: binding.symbolId ?? '',
+      strategyId: binding.strategyId ?? '',
       marketType: binding.marketType,
       tradeSideMode: binding.tradeSideMode,
       fromDate: this.formatDate(formValue.fromDate),
@@ -302,6 +317,49 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       startTime: new Date(event.candleTime).toISOString(),
       price: Number(price ?? 0)
     };
+  }
+
+  private toPreviewIndicators(stepCount: number): ChartIndicatorSeries[] {
+    return (this.previewChartData?.indicatorData ?? []).map((indicator: TradeBotIndicatorData) => ({
+      name: indicator.name ?? 'Indicator',
+      color: indicator.color ?? '#8b5cf6',
+      pane: indicator.type === 'SUBCHART' ? 'subchart' : 'overlay',
+      values: (indicator.value ?? []).slice(0, stepCount).map((value: number | null) => (value == null ? null : Number(value)))
+    }));
+  }
+
+  private toPreviewLines(currentStepTime?: number): ChartLine[] {
+    if (!currentStepTime) {
+      return [];
+    }
+    return (this.previewChartData?.lineData ?? [])
+      .filter((item: TradeBotLineData) => item.from && item.to)
+      .filter((item: TradeBotLineData) => (item.from?.time ?? 0) <= currentStepTime)
+      .map((item: TradeBotLineData) => ({
+        name: item.name ?? 'Line',
+        color: item.color ?? '#0ea5e9',
+        start: Number(item.from?.value ?? 0),
+        end: Number(item.to?.value ?? item.from?.value ?? 0),
+        startTime: this.toIsoTime(item.from?.time ?? currentStepTime),
+        endTime: this.toIsoTime(Math.min(item.to?.time ?? currentStepTime, currentStepTime))
+      }));
+  }
+
+  private toPreviewAreas(currentStepTime?: number): ChartBoxArea[] {
+    if (!currentStepTime) {
+      return [];
+    }
+    return (this.previewChartData?.areaData ?? [])
+      .filter((item: TradeBotAreaData) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
+      .filter((item: TradeBotAreaData) => (item.from ?? 0) <= currentStepTime)
+      .map((item: TradeBotAreaData) => ({
+        name: item.name ?? 'Zone',
+        color: item.color ?? 'rgba(59, 130, 246, 0.18)',
+        startTime: this.toIsoTime(item.from ?? currentStepTime),
+        endTime: this.toIsoTime(Math.min(item.to ?? currentStepTime, currentStepTime)),
+        high: Number(item.maxPrice ?? 0),
+        low: Number(item.minPrice ?? 0)
+      }));
   }
 
   private colorForEvent(type: StrategyReplayEventType): string {
@@ -374,5 +432,9 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       default:
         return normalized.toLowerCase() || 'm5';
     }
+  }
+
+  private toIsoTime(value: number): string {
+    return new Date(value).toISOString();
   }
 }

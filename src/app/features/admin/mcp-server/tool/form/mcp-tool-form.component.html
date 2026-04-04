@@ -1,16 +1,20 @@
-<section class="crud-page">
-  <div class="header-row">
-    <h2>MCP Tool Config - {{ formContext.mode === 'edit' ? 'Edit' : 'Create' }}</h2>
-  </div>
-
-  <div class="form-wrap shadow-1">
-    <app-form-input
-      [config]="formConfig"
-      [context]="formContext"
-      [initialValue]="formInitialValue"
-      [submitting]="submitting"
-      (valueChange)="onFormValueChange($event)"
-      (formSubmit)="onSubmitForm($event)"
-    ></app-form-input>
-  </div>
-</section>
+<app-base-crud-page
+  [pageConfig]="{
+    title: (formContext.mode === 'edit' ? 'mcpTool.editTitle' : 'mcpTool.createTitle'),
+    description: 'mcpTool.form.description',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: submitting, submitForm: true }
+    ],
+    infoSection: {
+      title: 'mcpTool.form.infoTitle',
+      description: 'mcpTool.form.infoDescription'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [submitting]="submitting"
+  (valueChange)="onFormValueChange($event)"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

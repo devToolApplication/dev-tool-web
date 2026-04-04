@@ -1,17 +1,20 @@
-<section class="crud-page">
-  <div class="header-row">
-    <h2>Trade Bot Data Source - {{ editId ? 'Edit' : 'Create' }}</h2>
-  </div>
-
-  <div class="form-wrap shadow-1">
-    @if (formVisible()) {
-      <app-form-input
-        [config]="formConfig"
-        [context]="formContext"
-        [initialValue]="formInitialValue"
-        [submitting]="loading"
-        (formSubmit)="onSubmitForm($event)"
-      ></app-form-input>
+<app-base-crud-page
+  [pageConfig]="{
+    title: 'Trade Bot Data Source - ' + (editId ? 'Edit' : 'Create'),
+    description: 'Configure which market data resources and intervals the trade bot should keep synchronized.',
+    actions: [
+      { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'Save', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'Data Sync Scope',
+      description: 'Select the resource, symbol, and intervals to control which datasets are fetched and refreshed for the bot.'
     }
-  </div>
-</section>
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

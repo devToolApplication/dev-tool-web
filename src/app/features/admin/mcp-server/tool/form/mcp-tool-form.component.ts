@@ -337,7 +337,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
       error: () => {
         this.categories = [];
         this.applyCategoryOptions();
-        this.toastService.error('Load MCP categories failed');
+        this.toastService.error(this.i18nService.t('mcpCategory.loadListError'));
         this.loadDatabases();
       }
     });

@@ -1,11 +1,20 @@
-<section class="crud-page">
-  <div class="header-row">
-    <h2>Storage Config - {{ editId ? 'Edit' : 'Create' }}</h2>
-  </div>
-
-  <div class="form-wrap shadow-1">
-    @if (formVisible()) {
-      <app-form-input [config]="formConfig" [context]="formContext" [initialValue]="formInitialValue" (formSubmit)="onSubmitForm($event)"></app-form-input>
+<app-base-crud-page
+  [pageConfig]="{
+    title: 'Storage Config - ' + (editId ? 'Edit' : 'Create'),
+    description: 'Manage storage-related configuration values shared by the file management services.',
+    actions: [
+      { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'Save', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'Storage Service Config',
+      description: 'Capture the category, key, and payload that downstream storage integrations will read during execution.'
     }
-  </div>
-</section>
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

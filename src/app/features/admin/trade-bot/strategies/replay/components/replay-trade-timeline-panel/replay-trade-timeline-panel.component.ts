@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ReplayTradeTimelineItem } from '../../../../../../core/models/trade-bot/strategy-replay.model';
-import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
+import { ReplayTradeTimelineItem } from '../../../../../../../core/models/trade-bot/strategy-replay.model';
+import { TradeBotTextKey } from '../../../shared/strategy-ui.enums';
 
 @Component({
   selector: 'app-replay-trade-timeline-panel',

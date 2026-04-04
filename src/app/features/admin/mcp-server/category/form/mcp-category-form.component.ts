@@ -20,10 +20,10 @@ export class McpCategoryFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create' };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'name', label: 'Name', width: '1/2', validation: [Rules.required('Name is required')] },
-      { type: 'text', name: 'code', label: 'Code', width: '1/2', validation: [Rules.required('Code is required')] },
-      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' }
+      { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('mcpCategory.nameRequired')] },
+      { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('mcpCategory.codeRequired')] },
+      { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };
 
@@ -60,7 +60,7 @@ export class McpCategoryFormComponent implements OnInit {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
         void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.categoryList]);
       },
-      error: () => this.toastService.error('Save MCP category failed')
+      error: () => this.toastService.error(this.i18nService.t('mcpCategory.saveError'))
     });
   }
 
@@ -92,7 +92,7 @@ export class McpCategoryFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load MCP category detail failed');
+        this.toastService.error(this.i18nService.t('mcpCategory.loadDetailError'));
         void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.categoryList]);
       }
     });

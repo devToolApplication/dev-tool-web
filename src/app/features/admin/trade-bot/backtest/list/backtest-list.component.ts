@@ -25,14 +25,14 @@ export class BacktestListComponent implements OnInit {
     filters: [
       { field: 'exchangeCode', label: 'Exchange', placeholder: 'Filter exchange' },
       { field: 'symbolCode', label: 'Symbol', placeholder: 'Filter symbol' },
-      { field: 'strategyCode', label: 'Strategy', placeholder: 'Filter strategy' },
+      { field: 'strategyServiceName', label: 'Strategy', placeholder: 'Filter strategy' },
       { field: 'status', label: 'Status', placeholder: 'RUNNING / COMPLETED' }
     ],
     filterOptions: { primaryField: 'symbolCode' },
     columns: [
       { field: 'exchangeCode', header: 'Exchange', sortable: true },
       { field: 'symbolCode', header: 'Symbol', sortable: true },
-      { field: 'strategyCode', header: 'Strategy', sortable: true },
+      { field: 'strategyServiceName', header: 'Strategy', sortable: true },
       { field: 'status', header: 'Status', sortable: true },
       { field: 'totalTrades', header: 'Trades', sortable: true },
       { field: 'pnl', header: 'PnL', sortable: true, type: 'number' },

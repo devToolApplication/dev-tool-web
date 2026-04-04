@@ -44,10 +44,10 @@ function baseSessionFields() {
   };
 }
 
-export function buildStrategySpecificConfigDefinition(strategyCode: string): StrategyConfigDefinition {
+export function buildStrategySpecificConfigDefinition(strategyServiceName: string): StrategyConfigDefinition {
   const base = baseSessionFields();
 
-  switch (strategyCode) {
+  switch (strategyServiceName) {
     case 'FIRST_M15_NEWYORK':
       return {
         formConfig: {
@@ -174,6 +174,43 @@ export function buildStrategySpecificConfigDefinition(strategyCode: string): Str
           rsiOversold: 30,
           atrPeriod: 14,
           atrSlMultiplier: 1
+        }
+      };
+    case 'BOLLINGER_RSI_SUPPORT_RESISTANCE':
+      return {
+        formConfig: {
+          fields: [
+            base.timezone,
+            base.baseTimeframe,
+            base.triggerTimeframe,
+            { type: 'number', name: 'bbPeriod', label: TradeBotTextKey.BbPeriod, width: '1/3', validation: required(TradeBotTextKey.BbPeriod) },
+            { type: 'number', name: 'bbStdDev', label: TradeBotTextKey.BbStdDev, width: '1/3', validation: required(TradeBotTextKey.BbStdDev) },
+            { type: 'number', name: 'rsiPeriod', label: TradeBotTextKey.RsiPeriod, width: '1/3', validation: required(TradeBotTextKey.RsiPeriod) },
+            { type: 'number', name: 'rsiOverbought', label: TradeBotTextKey.RsiOverbought, width: '1/3', validation: required(TradeBotTextKey.RsiOverbought) },
+            { type: 'number', name: 'rsiOversold', label: TradeBotTextKey.RsiOversold, width: '1/3', validation: required(TradeBotTextKey.RsiOversold) },
+            { type: 'number', name: 'atrPeriod', label: TradeBotTextKey.AtrPeriod, width: '1/3', validation: required(TradeBotTextKey.AtrPeriod) },
+            { type: 'number', name: 'atrSlMultiplier', label: TradeBotTextKey.AtrSlMultiplier, width: '1/3', validation: required(TradeBotTextKey.AtrSlMultiplier) },
+            { type: 'number', name: 'pivotLeft', label: TradeBotTextKey.PivotLeft, width: '1/3', validation: required(TradeBotTextKey.PivotLeft) },
+            { type: 'number', name: 'pivotRight', label: TradeBotTextKey.PivotRight, width: '1/3', validation: required(TradeBotTextKey.PivotRight) },
+            { type: 'number', name: 'supportResistanceLookback', label: TradeBotTextKey.SupportResistanceLookback, width: '1/3', validation: required(TradeBotTextKey.SupportResistanceLookback) },
+            { type: 'number', name: 'zoneAtrMultiplier', label: TradeBotTextKey.ZoneAtrMultiplier, width: '1/3', validation: required(TradeBotTextKey.ZoneAtrMultiplier) }
+          ]
+        },
+        initialValue: {
+          timezone: StrategyTimezone.UTC,
+          baseTimeframe: StrategyTimeframe.M15,
+          triggerTimeframe: StrategyTimeframe.M15,
+          bbPeriod: 20,
+          bbStdDev: 2,
+          rsiPeriod: 14,
+          rsiOverbought: 70,
+          rsiOversold: 30,
+          atrPeriod: 14,
+          atrSlMultiplier: 1,
+          pivotLeft: 2,
+          pivotRight: 2,
+          supportResistanceLookback: 80,
+          zoneAtrMultiplier: 0.35
         }
       };
     case 'VWAP_PULLBACK_INTRADAY':

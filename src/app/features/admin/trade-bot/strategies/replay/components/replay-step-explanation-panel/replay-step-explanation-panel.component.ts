@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { ReplayRuleExplanation, ReplayStep, ReplayStepEvent, ReplayTradeTimelineItem } from '../../../../../../core/models/trade-bot/strategy-replay.model';
-import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
+import { ReplayRuleExplanation, ReplayStep, ReplayStepEvent, ReplayTradeTimelineItem } from '../../../../../../../core/models/trade-bot/strategy-replay.model';
+import { TradeBotTextKey } from '../../../shared/strategy-ui.enums';
 
 @Component({
   selector: 'app-replay-step-explanation-panel',

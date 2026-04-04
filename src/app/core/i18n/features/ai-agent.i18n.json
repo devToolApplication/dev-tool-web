@@ -1,15 +1,15 @@
 {
   "vi": {
-    "aiAgent.title": "AI Agent Stream (Fake SSE)",
-    "aiAgent.description": "Mô phỏng luồng MCP realtime, tách riêng khỏi Dashboard.",
+    "aiAgent.title": "Luồng AI Agent (SSE giả lập)",
+    "aiAgent.description": "Mô phỏng luồng MCP thời gian thực, tách riêng khỏi bảng điều khiển.",
     "aiAgent.promptPlaceholder": "Nhập yêu cầu cho AI Agent",
-    "aiAgent.run": "Run",
-    "aiAgent.retry": "Retry",
-    "aiAgent.emptyTimeline": "Chưa có timeline event.",
-    "aiAgent.result": "kết quả",
-    "aiAgent.finalAnswer": "Final Answer",
-    "aiAgent.waitingText": "Đang chờ text chunk...",
-    "aiAgent.streamCompleted": "✅ Stream completed"
+    "aiAgent.run": "Chạy",
+    "aiAgent.retry": "Thử lại",
+    "aiAgent.emptyTimeline": "Chưa có sự kiện nào trong timeline.",
+    "aiAgent.result": "Kết quả",
+    "aiAgent.finalAnswer": "Câu trả lời cuối",
+    "aiAgent.waitingText": "Đang chờ từng đoạn văn bản...",
+    "aiAgent.streamCompleted": "Hoàn tất luồng"
   },
   "en": {
     "aiAgent.title": "AI Agent Stream (Fake SSE)",
@@ -21,6 +21,6 @@
     "aiAgent.result": "result",
     "aiAgent.finalAnswer": "Final Answer",
     "aiAgent.waitingText": "Waiting for text chunk...",
-    "aiAgent.streamCompleted": "✅ Stream completed"
+    "aiAgent.streamCompleted": "Stream completed"
   }
 }

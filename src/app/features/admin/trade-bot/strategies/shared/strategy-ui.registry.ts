@@ -2,7 +2,7 @@ import { StrategyUiMetadata } from '../../../../../core/models/trade-bot/strateg
 
 export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
   {
-    code: 'FIRST_M15_NEWYORK',
+    serviceName: 'FIRST_M15_NEWYORK',
     routePath: 'first-m15-new-york',
     icon: 'pi pi-clock',
     displayOrder: 10,
@@ -11,7 +11,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.firstM15.description'
   },
   {
-    code: 'EMA_PULLBACK_TREND',
+    serviceName: 'EMA_PULLBACK_TREND',
     routePath: 'ema-pullback-trend',
     icon: 'pi pi-arrow-up-right',
     displayOrder: 20,
@@ -20,7 +20,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.emaPullback.description'
   },
   {
-    code: 'OPENING_RANGE_BREAKOUT',
+    serviceName: 'OPENING_RANGE_BREAKOUT',
     routePath: 'opening-range-breakout',
     icon: 'pi pi-chart-line',
     displayOrder: 30,
@@ -29,7 +29,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.openingRange.description'
   },
   {
-    code: 'PREV_DAY_HIGH_LOW_RETEST',
+    serviceName: 'PREV_DAY_HIGH_LOW_RETEST',
     routePath: 'prev-day-high-low-retest',
     icon: 'pi pi-flag',
     displayOrder: 40,
@@ -38,7 +38,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.prevDay.description'
   },
   {
-    code: 'DONCHIAN_BREAKOUT_20',
+    serviceName: 'DONCHIAN_BREAKOUT_20',
     routePath: 'donchian-breakout-20',
     icon: 'pi pi-chart-bar',
     displayOrder: 50,
@@ -47,7 +47,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.donchian.description'
   },
   {
-    code: 'BOLLINGER_RSI_MEAN_REVERSION',
+    serviceName: 'BOLLINGER_RSI_MEAN_REVERSION',
     routePath: 'bollinger-rsi-mean-reversion',
     icon: 'pi pi-sync',
     displayOrder: 60,
@@ -56,7 +56,16 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.bollingerRsi.description'
   },
   {
-    code: 'VWAP_PULLBACK_INTRADAY',
+    serviceName: 'BOLLINGER_RSI_SUPPORT_RESISTANCE',
+    routePath: 'bollinger-rsi-support-resistance',
+    icon: 'pi pi-chart-scatter',
+    displayOrder: 65,
+    family: 'mean-reversion',
+    accentColor: '#0f766e',
+    shortDescription: 'tradeBot.strategy.meta.bollingerRsiSr.description'
+  },
+  {
+    serviceName: 'VWAP_PULLBACK_INTRADAY',
     routePath: 'vwap-pullback-intraday',
     icon: 'pi pi-wave-pulse',
     displayOrder: 70,
@@ -65,7 +74,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.vwapPullback.description'
   },
   {
-    code: 'ASIA_RANGE_LONDON_BREAKOUT',
+    serviceName: 'ASIA_RANGE_LONDON_BREAKOUT',
     routePath: 'asia-range-london-breakout',
     icon: 'pi pi-globe',
     displayOrder: 80,
@@ -74,7 +83,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.asiaLondon.description'
   },
   {
-    code: 'INSIDE_BAR_BREAKOUT_MTF',
+    serviceName: 'INSIDE_BAR_BREAKOUT_MTF',
     routePath: 'inside-bar-breakout-mtf',
     icon: 'pi pi-stop',
     displayOrder: 90,
@@ -83,7 +92,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.insideBar.description'
   },
   {
-    code: 'RSI_DIVERGENCE_SWING',
+    serviceName: 'RSI_DIVERGENCE_SWING',
     routePath: 'rsi-divergence-swing',
     icon: 'pi pi-sliders-h',
     displayOrder: 100,
@@ -92,7 +101,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     shortDescription: 'tradeBot.strategy.meta.rsiDivergence.description'
   },
   {
-    code: 'LIQUIDITY_SWEEP_FVG_RECLAIM',
+    serviceName: 'LIQUIDITY_SWEEP_FVG_RECLAIM',
     routePath: 'liquidity-sweep-fvg-reclaim',
     icon: 'pi pi-bolt',
     displayOrder: 110,
@@ -102,11 +111,11 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
   }
 ];
 
-export function resolveStrategyUiMetadataByCode(code: string | null | undefined): StrategyUiMetadata | undefined {
-  if (!code) {
+export function resolveStrategyUiMetadataByServiceName(serviceName: string | null | undefined): StrategyUiMetadata | undefined {
+  if (!serviceName) {
     return undefined;
   }
-  return STRATEGY_UI_REGISTRY.find((item) => item.code === code);
+  return STRATEGY_UI_REGISTRY.find((item) => item.serviceName === serviceName);
 }
 
 export function resolveStrategyUiMetadataByRoutePath(routePath: string | null | undefined): StrategyUiMetadata | undefined {

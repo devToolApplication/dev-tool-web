@@ -30,7 +30,39 @@ export class ChartQueryService {
           candlestickData: res.data?.candlestickData ?? [],
           lineData: res.data?.lineData ?? [],
           areaData: res.data?.areaData ?? [],
-          pointData: res.data?.pointData ?? []
+          pointData: res.data?.pointData ?? [],
+          indicatorData: res.data?.indicatorData ?? []
+        }))
+      );
+  }
+
+  getStrategyPreview(
+    symbol: string,
+    interval: string,
+    startTime: number,
+    endTime: number,
+    strategyServiceName: string,
+    configJson: Record<string, unknown>,
+    dataResource?: string
+  ): Observable<TradeBotCandleResponse> {
+    let params = new HttpParams()
+      .set('symbol', symbol)
+      .set('interval', interval)
+      .set('startTime', startTime)
+      .set('endTime', endTime);
+    if (dataResource) {
+      params = params.set('dataResource', dataResource);
+    }
+
+    return this.http
+      .post<BaseResponse<TradeBotCandleResponse>>(`${this.apiUrl}/fetch/trade-signal`, { strategyServiceName, configJson }, { params })
+      .pipe(
+        map((res) => ({
+          candlestickData: res.data?.candlestickData ?? [],
+          lineData: res.data?.lineData ?? [],
+          areaData: res.data?.areaData ?? [],
+          pointData: res.data?.pointData ?? [],
+          indicatorData: res.data?.indicatorData ?? []
         }))
       );
   }

@@ -23,14 +23,16 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
     showVolume: true,
     showLines: true,
     showBoxAreas: true,
-    showPoints: true
+    showPoints: true,
+    showIndicators: true
   };
 
   chartPayload: CandleChartPayload = {
     candles: [],
     lines: [],
     boxAreas: [],
-    points: []
+    points: [],
+    indicators: []
   };
 
   syncConfig: SyncConfigResponse | null = null;
@@ -247,6 +249,12 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
         color: item.color ?? '#f59e0b',
         startTime: this.formatChartTime(item.time),
         price: item.value
+      })),
+      indicators: (response.indicatorData ?? []).map((item) => ({
+        name: item.name ?? 'Indicator',
+        color: item.color ?? '#8b5cf6',
+        pane: item.type === 'SUBCHART' ? 'subchart' as const : 'overlay' as const,
+        values: (item.value ?? []).map((value) => (value == null ? null : Number(value)))
       }))
     };
   }

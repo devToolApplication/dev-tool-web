@@ -1,9 +1,10 @@
 import { TradeSideMode } from './trade-strategy-binding.model';
 
 export interface BacktestRunDto {
-  exchangeCode: string;
-  symbolCode: string;
-  strategyCode: string;
+  bindingId: string;
+  exchangeId: string;
+  symbolId: string;
+  strategyId: string;
   marketType: string;
   tradeSideMode: TradeSideMode;
   fromDate: string;
@@ -17,10 +18,13 @@ export interface BacktestRunDto {
 export interface BacktestJobResponse {
   id: string;
   bindingId: string;
+  exchangeId: string;
   exchangeCode: string;
+  symbolId: string;
   symbolCode: string;
   providerSymbol: string;
-  strategyCode: string;
+  strategyId: string;
+  strategyServiceName: string;
   marketType: string;
   tradeSideMode: TradeSideMode;
   fromDate: string;
@@ -43,10 +47,13 @@ export interface BacktestOrderResponse {
   id: string;
   backtestJobId: string;
   bindingId: string;
+  exchangeId: string;
   exchangeCode: string;
+  symbolId: string;
   symbolCode: string;
   providerSymbol: string;
-  strategyCode: string;
+  strategyId: string;
+  strategyServiceName: string;
   marketType: string;
   tradeSideMode: TradeSideMode;
   nyTradeDate: string;

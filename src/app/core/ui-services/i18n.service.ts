@@ -9,6 +9,7 @@ import mcpToolConfigTranslations from '../i18n/features/mcp-tool-config.i18n.jso
 import profileTranslations from '../i18n/features/profile.i18n.json';
 import reportsTranslations from '../i18n/features/reports.i18n.json';
 import settingsTranslations from '../i18n/features/settings.i18n.json';
+import systemManagementTranslations from '../i18n/features/system-management.i18n.json';
 import tradeBotTranslations from '../i18n/features/trade-bot.i18n.json';
 import uploadStorageTranslations from '../i18n/features/upload-storage.i18n.json';
 
@@ -25,6 +26,7 @@ const TRANSLATIONS: TranslationMap = {
     ...aiAgentTranslations.vi,
     ...errorsTranslations.vi,
     ...settingsTranslations.vi,
+    ...systemManagementTranslations.vi,
     ...mailTranslations.vi,
     ...profileTranslations.vi,
     ...reportsTranslations.vi,
@@ -39,6 +41,7 @@ const TRANSLATIONS: TranslationMap = {
     ...aiAgentTranslations.en,
     ...errorsTranslations.en,
     ...settingsTranslations.en,
+    ...systemManagementTranslations.en,
     ...mailTranslations.en,
     ...profileTranslations.en,
     ...reportsTranslations.en,

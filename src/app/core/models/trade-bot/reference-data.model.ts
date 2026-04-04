@@ -22,9 +22,19 @@ export interface SymbolResponse {
 
 export interface StrategyResponse {
   id: string;
-  code: string;
+  serviceName: string;
   name: string;
   description?: string;
   version?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETE';
 }
+
+export interface StrategyCreateDto {
+  serviceName: string;
+  name: string;
+  description?: string;
+  version?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'DELETE';
+}
+
+export interface StrategyUpdateDto extends StrategyCreateDto {}

@@ -60,6 +60,8 @@ export enum TradeBotTextKey {
   RsiPeriod = 'tradeBot.strategy.field.rsiPeriod',
   RsiOverbought = 'tradeBot.strategy.field.rsiOverbought',
   RsiOversold = 'tradeBot.strategy.field.rsiOversold',
+  SupportResistanceLookback = 'tradeBot.strategy.field.supportResistanceLookback',
+  ZoneAtrMultiplier = 'tradeBot.strategy.field.zoneAtrMultiplier',
   MinDistanceFromVwapPct = 'tradeBot.strategy.field.minDistanceFromVwapPct',
   AsiaStart = 'tradeBot.strategy.field.asiaStart',
   AsiaEnd = 'tradeBot.strategy.field.asiaEnd',

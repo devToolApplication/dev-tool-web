@@ -5,21 +5,21 @@
         <div class="text-base font-semibold">{{ TEXT.TradeTimeline | translateContent }}</div>
         <div class="text-sm text-surface-500">{{ TEXT.TradeTimelineDesc | translateContent }}</div>
       </div>
-      <p-tag [value]="trades.length + ' trades'" severity="contrast"></p-tag>
+      <p-tag [value]="trades.length + ' ' + ('tradeBot.replay.tradeTimeline.count' | translateContent)" severity="contrast"></p-tag>
     </div>
   </ng-template>
 
   <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto pr-1">
-    <button
-      *ngFor="let trade of trades"
-      type="button"
-      class="rounded-xl border p-3 text-left transition"
-      [ngClass]="{
-        'border-primary bg-primary-50': trade.id === highlightedTradeId,
-        'border-surface-200 bg-surface-0 hover:border-primary': trade.id !== highlightedTradeId
-      }"
-      (click)="tradeSelect.emit(trade)"
-    >
+    @for (trade of trades; track trade.id) {
+      <button
+        type="button"
+        class="rounded-xl border p-3 text-left transition"
+        [ngClass]="{
+          'border-primary bg-primary-50': trade.id === highlightedTradeId,
+          'border-surface-200 bg-surface-0 hover:border-primary': trade.id !== highlightedTradeId
+        }"
+        (click)="tradeSelect.emit(trade)"
+      >
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2">
@@ -43,16 +43,19 @@
         ></button>
       </div>
 
-      <div *ngIf="expandedTradeId === trade.id" class="mt-3 grid grid-cols-2 gap-2 text-sm text-surface-600">
-        <div>{{ TEXT.ExitTime | translateContent }}: {{ trade.exitTime ? (trade.exitTime | date:'MM-dd HH:mm') : '--' }}</div>
-        <div>{{ TEXT.ExitPrice | translateContent }}: {{ trade.exitPrice ?? '--' }}</div>
-        <div>{{ TEXT.StopLossPrice | translateContent }}: {{ trade.stopLoss }}</div>
-        <div>{{ TEXT.TakeProfitPrice | translateContent }}: {{ trade.takeProfit }}</div>
-        <div>{{ TEXT.EntryReason | translateContent }}: {{ trade.entryReason || '--' }}</div>
-        <div>{{ TEXT.ExitReason | translateContent }}: {{ trade.exitReason || '--' }}</div>
-        <div>{{ TEXT.WinLoss | translateContent }}: {{ trade.result }}</div>
-        <div>{{ TEXT.Pnl | translateContent }}: {{ trade.pnl ?? '--' }}</div>
-      </div>
-    </button>
+        @if (expandedTradeId === trade.id) {
+          <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-surface-600">
+            <div>{{ TEXT.ExitTime | translateContent }}: {{ trade.exitTime ? (trade.exitTime | date:'MM-dd HH:mm') : '--' }}</div>
+            <div>{{ TEXT.ExitPrice | translateContent }}: {{ trade.exitPrice ?? '--' }}</div>
+            <div>{{ TEXT.StopLossPrice | translateContent }}: {{ trade.stopLoss }}</div>
+            <div>{{ TEXT.TakeProfitPrice | translateContent }}: {{ trade.takeProfit }}</div>
+            <div>{{ TEXT.EntryReason | translateContent }}: {{ trade.entryReason || '--' }}</div>
+            <div>{{ TEXT.ExitReason | translateContent }}: {{ trade.exitReason || '--' }}</div>
+            <div>{{ TEXT.WinLoss | translateContent }}: {{ trade.result }}</div>
+            <div>{{ TEXT.Pnl | translateContent }}: {{ trade.pnl ?? '--' }}</div>
+          </div>
+        }
+      </button>
+    }
   </div>
 </p-panel>

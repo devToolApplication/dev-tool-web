@@ -18,22 +18,22 @@ import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
 })
 export class McpCategoryListComponent implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'MCP Categories',
+    title: 'mcpCategory.title',
     toolbar: {
-      new: { visible: true, label: 'New Category', icon: 'pi pi-plus', severity: 'success' }
+      new: { visible: true, label: 'mcpCategory.new', icon: 'pi pi-plus', severity: 'success' }
     },
     columns: [
-      { field: 'name', header: 'Name', sortable: true },
-      { field: 'code', header: 'Code', sortable: true },
-      { field: 'status', header: 'Status' },
-      { field: 'description', header: 'Description' },
+      { field: 'name', header: 'name', sortable: true },
+      { field: 'code', header: 'code', sortable: true },
+      { field: 'status', header: 'status' },
+      { field: 'description', header: 'description' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         actions: [
-          { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-          { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+          { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
+          { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
         ]
       }
     ],
@@ -82,7 +82,7 @@ export class McpCategoryListComponent implements OnInit {
       next: (res: BasePageResponse<McpCategoryResponse>) => {
         this.rows = res.data ?? [];
       },
-      error: () => this.toastService.error('Load MCP categories failed')
+      error: () => this.toastService.error(this.i18nService.t('mcpCategory.loadListError'))
     });
   }
 }

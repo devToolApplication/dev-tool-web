@@ -133,7 +133,7 @@ export class McpToolListComponent implements OnInit {
         }
       },
       error: () => {
-        this.toastService.error('Load MCP categories failed');
+        this.toastService.error(this.i18nService.t('mcpCategory.loadListError'));
       }
     });
   }

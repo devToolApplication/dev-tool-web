@@ -20,12 +20,12 @@ export class AiAgentSecretFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create' };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'category', label: 'Category', width: '1/2', validation: [Rules.required('Category is required')] },
-      { type: 'text', name: 'name', label: 'Name', width: '1/2', validation: [Rules.required('Name is required')] },
-      { type: 'text', name: 'code', label: 'Code', width: '1/2', validation: [Rules.required('Code is required')] },
-      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'secretValue', label: 'Secret Value', width: 'full', validation: [Rules.required('Secret value is required')] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' }
+      { type: 'text', name: 'category', label: 'category', width: '1/2', validation: [Rules.required('systemManagement.validation.categoryRequired')] },
+      { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('systemManagement.validation.nameRequired')] },
+      { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('systemManagement.validation.codeRequired')] },
+      { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'textarea', name: 'secretValue', label: 'systemManagement.field.secretValue', width: 'full', validation: [Rules.required('systemManagement.validation.secretValueRequired')] },
+      { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };
 
@@ -62,7 +62,7 @@ export class AiAgentSecretFormComponent implements OnInit {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
         void this.router.navigate([AI_AGENT_SECRET_ROUTES.list]);
       },
-      error: () => this.toastService.error('Save AI Agent secret failed')
+      error: () => this.toastService.error(this.i18nService.t('systemManagement.aiAgentSecret.toast.saveError'))
     });
   }
 
@@ -88,7 +88,7 @@ export class AiAgentSecretFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load AI Agent secret detail failed');
+        this.toastService.error(this.i18nService.t('systemManagement.aiAgentSecret.toast.loadDetailError'));
         void this.router.navigate([AI_AGENT_SECRET_ROUTES.list]);
       }
     });

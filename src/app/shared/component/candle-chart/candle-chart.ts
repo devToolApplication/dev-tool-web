@@ -44,11 +44,19 @@ export interface ChartPoint {
   price: number;
 }
 
+export interface ChartIndicatorSeries {
+  name: string;
+  color: string;
+  pane: 'overlay' | 'subchart';
+  values: Array<number | null>;
+}
+
 export interface CandleChartPayload {
   candles: CandleData[];
   lines: ChartLine[];
   boxAreas: ChartBoxArea[];
   points: ChartPoint[];
+  indicators: ChartIndicatorSeries[];
 }
 
 export interface CandleChartConfig {
@@ -57,6 +65,7 @@ export interface CandleChartConfig {
   showLines: boolean;
   showBoxAreas: boolean;
   showPoints: boolean;
+  showIndicators: boolean;
 }
 
 @Component({
@@ -75,12 +84,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     showLines: true,
     showBoxAreas: true,
     showPoints: true,
+    showIndicators: true,
   };
   @Input() data: CandleChartPayload = {
     candles: [],
     lines: [],
     boxAreas: [],
     points: [],
+    indicators: [],
   };
 
   private echartsModule: typeof import('echarts') | null = null;
@@ -130,6 +141,15 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       item.high,
     ]);
     const volumeValues = this.data.candles.map((item) => item.volume ?? 0);
+    const overlayIndicators = this.config.showIndicators
+      ? this.data.indicators.filter((indicator) => indicator.pane === 'overlay')
+      : [];
+    const subchartIndicators = this.config.showIndicators
+      ? this.data.indicators.filter((indicator) => indicator.pane === 'subchart')
+      : [];
+    const hasVolumePane = this.config.showVolume;
+    const hasIndicatorPane = subchartIndicators.length > 0;
+    const bottomAxisIndex = hasIndicatorPane ? (hasVolumePane ? 2 : 1) : hasVolumePane ? 1 : 0;
 
     const lineSeries = this.config.showLines
       ? this.data.lines.map((line, index) => ({
@@ -184,6 +204,45 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
         }]
       : [];
 
+    const overlayIndicatorSeries = overlayIndicators.map((indicator) => ({
+      name: indicator.name,
+      type: 'line' as const,
+      data: indicator.values.map((value, index) => [xAxis[index], value]),
+      showSymbol: false,
+      connectNulls: false,
+      smooth: false,
+      xAxisIndex: 0,
+      yAxisIndex: 0,
+      lineStyle: {
+        width: indicator.name.toLowerCase().includes('middle') ? 1.4 : 1.8,
+        color: indicator.color,
+        opacity: indicator.name.toLowerCase().includes('rsi ') ? 0.7 : 1,
+      },
+      encode: { x: 0, y: 1 },
+      tooltip: { show: false },
+      silent: true,
+    }));
+
+    const subchartIndicatorSeries = subchartIndicators.map((indicator) => ({
+      name: indicator.name,
+      type: 'line' as const,
+      data: indicator.values.map((value, index) => [xAxis[index], value]),
+      showSymbol: false,
+      connectNulls: false,
+      smooth: false,
+      xAxisIndex: hasVolumePane ? 2 : 1,
+      yAxisIndex: hasVolumePane ? 2 : 1,
+      lineStyle: {
+        width: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 1 : 1.8,
+        type: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 'dashed' : 'solid',
+        color: indicator.color,
+        opacity: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 0.75 : 1,
+      },
+      encode: { x: 0, y: 1 },
+      tooltip: { show: false },
+      silent: true,
+    }));
+
     const pointSeries = this.config.showPoints
       ? this.data.points.map((point) => ({
           name: point.name,
@@ -211,6 +270,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       });
     }
 
+    series.push(...overlayIndicatorSeries);
+
     if (this.config.showVolume) {
       series.push({
         name: 'Volume',
@@ -230,7 +291,72 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       });
     }
 
-    series.push(...lineSeries, ...boxAreaSeries, ...pointSeries);
+    series.push(...subchartIndicatorSeries, ...lineSeries, ...boxAreaSeries, ...pointSeries);
+
+    const grid: any[] = [
+      {
+        left: 40,
+        right: 20,
+        top: 40,
+        height: hasVolumePane ? (hasIndicatorPane ? '44%' : '58%') : hasIndicatorPane ? '60%' : '74%',
+      },
+    ];
+
+    if (hasVolumePane) {
+      grid.push({
+        left: 40,
+        right: 20,
+        top: hasIndicatorPane ? '58%' : '74%',
+        height: hasIndicatorPane ? '12%' : '16%',
+      });
+    }
+
+    if (hasIndicatorPane) {
+      grid.push({
+        left: 40,
+        right: 20,
+        top: hasVolumePane ? '76%' : '72%',
+        height: hasVolumePane ? '14%' : '18%',
+      });
+    }
+
+    const xAxes = grid.map((item, index) => ({
+      type: 'category' as const,
+      gridIndex: index,
+      data: xAxis,
+      boundaryGap: true,
+      axisLine: { lineStyle: { color: '#64748b' } },
+      axisLabel: { show: index === bottomAxisIndex },
+      min: 'dataMin',
+      max: 'dataMax',
+    }));
+
+    const yAxes: any[] = [
+      {
+        scale: true,
+        axisLine: { lineStyle: { color: '#64748b' } },
+        splitLine: { lineStyle: { color: 'rgba(100, 116, 139, 0.2)' } },
+      },
+    ];
+
+    if (hasVolumePane) {
+      yAxes.push({
+        gridIndex: 1,
+        scale: true,
+        axisLine: { lineStyle: { color: '#64748b' } },
+        splitLine: { show: false },
+      });
+    }
+
+    if (hasIndicatorPane) {
+      yAxes.push({
+        gridIndex: hasVolumePane ? 2 : 1,
+        min: 0,
+        max: 100,
+        axisLine: { lineStyle: { color: '#64748b' } },
+        splitLine: { lineStyle: { color: 'rgba(100, 116, 139, 0.14)' } },
+      });
+    }
 
     this.chartInstance.setOption(
       {
@@ -242,10 +368,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
           },
         },
         legend: { top: 10 },
-        grid: [
-          { left: 40, right: 20, top: 40, height: '58%' },
-          { left: 40, right: 20, top: '74%', height: '16%' },
-        ],
+        grid,
         toolbox: {
           right: 16,
           feature: {
@@ -258,7 +381,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
         dataZoom: [
           {
             type: 'inside',
-            xAxisIndex: [0, 1],
+            xAxisIndex: grid.map((_, index) => index),
             filterMode: 'filter',
             zoomOnMouseWheel: true,
             moveOnMouseMove: true,
@@ -266,45 +389,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
           },
           {
             type: 'slider',
-            xAxisIndex: [0, 1],
+            xAxisIndex: grid.map((_, index) => index),
             filterMode: 'filter',
             height: 24,
             bottom: 8,
           },
         ],
-        xAxis: [
-          {
-            type: 'category',
-            data: xAxis,
-            boundaryGap: true,
-            axisLine: { lineStyle: { color: '#64748b' } },
-            axisLabel: { show: false },
-            min: 'dataMin',
-            max: 'dataMax',
-          },
-          {
-            type: 'category',
-            gridIndex: 1,
-            data: xAxis,
-            boundaryGap: true,
-            axisLine: { lineStyle: { color: '#64748b' } },
-            min: 'dataMin',
-            max: 'dataMax',
-          },
-        ],
-        yAxis: [
-          {
-            scale: true,
-            axisLine: { lineStyle: { color: '#64748b' } },
-            splitLine: { lineStyle: { color: 'rgba(100, 116, 139, 0.2)' } },
-          },
-          {
-            gridIndex: 1,
-            scale: true,
-            axisLine: { lineStyle: { color: '#64748b' } },
-            splitLine: { show: false },
-          },
-        ],
+        xAxis: xAxes,
+        yAxis: yAxes,
         series,
       },
       true,

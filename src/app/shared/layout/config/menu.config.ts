@@ -2,57 +2,59 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 
 export const APP_LAYOUT_MENU: AppMenuItem[] = [
   {
-    label: 'admin',
+    label: 'layout.menu.admin',
     icon: 'pi pi-shield',
     items: [
-      { label: 'Dashboard', icon: 'pi pi-home', routerLink: '/admin/dashboard' },
+      { label: 'layout.menu.dashboard', icon: 'pi pi-home', routerLink: '/admin/dashboard' },
       {
-        label: 'Quan ly he thong',
+        label: 'layout.menu.systemManagement',
         icon: 'pi pi-cog',
         items: [
           {
-            label: 'Khoa bi mat',
+            label: 'layout.menu.secretManagement',
             icon: 'pi pi-key',
             items: [
-              { label: 'He thong luu tru', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-secrets' },
-              { label: 'He thong AI Agent', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-secrets' },
-              { label: 'Trade Bot MCRS', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-secrets' }
+              { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-secrets' },
+              { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-secrets' },
+              { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-secrets' }
             ]
           },
           {
-            label: 'Cau hinh chung',
+            label: 'layout.menu.generalConfig',
             icon: 'pi pi-sliders-h',
             items: [
-              { label: 'He thong luu tru', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
-              { label: 'He thong AI Agent', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
-              { label: 'Trade Bot MCRS', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' }
+              { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
+              { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
+              { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' }
             ]
           }
         ]
       },
       {
-        label: 'Quan ly luu tru file',
+        label: 'layout.menu.fileStorageManagement',
         icon: 'pi pi-cloud-upload',
-        items: [{ label: 'Kho luu tru', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' }]
+        items: [{ label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' }]
       },
       {
-        label: 'Quan ly mcp server',
+        label: 'layout.menu.mcpServerManagement',
         icon: 'pi pi-wrench',
         items: [
-          { label: 'mcp category', icon: 'pi pi-tags', routerLink: '/admin/mcp-tool-config/category' },
-          { label: 'mcp tool', icon: 'pi pi-wrench', routerLink: '/admin/mcp-tool-config/tool' }
+          { label: 'layout.menu.mcpCategory', icon: 'pi pi-tags', routerLink: '/admin/mcp-tool-config/category' },
+          { label: 'layout.menu.mcpTool', icon: 'pi pi-wrench', routerLink: '/admin/mcp-tool-config/tool' }
         ]
       },
       {
-        label: 'Quan ly trade bot',
+        label: 'layout.menu.tradeBotManagement',
         icon: 'pi pi-chart-line',
         items: [
-          { label: 'Nguon du lieu', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' },
-          { label: 'Trade Strategy Binding', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/strategy-binding' },
+          { label: 'layout.menu.dataSource', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' },
+          { label: 'Strategy Config', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' },
+          { label: 'Rule Config', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/rule-configs' },
+          { label: 'layout.menu.strategyBinding', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/strategy-binding' },
           { label: 'Backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
         ]
       },
-      { label: 'AI Agent Stream', icon: 'pi pi-sparkles', routerLink: '/admin/ai-agent-stream' }
+      { label: 'layout.menu.aiAgentStream', icon: 'pi pi-sparkles', routerLink: '/admin/ai-agent-stream' }
     ]
   },
   {

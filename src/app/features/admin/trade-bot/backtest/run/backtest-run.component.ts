@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import { forkJoin, finalize } from 'rxjs';
 import { BacktestRunDto } from '../../../../../core/models/trade-bot/backtest.model';
 import { ExchangeResponse, StrategyResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
+import { TradeStrategyBindingResponse } from '../../../../../core/models/trade-bot/trade-strategy-binding.model';
 import { BacktestService } from '../../../../../core/services/trade-bot-service/backtest.service';
 import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
+import { TradeStrategyBindingService } from '../../../../../core/services/trade-bot-service/trade-strategy-binding.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
@@ -15,9 +17,10 @@ import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategies/strategy-management
 import { TradeBotTextKey } from '../../strategies/shared/strategy-ui.enums';
 
 interface BacktestRunFormValue {
-  exchangeCode: string;
-  symbolCode: string;
-  strategyCode: string;
+  bindingId: string;
+  exchangeId: string;
+  symbolId: string;
+  strategyId: string;
   marketType: string;
   tradeSideMode: 'BOTH' | 'LONG_ONLY' | 'SHORT_ONLY';
   fromDate: Date | null;
@@ -39,32 +42,35 @@ type SelectOption = { label: string; value: string };
   templateUrl: './backtest-run.component.html'
 })
 export class BacktestRunComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: { exchangeOptions: [], symbolOptions: [], strategyOptions: [] } };
+  readonly formContext: FormContext = { user: null, mode: 'create', extra: { bindingOptions: [], exchangeOptions: [], symbolOptions: [], strategyOptions: [] } };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'select', name: 'exchangeCode', label: 'Exchange', width: '1/3', optionsExpression: 'context.extra?.exchangeOptions || []', validation: [Rules.required('Exchange is required')] },
-      { type: 'select', name: 'symbolCode', label: 'Symbol', width: '1/3', optionsExpression: 'context.extra?.symbolOptions || []', validation: [Rules.required('Symbol is required')] },
-      { type: 'select', name: 'strategyCode', label: 'Strategy', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('Strategy is required')] },
-      { type: 'select', name: 'marketType', label: 'Market Type', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('Market type is required')] },
-      { type: 'select', name: 'tradeSideMode', label: 'Trade Side Mode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('Trade side mode is required')] },
-      { type: 'number', name: 'initialBalance', label: 'Initial Balance', width: '1/3', validation: [Rules.required('Initial balance is required')] },
-      { type: 'date', name: 'fromDate', label: 'From Date', width: '1/3', validation: [Rules.required('From date is required')] },
-      { type: 'date', name: 'toDate', label: 'To Date', width: '1/3', validation: [Rules.required('To date is required')] },
-      { type: 'number', name: 'feeRate', label: 'Fee Rate', width: '1/3' },
-      { type: 'number', name: 'slippageRate', label: 'Slippage Rate', width: '1/3' },
-      { type: 'number', name: 'fixedQuantity', label: 'Fixed Quantity', width: '1/3' },
-      { type: 'number', name: 'fixedRiskAmount', label: 'Fixed Risk Amount', width: '1/3' },
-      { type: 'number', name: 'riskPercentPerTrade', label: 'Risk % / Trade', width: '1/3' },
-      { type: 'checkbox', name: 'allowCompounding', label: 'Allow Compounding', width: '1/3' }
+      { type: 'select', name: 'bindingId', label: 'tradeBot.backtest.run.field.binding', width: 'full', optionsExpression: 'context.extra?.bindingOptions || []', validation: [Rules.required('tradeBot.backtest.run.validation.bindingRequired')] },
+      { type: 'select', name: 'exchangeId', label: 'tradeBot.strategy.field.exchange', width: '1/3', optionsExpression: 'context.extra?.exchangeOptions || []', validation: [Rules.required('tradeBot.backtest.run.validation.exchangeRequired')] },
+      { type: 'select', name: 'symbolId', label: 'tradeBot.strategy.field.symbol', width: '1/3', optionsExpression: 'context.extra?.symbolOptions || []', validation: [Rules.required('tradeBot.backtest.run.validation.symbolRequired')] },
+      { type: 'select', name: 'strategyId', label: 'tradeBot.strategy.field.strategyName', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('tradeBot.backtest.run.validation.strategyRequired')] },
+      { type: 'select', name: 'marketType', label: 'tradeBot.strategy.field.marketType', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('tradeBot.backtest.run.validation.marketTypeRequired')] },
+      { type: 'select', name: 'tradeSideMode', label: 'tradeBot.strategy.field.tradeSideMode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('tradeBot.backtest.run.validation.tradeSideModeRequired')] },
+      { type: 'number', name: 'initialBalance', label: 'tradeBot.replay.field.initialBalance', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.initialBalanceRequired')] },
+      { type: 'date', name: 'fromDate', label: 'fromDate', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.fromDateRequired')] },
+      { type: 'date', name: 'toDate', label: 'toDate', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.toDateRequired')] },
+      { type: 'number', name: 'feeRate', label: 'tradeBot.replay.field.feeRate', width: '1/3' },
+      { type: 'number', name: 'slippageRate', label: 'tradeBot.replay.field.slippage', width: '1/3' },
+      { type: 'number', name: 'fixedQuantity', label: 'tradeBot.backtest.run.field.fixedQuantity', width: '1/3' },
+      { type: 'number', name: 'fixedRiskAmount', label: 'tradeBot.backtest.run.field.fixedRiskAmount', width: '1/3' },
+      { type: 'number', name: 'riskPercentPerTrade', label: 'tradeBot.replay.field.riskPerTrade', width: '1/3' },
+      { type: 'checkbox', name: 'allowCompounding', label: 'tradeBot.backtest.run.field.allowCompounding', width: '1/3' }
     ]
   };
 
   readonly formVisible = signal(true);
   loading = false;
+  bindings: TradeStrategyBindingResponse[] = [];
   formInitialValue: BacktestRunFormValue = {
-    exchangeCode: 'OANDA',
-    symbolCode: 'XAUUSD',
-    strategyCode: 'FIRST_M15_NEWYORK',
+    bindingId: '',
+    exchangeId: '',
+    symbolId: '',
+    strategyId: '',
     marketType: 'FOREX',
     tradeSideMode: 'BOTH',
     fromDate: new Date(),
@@ -80,6 +86,7 @@ export class BacktestRunComponent implements OnInit {
 
   constructor(
     private readonly referenceDataService: ReferenceDataService,
+    private readonly bindingService: TradeStrategyBindingService,
     private readonly backtestService: BacktestService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
@@ -97,12 +104,19 @@ export class BacktestRunComponent implements OnInit {
       return;
     }
 
+    const binding = this.bindings.find((item) => item.id === model.bindingId);
+    if (!binding) {
+      this.toastService.error(this.i18nService.t('tradeBot.backtest.run.validation.bindingRequired'));
+      return;
+    }
+
     const payload: BacktestRunDto = {
-      exchangeCode: model.exchangeCode,
-      symbolCode: model.symbolCode,
-      strategyCode: model.strategyCode,
-      marketType: model.marketType,
-      tradeSideMode: model.tradeSideMode,
+      bindingId: binding.id,
+      exchangeId: binding.exchangeId ?? model.exchangeId,
+      symbolId: binding.symbolId ?? model.symbolId,
+      strategyId: binding.strategyId ?? model.strategyId,
+      marketType: binding.marketType,
+      tradeSideMode: binding.tradeSideMode,
       fromDate: this.toLocalDateString(model.fromDate),
       toDate: this.toLocalDateString(model.toDate),
       initialBalance: Number(model.initialBalance),
@@ -135,6 +149,7 @@ export class BacktestRunComponent implements OnInit {
     this.loadingService
       .track(
         forkJoin({
+          bindings: this.bindingService.getPage(0, 200, ['exchangeCode,asc']),
           exchanges: this.referenceDataService.getExchanges(),
           symbols: this.referenceDataService.getSymbols(),
           strategies: this.referenceDataService.getStrategies()
@@ -142,11 +157,23 @@ export class BacktestRunComponent implements OnInit {
       )
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ exchanges, symbols, strategies }) => {
+        next: ({ bindings, exchanges, symbols, strategies }) => {
+          this.bindings = bindings.data ?? [];
+          const firstBinding = this.bindings[0];
           this.formContext.extra = {
+            bindingOptions: this.mapBindingOptions(this.bindings),
             exchangeOptions: this.mapExchangeOptions(exchanges),
             symbolOptions: this.mapSymbolOptions(symbols),
             strategyOptions: this.mapStrategyOptions(strategies)
+          };
+          this.formInitialValue = {
+            ...this.formInitialValue,
+            bindingId: firstBinding?.id ?? '',
+            exchangeId: firstBinding?.exchangeId ?? exchanges[0]?.id ?? '',
+            symbolId: firstBinding?.symbolId ?? symbols[0]?.id ?? '',
+            strategyId: firstBinding?.strategyId ?? strategies[0]?.id ?? '',
+            marketType: firstBinding?.marketType ?? 'FOREX',
+            tradeSideMode: firstBinding?.tradeSideMode ?? 'BOTH'
           };
           this.rerenderForm();
         },
@@ -160,15 +187,22 @@ export class BacktestRunComponent implements OnInit {
   }
 
   private mapExchangeOptions(items: ExchangeResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.code }));
+    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
+  }
+
+  private mapBindingOptions(items: TradeStrategyBindingResponse[]): SelectOption[] {
+    return items.map((item) => ({
+      label: `${item.exchangeCode} - ${item.symbolCode} - ${item.strategyServiceName} - ${item.ruleCode ?? this.i18nService.t('tradeBot.rule.none')}`,
+      value: item.id
+    }));
   }
 
   private mapSymbolOptions(items: SymbolResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.code }));
+    return items.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.id }));
   }
 
   private mapStrategyOptions(items: StrategyResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.code }));
+    return items.map((item) => ({ label: `${item.serviceName} - ${item.name}`, value: item.id }));
   }
 
   private toLocalDateString(value: Date): string {

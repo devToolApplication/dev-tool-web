@@ -1,0 +1,20 @@
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'tradeBot.strategyConfig.form.editTitle' : 'tradeBot.strategyConfig.form.createTitle',
+    description: 'tradeBot.strategyConfig.form.description',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'tradeBot.strategyConfig.form.infoTitle',
+      description: 'tradeBot.strategyConfig.form.infoDescription'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

@@ -24,7 +24,8 @@ export class TradeStrategyBindingListComponent implements OnInit {
     filters: [
       { field: 'exchangeCode', label: TradeBotTextKey.Exchange, placeholder: 'tradeBot.filter.exchange' },
       { field: 'symbolCode', label: TradeBotTextKey.Symbol, placeholder: 'tradeBot.filter.symbol' },
-      { field: 'strategyCode', label: TradeBotTextKey.StrategyCode, placeholder: 'tradeBot.filter.strategy' },
+      { field: 'strategyServiceName', label: TradeBotTextKey.StrategyCode, placeholder: 'tradeBot.filter.strategy' },
+      { field: 'ruleCode', label: 'Rule', placeholder: 'Rule code' },
       { field: 'marketType', label: TradeBotTextKey.MarketType, placeholder: 'tradeBot.filter.marketType' },
       { field: 'status', label: TradeBotTextKey.Status, placeholder: 'tradeBot.filter.status' }
     ],
@@ -33,7 +34,8 @@ export class TradeStrategyBindingListComponent implements OnInit {
       { field: 'exchangeCode', header: TradeBotTextKey.Exchange, sortable: true },
       { field: 'symbolCode', header: TradeBotTextKey.Symbol, sortable: true },
       { field: 'providerSymbol', header: TradeBotTextKey.ProviderSymbol, sortable: true },
-      { field: 'strategyCode', header: TradeBotTextKey.StrategyCode, sortable: true },
+      { field: 'strategyServiceName', header: TradeBotTextKey.StrategyCode, sortable: true },
+      { field: 'ruleCode', header: 'Rule', sortable: true },
       { field: 'marketType', header: TradeBotTextKey.MarketType, sortable: true },
       { field: 'tradeSideMode', header: TradeBotTextKey.TradeSideMode, sortable: true },
       { field: 'status', header: TradeBotTextKey.Status, sortable: true },

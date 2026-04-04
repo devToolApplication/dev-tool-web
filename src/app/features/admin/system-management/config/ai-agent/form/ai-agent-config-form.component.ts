@@ -20,11 +20,11 @@ export class AiAgentConfigFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create' };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'category', label: 'Category', width: '1/2', validation: [Rules.required('Category is required')] },
-      { type: 'text', name: 'key', label: 'Key', width: '1/2', validation: [Rules.required('Key is required')] },
-      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'value', label: 'JSON Value', width: 'full', validation: [Rules.required('Value is required')] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' }
+      { type: 'text', name: 'category', label: 'category', width: '1/2', validation: [Rules.required('systemManagement.validation.categoryRequired')] },
+      { type: 'text', name: 'key', label: 'key', width: '1/2', validation: [Rules.required('systemManagement.validation.keyRequired')] },
+      { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'textarea', name: 'value', label: 'systemManagement.field.jsonValue', width: 'full', validation: [Rules.required('systemManagement.validation.valueRequired')] },
+      { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };
 
@@ -61,7 +61,7 @@ export class AiAgentConfigFormComponent implements OnInit {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
         void this.router.navigate([AI_AGENT_CONFIG_ROUTES.list]);
       },
-      error: () => this.toastService.error('Save AI Agent config failed')
+      error: () => this.toastService.error(this.i18nService.t('systemManagement.aiAgentConfig.toast.saveError'))
     });
   }
 
@@ -87,7 +87,7 @@ export class AiAgentConfigFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load AI Agent config detail failed');
+        this.toastService.error(this.i18nService.t('systemManagement.aiAgentConfig.toast.loadDetailError'));
         void this.router.navigate([AI_AGENT_CONFIG_ROUTES.list]);
       }
     });

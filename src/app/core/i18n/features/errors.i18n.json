@@ -1,10 +1,10 @@
 {
   "vi": {
-    "errors.forbiddenTitle": "Forbidden",
+    "errors.forbiddenTitle": "Không được phép truy cập",
     "errors.forbiddenDescription": "Bạn không có quyền truy cập tài nguyên này.",
-    "errors.notFoundTitle": "Not Found",
+    "errors.notFoundTitle": "Không tìm thấy",
     "errors.notFoundDescription": "Trang bạn truy cập không tồn tại hoặc đã được di chuyển.",
-    "errors.backToDashboard": "Quay về Dashboard"
+    "errors.backToDashboard": "Quay về bảng điều khiển"
   },
   "en": {
     "errors.forbiddenTitle": "Forbidden",

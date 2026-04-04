@@ -44,6 +44,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
+import { BaseCrudPageComponent } from './ui/base-crud-page/base-crud-page.component';
 import { BasePopupComponent } from './component/base-popup/base-popup.component';
 import { BaseReplayControlsComponent } from './component/base-replay-controls/base-replay-controls.component';
 import { AutoComplete } from './component/auto-complete/auto-complete';
@@ -123,6 +124,7 @@ const FEATURE = [
 ];
 
 const COMPONENTS = [
+  BaseCrudPageComponent,
   BasePopupComponent,
   BaseReplayControlsComponent,
   Breadcrumb,

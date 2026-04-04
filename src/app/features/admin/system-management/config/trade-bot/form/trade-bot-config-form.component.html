@@ -1,12 +1,20 @@
-<div class="card">
-  @if (formVisible()) {
-    <app-form-input
-      [config]="formConfig"
-      [context]="formContext"
-      [initialValue]="formInitialValue"
-      [submitting]="loading"
-      submitLabel="Save"
-      (formSubmit)="onSubmitForm($event)"
-    ></app-form-input>
-  }
-</div>
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'systemManagement.tradeBotConfig.form.editTitle' : 'systemManagement.tradeBotConfig.form.createTitle',
+    description: 'systemManagement.tradeBotConfig.form.description',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'systemManagement.tradeBotConfig.form.infoTitle',
+      description: 'systemManagement.tradeBotConfig.form.infoDescription'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

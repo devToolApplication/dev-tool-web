@@ -1,19 +1,24 @@
 {
   "vi": {
-    "uploadStorage.title": "Upload Storage Management",
-    "uploadStorage.viewTitle": "Upload Storage - View",
-    "uploadStorage.namePlaceholder": "Nhập tên storage",
-    "uploadStorage.loadListError": "Tải danh sách upload storage thất bại",
-    "uploadStorage.selectDeleteRecord": "Vui lòng chọn bản ghi cần xoá từ bảng",
-    "uploadStorage.exportDeveloping": "Tính năng export đang được phát triển",
-    "uploadStorage.importSelectedFile": "Đã chọn file import: {{name}}",
-    "uploadStorage.deleteSuccess": "Đã xoá upload storage",
-    "uploadStorage.deleteError": "Xoá upload storage thất bại",
-    "uploadStorage.nameRequired": "Tên storage là bắt buộc",
-    "uploadStorage.createSuccess": "Tạo upload storage thành công",
-    "uploadStorage.updateSuccess": "Cập nhật upload storage thành công",
-    "uploadStorage.saveError": "Lưu upload storage thất bại",
-    "uploadStorage.detailError": "Không lấy được chi tiết upload storage"
+    "uploadStorage.title": "Quản lý kho tải lên",
+    "uploadStorage.viewTitle": "Danh sách kho tải lên",
+    "uploadStorage.namePlaceholder": "Nhập tên kho tải lên",
+    "uploadStorage.loadListError": "Tải danh sách kho tải lên thất bại",
+    "uploadStorage.selectDeleteRecord": "Vui lòng chọn bản ghi cần xóa trong bảng",
+    "uploadStorage.exportDeveloping": "Tính năng xuất dữ liệu đang được phát triển",
+    "uploadStorage.importSelectedFile": "Đã chọn tệp import: {{name}}",
+    "uploadStorage.deleteSuccess": "Đã xóa kho tải lên",
+    "uploadStorage.deleteError": "Xóa kho tải lên thất bại",
+    "uploadStorage.nameRequired": "Tên kho tải lên là bắt buộc",
+    "uploadStorage.createSuccess": "Tạo kho tải lên thành công",
+    "uploadStorage.updateSuccess": "Cập nhật kho tải lên thành công",
+    "uploadStorage.saveError": "Lưu kho tải lên thất bại",
+    "uploadStorage.detailError": "Không thể tải chi tiết kho tải lên",
+    "uploadStorage.form.createTitle": "Tạo kho tải lên",
+    "uploadStorage.form.editTitle": "Cập nhật kho tải lên",
+    "uploadStorage.form.description": "Cấu hình provider lưu trữ, endpoint API và secret metadata được sử dụng trong luồng tải tệp lên.",
+    "uploadStorage.form.infoTitle": "Thiết lập provider lưu trữ",
+    "uploadStorage.form.infoDescription": "Xác định nơi tệp tải lên sẽ được gửi đến và gắn metadata cần thiết để xác thực request."
   },
   "en": {
     "uploadStorage.title": "Upload Storage Management",
@@ -29,6 +34,11 @@
     "uploadStorage.createSuccess": "Upload storage created successfully",
     "uploadStorage.updateSuccess": "Upload storage updated successfully",
     "uploadStorage.saveError": "Failed to save upload storage",
-    "uploadStorage.detailError": "Unable to load upload storage details"
+    "uploadStorage.detailError": "Unable to load upload storage details",
+    "uploadStorage.form.createTitle": "Create Upload Storage",
+    "uploadStorage.form.editTitle": "Edit Upload Storage",
+    "uploadStorage.form.description": "Configure the storage provider, API endpoint, and secret metadata used for upload flows.",
+    "uploadStorage.form.infoTitle": "Storage Provider Setup",
+    "uploadStorage.form.infoDescription": "Define where uploaded files are sent and attach the metadata required to authenticate requests."
   }
 }

@@ -7,10 +7,12 @@ import { StrategyEntryMode, StrategyStopLossMode, StrategyValidityMode } from '.
 
 export interface StrategyGeneralInfoFormModel {
   name: FormControl<string>;
-  strategyCode: FormControl<string>;
+  strategyId: FormControl<string>;
+  strategyServiceName: FormControl<string>;
   strategyName: FormControl<string>;
-  exchangeCode: FormControl<string>;
-  symbolCode: FormControl<string>;
+  ruleId: FormControl<string>;
+  exchangeId: FormControl<string>;
+  symbolId: FormControl<string>;
   marketType: FormControl<string>;
   tradeSideMode: FormControl<TradeSideMode>;
   providerSymbol: FormControl<string>;
@@ -36,10 +38,12 @@ export class StrategyFormBuilders {
   createGeneralInfoForm(): StrategyGeneralInfoFormGroup {
     return this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.maxLength(120), StrategyFormValidators.nonBlank()]],
-      strategyCode: [{ value: '', disabled: true }, [Validators.required]],
+      strategyId: [''],
+      strategyServiceName: [{ value: '', disabled: true }, [Validators.required]],
       strategyName: [{ value: '', disabled: true }, [Validators.required]],
-      exchangeCode: ['', Validators.required],
-      symbolCode: ['', Validators.required],
+      ruleId: ['', Validators.required],
+      exchangeId: ['', Validators.required],
+      symbolId: ['', Validators.required],
       marketType: ['', Validators.required],
       tradeSideMode: ['BOTH' as TradeSideMode, Validators.required],
       providerSymbol: ['', [Validators.required, StrategyFormValidators.nonBlank()]],
@@ -66,10 +70,12 @@ export class StrategyFormBuilders {
   ): void {
     generalForm.patchValue({
       name: binding.name ?? '',
-      strategyCode: binding.strategyCode,
-      strategyName: strategy?.name ?? binding.strategyCode,
-      exchangeCode: binding.exchangeCode,
-      symbolCode: binding.symbolCode,
+      strategyId: binding.strategyId ?? '',
+      strategyServiceName: binding.strategyServiceName ?? '',
+      strategyName: strategy?.name ?? binding.strategyName ?? binding.strategyServiceName ?? '',
+      ruleId: binding.ruleId ?? '',
+      exchangeId: binding.exchangeId ?? '',
+      symbolId: binding.symbolId ?? '',
       marketType: binding.marketType,
       tradeSideMode: binding.tradeSideMode,
       providerSymbol: binding.providerSymbol ?? '',

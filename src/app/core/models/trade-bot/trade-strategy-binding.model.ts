@@ -11,8 +11,11 @@ export interface TradeStrategyBindingResponse {
   symbolCode: string;
   symbolDisplayName?: string;
   strategyId?: string;
-  strategyCode: string;
+  strategyServiceName?: string;
   strategyName?: string;
+  ruleId?: string;
+  ruleCode?: string;
+  ruleName?: string;
   marketType: string;
   tradeSideMode: TradeSideMode;
   providerSymbol: string;
@@ -23,14 +26,14 @@ export interface TradeStrategyBindingResponse {
 
 export interface TradeStrategyBindingCreateDto {
   name?: string;
-  exchangeCode: string;
-  symbolCode: string;
-  strategyCode: string;
+  exchangeId: string;
+  symbolId: string;
+  strategyId: string;
+  ruleId: string;
   marketType: string;
   tradeSideMode: TradeSideMode;
   providerSymbol?: string;
   description?: string;
-  configJson: Record<string, unknown>;
   status: TradeBotStatus;
 }
 
@@ -38,13 +41,13 @@ export interface TradeStrategyBindingUpdateDto extends TradeStrategyBindingCreat
 
 export interface TradeStrategyBindingPatchDto {
   name?: string;
-  exchangeCode?: string;
-  symbolCode?: string;
-  strategyCode?: string;
+  exchangeId?: string;
+  symbolId?: string;
+  strategyId?: string;
+  ruleId?: string;
   marketType?: string;
   tradeSideMode?: TradeSideMode;
   providerSymbol?: string;
   description?: string;
-  configJson?: Record<string, unknown>;
   status?: TradeBotStatus;
 }

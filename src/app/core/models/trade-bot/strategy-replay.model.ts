@@ -89,7 +89,7 @@ export interface ReplayStep {
 
 export interface StrategyReplayPayload {
   jobId: string;
-  strategyCode: string;
+  strategyServiceName: string;
   symbolCode: string;
   exchangeCode: string;
   steps: ReplayStep[];

@@ -3,8 +3,12 @@
     <div class="min-w-0">
       <div class="flex flex-wrap items-center gap-2">
         <h2 class="m-0 text-2xl font-semibold">{{ TEXT.BacktestReplayTitle | translateContent }}</h2>
-        <p-tag *ngIf="binding" [value]="binding.strategyCode" severity="contrast"></p-tag>
-        <p-tag *ngIf="job" [value]="job.status" severity="secondary"></p-tag>
+        @if (binding) {
+          <p-tag [value]="binding.strategyServiceName" severity="contrast"></p-tag>
+        }
+        @if (job) {
+          <p-tag [value]="job.status" severity="secondary"></p-tag>
+        }
       </div>
       <p class="mt-2 text-sm text-surface-500">
         {{ binding?.exchangeCode }} / {{ binding?.symbolCode }} / {{ binding?.providerSymbol }}
@@ -57,7 +61,8 @@
     </div>
   </p-panel>
 
-  <div *ngIf="job || metric" class="grid grid-cols-12 gap-4">
+  @if (job || metric) {
+    <div class="grid grid-cols-12 gap-4">
     <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
       <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.TotalTrades | translateContent }}</div>
       <div class="mt-2 text-2xl font-semibold">{{ metric?.totalTrades ?? orders.length }}</div>
@@ -82,9 +87,11 @@
       <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.FinalEquity | translateContent }}</div>
       <div class="mt-2 text-2xl font-semibold">{{ metric?.finalEquity ?? job?.finalEquity ?? 0 | number:'1.2-2' }}</div>
     </div>
-  </div>
+    </div>
+  }
 
-  <div class="grid grid-cols-12 gap-4" *ngIf="replayPayload">
+  @if (replayPayload) {
+    <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12 xl:col-span-8 flex flex-col gap-4">
       <app-base-replay-controls
         [currentStep]="replay.currentStepIndex()"
@@ -163,5 +170,6 @@
         (eventSelect)="onEventSelected($event)"
       ></app-replay-event-log-panel>
     </div>
-  </div>
+    </div>
+  }
 </section>

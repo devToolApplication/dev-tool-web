@@ -1,0 +1,14 @@
+.crud-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.header-actions:empty {
+  display: none;
+}
+
+.form-wrap {
+  border-radius: 1rem;
+  background: var(--app-surface);
+  padding: 1rem;
+}

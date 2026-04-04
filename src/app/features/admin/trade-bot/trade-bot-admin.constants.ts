@@ -38,12 +38,12 @@ export const STRATEGY_CONFIG_DEFAULTS = {
 
 export const TRADE_STRATEGY_BINDING_INITIAL_VALUE = {
   name: '',
-  exchangeCode: 'OANDA',
-  symbolCode: 'XAUUSD',
-  strategyCode: 'FIRST_M15_NEWYORK',
+  exchangeId: '',
+  symbolId: '',
+  strategyId: '',
   marketType: 'FOREX',
   tradeSideMode: 'BOTH' as TradeSideMode,
-  providerSymbol: 'XAU_USD',
+  providerSymbol: '',
   description: '',
   status: 'ACTIVE' as const,
   ...STRATEGY_CONFIG_DEFAULTS

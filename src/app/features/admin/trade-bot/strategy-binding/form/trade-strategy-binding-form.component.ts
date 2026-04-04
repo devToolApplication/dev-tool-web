@@ -3,45 +3,33 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, finalize } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { ExchangeResponse, StrategyResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
+import { StrategyRuleResponse } from '../../../../../core/models/trade-bot/strategy-rule.model';
 import {
   TradeStrategyBindingCreateDto,
   TradeStrategyBindingResponse,
   TradeStrategyBindingUpdateDto
 } from '../../../../../core/models/trade-bot/trade-strategy-binding.model';
 import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
+import { StrategyRuleService } from '../../../../../core/services/trade-bot-service/strategy-rule.service';
 import { TradeStrategyBindingService } from '../../../../../core/services/trade-bot-service/trade-strategy-binding.service';
+import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
-import {
-  MARKET_TYPE_OPTIONS,
-  STRATEGY_CONFIG_DEFAULTS,
-  TRADE_BOT_BINDING_ROUTES,
-  TRADE_SIDE_MODE_OPTIONS,
-  TRADE_STRATEGY_BINDING_INITIAL_VALUE
-} from '../../trade-bot-admin.constants';
+import { MARKET_TYPE_OPTIONS, TRADE_BOT_BINDING_ROUTES, TRADE_SIDE_MODE_OPTIONS } from '../../trade-bot-admin.constants';
 
 interface TradeStrategyBindingFormValue {
   name: string;
-  exchangeCode: string;
-  symbolCode: string;
-  strategyCode: string;
+  exchangeId: string;
+  symbolId: string;
+  strategyId: string;
+  ruleId: string;
   marketType: string;
   tradeSideMode: 'BOTH' | 'LONG_ONLY' | 'SHORT_ONLY';
   providerSymbol: string;
   description: string;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETE';
-  timezone: string;
-  firstM15CandleStart: string;
-  baseTimeframe: string;
-  triggerTimeframe: string;
-  breakoutConfirmByClose: boolean;
-  entryMode: string;
-  slMode: string;
-  tpRr: number;
-  maxTradesPerDay: number;
-  strategyValidity: string;
 }
 
 type SelectOption = { label: string; value: string };
@@ -52,41 +40,45 @@ type SelectOption = { label: string; value: string };
   templateUrl: './trade-strategy-binding-form.component.html'
 })
 export class TradeStrategyBindingFormComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: { exchangeOptions: [], symbolOptions: [], strategyOptions: [] } };
+  readonly formContext: FormContext = { user: null, mode: 'create', extra: { exchangeOptions: [], symbolOptions: [], strategyOptions: [], ruleOptions: [] } };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'name', label: 'Binding Name', width: 'full' },
-      { type: 'select', name: 'exchangeCode', label: 'Exchange', width: '1/3', optionsExpression: 'context.extra?.exchangeOptions || []', validation: [Rules.required('Exchange is required')] },
-      { type: 'select', name: 'symbolCode', label: 'Symbol', width: '1/3', optionsExpression: 'context.extra?.symbolOptions || []', validation: [Rules.required('Symbol is required')] },
-      { type: 'select', name: 'strategyCode', label: 'Strategy', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('Strategy is required')] },
-      { type: 'select', name: 'marketType', label: 'Market Type', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('Market type is required')] },
-      { type: 'select', name: 'tradeSideMode', label: 'Trade Side Mode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('Trade side mode is required')] },
-      { type: 'text', name: 'providerSymbol', label: 'Provider Symbol', width: '1/3', validation: [Rules.required('Provider symbol is required')] },
-      { type: 'select', name: 'status', label: 'Status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS], validation: [Rules.required('Status is required')] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' },
-      { type: 'text', name: 'timezone', label: 'Timezone', width: '1/3', validation: [Rules.required('Timezone is required')] },
-      { type: 'text', name: 'firstM15CandleStart', label: 'First M15 Start', width: '1/3', validation: [Rules.required('First candle start is required')] },
-      { type: 'text', name: 'baseTimeframe', label: 'Base Timeframe', width: '1/3', validation: [Rules.required('Base timeframe is required')] },
-      { type: 'text', name: 'triggerTimeframe', label: 'Trigger Timeframe', width: '1/3', validation: [Rules.required('Trigger timeframe is required')] },
-      { type: 'checkbox', name: 'breakoutConfirmByClose', label: 'Breakout Confirm By Close', width: '1/3' },
-      { type: 'text', name: 'entryMode', label: 'Entry Mode', width: '1/3', validation: [Rules.required('Entry mode is required')] },
-      { type: 'text', name: 'slMode', label: 'SL Mode', width: '1/3', validation: [Rules.required('SL mode is required')] },
-      { type: 'number', name: 'tpRr', label: 'TP RR', width: '1/3', validation: [Rules.required('TP RR is required')] },
-      { type: 'number', name: 'maxTradesPerDay', label: 'Max Trades / Day', width: '1/3', validation: [Rules.required('Max trades per day is required')] },
-      { type: 'text', name: 'strategyValidity', label: 'Strategy Validity', width: '1/3', validation: [Rules.required('Strategy validity is required')] }
+      { type: 'text', name: 'name', label: 'tradeBot.strategy.field.bindingName', width: 'full', validation: [Rules.required('tradeBot.strategyBinding.validation.bindingNameRequired')] },
+      { type: 'select', name: 'exchangeId', label: 'tradeBot.strategy.field.exchange', width: '1/3', optionsExpression: 'context.extra?.exchangeOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.exchangeRequired')] },
+      { type: 'select', name: 'symbolId', label: 'tradeBot.strategy.field.symbol', width: '1/3', optionsExpression: 'context.extra?.symbolOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.symbolRequired')] },
+      { type: 'select', name: 'strategyId', label: 'tradeBot.strategy.field.strategyName', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.strategyRequired')] },
+      { type: 'select', name: 'ruleId', label: 'tradeBot.strategy.field.rule', width: '1/3', optionsExpression: 'context.extra?.ruleOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.ruleRequired')] },
+      { type: 'select', name: 'marketType', label: 'tradeBot.strategy.field.marketType', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('tradeBot.strategyBinding.validation.marketTypeRequired')] },
+      { type: 'select', name: 'tradeSideMode', label: 'tradeBot.strategy.field.tradeSideMode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('tradeBot.strategyBinding.validation.tradeSideModeRequired')] },
+      { type: 'text', name: 'providerSymbol', label: 'tradeBot.strategy.field.providerSymbol', width: '1/3', validation: [Rules.required('tradeBot.strategyBinding.validation.providerSymbolRequired')] },
+      { type: 'select', name: 'status', label: 'tradeBot.strategy.field.status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS], validation: [Rules.required('tradeBot.strategyBinding.validation.statusRequired')] },
+      { type: 'textarea', name: 'description', label: 'tradeBot.strategy.field.description', width: 'full' }
     ]
   };
 
   editId: string | null = null;
   loading = false;
   readonly formVisible = signal(true);
-  formInitialValue: TradeStrategyBindingFormValue = { ...TRADE_STRATEGY_BINDING_INITIAL_VALUE };
+  formInitialValue: TradeStrategyBindingFormValue = {
+    name: '',
+    exchangeId: '',
+    symbolId: '',
+    strategyId: '',
+    ruleId: '',
+    marketType: 'FOREX',
+    tradeSideMode: 'BOTH',
+    providerSymbol: '',
+    description: '',
+    status: 'ACTIVE'
+  };
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly service: TradeStrategyBindingService,
     private readonly referenceDataService: ReferenceDataService,
+    private readonly ruleService: StrategyRuleService,
+    private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService
   ) {}
@@ -101,10 +93,10 @@ export class TradeStrategyBindingFormComponent implements OnInit {
     this.loading = true;
     this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
       next: () => {
-        this.toastService.success(this.editId ? 'Update binding successfully' : 'Create binding successfully');
+        this.toastService.success(this.i18nService.t(this.editId ? 'tradeBot.strategyBinding.toast.updateSuccess' : 'tradeBot.strategyBinding.toast.createSuccess'));
         void this.router.navigate([TRADE_BOT_BINDING_ROUTES.list]);
       },
-      error: () => this.toastService.error('Save binding failed')
+      error: (error) => this.toastService.error(error?.error?.errorMessage ?? this.i18nService.t('tradeBot.strategyBinding.toast.saveError'))
     });
   }
 
@@ -115,21 +107,23 @@ export class TradeStrategyBindingFormComponent implements OnInit {
         forkJoin({
           exchanges: this.referenceDataService.getExchanges(),
           symbols: this.referenceDataService.getSymbols(),
-          strategies: this.referenceDataService.getStrategies()
+          strategies: this.referenceDataService.getStrategies(),
+          rules: this.ruleService.getAll()
         })
       )
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ exchanges, symbols, strategies }) => {
+        next: ({ exchanges, symbols, strategies, rules }) => {
           this.formContext.extra = {
             exchangeOptions: this.mapExchangeOptions(exchanges),
             symbolOptions: this.mapSymbolOptions(symbols),
-            strategyOptions: this.mapStrategyOptions(strategies)
+            strategyOptions: this.mapStrategyOptions(strategies),
+            ruleOptions: this.mapRuleOptions(rules)
           };
           this.bindRouteMode();
         },
         error: () => {
-          this.toastService.error('Load reference data failed');
+          this.toastService.error(this.i18nService.t('tradeBot.strategyBinding.toast.loadReferenceError'));
           this.bindRouteMode();
         }
       });
@@ -150,7 +144,6 @@ export class TradeStrategyBindingFormComponent implements OnInit {
     if (!id) {
       this.editId = null;
       this.formContext.mode = 'create';
-      this.formInitialValue = { ...TRADE_STRATEGY_BINDING_INITIAL_VALUE };
       this.rerenderForm();
       return;
     }
@@ -164,7 +157,7 @@ export class TradeStrategyBindingFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load binding detail failed');
+        this.toastService.error(this.i18nService.t('tradeBot.strategyBinding.toast.loadDetailError'));
         void this.router.navigate([TRADE_BOT_BINDING_ROUTES.list]);
       }
     });
@@ -176,65 +169,48 @@ export class TradeStrategyBindingFormComponent implements OnInit {
   }
 
   private toFormValue(detail: TradeStrategyBindingResponse): TradeStrategyBindingFormValue {
-    const config = detail.configJson ?? {};
     return {
       name: detail.name ?? '',
-      exchangeCode: detail.exchangeCode,
-      symbolCode: detail.symbolCode,
-      strategyCode: detail.strategyCode,
+      exchangeId: detail.exchangeId ?? '',
+      symbolId: detail.symbolId ?? '',
+      strategyId: detail.strategyId ?? '',
+      ruleId: detail.ruleId ?? '',
       marketType: detail.marketType,
       tradeSideMode: detail.tradeSideMode,
       providerSymbol: detail.providerSymbol,
       description: detail.description ?? '',
-      status: detail.status,
-      timezone: String(config['timezone'] ?? STRATEGY_CONFIG_DEFAULTS.timezone),
-      firstM15CandleStart: String(config['first_m15_candle_start'] ?? STRATEGY_CONFIG_DEFAULTS.firstM15CandleStart),
-      baseTimeframe: String(config['base_timeframe'] ?? STRATEGY_CONFIG_DEFAULTS.baseTimeframe),
-      triggerTimeframe: String(config['trigger_timeframe'] ?? STRATEGY_CONFIG_DEFAULTS.triggerTimeframe),
-      breakoutConfirmByClose: Boolean(config['breakout_confirm_by_close'] ?? STRATEGY_CONFIG_DEFAULTS.breakoutConfirmByClose),
-      entryMode: String(config['entry_mode'] ?? STRATEGY_CONFIG_DEFAULTS.entryMode),
-      slMode: String(config['sl_mode'] ?? STRATEGY_CONFIG_DEFAULTS.slMode),
-      tpRr: Number(config['tp_rr'] ?? STRATEGY_CONFIG_DEFAULTS.tpRr),
-      maxTradesPerDay: Number(config['max_trades_per_day'] ?? STRATEGY_CONFIG_DEFAULTS.maxTradesPerDay),
-      strategyValidity: String(config['strategy_validity'] ?? STRATEGY_CONFIG_DEFAULTS.strategyValidity)
+      status: detail.status
     };
   }
 
   private toPayload(model: TradeStrategyBindingFormValue): TradeStrategyBindingCreateDto {
     return {
       name: model.name?.trim() || undefined,
-      exchangeCode: model.exchangeCode,
-      symbolCode: model.symbolCode,
-      strategyCode: model.strategyCode,
+      exchangeId: model.exchangeId,
+      symbolId: model.symbolId,
+      strategyId: model.strategyId,
+      ruleId: model.ruleId,
       marketType: model.marketType,
       tradeSideMode: model.tradeSideMode,
       providerSymbol: model.providerSymbol,
       description: model.description,
-      status: model.status,
-      configJson: {
-        timezone: model.timezone,
-        first_m15_candle_start: model.firstM15CandleStart,
-        base_timeframe: model.baseTimeframe,
-        trigger_timeframe: model.triggerTimeframe,
-        breakout_confirm_by_close: model.breakoutConfirmByClose,
-        entry_mode: model.entryMode,
-        sl_mode: model.slMode,
-        tp_rr: model.tpRr,
-        max_trades_per_day: model.maxTradesPerDay,
-        strategy_validity: model.strategyValidity
-      }
+      status: model.status
     };
   }
 
   private mapExchangeOptions(items: ExchangeResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.code }));
+    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
   }
 
   private mapSymbolOptions(items: SymbolResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.code }));
+    return items.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.id }));
   }
 
   private mapStrategyOptions(items: StrategyResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.code }));
+    return items.map((item) => ({ label: `${item.serviceName} - ${item.name}`, value: item.id }));
+  }
+
+  private mapRuleOptions(items: StrategyRuleResponse[]): SelectOption[] {
+    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
   }
 }

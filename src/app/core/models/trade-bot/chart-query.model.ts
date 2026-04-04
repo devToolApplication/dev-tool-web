@@ -36,9 +36,18 @@ export interface TradeBotPointData {
   value: number;
 }
 
+export interface TradeBotIndicatorData {
+  name?: string;
+  color?: string;
+  type?: 'OVERLAY' | 'SUBCHART';
+  value: Array<number | null>;
+  defaultDisplay?: boolean;
+}
+
 export interface TradeBotCandleResponse {
   candlestickData: TradeBotCandlestickData[];
   lineData: TradeBotLineData[];
   areaData: TradeBotAreaData[];
   pointData: TradeBotPointData[];
+  indicatorData: TradeBotIndicatorData[];
 }
