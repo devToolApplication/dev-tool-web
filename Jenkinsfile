@@ -23,14 +23,12 @@ pipeline {
     stages {
         stage('Build Angular App') {
             steps {
-                container('node') {
-                    sh '''
-                    echo "📦 Installing dependencies..."
-                    npm ci
-                    echo "🛠️ Building Angular..."
-                    npm run build-prod
-                    '''
-                }
+                sh '''
+                echo "Installing dependencies..."
+                npm ci
+                echo "Building Angular..."
+                npm run build-prod
+                '''
             }
         }
 
@@ -38,7 +36,7 @@ pipeline {
             steps {
                 container('kaniko') {
                     sh '''
-                    echo "🐳 Building image with Kaniko..."
+                    echo "Building image with Kaniko..."
                     /kaniko/executor \
                       --dockerfile=Dockerfile \
                       --context=dir://$(pwd) \
@@ -92,10 +90,10 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'k8s-*.yaml', allowEmptyArchive: true
-            echo '✅ Build & Deploy finished.'
+            echo 'Build & Deploy finished.'
         }
         failure {
-            echo '❌ Build or Deploy failed. Check logs for details.'
+            echo 'Build or Deploy failed. Check logs for details.'
         }
     }
 }
