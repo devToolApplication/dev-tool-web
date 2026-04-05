@@ -1,5 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TableConfig, TableToolbarButtonConfig, TableToolbarConfig, TableToolbarImportConfig } from './models/table-config.model';
+import { BasePageResponse } from '../../../../../core/models/base-response.model';
+import { TableConfig, TableToolbarButtonConfig, TableToolbarConfig, TableToolbarImportConfig } from '../../models/table-config.model';
+
+export interface TablePageChangeEvent {
+  page: number;
+  rows: number;
+  first: number;
+}
 
 @Component({
   selector: 'app-table',
@@ -10,7 +17,11 @@ import { TableConfig, TableToolbarButtonConfig, TableToolbarConfig, TableToolbar
 export class TableComponent {
   @Input() config!: TableConfig;
   @Input() data: any[] = [];
+  @Input() pageResponse: BasePageResponse<any> | null = null;
   @Input() loading = false;
+  @Input() totalRecords: number | null = null;
+  @Input() currentPage = 0;
+  @Input() rows = 10;
 
   @Output() search = new EventEmitter<Record<string, any>>();
   @Output() resetFilter = new EventEmitter<void>();
@@ -18,6 +29,7 @@ export class TableComponent {
   @Output() delete = new EventEmitter<void>();
   @Output() export = new EventEmitter<void>();
   @Output() import = new EventEmitter<File>();
+  @Output() pageChange = new EventEmitter<TablePageChangeEvent>();
 
   get toolbarConfig(): TableToolbarConfig {
     return this.config.toolbar ?? {};
@@ -41,6 +53,39 @@ export class TableComponent {
 
   get scrollable(): boolean {
     return this.config.scrollable ?? true;
+  }
+
+  get resolvedRows(): number {
+    if (this.pageResponse?.metadata?.pageSize != null) {
+      return this.pageResponse.metadata.pageSize;
+    }
+    return this.rows || this.config.rows || 10;
+  }
+
+  get resolvedTotalRecords(): number {
+    if (this.pageResponse?.metadata?.totalElements != null) {
+      return this.pageResponse.metadata.totalElements;
+    }
+    return this.totalRecords ?? this.data.length;
+  }
+
+  get first(): number {
+    return this.resolvedCurrentPage * this.resolvedRows;
+  }
+
+  get resolvedCurrentPage(): number {
+    if (this.pageResponse?.metadata?.pageNumber != null) {
+      return this.pageResponse.metadata.pageNumber;
+    }
+    return this.currentPage;
+  }
+
+  get resolvedData(): any[] {
+    return this.pageResponse?.data ?? this.data;
+  }
+
+  get serverSidePagination(): boolean {
+    return this.pageResponse !== null || this.totalRecords !== null;
   }
 
   get scrollHeight(): string {
@@ -71,6 +116,18 @@ export class TableComponent {
     if (file) {
       this.import.emit(file);
     }
+  }
+
+  onPage(event: { page?: number; rows?: number; first?: number }): void {
+    const rows = event.rows ?? this.resolvedRows;
+    const first = event.first ?? 0;
+    const page = event.page ?? (rows > 0 ? Math.floor(first / rows) : 0);
+
+    this.pageChange.emit({
+      page,
+      rows,
+      first
+    });
   }
 
   onSearch(filters: Record<string, any>): void {

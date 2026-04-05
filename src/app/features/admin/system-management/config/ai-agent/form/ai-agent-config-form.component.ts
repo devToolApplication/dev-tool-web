@@ -23,7 +23,7 @@ export class AiAgentConfigFormComponent implements OnInit {
       { type: 'text', name: 'category', label: 'category', width: '1/2', validation: [Rules.required('systemManagement.validation.categoryRequired')] },
       { type: 'text', name: 'key', label: 'key', width: '1/2', validation: [Rules.required('systemManagement.validation.keyRequired')] },
       { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'value', label: 'systemManagement.field.jsonValue', width: 'full', validation: [Rules.required('systemManagement.validation.valueRequired')] },
+      { type: 'textarea', name: 'value', label: 'systemManagement.field.jsonValue', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'systemManagement.validation.invalidJson', validation: [Rules.required('systemManagement.validation.valueRequired')] },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };

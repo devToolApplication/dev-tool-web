@@ -12,7 +12,6 @@ export class StrategyGeneralInfoSectionComponent {
   @Input({ required: true }) form!: StrategyGeneralInfoFormGroup;
   @Input() exchangeOptions: Array<{ label: string; value: string }> = [];
   @Input() symbolOptions: Array<{ label: string; value: string }> = [];
-  @Input() ruleOptions: Array<{ label: string; value: string }> = [];
   @Input() marketTypeOptions: Array<{ label: string; value: string }> = [];
   @Input() tradeSideModeOptions: Array<{ label: string; value: string }> = [];
   @Input() statusOptions: Array<{ label: string; value: string }> = [];

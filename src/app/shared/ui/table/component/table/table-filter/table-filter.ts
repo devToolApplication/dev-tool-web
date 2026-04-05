@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { TableFilterField, TableFilterOption, TableFilterOptions } from '../../models/table-config.model';
+import { TableFilterField, TableFilterOption, TableFilterOptions } from '../../../models/table-config.model';
 
 @Component({
   selector: 'app-table-filter',

@@ -1,8 +1,10 @@
 <app-table
   [config]="tableConfig"
   [data]="rows"
+  [pageResponse]="pageResponse"
   [loading]="loading"
   (create)="onCreate()"
+  (pageChange)="onPageChange($event)"
   (search)="onSearch($event)"
   (resetFilter)="onResetFilter()"
 ></app-table>

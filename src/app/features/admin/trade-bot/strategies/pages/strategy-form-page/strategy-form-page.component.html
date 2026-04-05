@@ -26,7 +26,6 @@
           [form]="generalInfoForm"
           [exchangeOptions]="exchangeOptions"
           [symbolOptions]="symbolOptions"
-          [ruleOptions]="ruleOptions"
           [marketTypeOptions]="marketTypeOptions"
           [tradeSideModeOptions]="tradeSideModeOptions"
           [statusOptions]="statusOptions"
@@ -36,20 +35,70 @@
           <ng-template pTemplate="header">
             <div class="flex w-full items-center justify-between gap-3">
               <div>
-                <div class="text-base font-semibold">{{ 'tradeBot.strategy.form.selectedRuleTitle' | translateContent }}</div>
-                <div class="text-sm text-surface-500">{{ 'tradeBot.strategy.form.selectedRuleDescription' | translateContent }}</div>
+                <div class="text-base font-semibold">Rule Slots</div>
+                <div class="text-sm text-surface-500">Strategy này sẽ chỉ lưu được khi đã chọn đủ các rule bắt buộc.</div>
               </div>
             </div>
           </ng-template>
 
-          @if (selectedRule) {
-            <div class="flex flex-wrap items-center gap-2">
-              <p-tag [value]="selectedRule.code" severity="contrast"></p-tag>
-              <p-tag [value]="selectedRule.strategyServiceName" severity="secondary"></p-tag>
+          @if (strategyDefinition.ruleSlots.length > 0) {
+            <form class="grid grid-cols-12 gap-4" [formGroup]="ruleSlotsForm">
+              @for (slot of strategyDefinition.ruleSlots; track slot.slotCode) {
+                <div class="col-span-12 md:col-span-6">
+                  <label class="mb-2 block text-sm font-medium">
+                    {{ slot.label | translateContent }}
+                    @if (slot.required) {
+                      <span class="text-red-500">*</span>
+                    }
+                  </label>
+                  <p-select
+                    class="w-full"
+                    [options]="getRuleOptions(slot)"
+                    optionLabel="label"
+                    optionValue="value"
+                    [formControlName]="slot.slotCode"
+                  ></p-select>
+                  @if (ruleSlotsForm.controls[slot.slotCode]?.touched && ruleSlotsForm.controls[slot.slotCode]?.invalid) {
+                    <small class="text-red-500">Rule slot này là bắt buộc</small>
+                  }
+                </div>
+              }
+            </form>
+          } @else {
+            <div class="rounded-xl border border-dashed border-surface-300 p-4 text-sm text-surface-500">Strategy này chưa khai báo rule slot trong `STRATEGY_DEFINITIONS`.</div>
+          }
+        </p-panel>
+
+        <p-panel>
+          <ng-template pTemplate="header">
+            <div class="flex w-full items-center justify-between gap-3">
+              <div>
+                <div class="text-base font-semibold">{{ 'tradeBot.strategy.form.selectedRuleTitle' | translateContent }}</div>
+                <div class="text-sm text-surface-500">Preview snapshot của các rule đang được gắn vào strategy instance này.</div>
+              </div>
             </div>
-            <div class="mt-3 text-base font-semibold">{{ selectedRule.name }}</div>
-            <div class="mt-1 text-sm text-surface-500">{{ (selectedRule.description || 'tradeBot.strategy.form.ruleNoDescription') | translateContent }}</div>
-            <pre class="mt-4 max-h-96 overflow-auto rounded-xl bg-surface-900/95 p-4 text-xs text-surface-0">{{ selectedRule.configJson | json }}</pre>
+          </ng-template>
+
+          @if (selectedRuleDetails.length > 0) {
+            <div class="flex flex-col gap-4">
+              @for (detail of selectedRuleDetails; track detail.slot.slotCode) {
+                <div class="rounded-xl border border-surface-200 p-4">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p-tag [value]="detail.slot.slotCode" severity="secondary"></p-tag>
+                    @if (detail.rule) {
+                      <p-tag [value]="detail.rule.code" severity="contrast"></p-tag>
+                    }
+                  </div>
+                  <div class="mt-3 text-base font-semibold">{{ detail.slot.label | translateContent }}</div>
+                  @if (detail.rule) {
+                    <div class="mt-1 text-sm text-surface-500">{{ detail.rule.name }}</div>
+                    <pre class="mt-4 max-h-72 overflow-auto rounded-xl bg-surface-900/95 p-4 text-xs text-surface-0">{{ detail.rule.configJson | json }}</pre>
+                  } @else {
+                    <div class="mt-2 text-sm text-surface-500">Chưa chọn rule cho slot này.</div>
+                  }
+                </div>
+              }
+            </div>
           } @else {
             <div class="rounded-xl border border-dashed border-surface-300 p-4 text-sm text-surface-500">{{ 'tradeBot.strategy.form.rulePreviewEmpty' | translateContent }}</div>
           }
@@ -81,7 +130,7 @@
                   <p-tag [value]="(generalInfoForm.valid ? TEXT.GeneralInformationReady : TEXT.GeneralInformationNeedsReview) | translateContent" [severity]="generalInfoForm.valid ? 'success' : 'warn'"></p-tag>
                 </li>
                 <li class="flex items-center justify-between gap-2">
-                  <span>{{ 'tradeBot.strategy.form.rulePreset' | translateContent }}</span>
+                  <span>Rule Slots</span>
                   <p-tag [value]="(ruleReady ? 'tradeBot.strategy.form.ruleReady' : 'tradeBot.strategy.form.ruleNeedsSelection') | translateContent" [severity]="ruleReady ? 'success' : 'warn'"></p-tag>
                 </li>
               </ul>

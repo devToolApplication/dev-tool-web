@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, finalize } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { ExchangeResponse, StrategyResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
-import { StrategyRuleResponse } from '../../../../../core/models/trade-bot/strategy-rule.model';
 import {
   TradeStrategyBindingCreateDto,
   TradeStrategyBindingResponse,
@@ -24,7 +23,6 @@ interface TradeStrategyBindingFormValue {
   exchangeId: string;
   symbolId: string;
   strategyId: string;
-  ruleId: string;
   marketType: string;
   tradeSideMode: 'BOTH' | 'LONG_ONLY' | 'SHORT_ONLY';
   providerSymbol: string;
@@ -40,14 +38,13 @@ type SelectOption = { label: string; value: string };
   templateUrl: './trade-strategy-binding-form.component.html'
 })
 export class TradeStrategyBindingFormComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: { exchangeOptions: [], symbolOptions: [], strategyOptions: [], ruleOptions: [] } };
+  readonly formContext: FormContext = { user: null, mode: 'create', extra: { exchangeOptions: [], symbolOptions: [], strategyOptions: [] } };
   readonly formConfig: FormConfig = {
     fields: [
       { type: 'text', name: 'name', label: 'tradeBot.strategy.field.bindingName', width: 'full', validation: [Rules.required('tradeBot.strategyBinding.validation.bindingNameRequired')] },
       { type: 'select', name: 'exchangeId', label: 'tradeBot.strategy.field.exchange', width: '1/3', optionsExpression: 'context.extra?.exchangeOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.exchangeRequired')] },
       { type: 'select', name: 'symbolId', label: 'tradeBot.strategy.field.symbol', width: '1/3', optionsExpression: 'context.extra?.symbolOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.symbolRequired')] },
       { type: 'select', name: 'strategyId', label: 'tradeBot.strategy.field.strategyName', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.strategyRequired')] },
-      { type: 'select', name: 'ruleId', label: 'tradeBot.strategy.field.rule', width: '1/3', optionsExpression: 'context.extra?.ruleOptions || []', validation: [Rules.required('tradeBot.strategyBinding.validation.ruleRequired')] },
       { type: 'select', name: 'marketType', label: 'tradeBot.strategy.field.marketType', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('tradeBot.strategyBinding.validation.marketTypeRequired')] },
       { type: 'select', name: 'tradeSideMode', label: 'tradeBot.strategy.field.tradeSideMode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('tradeBot.strategyBinding.validation.tradeSideModeRequired')] },
       { type: 'text', name: 'providerSymbol', label: 'tradeBot.strategy.field.providerSymbol', width: '1/3', validation: [Rules.required('tradeBot.strategyBinding.validation.providerSymbolRequired')] },
@@ -64,7 +61,6 @@ export class TradeStrategyBindingFormComponent implements OnInit {
     exchangeId: '',
     symbolId: '',
     strategyId: '',
-    ruleId: '',
     marketType: 'FOREX',
     tradeSideMode: 'BOTH',
     providerSymbol: '',
@@ -77,7 +73,6 @@ export class TradeStrategyBindingFormComponent implements OnInit {
     private readonly router: Router,
     private readonly service: TradeStrategyBindingService,
     private readonly referenceDataService: ReferenceDataService,
-    private readonly ruleService: StrategyRuleService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService
@@ -107,18 +102,16 @@ export class TradeStrategyBindingFormComponent implements OnInit {
         forkJoin({
           exchanges: this.referenceDataService.getExchanges(),
           symbols: this.referenceDataService.getSymbols(),
-          strategies: this.referenceDataService.getStrategies(),
-          rules: this.ruleService.getAll()
+          strategies: this.referenceDataService.getStrategies()
         })
       )
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ exchanges, symbols, strategies, rules }) => {
+        next: ({ exchanges, symbols, strategies }) => {
           this.formContext.extra = {
             exchangeOptions: this.mapExchangeOptions(exchanges),
             symbolOptions: this.mapSymbolOptions(symbols),
-            strategyOptions: this.mapStrategyOptions(strategies),
-            ruleOptions: this.mapRuleOptions(rules)
+            strategyOptions: this.mapStrategyOptions(strategies)
           };
           this.bindRouteMode();
         },
@@ -174,7 +167,6 @@ export class TradeStrategyBindingFormComponent implements OnInit {
       exchangeId: detail.exchangeId ?? '',
       symbolId: detail.symbolId ?? '',
       strategyId: detail.strategyId ?? '',
-      ruleId: detail.ruleId ?? '',
       marketType: detail.marketType,
       tradeSideMode: detail.tradeSideMode,
       providerSymbol: detail.providerSymbol,
@@ -189,10 +181,11 @@ export class TradeStrategyBindingFormComponent implements OnInit {
       exchangeId: model.exchangeId,
       symbolId: model.symbolId,
       strategyId: model.strategyId,
-      ruleId: model.ruleId,
       marketType: model.marketType,
       tradeSideMode: model.tradeSideMode,
       providerSymbol: model.providerSymbol,
+      configJson: {},
+      selectedRules: [],
       description: model.description,
       status: model.status
     };
@@ -208,9 +201,5 @@ export class TradeStrategyBindingFormComponent implements OnInit {
 
   private mapStrategyOptions(items: StrategyResponse[]): SelectOption[] {
     return items.map((item) => ({ label: `${item.serviceName} - ${item.name}`, value: item.id }));
-  }
-
-  private mapRuleOptions(items: StrategyRuleResponse[]): SelectOption[] {
-    return items.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
   }
 }

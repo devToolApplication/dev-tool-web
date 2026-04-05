@@ -10,7 +10,6 @@ export const STRATEGY_RULE_ROUTES = {
 export const STRATEGY_RULE_INITIAL_VALUE: StrategyRuleCreateDto = {
   code: '',
   name: '',
-  strategyId: '',
   configJson: {},
   description: '',
   status: 'ACTIVE'

@@ -208,15 +208,16 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
           metric: this.backtestService.getMetrics(jobId).pipe(catchError(() => of(null))),
           orders: this.backtestService.getOrders(jobId, 0, 500, ['entryTime,asc']).pipe(catchError(() => of({ data: [], metadata: null } as any)))
         }).pipe(
-          switchMap(({ job, metric, orders }) =>
-            this.chartQueryService
+          switchMap(({ job, metric, orders }) => {
+            const previewConfig = job.configJson ?? binding.configJson ?? {};
+            return this.chartQueryService
               .getStrategyPreview(
                 job.providerSymbol || job.symbolCode,
-                this.resolveReplayInterval(binding),
+                this.resolveReplayInterval(previewConfig),
                 this.resolveReplayStartTime(job, orders.data ?? []),
                 this.resolveReplayEndTime(job, orders.data ?? []),
                 binding.strategyServiceName ?? job.strategyServiceName,
-                binding.configJson ?? {},
+                previewConfig,
                 this.resolveDataResource(job.exchangeCode)
               )
               .pipe(
@@ -230,8 +231,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
                     replay: buildChartReplayPayload(job, chartData, orders.data ?? [], metric)
                   })
                 )
-              )
-          )
+              );
+          })
         )
       )
       .pipe(finalize(() => (this.loadingOrders = false)))
@@ -269,13 +270,31 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   }
 
   private applyBacktestDefaults(binding: TradeStrategyBindingResponse): void {
-    const defaults = (binding.configJson?.['backtest_defaults'] as Record<string, unknown> | undefined) ?? {};
+    const tradeManagementRule = this.findSelectedRuleConfig(binding, 'TRADE_MANAGEMENT_RULE', 'TRADE_MANAGEMENT');
+    const defaults =
+      ((tradeManagementRule?.['backtest_defaults'] as Record<string, unknown> | undefined) ?? {
+        initialBalance: tradeManagementRule?.['backtest_initial_balance'],
+        feeRate: tradeManagementRule?.['backtest_fee_rate'],
+        slippageRate: tradeManagementRule?.['backtest_slippage_rate'],
+        riskPerTradePct: tradeManagementRule?.['backtest_risk_per_trade_pct']
+      }) ??
+      {};
     this.runForm.patchValue({
       initialBalance: Number(defaults['initialBalance'] ?? 10_000),
       feeRate: Number(defaults['feeRate'] ?? 0.0005),
       slippageRate: Number(defaults['slippageRate'] ?? 0.0002),
       riskPerTradePct: Number(defaults['riskPerTradePct'] ?? 1)
     });
+  }
+
+  private findSelectedRuleConfig(
+    binding: TradeStrategyBindingResponse,
+    slotCode: string,
+    ruleCode: string
+  ): Record<string, unknown> | undefined {
+    return binding.selectedRules?.find(
+      (item) => item.slotCode?.toUpperCase() === slotCode || item.ruleCode?.toUpperCase() === ruleCode
+    )?.configJson;
   }
 
   private toChartLine(payload: Record<string, unknown>, fallbackName: string): ChartLine {
@@ -391,8 +410,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     return date;
   }
 
-  private resolveReplayInterval(binding: TradeStrategyBindingResponse): string {
-    const config = binding.configJson ?? {};
+  private resolveReplayInterval(config: Record<string, unknown>): string {
     return this.toIntervalKey(String(config['trigger_timeframe'] ?? config['base_timeframe'] ?? 'M5'));
   }
 

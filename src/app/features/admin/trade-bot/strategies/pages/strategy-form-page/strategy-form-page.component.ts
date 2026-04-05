@@ -1,18 +1,26 @@
 import { DestroyRef, Component, OnInit, inject } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StrategyResponse, SymbolResponse } from '../../../../../../core/models/trade-bot/reference-data.model';
-import { StrategyRuleResponse } from '../../../../../../core/models/trade-bot/strategy-rule.model';
-import { TradeStrategyBindingCreateDto, TradeStrategyBindingResponse } from '../../../../../../core/models/trade-bot/trade-strategy-binding.model';
+import {
+  TradeStrategyBindingCreateDto,
+  TradeStrategyBindingResponse,
+  TradeStrategySelectedRule
+} from '../../../../../../core/models/trade-bot/trade-strategy-binding.model';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { STRATEGY_MANAGEMENT_ROUTES, STRATEGY_FAMILY_LABELS } from '../../strategy-management.constants';
 import { StrategyFormBuilders, StrategyGeneralInfoFormGroup } from '../../shared/strategy-form.builders';
+import { StrategyConfigDefinition, StrategyRuleSlotDefinition } from '../../shared/strategy-config-form.factory';
 import { StrategyFormFacade, StrategyFormPageContext, StrategySelectOption } from '../../shared/strategy-form.facade';
 import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
 import { resolveStrategyUiMetadataByServiceName } from '../../shared/strategy-ui.registry';
+import { StrategyRuleResponse } from '../../../../../../core/models/trade-bot/strategy-rule.model';
+
+type RuleSlotFormGroup = FormGroup<Record<string, FormControl<string>>>;
 
 @Component({
   selector: 'app-strategy-form-page',
@@ -32,16 +40,25 @@ export class StrategyFormPageComponent implements OnInit {
 
   strategyMeta = resolveStrategyUiMetadataByServiceName('FIRST_M15_NEWYORK');
   currentStrategy?: StrategyResponse;
-  selectedRule?: StrategyRuleResponse;
+  strategyDefinition: StrategyConfigDefinition = {
+    code: '',
+    label: '',
+    description: '',
+    executor: '',
+    formConfig: { fields: [] },
+    initialValue: {},
+    ruleSlots: []
+  };
   referenceSymbols: SymbolResponse[] = [];
   availableRules: StrategyRuleResponse[] = [];
 
   exchangeOptions: StrategySelectOption[] = [];
   symbolOptions: StrategySelectOption[] = [];
-  ruleOptions: StrategySelectOption[] = [];
   marketTypeOptions: StrategySelectOption[] = [];
   tradeSideModeOptions: StrategySelectOption[] = [];
   statusOptions: StrategySelectOption[] = [];
+
+  ruleSlotsForm: RuleSlotFormGroup = new FormGroup({});
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -58,9 +75,6 @@ export class StrategyFormPageComponent implements OnInit {
   ngOnInit(): void {
     this.generalInfoForm.controls.symbolId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((symbolId) => {
       this.prefillProviderSymbol(symbolId);
-    });
-    this.generalInfoForm.controls.ruleId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((ruleId) => {
-      this.selectedRule = this.availableRules.find((item) => item.id === ruleId);
     });
 
     combineLatest([this.route.data, this.route.paramMap])
@@ -80,13 +94,21 @@ export class StrategyFormPageComponent implements OnInit {
   }
 
   get ruleReady(): boolean {
-    return Boolean(this.generalInfoForm.controls.ruleId.value);
+    return this.ruleSlotsForm.valid;
+  }
+
+  get selectedRuleDetails(): Array<{ slot: StrategyRuleSlotDefinition; rule?: StrategyRuleResponse }> {
+    return this.strategyDefinition.ruleSlots.map((slot) => ({
+      slot,
+      rule: this.findRuleById(this.ruleSlotsForm.controls[slot.slotCode]?.value ?? '')
+    }));
   }
 
   save(): void {
     this.generalInfoForm.markAllAsTouched();
+    this.ruleSlotsForm.markAllAsTouched();
 
-    if (this.generalInfoForm.invalid) {
+    if (this.generalInfoForm.invalid || this.ruleSlotsForm.invalid) {
       this.toastService.info(this.i18nService.t(TradeBotTextKey.ReviewStrategyBeforeSave));
       return;
     }
@@ -107,6 +129,14 @@ export class StrategyFormPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate([STRATEGY_MANAGEMENT_ROUTES.list]);
+  }
+
+  getRuleOptions(slot: StrategyRuleSlotDefinition): StrategySelectOption[] {
+    const acceptedRuleCodes = new Set((slot.acceptedRuleCodes ?? []).map((item) => item.toUpperCase()));
+    return this.availableRules
+      .filter((item) => item.status === 'ACTIVE')
+      .filter((item) => acceptedRuleCodes.size === 0 || acceptedRuleCodes.has(String(item.code ?? '').trim().toUpperCase()))
+      .map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
   }
 
   private loadPage(data: Data, params: ParamMap): void {
@@ -144,17 +174,32 @@ export class StrategyFormPageComponent implements OnInit {
     const strategyServiceName = context.binding?.strategyServiceName ?? requestedStrategyServiceName;
     this.currentStrategy = context.selectedStrategy ?? context.references.strategies.find((item) => item.serviceName === strategyServiceName);
     this.strategyMeta = resolveStrategyUiMetadataByServiceName(strategyServiceName);
-    this.availableRules = context.references.rules.filter((item) => item.strategyServiceName === strategyServiceName);
-    this.ruleOptions = this.availableRules.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
+    this.strategyDefinition = context.selectedDefinition;
+    this.availableRules = context.references.rules ?? [];
+
+    this.buildRuleSlotsForm(this.strategyDefinition.ruleSlots, context.binding?.selectedRules ?? []);
 
     if (context.binding) {
       this.patchEditState(context.binding, this.currentStrategy);
-      this.selectedRule = this.availableRules.find((item) => item.id === context.binding?.ruleId);
       return;
     }
 
     this.resetCreateState(strategyServiceName, this.currentStrategy, context.references.symbols);
-    this.selectedRule = this.availableRules.find((item) => item.id === this.generalInfoForm.controls.ruleId.value);
+  }
+
+  private buildRuleSlotsForm(slots: StrategyRuleSlotDefinition[], selectedRules: TradeStrategySelectedRule[]): void {
+    const controls: Record<string, FormControl<string>> = {};
+
+    slots.forEach((slot) => {
+      const matchedSelection = selectedRules.find((item) => item.slotCode?.toUpperCase() === slot.slotCode.toUpperCase());
+      const defaultOption = this.getRuleOptions(slot)[0]?.value ?? '';
+      controls[slot.slotCode] = new FormControl(matchedSelection?.ruleId ?? (slot.required ? defaultOption : ''), {
+        nonNullable: true,
+        validators: slot.required ? [Validators.required] : []
+      });
+    });
+
+    this.ruleSlotsForm = new FormGroup(controls);
   }
 
   private patchEditState(binding: TradeStrategyBindingResponse, strategy: StrategyResponse | undefined): void {
@@ -164,7 +209,6 @@ export class StrategyFormPageComponent implements OnInit {
         strategyId: binding.strategyId ?? '',
         strategyServiceName: binding.strategyServiceName ?? '',
         strategyName: strategy?.name ?? binding.strategyName ?? binding.strategyServiceName ?? '',
-        ruleId: binding.ruleId ?? '',
         exchangeId: binding.exchangeId ?? '',
         symbolId: binding.symbolId ?? '',
         marketType: binding.marketType,
@@ -179,14 +223,12 @@ export class StrategyFormPageComponent implements OnInit {
 
   private resetCreateState(strategyServiceName: string, strategy: StrategyResponse | undefined, symbols: SymbolResponse[]): void {
     const defaultSymbol = symbols[0];
-    const defaultRule = this.availableRules[0];
     this.generalInfoForm.reset(
       {
         name: '',
         strategyId: strategy?.id ?? '',
         strategyServiceName,
-        strategyName: strategy?.name ?? strategyServiceName,
-        ruleId: defaultRule?.id ?? '',
+        strategyName: strategy?.name ?? this.strategyDefinition.label ?? strategyServiceName,
         exchangeId: this.exchangeOptions[0]?.value ?? '',
         symbolId: defaultSymbol?.id ?? '',
         marketType: defaultSymbol?.marketType ?? this.marketTypeOptions[0]?.value ?? '',
@@ -207,13 +249,36 @@ export class StrategyFormPageComponent implements OnInit {
       exchangeId: general.exchangeId,
       symbolId: general.symbolId,
       strategyId: general.strategyId,
-      ruleId: general.ruleId,
       marketType: general.marketType,
       tradeSideMode: general.tradeSideMode,
       providerSymbol: general.providerSymbol.trim(),
       description: general.description.trim() || undefined,
-      status: general.status
+      status: general.status,
+      configJson: {},
+      selectedRules: this.buildSelectedRulePayload()
     };
+  }
+
+  private buildSelectedRulePayload(): TradeStrategySelectedRule[] {
+    return this.strategyDefinition.ruleSlots
+      .map((slot) => {
+        const ruleId = this.ruleSlotsForm.controls[slot.slotCode]?.value ?? '';
+        if (!ruleId) {
+          return null;
+        }
+        return {
+          slotCode: slot.slotCode,
+          ruleId
+        } as TradeStrategySelectedRule;
+      })
+      .filter((item): item is TradeStrategySelectedRule => item !== null);
+  }
+
+  private findRuleById(ruleId: string): StrategyRuleResponse | undefined {
+    if (!ruleId) {
+      return undefined;
+    }
+    return this.availableRules.find((item) => item.id === ruleId);
   }
 
   private prefillProviderSymbol(symbolId: string): void {

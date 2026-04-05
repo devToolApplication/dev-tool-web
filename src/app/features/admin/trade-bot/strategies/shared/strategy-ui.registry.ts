@@ -108,6 +108,15 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     family: 'liquidity',
     accentColor: '#9333ea',
     shortDescription: 'tradeBot.strategy.meta.liquidityFvg.description'
+  },
+  {
+    serviceName: 'PIVOT_SWEEP_REJECTION',
+    routePath: 'pivot-sweep-rejection',
+    icon: 'pi pi-chart-scatter',
+    displayOrder: 115,
+    family: 'price-action',
+    accentColor: '#b45309',
+    shortDescription: 'Pivot sweep rejection strategy'
   }
 ];
 

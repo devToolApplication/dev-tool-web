@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
-import { BasePageResponse, BaseResponse } from '../../models/base-response.model';
+import { BasePageResponse, BaseResponse, normalizePageMetadata } from '../../models/base-response.model';
 import {
   TradeStrategyBindingCreateDto,
   TradeStrategyBindingPatchDto,
@@ -32,7 +32,7 @@ export class TradeStrategyBindingService {
       .pipe(
         map((res) => ({
           data: res.data?.data ?? [],
-          metadata: res.data?.metadata ?? { pageNumber: page, pageSize: size, totalElements: 0, totalPages: 0 }
+          metadata: normalizePageMetadata(res.data?.metadata, page, size)
         }))
       );
   }

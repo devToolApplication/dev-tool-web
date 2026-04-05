@@ -1,9 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin, of } from 'rxjs';
-import { StrategyResponse } from '../../../../../core/models/trade-bot/reference-data.model';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { StrategyRuleCreateDto, StrategyRuleResponse, StrategyRuleUpdateDto } from '../../../../../core/models/trade-bot/strategy-rule.model';
-import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
+import { TradeBotConfigService } from '../../../../../core/services/trade-bot-service/config.service';
 import { StrategyRuleService } from '../../../../../core/services/trade-bot-service/strategy-rule.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
@@ -15,6 +14,8 @@ import {
   StrategyRuleFormValue,
   buildStrategyRuleFormConfig,
   buildStrategyRuleInitialValue,
+  configureStrategyRuleDefinitions,
+  getStrategyRuleDefaultCode,
   mapApiConfigToRuleConfig,
   mapRuleConfigToApiPayload,
   resolveStrategyRuleDefinition
@@ -28,22 +29,20 @@ import {
 export class StrategyRuleFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formVisible = signal(true);
+  private static readonly RULE_DEFINITIONS_CONFIG_CATEGORY = 'RULE_DEFINITIONS';
 
   editId: string | null = null;
   loading = false;
   saving = false;
 
-  formConfig: FormConfig = buildStrategyRuleFormConfig('RSI');
-  formInitialValue: StrategyRuleFormValue = buildStrategyRuleInitialValue('RSI');
+  formConfig: FormConfig = buildStrategyRuleFormConfig(null);
+  formInitialValue: StrategyRuleFormValue = buildStrategyRuleInitialValue(null);
   selectedRuleCode = this.formInitialValue.code;
-
-  strategies: StrategyResponse[] = [];
-  strategyOptions: Array<{ label: string; value: string }> = [];
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly referenceDataService: ReferenceDataService,
+    private readonly tradeBotConfigService: TradeBotConfigService,
     private readonly service: StrategyRuleService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
@@ -122,7 +121,6 @@ export class StrategyRuleFormComponent implements OnInit {
     this.formInitialValue = buildStrategyRuleInitialValue(nextCode, {
       code: nextCode,
       name: value.name ?? '',
-      strategyId: value.strategyId ?? '',
       status: value.status ?? 'ACTIVE',
       description: value.description ?? ''
     });
@@ -156,16 +154,16 @@ export class StrategyRuleFormComponent implements OnInit {
     this.loadingService
       .track(
         forkJoin({
-          strategies: this.referenceDataService.getStrategies(),
+          definitions: this.tradeBotConfigService
+            .getAll({ category: StrategyRuleFormComponent.RULE_DEFINITIONS_CONFIG_CATEGORY })
+            .pipe(catchError(() => of([]))),
           rule: id ? this.service.getById(id) : of(null)
         })
       )
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ strategies, rule }) => {
-          this.strategies = strategies;
-          this.strategyOptions = strategies.map((item) => ({ label: `${item.serviceName} - ${item.name}`, value: item.id }));
-          this.formContext.extra = { strategyOptions: this.strategyOptions };
+        next: ({ definitions, rule }) => {
+          configureStrategyRuleDefinitions(definitions);
 
           if (rule) {
             this.patchEditState(rule);
@@ -187,7 +185,6 @@ export class StrategyRuleFormComponent implements OnInit {
     this.formInitialValue = buildStrategyRuleInitialValue(normalizedCode, {
       code: normalizedCode,
       name: rule.name ?? '',
-      strategyId: rule.strategyId ?? '',
       status: rule.status,
       description: rule.description ?? '',
       configJson: mapApiConfigToRuleConfig(rule.configJson ?? {}, normalizedCode)
@@ -196,12 +193,10 @@ export class StrategyRuleFormComponent implements OnInit {
   }
 
   private resetCreateState(): void {
-    const defaultCode = 'RSI';
+    const defaultCode = getStrategyRuleDefaultCode() ?? '';
     this.selectedRuleCode = defaultCode;
     this.formContext.mode = 'create';
-    this.formInitialValue = buildStrategyRuleInitialValue(defaultCode, {
-      strategyId: this.strategies[0]?.id ?? ''
-    });
+    this.formInitialValue = buildStrategyRuleInitialValue(defaultCode);
     this.refreshForm(defaultCode);
   }
 
@@ -209,7 +204,6 @@ export class StrategyRuleFormComponent implements OnInit {
     return {
       code: model.code.trim().toUpperCase(),
       name: model.name.trim(),
-      strategyId: model.strategyId,
       description: model.description.trim() || undefined,
       status: model.status,
       configJson: mapRuleConfigToApiPayload(model.configJson)

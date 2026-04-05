@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
-import { BasePageResponse, BaseResponse } from '../../models/base-response.model';
+import { BasePageResponse, BaseResponse, normalizePageMetadata } from '../../models/base-response.model';
 import { TradeBotSecretCreateDto, TradeBotSecretResponse, TradeBotSecretUpdateDto } from '../../models/trade-bot/trade-bot-secret.model';
 
 @Injectable({ providedIn: 'root' })
@@ -37,7 +37,10 @@ export class TradeBotSecretService {
     });
 
     return this.http.get<BaseResponse<BasePageResponse<TradeBotSecretResponse>>>(`${this.apiUrl}/page`, { params }).pipe(
-      map((res) => res.data ?? { data: [], metadata: { pageNumber: page, pageSize: size, totalElements: 0, totalPages: 0 } })
+      map((res) => ({
+        data: res.data?.data ?? [],
+        metadata: normalizePageMetadata(res.data?.metadata, page, size)
+      }))
     );
   }
 

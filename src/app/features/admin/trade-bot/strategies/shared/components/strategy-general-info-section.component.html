@@ -27,10 +27,6 @@
       <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyName | translateContent }}</label>
       <input pInputText class="w-full" [value]="form.controls.strategyName.getRawValue()" readonly />
     </div>
-    <div class="col-span-12 md:col-span-6">
-      <label class="mb-2 block text-sm font-medium">{{ 'tradeBot.strategy.field.rule' | translateContent }}</label>
-      <p-select class="w-full" [options]="ruleOptions" optionLabel="label" optionValue="value" formControlName="ruleId"></p-select>
-    </div>
 
     <div class="col-span-12 md:col-span-4">
       <label class="mb-2 block text-sm font-medium">{{ TEXT.Exchange | translateContent }}</label>

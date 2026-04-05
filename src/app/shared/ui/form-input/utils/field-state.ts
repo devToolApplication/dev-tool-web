@@ -6,7 +6,8 @@ import {
   FieldState,
   FormContext,
   SelectOption,
-  GroupFieldState
+  GroupFieldState,
+  TextFieldConfig
 } from '../models/form-config.model';
 
 export function createFieldState<TFormModel extends object>(
@@ -80,6 +81,18 @@ export function createFieldState<TFormModel extends object>(
     }
 
     const result: Record<string, string> = {};
+    const currentValue = value();
+
+    if ((config.type === 'text' || config.type === 'textarea') && isJsonContent(config)) {
+      const rawValue = String(currentValue ?? '').trim();
+      if (rawValue !== '') {
+        try {
+          JSON.parse(rawValue);
+        } catch {
+          result['custom'] = config.jsonValidationMessage ?? 'Invalid JSON';
+        }
+      }
+    }
 
     config.validation?.forEach(rule => {
       const invalid = expr.evaluate(rule.expression, buildCtx());
@@ -138,4 +151,8 @@ export function createFieldState<TFormModel extends object>(
   }
 
   return baseState;
+}
+
+function isJsonContent(config: FieldConfig): config is TextFieldConfig {
+  return (config.type === 'text' || config.type === 'textarea') && config.contentType === 'json';
 }

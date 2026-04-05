@@ -1,55 +1,134 @@
-<p-floatlabel [variant]="variant">
-  @if (iconClass) {
-    <p-iconfield [style.width.%]="fluid ? 100 : null">
-      <p-inputicon [class]="iconClass"></p-inputicon>
-      <textarea
-        pTextarea
-        [id]="inputId"
-        [rows]="rows"
-        [ngModel]="value"
-        (ngModelChange)="onChange($event)"
-        [disabled]="disabled"
-        [readonly]="readonly"
-        [required]="required"
-        [autofocus]="autofocus"
-        [attr.placeholder]="(placeholder || null) | translateContent"
-        [invalid]="invalid"
-        autocomplete="off"
-        [style.width.%]="fluid ? 100 : null"
-        [class]="styleClass"
-        [attr.title]="(tooltip || null) | translateContent"
-        (blur)="onBlur()"
-        (focus)="onFocus()"
-      ></textarea>
-    </p-iconfield>
+<div class="input-area">
+  @if (contentType === 'json') {
+    <div class="input-area__json-shell" [class.input-area__json-shell--invalid]="invalid">
+      <div class="input-area__json-label">{{ label | translateContent }}</div>
+      <div
+        class="input-area__json-editor"
+        [class.input-area__json-editor--with-zoom]="showZoomButton"
+        [style.height]="inlineJsonHeight"
+        [style.maxHeight]="inlineJsonHeight"
+      >
+        @if (showZoomButton) {
+          <div class="input-area__zoom-overlay">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-window-maximize"
+              class="p-button-text p-button-sm input-area__zoom-button"
+              [disabled]="disabled"
+              (click)="openZoom()"
+            ></button>
+          </div>
+        }
+        <div #inlineJsonHost class="input-area__json-editor-host"></div>
+      </div>
+    </div>
+  } @else {
+    <p-floatlabel [variant]="variant">
+      <div class="input-area__editor-frame">
+        @if (showZoomButton) {
+          <div class="input-area__zoom-overlay">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-window-maximize"
+              class="p-button-text p-button-sm input-area__zoom-button"
+              [disabled]="disabled"
+              (click)="openZoom()"
+            ></button>
+          </div>
+        }
+        @if (iconClass) {
+          <p-iconfield [style.width.%]="fluid ? 100 : null">
+            <p-inputicon [class]="iconClass"></p-inputicon>
+            <textarea
+              pTextarea
+              [id]="inputId"
+              [rows]="rows"
+              [autoResize]="true"
+              [ngModel]="value"
+              (ngModelChange)="onChange($event)"
+              [disabled]="disabled"
+              [readonly]="readonly"
+              [required]="required"
+              [autofocus]="autofocus"
+              [attr.placeholder]="(placeholder || null) | translateContent"
+              [invalid]="invalid"
+              autocomplete="off"
+              [style.width.%]="fluid ? 100 : null"
+              [style.maxHeight]="inlineTextMaxHeight"
+              [class]="styleClass"
+              [class.input-area__inline-textarea--with-zoom]="showZoomButton"
+              [attr.title]="(tooltip || null) | translateContent"
+              (blur)="onBlur()"
+              (focus)="onFocus()"
+            ></textarea>
+          </p-iconfield>
+        } @else {
+          <textarea
+            pTextarea
+            [id]="inputId"
+            [rows]="rows"
+            [autoResize]="true"
+            [ngModel]="value"
+            (ngModelChange)="onChange($event)"
+            [disabled]="disabled"
+            [readonly]="readonly"
+            [required]="required"
+            [autofocus]="autofocus"
+            [attr.placeholder]="(placeholder || null) | translateContent"
+            [invalid]="invalid"
+            autocomplete="off"
+            [style.width.%]="fluid ? 100 : null"
+            [style.maxHeight]="inlineTextMaxHeight"
+            [class]="styleClass"
+            [class.input-area__inline-textarea--with-zoom]="showZoomButton"
+            [attr.title]="(tooltip || null) | translateContent"
+            (blur)="onBlur()"
+            (focus)="onFocus()"
+          ></textarea>
+        }
+      </div>
+      <label [attr.for]="inputId">{{ label | translateContent }}</label>
+    </p-floatlabel>
+  }
+
+  @if (helpText && !invalid) {
+    <small [id]="inputId">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+  }
+</div>
+
+<p-dialog
+  [visible]="zoomVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [maximizable]="true"
+  [style]="{ width: 'min(96vw, 72rem)' }"
+  [breakpoints]="{ '960px': '95vw', '640px': '98vw' }"
+  [header]="(label || placeholder || 'Content') | translateContent"
+  (visibleChange)="zoomVisible = $event"
+  (onHide)="closeZoom()"
+>
+  @if (contentType === 'json') {
+    <div #dialogJsonContainer class="input-area__json-editor input-area__json-editor--dialog"></div>
   } @else {
     <textarea
       pTextarea
-      [id]="inputId"
+      class="input-area__zoom-textarea"
       [rows]="rows"
+      [autoResize]="true"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
       [readonly]="readonly"
       [required]="required"
-      [autofocus]="autofocus"
       [attr.placeholder]="(placeholder || null) | translateContent"
-      [invalid]="invalid"
       autocomplete="off"
-      [style.width.%]="fluid ? 100 : null"
-      [class]="styleClass"
-      [attr.title]="(tooltip || null) | translateContent"
-      (blur)="onBlur()"
-      (focus)="onFocus()"
     ></textarea>
   }
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
-
-@if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}
+</p-dialog>

@@ -1,12 +1,12 @@
+import { TradeBotConfigResponse } from '../../../../../core/models/trade-bot/config.model';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { StrategyRuleStatus } from '../../../../../core/models/trade-bot/strategy-rule.model';
-import { FieldConfig, FormConfig, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
+import { FieldConfig, FieldType, FormConfig, GridWidth, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
 
 export interface StrategyRuleFormValue {
   code: string;
   name: string;
-  strategyId: string;
   status: StrategyRuleStatus;
   description: string;
   configJson: Record<string, unknown>;
@@ -20,213 +20,36 @@ export interface StrategyRuleCodeDefinition {
   initialValue: Record<string, unknown>;
 }
 
-const buildNumberValidation = (min = 0) => [Rules.required('tradeBot.strategyRule.validation.fieldRequired'), Rules.min(min, `tradeBot.strategyRule.validation.min.${min}`)];
+interface StrategyRuleDefinitionConfigValue {
+  label?: string;
+  description?: string;
+  configFields?: unknown[];
+  initialValue?: Record<string, unknown>;
+}
+let strategyRuleDefinitions: StrategyRuleCodeDefinition[] = [];
+let ruleDefinitionMap = buildRuleDefinitionMap(strategyRuleDefinitions);
+let strategyRuleCodeOptions = buildRuleCodeOptions(strategyRuleDefinitions);
 
-const numberField = (
-  name: string,
-  label: string,
-  width: '1/2' | '1/3' = '1/3',
-  validation = buildNumberValidation()
-): FieldConfig => ({
-  type: 'number',
-  name: `configJson.${name}`,
-  label,
-  width,
-  validation
-});
+export function configureStrategyRuleDefinitions(configs: TradeBotConfigResponse[] | null | undefined): void {
+  const definitions = (configs ?? [])
+    .filter((item) => item?.status === 'ACTIVE')
+    .map(mapConfigToDefinition)
+    .filter((item): item is StrategyRuleCodeDefinition => item !== null);
 
-const RULE_DEFINITIONS: StrategyRuleCodeDefinition[] = [
-  {
-    code: 'RSI',
-    label: 'RSI',
-    description: 'tradeBot.strategyRule.definition.rsi.description',
-    configFields: [
-      numberField('rsiPeriod', 'tradeBot.strategy.field.rsiPeriod', '1/3', buildNumberValidation(2)),
-      numberField('rsiOverbought', 'tradeBot.strategy.field.rsiOverbought'),
-      numberField('rsiOversold', 'tradeBot.strategy.field.rsiOversold')
-    ],
-    initialValue: { rsiPeriod: 14, rsiOverbought: 70, rsiOversold: 30 }
-  },
-  {
-    code: 'MACD',
-    label: 'MACD',
-    description: 'tradeBot.strategyRule.definition.macd.description',
-    configFields: [
-      numberField('macdFastPeriod', 'tradeBot.strategyRule.field.macdFastPeriod', '1/3', buildNumberValidation(1)),
-      numberField('macdSlowPeriod', 'tradeBot.strategyRule.field.macdSlowPeriod', '1/3', buildNumberValidation(2)),
-      numberField('macdSignalPeriod', 'tradeBot.strategyRule.field.macdSignalPeriod', '1/3', buildNumberValidation(1))
-    ],
-    initialValue: { macdFastPeriod: 12, macdSlowPeriod: 26, macdSignalPeriod: 9 }
-  },
-  {
-    code: 'EMA',
-    label: 'EMA',
-    description: 'tradeBot.strategyRule.definition.ema.description',
-    configFields: [numberField('emaPeriod', 'tradeBot.strategyRule.field.emaPeriod', '1/3', buildNumberValidation(2))],
-    initialValue: { emaPeriod: 20 }
-  },
-  {
-    code: 'SMA',
-    label: 'SMA',
-    description: 'tradeBot.strategyRule.definition.sma.description',
-    configFields: [numberField('smaPeriod', 'tradeBot.strategyRule.field.smaPeriod', '1/3', buildNumberValidation(2))],
-    initialValue: { smaPeriod: 20 }
-  },
-  {
-    code: 'DOWN_TREND',
-    label: 'tradeBot.strategyRule.definition.downTrend.label',
-    description: 'tradeBot.strategyRule.definition.downTrend.description',
-    configFields: [numberField('trendPeriod', 'tradeBot.strategyRule.field.trendPeriod', '1/3', buildNumberValidation(2))],
-    initialValue: { trendPeriod: 20 }
-  },
-  {
-    code: 'UP_TREND',
-    label: 'tradeBot.strategyRule.definition.upTrend.label',
-    description: 'tradeBot.strategyRule.definition.upTrend.description',
-    configFields: [numberField('trendPeriod', 'tradeBot.strategyRule.field.trendPeriod', '1/3', buildNumberValidation(2))],
-    initialValue: { trendPeriod: 20 }
-  },
-  {
-    code: 'PIVOT_POINT',
-    label: 'tradeBot.strategyRule.definition.pivotPoint.label',
-    description: 'tradeBot.strategyRule.definition.pivotPoint.description',
-    configFields: [
-      numberField('pivotLeft', 'tradeBot.strategy.field.pivotLeft', '1/3', buildNumberValidation(1)),
-      numberField('pivotRight', 'tradeBot.strategy.field.pivotRight', '1/3', buildNumberValidation(1)),
-      numberField('allowEqualBar', 'tradeBot.strategyRule.field.allowEqualBar', '1/3', buildNumberValidation(0))
-    ],
-    initialValue: { pivotLeft: 2, pivotRight: 2, allowEqualBar: 0 }
-  },
-  {
-    code: 'DEMARK_PIVOT_POINT',
-    label: 'tradeBot.strategyRule.definition.demarkPivotPoint.label',
-    description: 'tradeBot.strategyRule.definition.demarkPivotPoint.description',
-    configFields: [
-      numberField('pivotLeft', 'tradeBot.strategy.field.pivotLeft', '1/3', buildNumberValidation(1)),
-      numberField('pivotRight', 'tradeBot.strategy.field.pivotRight', '1/3', buildNumberValidation(1)),
-      numberField('allowEqualBar', 'tradeBot.strategyRule.field.allowEqualBar', '1/3', buildNumberValidation(0))
-    ],
-    initialValue: { pivotLeft: 2, pivotRight: 2, allowEqualBar: 0 }
-  },
-  {
-    code: 'DEMARK_REVERSAL',
-    label: 'tradeBot.strategyRule.definition.demarkReversal.label',
-    description: 'tradeBot.strategyRule.definition.demarkReversal.description',
-    configFields: [
-      numberField('pivotLeft', 'tradeBot.strategy.field.pivotLeft', '1/3', buildNumberValidation(1)),
-      numberField('pivotRight', 'tradeBot.strategy.field.pivotRight', '1/3', buildNumberValidation(1))
-    ],
-    initialValue: { pivotLeft: 2, pivotRight: 2 }
-  },
-  {
-    code: 'FIBONACCI_REVERSAL',
-    label: 'tradeBot.strategyRule.definition.fibonacciReversal.label',
-    description: 'tradeBot.strategyRule.definition.fibonacciReversal.description',
-    configFields: [
-      numberField('pivotLeft', 'tradeBot.strategy.field.pivotLeft', '1/3', buildNumberValidation(1)),
-      numberField('pivotRight', 'tradeBot.strategy.field.pivotRight', '1/3', buildNumberValidation(1))
-    ],
-    initialValue: { pivotLeft: 2, pivotRight: 2 }
-  },
-  {
-    code: 'STANDARD_REVERSAL',
-    label: 'tradeBot.strategyRule.definition.standardReversal.label',
-    description: 'tradeBot.strategyRule.definition.standardReversal.description',
-    configFields: [
-      numberField('pivotLeft', 'tradeBot.strategy.field.pivotLeft', '1/3', buildNumberValidation(1)),
-      numberField('pivotRight', 'tradeBot.strategy.field.pivotRight', '1/3', buildNumberValidation(1))
-    ],
-    initialValue: { pivotLeft: 2, pivotRight: 2 }
-  },
-  {
-    code: 'BEARISH_ENGULFING',
-    label: 'tradeBot.strategyRule.definition.bearishEngulfing.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'BULLISH_ENGULFING',
-    label: 'tradeBot.strategyRule.definition.bullishEngulfing.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'BEARISH_HARAMIL',
-    label: 'tradeBot.strategyRule.definition.bearishHarami.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'BULLISH_HARAMIL',
-    label: 'tradeBot.strategyRule.definition.bullishHarami.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'DOJI',
-    label: 'tradeBot.strategyRule.definition.doji.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'HAMMER',
-    label: 'tradeBot.strategyRule.definition.hammer.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'INVERTED_HAMMER',
-    label: 'tradeBot.strategyRule.definition.invertedHammer.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'HANGING_MAN',
-    label: 'tradeBot.strategyRule.definition.hangingMan.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'SHOOTING_STAR',
-    label: 'tradeBot.strategyRule.definition.shootingStar.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'THREE_BLACK_CROW',
-    label: 'tradeBot.strategyRule.definition.threeBlackCrow.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  },
-  {
-    code: 'THREE_WHITE_SOLIDER',
-    label: 'tradeBot.strategyRule.definition.threeWhiteSolider.label',
-    description: 'tradeBot.strategyRule.definition.noExtraParams',
-    configFields: [],
-    initialValue: {}
-  }
-];
+  updateRuleDefinitions(definitions);
+}
 
-const RULE_DEFINITION_MAP = new Map(RULE_DEFINITIONS.map((item) => [item.code, item]));
-
-export const STRATEGY_RULE_CODE_OPTIONS: SelectOption[] = RULE_DEFINITIONS.map((item) => ({ label: item.label, value: item.code }));
+export function getStrategyRuleDefaultCode(): string | null {
+  return strategyRuleDefinitions[0]?.code ?? null;
+}
 
 export function resolveStrategyRuleDefinition(ruleCode: string | null | undefined): StrategyRuleCodeDefinition {
   const normalizedCode = normalizeRuleCode(ruleCode);
+  const fallbackCode = normalizedCode || getStrategyRuleDefaultCode() || '';
   return (
-    RULE_DEFINITION_MAP.get(normalizedCode) ?? {
-      code: normalizedCode || 'RSI',
-      label: normalizedCode || 'RSI',
+    ruleDefinitionMap.get(normalizedCode) ?? {
+      code: fallbackCode,
+      label: fallbackCode,
       description: 'tradeBot.strategyRule.definition.fallbackDescription',
       configFields: [],
       initialValue: {}
@@ -236,9 +59,9 @@ export function resolveStrategyRuleDefinition(ruleCode: string | null | undefine
 
 export function buildStrategyRuleFormConfig(ruleCode: string | null | undefined): FormConfig {
   const definition = resolveStrategyRuleDefinition(ruleCode);
-  const codeOptions = RULE_DEFINITION_MAP.has(definition.code)
-    ? STRATEGY_RULE_CODE_OPTIONS
-    : [{ label: definition.label, value: definition.code }, ...STRATEGY_RULE_CODE_OPTIONS];
+  const codeOptions = ruleDefinitionMap.has(definition.code)
+    ? strategyRuleCodeOptions
+    : [{ label: definition.label, value: definition.code }, ...strategyRuleCodeOptions];
 
   return {
     fields: [
@@ -256,14 +79,6 @@ export function buildStrategyRuleFormConfig(ruleCode: string | null | undefined)
         label: 'tradeBot.strategyRule.field.name',
         width: '1/2',
         validation: [Rules.required('tradeBot.strategyRule.validation.nameRequired')]
-      },
-      {
-        type: 'select',
-        name: 'strategyId',
-        label: 'tradeBot.strategy.field.strategyName',
-        width: '1/2',
-        optionsExpression: 'context.extra?.strategyOptions || []',
-        validation: [Rules.required('tradeBot.strategyRule.validation.strategyRequired')]
       },
       {
         type: 'select',
@@ -293,7 +108,6 @@ export function buildStrategyRuleInitialValue(
   return {
     code: definition.code,
     name: '',
-    strategyId: '',
     status: 'ACTIVE',
     description: '',
     configJson: { ...definition.initialValue },
@@ -303,10 +117,13 @@ export function buildStrategyRuleInitialValue(
 
 export function mapApiConfigToRuleConfig(rawConfig: Record<string, unknown> | undefined, ruleCode: string | null | undefined): Record<string, unknown> {
   const definition = resolveStrategyRuleDefinition(ruleCode);
-  const allowedKeys = new Set(Object.keys(definition.initialValue));
+  const allowedKeys = new Set([
+    ...Object.keys(definition.initialValue),
+    ...definition.configFields.map((field) => extractConfigKey(field.name)).filter((key): key is string => !!key)
+  ]);
   const mapped = { ...definition.initialValue };
 
-  if (allowedKeys.size === 0 && !RULE_DEFINITION_MAP.has(definition.code)) {
+  if (allowedKeys.size === 0 && !ruleDefinitionMap.has(definition.code)) {
     return { ...(rawConfig ?? {}) };
   }
 
@@ -335,4 +152,99 @@ function normalizeRuleCode(ruleCode: string | null | undefined): string {
   return String(ruleCode ?? '')
     .trim()
     .toUpperCase();
+}
+
+function updateRuleDefinitions(definitions: StrategyRuleCodeDefinition[]): void {
+  strategyRuleDefinitions = [...definitions].sort((left, right) => left.code.localeCompare(right.code));
+  ruleDefinitionMap = buildRuleDefinitionMap(strategyRuleDefinitions);
+  strategyRuleCodeOptions = buildRuleCodeOptions(strategyRuleDefinitions);
+}
+
+function buildRuleDefinitionMap(definitions: StrategyRuleCodeDefinition[]): Map<string, StrategyRuleCodeDefinition> {
+  return new Map(definitions.map((item) => [item.code, item]));
+}
+
+function buildRuleCodeOptions(definitions: StrategyRuleCodeDefinition[]): SelectOption[] {
+  return definitions.map((item) => ({ label: item.label, value: item.code }));
+}
+
+function mapConfigToDefinition(config: TradeBotConfigResponse): StrategyRuleCodeDefinition | null {
+  if (!isRecord(config?.value)) {
+    return null;
+  }
+
+  const rawValue = config.value as StrategyRuleDefinitionConfigValue;
+  const code = normalizeRuleCode(config.key);
+  if (!code) {
+    return null;
+  }
+
+  return {
+    code,
+    label: String(rawValue.label ?? code).trim() || code,
+    description: String(rawValue.description ?? 'tradeBot.strategyRule.definition.fallbackDescription').trim(),
+    configFields: normalizeConfigFields(rawValue.configFields),
+    initialValue: isRecord(rawValue.initialValue) ? { ...rawValue.initialValue } : {}
+  };
+}
+
+function normalizeConfigFields(configFields: unknown[] | undefined): FieldConfig[] {
+  return (configFields ?? [])
+    .map((field) => normalizeConfigField(field))
+    .filter((field): field is FieldConfig => field !== null);
+}
+
+function normalizeConfigField(field: unknown): FieldConfig | null {
+  if (!isRecord(field)) {
+    return null;
+  }
+
+  const type = String(field['type'] ?? '').trim() as FieldType;
+  const name = String(field['name'] ?? '').trim();
+  if (!isSupportedFieldType(type) || !name) {
+    return null;
+  }
+
+  const width = isGridWidth(field['width']) ? field['width'] : undefined;
+  return {
+    ...(field as unknown as FieldConfig),
+    name: name.startsWith('configJson.') ? name : `configJson.${name}`,
+    ...(width ? { width } : {})
+  };
+}
+
+function extractConfigKey(fieldName: string | undefined): string | null {
+  if (!fieldName) {
+    return null;
+  }
+  return fieldName.startsWith('configJson.') ? fieldName.slice('configJson.'.length) : fieldName;
+}
+
+function isSupportedFieldType(type: string): type is FieldType {
+  return [
+    'text',
+    'number',
+    'select',
+    'group',
+    'checkbox',
+    'date',
+    'radio',
+    'select-multi',
+    'auto-complete',
+    'textarea',
+    'array',
+    'record',
+    'tags',
+    'input-multi',
+    'secret-metadata',
+    'tree'
+  ].includes(type);
+}
+
+function isGridWidth(value: unknown): value is GridWidth {
+  return ['1/2', '1/3', '1/4', '1/6', 'full'].includes(String(value ?? ''));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

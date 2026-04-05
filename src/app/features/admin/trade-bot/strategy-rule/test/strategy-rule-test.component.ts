@@ -126,12 +126,12 @@ export class StrategyRuleTestComponent implements OnInit {
     this.previewing = true;
     this.loadingService
       .track(
-        this.chartQueryService.getStrategyPreview(
+        this.chartQueryService.getRulePreview(
           symbol.providerSymbol ?? symbol.code,
           interval,
           startTime,
           endTime,
-          this.rule.strategyServiceName,
+          this.rule.code,
           this.rule.configJson,
           this.resolveDataResource(exchange.code)
         )

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { TableAction, TableColumn } from '../../models/table-config.model';
-import { getValueByPath } from '../../utils/object.util';
+import { TableAction, TableColumn } from '../../../models/table-config.model';
+import { getValueByPath } from '../../../utils/object.util';
 
 @Component({
   selector: 'app-table-cell',

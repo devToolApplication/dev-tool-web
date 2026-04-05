@@ -13,5 +13,6 @@ export const STRATEGY_FAMILY_LABELS: Record<string, string> = {
   session: 'tradeBot.strategy.family.session',
   pattern: 'tradeBot.strategy.family.pattern',
   divergence: 'tradeBot.strategy.family.divergence',
-  liquidity: 'tradeBot.strategy.family.liquidity'
+  liquidity: 'tradeBot.strategy.family.liquidity',
+  'price-action': 'Price Action'
 };

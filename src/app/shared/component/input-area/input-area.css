@@ -1,0 +1,93 @@
+.input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-area__editor-frame {
+  position: relative;
+}
+
+.input-area__zoom-button {
+  padding: 0.125rem;
+}
+
+.input-area__zoom-overlay {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+}
+
+.input-area__inline-textarea--with-zoom {
+  padding-right: 2.75rem;
+}
+
+.input-area__zoom-textarea {
+  width: 100%;
+  min-height: 65vh;
+  resize: vertical;
+}
+
+.input-area__json-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-area__json-shell--invalid {
+  border-radius: 0.75rem;
+}
+
+.input-area__json-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.input-area__json-editor {
+  position: relative;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--p-content-background);
+}
+
+.input-area__json-editor-host {
+  height: 100%;
+}
+
+.input-area__json-editor--dialog {
+  min-height: 70vh;
+}
+
+:host ::ng-deep .input-area__json-shell--invalid .input-area__json-editor {
+  border-color: var(--p-red-400);
+}
+
+:host ::ng-deep .input-area__json-editor .cm-editor {
+  height: 100%;
+  border: none;
+  background: transparent;
+}
+
+:host ::ng-deep .input-area__json-editor .cm-focused {
+  outline: none;
+}
+
+:host ::ng-deep .input-area__json-editor .cm-scroller {
+  overflow: auto;
+  font-family: var(--p-font-family-monospace, 'JetBrains Mono', monospace);
+}
+
+:host ::ng-deep .input-area__json-editor--with-zoom .cm-scroller {
+  padding-right: 2.75rem;
+}
+
+:host ::ng-deep .input-area__json-editor .cm-content {
+  min-height: 100%;
+}
+
+:host ::ng-deep .input-area__json-editor--dialog .cm-content {
+  min-height: 70vh;
+}

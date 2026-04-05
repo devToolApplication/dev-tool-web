@@ -142,6 +142,10 @@
           [value]="field.value()"
           [disabled]="field.disabled()"
           [helpText]="textConfig?.helpText"
+          [rows]="textConfig?.rows ?? 5"
+          [maxRows]="textConfig?.maxRows ?? 5"
+          [showZoomButton]="textConfig?.showZoomButton ?? false"
+          [contentType]="textConfig?.contentType ?? 'text'"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
           (blur)="onBlur()">

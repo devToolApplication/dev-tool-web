@@ -3,15 +3,18 @@ import { forkJoin, map, Observable } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { ExchangeResponse, StrategyResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
 import { StrategyRuleResponse } from '../../../../../core/models/trade-bot/strategy-rule.model';
+import { TradeBotConfigResponse } from '../../../../../core/models/trade-bot/config.model';
 import {
   TradeStrategyBindingCreateDto,
   TradeStrategyBindingResponse,
   TradeStrategyBindingUpdateDto
 } from '../../../../../core/models/trade-bot/trade-strategy-binding.model';
+import { TradeBotConfigService } from '../../../../../core/services/trade-bot-service/config.service';
 import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
 import { StrategyRuleService } from '../../../../../core/services/trade-bot-service/strategy-rule.service';
 import { TradeStrategyBindingService } from '../../../../../core/services/trade-bot-service/trade-strategy-binding.service';
 import { MARKET_TYPE_OPTIONS, TRADE_SIDE_MODE_OPTIONS } from '../../trade-bot-admin.constants';
+import { StrategyConfigDefinition, configureStrategyDefinitions, resolveStrategyConfigDefinition } from './strategy-config-form.factory';
 
 export interface StrategySelectOption {
   label: string;
@@ -23,15 +26,16 @@ export interface StrategyReferenceBundle {
   symbols: SymbolResponse[];
   strategies: StrategyResponse[];
   rules: StrategyRuleResponse[];
+  definitions: TradeBotConfigResponse[];
 }
 
 export interface StrategyFormPageContext {
   references: StrategyReferenceBundle;
   binding?: TradeStrategyBindingResponse;
   selectedStrategy?: StrategyResponse;
+  selectedDefinition: StrategyConfigDefinition;
   exchangeOptions: StrategySelectOption[];
   symbolOptions: StrategySelectOption[];
-  ruleOptions: StrategySelectOption[];
   marketTypeOptions: StrategySelectOption[];
   tradeSideModeOptions: StrategySelectOption[];
   statusOptions: StrategySelectOption[];
@@ -42,7 +46,8 @@ export class StrategyFormFacade {
   constructor(
     private readonly referenceDataService: ReferenceDataService,
     private readonly strategyRuleService: StrategyRuleService,
-    private readonly bindingService: TradeStrategyBindingService
+    private readonly bindingService: TradeStrategyBindingService,
+    private readonly tradeBotConfigService: TradeBotConfigService
   ) {}
 
   loadCreateContext(strategyServiceName: string): Observable<StrategyFormPageContext> {
@@ -65,7 +70,8 @@ export class StrategyFormFacade {
       exchanges: this.referenceDataService.getExchanges(),
       symbols: this.referenceDataService.getSymbols(),
       strategies: this.referenceDataService.getStrategies(),
-      rules: this.strategyRuleService.getAll()
+      rules: this.strategyRuleService.getAll(),
+      definitions: this.tradeBotConfigService.getAll({ category: 'STRATEGY_DEFINITIONS' })
     });
   }
 
@@ -74,15 +80,16 @@ export class StrategyFormFacade {
     binding: TradeStrategyBindingResponse | undefined,
     strategyServiceName: string
   ): StrategyFormPageContext {
+    configureStrategyDefinitions(references.definitions);
+    const selectedDefinition = resolveStrategyConfigDefinition(strategyServiceName);
+
     return {
       references,
       binding,
       selectedStrategy: references.strategies.find((item) => item.serviceName === strategyServiceName),
+      selectedDefinition,
       exchangeOptions: references.exchanges.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id })),
       symbolOptions: references.symbols.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.id })),
-      ruleOptions: references.rules
-        .filter((item) => item.strategyServiceName === strategyServiceName)
-        .map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id })),
       marketTypeOptions: [...MARKET_TYPE_OPTIONS],
       tradeSideModeOptions: [...TRADE_SIDE_MODE_OPTIONS],
       statusOptions: SYSTEM_STATUS_OPTIONS.map((item) => ({ label: String(item.label), value: String(item.value) }))

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
@@ -8,6 +8,7 @@ import { TradeStrategyBindingService } from '../../../../../core/services/trade-
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategies/strategy-management.constants';
 import { TradeBotTextKey } from '../../strategies/shared/strategy-ui.enums';
@@ -17,7 +18,7 @@ import { TradeBotTextKey } from '../../strategies/shared/strategy-ui.enums';
   standalone: false,
   templateUrl: './trade-strategy-binding-list.component.html'
 })
-export class TradeStrategyBindingListComponent implements OnInit {
+export class TradeStrategyBindingListComponent extends BasePagedList<TradeStrategyBindingResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: TradeBotTextKey.StrategyListTitle,
     toolbar: { new: { visible: true, label: TradeBotTextKey.NewStrategy, icon: 'pi pi-plus', severity: 'success' } },
@@ -55,17 +56,18 @@ export class TradeStrategyBindingListComponent implements OnInit {
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  rows: TradeStrategyBindingResponse[] = [];
   loading = false;
-  filters: Record<string, unknown> = {};
 
   constructor(
     private readonly service: TradeStrategyBindingService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly route: ActivatedRoute,
     private readonly router: Router
-  ) {}
+  ) {
+    super(route, router, DEFAULT_TABLE_ROWS);
+  }
 
   ngOnInit(): void {
     this.loadPage();
@@ -73,16 +75,6 @@ export class TradeStrategyBindingListComponent implements OnInit {
 
   onCreate(): void {
     void this.router.navigate([STRATEGY_MANAGEMENT_ROUTES.createEntry]);
-  }
-
-  onSearch(filters: Record<string, unknown>): void {
-    this.filters = filters;
-    this.loadPage();
-  }
-
-  onResetFilter(): void {
-    this.filters = {};
-    this.loadPage();
   }
 
   private goEdit(id: string): void {
@@ -104,13 +96,13 @@ export class TradeStrategyBindingListComponent implements OnInit {
     });
   }
 
-  private loadPage(): void {
+  protected loadPage(): void {
     this.loading = true;
     this.loadingService
-      .track(this.service.getPage(0, 200, ['exchangeCode,asc', 'symbolCode,asc'], this.filters))
+      .track(this.service.getPage(this.page, this.pageSize, ['exchangeCode,asc', 'symbolCode,asc'], this.filters))
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (res: BasePageResponse<TradeStrategyBindingResponse>) => (this.rows = res.data ?? []),
+        next: (res: BasePageResponse<TradeStrategyBindingResponse>) => this.setPageResponse(res),
         error: () => this.toastService.error(this.i18nService.t(TradeBotTextKey.LoadStrategyListFailed))
       });
   }

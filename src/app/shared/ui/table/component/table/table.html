@@ -51,11 +51,14 @@
 
 <p-table
   styleClass="app-table-scrollable"
-  [value]="data"
-  [rows]="config.rows ?? 10"
+  [value]="resolvedData"
+  [rows]="resolvedRows"
   [paginator]="config.pagination ?? true"
   [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
   [loading]="loading"
+  [lazy]="serverSidePagination"
+  [totalRecords]="resolvedTotalRecords"
+  [first]="first"
   [tableStyle]="{ 'min-width': tableMinWidth }"
   [rowHover]="true"
   [currentPageReportTemplate]="'showingEntries' | translateContent"
@@ -63,6 +66,7 @@
   [scrollable]="scrollable"
   [scrollHeight]="scrollHeight"
   responsiveLayout="scroll"
+  (onPage)="onPage($event)"
 >
   <ng-template pTemplate="caption">
     <div class="table-caption">
@@ -113,7 +117,7 @@
 
   <ng-template pTemplate="summary">
     <div class="table-summary">
-      {{ (('totalRecords' | translateContent).replace('{{count}}', data.length.toString())) }}
+      {{ (('totalRecords' | translateContent).replace('{{count}}', resolvedTotalRecords.toString())) }}
     </div>
   </ng-template>
 </p-table>

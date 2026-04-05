@@ -10,7 +10,6 @@ export interface StrategyGeneralInfoFormModel {
   strategyId: FormControl<string>;
   strategyServiceName: FormControl<string>;
   strategyName: FormControl<string>;
-  ruleId: FormControl<string>;
   exchangeId: FormControl<string>;
   symbolId: FormControl<string>;
   marketType: FormControl<string>;
@@ -41,7 +40,6 @@ export class StrategyFormBuilders {
       strategyId: [''],
       strategyServiceName: [{ value: '', disabled: true }, [Validators.required]],
       strategyName: [{ value: '', disabled: true }, [Validators.required]],
-      ruleId: ['', Validators.required],
       exchangeId: ['', Validators.required],
       symbolId: ['', Validators.required],
       marketType: ['', Validators.required],
@@ -73,7 +71,6 @@ export class StrategyFormBuilders {
       strategyId: binding.strategyId ?? '',
       strategyServiceName: binding.strategyServiceName ?? '',
       strategyName: strategy?.name ?? binding.strategyName ?? binding.strategyServiceName ?? '',
-      ruleId: binding.ruleId ?? '',
       exchangeId: binding.exchangeId ?? '',
       symbolId: binding.symbolId ?? '',
       marketType: binding.marketType,

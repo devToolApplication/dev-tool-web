@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
-import { BasePageResponse, BaseResponse } from '../../models/base-response.model';
+import { BasePageResponse, BaseResponse, normalizePageMetadata } from '../../models/base-response.model';
 import { StorageSecretCreateDto, StorageSecretResponse, StorageSecretUpdateDto } from '../../models/file-storage/storage-secret.model';
 
 @Injectable({ providedIn: 'root' })
@@ -43,12 +43,10 @@ export class StorageSecretService {
     return this.http
       .get<BaseResponse<BasePageResponse<StorageSecretResponse>>>(`${this.apiUrl}/page`, { params })
       .pipe(
-        map((res) =>
-          res.data ?? {
-            data: [],
-            metadata: { pageNumber: page, pageSize: size, totalElements: 0, totalPages: 0 }
-          }
-        )
+        map((res) => ({
+          data: res.data?.data ?? [],
+          metadata: normalizePageMetadata(res.data?.metadata, page, size)
+        }))
       );
   }
 

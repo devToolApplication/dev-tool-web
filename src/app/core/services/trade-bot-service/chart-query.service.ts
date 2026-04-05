@@ -67,6 +67,37 @@ export class ChartQueryService {
       );
   }
 
+  getRulePreview(
+    symbol: string,
+    interval: string,
+    startTime: number,
+    endTime: number,
+    ruleCode: string,
+    configJson: Record<string, unknown>,
+    dataResource?: string
+  ): Observable<TradeBotCandleResponse> {
+    let params = new HttpParams()
+      .set('symbol', symbol)
+      .set('interval', interval)
+      .set('startTime', startTime)
+      .set('endTime', endTime);
+    if (dataResource) {
+      params = params.set('dataResource', dataResource);
+    }
+
+    return this.http
+      .post<BaseResponse<TradeBotCandleResponse>>(`${this.apiUrl}/fetch/trade-signal`, { ruleCode, configJson }, { params })
+      .pipe(
+        map((res) => ({
+          candlestickData: res.data?.candlestickData ?? [],
+          lineData: res.data?.lineData ?? [],
+          areaData: res.data?.areaData ?? [],
+          pointData: res.data?.pointData ?? [],
+          indicatorData: res.data?.indicatorData ?? []
+        }))
+      );
+  }
+
   createLiveCandleStream(dataResource: string, symbol: string, interval: string): Observable<TradeBotCandleResponse> {
     return new Observable<TradeBotCandleResponse>((subscriber) => {
       let stompClient: Client | null = null;

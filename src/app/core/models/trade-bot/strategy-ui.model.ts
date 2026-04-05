@@ -10,9 +10,10 @@ export type StrategyRoutePath =
   | 'asia-range-london-breakout'
   | 'inside-bar-breakout-mtf'
   | 'rsi-divergence-swing'
-  | 'liquidity-sweep-fvg-reclaim';
+  | 'liquidity-sweep-fvg-reclaim'
+  | 'pivot-sweep-rejection';
 
-export type StrategyUiFamily = 'breakout' | 'trend' | 'mean-reversion' | 'session' | 'pattern' | 'divergence' | 'liquidity';
+export type StrategyUiFamily = 'breakout' | 'trend' | 'mean-reversion' | 'session' | 'pattern' | 'divergence' | 'liquidity' | 'price-action';
 
 export interface StrategyUiMetadata {
   serviceName: string;

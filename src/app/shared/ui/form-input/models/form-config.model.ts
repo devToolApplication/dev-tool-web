@@ -39,6 +39,11 @@ export interface TextFieldConfig extends BaseFieldConfig {
   type: 'text' | 'textarea';
   placeholder?: string;
   helpText?: string;
+  rows?: number;
+  maxRows?: number;
+  showZoomButton?: boolean;
+  contentType?: 'text' | 'json';
+  jsonValidationMessage?: string;
 }
 
 export interface NumberFieldConfig extends BaseFieldConfig {

@@ -141,7 +141,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
           { type: 'text', name: 'url', label: 'mcpTool.url', width: '1/2', validation: [Rules.required('mcpTool.urlRequired')] },
           { type: 'record', name: 'params', label: 'mcpTool.params', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: '1/2' },
           { type: 'record', name: 'headers', label: 'mcpTool.headers', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: '1/2' },
-          { type: 'textarea', name: 'body', label: 'mcpTool.body', width: 'full' }
+          { type: 'textarea', name: 'body', label: 'mcpTool.body', width: 'full', showZoomButton: true }
         ]
       },
       {

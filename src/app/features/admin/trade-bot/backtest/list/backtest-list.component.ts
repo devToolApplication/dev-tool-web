@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
@@ -8,6 +8,7 @@ import { BacktestService } from '../../../../../core/services/trade-bot-service/
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { TRADE_BOT_BACKTEST_ROUTES } from '../../trade-bot-admin.constants';
 import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategies/strategy-management.constants';
@@ -18,7 +19,7 @@ import { TradeBotTextKey } from '../../strategies/shared/strategy-ui.enums';
   standalone: false,
   templateUrl: './backtest-list.component.html'
 })
-export class BacktestListComponent implements OnInit {
+export class BacktestListComponent extends BasePagedList<BacktestJobResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: TradeBotTextKey.BacktestReplayTitle,
     toolbar: { new: { visible: true, label: TradeBotTextKey.RunBacktest, icon: 'pi pi-play', severity: 'success' } },
@@ -49,17 +50,18 @@ export class BacktestListComponent implements OnInit {
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  rows: BacktestJobResponse[] = [];
   loading = false;
-  filters: Record<string, unknown> = {};
 
   constructor(
     private readonly service: BacktestService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly route: ActivatedRoute,
     private readonly router: Router
-  ) {}
+  ) {
+    super(route, router, DEFAULT_TABLE_ROWS);
+  }
 
   ngOnInit(): void {
     this.loadPage();
@@ -67,16 +69,6 @@ export class BacktestListComponent implements OnInit {
 
   onCreate(): void {
     void this.router.navigate([TRADE_BOT_BACKTEST_ROUTES.run]);
-  }
-
-  onSearch(filters: Record<string, unknown>): void {
-    this.filters = filters;
-    this.loadPage();
-  }
-
-  onResetFilter(): void {
-    this.filters = {};
-    this.loadPage();
   }
 
   private goDetail(id: string): void {
@@ -88,13 +80,13 @@ export class BacktestListComponent implements OnInit {
     void this.router.navigate([`${TRADE_BOT_BACKTEST_ROUTES.list}/${id}`]);
   }
 
-  private loadPage(): void {
+  protected loadPage(): void {
     this.loading = true;
     this.loadingService
-      .track(this.service.getPage(0, 200, ['startedAt,desc'], this.filters))
+      .track(this.service.getPage(this.page, this.pageSize, ['startedAt,desc'], this.filters))
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (res: BasePageResponse<BacktestJobResponse>) => (this.rows = res.data ?? []),
+        next: (res: BasePageResponse<BacktestJobResponse>) => this.setPageResponse(res),
         error: () => this.toastService.error(this.i18nService.t(TradeBotTextKey.LoadReplayFailed))
       });
   }

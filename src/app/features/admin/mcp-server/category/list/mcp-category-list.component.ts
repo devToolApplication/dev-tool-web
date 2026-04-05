@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
@@ -8,6 +8,7 @@ import { McpCategoryService } from '../../../../../core/services/ai-agent-servic
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
 
@@ -16,7 +17,7 @@ import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
   standalone: false,
   templateUrl: './mcp-category-list.component.html'
 })
-export class McpCategoryListComponent implements OnInit {
+export class McpCategoryListComponent extends BasePagedList<McpCategoryResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'mcpCategory.title',
     toolbar: {
@@ -42,16 +43,18 @@ export class McpCategoryListComponent implements OnInit {
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  rows: McpCategoryResponse[] = [];
   loading = false;
 
   constructor(
     private readonly service: McpCategoryService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly i18nService: I18nService
-  ) {}
+  ) {
+    super(route, router, DEFAULT_TABLE_ROWS);
+  }
 
   ngOnInit(): void {
     this.loadPage();
@@ -76,11 +79,11 @@ export class McpCategoryListComponent implements OnInit {
     });
   }
 
-  private loadPage(): void {
+  protected loadPage(): void {
     this.loading = true;
-    this.loadingService.track(this.service.getPage()).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loadingService.track(this.service.getPage(this.page, this.pageSize, ['name,asc'])).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (res: BasePageResponse<McpCategoryResponse>) => {
-        this.rows = res.data ?? [];
+        this.setPageResponse(res);
       },
       error: () => this.toastService.error(this.i18nService.t('mcpCategory.loadListError'))
     });

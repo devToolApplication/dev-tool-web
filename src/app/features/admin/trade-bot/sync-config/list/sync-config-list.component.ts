@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
@@ -8,6 +8,7 @@ import { SyncConfigService } from '../../../../../core/services/trade-bot-servic
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { TRADE_BOT_ROUTES } from '../../trade-bot.constants';
 
@@ -16,7 +17,7 @@ import { TRADE_BOT_ROUTES } from '../../trade-bot.constants';
   standalone: false,
   templateUrl: './sync-config-list.component.html'
 })
-export class SyncConfigListComponent implements OnInit {
+export class SyncConfigListComponent extends BasePagedList<SyncConfigResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'tradeBot.dataSourceTitle',
     toolbar: {
@@ -44,7 +45,6 @@ export class SyncConfigListComponent implements OnInit {
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  rows: SyncConfigResponse[] = [];
   loading = false;
 
   constructor(
@@ -52,8 +52,11 @@ export class SyncConfigListComponent implements OnInit {
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly route: ActivatedRoute,
     private readonly router: Router
-  ) {}
+  ) {
+    super(route, router, DEFAULT_TABLE_ROWS);
+  }
 
   ngOnInit(): void {
     this.loadPage();
@@ -90,11 +93,11 @@ export class SyncConfigListComponent implements OnInit {
     });
   }
 
-  private loadPage(): void {
+  protected loadPage(): void {
     this.loading = true;
-    this.loadingService.track(this.service.getPage(0, this.tableConfig.rows ?? DEFAULT_TABLE_ROWS)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loadingService.track(this.service.getPage(this.page, this.pageSize)).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (res: BasePageResponse<SyncConfigResponse>) => {
-        this.rows = res.data ?? [];
+        this.setPageResponse(res);
       },
       error: () => this.toastService.error(this.i18nService.t('tradeBot.loadSyncConfigError'))
     });

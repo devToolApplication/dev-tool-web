@@ -24,6 +24,9 @@
   "private": true,
   "packageManager": "npm@11.8.0",
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.6",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",
@@ -33,6 +36,7 @@
     "@primeuix/themes": "^2.0.3",
     "@stomp/stompjs": "^7.3.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "codemirror": "^6.0.2",
     "echarts": "^6.0.0",
     "keycloak-js": "^26.2.3",
     "postcss": "^8.5.6",

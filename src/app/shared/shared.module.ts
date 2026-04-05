@@ -97,9 +97,9 @@ import { FieldRenderer } from './ui/form-input/component/field-renderer/field-re
 import { FieldSecretMetadataRendererComponent } from './ui/form-input/component/field-secret-metadata-renderer/field-secret-metadata-renderer';
 import { FieldTreeRendererComponent } from './ui/form-input/component/field-tree-renderer/field-tree-renderer';
 import { FormInput } from './ui/form-input/form-input';
-import { TableCellComponent } from './ui/table/component/table-cell/table-cell';
-import { TableFilterComponent } from './ui/table/component/table-filter/table-filter';
-import { TableComponent } from './ui/table/table';
+import { TableCellComponent } from './ui/table/component/table/table-cell/table-cell';
+import { TableFilterComponent } from './ui/table/component/table/table-filter/table-filter';
+import { TableComponent } from './ui/table/component/table/table';
 
 const PIPE = [TranslateContentPipe];
 
