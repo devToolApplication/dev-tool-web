@@ -4,13 +4,12 @@ import { environment } from '../../../enviroment/environment';
 
 @Injectable({ providedIn: 'root' })
 export class KeycloakService {
-
   private keycloak!: Keycloak;
+  private initialized = false;
 
   constructor(private zone: NgZone) {}
 
   init(): Promise<boolean> {
-
     this.keycloak = new Keycloak({
       url: environment.keycloak.url,
       realm: environment.keycloak.realm,
@@ -22,7 +21,13 @@ export class KeycloakService {
         onLoad: 'login-required',
         checkLoginIframe: false
       })
-    );
+    ).then((authenticated) => {
+      this.initialized = authenticated;
+      return authenticated;
+    }).catch((error) => {
+      this.initialized = false;
+      throw error;
+    });
   }
 
   get token(): string | undefined {
@@ -33,8 +38,20 @@ export class KeycloakService {
     return this.keycloak?.tokenParsed;
   }
 
-  logout() {
-    this.keycloak?.logout();
+  async logout(): Promise<void> {
+    const redirectUri = window.location.origin;
+
+    if (this.initialized && this.keycloak) {
+      await this.keycloak.logout({ redirectUri });
+      return;
+    }
+
+    const logoutUrl =
+      `${environment.keycloak.url}/realms/${environment.keycloak.realm}` +
+      `/protocol/openid-connect/logout?client_id=${encodeURIComponent(environment.keycloak.clientId)}` +
+      `&post_logout_redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+    window.location.assign(logoutUrl);
   }
 
   hasRole(role: string): boolean {
