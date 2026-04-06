@@ -7,6 +7,7 @@ export interface StrategyRuleSlotDefinition {
   required: boolean;
   selectionMode: string;
   acceptedRuleCodes: string[];
+  acceptedRuleGroupCodes: string[];
 }
 
 export interface StrategyConfigDefinition {
@@ -14,6 +15,7 @@ export interface StrategyConfigDefinition {
   label: string;
   description: string;
   executor: string;
+  ruleGroupSelectionMode: string;
   formConfig: FormConfig;
   initialValue: Record<string, unknown>;
   ruleSlots: StrategyRuleSlotDefinition[];
@@ -23,6 +25,7 @@ interface StrategyDefinitionConfigValue {
   label?: string;
   description?: string;
   executor?: string;
+  ruleGroupSelectionMode?: string;
   configFields?: unknown[];
   initialValue?: Record<string, unknown>;
   ruleSlots?: unknown[];
@@ -49,6 +52,7 @@ export function resolveStrategyConfigDefinition(strategyServiceName: string | nu
       label: normalizedCode,
       description: 'tradeBot.strategy.meta.defaultDescription',
       executor: normalizedCode,
+      ruleGroupSelectionMode: 'ANY',
       formConfig: { fields: [] },
       initialValue: {},
       ruleSlots: []
@@ -107,6 +111,7 @@ function mapConfigToDefinition(config: TradeBotConfigResponse): StrategyConfigDe
     label: String(rawValue.label ?? code).trim() || code,
     description: String(rawValue.description ?? 'tradeBot.strategy.meta.defaultDescription').trim(),
     executor: String(rawValue.executor ?? code).trim() || code,
+    ruleGroupSelectionMode: String(rawValue.ruleGroupSelectionMode ?? 'ANY').trim().toUpperCase() || 'ANY',
     formConfig: { fields: normalizeConfigFields(rawValue.configFields) },
     initialValue: isRecord(rawValue.initialValue) ? { ...rawValue.initialValue } : {},
     ruleSlots: normalizeRuleSlots(rawValue.ruleSlots)
@@ -162,6 +167,11 @@ function normalizeRuleSlot(slot: unknown): StrategyRuleSlotDefinition | null {
       ? slot['acceptedRuleCodes'].map((item) => normalizeStrategyCode(String(item))).filter(Boolean)
       : Array.isArray(slot['accepted_rule_codes'])
         ? slot['accepted_rule_codes'].map((item) => normalizeStrategyCode(String(item))).filter(Boolean)
+        : [],
+    acceptedRuleGroupCodes: Array.isArray(slot['acceptedRuleGroupCodes'])
+      ? slot['acceptedRuleGroupCodes'].map((item) => normalizeStrategyCode(String(item))).filter(Boolean)
+      : Array.isArray(slot['accepted_rule_group_codes'])
+        ? slot['accepted_rule_group_codes'].map((item) => normalizeStrategyCode(String(item))).filter(Boolean)
         : []
   };
 }

@@ -30,6 +30,7 @@ export class StrategyRuleFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formVisible = signal(true);
   private static readonly RULE_DEFINITIONS_CONFIG_CATEGORY = 'RULE_DEFINITIONS';
+  private static readonly RULE_CONFIG_SCHEMAS_CATEGORY = 'RULE_CONFIG_SCHEMAS';
 
   editId: string | null = null;
   loading = false;
@@ -157,13 +158,16 @@ export class StrategyRuleFormComponent implements OnInit {
           definitions: this.tradeBotConfigService
             .getAll({ category: StrategyRuleFormComponent.RULE_DEFINITIONS_CONFIG_CATEGORY })
             .pipe(catchError(() => of([]))),
+          configSchemas: this.tradeBotConfigService
+            .getAll({ category: StrategyRuleFormComponent.RULE_CONFIG_SCHEMAS_CATEGORY })
+            .pipe(catchError(() => of([]))),
           rule: id ? this.service.getById(id) : of(null)
         })
       )
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ definitions, rule }) => {
-          configureStrategyRuleDefinitions(definitions);
+        next: ({ definitions, configSchemas, rule }) => {
+          configureStrategyRuleDefinitions(definitions, configSchemas);
 
           if (rule) {
             this.patchEditState(rule);

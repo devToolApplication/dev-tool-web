@@ -19,6 +19,7 @@ import { StrategyFormFacade, StrategyFormPageContext, StrategySelectOption } fro
 import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
 import { resolveStrategyUiMetadataByServiceName } from '../../shared/strategy-ui.registry';
 import { StrategyRuleResponse } from '../../../../../../core/models/trade-bot/strategy-rule.model';
+import { STRATEGY_RULE_ROUTES } from '../../../strategy-rule/strategy-rule.constants';
 
 type RuleSlotFormGroup = FormGroup<Record<string, FormControl<string>>>;
 
@@ -29,6 +30,8 @@ type RuleSlotFormGroup = FormGroup<Record<string, FormControl<string>>>;
   styleUrl: './strategy-form-page.component.css'
 })
 export class StrategyFormPageComponent implements OnInit {
+  private static readonly SAME_GROUP_RULE_SELECTION_MODE = 'SAME_GROUP';
+
   readonly generalInfoForm: StrategyGeneralInfoFormGroup;
   readonly destroyRef = inject(DestroyRef);
   readonly TEXT = TradeBotTextKey;
@@ -45,6 +48,7 @@ export class StrategyFormPageComponent implements OnInit {
     label: '',
     description: '',
     executor: '',
+    ruleGroupSelectionMode: 'ANY',
     formConfig: { fields: [] },
     initialValue: {},
     ruleSlots: []
@@ -97,10 +101,11 @@ export class StrategyFormPageComponent implements OnInit {
     return this.ruleSlotsForm.valid;
   }
 
-  get selectedRuleDetails(): Array<{ slot: StrategyRuleSlotDefinition; rule?: StrategyRuleResponse }> {
+  get selectedRuleDetails(): Array<{ slot: StrategyRuleSlotDefinition; rule?: StrategyRuleResponse; configJson?: Record<string, unknown> }> {
     return this.strategyDefinition.ruleSlots.map((slot) => ({
       slot,
-      rule: this.findRuleById(this.ruleSlotsForm.controls[slot.slotCode]?.value ?? '')
+      rule: this.findRuleById(this.ruleSlotsForm.controls[slot.slotCode]?.value ?? ''),
+      configJson: this.findRuleById(this.ruleSlotsForm.controls[slot.slotCode]?.value ?? '')?.configJson
     }));
   }
 
@@ -131,11 +136,35 @@ export class StrategyFormPageComponent implements OnInit {
     void this.router.navigate([STRATEGY_MANAGEMENT_ROUTES.list]);
   }
 
+  goRulePreview(ruleId: string | undefined): void {
+    if (!ruleId) {
+      return;
+    }
+    void this.router.navigate([STRATEGY_RULE_ROUTES.test(ruleId)]);
+  }
+
   getRuleOptions(slot: StrategyRuleSlotDefinition): StrategySelectOption[] {
+    return this.getRuleOptionsForSlot(slot);
+  }
+
+  onRuleSelectionChange(slotCode: string): void {
+    this.reconcileRuleGroupSelections(slotCode);
+  }
+
+  private getRuleOptionsForSlot(slot: StrategyRuleSlotDefinition, pinnedRuleGroupCode?: string | null): StrategySelectOption[] {
     const acceptedRuleCodes = new Set((slot.acceptedRuleCodes ?? []).map((item) => item.toUpperCase()));
+    const acceptedRuleGroupCodes = new Set((slot.acceptedRuleGroupCodes ?? []).map((item) => item.toUpperCase()));
+    const effectiveRuleGroupCode = pinnedRuleGroupCode ?? this.getPinnedRuleGroupCode(slot.slotCode);
+
     return this.availableRules
       .filter((item) => item.status === 'ACTIVE')
       .filter((item) => acceptedRuleCodes.size === 0 || acceptedRuleCodes.has(String(item.code ?? '').trim().toUpperCase()))
+      .filter(
+        (item) =>
+          acceptedRuleGroupCodes.size === 0 ||
+          acceptedRuleGroupCodes.has(this.normalizeRuleGroupCode(item.ruleGroupCode))
+      )
+      .filter((item) => !effectiveRuleGroupCode || this.normalizeRuleGroupCode(item.ruleGroupCode) === effectiveRuleGroupCode)
       .map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
   }
 
@@ -192,7 +221,7 @@ export class StrategyFormPageComponent implements OnInit {
 
     slots.forEach((slot) => {
       const matchedSelection = selectedRules.find((item) => item.slotCode?.toUpperCase() === slot.slotCode.toUpperCase());
-      const defaultOption = this.getRuleOptions(slot)[0]?.value ?? '';
+      const defaultOption = this.getRuleOptionsForSlot(slot)[0]?.value ?? '';
       controls[slot.slotCode] = new FormControl(matchedSelection?.ruleId ?? (slot.required ? defaultOption : ''), {
         nonNullable: true,
         validators: slot.required ? [Validators.required] : []
@@ -200,6 +229,7 @@ export class StrategyFormPageComponent implements OnInit {
     });
 
     this.ruleSlotsForm = new FormGroup(controls);
+    this.reconcileRuleGroupSelections();
   }
 
   private patchEditState(binding: TradeStrategyBindingResponse, strategy: StrategyResponse | undefined): void {
@@ -266,9 +296,16 @@ export class StrategyFormPageComponent implements OnInit {
         if (!ruleId) {
           return null;
         }
+        const rule = this.findRuleById(ruleId);
         return {
           slotCode: slot.slotCode,
-          ruleId
+          slotLabel: slot.label,
+          ruleId,
+          ruleCode: rule?.code ?? ruleId,
+          ruleName: rule?.name,
+          ruleGroupCode: rule?.ruleGroupCode,
+          ruleGroupLabel: rule?.ruleGroupLabel,
+          configJson: rule?.configJson ? { ...rule.configJson } : undefined
         } as TradeStrategySelectedRule;
       })
       .filter((item): item is TradeStrategySelectedRule => item !== null);
@@ -279,6 +316,58 @@ export class StrategyFormPageComponent implements OnInit {
       return undefined;
     }
     return this.availableRules.find((item) => item.id === ruleId);
+  }
+
+  private reconcileRuleGroupSelections(changedSlotCode?: string): void {
+    if (this.strategyDefinition.ruleGroupSelectionMode !== StrategyFormPageComponent.SAME_GROUP_RULE_SELECTION_MODE) {
+      return;
+    }
+
+    const pinnedRuleGroupCode =
+      (changedSlotCode ? this.normalizeRuleGroupCode(this.findRuleById(this.ruleSlotsForm.controls[changedSlotCode]?.value ?? '')?.ruleGroupCode) : '') ||
+      this.getPinnedRuleGroupCode();
+    if (!pinnedRuleGroupCode) {
+      return;
+    }
+
+    this.strategyDefinition.ruleSlots.forEach((slot) => {
+      if (slot.slotCode === changedSlotCode) {
+        return;
+      }
+
+      const control = this.ruleSlotsForm.controls[slot.slotCode];
+      if (!control) {
+        return;
+      }
+
+      const currentRule = this.findRuleById(control.value);
+      if (this.normalizeRuleGroupCode(currentRule?.ruleGroupCode) === pinnedRuleGroupCode) {
+        return;
+      }
+
+      const nextOption = this.getRuleOptionsForSlot(slot, pinnedRuleGroupCode)[0];
+      control.setValue(nextOption?.value ?? '', { emitEvent: false });
+    });
+  }
+
+  private getPinnedRuleGroupCode(excludedSlotCode?: string): string | null {
+    if (this.strategyDefinition.ruleGroupSelectionMode !== StrategyFormPageComponent.SAME_GROUP_RULE_SELECTION_MODE) {
+      return null;
+    }
+
+    const selectedRuleGroups = this.strategyDefinition.ruleSlots
+      .filter((slot) => slot.slotCode !== excludedSlotCode)
+      .map((slot) => this.findRuleById(this.ruleSlotsForm.controls[slot.slotCode]?.value ?? ''))
+      .map((rule) => this.normalizeRuleGroupCode(rule?.ruleGroupCode))
+      .filter((groupCode) => !!groupCode);
+    const distinctGroups = [...new Set(selectedRuleGroups)];
+    return distinctGroups.length === 1 ? distinctGroups[0] : null;
+  }
+
+  private normalizeRuleGroupCode(value: string | null | undefined): string {
+    return String(value ?? '')
+      .trim()
+      .toUpperCase();
   }
 
   private prefillProviderSymbol(symbolId: string): void {

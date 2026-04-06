@@ -7,6 +7,8 @@ export interface TradeStrategySelectedRule {
   ruleId: string;
   ruleCode?: string;
   ruleName?: string;
+  ruleGroupCode?: string;
+  ruleGroupLabel?: string;
   configJson?: Record<string, unknown>;
 }
 

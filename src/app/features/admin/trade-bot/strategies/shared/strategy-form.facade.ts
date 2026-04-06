@@ -26,6 +26,8 @@ export interface StrategyReferenceBundle {
   symbols: SymbolResponse[];
   strategies: StrategyResponse[];
   rules: StrategyRuleResponse[];
+  ruleDefinitions: TradeBotConfigResponse[];
+  ruleConfigSchemas: TradeBotConfigResponse[];
   definitions: TradeBotConfigResponse[];
 }
 
@@ -45,9 +47,9 @@ export interface StrategyFormPageContext {
 export class StrategyFormFacade {
   constructor(
     private readonly referenceDataService: ReferenceDataService,
-    private readonly strategyRuleService: StrategyRuleService,
     private readonly bindingService: TradeStrategyBindingService,
-    private readonly tradeBotConfigService: TradeBotConfigService
+    private readonly tradeBotConfigService: TradeBotConfigService,
+    private readonly strategyRuleService: StrategyRuleService
   ) {}
 
   loadCreateContext(strategyServiceName: string): Observable<StrategyFormPageContext> {
@@ -70,9 +72,21 @@ export class StrategyFormFacade {
       exchanges: this.referenceDataService.getExchanges(),
       symbols: this.referenceDataService.getSymbols(),
       strategies: this.referenceDataService.getStrategies(),
-      rules: this.strategyRuleService.getAll(),
+      rules: this.strategyRuleService.getAll({ status: 'ACTIVE' }),
+      ruleDefinitions: this.tradeBotConfigService.getAll({ category: 'RULE_DEFINITIONS' }),
+      ruleConfigSchemas: this.tradeBotConfigService.getAll({ category: 'RULE_CONFIG_SCHEMAS' }),
       definitions: this.tradeBotConfigService.getAll({ category: 'STRATEGY_DEFINITIONS' })
-    });
+    }).pipe(
+      map(({ exchanges, symbols, strategies, rules, ruleDefinitions, ruleConfigSchemas, definitions }) => ({
+        exchanges,
+        symbols,
+        strategies,
+        rules,
+        ruleDefinitions,
+        ruleConfigSchemas,
+        definitions
+      }))
+    );
   }
 
   private buildContext(

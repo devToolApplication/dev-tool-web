@@ -4,6 +4,8 @@ export interface StrategyRuleResponse {
   id: string;
   code: string;
   name: string;
+  ruleGroupCode?: string;
+  ruleGroupLabel?: string;
   strategyId?: string;
   strategyServiceName?: string;
   strategyName?: string;

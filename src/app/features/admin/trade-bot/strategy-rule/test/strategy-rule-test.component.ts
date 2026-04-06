@@ -207,7 +207,7 @@ export class StrategyRuleTestComponent implements OnInit {
       points: (response.pointData ?? []).map((item) => ({
         name: item.name ?? 'Point',
         color: item.color ?? '#f59e0b',
-        startTime: this.formatChartTime(item.time),
+        startTime: this.formatChartTime(this.normalizePointTime(item.time)),
         price: item.value
       })),
       indicators: (response.indicatorData ?? []).map((item) => ({
@@ -226,6 +226,10 @@ export class StrategyRuleTestComponent implements OnInit {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
+  }
+
+  private normalizePointTime(value: number): number {
+    return value < 1_000_000_000_000 ? value * 1000 : value;
   }
 
   private toDateOffset(offsetDays: number): Date {
