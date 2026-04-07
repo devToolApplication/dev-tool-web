@@ -1,7 +1,6 @@
 .page-shell {
   min-height: 100%;
-  background: var(--app-surface);
+  background: transparent;
   border-radius: 16px;
   padding: 1rem;
-  box-shadow: var(--app-page-shell-shadow);
 }

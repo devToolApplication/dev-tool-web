@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { MenuItem } from 'primeng/api';
@@ -21,32 +21,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
     icon: 'pi pi-home',
     routerLink: '/'
   };
+  accountMenuItems: MenuItem[] = [];
   breadcrumbItems: MenuItem[] = [];
-
-  get accountMenuItems(): MenuItem[] {
-    return [
-      {
-        label: this.i18nService.t('layout.settings'),
-        icon: 'pi pi-cog',
-        command: () => this.router.navigate(['/settings'])
-      },
-      {
-        label: this.i18nService.t('layout.logout'),
-        icon: 'pi pi-sign-out',
-        command: () => this.keycloakService.logout()
-      }
-    ];
-  }
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly router: Router,
+    private readonly zone: NgZone,
     private readonly keycloakService: KeycloakService,
     private readonly i18nService: I18nService
   ) {}
 
   ngOnInit(): void {
+    this.buildAccountMenuItems();
     this.updateBreadcrumb();
 
     this.router.events
@@ -68,6 +56,33 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleAccountMenu(event: Event): void {
     this.userMenu.toggle(event);
+  }
+
+  private buildAccountMenuItems(): void {
+    this.accountMenuItems = [
+      {
+        label: this.i18nService.t('layout.settings'),
+        icon: 'pi pi-cog',
+        command: () => this.openSettings()
+      },
+      {
+        label: this.i18nService.t('layout.logout'),
+        icon: 'pi pi-sign-out',
+        command: () => this.logout()
+      }
+    ];
+  }
+
+  private openSettings(): void {
+    this.zone.run(() => {
+      this.userMenu.hide();
+      void this.router.navigateByUrl('/settings');
+    });
+  }
+
+  private logout(): void {
+    this.userMenu.hide();
+    void this.keycloakService.logout();
   }
 
   private updateBreadcrumb(): void {

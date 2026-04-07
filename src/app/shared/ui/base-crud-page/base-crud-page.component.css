@@ -3,12 +3,22 @@
   gap: 1rem;
 }
 
+.header-row {
+  border: 1px solid var(--app-border);
+  background: var(--app-card-bg);
+  box-shadow: var(--app-shadow-lg);
+  backdrop-filter: blur(14px);
+}
+
 .header-actions:empty {
   display: none;
 }
 
 .form-wrap {
   border-radius: 1rem;
-  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  background: var(--app-card-bg);
   padding: 1rem;
+  box-shadow: var(--app-shadow-lg);
+  backdrop-filter: blur(14px);
 }

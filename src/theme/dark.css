@@ -1,19 +1,24 @@
 :root[data-theme="dark"],
 :root.app-dark {
-  --app-bg: #0b1020;
-  --app-surface: #11182a;
-  --app-surface-alt: #1b2438;
+  --app-bg: #070b22;
+  --app-surface: rgba(15, 21, 58, 0.54);
+  --app-surface-alt: rgba(12, 18, 50, 0.68);
+  --app-surface-soft: rgba(17, 24, 57, 0.42);
+  --app-surface-strong: rgba(8, 12, 34, 0.86);
 
-  --app-text: #e5e7eb;
-  --app-text-muted: #9ca3af;
-  --app-border: #2c364b;
+  --app-text: #f3f6ff;
+  --app-text-muted: #b5bddf;
+  --app-text-soft: #d9def8;
+  --app-border: rgba(130, 164, 255, 0.34);
+  --app-border-soft: rgba(191, 204, 255, 0.14);
+  --app-border-strong: rgba(109, 159, 255, 0.52);
 
-  --app-input-bg: #0f172a;
-  --app-input-text: #e5e7eb;
-  --app-input-border: #334155;
+  --app-input-bg: rgba(10, 16, 41, 0.86);
+  --app-input-text: #f3f6ff;
+  --app-input-border: rgba(120, 156, 255, 0.26);
 
-  --app-overlay-bg: #111827;
-  --app-overlay-text: #e5e7eb;
+  --app-overlay-bg: rgba(10, 14, 36, 0.96);
+  --app-overlay-text: #f3f6ff;
 
   --app-custom-select-bg: var(--app-custom-dark-select-bg);
   --app-custom-select-text: var(--app-custom-dark-select-text);
@@ -21,28 +26,51 @@
   --app-custom-input-text: var(--app-custom-dark-input-text);
   --app-custom-text: var(--app-custom-dark-text);
 
-  --app-tab-list-bg: #1b2438;
-  --app-tab-list-border: #2c364b;
-  --app-tab-text: #94a3b8;
-  --app-tab-text-active: #e5e7eb;
-  --app-tab-active-bg: #11182a;
-  --app-tab-panels-bg: #11182a;
-  --app-tab-panels-border: #2c364b;
-  --app-tab-panel-text: #e5e7eb;
+  --app-tab-list-bg: rgba(11, 17, 45, 0.74);
+  --app-tab-list-border: rgba(130, 164, 255, 0.26);
+  --app-tab-text: #c7d1f5;
+  --app-tab-text-active: #f5f8ff;
+  --app-tab-active-bg: rgba(15, 21, 58, 0.82);
+  --app-tab-panels-bg: rgba(12, 18, 50, 0.48);
+  --app-tab-panels-border: rgba(136, 163, 255, 0.3);
+  --app-tab-panel-text: #f3f6ff;
 
-  --app-sidebar-bg: #0f172a;
+  --app-sidebar-bg: rgba(8, 12, 34, 0.86);
   --app-sidebar-text: var(--app-text);
   --app-sidebar-muted: var(--app-text-muted);
-  --app-sidebar-border: var(--app-border);
-  --app-sidebar-brand-bg: color-mix(in srgb, var(--app-primary) 24%, transparent);
-  --app-sidebar-item-hover: color-mix(in srgb, var(--app-primary) 20%, transparent);
-  --app-sidebar-badge-bg: #1f2937;
-  --app-sidebar-badge-text: #d1d5db;
+  --app-sidebar-border: rgba(143, 167, 255, 0.16);
+  --app-sidebar-brand-bg: linear-gradient(135deg, rgba(112, 194, 255, 0.3), rgba(154, 115, 255, 0.24));
+  --app-sidebar-item-hover: rgba(13, 18, 48, 0.44);
+  --app-sidebar-badge-bg: rgba(18, 26, 64, 0.86);
+  --app-sidebar-badge-text: #d9def8;
+  --app-sidebar-link-bg: rgba(13, 18, 48, 0.28);
+  --app-sidebar-link-hover-border: rgba(134, 161, 255, 0.18);
+  --app-shell-sidebar-bg: linear-gradient(180deg, rgba(8, 12, 34, 0.94), rgba(8, 12, 34, 0.78));
 
-  --app-shadow-xs: 0 1px 2px rgb(0 0 0 / 20%);
-  --app-shadow-sm: 0 2px 8px rgb(0 0 0 / 24%);
-  --app-shadow-md: 0 6px 14px rgb(0 0 0 / 28%);
-  --app-shadow-lg: 0 10px 24px rgb(0 0 0 / 34%);
-  --app-shadow-xl: 0 16px 36px rgb(0 0 0 / 40%);
-  --app-shadow-overlay: 0 18px 42px rgb(0 0 0 / 44%);
+  --app-layout-background:
+    radial-gradient(900px 420px at 71% 19%, rgba(255, 101, 217, 0.16), transparent 52%),
+    radial-gradient(920px 480px at 75% 82%, rgba(176, 86, 255, 0.14), transparent 58%),
+    radial-gradient(760px 380px at 28% 84%, rgba(58, 122, 255, 0.14), transparent 55%),
+    linear-gradient(rgb(7 10 24 / 52%), rgb(7 10 24 / 72%)),
+    url('/backgrounds/space-bg.png') center / cover no-repeat fixed;
+  --app-layout-stars:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.95) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 24% 62%, rgba(214, 226, 255, 0.9) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 48% 31%, rgba(255, 255, 255, 0.9) 0 1.1px, transparent 1.5px),
+    radial-gradient(circle at 66% 54%, rgba(196, 208, 255, 0.88) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 83% 72%, rgba(255, 255, 255, 0.9) 0 1.1px, transparent 1.5px),
+    radial-gradient(circle at 6% 84%, rgba(255, 255, 255, 0.85) 0 1px, transparent 1.5px);
+  --app-layout-stars-opacity: 0.38;
+  --app-layout-streaks:
+    linear-gradient(165deg, transparent 48%, rgba(255, 90, 211, 0.12) 50%, transparent 52%),
+    linear-gradient(154deg, transparent 49%, rgba(118, 173, 255, 0.1) 50.5%, transparent 52%);
+  --app-layout-streaks-opacity: 0.6;
+
+  --app-control-accent-bg: linear-gradient(90deg, rgba(59, 108, 255, 0.84), rgba(104, 88, 255, 0.74));
+  --app-control-accent-bg-hover: linear-gradient(90deg, rgba(87, 129, 255, 0.92), rgba(129, 105, 255, 0.82));
+  --app-control-accent-bg-active: linear-gradient(90deg, rgba(59, 108, 255, 0.9), rgba(129, 87, 255, 0.82));
+  --app-control-accent-border: rgba(122, 160, 255, 0.28);
+  --app-control-accent-shadow: 0 0 14px rgba(93, 126, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --app-control-neutral-bg: rgba(10, 16, 41, 0.82);
+  --app-control-chip-bg: rgba(59, 108, 255, 0.2);
 }

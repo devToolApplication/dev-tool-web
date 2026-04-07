@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+:host label {
+  color: var(--app-text-soft);
+  font-weight: 600;
+}
+
+:host small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--app-text-muted);
+}

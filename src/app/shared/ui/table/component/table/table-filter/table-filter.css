@@ -29,7 +29,8 @@ app-input-text {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.32);
+  background: rgba(7, 11, 34, 0.56);
+  backdrop-filter: blur(4px);
   z-index: 1100;
 }
 
@@ -41,8 +42,10 @@ app-input-text {
   width: min(40rem, 100vw);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background: var(--app-surface);
-  box-shadow: -24px 0 48px rgba(15, 23, 42, 0.22);
+  background: var(--app-card-bg-strong);
+  border-left: 1px solid var(--app-border);
+  box-shadow: -24px 0 48px rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(18px);
   z-index: 1101;
 }
 

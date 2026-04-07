@@ -5,10 +5,13 @@
 .header-toolbar {
   height: 62px;
   border: 0;
-  border-radius: 0;
+  border-radius: 16px;
   padding-inline: 1rem;
-  box-shadow: none;
-  background: var(--app-bg);
+  box-shadow: var(--app-shadow-md);
+  background: var(--app-card-bg-strong);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  margin: 1rem 1rem 0;
 }
 
 .brand-wrap {
@@ -31,7 +34,7 @@
 }
 
 .sidebar-toggle-button:hover {
-  background: var(--app-surface-alt);
+  background: var(--app-surface-soft);
 }
 
 .avatar-button {

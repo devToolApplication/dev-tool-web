@@ -3,8 +3,10 @@
   min-height: 420px;
   border: 1px solid var(--app-border);
   border-radius: 10px;
-  background: var(--app-surface);
+  background: var(--app-card-bg);
   padding: 8px;
+  box-shadow: var(--app-shadow-lg);
+  backdrop-filter: blur(14px);
 }
 
 .candle-chart-canvas {
