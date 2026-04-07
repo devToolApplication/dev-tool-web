@@ -54,7 +54,8 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.02),
     0 0 0 1px rgba(130, 164, 255, 0.06);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .input-area__json-editor-host {
@@ -94,8 +95,8 @@
 }
 
 :host ::ng-deep .input-area__json-editor .cm-gutters {
-  background: rgba(10, 16, 41, 0.64);
-  border-right: 1px solid rgba(120, 156, 255, 0.16);
+  background: var(--app-custom-input-bg);
+  border-right: 1px solid var(--app-input-border);
   color: var(--app-text-muted);
 }
 

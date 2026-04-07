@@ -8,8 +8,9 @@
   border-radius: 16px;
   padding-inline: 1rem;
   box-shadow: var(--app-shadow-md);
-  background: var(--app-card-bg-strong);
-  backdrop-filter: blur(12px);
+  background: var(--app-card-surface-strong);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--app-border);
   margin: 1rem 1rem 0;
 }

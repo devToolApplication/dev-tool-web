@@ -5,9 +5,10 @@
 
 .header-row {
   border: 1px solid var(--app-border);
-  background: var(--app-card-bg);
+  background: var(--app-card-surface);
   box-shadow: var(--app-shadow-lg);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .header-actions:empty {
@@ -17,8 +18,9 @@
 .form-wrap {
   border-radius: 1rem;
   border: 1px solid var(--app-border);
-  background: var(--app-card-bg);
+  background: var(--app-card-surface);
   padding: 1rem;
   box-shadow: var(--app-shadow-lg);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }

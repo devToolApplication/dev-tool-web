@@ -26,27 +26,34 @@ app-input-text {
   flex: 1;
 }
 
-.drawer-backdrop {
-  position: fixed;
-  inset: 0;
+:host ::ng-deep .table-filter-drawer-mask {
+  padding: 0;
   background: rgba(7, 11, 34, 0.56);
   backdrop-filter: blur(4px);
-  z-index: 1100;
+  -webkit-backdrop-filter: blur(4px);
 }
 
-.filter-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(40rem, 100vw);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  background: var(--app-card-bg-strong);
+:host ::ng-deep .table-filter-drawer.p-dialog {
+  margin: 0;
+  max-height: 100vh;
+  border: none;
   border-left: 1px solid var(--app-border);
+  border-radius: 0;
+  background: var(--app-card-surface-strong);
   box-shadow: -24px 0 48px rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(18px);
-  z-index: 1101;
+  overflow: hidden;
+}
+
+:host ::ng-deep .table-filter-drawer .p-dialog-header,
+:host ::ng-deep .table-filter-drawer .p-dialog-content,
+:host ::ng-deep .table-filter-drawer .p-dialog-footer {
+  padding: 0;
+  background: transparent;
+}
+
+:host ::ng-deep .table-filter-drawer .p-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .drawer-header,
@@ -76,6 +83,7 @@ app-input-text {
 .drawer-content {
   overflow: auto;
   padding: 1.25rem;
+  min-height: 0;
 }
 
 .drawer-grid {

@@ -50,7 +50,7 @@
 </p-toolbar>
 
 <p-table
-  styleClass="app-table-scrollable"
+  [styleClass]="(config.filters?.length ? 'app-table-scrollable app-table-scrollable--with-filters' : 'app-table-scrollable')"
   [value]="resolvedData"
   [rows]="resolvedRows"
   [paginator]="config.pagination ?? true"

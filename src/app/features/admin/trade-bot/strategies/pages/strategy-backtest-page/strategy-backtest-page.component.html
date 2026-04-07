@@ -92,7 +92,7 @@
 
   @if (replayPayload) {
     <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-12 xl:col-span-8 flex flex-col gap-4">
+    <div class="col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
       <app-base-replay-controls
         [currentStep]="replay.currentStepIndex()"
         [totalSteps]="replay.steps().length"
@@ -141,7 +141,7 @@
       </p-panel>
     </div>
 
-    <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
+    <div class="col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">
       <app-replay-auto-pause-panel
         [enabled]="replay.autoPauseEnabled()"
         [selectedTypes]="replay.autoPauseEventTypes()"

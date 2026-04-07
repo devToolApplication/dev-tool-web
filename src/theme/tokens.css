@@ -1,12 +1,18 @@
 :root {
   /* Surface */
   --app-bg: #f6f8ff;
-  --app-surface: rgba(255, 255, 255, 0.78);
-  --app-surface-alt: rgba(255, 255, 255, 0.66);
-  --app-surface-soft: rgba(255, 255, 255, 0.5);
-  --app-surface-strong: rgba(255, 255, 255, 0.92);
-  --app-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.66));
-  --app-card-bg-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.76));
+  --app-surface: rgba(255, 255, 255, 0.72);
+  --app-surface-alt: rgba(255, 255, 255, 0.58);
+  --app-surface-soft: rgba(255, 255, 255, 0.42);
+  --app-surface-strong: rgba(255, 255, 255, 0.86);
+  --app-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.58));
+  --app-card-bg-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.68));
+  --app-card-surface: rgba(255, 255, 255, 0.66);
+  --app-card-surface-strong: rgba(255, 255, 255, 0.78);
+  --app-table-shell-bg: rgba(255, 255, 255, 0.62);
+  --app-table-header-bg: rgba(255, 255, 255, 0.74);
+  --app-table-cell-bg: rgba(255, 255, 255, 0.52);
+  --app-table-row-hover-bg: rgba(255, 255, 255, 0.68);
   --app-card-highlight:
     radial-gradient(220px 90px at 0% 0%, rgba(111, 108, 255, 0.14), transparent 70%),
     radial-gradient(280px 110px at 100% 100%, rgba(95, 212, 255, 0.1), transparent 72%);
@@ -31,24 +37,32 @@
   --app-accent-green: #20b486;
 
   /* Input */
-  --app-input-bg: rgba(255, 255, 255, 0.9);
+  --app-input-bg: rgba(255, 255, 255, 0.82);
   --app-input-text: var(--app-text);
   --app-input-border: rgba(115, 131, 203, 0.18);
+  --app-input-disabled-bg: linear-gradient(180deg, rgba(241, 245, 255, 0.96), rgba(232, 238, 252, 0.88));
+  --app-input-disabled-text: #8190b1;
+  --app-input-disabled-border: rgba(147, 164, 215, 0.24);
+  --app-input-disabled-placeholder: rgba(129, 144, 177, 0.82);
+  --app-input-disabled-icon: rgba(110, 122, 152, 0.72);
+  --app-input-disabled-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 0 0 1px rgba(147, 164, 215, 0.08);
 
   /* Overlay */
-  --app-overlay-bg: rgba(255, 255, 255, 0.94);
+  --app-overlay-bg: rgba(255, 255, 255, 0.88);
   --app-overlay-text: var(--app-text);
 
   /* Custom theme token per mode */
-  --app-custom-light-select-bg: rgba(255, 255, 255, 0.98);
+  --app-custom-light-select-bg: rgba(255, 255, 255, 0.9);
   --app-custom-light-select-text: var(--app-text);
-  --app-custom-light-input-bg: rgba(255, 255, 255, 0.92);
+  --app-custom-light-input-bg: rgba(255, 255, 255, 0.82);
   --app-custom-light-input-text: var(--app-text);
   --app-custom-light-text: var(--app-text);
 
-  --app-custom-dark-select-bg: rgba(10, 14, 36, 0.96);
+  --app-custom-dark-select-bg: rgba(10, 14, 36, 0.9);
   --app-custom-dark-select-text: var(--app-text);
-  --app-custom-dark-input-bg: rgba(10, 16, 41, 0.86);
+  --app-custom-dark-input-bg: rgba(10, 16, 41, 0.78);
   --app-custom-dark-input-text: var(--app-text);
   --app-custom-dark-text: var(--app-text);
 
@@ -59,12 +73,12 @@
   --app-custom-text: var(--app-custom-light-text);
 
   /* Tabs */
-  --app-tab-list-bg: rgba(255, 255, 255, 0.72);
+  --app-tab-list-bg: rgba(255, 255, 255, 0.64);
   --app-tab-list-border: rgba(133, 156, 221, 0.18);
   --app-tab-text: #6e7a98;
   --app-tab-text-active: #172033;
-  --app-tab-active-bg: rgba(255, 255, 255, 0.9);
-  --app-tab-panels-bg: rgba(255, 255, 255, 0.72);
+  --app-tab-active-bg: rgba(255, 255, 255, 0.82);
+  --app-tab-panels-bg: rgba(255, 255, 255, 0.62);
   --app-tab-panels-border: rgba(133, 156, 221, 0.22);
   --app-tab-panel-text: var(--app-text);
 
@@ -104,8 +118,64 @@
   --app-control-accent-bg-active: linear-gradient(135deg, #6662f3, #846ef7 50%, #4dc7f1);
   --app-control-accent-border: rgba(115, 131, 203, 0.18);
   --app-control-accent-shadow: 0 16px 35px rgba(99, 116, 255, 0.28);
-  --app-control-neutral-bg: rgba(255, 255, 255, 0.84);
+  --app-control-neutral-bg: rgba(255, 255, 255, 0.76);
   --app-control-chip-bg: rgba(111, 108, 255, 0.12);
+  --app-control-secondary-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(236, 242, 255, 0.88));
+  --app-control-secondary-bg-hover: linear-gradient(135deg, rgba(247, 250, 255, 0.98), rgba(227, 236, 255, 0.92));
+  --app-control-secondary-bg-active: linear-gradient(135deg, rgba(236, 242, 255, 0.96), rgba(217, 229, 255, 0.9));
+  --app-control-secondary-border: rgba(136, 157, 219, 0.28);
+  --app-control-secondary-text: #51607f;
+  --app-control-secondary-shadow:
+    0 10px 24px rgba(118, 136, 198, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-success-bg: linear-gradient(135deg, rgba(226, 253, 238, 0.98), rgba(203, 245, 224, 0.92));
+  --app-control-success-bg-hover: linear-gradient(135deg, rgba(213, 250, 230, 0.98), rgba(188, 239, 214, 0.94));
+  --app-control-success-bg-active: linear-gradient(135deg, rgba(198, 245, 219, 0.98), rgba(177, 232, 202, 0.94));
+  --app-control-success-border: rgba(46, 180, 126, 0.28);
+  --app-control-success-text: #187a58;
+  --app-control-success-shadow:
+    0 10px 24px rgba(32, 157, 111, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-info-bg: linear-gradient(135deg, rgba(233, 246, 255, 0.98), rgba(213, 236, 255, 0.92));
+  --app-control-info-bg-hover: linear-gradient(135deg, rgba(224, 242, 255, 0.98), rgba(198, 229, 255, 0.94));
+  --app-control-info-bg-active: linear-gradient(135deg, rgba(210, 235, 255, 0.98), rgba(186, 220, 255, 0.94));
+  --app-control-info-border: rgba(73, 143, 255, 0.28);
+  --app-control-info-text: #2a6fd6;
+  --app-control-info-shadow:
+    0 10px 24px rgba(73, 143, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-warn-bg: linear-gradient(135deg, rgba(255, 247, 224, 0.98), rgba(255, 236, 196, 0.92));
+  --app-control-warn-bg-hover: linear-gradient(135deg, rgba(255, 243, 209, 0.98), rgba(255, 229, 176, 0.94));
+  --app-control-warn-bg-active: linear-gradient(135deg, rgba(255, 236, 192, 0.98), rgba(255, 219, 153, 0.94));
+  --app-control-warn-border: rgba(230, 162, 47, 0.28);
+  --app-control-warn-text: #a76a12;
+  --app-control-warn-shadow:
+    0 10px 24px rgba(230, 162, 47, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-danger-bg: linear-gradient(135deg, rgba(255, 238, 243, 0.98), rgba(255, 220, 229, 0.92));
+  --app-control-danger-bg-hover: linear-gradient(135deg, rgba(255, 230, 237, 0.98), rgba(255, 208, 221, 0.94));
+  --app-control-danger-bg-active: linear-gradient(135deg, rgba(255, 220, 229, 0.98), rgba(255, 194, 210, 0.94));
+  --app-control-danger-border: rgba(241, 99, 132, 0.28);
+  --app-control-danger-text: #c43d67;
+  --app-control-danger-shadow:
+    0 10px 24px rgba(241, 99, 132, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-help-bg: linear-gradient(135deg, rgba(245, 237, 255, 0.98), rgba(232, 219, 255, 0.92));
+  --app-control-help-bg-hover: linear-gradient(135deg, rgba(240, 229, 255, 0.98), rgba(223, 206, 255, 0.94));
+  --app-control-help-bg-active: linear-gradient(135deg, rgba(233, 220, 255, 0.98), rgba(211, 191, 255, 0.94));
+  --app-control-help-border: rgba(156, 106, 255, 0.28);
+  --app-control-help-text: #7d4fd1;
+  --app-control-help-shadow:
+    0 10px 24px rgba(156, 106, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --app-control-contrast-bg: linear-gradient(135deg, rgba(72, 84, 119, 0.96), rgba(48, 58, 89, 0.92));
+  --app-control-contrast-bg-hover: linear-gradient(135deg, rgba(82, 96, 136, 0.98), rgba(56, 69, 103, 0.94));
+  --app-control-contrast-bg-active: linear-gradient(135deg, rgba(62, 74, 108, 0.98), rgba(44, 54, 84, 0.94));
+  --app-control-contrast-border: rgba(67, 82, 122, 0.34);
+  --app-control-contrast-text: #f7f9ff;
+  --app-control-contrast-shadow:
+    0 10px 24px rgba(44, 54, 84, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
   /* Shadow scale */
   --app-shadow-xs:

@@ -15,7 +15,6 @@
         severity="secondary"
         [text]="true"
         [label]="''"
-        [disabled]="loading || !primaryFieldConfig"
         [disabled]="loading || !visibleAdvancedFields().length"
         (buttonClick)="openDrawer()"
       ></app-button>
@@ -31,10 +30,25 @@
   </div>
 </section>
 
-@if (drawerOpen()) {
-  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
-
-  <aside class="filter-drawer" role="dialog" aria-modal="true">
+<p-dialog
+  [visible]="drawerOpen()"
+  [modal]="true"
+  [dismissableMask]="true"
+  [closeOnEscape]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="false"
+  [appendTo]="'body'"
+  [position]="'right'"
+  [baseZIndex]="2400"
+  [blockScroll]="true"
+  [styleClass]="'table-filter-drawer'"
+  [maskStyleClass]="'table-filter-drawer-mask'"
+  [style]="{ width: 'min(40rem, 100vw)', height: '100vh', maxHeight: '100vh', margin: '0' }"
+  [contentStyle]="{ padding: '0', overflow: 'hidden' }"
+  (visibleChange)="onDrawerVisibleChange($event)"
+>
+  <ng-template pTemplate="header">
     <header class="drawer-header">
       <div>
         <p class="drawer-eyebrow">{{ 'filters' | translateContent }}</p>
@@ -49,75 +63,77 @@
         (buttonClick)="closeDrawer()"
       ></app-button>
     </header>
+  </ng-template>
 
-    <div class="drawer-content">
-      <div class="drawer-grid">
-        @for (field of visibleAdvancedFields(); track field.field) {
-          <div class="drawer-field" [class.full-span]="field.type === 'date-range'">
-            <label>{{ field.label | translateContent }}</label>
+  <div class="drawer-content">
+    <div class="drawer-grid">
+      @for (field of visibleAdvancedFields(); track field.field) {
+        <div class="drawer-field" [class.full-span]="field.type === 'date-range'">
+          <label>{{ field.label | translateContent }}</label>
 
-            @switch (field.type ?? 'text') {
-              @case ('select') {
-                <app-select
-                  [options]="optionsOf(field)"
-                  [value]="valueOf(field)"
-                  [placeholder]="field.placeholder ?? field.label"
-                  [showClear]="true"
-                  (valueChange)="onFieldChange(field, $event)"
-                ></app-select>
-              }
-              @case ('multi-select') {
-                <app-select-multi
-                  [options]="optionsOf(field)"
-                  [value]="valueOf(field)"
-                  [placeholder]="field.placeholder ?? field.label"
-                  [enableFilter]="true"
-                  (valueChange)="onFieldChange(field, $event)"
-                ></app-select-multi>
-              }
-              @case ('boolean') {
-                <app-select
-                  [options]="optionsOf(field)"
-                  [value]="valueOf(field)"
-                  [placeholder]="field.placeholder ?? field.label"
-                  [showClear]="true"
-                  (valueChange)="onFieldChange(field, $event)"
-                ></app-select>
-              }
-              @case ('date') {
-                <app-date-picker
-                  [value]="valueOf(field)"
-                  [placeholder]="field.placeholder ?? field.label"
-                  (valueChange)="onFieldChange(field, $event)"
-                ></app-date-picker>
-              }
-              @case ('date-range') {
-                <div class="date-range-grid">
-                  <app-date-picker
-                    [value]="valueOf(field)?.start"
-                    [placeholder]="'fromDate'"
-                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
-                  ></app-date-picker>
-                  <app-date-picker
-                    [value]="valueOf(field)?.end"
-                    [placeholder]="'toDate'"
-                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
-                  ></app-date-picker>
-                </div>
-              }
-              @default {
-                <app-input-text
-                  [value]="valueOf(field)"
-                  [placeholder]="field.placeholder ?? field.label"
-                  (valueChange)="onFieldChange(field, $event)"
-                ></app-input-text>
-              }
+          @switch (field.type ?? 'text') {
+            @case ('select') {
+              <app-select
+                [options]="optionsOf(field)"
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                [showClear]="true"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-select>
             }
-          </div>
-        }
-      </div>
+            @case ('multi-select') {
+              <app-select-multi
+                [options]="optionsOf(field)"
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                [enableFilter]="true"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-select-multi>
+            }
+            @case ('boolean') {
+              <app-select
+                [options]="optionsOf(field)"
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                [showClear]="true"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-select>
+            }
+            @case ('date') {
+              <app-date-picker
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-date-picker>
+            }
+            @case ('date-range') {
+              <div class="date-range-grid">
+                <app-date-picker
+                  [value]="valueOf(field)?.start"
+                  [placeholder]="'fromDate'"
+                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
+                ></app-date-picker>
+                <app-date-picker
+                  [value]="valueOf(field)?.end"
+                  [placeholder]="'toDate'"
+                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
+                ></app-date-picker>
+              </div>
+            }
+            @default {
+              <app-input-text
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-input-text>
+            }
+          }
+        </div>
+      }
     </div>
+  </div>
 
+  <ng-template pTemplate="footer">
     <footer class="drawer-footer">
       <app-button
         severity="secondary"
@@ -138,5 +154,5 @@
         ></app-button>
       </div>
     </footer>
-  </aside>
-}
+  </ng-template>
+</p-dialog>

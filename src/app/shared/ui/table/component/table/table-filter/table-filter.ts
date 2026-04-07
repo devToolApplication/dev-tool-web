@@ -105,6 +105,15 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     this.drawerOpen.set(true);
   }
 
+  onDrawerVisibleChange(visible: boolean): void {
+    if (visible) {
+      this.drawerOpen.set(true);
+      return;
+    }
+
+    this.closeDrawer();
+  }
+
   closeDrawer(): void {
     this.draftValues.set(this.cloneValue(this.appliedValues()));
     this.searchValue.set(this.getPrimaryFieldValue(this.appliedValues()));

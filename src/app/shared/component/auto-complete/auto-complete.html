@@ -1,6 +1,7 @@
 <p-floatlabel [variant]="variant">
   <p-autocomplete
     [inputId]="inputId"
+    appendTo="body"
     [suggestions]="suggestions"
     [ngModel]="value"
     (ngModelChange)="onInput($any($event) || '')"
