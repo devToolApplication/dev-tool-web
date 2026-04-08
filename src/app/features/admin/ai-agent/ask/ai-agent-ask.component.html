@@ -1,0 +1,136 @@
+<section class="ask-page">
+  <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+    <p-tablist>
+      <p-tab value="chatgpt">Check ChatGPT</p-tab>
+      <p-tab value="langchain4j">Check LangChain4j</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="chatgpt">
+        <app-base-crud-page
+          [pageConfig]="{
+            title: 'Check ChatGPT',
+            description: 'Goi Playwright ChatGPT theo format chat/completions giong OpenAI.',
+            actions: [
+              { id: 'check-cdp-chatgpt', label: 'Check CDP', icon: 'pi pi-link', loading: checkingConnection, disabled: checkingConnection || submittingChatGpt },
+              { id: 'chat-completions', label: 'Chat Completions', icon: 'pi pi-send', loading: submittingChatGpt, disabled: submittingChatGpt || checkingConnection, submitForm: true }
+            ],
+            infoSection: {
+              title: 'ChatGPT',
+              description: 'Can Chrome mo voi remote debugging va tab ChatGPT da dang nhap san.'
+            }
+          }"
+          [formConfig]="chatGptFormConfig"
+          [formContext]="formContext"
+          [formInitialValue]="chatGptFormValue"
+          [formVisible]="formVisible()"
+          [submitting]="submittingChatGpt"
+          (valueChange)="onChatGptValueChange($event)"
+          (formSubmit)="onSubmitChatGpt($event)"
+          (actionClick)="onCheckConnection()"
+        ></app-base-crud-page>
+
+        @if (chatGptResult) {
+          <section class="sub-result-card border-default bg-surface">
+            <div class="sub-result-header">
+              <h4>OpenAI Compatible Result</h4>
+              <span class="status-pill success">Completed</span>
+            </div>
+
+            <div class="detail-grid">
+              <div><strong>ID:</strong> {{ chatGptResult.id || '-' }}</div>
+              <div><strong>Model:</strong> {{ chatGptResult.model || '-' }}</div>
+              <div><strong>Created:</strong> {{ chatGptResult.created ?? '-' }}</div>
+              <div><strong>Object:</strong> {{ chatGptResult.object || '-' }}</div>
+              <div><strong>Finish Reason:</strong> {{ chatGptResult.choices?.[0]?.finishReason || '-' }}</div>
+              <div><strong>Total Tokens:</strong> {{ chatGptResult.usage?.totalTokens ?? '-' }}</div>
+              <div class="full-width">
+                <strong>Content:</strong>
+                <pre class="result-body">{{ chatGptResult.choices?.[0]?.message?.content || '-' }}</pre>
+              </div>
+            </div>
+          </section>
+        }
+      </p-tabpanel>
+
+      <p-tabpanel value="langchain4j">
+        <app-base-crud-page
+          [pageConfig]="{
+            title: 'Check LangChain4j',
+            description: 'Goi LangChain4j chain tren Playwright ChatGPT adapter.',
+            actions: [
+              { id: 'check-cdp-langchain4j', label: 'Check CDP', icon: 'pi pi-link', loading: checkingConnection, disabled: checkingConnection || submittingLangChain4j },
+              { id: 'langchain4j-test', label: 'Run LangChain4j', icon: 'pi pi-play', loading: submittingLangChain4j, disabled: submittingLangChain4j || checkingConnection, submitForm: true }
+            ],
+            infoSection: {
+              title: 'LangChain4j',
+              description: 'Dung adapter ChatModel de goi ChatGPT qua Playwright.'
+            }
+          }"
+          [formConfig]="langChain4jFormConfig"
+          [formContext]="formContext"
+          [formInitialValue]="langChain4jFormValue"
+          [formVisible]="formVisible()"
+          [submitting]="submittingLangChain4j"
+          (valueChange)="onLangChain4jValueChange($event)"
+          (formSubmit)="onSubmitLangChain4j($event)"
+          (actionClick)="onCheckConnection()"
+        ></app-base-crud-page>
+
+        @if (langChain4jResult) {
+          <section class="sub-result-card border-default bg-surface">
+            <div class="sub-result-header">
+              <h4>LangChain4j Result</h4>
+              <span class="status-pill success">Completed</span>
+            </div>
+
+            <div class="detail-grid">
+              <div><strong>Completion ID:</strong> {{ langChain4jResult.completion?.id || '-' }}</div>
+              <div><strong>Model:</strong> {{ langChain4jResult.completion?.model || '-' }}</div>
+              <div><strong>Finish Reason:</strong> {{ langChain4jResult.completion?.choices?.[0]?.finishReason || '-' }}</div>
+              <div><strong>Total Tokens:</strong> {{ langChain4jResult.completion?.usage?.totalTokens ?? '-' }}</div>
+              <div class="full-width">
+                <strong>Response Text:</strong>
+                <pre class="result-body">{{ langChain4jResult.responseText || '-' }}</pre>
+              </div>
+              <div class="full-width">
+                <strong>Tool Executions:</strong>
+                <pre class="result-body">{{ langChain4jResult.toolExecutions?.length ? (langChain4jResult.toolExecutions | json) : '[]' }}</pre>
+              </div>
+            </div>
+          </section>
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  @if (connectionResult) {
+    <section class="sub-result-card border-default bg-surface">
+      <div class="sub-result-header">
+        <h4>CDP Result</h4>
+        <span class="status-pill" [class.success]="connectionResult.connected" [class.error]="!connectionResult.connected">
+          {{ connectionResult.connected ? 'Connected' : 'Failed' }}
+        </span>
+      </div>
+
+      <div class="detail-grid">
+        <div><strong>Endpoint:</strong> {{ connectionResult.cdpUrl || '-' }}</div>
+        <div><strong>Browser:</strong> {{ connectionResult.browserVersion || '-' }}</div>
+        <div><strong>Contexts:</strong> {{ connectionResult.contextCount ?? 0 }}</div>
+        <div><strong>Pages:</strong> {{ connectionResult.pageCount ?? 0 }}</div>
+      </div>
+
+      @if (connectionResult.errorMessage) {
+        <div class="inline-error">{{ connectionResult.errorMessage }}</div>
+      }
+
+      @if ((connectionResult.pageUrls?.length || 0) > 0) {
+        <div class="url-list">
+          @for (url of connectionResult.pageUrls; track url) {
+            <div class="url-item">{{ url }}</div>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

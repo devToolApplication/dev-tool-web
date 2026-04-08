@@ -1,0 +1,52 @@
+<section class="crud-page">
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="onCreate()"
+  ></app-table>
+</section>
+
+<app-base-popup
+  [visible]="testPromptVisible"
+  [header]="'Test AI Prompt'"
+  [subheader]="selectedModel ? (selectedModel.modelName + ' (' + selectedModel.providerModelType + ')') : ''"
+  [size]="'lg'"
+  [loading]="testPromptSubmitting"
+  [showCloseIcon]="true"
+  [showDefaultConfirm]="false"
+  (visibleChange)="onPromptVisibleChange($event)"
+  (cancel)="onPromptCancel()"
+>
+  <app-form-input
+    [config]="promptFormConfig"
+    [context]="promptFormContext"
+    [initialValue]="testPromptInitialValue"
+    [showSubmit]="false"
+    [submitting]="testPromptSubmitting"
+    (valueChange)="onPromptValueChange($event)"
+  ></app-form-input>
+
+  @if (testPromptAnswer) {
+    <section class="result-card">
+      <div class="result-header">
+        <h3>AI Response</h3>
+        <span class="token-count">Tokens: {{ testPromptAnswer.totalToken ?? 0 }}</span>
+      </div>
+      @if (testPromptAnswer.success) {
+        <pre class="result-body">{{ testPromptAnswer.answer || '' }}</pre>
+      } @else {
+        <div class="result-error">{{ testPromptAnswer.errorMessage || 'Unknown error' }}</div>
+      }
+    </section>
+  }
+
+  <div popup-footer>
+    <button pButton type="button" class="p-button-text" [disabled]="testPromptSubmitting" (click)="onPromptCancel()">Cancel</button>
+    <button pButton type="button" icon="pi pi-send" [loading]="testPromptSubmitting" (click)="onSubmitPrompt(testPromptFormValue)">Submit</button>
+  </div>
+</app-base-popup>

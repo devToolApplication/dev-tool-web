@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AiAgentConfigFormComponent } from './config/ai-agent/form/ai-agent-config-form.component';
 import { AiAgentConfigListComponent } from './config/ai-agent/list/ai-agent-config-list.component';
+import { AiAgentAskComponent } from '../ai-agent/ask/ai-agent-ask.component';
 import { StorageConfigFormComponent } from './config/storage/form/storage-config-form.component';
 import { StorageConfigListComponent } from './config/storage/list/storage-config-list.component';
 import { TradeBotConfigFormComponent } from './config/trade-bot/form/trade-bot-config-form.component';
@@ -67,6 +68,10 @@ export const systemManagementRoutes: Routes = [
       { path: 'create', component: AiAgentConfigFormComponent },
       { path: 'edit/:id', component: AiAgentConfigFormComponent }
     ]
+  },
+  {
+    path: 'admin/system-management/system-ask',
+    component: AiAgentAskComponent
   },
   {
     path: 'admin/system-management/trade-bot-configs',

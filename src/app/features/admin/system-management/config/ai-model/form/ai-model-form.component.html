@@ -1,0 +1,20 @@
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'Edit AI Model' : 'Create AI Model',
+    description: 'Manage runtime AI models for ai-agent-mcrs.',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'AI Model Configuration',
+      description: 'Define provider, model type, endpoint, and metadata used by runtime.'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

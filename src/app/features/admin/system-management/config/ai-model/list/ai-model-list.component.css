@@ -1,0 +1,35 @@
+.result-card {
+  padding: 1rem;
+  border: 1px solid #d9e2f2;
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.result-header h3 {
+  margin: 0;
+}
+
+.token-count {
+  color: #5f6b7a;
+  font-size: 0.875rem;
+}
+
+.result-body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, monospace;
+}
+
+.result-error {
+  color: #b42318;
+  font-weight: 600;
+}

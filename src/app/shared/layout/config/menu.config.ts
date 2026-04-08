@@ -7,6 +7,13 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     items: [
       { label: 'layout.menu.dashboard', icon: 'pi pi-home', routerLink: '/admin/dashboard' },
       {
+        label: 'AI Agent',
+        icon: 'pi pi-sparkles',
+        items: [
+          { label: 'AI Model', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' }
+        ]
+      },
+      {
         label: 'layout.menu.systemManagement',
         icon: 'pi pi-cog',
         items: [
@@ -25,6 +32,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
             items: [
               { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
               { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
+              { label: 'Playwright CDP Test', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' },
               { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' }
             ]
           }
@@ -54,7 +62,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
           { label: 'Backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
         ]
       },
-      { label: 'layout.menu.aiAgentStream', icon: 'pi pi-sparkles', routerLink: '/admin/ai-agent-stream' }
     ]
   },
   {

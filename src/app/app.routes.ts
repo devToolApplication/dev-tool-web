@@ -7,7 +7,7 @@ import { profileRoutes } from './features/profile/profile-routing.module';
 import { settingsRoutes } from './features/settings/settings-routing.module';
 import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
 import { errorRoutes } from './features/error/error-routing.module';
-import { aiAgentRoutes } from './features/ai-agent/ai-agent-routing.module';
+import { aiAgentAdminRoutes } from './features/admin/ai-agent/ai-agent.feature';
 import { fileStorageRoutes } from './features/admin/file-storage/file-storage.feature';
 import { mcpServerRoutes } from './features/admin/mcp-server/mcp-server.feature';
 import { systemManagementRoutes } from './features/admin/system-management/system-management.feature';
@@ -21,8 +21,8 @@ const routes: Routes = [
   ...settingsRoutes,
   ...demoRouter,
   ...dashboardRoutes,
+  ...aiAgentAdminRoutes,
   ...fileStorageRoutes,
-  ...aiAgentRoutes,
   ...mcpServerRoutes,
   ...systemManagementRoutes,
   ...tradeBotRoutes,

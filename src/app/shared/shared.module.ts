@@ -80,7 +80,7 @@ import { MailComponent } from '../features/mail/mail.component';
 import { ProfileComponent } from '../features/profile/profile.component';
 import { ReportsComponent } from '../features/reports/reports.component';
 import { SettingsComponent } from '../features/settings/settings.component';
-import { AiAgentComponent } from '../features/ai-agent/ai-agent.component';
+import { AI_AGENT_FEATURE_COMPONENTS } from '../features/admin/ai-agent/ai-agent.feature';
 import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage/file-storage.feature';
 import { MCP_SERVER_FEATURE_COMPONENTS } from '../features/admin/mcp-server/mcp-server.feature';
 import { SYSTEM_MANAGEMENT_FEATURE_COMPONENTS } from '../features/admin/system-management/system-management.feature';
@@ -110,13 +110,13 @@ const FEATURE = [
   ProfileComponent,
   SettingsComponent,
   DashboardComponent,
-  AiAgentComponent,
   AiAgentDashboardComponent,
   TradeBotDashboardComponent,
   FileStorageDashboardComponent,
   ForbiddenComponent,
   NotFoundComponent,
   FeaturePlaceholderComponent,
+  ...AI_AGENT_FEATURE_COMPONENTS,
   ...FILE_STORAGE_FEATURE_COMPONENTS,
   ...MCP_SERVER_FEATURE_COMPONENTS,
   ...SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,

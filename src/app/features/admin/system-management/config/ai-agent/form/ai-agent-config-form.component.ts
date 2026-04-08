@@ -78,6 +78,7 @@ export class AiAgentConfigFormComponent implements OnInit {
       this.rerenderForm();
       return;
     }
+
     this.editId = id;
     this.formContext.mode = 'edit';
     this.loading = true;
