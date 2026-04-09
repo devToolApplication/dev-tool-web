@@ -5,6 +5,51 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
 @Component({
   selector: 'app-base-popup',
   standalone: false,
+  styles: [`
+    :host ::ng-deep .base-popup.p-dialog {
+      border: 1px solid var(--app-border-strong);
+      border-radius: 1.2rem;
+      background:
+        var(--app-card-highlight),
+        var(--app-card-bg-strong);
+      color: var(--app-text);
+      box-shadow: var(--app-shadow-overlay);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-header,
+    :host ::ng-deep .base-popup .p-dialog-content,
+    :host ::ng-deep .base-popup .p-dialog-footer {
+      background: transparent;
+      color: inherit;
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-header {
+      padding: 1.35rem 1.4rem 0.85rem;
+      border-bottom: 1px solid var(--app-border-soft);
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-content {
+      padding: 1.1rem 1.4rem;
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-footer {
+      padding: 0.95rem 1.4rem 1.25rem;
+      border-top: 1px solid var(--app-border-soft);
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-header-icon {
+      color: var(--app-text-muted);
+      background: var(--app-surface-soft);
+      border: 1px solid var(--app-border-soft);
+    }
+
+    :host ::ng-deep .base-popup .p-dialog-header-icon:hover {
+      background: var(--app-surface-alt);
+      color: var(--app-text);
+    }
+  `],
   template: `
     <p-dialog
       [visible]="visible"
@@ -40,7 +85,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
         <div class="flex items-center justify-between gap-3">
           <ng-content select="[popup-footer-start]"></ng-content>
           <div class="flex items-center gap-2">
-            <button pButton type="button" class="p-button-text" [disabled]="loading" (click)="cancel.emit()">{{ cancelLabel | translateContent }}</button>
+            <button *ngIf="showDefaultCancel" pButton type="button" class="p-button-text" [disabled]="loading" (click)="cancel.emit()">{{ cancelLabel | translateContent }}</button>
             <button *ngIf="showDefaultConfirm" pButton type="button" [loading]="loading" (click)="confirm.emit()">{{ confirmLabel | translateContent }}</button>
             <ng-content select="[popup-footer]"></ng-content>
           </div>
@@ -61,6 +106,7 @@ export class BasePopupComponent {
   @Input() showCloseIcon = true;
   @Input() confirmLabel = 'submit';
   @Input() cancelLabel = 'cancel';
+  @Input() showDefaultCancel = true;
   @Input() showDefaultConfirm = false;
   @Input() hasProjectedHeader = false;
 

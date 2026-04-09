@@ -1,0 +1,62 @@
+<section class="crud-page">
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="onCreate()"
+  ></app-table>
+</section>
+
+<app-base-popup
+  [visible]="testPromptVisible"
+  [header]="'Test AI Prompt'"
+  [subheader]="selectedModel ? (selectedModel.modelName + ' (' + selectedModel.providerModelType + ')') : ''"
+  [size]="'lg'"
+  [loading]="testPromptSubmitting"
+  [showCloseIcon]="true"
+  [showDefaultCancel]="false"
+  [showDefaultConfirm]="false"
+  (visibleChange)="onPromptVisibleChange($event)"
+  (cancel)="onPromptCancel()"
+>
+  <app-form-input
+    [config]="promptFormConfig"
+    [context]="promptFormContext"
+    [initialValue]="testPromptInitialValue"
+    [showSubmit]="false"
+    [submitting]="testPromptSubmitting"
+    (valueChange)="onPromptValueChange($event)"
+  ></app-form-input>
+
+  @if (testPromptAnswer) {
+    <section class="result-card">
+      <div class="result-header">
+        <h3>AI Response</h3>
+        <span class="token-count">Tokens: {{ testPromptAnswer.totalToken ?? 0 }} | Steps: {{ testPromptAnswer.iterationCount ?? 1 }}</span>
+      </div>
+      @if (testPromptAnswer.success) {
+        <pre class="result-body">{{ testPromptAnswer.answer || '' }}</pre>
+      } @else {
+        <div class="result-error">{{ testPromptAnswer.errorMessage || 'Unknown error' }}</div>
+      }
+      @if ((testPromptAnswer.toolExecutions?.length || 0) > 0) {
+        <section class="sub-result-card border-default bg-surface">
+          <div class="sub-result-header">
+            <h4>Tool Executions</h4>
+            <span class="status-pill success">{{ testPromptAnswer.toolExecutions?.length }} tools</span>
+          </div>
+          <pre class="result-body">{{ testPromptAnswer.toolExecutions | json }}</pre>
+        </section>
+      }
+    </section>
+  }
+
+  <div popup-footer>
+    <button pButton type="button" class="p-button-text" [disabled]="testPromptSubmitting" (click)="onPromptCancel()">Cancel</button>
+    <button pButton type="button" icon="pi pi-send" [loading]="testPromptSubmitting" (click)="onSubmitPrompt(testPromptFormValue)">Submit</button>
+  </div>
+</app-base-popup>

@@ -101,8 +101,7 @@ export interface PlaywrightOpenAiChatCompletionResponse {
 }
 
 export interface PlaywrightLangChain4jTestRequest {
-  cdpUrl?: string;
-  clearBeforeType?: boolean;
+  model?: string;
   prompt: string;
 }
 

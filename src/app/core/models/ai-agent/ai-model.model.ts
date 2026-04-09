@@ -1,6 +1,6 @@
 import { UploadStorageStatus } from '../file-storage/upload-storage.model';
 
-export type AiProviderModelType = 'GROQ' | 'OPENROUTER';
+export type AiProviderModelType = 'GROQ' | 'OPENROUTER' | 'PLAYWRIGHT';
 export type AiModelMetadataType = 'CONFIG' | 'SECRET';
 
 export interface AiModelMetadataEntry {

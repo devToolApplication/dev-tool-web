@@ -7,10 +7,18 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     items: [
       { label: 'layout.menu.dashboard', icon: 'pi pi-home', routerLink: '/admin/dashboard' },
       {
-        label: 'AI Agent',
+        label: 'layout.menu.aiAgentManagement',
         icon: 'pi pi-sparkles',
         items: [
-          { label: 'AI Model', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' }
+          { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
+          {
+            label: 'layout.menu.mcpServerManagement',
+            icon: 'pi pi-wrench',
+            items: [
+              { label: 'layout.menu.mcpCategory', icon: 'pi pi-tags', routerLink: '/admin/mcp-tool-config/category' },
+              { label: 'layout.menu.mcpTool', icon: 'pi pi-wrench', routerLink: '/admin/mcp-tool-config/tool' }
+            ]
+          }
         ]
       },
       {
@@ -32,8 +40,14 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
             items: [
               { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
               { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
-              { label: 'Playwright CDP Test', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' },
               { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' }
+            ]
+          },
+          {
+            label: 'layout.menu.debugTools',
+            icon: 'pi pi-bug',
+            items: [
+              { label: 'layout.menu.checkChatGpt', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' }
             ]
           }
         ]
@@ -42,14 +56,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.fileStorageManagement',
         icon: 'pi pi-cloud-upload',
         items: [{ label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' }]
-      },
-      {
-        label: 'layout.menu.mcpServerManagement',
-        icon: 'pi pi-wrench',
-        items: [
-          { label: 'layout.menu.mcpCategory', icon: 'pi pi-tags', routerLink: '/admin/mcp-tool-config/category' },
-          { label: 'layout.menu.mcpTool', icon: 'pi pi-wrench', routerLink: '/admin/mcp-tool-config/tool' }
-        ]
       },
       {
         label: 'layout.menu.tradeBotManagement',

@@ -76,15 +76,12 @@ import { DemoComponent } from '../features/demo/demo.component';
 import { ForbiddenComponent } from '../features/error/forbidden/forbidden.component';
 import { NotFoundComponent } from '../features/error/not-found/not-found.component';
 import { FeaturePlaceholderComponent } from '../features/feature-placeholder/feature-placeholder.component';
-import { MailComponent } from '../features/mail/mail.component';
-import { ProfileComponent } from '../features/profile/profile.component';
-import { ReportsComponent } from '../features/reports/reports.component';
 import { SettingsComponent } from '../features/settings/settings.component';
 import { AI_AGENT_FEATURE_COMPONENTS } from '../features/admin/ai-agent/ai-agent.feature';
-import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage/file-storage.feature';
-import { MCP_SERVER_FEATURE_COMPONENTS } from '../features/admin/mcp-server/mcp-server.feature';
+import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage-management/file-storage-management.feature';
+import { MCP_SERVER_FEATURE_COMPONENTS } from '../features/admin/mcp-server-management/mcp-server-management.feature';
 import { SYSTEM_MANAGEMENT_FEATURE_COMPONENTS } from '../features/admin/system-management/system-management.feature';
-import { TRADE_BOT_FEATURE_COMPONENTS } from '../features/admin/trade-bot/trade-bot.feature';
+import { TRADE_BOT_FEATURE_COMPONENTS } from '../features/admin/trade-bot-management/trade-bot-management.feature';
 import { BaseLayoutComponent } from './layout/base/base.layout';
 import { HeaderComponent } from './layout/header/header.component';
 import { PageComponent } from './layout/page/page.component';
@@ -105,9 +102,6 @@ const PIPE = [TranslateContentPipe];
 
 const FEATURE = [
   DemoComponent,
-  MailComponent,
-  ReportsComponent,
-  ProfileComponent,
   SettingsComponent,
   DashboardComponent,
   AiAgentDashboardComponent,

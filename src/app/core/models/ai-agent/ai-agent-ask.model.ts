@@ -9,4 +9,11 @@ export interface AiAgentAskResponse {
   answer?: string;
   errorMessage?: string;
   totalToken?: number;
+  iterationCount?: number;
+  toolExecutions?: {
+    callId?: string;
+    toolName?: string;
+    arguments?: string;
+    result?: string;
+  }[];
 }

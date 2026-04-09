@@ -41,6 +41,17 @@ export interface McpDbConfig {
   condition: string;
 }
 
+export interface McpToolFunctionDefinition {
+  name: string;
+  description?: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface McpToolDefinition {
+  type: 'function';
+  function: McpToolFunctionDefinition;
+}
+
 export interface McpToolResponse {
   id: string;
   category: McpToolCategory;
@@ -48,6 +59,7 @@ export interface McpToolResponse {
   type: McpToolType;
   enabled: boolean;
   description: string;
+  tool?: McpToolDefinition;
   tags: string[];
   endpoint?: McpEndpointConfig;
   db?: McpDbConfig;
@@ -60,6 +72,7 @@ export interface McpToolCreateDto {
   type: McpToolType;
   enabled: boolean;
   description: string;
+  tool?: McpToolDefinition;
   tags: string[];
   endpoint?: McpEndpointConfig;
   db?: McpDbConfig;
@@ -71,6 +84,7 @@ export interface McpToolUpdateDto {
   type?: McpToolType;
   enabled?: boolean;
   description?: string;
+  tool?: McpToolDefinition;
   tags?: string[];
   endpoint?: McpEndpointConfig;
   db?: McpDbConfig;

@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
-import { AiAgentAskComponent } from './ask/ai-agent-ask.component';
-import { AiModelFormComponent } from '../system-management/config/ai-model/form/ai-model-form.component';
-import { AiModelListComponent } from '../system-management/config/ai-model/list/ai-model-list.component';
+import { AiModelFormComponent } from './ai-model/form/ai-model-form.component';
+import { AiModelListComponent } from './ai-model/list/ai-model-list.component';
 
-export const AI_AGENT_FEATURE_COMPONENTS = [AiAgentAskComponent, AiModelListComponent, AiModelFormComponent];
+export const AI_AGENT_FEATURE_COMPONENTS = [AiModelListComponent, AiModelFormComponent];
 
 export const aiAgentAdminRoutes: Routes = [
   {

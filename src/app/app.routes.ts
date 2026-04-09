@@ -1,23 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { demoRouter } from './features/demo/demo-routing.module';
-import { mailRoutes } from './features/mail/mail-routing.module';
-import { reportsRoutes } from './features/reports/reports-routing.module';
-import { profileRoutes } from './features/profile/profile-routing.module';
 import { settingsRoutes } from './features/settings/settings-routing.module';
 import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
 import { errorRoutes } from './features/error/error-routing.module';
 import { aiAgentAdminRoutes } from './features/admin/ai-agent/ai-agent.feature';
-import { fileStorageRoutes } from './features/admin/file-storage/file-storage.feature';
-import { mcpServerRoutes } from './features/admin/mcp-server/mcp-server.feature';
+import { fileStorageRoutes } from './features/admin/file-storage-management/file-storage-management.feature';
+import { mcpServerRoutes } from './features/admin/mcp-server-management/mcp-server-management.feature';
 import { systemManagementRoutes } from './features/admin/system-management/system-management.feature';
-import { tradeBotRoutes } from './features/admin/trade-bot/trade-bot.feature';
+import { tradeBotRoutes } from './features/admin/trade-bot-management/trade-bot-management.feature';
 import { FeaturePlaceholderComponent } from './features/feature-placeholder/feature-placeholder.component';
 
 const routes: Routes = [
-  ...mailRoutes,
-  ...reportsRoutes,
-  ...profileRoutes,
   ...settingsRoutes,
   ...demoRouter,
   ...dashboardRoutes,
