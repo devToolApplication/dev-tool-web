@@ -20,6 +20,7 @@ export class AiModelFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create' };
   readonly formConfig: FormConfig = {
     fields: [
+      { type: 'text', name: 'code', label: 'Code', width: '1/2' },
       { type: 'text', name: 'modelName', label: 'Model Name', width: '1/2', validation: [Rules.required('Name is required')] },
       {
         type: 'select',
@@ -34,7 +35,33 @@ export class AiModelFormComponent implements OnInit {
         validation: [Rules.required('Provider is required')]
       },
       { type: 'text', name: 'modelType', label: 'Model Type', width: '1/2', validation: [Rules.required('Model type is required')] },
+      {
+        type: 'select',
+        name: 'apiType',
+        label: 'API Type',
+        width: '1/2',
+        options: [
+          { label: 'OPENAI_COMPATIBLE', value: 'OPENAI_COMPATIBLE' },
+          { label: 'TEXT_ONLY', value: 'TEXT_ONLY' },
+          { label: 'CUSTOM', value: 'CUSTOM' }
+        ]
+      },
+      {
+        type: 'select',
+        name: 'toolSupportMode',
+        label: 'Tool Support',
+        width: '1/2',
+        options: [
+          { label: 'NATIVE', value: 'NATIVE' },
+          { label: 'FAKE_PROMPT', value: 'FAKE_PROMPT' },
+          { label: 'NONE', value: 'NONE' }
+        ]
+      },
       { type: 'text', name: 'url', label: 'URL', width: '1/2' },
+      { type: 'text', name: 'authType', label: 'Auth Type', width: '1/2', placeholder: 'BEARER / API_KEY / NONE' },
+      { type: 'text', name: 'secretKeyRef', label: 'Secret Ref', width: '1/2' },
+      { type: 'number', name: 'timeoutMs', label: 'Timeout (ms)', width: '1/2' },
+      { type: 'number', name: 'maxContext', label: 'Max Context', width: '1/2' },
       { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
       { type: 'checkbox', name: 'defaultActive', label: 'Default Active', width: '1/2' },
       {
@@ -106,6 +133,7 @@ export class AiModelFormComponent implements OnInit {
     this.loadingService.track(this.service.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (detail: AiModelResponse) => {
         this.formInitialValue = {
+          code: detail.code ?? '',
           modelName: detail.modelName,
           description: detail.description ?? '',
           modelType: detail.modelType,
@@ -113,6 +141,12 @@ export class AiModelFormComponent implements OnInit {
           status: detail.status,
           defaultActive: detail.defaultActive,
           url: detail.url ?? '',
+          apiType: detail.apiType ?? 'OPENAI_COMPATIBLE',
+          toolSupportMode: detail.toolSupportMode ?? 'FAKE_PROMPT',
+          authType: detail.authType ?? '',
+          secretKeyRef: detail.secretKeyRef ?? '',
+          timeoutMs: detail.timeoutMs ?? 30000,
+          maxContext: detail.maxContext ?? 0,
           metadata: detail.metadata ?? []
         };
         this.rerenderForm();

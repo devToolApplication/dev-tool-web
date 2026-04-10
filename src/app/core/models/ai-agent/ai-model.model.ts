@@ -2,6 +2,8 @@ import { UploadStorageStatus } from '../file-storage/upload-storage.model';
 
 export type AiProviderModelType = 'GROQ' | 'OPENROUTER' | 'PLAYWRIGHT';
 export type AiModelMetadataType = 'CONFIG' | 'SECRET';
+export type AiApiType = 'OPENAI_COMPATIBLE' | 'TEXT_ONLY' | 'CUSTOM';
+export type ToolSupportMode = 'NATIVE' | 'FAKE_PROMPT' | 'NONE';
 
 export interface AiModelMetadataEntry {
   key: string;
@@ -11,6 +13,7 @@ export interface AiModelMetadataEntry {
 
 export interface AiModelResponse {
   id: string;
+  code?: string;
   modelName: string;
   description?: string;
   modelType: string;
@@ -18,10 +21,17 @@ export interface AiModelResponse {
   status: UploadStorageStatus;
   defaultActive: boolean;
   url?: string;
+  apiType?: AiApiType;
+  toolSupportMode?: ToolSupportMode;
+  authType?: string;
+  secretKeyRef?: string;
+  timeoutMs?: number;
+  maxContext?: number;
   metadata: AiModelMetadataEntry[];
 }
 
 export interface AiModelCreateDto {
+  code?: string;
   modelName: string;
   description?: string;
   modelType: string;
@@ -29,10 +39,17 @@ export interface AiModelCreateDto {
   status: UploadStorageStatus;
   defaultActive: boolean;
   url?: string;
+  apiType?: AiApiType;
+  toolSupportMode?: ToolSupportMode;
+  authType?: string;
+  secretKeyRef?: string;
+  timeoutMs?: number;
+  maxContext?: number;
   metadata: AiModelMetadataEntry[];
 }
 
 export interface AiModelUpdateDto {
+  code?: string;
   modelName?: string;
   description?: string;
   modelType?: string;
@@ -40,5 +57,11 @@ export interface AiModelUpdateDto {
   status?: UploadStorageStatus;
   defaultActive?: boolean;
   url?: string;
+  apiType?: AiApiType;
+  toolSupportMode?: ToolSupportMode;
+  authType?: string;
+  secretKeyRef?: string;
+  timeoutMs?: number;
+  maxContext?: number;
   metadata?: AiModelMetadataEntry[];
 }

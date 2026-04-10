@@ -8,7 +8,12 @@ export const AI_AGENT_CONFIG_ROUTES = {
 export const AI_AGENT_CONFIG_INITIAL_VALUE: AiAgentConfigCreateDto = {
   category: '',
   key: '',
-  value: '{}',
+  value: '',
+  valueType: 'STRING',
+  configGroup: '',
+  scopeType: 'GLOBAL',
+  scopeRef: '',
   description: '',
+  enabled: true,
   status: 'ACTIVE'
 };

@@ -1,0 +1,20 @@
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'Edit Prompt Template' : 'Create Prompt Template',
+    description: 'Manage reusable prompt templates for agent runtime.',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'Prompt Template',
+      description: 'Keep system, tool protocol, and agent prompts reusable and versioned.'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

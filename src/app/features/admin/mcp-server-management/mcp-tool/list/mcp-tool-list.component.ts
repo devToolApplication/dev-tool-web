@@ -48,9 +48,12 @@ export class McpToolListComponent implements OnInit {
     ],
     filterOptions: { primaryField: 'name' },
     columns: [
+      { field: 'code', header: 'Code', sortable: true },
       { field: 'name', header: 'name', sortable: true },
       { field: 'category', header: 'category', sortable: true },
       { field: 'type', header: 'mcpTool.type', sortable: true },
+      { field: 'executorType', header: 'Executor Type', sortable: true },
+      { field: 'authType', header: 'Auth Type', sortable: true },
       { field: 'tags', header: 'mcpTool.tags', type: 'array' },
       { field: 'endpoint.method', header: 'mcpTool.method' },
       { field: 'endpoint.url', header: 'mcpTool.url' },

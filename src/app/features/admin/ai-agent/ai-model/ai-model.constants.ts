@@ -6,6 +6,7 @@ export const AI_MODEL_ROUTES = {
 } as const;
 
 export const AI_MODEL_INITIAL_VALUE: AiModelCreateDto = {
+  code: '',
   modelName: '',
   description: '',
   modelType: '',
@@ -13,5 +14,11 @@ export const AI_MODEL_INITIAL_VALUE: AiModelCreateDto = {
   status: 'ACTIVE',
   defaultActive: false,
   url: '',
+  apiType: 'OPENAI_COMPATIBLE',
+  toolSupportMode: 'FAKE_PROMPT',
+  authType: '',
+  secretKeyRef: '',
+  timeoutMs: 30000,
+  maxContext: 0,
   metadata: []
 };

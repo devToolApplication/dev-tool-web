@@ -1,4 +1,5 @@
 import { UploadStorageStatus } from '../file-storage/upload-storage.model';
+import { ScopeType } from './ai-agent-config.model';
 
 export interface AiAgentSecretResponse {
   id: string;
@@ -6,6 +7,11 @@ export interface AiAgentSecretResponse {
   name: string;
   code: string;
   secretValue: string;
+  provider?: string;
+  scopeType?: ScopeType;
+  scopeRef?: string;
+  enabled?: boolean;
+  rotationVersion?: number;
   description?: string;
   status: UploadStorageStatus;
 }
@@ -15,6 +21,11 @@ export interface AiAgentSecretCreateDto {
   name: string;
   code: string;
   secretValue: string;
+  provider?: string;
+  scopeType?: ScopeType;
+  scopeRef?: string;
+  enabled?: boolean;
+  rotationVersion?: number;
   description?: string;
   status: UploadStorageStatus;
 }
@@ -24,6 +35,11 @@ export interface AiAgentSecretUpdateDto {
   name?: string;
   code?: string;
   secretValue?: string;
+  provider?: string;
+  scopeType?: ScopeType;
+  scopeRef?: string;
+  enabled?: boolean;
+  rotationVersion?: number;
   description?: string;
   status?: UploadStorageStatus;
 }

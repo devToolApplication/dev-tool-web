@@ -29,6 +29,9 @@ export class AiAgentConfigListComponent extends BasePagedList<AiAgentConfigRespo
     columns: [
       { field: 'category', header: 'Category', sortable: true },
       { field: 'key', header: 'Key', sortable: true },
+      { field: 'configGroup', header: 'Group', sortable: true },
+      { field: 'scopeType', header: 'Scope', sortable: true },
+      { field: 'enabled', header: 'Enabled', type: 'boolean' },
       { field: 'status', header: 'Status' },
       { field: 'description', header: 'Description' },
       {

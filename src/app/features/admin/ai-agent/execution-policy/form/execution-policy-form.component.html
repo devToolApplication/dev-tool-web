@@ -1,0 +1,20 @@
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'Edit Execution Policy' : 'Create Execution Policy',
+    description: 'Manage runtime guardrails for agent execution loop.',
+    actions: [
+      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+    ],
+    infoSection: {
+      title: 'Execution Policy',
+      description: 'Configure step limits, timeout thresholds, and fallback behavior.'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

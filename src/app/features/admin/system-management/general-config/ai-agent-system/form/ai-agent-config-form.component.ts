@@ -22,8 +22,38 @@ export class AiAgentConfigFormComponent implements OnInit {
     fields: [
       { type: 'text', name: 'category', label: 'category', width: '1/2', validation: [Rules.required('systemManagement.validation.categoryRequired')] },
       { type: 'text', name: 'key', label: 'key', width: '1/2', validation: [Rules.required('systemManagement.validation.keyRequired')] },
+      { type: 'text', name: 'configGroup', label: 'Config Group', width: '1/2' },
+      {
+        type: 'select',
+        name: 'valueType',
+        label: 'Value Type',
+        width: '1/2',
+        options: [
+          { label: 'STRING', value: 'STRING' },
+          { label: 'INTEGER', value: 'INTEGER' },
+          { label: 'BOOLEAN', value: 'BOOLEAN' },
+          { label: 'JSON', value: 'JSON' },
+          { label: 'DECIMAL', value: 'DECIMAL' }
+        ]
+      },
+      {
+        type: 'select',
+        name: 'scopeType',
+        label: 'Scope Type',
+        width: '1/2',
+        options: [
+          { label: 'GLOBAL', value: 'GLOBAL' },
+          { label: 'CHANNEL', value: 'CHANNEL' },
+          { label: 'AGENT', value: 'AGENT' },
+          { label: 'MODEL', value: 'MODEL' },
+          { label: 'TOOL', value: 'TOOL' },
+          { label: 'USER', value: 'USER' }
+        ]
+      },
+      { type: 'text', name: 'scopeRef', label: 'Scope Ref', width: '1/2' },
+      { type: 'checkbox', name: 'enabled', label: 'Enabled', width: '1/2' },
       { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'value', label: 'systemManagement.field.jsonValue', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'systemManagement.validation.invalidJson', validation: [Rules.required('systemManagement.validation.valueRequired')] },
+      { type: 'textarea', name: 'value', label: 'Value', width: 'full', showZoomButton: true, validation: [Rules.required('systemManagement.validation.valueRequired')] },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };

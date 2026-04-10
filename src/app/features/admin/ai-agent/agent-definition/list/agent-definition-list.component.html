@@ -1,0 +1,12 @@
+<section class="crud-page">
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="onCreate()"
+  ></app-table>
+</section>

@@ -38,6 +38,9 @@
         <h3>AI Response</h3>
         <span class="token-count">Tokens: {{ testPromptAnswer.totalToken ?? 0 }} | Steps: {{ testPromptAnswer.iterationCount ?? 1 }}</span>
       </div>
+      @if (testPromptAnswer.sessionId || testPromptAnswer.executionStatus) {
+        <div class="result-meta">Session: {{ testPromptAnswer.sessionId || '-' }} | Status: {{ testPromptAnswer.executionStatus || '-' }}</div>
+      }
       @if (testPromptAnswer.success) {
         <pre class="result-body">{{ testPromptAnswer.answer || '' }}</pre>
       } @else {

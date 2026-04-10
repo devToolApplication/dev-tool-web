@@ -10,6 +10,11 @@ export const AI_AGENT_SECRET_INITIAL_VALUE: AiAgentSecretCreateDto = {
   name: '',
   code: '',
   secretValue: '',
+  provider: '',
+  scopeType: 'GLOBAL',
+  scopeRef: '',
+  enabled: true,
+  rotationVersion: 1,
   description: '',
   status: 'ACTIVE'
 };

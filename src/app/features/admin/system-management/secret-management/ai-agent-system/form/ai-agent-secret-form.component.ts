@@ -23,6 +23,24 @@ export class AiAgentSecretFormComponent implements OnInit {
       { type: 'text', name: 'category', label: 'category', width: '1/2', validation: [Rules.required('systemManagement.validation.categoryRequired')] },
       { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('systemManagement.validation.nameRequired')] },
       { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('systemManagement.validation.codeRequired')] },
+      { type: 'text', name: 'provider', label: 'Provider', width: '1/2' },
+      {
+        type: 'select',
+        name: 'scopeType',
+        label: 'Scope Type',
+        width: '1/2',
+        options: [
+          { label: 'GLOBAL', value: 'GLOBAL' },
+          { label: 'CHANNEL', value: 'CHANNEL' },
+          { label: 'AGENT', value: 'AGENT' },
+          { label: 'MODEL', value: 'MODEL' },
+          { label: 'TOOL', value: 'TOOL' },
+          { label: 'USER', value: 'USER' }
+        ]
+      },
+      { type: 'text', name: 'scopeRef', label: 'Scope Ref', width: '1/2' },
+      { type: 'number', name: 'rotationVersion', label: 'Rotation Version', width: '1/2' },
+      { type: 'checkbox', name: 'enabled', label: 'Enabled', width: '1/2' },
       { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
       { type: 'textarea', name: 'secretValue', label: 'systemManagement.field.secretValue', width: 'full', showZoomButton: true, validation: [Rules.required('systemManagement.validation.secretValueRequired')] },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }

@@ -33,9 +33,11 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
     ],
     filterOptions: { primaryField: 'modelName' },
     columns: [
+      { field: 'code', header: 'Code', sortable: true },
       { field: 'modelName', header: 'Model Name', sortable: true },
       { field: 'providerModelType', header: 'Provider', sortable: true },
       { field: 'modelType', header: 'Model Type', sortable: true },
+      { field: 'toolSupportMode', header: 'Tool Support', sortable: true },
       { field: 'defaultActive', header: 'Default', type: 'boolean' },
       { field: 'status', header: 'Status' },
       {

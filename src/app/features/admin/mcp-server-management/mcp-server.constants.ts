@@ -13,9 +13,16 @@ export const MCP_CATEGORY_INITIAL_VALUE: McpCategoryCreateDto = {
 };
 
 export const MCP_TOOL_INITIAL_VALUE: McpToolCreateDto = {
+  code: '',
   category: 'custom',
   name: '',
   type: 'endpoint',
+  executorType: 'HTTP',
+  executorRef: '',
+  endpointUrl: '',
+  authType: '',
+  secretKeyRef: '',
+  timeoutMs: 10000,
   enabled: true,
   description: '',
   tool: {
@@ -39,6 +46,9 @@ export const MCP_TOOL_INITIAL_VALUE: McpToolCreateDto = {
     databaseName: '',
     collectionName: '',
     fields: [],
+    matchMode: 'and',
+    rules: [],
     condition: ''
-  }
+  },
+  status: 'ACTIVE'
 };

@@ -1,0 +1,84 @@
+<section class="playground-page">
+  <app-base-crud-page
+    [pageConfig]="{
+      title: 'AI Agent Playground',
+      description: 'Run admin playground requests against agent runtime and inspect execution trace.',
+      actions: [
+        { id: 'clear-result', label: 'Clear Result', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result && !steps.length },
+        { id: 'run', label: 'Run Request', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
+      ],
+      infoSection: {
+        title: 'Runtime Test',
+        description: 'Select an agent to run the full runtime flow. Model Override is optional and, when set, replaces the agent model for this test.'
+      }
+    }"
+    [formConfig]="formConfig"
+    [formContext]="formContext"
+    [formInitialValue]="formInitialValue"
+    [formVisible]="formVisible()"
+    [submitting]="running"
+    (valueChange)="onValueChange($event)"
+    (formSubmit)="onSubmitForm($event)"
+    (actionClick)="onActionClick($event)"
+  ></app-base-crud-page>
+
+  @if (result) {
+    <section class="result-card">
+      <div class="result-header">
+        <h3>Execution Result</h3>
+        <span class="status-pill" [class.success]="result.success" [class.error]="!result.success">
+          {{ result.executionStatus || (result.success ? 'COMPLETED' : 'FAILED') }}
+        </span>
+      </div>
+
+      <div class="detail-grid">
+        <div><strong>Agent:</strong> {{ selectedAgentLabel }}</div>
+        <div><strong>Model Override:</strong> {{ selectedModelLabel }}</div>
+        <div><strong>Session ID:</strong> {{ result.sessionId || '-' }}</div>
+        <div><strong>User ID:</strong> {{ formValue.userId || '-' }}</div>
+        <div><strong>Total Tokens:</strong> {{ result.totalToken ?? 0 }}</div>
+        <div><strong>Iterations:</strong> {{ result.iterationCount ?? 0 }}</div>
+      </div>
+
+      @if (result.success) {
+        <div class="section-title">Answer</div>
+        <pre class="result-body">{{ result.answer || '' }}</pre>
+      } @else {
+        <div class="section-title">Error</div>
+        <div class="result-error">{{ result.errorMessage || 'Unknown runtime error' }}</div>
+      }
+
+      @if ((result.toolExecutions?.length || 0) > 0) {
+        <div class="section-title">Tool Executions</div>
+        <pre class="result-body">{{ result.toolExecutions | json }}</pre>
+      }
+    </section>
+  }
+
+  @if (result?.sessionId) {
+    <section class="trace-card">
+      <div class="trace-header">
+        <h3>Execution Steps</h3>
+        <button pButton type="button" icon="pi pi-refresh" class="p-button-text" [loading]="traceLoading" (click)="refreshTrace()">Refresh Trace</button>
+      </div>
+
+      @if (traceLoading) {
+        <div class="empty-state">Loading execution steps...</div>
+      } @else if (steps.length > 0) {
+        <div class="step-list">
+          @for (step of steps; track step.id) {
+            <article class="step-card">
+              <div class="step-header">
+                <div class="step-title">#{{ step.stepNo }} {{ step.stepType }}</div>
+                <div class="step-time">{{ step.createdAt || '-' }}</div>
+              </div>
+              <pre class="step-payload">{{ step.payloadJson || '{}' }}</pre>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">No execution steps returned for this session yet.</div>
+      }
+    </section>
+  }
+</section>
