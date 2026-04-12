@@ -1,5 +1,12 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { AutoCompleteFieldConfig, FieldState, InputMultiFieldConfig, NumberFieldConfig, TextFieldConfig } from '../../models/form-config.model';
+import {
+  AutoCompleteFieldConfig,
+  FieldState,
+  InputMultiFieldConfig,
+  NumberFieldConfig,
+  SelectFieldConfig,
+  TextFieldConfig
+} from '../../models/form-config.model';
 
 
 @Component({
@@ -15,6 +22,7 @@ export class FieldRenderer implements OnChanges {
   numberConfig?: NumberFieldConfig;
   inputMultiConfig?: InputMultiFieldConfig;
   autoCompleteConfig?: AutoCompleteFieldConfig;
+  selectConfig?: SelectFieldConfig;
   textConfig?: TextFieldConfig;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -22,26 +30,37 @@ export class FieldRenderer implements OnChanges {
       this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
+      this.selectConfig = undefined;
       this.textConfig = undefined;
     } else if (this.field?.type === 'auto-complete') {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = this.field.fieldConfig as AutoCompleteFieldConfig;
+      this.selectConfig = undefined;
       this.textConfig = undefined;
     } else if (this.field?.type === 'input-multi') {
       this.numberConfig = undefined;
       this.inputMultiConfig = this.field.fieldConfig as InputMultiFieldConfig;
       this.autoCompleteConfig = undefined;
+      this.selectConfig = undefined;
+      this.textConfig = undefined;
+    } else if (this.field?.type === 'select' || this.field?.type === 'select-multi') {
+      this.numberConfig = undefined;
+      this.inputMultiConfig = undefined;
+      this.autoCompleteConfig = undefined;
+      this.selectConfig = this.field.fieldConfig as SelectFieldConfig;
       this.textConfig = undefined;
     } else if (this.field?.type === 'text' || this.field?.type === 'textarea') {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
+      this.selectConfig = undefined;
       this.textConfig = this.field.fieldConfig as TextFieldConfig;
     } else {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
+      this.selectConfig = undefined;
       this.textConfig = undefined;
     }
   }

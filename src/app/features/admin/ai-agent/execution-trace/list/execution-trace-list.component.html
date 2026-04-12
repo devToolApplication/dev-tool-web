@@ -41,17 +41,35 @@
 
   @if (stepLoading) {
     <div class="empty-state">Loading steps...</div>
-  } @else if (selectedSteps.length > 0) {
-    <section class="step-list">
-      @for (step of selectedSteps; track step.id) {
+  } @else if (selectedStepTimelineItems.length > 0) {
+    <section class="step-timeline-wrapper">
+      <ng-template #stepOppositeTemplate let-step>
+        <div class="timeline-time">{{ step.timestamp }}</div>
+      </ng-template>
+
+      <ng-template #stepMarkerTemplate let-step>
+        <span class="timeline-marker" [ngClass]="step.colorClass">
+          <i [class]="step.icon"></i>
+        </span>
+      </ng-template>
+
+      <ng-template #stepContentTemplate let-step>
         <article class="step-card">
           <div class="step-header">
             <div class="step-title">#{{ step.stepNo }} {{ step.stepType }}</div>
-            <div class="step-time">{{ step.createdAt || '-' }}</div>
           </div>
-          <pre class="step-payload">{{ step.payloadJson || '{}' }}</pre>
+          <pre class="step-payload">{{ step.payload }}</pre>
         </article>
-      }
+      </ng-template>
+
+      <app-timeline
+        [value]="selectedStepTimelineItems"
+        align="left"
+        styleClass="execution-step-timeline"
+        [oppositeTemplate]="stepOppositeTemplate"
+        [markerTemplate]="stepMarkerTemplate"
+        [contentTemplate]="stepContentTemplate"
+      ></app-timeline>
     </section>
   } @else {
     <div class="empty-state">No steps recorded for this session.</div>

@@ -1,10 +1,5 @@
-export interface PlaywrightCdpConnectRequest {
-  cdpUrl?: string;
-}
-
 export interface PlaywrightCdpConnectResponse {
   connected: boolean;
-  cdpUrl?: string;
   browserVersion?: string;
   contextCount?: number;
   pageCount?: number;
@@ -13,7 +8,6 @@ export interface PlaywrightCdpConnectResponse {
 }
 
 export interface PlaywrightChatGptSendRequest {
-  cdpUrl?: string;
   prompt: string;
   clearBeforeType?: boolean;
 }
@@ -24,7 +18,6 @@ export interface PlaywrightOpenAiChatCompletionMessageRequest {
 }
 
 export interface PlaywrightOpenAiChatCompletionRequest {
-  cdpUrl?: string;
   model?: string;
   clearBeforeType?: boolean;
   messages: PlaywrightOpenAiChatCompletionMessageRequest[];
@@ -67,15 +60,29 @@ export interface PlaywrightConversationStreamResponse {
   messageStreamComplete?: boolean;
   conversationId?: string;
   assistantMessageId?: string;
+  assistantRawText?: string;
   assistantText?: string;
+  toolCalls?: PlaywrightOpenAiChatCompletionToolCallResponse[];
   eventCount?: number;
   events?: PlaywrightConversationStreamEventResponse[];
+}
+
+export interface PlaywrightOpenAiChatCompletionToolCallFunctionResponse {
+  name?: string;
+  arguments?: string;
+}
+
+export interface PlaywrightOpenAiChatCompletionToolCallResponse {
+  id?: string;
+  type?: string;
+  function?: PlaywrightOpenAiChatCompletionToolCallFunctionResponse;
 }
 
 export interface PlaywrightOpenAiChatCompletionMessageResponse {
   role?: string;
   content?: string;
   refusal?: string | null;
+  toolCalls?: PlaywrightOpenAiChatCompletionToolCallResponse[] | null;
 }
 
 export interface PlaywrightOpenAiChatCompletionChoiceResponse {
@@ -100,26 +107,8 @@ export interface PlaywrightOpenAiChatCompletionResponse {
   usage?: PlaywrightOpenAiChatCompletionUsageResponse;
 }
 
-export interface PlaywrightLangChain4jTestRequest {
-  model?: string;
-  prompt: string;
-}
-
-export interface PlaywrightLangChain4jToolExecutionResponse {
-  toolName?: string;
-  arguments?: string;
-  result?: string;
-}
-
-export interface PlaywrightLangChain4jTestResponse {
-  responseText?: string;
-  completion?: PlaywrightOpenAiChatCompletionResponse;
-  toolExecutions?: PlaywrightLangChain4jToolExecutionResponse[];
-}
-
 export interface PlaywrightChatGptSendResponse {
   sent: boolean;
-  cdpUrl?: string;
   pageUrl?: string;
   pageTitle?: string;
   message?: string;

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { UploadStorageResponse } from '../../../../../core/models/file-storage/upload-storage.model';
@@ -7,6 +7,7 @@ import { LoadingService } from '../../../../../core/ui-services/loading.service'
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { UploadStorageService } from '../../../../../core/services/file-service/upload-storage.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 
 @Component({
@@ -15,7 +16,7 @@ import { TableConfig } from '../../../../../shared/ui/table/models/table-config.
   templateUrl: './upload-storage-list.component.html',
   styleUrl: './upload-storage-list.component.css'
 })
-export class UploadStorageListComponent implements OnInit {
+export class UploadStorageListComponent extends BasePagedList<UploadStorageResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'uploadStorage.viewTitle',
     filters: [
@@ -97,50 +98,48 @@ export class UploadStorageListComponent implements OnInit {
     rowsPerPageOptions: [5, 10, 20, 50]
   };
 
-  rows: UploadStorageResponse[] = [];
   tableLoading = false;
   loading = false;
 
   selectedStorageId: string | null = null;
-  filters: Record<string, any> = {};
 
   constructor(
     private readonly uploadStorageService: UploadStorageService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly i18nService: I18nService
-  ) {}
-
-  ngOnInit(): void {
-
+  ) {
+    super(route, router, 10);
   }
 
-  loadPage(): void {
+  ngOnInit(): void {
+    this.loadPage();
+  }
+
+  protected loadPage(): void {
     this.tableLoading = true;
 
     this.loadingService
-      .track(this.uploadStorageService.getPage(0, this.tableConfig.rows ?? 10, ['name,asc'], this.filters))
+      .track(
+        this.uploadStorageService.getPage(
+          this.page,
+          this.pageSize,
+          ['name,asc'],
+          this.filters as Record<string, string | number | boolean>
+        )
+      )
       .pipe(finalize(() => (this.tableLoading = false)))
       .subscribe({
         next: (res: BasePageResponse<UploadStorageResponse>) => {
-          this.rows = res.data ?? [];
+          this.setPageResponse(res);
           if (this.selectedStorageId && !this.rows.some((row) => row.id === this.selectedStorageId)) {
             this.selectedStorageId = null;
           }
         },
         error: () => this.toastService.error(this.i18nService.t('uploadStorage.loadListError'))
       });
-  }
-
-  onSearch(filters: Record<string, any>): void {
-    this.filters = filters;
-    this.loadPage();
-  }
-
-  onResetFilter(): void {
-    this.filters = {};
-    this.loadPage();
   }
 
   goCreate(): void {

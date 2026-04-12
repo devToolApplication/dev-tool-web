@@ -10,6 +10,16 @@ import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 
+interface ExecutionStepTimelineItem {
+  id: string;
+  stepNo: number;
+  stepType: ExecutionStepResponse['stepType'];
+  timestamp: string;
+  icon: string;
+  colorClass: string;
+  payload: string;
+}
+
 @Component({
   selector: 'app-execution-trace-list',
   standalone: false,
@@ -70,6 +80,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   stepPopupVisible = false;
   selectedSession: ExecutionSessionResponse | null = null;
   selectedSteps: ExecutionStepResponse[] = [];
+  selectedStepTimelineItems: ExecutionStepTimelineItem[] = [];
 
   constructor(
     private readonly service: ExecutionTraceService,
@@ -105,7 +116,8 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     this.stepLoading = true;
     this.loadingService.track(this.service.getSteps(this.selectedSession.sessionId)).pipe(finalize(() => (this.stepLoading = false))).subscribe({
       next: (steps) => {
-        this.selectedSteps = steps;
+        this.selectedSteps = [...steps].sort((left, right) => left.stepNo - right.stepNo);
+        this.selectedStepTimelineItems = this.selectedSteps.map((step) => this.toTimelineItem(step));
       },
       error: () => this.toastService.error('Load execution steps failed')
     });
@@ -122,6 +134,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   private openSteps(session: ExecutionSessionResponse): void {
     this.selectedSession = session;
     this.selectedSteps = [];
+    this.selectedStepTimelineItems = [];
     this.stepPopupVisible = true;
     this.refreshSelectedSteps();
   }
@@ -138,6 +151,74 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   private resetPopupState(): void {
     this.selectedSession = null;
     this.selectedSteps = [];
+    this.selectedStepTimelineItems = [];
     this.stepLoading = false;
+  }
+
+  private toTimelineItem(step: ExecutionStepResponse): ExecutionStepTimelineItem {
+    const payload = this.formatPayload(step.payloadJson);
+    const appearance = this.getStepAppearance(step.stepType);
+    return {
+      id: step.id,
+      stepNo: step.stepNo,
+      stepType: step.stepType,
+      timestamp: this.formatTimestamp(step.createdAt),
+      icon: appearance.icon,
+      colorClass: appearance.colorClass,
+      payload
+    };
+  }
+
+  private getStepAppearance(stepType: ExecutionStepResponse['stepType']): { icon: string; colorClass: string } {
+    switch (stepType) {
+      case 'USER_INPUT':
+        return { icon: 'pi pi-user', colorClass: 'timeline-marker-user' };
+      case 'MODEL_REQUEST':
+        return { icon: 'pi pi-send', colorClass: 'timeline-marker-request' };
+      case 'MODEL_RESPONSE':
+        return { icon: 'pi pi-sparkles', colorClass: 'timeline-marker-response' };
+      case 'TOOL_CALL':
+        return { icon: 'pi pi-wrench', colorClass: 'timeline-marker-tool-call' };
+      case 'TOOL_RESULT':
+        return { icon: 'pi pi-check-circle', colorClass: 'timeline-marker-tool-result' };
+      case 'FINAL_ANSWER':
+        return { icon: 'pi pi-verified', colorClass: 'timeline-marker-final' };
+      case 'ERROR':
+        return { icon: 'pi pi-exclamation-triangle', colorClass: 'timeline-marker-error' };
+      default:
+        return { icon: 'pi pi-circle', colorClass: 'timeline-marker-default' };
+    }
+  }
+
+  private formatTimestamp(value?: string): string {
+    if (!value) {
+      return '-';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(date);
+  }
+
+  private formatPayload(payloadJson?: string): string {
+    if (!payloadJson?.trim()) {
+      return '{}';
+    }
+
+    try {
+      return JSON.stringify(JSON.parse(payloadJson), null, 2);
+    } catch {
+      return payloadJson;
+    }
   }
 }

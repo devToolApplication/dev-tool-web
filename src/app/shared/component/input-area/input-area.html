@@ -45,7 +45,7 @@
               pTextarea
               [id]="inputId"
               [rows]="rows"
-              [autoResize]="true"
+              [autoResize]="false"
               [ngModel]="value"
               (ngModelChange)="onChange($event)"
               [disabled]="disabled"
@@ -58,6 +58,7 @@
               [style.width.%]="fluid ? 100 : null"
               [style.maxHeight]="inlineTextMaxHeight"
               [class]="styleClass"
+              [class.input-area__inline-textarea]="true"
               [class.input-area__inline-textarea--with-zoom]="showZoomButton"
               [attr.title]="(tooltip || null) | translateContent"
               (blur)="onBlur()"
@@ -69,7 +70,7 @@
             pTextarea
             [id]="inputId"
             [rows]="rows"
-            [autoResize]="true"
+            [autoResize]="false"
             [ngModel]="value"
             (ngModelChange)="onChange($event)"
             [disabled]="disabled"
@@ -82,6 +83,7 @@
             [style.width.%]="fluid ? 100 : null"
             [style.maxHeight]="inlineTextMaxHeight"
             [class]="styleClass"
+            [class.input-area__inline-textarea]="true"
             [class.input-area__inline-textarea--with-zoom]="showZoomButton"
             [attr.title]="(tooltip || null) | translateContent"
             (blur)="onBlur()"
@@ -121,7 +123,7 @@
       pTextarea
       class="input-area__zoom-textarea"
       [rows]="rows"
-      [autoResize]="true"
+      [autoResize]="false"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"

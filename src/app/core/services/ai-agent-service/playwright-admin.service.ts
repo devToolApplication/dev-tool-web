@@ -4,12 +4,9 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
 import { BaseResponse } from '../../models/base-response.model';
 import {
-  PlaywrightCdpConnectRequest,
   PlaywrightCdpConnectResponse,
   PlaywrightChatGptSendRequest,
   PlaywrightChatGptSendResponse,
-  PlaywrightLangChain4jTestRequest,
-  PlaywrightLangChain4jTestResponse,
   PlaywrightOpenAiChatCompletionRequest,
   PlaywrightOpenAiChatCompletionResponse
 } from '../../models/ai-agent/playwright.model';
@@ -20,25 +17,78 @@ export class PlaywrightAdminService {
 
   constructor(private readonly http: HttpClient) {}
 
-  checkCdp(payload: PlaywrightCdpConnectRequest): Observable<PlaywrightCdpConnectResponse> {
-    return this.http.post<BaseResponse<PlaywrightCdpConnectResponse>>(`${this.apiUrl}/cdp-check`, payload).pipe(map((res) => res.data));
+  checkCdp(): Observable<PlaywrightCdpConnectResponse> {
+    return this.http.post<BaseResponse<PlaywrightCdpConnectResponse>>(`${this.apiUrl}/cdp-check`, {}).pipe(map((res) => res.data));
   }
 
   sendChatGptPrompt(payload: PlaywrightChatGptSendRequest): Observable<PlaywrightChatGptSendResponse> {
     return this.http
       .post<BaseResponse<PlaywrightChatGptSendResponse>>(`${this.apiUrl}/chatgpt/send`, payload)
-      .pipe(map((res) => res.data));
+      .pipe(map((res) => this.mapChatGptSendResponse(res.data)));
   }
 
   chatCompletions(payload: PlaywrightOpenAiChatCompletionRequest): Observable<PlaywrightOpenAiChatCompletionResponse> {
     return this.http
       .post<BaseResponse<PlaywrightOpenAiChatCompletionResponse>>(`${this.apiUrl}/chat/completions`, payload)
-      .pipe(map((res) => res.data));
+      .pipe(map((res) => this.mapOpenAiResponse(res.data)));
   }
 
-  langChain4jTest(payload: PlaywrightLangChain4jTestRequest): Observable<PlaywrightLangChain4jTestResponse> {
-    return this.http
-      .post<BaseResponse<PlaywrightLangChain4jTestResponse>>(`${this.apiUrl}/langchain4j/test`, payload)
-      .pipe(map((res) => res.data));
+  private mapChatGptSendResponse(response: PlaywrightChatGptSendResponse): PlaywrightChatGptSendResponse {
+    if (!response) {
+      return response;
+    }
+
+    return {
+      ...response,
+      conversationResponseOpenAi: response.conversationResponseOpenAi
+        ? this.mapOpenAiResponse(response.conversationResponseOpenAi)
+        : response.conversationResponseOpenAi
+    };
+  }
+
+  private mapOpenAiResponse(response: any): PlaywrightOpenAiChatCompletionResponse {
+    if (!response) {
+      return response;
+    }
+
+    return {
+      id: response.id,
+      object: response.object,
+      created: response.created,
+      model: response.model,
+      systemFingerprint: response.systemFingerprint ?? response.system_fingerprint ?? null,
+      choices: Array.isArray(response.choices)
+        ? response.choices.map((choice: any) => ({
+            index: choice?.index,
+            finishReason: choice?.finishReason ?? choice?.finish_reason,
+            message: choice?.message
+              ? {
+                  role: choice.message.role,
+                  content: choice.message.content,
+                  refusal: choice.message.refusal,
+                  toolCalls: Array.isArray(choice.message.toolCalls ?? choice.message.tool_calls)
+                    ? (choice.message.toolCalls ?? choice.message.tool_calls).map((toolCall: any) => ({
+                        id: toolCall?.id,
+                        type: toolCall?.type,
+                        function: toolCall?.function
+                          ? {
+                              name: toolCall.function.name,
+                              arguments: toolCall.function.arguments
+                            }
+                          : undefined
+                      }))
+                    : null
+                }
+              : undefined
+          }))
+        : undefined,
+      usage: response.usage
+        ? {
+            promptTokens: response.usage.promptTokens ?? response.usage.prompt_tokens ?? null,
+            completionTokens: response.usage.completionTokens ?? response.usage.completion_tokens ?? null,
+            totalTokens: response.usage.totalTokens ?? response.usage.total_tokens ?? null
+          }
+        : undefined
+    };
   }
 }

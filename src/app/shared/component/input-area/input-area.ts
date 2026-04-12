@@ -89,17 +89,17 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
   }
 
   get inlineTextMaxHeight(): string | null {
-    if (this.maxRows <= 0) {
+    if (this.resolvedMaxRows <= 0) {
       return null;
     }
-    return `calc(${this.maxRows} * 1lh + 1.25rem)`;
+    return `calc(${this.resolvedMaxRows} * 1lh + 1.25rem)`;
   }
 
   get inlineJsonHeight(): string | null {
-    if (this.maxRows <= 0) {
+    if (this.resolvedMaxRows <= 0) {
       return null;
     }
-    return `calc(${this.maxRows} * 1lh + 2rem)`;
+    return `calc(${this.resolvedMaxRows} * 1lh + 2rem)`;
   }
 
   ngOnDestroy(): void {
@@ -234,5 +234,12 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
       basicSetup: codeMirrorModule.basicSetup,
       json: jsonModule.json
     };
+  }
+
+  private get resolvedMaxRows(): number {
+    if (this.maxRows <= 0) {
+      return this.maxRows;
+    }
+    return Math.max(this.maxRows, this.rows);
   }
 }

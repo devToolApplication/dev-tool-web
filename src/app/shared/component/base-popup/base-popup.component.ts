@@ -68,10 +68,12 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
         <div class="flex w-full items-center justify-between gap-3">
           <div class="min-w-0 flex-1">
             <ng-content select="[popup-header]"></ng-content>
-            <div *ngIf="!hasProjectedHeader" class="flex flex-col gap-1">
-              <span class="text-lg font-semibold">{{ header | translateContent }}</span>
-              <small *ngIf="subheader" class="text-surface-500">{{ subheader | translateContent }}</small>
-            </div>
+            @if (!hasProjectedHeader) {
+              <div class="flex flex-col gap-1">
+                <span class="text-lg font-semibold">{{ header | translateContent }}</span>
+                <small *ngIf="subheader" class="text-surface-500">{{ subheader | translateContent }}</small>
+              </div>
+            }
           </div>
           <p-tag *ngIf="loading" [value]="'loading' | translateContent" severity="info"></p-tag>
         </div>

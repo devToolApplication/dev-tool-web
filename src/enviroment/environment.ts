@@ -15,8 +15,8 @@ export const environment = {
   apiUrl:{
     // adminAiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1/admin',
     adminAiGenerator: 'http://127.0.0.1:31001/ai-agent-mcrs/v1/admin',
-    // aiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1',
-    aiGenerator: 'http://127.0.0.1:31001/ai-agent-mcrs/v1',
+    aiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1',
+    // aiGenerator: 'http://127.0.0.1:31001/ai-agent-mcrs/v1',
     // adminFileServiceUrl: 'https://api.103.77.243.66.nip.io/file-mcrs/v1/admin',
     adminFileServiceUrl: 'http://127.0.0.1:31000/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'http://127.0.0.1:31002/trade-bot-mcrs/v1/admin',

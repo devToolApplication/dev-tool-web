@@ -23,9 +23,15 @@
   padding-right: 2.75rem;
 }
 
+.input-area__inline-textarea {
+  overflow-y: auto;
+  resize: vertical;
+}
+
 .input-area__zoom-textarea {
   width: 100%;
   min-height: 65vh;
+  overflow-y: auto;
   resize: vertical;
 }
 

@@ -59,6 +59,8 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   type: 'select' | 'select-multi';
   options?: any[];
   optionsExpression?: string;
+  placeholder?: string;
+  showClear?: boolean;
 }
 
 export interface AutoCompleteFieldConfig extends BaseFieldConfig {

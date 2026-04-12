@@ -1,0 +1,19 @@
+<p-timeline [value]="value" [align]="align" [layout]="layout" [styleClass]="styleClass">
+  <ng-template pTemplate="opposite" let-item>
+    @if (oppositeTemplate) {
+      <ng-container [ngTemplateOutlet]="oppositeTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="marker" let-item>
+    @if (markerTemplate) {
+      <ng-container [ngTemplateOutlet]="markerTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="content" let-item>
+    @if (contentTemplate) {
+      <ng-container [ngTemplateOutlet]="contentTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+    }
+  </ng-template>
+</p-timeline>

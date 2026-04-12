@@ -10,7 +10,12 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.aiAgentManagement',
         icon: 'pi pi-sparkles',
         items: [
+          { label: 'AI Playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/playground' },
+          { label: 'Agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
           { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
+          { label: 'Prompt Templates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
+          { label: 'Execution Policies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
+          { label: 'Execution Traces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
           {
             label: 'layout.menu.mcpServerManagement',
             icon: 'pi pi-wrench',

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
@@ -9,6 +9,7 @@ import { McpToolService } from '../../../../../core/services/ai-agent-service/mc
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
 
@@ -18,9 +19,10 @@ import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
   templateUrl: './mcp-tool-list.component.html',
   styleUrl: './mcp-tool-list.component.css'
 })
-export class McpToolListComponent implements OnInit {
+export class McpToolListComponent extends BasePagedList<McpToolResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'mcpTool.viewTitle',
+    minWidth: '148rem',
     toolbar: {
       new: { visible: true, label: 'mcpTool.newTool', icon: 'pi pi-plus', severity: 'success' }
     },
@@ -48,24 +50,27 @@ export class McpToolListComponent implements OnInit {
     ],
     filterOptions: { primaryField: 'name' },
     columns: [
-      { field: 'code', header: 'Code', sortable: true },
-      { field: 'name', header: 'name', sortable: true },
-      { field: 'category', header: 'category', sortable: true },
-      { field: 'type', header: 'mcpTool.type', sortable: true },
-      { field: 'executorType', header: 'Executor Type', sortable: true },
-      { field: 'authType', header: 'Auth Type', sortable: true },
-      { field: 'tags', header: 'mcpTool.tags', type: 'array' },
-      { field: 'endpoint.method', header: 'mcpTool.method' },
-      { field: 'endpoint.url', header: 'mcpTool.url' },
-      { field: 'db.queryType', header: 'mcpTool.queryType' },
-      { field: 'db.databaseName', header: 'mcpTool.database' },
-      { field: 'db.collectionName', header: 'mcpTool.collection' },
-      { field: 'enabled', header: 'enabled', type: 'boolean' },
-      { field: 'updatedAt', header: 'updatedAt', type: 'date', format: 'dd/MM/yyyy HH:mm' },
+      { field: 'code', header: 'Code', sortable: true, width: '14rem' },
+      { field: 'name', header: 'name', sortable: true, width: '16rem', frozen: true, alignFrozen: 'left' },
+      { field: 'category', header: 'category', sortable: true, width: '12rem' },
+      { field: 'type', header: 'mcpTool.type', sortable: true, width: '7rem' },
+      { field: 'executorType', header: 'Executor Type', sortable: true, width: '10rem' },
+      { field: 'authType', header: 'Auth Type', sortable: true, width: '9rem' },
+      { field: 'tags', header: 'mcpTool.tags', type: 'array', width: '14rem' },
+      { field: 'endpoint.method', header: 'mcpTool.method', width: '8rem' },
+      { field: 'endpoint.url', header: 'mcpTool.url', width: '24rem' },
+      { field: 'db.queryType', header: 'mcpTool.queryType', width: '10rem' },
+      { field: 'db.databaseName', header: 'mcpTool.database', width: '12rem' },
+      { field: 'db.collectionName', header: 'mcpTool.collection', width: '14rem' },
+      { field: 'enabled', header: 'enabled', type: 'boolean', width: '7rem' },
+      { field: 'updatedAt', header: 'updatedAt', type: 'date', format: 'dd/MM/yyyy HH:mm', width: '12rem' },
       {
         field: 'actions',
         header: 'actions',
         type: 'actions',
+        width: '13rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.editTool(row.id) },
           { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.deleteTool(row.id) }
@@ -77,32 +82,24 @@ export class McpToolListComponent implements OnInit {
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  rows: McpToolResponse[] = [];
   categories: McpCategoryResponse[] = [];
   loading = false;
   tableLoading = false;
-  filters: Record<string, any> = {};
 
   constructor(
     private readonly toolService: McpToolService,
     private readonly categoryService: McpCategoryService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly i18nService: I18nService
-  ) {}
+  ) {
+    super(route, router, DEFAULT_TABLE_ROWS);
+  }
 
   ngOnInit(): void {
     this.loadCategories();
-  }
-
-  onSearch(filters: Record<string, unknown>): void {
-    this.filters = filters;
-    this.loadPage();
-  }
-
-  onResetFilter(): void {
-    this.filters = {};
     this.loadPage();
   }
 
@@ -141,13 +138,16 @@ export class McpToolListComponent implements OnInit {
     });
   }
 
-  private loadPage(): void {
+  protected loadPage(): void {
     this.tableLoading = true;
-    this.loadingService.track(this.toolService.getPage(0, this.tableConfig.rows ?? DEFAULT_TABLE_ROWS, ['updatedAt,desc'], this.filters)).pipe(finalize(() => (this.tableLoading = false))).subscribe({
-      next: (res: BasePageResponse<McpToolResponse>) => {
-        this.rows = res.data ?? [];
-      },
-      error: () => this.toastService.error(this.i18nService.t('mcpTool.loadListError'))
-    });
+    this.loadingService
+      .track(this.toolService.getPage(this.page, this.pageSize, ['updatedAt,desc'], this.filters as Record<string, string | number | boolean>))
+      .pipe(finalize(() => (this.tableLoading = false)))
+      .subscribe({
+        next: (res: BasePageResponse<McpToolResponse>) => {
+          this.setPageResponse(res);
+        },
+        error: () => this.toastService.error(this.i18nService.t('mcpTool.loadListError'))
+      });
   }
 }

@@ -87,6 +87,11 @@ export interface TableColumn {
   sortable?: boolean;
   format?: string;
   currencyCode?: string;
+  width?: string;
+  minWidth?: string;
+  maxWidth?: string;
+  frozen?: boolean;
+  alignFrozen?: 'left' | 'right';
   actions?: TableAction[];
 }
 

@@ -5,46 +5,31 @@ import {
   McpCategoryResponse,
   McpCollectionField,
   McpDbConfig,
-  McpDbQueryType,
+  McpDbMatchMode,
+  McpDbQueryRule,
+  McpDbRuleOperator,
   McpEndpointConfig,
   McpEndpointMethod,
   McpToolCreateDto,
   McpToolDefinition,
   McpToolResponse,
   McpToolType,
-  McpToolUpdateDto
+  McpToolUpdateDto,
+  ToolExecutorType
 } from '../../../../../core/models/mcp-server/mcp-tool.model';
+import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { McpCategoryService } from '../../../../../core/services/ai-agent-service/mcp-category.service';
 import { McpToolService } from '../../../../../core/services/ai-agent-service/mcp-tool.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { FormConfig, FormContext, TreeFieldConfig } from '../../../../../shared/ui/form-input/models/form-config.model';
+import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
 import { MCP_TOOL_CONFIG_ROUTES, MCP_TOOL_INITIAL_VALUE } from '../../mcp-server.constants';
 
-type DbConditionLogic = 'and' | 'or';
-type DbConditionOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'regex' | 'exists';
-
-interface McpDbFormConfig extends McpDbConfig {
-  queryTree?: DbConditionTreeForm;
-}
-
 interface McpToolFormValue extends Omit<McpToolCreateDto, 'db'> {
-  db?: McpDbFormConfig;
+  db?: McpDbConfig;
   toolParametersText: string;
-}
-
-interface DbConditionTreeForm {
-  logic: DbConditionLogic;
-  rules: DbConditionRowNode[];
-  children: Array<{ node: DbConditionTreeForm }>;
-}
-
-interface DbConditionRowNode {
-  field: string;
-  operator: DbConditionOperator;
-  value: string;
 }
 
 @Component({
@@ -55,22 +40,17 @@ interface DbConditionRowNode {
 })
 export class McpToolFormComponent implements OnInit, OnDestroy {
   private readonly defaultCategoryCode = 'custom';
-  private readonly filterPlaceholderPattern = /^\{\{\s*([^{}]+?)\s*\}\}$/;
-  private readonly conditionLogicOptions = [
-    { label: 'mcpTool.conditionAnd', value: 'and' },
-    { label: 'mcpTool.conditionOr', value: 'or' }
-  ];
-  private readonly conditionOperatorOptions = [
-    { label: 'mcpTool.operator.eq', value: 'eq' },
-    { label: 'mcpTool.operator.ne', value: 'ne' },
-    { label: 'mcpTool.operator.gt', value: 'gt' },
-    { label: 'mcpTool.operator.gte', value: 'gte' },
-    { label: 'mcpTool.operator.lt', value: 'lt' },
-    { label: 'mcpTool.operator.lte', value: 'lte' },
-    { label: 'mcpTool.operator.in', value: 'in' },
-    { label: 'mcpTool.operator.nin', value: 'nin' },
-    { label: 'mcpTool.operator.regex', value: 'regex' },
-    { label: 'mcpTool.operator.exists', value: 'exists' }
+  private readonly operatorOptions = [
+    { label: 'Equals', value: 'eq' },
+    { label: 'Not Equals', value: 'ne' },
+    { label: 'Greater Than', value: 'gt' },
+    { label: 'Greater Than or Equal', value: 'gte' },
+    { label: 'Less Than', value: 'lt' },
+    { label: 'Less Than or Equal', value: 'lte' },
+    { label: 'In', value: 'in' },
+    { label: 'Not In', value: 'nin' },
+    { label: 'Regex', value: 'regex' },
+    { label: 'Exists', value: 'exists' }
   ];
 
   formContext: FormContext = {
@@ -80,8 +60,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
       categoryOptions: [],
       databaseOptions: [],
       collectionOptions: [],
-      fieldOptions: [],
-      conditionFieldOptions: []
+      fieldOptions: []
     }
   };
 
@@ -106,13 +85,26 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
         ],
         validation: [Rules.required('mcpTool.typeRequired')]
       },
+      { type: 'text', name: 'code', label: 'Code', width: '1/2' },
+      { type: 'text', name: 'name', label: 'mcpTool.functionName', width: '1/2', validation: [Rules.required('mcpTool.nameRequired')] },
       {
-        type: 'text',
-        name: 'name',
-        label: 'mcpTool.functionName',
+        type: 'select',
+        name: 'executorType',
+        label: 'Executor Type',
         width: '1/2',
-        validation: [Rules.required('mcpTool.nameRequired')]
+        options: [
+          { label: 'HTTP', value: 'HTTP' },
+          { label: 'DB', value: 'DB' },
+          { label: 'JAVA_BEAN', value: 'JAVA_BEAN' },
+          { label: 'WORKFLOW', value: 'WORKFLOW' },
+          { label: 'SCRIPT', value: 'SCRIPT' }
+        ]
       },
+      { type: 'text', name: 'executorRef', label: 'Executor Ref', width: '1/2' },
+      { type: 'text', name: 'authType', label: 'Auth Type', width: '1/2', placeholder: 'BEARER / API_KEY / NONE' },
+      { type: 'text', name: 'secretKeyRef', label: 'Secret Ref', width: '1/2' },
+      { type: 'number', name: 'timeoutMs', label: 'Timeout (ms)', width: '1/2' },
+      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
       { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/2' },
       { type: 'textarea', name: 'description', label: 'mcpTool.functionDescription', width: 'full' },
       {
@@ -122,7 +114,8 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
         width: 'full',
         rows: 10,
         showZoomButton: true,
-        helpText: 'mcpTool.parametersSchemaHint'
+        helpText: 'mcpTool.parametersSchemaHint',
+        rules: { visible: 'model.type === "endpoint"' }
       },
       {
         type: 'input-multi',
@@ -164,9 +157,9 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
             ],
             validation: [Rules.required('mcpTool.methodRequired')]
           },
-          { type: 'text', name: 'url', label: 'mcpTool.url', width: '1/2', validation: [Rules.required('mcpTool.urlRequired')] },
-          { type: 'record', name: 'params', label: 'mcpTool.params', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: '1/2' },
-          { type: 'record', name: 'headers', label: 'mcpTool.headers', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: '1/2' },
+          { type: 'text', name: 'url', label: 'mcpTool.url', width: 'full', validation: [Rules.required('mcpTool.urlRequired')] },
+          { type: 'record', name: 'params', label: 'mcpTool.params', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: 'full' },
+          { type: 'record', name: 'headers', label: 'mcpTool.headers', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: 'full' },
           { type: 'textarea', name: 'body', label: 'mcpTool.body', width: 'full', showZoomButton: true }
         ]
       },
@@ -182,29 +175,67 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
             name: 'queryType',
             label: 'mcpTool.queryType',
             width: '1/3',
-            options: [
-              { label: 'mcpTool.selectQuery', value: 'select' },
-              { label: 'mcpTool.insertQuery', value: 'insert' },
-              { label: 'mcpTool.updateQuery', value: 'update' },
-              { label: 'mcpTool.deleteQuery', value: 'delete' }
-            ],
+            options: [{ label: 'mcpTool.selectQuery', value: 'select' }],
             validation: [Rules.required('mcpTool.queryTypeRequired')]
           },
-          { type: 'select', name: 'databaseName', label: 'mcpTool.database', width: '1/3', optionsExpression: 'context.extra?.databaseOptions || []', validation: [Rules.required('mcpTool.databaseRequired')] },
-          { type: 'select', name: 'collectionName', label: 'mcpTool.collection', width: '1/3', optionsExpression: 'context.extra?.collectionOptions || []', validation: [Rules.required('mcpTool.collectionRequired')] },
+          {
+            type: 'select',
+            name: 'databaseName',
+            label: 'mcpTool.database',
+            width: '1/3',
+            optionsExpression: 'context.extra?.databaseOptions || []',
+            validation: [Rules.required('mcpTool.databaseRequired')]
+          },
+          {
+            type: 'select',
+            name: 'collectionName',
+            label: 'mcpTool.collection',
+            width: '1/3',
+            optionsExpression: 'context.extra?.collectionOptions || []',
+            validation: [Rules.required('mcpTool.collectionRequired')]
+          },
           { type: 'select-multi', name: 'fields', label: 'mcpTool.fields', width: 'full', optionsExpression: 'context.extra?.fieldOptions || []' },
-          this.buildQueryTreeField('queryTree', 'mcpTool.conditionBuilder', 'model.db && model.db.queryType !== "insert"')
+          {
+            type: 'select',
+            name: 'matchMode',
+            label: 'Match Mode',
+            width: '1/3',
+            options: [
+              { label: 'All Rules', value: 'and' },
+              { label: 'Any Rule', value: 'or' }
+            ]
+          },
+          {
+            type: 'array',
+            name: 'rules',
+            label: 'Query Rules',
+            width: 'full',
+            itemConfig: [
+              { type: 'select', name: 'field', label: 'Field', width: '1/3', optionsExpression: 'context.extra?.fieldOptions || []' },
+              { type: 'select', name: 'operator', label: 'Operator', width: '1/3', options: this.operatorOptions },
+              { type: 'text', name: 'argumentName', label: 'Argument Name', width: '1/6', placeholder: 'code / userId / sessionId' },
+              { type: 'text', name: 'value', label: 'Static Value', width: '1/6', placeholder: 'Fallback or fixed value' }
+            ]
+          },
+          {
+            type: 'textarea',
+            name: 'condition',
+            label: 'Raw Condition JSON',
+            width: 'full',
+            rows: 8,
+            showZoomButton: true,
+            helpText: 'Optional advanced override. Runtime uses simple rules first, then falls back to this condition.'
+          }
         ]
       }
     ]
   };
 
   toolId: string | null = null;
-  formInitialValue: McpToolFormValue = { ...(MCP_TOOL_INITIAL_VALUE as McpToolFormValue), toolParametersText: '' };
+  formInitialValue: McpToolFormValue = this.createInitialValue();
   submitting = false;
   loading = false;
-  private currentModel: McpToolFormValue = { ...(MCP_TOOL_INITIAL_VALUE as McpToolFormValue), toolParametersText: '' };
-
+  private currentModel: McpToolFormValue = this.createInitialValue();
   private detailSub?: Subscription;
   private categories: McpCategoryResponse[] = [];
   private databaseOptions: { label: string; value: string }[] = [];
@@ -220,74 +251,15 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     private readonly i18nService: I18nService
   ) {}
 
-  private buildQueryTreeField(name: string, label: string, visible?: string): TreeFieldConfig {
-    return {
-      type: 'tree',
-      name,
-      label,
-      width: 'full',
-      rules: visible ? { visible } : undefined,
-      children: [
-      {
-        type: 'select',
-        name: 'logic',
-        label: 'mcpTool.conditionLogic',
-        width: '1/3',
-        options: this.conditionLogicOptions
-      },
-      {
-        type: 'array',
-        name: 'rules',
-        label: 'mcpTool.condition',
-        width: 'full',
-        itemConfig: [
-          {
-            type: 'select',
-            name: 'field',
-            label: 'mcpTool.conditionField',
-            width: '1/3',
-            optionsExpression: 'context.extra?.conditionFieldOptions || []'
-          },
-          {
-            type: 'select',
-            name: 'operator',
-            label: 'mcpTool.conditionOperator',
-            width: '1/3',
-            options: this.conditionOperatorOptions
-          },
-          {
-            type: 'text',
-            name: 'value',
-            label: 'mcpTool.conditionValue',
-            width: '1/3',
-            placeholder: 'mcpTool.conditionValuePlaceholder',
-            helpText: 'mcpTool.conditionValueHint'
-          }
-        ]
-      },
-      {
-        type: 'array',
-        name: 'children',
-        label: 'mcpTool.conditionGroups',
-        width: 'full',
-        itemConfig: [
-          {
-            type: 'tree',
-            name: 'node',
-            label: 'mcpTool.conditionGroup'
-          }
-        ]
-      }
-    ]
-    };
-  }
-
   ngOnInit(): void {
-    const initialId = this.route.snapshot.paramMap.get('id');
-    this.toolId = initialId;
-    this.formContext = { ...this.formContext, mode: initialId ? 'edit' : 'create' };
+    this.toolId = this.route.snapshot.paramMap.get('id');
+    this.formContext = { ...this.formContext, mode: this.toolId ? 'edit' : 'create' };
     this.currentModel = { ...this.formInitialValue };
     this.loadCategories();
+  }
+
+  ngOnDestroy(): void {
+    this.detailSub?.unsubscribe();
   }
 
   onFormValueChange(rawModel: Record<string, unknown>): void {
@@ -295,32 +267,19 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     const previousModel = this.currentModel;
     this.currentModel = nextModel;
 
-    const type = (nextModel.type as McpToolType) ?? 'endpoint';
-    if (type !== 'db') {
-      if ((this.formContext.extra?.collectionOptions?.length ?? 0) > 0 || (this.formContext.extra?.fieldOptions?.length ?? 0) > 0) {
-        this.formContext = { ...this.formContext, extra: { ...this.formContext.extra, collectionOptions: [], fieldOptions: [] } };
-      }
+    if ((nextModel.type ?? 'endpoint') !== 'db') {
       return;
     }
 
-    const db = this.normalizeDbForm(nextModel.db);
-    const currentDb = this.normalizeDbForm(previousModel.db);
-    if (
-      db.databaseName === currentDb.databaseName &&
-      db.collectionName === currentDb.collectionName &&
-      JSON.stringify(db.fields) === JSON.stringify(currentDb.fields) &&
-      JSON.stringify(db.queryTree) === JSON.stringify(currentDb.queryTree)
-    ) {
+    const previousDb = this.normalizeDb(previousModel.db);
+    const nextDb = this.normalizeDb(nextModel.db);
+    if (nextDb.databaseName !== previousDb.databaseName) {
+      this.prepareDbOptions({ ...nextDb, collectionName: '', fields: [], rules: [] });
       return;
     }
 
-    if (db.databaseName !== currentDb.databaseName) {
-      this.prepareDbOptions(this.normalizeDb({ ...db, collectionName: '', fields: [] }), { ...db, collectionName: '', fields: [] });
-      return;
-    }
-
-    if (db.collectionName !== currentDb.collectionName) {
-      this.prepareFieldOptions(db.databaseName, db.collectionName, db.queryTree ?? this.createEmptyQueryTree());
+    if (nextDb.collectionName !== previousDb.collectionName) {
+      this.prepareFieldOptions(nextDb.databaseName, nextDb.collectionName, nextDb.rules ?? []);
     }
   }
 
@@ -331,36 +290,39 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
 
     const type = model.type ?? 'endpoint';
     const toolDefinition = this.buildToolDefinition(model);
-    if ((model.toolParametersText?.trim() || '') && !toolDefinition) {
+    if ((type === 'endpoint' || (model.toolParametersText?.trim() || '') !== '') && toolDefinition === null) {
       return;
     }
+
     const payload: McpToolCreateDto = {
+      code: (model.code || '').trim(),
       category: model.category ?? this.categories[0]?.code ?? this.defaultCategoryCode,
       name: (model.name || '').trim(),
       type,
+      executorType: (model.executorType as ToolExecutorType | undefined) ?? (type === 'db' ? 'DB' : 'HTTP'),
+      executorRef: (model.executorRef || '').trim(),
+      endpointUrl: type === 'endpoint' ? ((model.endpoint?.url || model.endpointUrl || '').trim()) : undefined,
+      authType: (model.authType || '').trim(),
+      secretKeyRef: (model.secretKeyRef || '').trim(),
+      timeoutMs: model.timeoutMs ?? 10000,
       enabled: model.enabled ?? true,
       description: (model.description || '').trim(),
       tags: this.normalizeTags(model.tags),
       endpoint: type === 'endpoint' ? this.normalizeEndpoint(model.endpoint) : undefined,
       db: type === 'db' ? this.normalizeDb(model.db) : undefined,
-      tool: toolDefinition
+      tool: toolDefinition ?? undefined,
+      status: model.status ?? 'ACTIVE'
     };
 
     const request$ = this.toolId ? this.toolService.update(this.toolId, payload as McpToolUpdateDto) : this.toolService.create(payload);
     this.submitting = true;
-    request$.pipe(finalize(() => (this.submitting = false))).subscribe({
+    this.loadingService.track(request$).pipe(finalize(() => (this.submitting = false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t(this.toolId ? 'mcpTool.updateSuccess' : 'mcpTool.createSuccess'));
         void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.toolList]);
       },
-      error: () => {
-        this.toastService.error(this.i18nService.t(this.toolId ? 'mcpTool.updateError' : 'mcpTool.createError'));
-      }
+      error: () => this.toastService.error(this.i18nService.t(this.toolId ? 'mcpTool.updateError' : 'mcpTool.createError'))
     });
-  }
-
-  ngOnDestroy(): void {
-    this.detailSub?.unsubscribe();
   }
 
   private loadCategories(): void {
@@ -391,8 +353,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
             ...this.formContext.extra,
             databaseOptions: this.databaseOptions,
             collectionOptions: [],
-            fieldOptions: [],
-            conditionFieldOptions: []
+            fieldOptions: []
           }
         };
         this.bindRouteMode();
@@ -405,8 +366,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
             ...this.formContext.extra,
             databaseOptions: [],
             collectionOptions: [],
-            fieldOptions: [],
-            conditionFieldOptions: []
+            fieldOptions: []
           }
         };
         this.bindRouteMode();
@@ -425,23 +385,6 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  private bindDetail(id: string): void {
-    this.detailSub?.unsubscribe();
-    this.loading = true;
-    this.detailSub = this.loadingService.track(this.toolService.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (tool: McpToolResponse) => {
-        this.formInitialValue = this.mapToInitialValue(tool);
-        this.currentModel = { ...this.formInitialValue };
-        this.applyCategoryOptions();
-        this.prepareDbOptions(this.normalizeDb(this.formInitialValue.db), this.normalizeDbForm(this.formInitialValue.db));
-      },
-      error: () => {
-        this.toastService.error(this.i18nService.t('mcpTool.loadDetailError'));
-        void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.toolList]);
-      }
-    });
-  }
-
   private applyRouteMode(id: string | null): void {
     if (!id) {
       this.toolId = null;
@@ -457,17 +400,41 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     this.bindDetail(id);
   }
 
+  private bindDetail(id: string): void {
+    this.detailSub?.unsubscribe();
+    this.loading = true;
+    this.detailSub = this.loadingService.track(this.toolService.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (tool) => {
+        this.formInitialValue = this.mapToInitialValue(tool);
+        this.currentModel = { ...this.formInitialValue };
+        this.applyCategoryOptions();
+        this.prepareDbOptions(this.normalizeDb(this.formInitialValue.db));
+      },
+      error: () => {
+        this.toastService.error(this.i18nService.t('mcpTool.loadDetailError'));
+        void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.toolList]);
+      }
+    });
+  }
+
   private mapToInitialValue(tool: McpToolResponse): McpToolFormValue {
     const db = this.mapDbResponseToForm(tool.db);
     return {
+      code: tool.code ?? '',
       category: tool.category,
       name: tool.name,
       type: tool.type,
+      executorType: tool.executorType ?? (tool.type === 'db' ? 'DB' : 'HTTP'),
+      executorRef: tool.executorRef ?? '',
+      endpointUrl: tool.endpointUrl ?? tool.endpoint?.url ?? '',
+      authType: tool.authType ?? '',
+      secretKeyRef: tool.secretKeyRef ?? '',
+      timeoutMs: tool.timeoutMs ?? 10000,
       enabled: tool.enabled,
       description: tool.description,
       tool: tool.tool,
       toolParametersText: this.stringifyToolParameters(tool.tool),
-      tags: [...tool.tags],
+      tags: [...(tool.tags ?? [])],
       endpoint: {
         method: tool.endpoint?.method ?? 'GET',
         url: tool.endpoint?.url ?? '',
@@ -475,127 +442,8 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
         headers: { ...(tool.endpoint?.headers ?? {}) },
         body: tool.endpoint?.body ?? ''
       },
-      db
-    };
-  }
-
-  private normalizeTags(value: unknown): string[] {
-    if (!Array.isArray(value)) {
-      return [];
-    }
-
-    return value.map((item) => String(item).trim()).filter(Boolean).filter((item, index, items) => items.indexOf(item) === index);
-  }
-
-  private normalizeEndpoint(value: unknown): McpEndpointConfig {
-    const record = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
-
-    return {
-      method: (record['method'] as McpEndpointMethod) ?? 'GET',
-      url: String(record['url'] ?? '').trim(),
-      params: this.normalizeRecord(record['params']),
-      headers: this.normalizeRecord(record['headers']),
-      body: String(record['body'] ?? '').trim()
-    };
-  }
-
-  private buildToolDefinition(model: McpToolFormValue): McpToolDefinition | undefined {
-    const parameters = this.parseToolParametersText(model.toolParametersText);
-    if (parameters === null) {
-      return undefined;
-    }
-
-    return {
-      type: 'function',
-      function: {
-        name: (model.name || '').trim(),
-        description: (model.description || '').trim(),
-        parameters: parameters ?? undefined
-      }
-    };
-  }
-
-  private parseToolParametersText(rawValue: string): Record<string, unknown> | undefined | null {
-    const normalized = rawValue?.trim() || '';
-    if (!normalized) {
-      return undefined;
-    }
-
-    try {
-      const parsed = JSON.parse(normalized);
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        this.toastService.error(this.i18nService.t('mcpTool.parametersSchemaInvalid'));
-        return null;
-      }
-      return parsed as Record<string, unknown>;
-    } catch {
-      this.toastService.error(this.i18nService.t('mcpTool.parametersSchemaInvalid'));
-      return null;
-    }
-  }
-
-  private stringifyToolParameters(tool?: McpToolDefinition): string {
-    const parameters = tool?.function?.parameters;
-    if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters) || Object.keys(parameters).length === 0) {
-      return '';
-    }
-    return JSON.stringify(parameters, null, 2);
-  }
-
-  private normalizeDb(value: unknown): McpDbConfig {
-    const db = this.normalizeDbForm(value);
-    return {
-      queryType: db.queryType,
-      databaseName: db.databaseName,
-      collectionName: db.collectionName,
-      fields: db.fields,
-      condition: this.buildCondition(db)
-    };
-  }
-
-  private normalizeDbForm(value: unknown): McpDbFormConfig {
-    const record = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
-    const queryTree = this.normalizeQueryTree(record['queryTree']);
-
-    return {
-      queryType: (record['queryType'] as McpDbQueryType) ?? 'select',
-      databaseName: String(record['databaseName'] ?? '').trim(),
-      collectionName: String(record['collectionName'] ?? '').trim(),
-      fields: this.normalizeTags(record['fields']),
-      condition: String(record['condition'] ?? '').trim(),
-      queryTree
-    };
-  }
-
-  private normalizeRecord(value: unknown): Record<string, string> {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return {};
-    }
-
-    return Object.entries(value as Record<string, unknown>).reduce<Record<string, string>>((acc, [key, item]) => {
-      const normalizedKey = key.trim();
-      if (!normalizedKey) {
-        return acc;
-      }
-
-      acc[normalizedKey] = String(item ?? '').trim();
-      return acc;
-    }, {});
-  }
-
-  private createInitialValue(): McpToolFormValue {
-    return {
-      ...(MCP_TOOL_INITIAL_VALUE as McpToolFormValue),
-      category: this.categories[0]?.code ?? this.defaultCategoryCode,
-      toolParametersText: '',
-      db: {
-        queryType: 'select',
-        databaseName: '',
-        collectionName: '',
-        fields: [],
-        condition: '',
-        queryTree: this.createEmptyQueryTree()
-      } as unknown as McpDbFormConfig
+      db,
+      status: tool.status ?? 'ACTIVE'
     };
   }
 
@@ -603,20 +451,26 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     const categoryOptions = this.categories.map((item) => ({ label: item.name || item.code, value: item.code }));
     this.formContext = { ...this.formContext, extra: { ...this.formContext.extra, categoryOptions } };
 
-    if (!this.formInitialValue.category && categoryOptions.length > 0) {
-      this.formInitialValue = { ...this.formInitialValue, category: categoryOptions[0].value };
+    if (categoryOptions.length === 0) {
+      return;
+    }
+
+    const hasSelectedCategory = categoryOptions.some((item) => item.value === this.formInitialValue.category);
+    if (!hasSelectedCategory) {
+      const fallbackCategory = categoryOptions[0].value;
+      this.formInitialValue = { ...this.formInitialValue, category: fallbackCategory };
+      this.currentModel = { ...this.currentModel, category: fallbackCategory };
     }
   }
 
-  private prepareDbOptions(db: McpDbConfig, dbForm?: McpDbFormConfig): void {
+  private prepareDbOptions(db: McpDbConfig): void {
     this.formContext = {
       ...this.formContext,
       extra: {
         ...this.formContext.extra,
         databaseOptions: this.databaseOptions,
         collectionOptions: [],
-        fieldOptions: [],
-        conditionFieldOptions: []
+        fieldOptions: []
       }
     };
 
@@ -633,8 +487,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
             ...this.formContext.extra,
             databaseOptions: this.databaseOptions,
             collectionOptions: collections.map((item) => ({ label: item, value: item })),
-            fieldOptions: [],
-            conditionFieldOptions: []
+            fieldOptions: []
           }
         };
 
@@ -642,19 +495,21 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.prepareFieldOptions(db.databaseName, db.collectionName, dbForm?.queryTree ?? this.createEmptyQueryTree());
+        this.prepareFieldOptions(db.databaseName, db.collectionName, db.rules ?? []);
       },
-      error: () => {
-        this.toastService.error(this.i18nService.t('mcpTool.loadCollectionsError'));
-      }
+      error: () => this.toastService.error(this.i18nService.t('mcpTool.loadCollectionsError'))
     });
   }
 
-  private prepareFieldOptions(databaseName: string, collectionName: string, queryTree: DbConditionTreeForm): void {
+  private prepareFieldOptions(databaseName: string, collectionName: string, rules: McpDbQueryRule[]): void {
+    if (!databaseName || !collectionName) {
+      return;
+    }
+
     const cacheKey = `${databaseName}.${collectionName}`;
     const cached = this.collectionFieldMap.get(cacheKey);
     if (cached) {
-      this.applyFieldOptions(cached, queryTree);
+      this.applyFieldOptions(cached, rules);
       return;
     }
 
@@ -662,201 +517,123 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     this.loadingService.track(this.toolService.getFields(databaseName, collectionName)).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (fields) => {
         this.collectionFieldMap.set(cacheKey, fields);
-        this.applyFieldOptions(fields, queryTree);
+        this.applyFieldOptions(fields, rules);
       },
-      error: () => {
-        this.toastService.error(this.i18nService.t('mcpTool.loadFieldsError'));
-      }
+      error: () => this.toastService.error(this.i18nService.t('mcpTool.loadFieldsError'))
     });
   }
 
-  private applyFieldOptions(fields: McpCollectionField[], queryTree: DbConditionTreeForm): void {
+  private applyFieldOptions(fields: McpCollectionField[], rules: McpDbQueryRule[]): void {
     const fieldOptions = fields.map((field) => ({ label: `${field.fieldName} (${field.dataTypes.join(', ')})`, value: field.fieldName }));
-    const allowed = new Set(fieldOptions.map((field) => field.value));
-    const db = this.normalizeDbForm(this.currentModel.db);
-    const nextQueryTree = this.filterQueryTree(queryTree, allowed);
+    const allowed = new Set(fieldOptions.map((item) => item.value));
+    const db = this.normalizeDb(this.currentModel.db);
+    const filteredRules = rules.filter((rule) => allowed.has(rule.field));
+
     this.formContext = {
       ...this.formContext,
       extra: {
         ...this.formContext.extra,
-        fieldOptions,
-        conditionFieldOptions: fieldOptions
+        fieldOptions
       }
     };
+
     this.currentModel = {
       ...this.currentModel,
       db: {
         ...db,
-        queryTree: nextQueryTree,
-        condition: this.buildCondition({ ...db, queryTree: nextQueryTree })
-      } as unknown as McpDbFormConfig
-    };
-  }
-
-  private buildCondition(db: McpDbFormConfig): string {
-    const root = db.queryTree ?? this.createEmptyQueryTree();
-    const payload = this.toMongoTree(root);
-    if (!payload) {
-      return '';
-    }
-    return JSON.stringify(payload);
-  }
-
-  private toMongoClause(item: DbConditionRowNode): Record<string, unknown> {
-    const value = this.parseConditionValue(item.operator, item.value);
-
-    switch (item.operator) {
-      case 'eq':
-        return { [item.field]: value };
-      case 'ne':
-        return { [item.field]: { $ne: value } };
-      case 'gt':
-        return { [item.field]: { $gt: value } };
-      case 'gte':
-        return { [item.field]: { $gte: value } };
-      case 'lt':
-        return { [item.field]: { $lt: value } };
-      case 'lte':
-        return { [item.field]: { $lte: value } };
-      case 'in':
-        return { [item.field]: { $in: value } };
-      case 'nin':
-        return { [item.field]: { $nin: value } };
-      case 'regex':
-        return { [item.field]: { $regex: value, $options: 'i' } };
-      case 'exists':
-        return { [item.field]: { $exists: value } };
-    }
-  }
-
-  private parseConditionValue(operator: DbConditionOperator, rawValue: string): unknown {
-    const placeholder = this.toFilterPlaceholder(rawValue);
-    if (placeholder !== null) {
-      if (operator === 'in' || operator === 'nin') {
-        return [placeholder];
+        rules: filteredRules.length > 0 ? filteredRules : db.rules ?? []
       }
-      return placeholder;
-    }
-
-    if (operator === 'exists') {
-      return rawValue.trim().toLowerCase() !== 'false';
-    }
-
-    if (operator === 'in' || operator === 'nin') {
-      return rawValue
-        .split(',')
-        .map((item) => this.parseScalar(item.trim()))
-        .filter((item) => item !== '');
-    }
-
-    return this.parseScalar(rawValue);
-  }
-
-  private parseScalar(rawValue: string): unknown {
-    const normalized = rawValue.trim();
-    if (normalized === '') {
-      return '';
-    }
-    if (normalized === 'true') {
-      return true;
-    }
-    if (normalized === 'false') {
-      return false;
-    }
-    if (normalized === 'null') {
-      return null;
-    }
-    const numericValue = Number(normalized);
-    if (!Number.isNaN(numericValue) && normalized !== '') {
-      return numericValue;
-    }
-    return normalized;
-  }
-
-  private toFilterPlaceholder(rawValue: string): string | null {
-    const normalized = rawValue.trim();
-    if (!normalized) {
-      return null;
-    }
-
-    const matched = normalized.match(this.filterPlaceholderPattern);
-    if (matched) {
-      return `{{${matched[1].trim()}}}`;
-    }
-
-    return `{{${normalized}}}`;
-  }
-
-  private fromStoredConditionValue(value: unknown): string {
-    if (Array.isArray(value) && value.length === 1) {
-      return this.fromStoredConditionValue(value[0]);
-    }
-
-    const normalized = String(value ?? '').trim();
-    const matched = normalized.match(this.filterPlaceholderPattern);
-    if (matched) {
-      return matched[1].trim();
-    }
-
-    return normalized;
-  }
-
-  private mapDbResponseToForm(db?: McpDbConfig): McpDbConfig {
-    const parsed = this.parseCondition(db?.condition);
-    return {
-      queryType: db?.queryType ?? 'select',
-      databaseName: db?.databaseName ?? '',
-      collectionName: db?.collectionName ?? '',
-      fields: [...(db?.fields ?? [])],
-      condition: db?.condition ?? '',
-      queryTree: parsed
-    } as unknown as McpDbConfig;
-  }
-
-  private normalizeQueryTree(value: unknown): DbConditionTreeForm {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return this.createEmptyQueryTree();
-    }
-
-    const record = value as Record<string, unknown>;
-    const rules = Array.isArray(record['rules']) ? record['rules'] : [];
-    const children = Array.isArray(record['children']) ? record['children'] : [];
-    return {
-      logic: record['logic'] === 'or' ? 'or' : 'and',
-      rules: rules.flatMap((rule) => this.normalizeQueryRule(rule)),
-      children: children.flatMap((child) => this.normalizeQueryChild(child))
     };
   }
 
-  private normalizeQueryChild(value: unknown): Array<{ node: DbConditionTreeForm }> {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return [];
+  private buildToolDefinition(model: McpToolFormValue): McpToolDefinition | null | undefined {
+    const normalized = model.toolParametersText?.trim() || '';
+    if (!normalized) {
+      return undefined;
     }
 
-    const record = value as Record<string, unknown>;
-    if (!record['node'] || typeof record['node'] !== 'object' || Array.isArray(record['node'])) {
-      return [];
+    try {
+      const parameters = JSON.parse(normalized);
+      if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)) {
+        this.toastService.error(this.i18nService.t('mcpTool.parametersSchemaInvalid'));
+        return null;
+      }
+      return {
+        type: 'function',
+        function: {
+          name: (model.name || '').trim(),
+          description: (model.description || '').trim(),
+          parameters
+        }
+      };
+    } catch {
+      this.toastService.error(this.i18nService.t('mcpTool.parametersSchemaInvalid'));
+      return null;
     }
-
-    return [{ node: this.normalizeQueryTree(record['node']) }];
   }
 
-  private normalizeQueryRule(value: unknown): DbConditionRowNode[] {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+  private stringifyToolParameters(tool?: McpToolDefinition): string {
+    const parameters = tool?.function?.parameters;
+    if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters) || Object.keys(parameters).length === 0) {
+      return '';
+    }
+    return JSON.stringify(parameters, null, 2);
+  }
+
+  private normalizeEndpoint(value: unknown): McpEndpointConfig {
+    const record = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+    return {
+      method: (record['method'] as McpEndpointMethod) ?? 'GET',
+      url: String(record['url'] ?? '').trim(),
+      params: this.normalizeRecord(record['params']),
+      headers: this.normalizeRecord(record['headers']),
+      body: String(record['body'] ?? '').trim()
+    };
+  }
+
+  private normalizeDb(value: unknown): McpDbConfig {
+    const record = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+    return {
+      queryType: 'select',
+      databaseName: String(record['databaseName'] ?? '').trim(),
+      collectionName: String(record['collectionName'] ?? '').trim(),
+      fields: this.normalizeTags(record['fields']),
+      matchMode: record['matchMode'] === 'or' ? 'or' : 'and',
+      rules: this.normalizeQueryRules(record['rules']),
+      condition: String(record['condition'] ?? '').trim()
+    };
+  }
+
+  private normalizeQueryRules(value: unknown): McpDbQueryRule[] {
+    if (!Array.isArray(value)) {
       return [];
+    }
+
+    return value
+      .map((rule) => this.normalizeQueryRule(rule))
+      .filter((rule): rule is McpDbQueryRule => !!rule);
+  }
+
+  private normalizeQueryRule(value: unknown): McpDbQueryRule | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
     }
 
     const record = value as Record<string, unknown>;
     const field = String(record['field'] ?? '').trim();
-    const operator = this.normalizeOperator(record['operator']);
-    return [{
+    if (!field) {
+      return null;
+    }
+
+    return {
       field,
-      operator,
-      value: String(record['value'] ?? '')
-    }];
+      operator: this.normalizeOperator(record['operator']),
+      argumentName: String(record['argumentName'] ?? '').trim(),
+      value: String(record['value'] ?? '').trim()
+    };
   }
 
-  private normalizeOperator(value: unknown): DbConditionOperator {
+  private normalizeOperator(value: unknown): McpDbRuleOperator {
     switch (value) {
       case 'ne':
       case 'gt':
@@ -873,66 +650,135 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  private parseCondition(rawCondition?: string): DbConditionTreeForm {
+  private normalizeRecord(value: unknown): Record<string, string> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return {};
+    }
+
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, string>>((acc, [key, item]) => {
+      const normalizedKey = key.trim();
+      if (!normalizedKey) {
+        return acc;
+      }
+      acc[normalizedKey] = String(item ?? '').trim();
+      return acc;
+    }, {});
+  }
+
+  private normalizeTags(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+      .filter((item, index, items) => items.indexOf(item) === index);
+  }
+
+  private createInitialValue(): McpToolFormValue {
+    return {
+      ...(MCP_TOOL_INITIAL_VALUE as McpToolFormValue),
+      category: this.defaultCategoryCode,
+      toolParametersText: '',
+      db: {
+        queryType: 'select',
+        databaseName: '',
+        collectionName: '',
+        fields: [],
+        matchMode: 'and',
+        rules: [],
+        condition: ''
+      }
+    };
+  }
+
+  private mapDbResponseToForm(db?: McpDbConfig): McpDbConfig {
+    const parsed = this.parseLegacyCondition(db?.condition);
+    return {
+      queryType: 'select',
+      databaseName: db?.databaseName ?? '',
+      collectionName: db?.collectionName ?? '',
+      fields: [...(db?.fields ?? [])],
+      matchMode: db?.matchMode ?? parsed.matchMode,
+      rules: db?.rules?.length ? db.rules : parsed.rules,
+      condition: db?.condition ?? ''
+    };
+  }
+
+  private parseLegacyCondition(rawCondition?: string): { matchMode: McpDbMatchMode; rules: McpDbQueryRule[] } {
     if (!rawCondition?.trim()) {
-      return this.createEmptyQueryTree();
+      return { matchMode: 'and', rules: [] };
     }
 
     try {
       const parsed = JSON.parse(rawCondition) as Record<string, unknown>;
       if (Array.isArray(parsed['$and'])) {
-        return this.createQueryTreeForm('and', this.parseConditionClauses(parsed['$and'] as Array<Record<string, unknown>>));
+        return { matchMode: 'and', rules: this.parseSimpleClauses(parsed['$and']) };
       }
       if (Array.isArray(parsed['$or'])) {
-        return this.createQueryTreeForm('or', this.parseConditionClauses(parsed['$or'] as Array<Record<string, unknown>>));
+        return { matchMode: 'or', rules: this.parseSimpleClauses(parsed['$or']) };
       }
-      return this.createQueryTreeForm('and', this.parseConditionClauses([parsed]));
+      return { matchMode: 'and', rules: this.parseSimpleClauses([parsed]) };
     } catch {
-      return this.createEmptyQueryTree();
+      return { matchMode: 'and', rules: [] };
     }
   }
 
-  private parseConditionClauses(clauses: Array<Record<string, unknown>>): Array<DbConditionTreeForm | DbConditionRowNode> {
-    const nodes: Array<DbConditionTreeForm | DbConditionRowNode> = [];
-
-    clauses.forEach((clause) => {
-      if (Array.isArray(clause['$and'])) {
-        nodes.push(this.createQueryTreeForm('and', this.parseConditionClauses(clause['$and'] as Array<Record<string, unknown>>)));
-        return;
-      }
-      if (Array.isArray(clause['$or'])) {
-        nodes.push(this.createQueryTreeForm('or', this.parseConditionClauses(clause['$or'] as Array<Record<string, unknown>>)));
-        return;
-      }
-
-      const [field, definition] = Object.entries(clause)[0] ?? [];
-      if (!field) {
-        return;
-      }
-
-      if (definition && typeof definition === 'object' && !Array.isArray(definition)) {
-        const record = definition as Record<string, unknown>;
-        const [operatorKey, operatorValue] = Object.entries(record)[0] ?? [];
-        const operator = this.mapMongoOperator(operatorKey);
-        if (!operator) {
-          return;
-        }
-
-        nodes.push({
-          field,
-          operator,
-          value: this.fromStoredConditionValue(operatorValue)
-        });
-        return;
-      }
-
-      nodes.push({ field, operator: 'eq', value: this.fromStoredConditionValue(definition) });
-    });
-
-    return nodes;
+  private parseSimpleClauses(clauses: unknown[]): McpDbQueryRule[] {
+    return clauses
+      .map((clause) => this.parseSimpleClause(clause))
+      .filter((rule): rule is McpDbQueryRule => !!rule);
   }
 
-  private mapMongoOperator(operator: string): DbConditionOperator | null {
+  private parseSimpleClause(clause: unknown): McpDbQueryRule | null {
+    if (!clause || typeof clause !== 'object' || Array.isArray(clause)) {
+      return null;
+    }
+
+    const record = clause as Record<string, unknown>;
+    const entries = Object.entries(record);
+    if (entries.length !== 1) {
+      return null;
+    }
+
+    const [field, definition] = entries[0];
+    if (!field || field.startsWith('$')) {
+      return null;
+    }
+
+    if (definition && typeof definition === 'object' && !Array.isArray(definition)) {
+      const operatorRecord = definition as Record<string, unknown>;
+      const operatorEntry = Object.entries(operatorRecord).find(([key]) => key.startsWith('$') && key !== '$options');
+      if (!operatorEntry) {
+        return null;
+      }
+
+      const [mongoOperator, operatorValue] = operatorEntry;
+      const operator = this.mapMongoOperator(mongoOperator);
+      if (!operator) {
+        return null;
+      }
+
+      const normalized = this.extractArgumentAndValue(operatorValue);
+      return {
+        field,
+        operator,
+        argumentName: normalized.argumentName,
+        value: normalized.value
+      };
+    }
+
+    const normalized = this.extractArgumentAndValue(definition);
+    return {
+      field,
+      operator: 'eq',
+      argumentName: normalized.argumentName,
+      value: normalized.value
+    };
+  }
+
+  private mapMongoOperator(operator: string): McpDbRuleOperator | null {
     switch (operator) {
       case '$ne': return 'ne';
       case '$gt': return 'gt';
@@ -947,48 +793,20 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createEmptyQueryTree(): DbConditionTreeForm {
-    return { logic: 'and', rules: [], children: [] };
-  }
-
-  private createQueryTreeForm(
-    logic: DbConditionLogic,
-    nodes: Array<DbConditionTreeForm | DbConditionRowNode>
-  ): DbConditionTreeForm {
-    return {
-      logic,
-      rules: nodes.filter((node): node is DbConditionRowNode => !('rules' in node)),
-      children: nodes
-        .filter((node): node is DbConditionTreeForm => 'rules' in node)
-        .map((node) => ({ node }))
-    };
-  }
-
-  private filterQueryTree(node: DbConditionTreeForm, allowed: Set<string>): DbConditionTreeForm {
-    return {
-      logic: node.logic,
-      rules: node.rules.filter((rule) => allowed.has(rule.field)),
-      children: node.children
-        .map((child) => ({ node: this.filterQueryTree(child.node, allowed) }))
-        .filter((child) => child.node.rules.length > 0 || child.node.children.length > 0)
-    };
-  }
-
-  private toMongoTree(node: DbConditionTreeForm): Record<string, unknown> | null {
-    const children = [
-      ...node.rules.map((rule) => this.toMongoClause(rule)),
-      ...node.children.map((child) => this.toMongoTree(child.node))
-    ]
-      .filter((child): child is Record<string, unknown> => !!child);
-
-    if (children.length === 0) {
-      return null;
+  private extractArgumentAndValue(value: unknown): { argumentName: string; value: string } {
+    if (Array.isArray(value) && value.length === 1) {
+      return this.extractArgumentAndValue(value[0]);
     }
 
-    if (children.length === 1) {
-      return children[0];
+    const normalized = String(value ?? '').trim();
+    const placeholderMatch = normalized.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
+    if (placeholderMatch) {
+      return { argumentName: placeholderMatch[1].trim(), value: '' };
     }
 
-    return node.logic === 'or' ? { $or: children } : { $and: children };
+    return {
+      argumentName: '',
+      value: Array.isArray(value) ? value.map((item) => String(item)).join(', ') : normalized
+    };
   }
 }

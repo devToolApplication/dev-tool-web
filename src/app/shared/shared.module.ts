@@ -37,6 +37,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { TieredMenuModule } from 'primeng/tieredmenu';
+import { TimelineModule } from 'primeng/timeline';
 import { ToastModule } from 'primeng/toast';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -68,6 +69,7 @@ import { SelectTree } from './component/select-tree/select-tree';
 import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
+import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
@@ -142,7 +144,8 @@ const COMPONENTS = [
   Select,
   ToggleButton,
   ToggleSwitch,
-  CandleChart
+  CandleChart,
+  TimelineComponent
 ];
 
 const UI = [FormInput, TableComponent];
@@ -203,6 +206,7 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     AvatarModule,
     TieredMenuModule,
     TabsModule,
+    TimelineModule,
     IconFieldModule,
     InputIconModule
   ],

@@ -40,14 +40,17 @@ export class AiAgentPlaygroundComponent implements OnInit {
         name: 'agentId',
         label: 'Agent',
         width: '1/2',
-        optionsExpression: 'context.extra?.agentOptions || []'
+        optionsExpression: 'context.extra?.agentOptions || []',
+        showClear: true
       },
       {
         type: 'select',
         name: 'modelId',
         label: 'Model Override',
         width: '1/2',
-        optionsExpression: 'context.extra?.modelOptions || []'
+        optionsExpression: 'context.extra?.modelOptions || []',
+        validation: [Rules.required('Model is required')],
+        showClear: true
       },
       {
         type: 'text',
@@ -188,8 +191,8 @@ export class AiAgentPlaygroundComponent implements OnInit {
       },
       error: () => {
         this.formContext.extra = {
-          agentOptions: [{ label: 'None', value: '' }],
-          modelOptions: [{ label: 'None', value: '' }]
+          agentOptions: [],
+          modelOptions: []
         };
         this.toastService.error('Load playground dependencies failed');
         this.applyQueryDefaults();
@@ -229,11 +232,11 @@ export class AiAgentPlaygroundComponent implements OnInit {
   }
 
   private toAgentOptions(items: AgentDefinitionResponse[]): { label: string; value: string }[] {
-    return [{ label: 'None', value: '' }, ...items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }))];
+    return items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
   }
 
   private toModelOptions(items: AiModelResponse[]): { label: string; value: string }[] {
-    return [{ label: 'None', value: '' }, ...items.map((item) => ({ label: `${item.modelName}${item.code ? ` (${item.code})` : ''}`, value: item.id }))];
+    return items.map((item) => ({ label: `${item.modelName}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
   }
 
   private getOptionLabel(optionKey: 'agentOptions' | 'modelOptions', value: string): string {

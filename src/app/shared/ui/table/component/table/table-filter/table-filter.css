@@ -37,10 +37,15 @@ app-input-text {
   margin: 0;
   max-height: 100vh;
   border: none;
-  border-left: 1px solid var(--app-border);
+  border-left: 1px solid color-mix(in srgb, var(--app-border) 92%, transparent);
   border-radius: 0;
-  background: var(--app-card-surface-strong);
-  box-shadow: -24px 0 48px rgba(15, 23, 42, 0.4);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-overlay-bg) 96%, transparent), color-mix(in srgb, var(--app-card-surface-strong) 90%, transparent)),
+    var(--app-card-highlight);
+  color: var(--app-text);
+  box-shadow:
+    -24px 0 48px rgba(15, 23, 42, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
   overflow: hidden;
 }
 
@@ -58,13 +63,21 @@ app-input-text {
 
 .drawer-header,
 .drawer-footer {
-  padding: 1rem 1.25rem;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid color-mix(in srgb, var(--app-border) 85%, transparent);
 }
 
 .drawer-footer {
   border-top: 1px solid color-mix(in srgb, var(--app-border) 85%, transparent);
   border-bottom: none;
+}
+
+.drawer-title-block {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .drawer-eyebrow {
@@ -80,9 +93,19 @@ app-input-text {
   margin: 0;
 }
 
+:host ::ng-deep .drawer-close-button.p-button {
+  margin-left: auto;
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: 999px;
+}
+
 .drawer-content {
   overflow: auto;
-  padding: 1.25rem;
+  padding: 1.5rem;
   min-height: 0;
 }
 
@@ -117,10 +140,18 @@ app-input-text {
   .filter-search-row,
   .filter-search-actions,
   .drawer-footer,
-  .drawer-footer-actions,
+  .drawer-footer-actions {
+    flex-wrap: wrap;
+  }
+
   .drawer-grid,
   .date-range-grid {
     grid-template-columns: 1fr;
-    flex-wrap: wrap;
+  }
+
+  .drawer-header,
+  .drawer-footer,
+  .drawer-content {
+    padding-inline: 1rem;
   }
 }

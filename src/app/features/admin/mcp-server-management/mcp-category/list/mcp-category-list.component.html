@@ -1,3 +1,10 @@
 <section class="crud-page">
-  <app-table [config]="tableConfig" [data]="rows" [loading]="loading" (create)="onCreate()"></app-table>
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading"
+    (pageChange)="onPageChange($event)"
+    (create)="onCreate()"
+  ></app-table>
 </section>

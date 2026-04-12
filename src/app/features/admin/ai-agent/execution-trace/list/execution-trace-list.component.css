@@ -12,26 +12,23 @@
   gap: 0.85rem 1rem;
 }
 
-.step-list {
-  display: grid;
-  gap: 0.85rem;
-}
-
 .step-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .step-title {
   font-weight: 600;
 }
 
-.step-time {
+.timeline-time {
   color: var(--app-text-muted);
   font-size: 0.875rem;
+  padding-top: 0.45rem;
+  white-space: nowrap;
 }
 
 .step-payload {
@@ -44,6 +41,53 @@
   white-space: pre-wrap;
   word-break: break-word;
   font-family: Consolas, monospace;
+}
+
+.step-timeline-wrapper {
+  padding: 0.25rem 0;
+}
+
+.timeline-marker {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.timeline-marker-user {
+  background: #0f766e;
+}
+
+.timeline-marker-request {
+  background: #2563eb;
+}
+
+.timeline-marker-response {
+  background: #7c3aed;
+}
+
+.timeline-marker-tool-call {
+  background: #c2410c;
+}
+
+.timeline-marker-tool-result {
+  background: #15803d;
+}
+
+.timeline-marker-final {
+  background: #4f46e5;
+}
+
+.timeline-marker-error {
+  background: #b42318;
+}
+
+.timeline-marker-default {
+  background: #475467;
 }
 
 .empty-state {
@@ -61,6 +105,18 @@
   grid-column: 1 / -1;
 }
 
+:host ::ng-deep .execution-step-timeline .p-timeline-event-opposite {
+  flex: 0 0 12rem;
+}
+
+:host ::ng-deep .execution-step-timeline .p-timeline-event-content {
+  padding-bottom: 1rem;
+}
+
+:host ::ng-deep .execution-step-timeline .p-timeline-event:last-child .p-timeline-event-connector {
+  display: none;
+}
+
 @media (max-width: 960px) {
   .session-grid {
     grid-template-columns: 1fr;
@@ -69,5 +125,25 @@
   .step-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .timeline-time {
+    padding-top: 0;
+    white-space: normal;
+  }
+
+  :host ::ng-deep .execution-step-timeline .p-timeline-event-opposite {
+    flex: 0 0 7.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :host ::ng-deep .execution-step-timeline .p-timeline-event {
+    gap: 0.75rem;
+  }
+
+  :host ::ng-deep .execution-step-timeline .p-timeline-event-opposite {
+    flex: 0 0 5.5rem;
+    font-size: 0.75rem;
   }
 }

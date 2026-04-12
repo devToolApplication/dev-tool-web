@@ -87,7 +87,15 @@
   <ng-template pTemplate="header">
     <tr>
       @for (col of config.columns; track col.field) {
-        <th [pSortableColumn]="col.sortable ? col.field : undefined">
+        <th
+          pFrozenColumn
+          [pSortableColumn]="col.sortable ? col.field : undefined"
+          [style.width]="col.width ?? null"
+          [style.minWidth]="col.minWidth ?? col.width ?? null"
+          [style.maxWidth]="col.maxWidth ?? null"
+          [frozen]="col.frozen ?? false"
+          [alignFrozen]="col.alignFrozen ?? 'left'"
+        >
           {{ col.header | translateContent }}
           @if (col.sortable) {
             <p-sortIcon [field]="col.field"></p-sortIcon>
@@ -100,7 +108,14 @@
   <ng-template pTemplate="body" let-row>
     <tr>
       @for (col of config.columns; track col.field) {
-        <td>
+        <td
+          pFrozenColumn
+          [style.width]="col.width ?? null"
+          [style.minWidth]="col.minWidth ?? col.width ?? null"
+          [style.maxWidth]="col.maxWidth ?? null"
+          [frozen]="col.frozen ?? false"
+          [alignFrozen]="col.alignFrozen ?? 'left'"
+        >
           <app-table-cell [column]="col" [rowData]="row"></app-table-cell>
         </td>
       }

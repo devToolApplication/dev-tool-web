@@ -50,16 +50,17 @@
 >
   <ng-template pTemplate="header">
     <header class="drawer-header">
-      <div>
+      <div class="drawer-title-block">
         <p class="drawer-eyebrow">{{ 'filters' | translateContent }}</p>
         <h3>{{ (options.drawerTitle ?? 'advancedFilters') | translateContent }}</h3>
       </div>
 
       <app-button
+        styleClass="drawer-close-button"
         icon="pi pi-times"
         severity="secondary"
         [text]="true"
-        [label]="options.cancelLabel ?? 'close'"
+        [label]="''"
         (buttonClick)="closeDrawer()"
       ></app-button>
     </header>
