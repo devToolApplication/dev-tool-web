@@ -54,6 +54,10 @@
   font-family: Consolas, monospace;
 }
 
+.step-payload {
+  display: block;
+}
+
 .result-error {
   color: #b42318;
   font-weight: 600;

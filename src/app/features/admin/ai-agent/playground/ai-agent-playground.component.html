@@ -72,7 +72,15 @@
                 <div class="step-title">#{{ step.stepNo }} {{ step.stepType }}</div>
                 <div class="step-time">{{ step.createdAt || '-' }}</div>
               </div>
-              <pre class="step-payload">{{ step.payloadJson || '{}' }}</pre>
+              <app-input-area
+                class="step-payload"
+                [value]="formatPayload(step.payloadJson)"
+                [disabled]="true"
+                [readonly]="true"
+                [rows]="10"
+                [maxRows]="18"
+                [contentType]="'text'"
+              ></app-input-area>
             </article>
           }
         </div>

@@ -174,6 +174,18 @@ export class AiAgentPlaygroundComponent implements OnInit {
     return this.getOptionLabel('modelOptions', this.formValue.modelId || this.formInitialValue.modelId || '');
   }
 
+  formatPayload(payloadJson?: string): string {
+    if (!payloadJson?.trim()) {
+      return '{}';
+    }
+
+    try {
+      return JSON.stringify(JSON.parse(payloadJson), null, 2);
+    } catch {
+      return payloadJson;
+    }
+  }
+
   private loadDependencies(): void {
     this.loading = true;
     this.loadingService.track(
