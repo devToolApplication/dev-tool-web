@@ -453,12 +453,20 @@
   :root .p-tab {
     border-radius: 12px;
     color: var(--app-tab-text);
-    transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    border: 1px solid transparent;
+    transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+
+  :root .p-tab:hover {
+    background: var(--app-tab-active-bg);
+    color: var(--app-tab-text-active);
+    border-color: color-mix(in srgb, var(--app-tab-list-border) 88%, transparent);
   }
 
   :root .p-tab[aria-selected='true'] {
     background: var(--app-tab-active-bg);
     color: var(--app-tab-text-active);
+    border-color: color-mix(in srgb, var(--app-tab-list-border) 92%, transparent);
     box-shadow: var(--app-shadow-sm);
   }
 

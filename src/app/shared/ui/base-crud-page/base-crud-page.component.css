@@ -18,7 +18,9 @@
 .form-wrap {
   border-radius: 1rem;
   border: 1px solid var(--app-border);
-  background: var(--app-card-surface);
+  background:
+    var(--app-card-highlight),
+    var(--app-card-bg-strong);
   padding: 1rem;
   box-shadow: var(--app-shadow-lg);
   backdrop-filter: blur(14px);

@@ -73,13 +73,19 @@
   --app-custom-text: var(--app-custom-light-text);
 
   /* Tabs */
-  --app-tab-list-bg: rgba(255, 255, 255, 0.64);
-  --app-tab-list-border: rgba(133, 156, 221, 0.18);
+  --app-tab-list-bg:
+    var(--app-card-highlight),
+    var(--app-card-bg);
+  --app-tab-list-border: var(--app-border);
   --app-tab-text: #6e7a98;
   --app-tab-text-active: #172033;
-  --app-tab-active-bg: rgba(255, 255, 255, 0.82);
-  --app-tab-panels-bg: rgba(255, 255, 255, 0.62);
-  --app-tab-panels-border: rgba(133, 156, 221, 0.22);
+  --app-tab-active-bg:
+    var(--app-card-highlight),
+    var(--app-card-bg-strong);
+  --app-tab-panels-bg:
+    var(--app-card-highlight),
+    linear-gradient(180deg, var(--app-card-surface-strong), var(--app-card-surface));
+  --app-tab-panels-border: var(--app-border);
   --app-tab-panel-text: var(--app-text);
 
   /* Layout */

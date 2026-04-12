@@ -104,17 +104,22 @@
   }
 </div>
 
-<p-dialog
+<app-base-popup
   [visible]="zoomVisible"
   [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
+  [appendTo]="'body'"
+  position="center"
+  styleClass="input-area-zoom-dialog"
+  maskStyleClass="input-area-zoom-dialog-mask"
   [maximizable]="true"
-  [style]="{ width: 'min(96vw, 72rem)' }"
-  [breakpoints]="{ '960px': '95vw', '640px': '98vw' }"
-  [header]="(label || placeholder || 'Content') | translateContent"
+  [width]="'min(96vw, 72rem)'"
+  [header]="label || placeholder || 'Content'"
+  [showDefaultCancel]="false"
+  [showDefaultConfirm]="false"
+  [showFooter]="false"
   (visibleChange)="zoomVisible = $event"
-  (onHide)="closeZoom()"
+  (hide)="closeZoom()"
+  (cancel)="closeZoom()"
 >
   @if (contentType === 'json') {
     <div #dialogJsonContainer class="input-area__json-editor input-area__json-editor--dialog"></div>
@@ -133,4 +138,4 @@
       autocomplete="off"
     ></textarea>
   }
-</p-dialog>
+</app-base-popup>

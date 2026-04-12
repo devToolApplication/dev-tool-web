@@ -54,12 +54,16 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
     <p-dialog
       [visible]="visible"
       [modal]="modal"
+      [appendTo]="appendTo"
+      [position]="position"
+      [maskStyleClass]="maskStyleClass"
       [dismissableMask]="dismissableMask"
       [closeOnEscape]="closeOnEscape"
       [draggable]="false"
       [resizable]="false"
+      [maximizable]="maximizable"
       [closable]="showCloseIcon"
-      [styleClass]="'base-popup ' + sizeClass"
+      [styleClass]="resolvedStyleClass"
       [style]="{ width: popupWidth }"
       (visibleChange)="onVisibleChange($event)"
       (onHide)="onHide()"
@@ -83,6 +87,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
         <ng-content></ng-content>
       </div>
 
+      @if (showFooter) {
       <ng-template pTemplate="footer">
         <div class="flex items-center justify-between gap-3">
           <ng-content select="[popup-footer-start]"></ng-content>
@@ -93,6 +98,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
           </div>
         </div>
       </ng-template>
+      }
     </p-dialog>
   `
 })
@@ -101,11 +107,18 @@ export class BasePopupComponent {
   @Input() header = '';
   @Input() subheader = '';
   @Input() size: PopupSize = 'md';
+  @Input() width?: string;
   @Input() loading = false;
   @Input() modal = true;
+  @Input() appendTo: HTMLElement | 'body' | null = null;
+  @Input() maskStyleClass = '';
+  @Input() position: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'topleft' | 'topright' | 'bottomleft' | 'bottomright' = 'center';
   @Input() dismissableMask = false;
   @Input() closeOnEscape = true;
+  @Input() maximizable = false;
   @Input() showCloseIcon = true;
+  @Input() showFooter = true;
+  @Input() styleClass = '';
   @Input() confirmLabel = 'submit';
   @Input() cancelLabel = 'cancel';
   @Input() showDefaultCancel = true;
@@ -121,7 +134,14 @@ export class BasePopupComponent {
     return `base-popup--${this.size}`;
   }
 
+  get resolvedStyleClass(): string {
+    return ['base-popup', this.sizeClass, this.styleClass].filter(Boolean).join(' ');
+  }
+
   get popupWidth(): string {
+    if (this.width) {
+      return this.width;
+    }
     switch (this.size) {
       case 'sm':
         return '28rem';

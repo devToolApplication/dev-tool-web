@@ -20,7 +20,7 @@ import { MCP_TOOL_CONFIG_ROUTES } from '../../mcp-server.constants';
   styleUrl: './mcp-tool-list.component.css'
 })
 export class McpToolListComponent extends BasePagedList<McpToolResponse> implements OnInit {
-  readonly tableConfig: TableConfig = {
+  tableConfig: TableConfig = {
     title: 'mcpTool.viewTitle',
     minWidth: '148rem',
     toolbar: {
@@ -54,12 +54,9 @@ export class McpToolListComponent extends BasePagedList<McpToolResponse> impleme
       { field: 'name', header: 'name', sortable: true, width: '16rem', frozen: true, alignFrozen: 'left' },
       { field: 'category', header: 'category', sortable: true, width: '12rem' },
       { field: 'type', header: 'mcpTool.type', sortable: true, width: '7rem' },
-      { field: 'executorType', header: 'Executor Type', sortable: true, width: '10rem' },
-      { field: 'authType', header: 'Auth Type', sortable: true, width: '9rem' },
       { field: 'tags', header: 'mcpTool.tags', type: 'array', width: '14rem' },
       { field: 'endpoint.method', header: 'mcpTool.method', width: '8rem' },
       { field: 'endpoint.url', header: 'mcpTool.url', width: '24rem' },
-      { field: 'db.queryType', header: 'mcpTool.queryType', width: '10rem' },
       { field: 'db.databaseName', header: 'mcpTool.database', width: '12rem' },
       { field: 'db.collectionName', header: 'mcpTool.collection', width: '14rem' },
       { field: 'enabled', header: 'enabled', type: 'boolean', width: '7rem' },
@@ -127,10 +124,17 @@ export class McpToolListComponent extends BasePagedList<McpToolResponse> impleme
     this.loadingService.track(this.categoryService.getAll()).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (categories) => {
         this.categories = categories;
-        const categoryFilter = this.tableConfig.filters?.find((item) => item.field === 'category');
-        if (categoryFilter) {
-          categoryFilter.options = categories.map((item) => ({ label: item.name || item.code, value: item.code }));
-        }
+        const categoryOptions = categories.map((item) => ({ label: item.name || item.code, value: item.code }));
+        queueMicrotask(() => {
+          this.tableConfig = {
+            ...this.tableConfig,
+            filters: (this.tableConfig.filters ?? []).map((item) =>
+              item.field === 'category'
+                ? { ...item, options: categoryOptions }
+                : item
+            )
+          };
+        });
       },
       error: () => {
         this.toastService.error(this.i18nService.t('mcpCategory.loadListError'));

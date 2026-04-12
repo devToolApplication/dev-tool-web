@@ -1,0 +1,13 @@
+:host ::ng-deep .p-fieldset{
+  background:
+    var(--app-card-highlight),
+    var(--app-card-bg);
+}
+
+:host ::ng-deep .field-group-fieldset .p-fieldset-legend {
+  background:
+    var(--app-card-highlight),
+    var(--app-card-bg-strong);
+
+  margin-bottom: 1rem;
+}

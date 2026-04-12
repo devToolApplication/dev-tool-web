@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
 import { BasePageResponse, BaseResponse } from '../../models/base-response.model';
-import { McpCollectionField, McpToolCreateDto, McpToolResponse, McpToolUpdateDto } from '../../models/mcp-server/mcp-tool.model';
+import { McpToolCreateDto, McpToolResponse, McpToolUpdateDto } from '../../models/mcp-server/mcp-tool.model';
 
 @Injectable({ providedIn: 'root' })
 export class McpToolService {
@@ -62,10 +62,5 @@ export class McpToolService {
 
   getDatabases(): Observable<string[]> {
     return this.http.get<BaseResponse<string[]>>(`${this.apiUrl}/metadata/databases`).pipe(map((res) => res.data ?? []));
-  }
-
-  getFields(databaseName: string, collectionName: string): Observable<McpCollectionField[]> {
-    const params = new HttpParams().set('databaseName', databaseName).set('collectionName', collectionName);
-    return this.http.get<BaseResponse<McpCollectionField[]>>(`${this.apiUrl}/metadata/fields`, { params }).pipe(map((res) => res.data ?? []));
   }
 }
