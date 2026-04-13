@@ -2,3 +2,26 @@
   display: block;
   min-width: 0;
 }
+
+.backtest-replay-grid,
+.backtest-main-column,
+.backtest-side-column,
+.backtest-orders-table-shell {
+  min-width: 0;
+}
+
+.backtest-main-column,
+.backtest-side-column,
+.backtest-orders-table-shell {
+  max-width: 100%;
+}
+
+.backtest-orders-table-shell {
+  overflow: hidden;
+}
+
+:host ::ng-deep .backtest-orders-table-shell app-table {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}

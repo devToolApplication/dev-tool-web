@@ -61,6 +61,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     ],
     pagination: true,
     scrollHeight: '28rem',
+    minWidth: '100%',
     rows: 20,
     rowsPerPageOptions: [10, 20, 50, 100]
   };

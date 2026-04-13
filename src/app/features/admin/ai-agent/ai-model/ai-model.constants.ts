@@ -16,8 +16,6 @@ export const AI_MODEL_INITIAL_VALUE: AiModelCreateDto = {
   url: '',
   apiType: 'OPENAI_COMPATIBLE',
   toolSupportMode: 'FAKE_PROMPT',
-  authType: '',
-  secretKeyRef: '',
   timeoutMs: 30000,
   maxContext: 0,
   metadata: []

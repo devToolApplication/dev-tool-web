@@ -91,8 +91,8 @@
   }
 
   @if (replayPayload) {
-    <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
+    <div class="backtest-replay-grid grid grid-cols-12 gap-4">
+    <div class="backtest-main-column col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
       <app-base-replay-controls
         [currentStep]="replay.currentStepIndex()"
         [totalSteps]="replay.steps().length"
@@ -137,11 +137,13 @@
           </div>
         </ng-template>
 
-        <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
+        <div class="backtest-orders-table-shell">
+          <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
+        </div>
       </p-panel>
     </div>
 
-    <div class="col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">
+    <div class="backtest-side-column col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">
       <app-replay-auto-pause-panel
         [enabled]="replay.autoPauseEnabled()"
         [selectedTypes]="replay.autoPauseEventTypes()"

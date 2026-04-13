@@ -62,6 +62,8 @@
 
 :host ::ng-deep .app-table-scrollable .p-datatable-table-container {
   min-width: 0;
+  max-width: 100%;
+  overflow: auto;
   background: transparent;
 }
 
@@ -74,6 +76,10 @@
 :host ::ng-deep .app-table-scrollable.p-datatable-scrollable .p-datatable-table-container {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+:host ::ng-deep .app-table-scrollable .p-datatable-table {
+  min-width: 100%;
 }
 
 @media (max-width: 767px) {

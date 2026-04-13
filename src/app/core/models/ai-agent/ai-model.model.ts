@@ -23,8 +23,6 @@ export interface AiModelResponse {
   url?: string;
   apiType?: AiApiType;
   toolSupportMode?: ToolSupportMode;
-  authType?: string;
-  secretKeyRef?: string;
   timeoutMs?: number;
   maxContext?: number;
   metadata: AiModelMetadataEntry[];
@@ -41,8 +39,6 @@ export interface AiModelCreateDto {
   url?: string;
   apiType?: AiApiType;
   toolSupportMode?: ToolSupportMode;
-  authType?: string;
-  secretKeyRef?: string;
   timeoutMs?: number;
   maxContext?: number;
   metadata: AiModelMetadataEntry[];
@@ -59,8 +55,6 @@ export interface AiModelUpdateDto {
   url?: string;
   apiType?: AiApiType;
   toolSupportMode?: ToolSupportMode;
-  authType?: string;
-  secretKeyRef?: string;
   timeoutMs?: number;
   maxContext?: number;
   metadata?: AiModelMetadataEntry[];

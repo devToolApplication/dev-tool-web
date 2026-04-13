@@ -58,8 +58,6 @@ export class AiModelFormComponent implements OnInit {
         ]
       },
       { type: 'text', name: 'url', label: 'URL', width: '1/2' },
-      { type: 'text', name: 'authType', label: 'Auth Type', width: '1/2', placeholder: 'BEARER / API_KEY / NONE' },
-      { type: 'text', name: 'secretKeyRef', label: 'Secret Ref', width: '1/2' },
       { type: 'number', name: 'timeoutMs', label: 'Timeout (ms)', width: '1/2' },
       { type: 'number', name: 'maxContext', label: 'Max Context', width: '1/2' },
       { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
@@ -143,8 +141,6 @@ export class AiModelFormComponent implements OnInit {
           url: detail.url ?? '',
           apiType: detail.apiType ?? 'OPENAI_COMPATIBLE',
           toolSupportMode: detail.toolSupportMode ?? 'FAKE_PROMPT',
-          authType: detail.authType ?? '',
-          secretKeyRef: detail.secretKeyRef ?? '',
           timeoutMs: detail.timeoutMs ?? 30000,
           maxContext: detail.maxContext ?? 0,
           metadata: detail.metadata ?? []
