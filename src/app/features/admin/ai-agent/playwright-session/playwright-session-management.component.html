@@ -1,0 +1,199 @@
+<section class="playwright-session-page">
+  <header class="page-hero">
+    <div>
+      <p class="eyebrow">AI Agent Runtime</p>
+      <h2>Playwright Sessions</h2>
+      <p class="hero-description">
+        Quản lý Chrome CDP sessions dùng cho ChatGPT temporary chat. Request mới chỉ lấy session đang rảnh; session treo có thể reset thủ công tại đây.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <button pButton type="button" icon="pi pi-refresh" class="p-button-text" [loading]="loading" (click)="loadSessions()">Refresh</button>
+      <button pButton type="button" icon="pi pi-sync" severity="secondary" [loading]="syncing" (click)="syncDefaultSession()">Sync Default</button>
+      <button pButton type="button" icon="pi pi-plus" severity="success" (click)="openCreate()">New Session</button>
+    </div>
+  </header>
+
+  <section class="stat-grid">
+    <article class="stat-card">
+      <span>Total</span>
+      <strong>{{ totalCount }}</strong>
+    </article>
+    <article class="stat-card idle">
+      <span>Rảnh</span>
+      <strong>{{ idleCount }}</strong>
+    </article>
+    <article class="stat-card busy">
+      <span>Đang xử lý</span>
+      <strong>{{ busyCount }}</strong>
+    </article>
+    <article class="stat-card hung">
+      <span>Treo</span>
+      <strong>{{ hungCount }}</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <p-table
+      [value]="sessions"
+      [loading]="loading"
+      [paginator]="sessions.length > 10"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [rowTrackBy]="trackBySessionId"
+      responsiveLayout="scroll"
+      styleClass="playwright-session-table"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Session</th>
+          <th>Status</th>
+          <th>CDP Endpoint</th>
+          <th>Timeout</th>
+          <th>Current Thread</th>
+          <th>Timeline</th>
+          <th class="action-col">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-session>
+        <tr>
+          <td>
+            <div class="session-title">{{ session.name || session.sessionId }}</div>
+            <code>{{ session.sessionId }}</code>
+          </td>
+          <td>
+            <div class="status-stack">
+              <p-tag [value]="statusLabel(session.status)" [severity]="statusSeverity(session.status)"></p-tag>
+              <span class="enabled-state" [class.off]="session.enabled === false">
+                {{ session.enabled === false ? 'Disabled' : 'Enabled' }}
+              </span>
+              @if (session.lastErrorMessage) {
+                <span class="error-line">{{ session.lastErrorMessage }}</span>
+              }
+            </div>
+          </td>
+          <td>
+            <code class="endpoint">{{ session.cdpEndpoint || '-' }}</code>
+            <div class="temporary-url">{{ session.temporaryChatUrl || '-' }}</div>
+          </td>
+          <td>{{ formatTimeout(session.timeoutMs) }}</td>
+          <td>
+            <div>{{ threadDisplay(session) }}</div>
+            @if (session.currentRequestId) {
+              <code class="request-id">{{ session.currentRequestId }}</code>
+            }
+          </td>
+          <td>
+            <div class="timeline-stack">
+              <span><strong>Leased:</strong> {{ formatDateTime(session.leasedAt) }}</span>
+              <span><strong>Expires:</strong> {{ formatDateTime(session.leaseExpiresAt) }}</span>
+              <span><strong>Reset:</strong> {{ formatDateTime(session.lastResetAt) }}</span>
+            </div>
+          </td>
+          <td class="action-cell">
+            <button pButton type="button" icon="pi pi-pencil" class="p-button-text" severity="info" (click)="openEdit(session)">Edit</button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-replay"
+              class="p-button-text"
+              severity="help"
+              [loading]="isActionLoading(session, 'reset')"
+              [disabled]="session.status === 'BUSY'"
+              (click)="runSessionAction(session, 'reset')"
+            >
+              Reset
+            </button>
+            @if (session.enabled === false || session.status === 'DISABLED') {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-check"
+                class="p-button-text"
+                severity="success"
+                [loading]="isActionLoading(session, 'enable')"
+                (click)="runSessionAction(session, 'enable')"
+              >
+                Enable
+              </button>
+            } @else {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-ban"
+                class="p-button-text"
+                severity="danger"
+                [loading]="isActionLoading(session, 'disable')"
+                [disabled]="session.status === 'BUSY'"
+                (click)="runSessionAction(session, 'disable')"
+              >
+                Disable
+              </button>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              Chưa có Playwright session. Bấm <strong>Sync Default</strong> để tạo session từ env hoặc <strong>New Session</strong> để thêm CDP endpoint mới.
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</section>
+
+<app-base-popup
+  [visible]="formVisible"
+  [header]="editMode ? 'Edit Playwright Session' : 'New Playwright Session'"
+  [subheader]="editMode ? (selectedSession?.sessionId || '') : 'Add a Chrome CDP endpoint to the session pool'"
+  [size]="'lg'"
+  [loading]="saving"
+  [showDefaultCancel]="false"
+  [showDefaultConfirm]="false"
+  (visibleChange)="onFormVisibleChange($event)"
+  (cancel)="closeForm()"
+>
+  <form class="session-form" #sessionForm="ngForm" (ngSubmit)="saveSession()">
+    <label>
+      <span>Session ID</span>
+      <input pInputText name="sessionId" [(ngModel)]="formModel.sessionId" [disabled]="editMode" placeholder="chrome-1" required />
+    </label>
+
+    <label>
+      <span>Name</span>
+      <input pInputText name="name" [(ngModel)]="formModel.name" placeholder="Chrome CDP 1" />
+    </label>
+
+    <label class="full">
+      <span>CDP Endpoint</span>
+      <input pInputText name="cdpEndpoint" [(ngModel)]="formModel.cdpEndpoint" placeholder="http://127.0.0.1:9222" required />
+    </label>
+
+    <label class="full">
+      <span>Temporary Chat URL</span>
+      <input pInputText name="temporaryChatUrl" [(ngModel)]="formModel.temporaryChatUrl" placeholder="https://chatgpt.com/?temporary-chat=true" />
+    </label>
+
+    <label>
+      <span>Lease Timeout (ms)</span>
+      <input pInputText type="number" min="1000" name="timeoutMs" [(ngModel)]="formModel.timeoutMs" placeholder="180000" />
+    </label>
+
+    <label class="switch-field">
+      <span>Enabled</span>
+      <p-toggleswitch name="enabled" [(ngModel)]="formModel.enabled"></p-toggleswitch>
+    </label>
+  </form>
+
+  <div popup-footer>
+    <button pButton type="button" class="p-button-text" [disabled]="saving" (click)="closeForm()">Cancel</button>
+    <button pButton type="button" icon="pi pi-save" [loading]="saving" (click)="saveSession()">Save</button>
+  </div>
+</app-base-popup>
