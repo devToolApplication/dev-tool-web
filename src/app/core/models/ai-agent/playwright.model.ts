@@ -120,3 +120,34 @@ export interface PlaywrightChatGptSendResponse {
   networkCallCount?: number;
   networkCalls?: PlaywrightObservedNetworkCallResponse[];
 }
+
+export type PlaywrightSessionStatus = 'IDLE' | 'BUSY' | 'HUNG' | 'DISABLED';
+
+export interface PlaywrightSessionResponse {
+  id?: string;
+  sessionId: string;
+  name?: string;
+  cdpEndpoint?: string;
+  temporaryChatUrl?: string;
+  status?: PlaywrightSessionStatus;
+  enabled?: boolean;
+  timeoutMs?: number;
+  currentRequestId?: string;
+  currentThreadId?: number;
+  currentThreadName?: string;
+  leasedAt?: string;
+  leaseExpiresAt?: string;
+  lastUsedAt?: string;
+  lastResetAt?: string;
+  hungAt?: string;
+  lastErrorMessage?: string;
+}
+
+export interface PlaywrightSessionUpsertRequest {
+  sessionId: string;
+  name?: string;
+  cdpEndpoint: string;
+  temporaryChatUrl?: string;
+  enabled?: boolean;
+  timeoutMs?: number;
+}

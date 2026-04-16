@@ -8,7 +8,9 @@ import {
   PlaywrightChatGptSendRequest,
   PlaywrightChatGptSendResponse,
   PlaywrightOpenAiChatCompletionRequest,
-  PlaywrightOpenAiChatCompletionResponse
+  PlaywrightOpenAiChatCompletionResponse,
+  PlaywrightSessionResponse,
+  PlaywrightSessionUpsertRequest
 } from '../../models/ai-agent/playwright.model';
 
 @Injectable({ providedIn: 'root' })
@@ -31,6 +33,34 @@ export class PlaywrightAdminService {
     return this.http
       .post<BaseResponse<PlaywrightOpenAiChatCompletionResponse>>(`${this.apiUrl}/chat/completions`, payload)
       .pipe(map((res) => this.mapOpenAiResponse(res.data)));
+  }
+
+  listSessions(): Observable<PlaywrightSessionResponse[]> {
+    return this.http.get<BaseResponse<PlaywrightSessionResponse[]>>(`${this.apiUrl}/sessions`).pipe(map((res) => res.data ?? []));
+  }
+
+  createSession(payload: PlaywrightSessionUpsertRequest): Observable<PlaywrightSessionResponse> {
+    return this.http.post<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions`, payload).pipe(map((res) => res.data));
+  }
+
+  updateSession(sessionId: string, payload: PlaywrightSessionUpsertRequest): Observable<PlaywrightSessionResponse> {
+    return this.http.put<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions/${sessionId}`, payload).pipe(map((res) => res.data));
+  }
+
+  syncDefaultSession(): Observable<PlaywrightSessionResponse> {
+    return this.http.post<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions/sync-default`, {}).pipe(map((res) => res.data));
+  }
+
+  resetSession(sessionId: string): Observable<PlaywrightSessionResponse> {
+    return this.http.post<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions/${sessionId}/reset`, {}).pipe(map((res) => res.data));
+  }
+
+  enableSession(sessionId: string): Observable<PlaywrightSessionResponse> {
+    return this.http.post<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions/${sessionId}/enable`, {}).pipe(map((res) => res.data));
+  }
+
+  disableSession(sessionId: string): Observable<PlaywrightSessionResponse> {
+    return this.http.post<BaseResponse<PlaywrightSessionResponse>>(`${this.apiUrl}/sessions/${sessionId}/disable`, {}).pipe(map((res) => res.data));
   }
 
   private mapChatGptSendResponse(response: PlaywrightChatGptSendResponse): PlaywrightChatGptSendResponse {

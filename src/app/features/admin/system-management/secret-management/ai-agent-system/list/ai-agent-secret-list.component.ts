@@ -30,7 +30,6 @@ export class AiAgentSecretListComponent extends BasePagedList<AiAgentSecretRespo
       { field: 'category', header: 'Category', sortable: true },
       { field: 'name', header: 'Name', sortable: true },
       { field: 'code', header: 'Code', sortable: true },
-      { field: 'provider', header: 'Provider', sortable: true },
       { field: 'enabled', header: 'Enabled', type: 'boolean' },
       { field: 'status', header: 'Status' },
       { field: 'description', header: 'Description' },

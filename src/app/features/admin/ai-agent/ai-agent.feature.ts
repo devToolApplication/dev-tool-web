@@ -7,6 +7,7 @@ import { ExecutionPolicyFormComponent } from './execution-policy/form/execution-
 import { ExecutionPolicyListComponent } from './execution-policy/list/execution-policy-list.component';
 import { ExecutionTraceListComponent } from './execution-trace/list/execution-trace-list.component';
 import { AiAgentPlaygroundComponent } from './playground/ai-agent-playground.component';
+import { PlaywrightSessionManagementComponent } from './playwright-session/playwright-session-management.component';
 import { PromptTemplateFormComponent } from './prompt-template/form/prompt-template-form.component';
 import { PromptTemplateListComponent } from './prompt-template/list/prompt-template-list.component';
 
@@ -20,7 +21,8 @@ export const AI_AGENT_FEATURE_COMPONENTS = [
   ExecutionPolicyListComponent,
   ExecutionPolicyFormComponent,
   ExecutionTraceListComponent,
-  AiAgentPlaygroundComponent
+  AiAgentPlaygroundComponent,
+  PlaywrightSessionManagementComponent
 ];
 
 export const aiAgentAdminRoutes: Routes = [
@@ -63,6 +65,10 @@ export const aiAgentAdminRoutes: Routes = [
   {
     path: 'admin/ai-agent/playground',
     component: AiAgentPlaygroundComponent
+  },
+  {
+    path: 'admin/ai-agent/playwright-sessions',
+    component: PlaywrightSessionManagementComponent
   },
   {
     path: 'admin/ai-agent/system-ask',

@@ -7,9 +7,7 @@ export interface AiAgentSecretResponse {
   name: string;
   code: string;
   secretValue: string;
-  provider?: string;
   scopeType?: ScopeType;
-  scopeRef?: string;
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;
@@ -21,9 +19,7 @@ export interface AiAgentSecretCreateDto {
   name: string;
   code: string;
   secretValue: string;
-  provider?: string;
   scopeType?: ScopeType;
-  scopeRef?: string;
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;
@@ -35,9 +31,7 @@ export interface AiAgentSecretUpdateDto {
   name?: string;
   code?: string;
   secretValue?: string;
-  provider?: string;
   scopeType?: ScopeType;
-  scopeRef?: string;
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;

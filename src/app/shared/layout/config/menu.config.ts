@@ -16,6 +16,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
           { label: 'Prompt Templates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
           { label: 'Execution Policies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
           { label: 'Execution Traces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
+          { label: 'Playwright Sessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' },
           {
             label: 'layout.menu.mcpServerManagement',
             icon: 'pi pi-wrench',
