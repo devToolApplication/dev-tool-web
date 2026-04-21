@@ -1,0 +1,6 @@
+<div class="dashboard-chart-shell">
+  <div #chartRef class="dashboard-chart-canvas"></div>
+  @if (!hasData) {
+    <div class="dashboard-chart-empty">{{ 'dashboard.noData' | translateContent }}</div>
+  }
+</div>

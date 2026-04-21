@@ -53,7 +53,8 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
             label: 'layout.menu.debugTools',
             icon: 'pi pi-bug',
             items: [
-              { label: 'layout.menu.checkChatGpt', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' }
+              { label: 'layout.menu.checkChatGpt', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' },
+              { label: 'layout.menu.fileUpload', icon: 'pi pi-upload', routerLink: '/admin/system-management/file-upload' }
             ]
           }
         ]
@@ -61,7 +62,10 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
       {
         label: 'layout.menu.fileStorageManagement',
         icon: 'pi pi-cloud-upload',
-        items: [{ label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' }]
+        items: [
+          { label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' },
+          { label: 'Uploaded Files', icon: 'pi pi-file', routerLink: '/admin/upload-storage/files' }
+        ]
       },
       {
         label: 'layout.menu.tradeBotManagement',

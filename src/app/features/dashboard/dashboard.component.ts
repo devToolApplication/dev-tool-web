@@ -1,11 +1,7 @@
-import { Component } from '@angular/core';
-import { DashboardItem, DashboardTabType } from './dashboard.models';
-
-interface DashboardMetric {
-  label: string;
-  value: string;
-  change: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { catchError, finalize, of } from 'rxjs';
+import { DashboardActivity, DashboardOverview, DashboardTabType } from './dashboard.models';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,45 +9,43 @@ interface DashboardMetric {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   activeTab: DashboardTabType = 'ai-agent';
-  loading = false;
-  items: DashboardItem[] = [];
 
-  readonly metrics: DashboardMetric[] = [
-    { label: 'dashboard.metric.requestsToday', value: '12,840', change: '+18%' },
-    { label: 'dashboard.metric.runningBots', value: '27', change: '+4' },
-    { label: 'dashboard.metric.successRate', value: '99.2%', change: '+0.7%' },
-    { label: 'dashboard.metric.storageUsed', value: '1.8 TB', change: '+120 GB' }
-  ];
+  readonly tabs: DashboardTabType[] = ['ai-agent', 'trade-bot', 'file-storage'];
 
-  readonly activities = [
-    'dashboard.activity.agentDeploy',
-    'dashboard.activity.tradeBot',
-    'dashboard.activity.fileSync',
-    'dashboard.activity.accessWarning'
-  ];
-
-  private readonly mockItemsByTab: Record<DashboardTabType, DashboardItem[]> = {
-    'ai-agent': [
-      this.createItem(1, 'Intent Classifier', 'Xử lý 3.2K prompt/giờ, độ chính xác 97.8%', 'agent'),
-      this.createItem(2, 'RAG Assistant', 'Truy xuất dữ liệu nội bộ với độ trễ trung bình 210ms', 'knowledge'),
-      this.createItem(3, 'Support Copilot', 'Đề xuất phản hồi tự động cho 62 phiên hỗ trợ', 'support')
-    ],
-    'trade-bot': [
-      this.createItem(4, 'BTC Trend Rider', 'P/L 24h: +2.9%, drawdown 1.1%', 'trade-btc'),
-      this.createItem(5, 'ETH Mean Revert', 'P/L 24h: +1.3%, 14 lệnh đã đóng', 'trade-eth'),
-      this.createItem(6, 'SOL Breakout', 'P/L 24h: +4.7%, volatility cao', 'trade-sol')
-    ],
-    'file-storage': [
-      this.createItem(7, 'Cluster AP-SG', 'Đã dùng 73%, tốc độ đọc 420MB/s', 'storage-ap'),
-      this.createItem(8, 'Cluster EU-DE', 'Đã dùng 48%, replication 3 bản sao', 'storage-eu'),
-      this.createItem(9, 'Cluster US-VA', 'Đã dùng 66%, chưa có cảnh báo lỗi', 'storage-us')
-    ]
+  readonly overviews: Partial<Record<DashboardTabType, DashboardOverview>> = {};
+  readonly loadingState: Record<DashboardTabType, boolean> = {
+    'ai-agent': false,
+    'trade-bot': false,
+    'file-storage': false
+  };
+  readonly errorState: Record<DashboardTabType, string> = {
+    'ai-agent': '',
+    'trade-bot': '',
+    'file-storage': ''
   };
 
-  constructor() {
-    this.items = this.mockItemsByTab['ai-agent'];
+  constructor(private readonly dashboardService: DashboardService) {}
+
+  ngOnInit(): void {
+    this.tabs.forEach((tab) => this.loadOverview(tab));
+  }
+
+  get activeOverview(): DashboardOverview | null {
+    return this.overviews[this.activeTab] ?? null;
+  }
+
+  get activeActivities(): DashboardActivity[] {
+    return this.activeOverview?.activities ?? [];
+  }
+
+  get loading(): boolean {
+    return this.loadingState[this.activeTab];
+  }
+
+  get activeError(): string {
+    return this.errorState[this.activeTab];
   }
 
   onTabChange(value: string | number | undefined): void {
@@ -61,38 +55,44 @@ export class DashboardComponent {
 
     const nextTab = value as DashboardTabType;
     this.activeTab = nextTab;
-    this.loading = true;
-
-    setTimeout(() => {
-      this.items = this.mockItemsByTab[nextTab];
-      this.loading = false;
-    }, 250);
+    if (!this.overviews[nextTab] && !this.loadingState[nextTab]) {
+      this.loadOverview(nextTab);
+    }
   }
 
-  private createItem(id: number, title: string, description: string, seed: string): DashboardItem {
-    return {
-      id,
-      title,
-      description,
-      imageUrl: this.buildMockImage(seed, title)
-    };
+  refreshActive(): void {
+    this.loadOverview(this.activeTab);
   }
 
-  private buildMockImage(seed: string, title: string): string {
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'>
-      <defs>
-        <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stop-color='#2563eb' />
-          <stop offset='100%' stop-color='#7c3aed' />
-        </linearGradient>
-      </defs>
-      <rect width='640' height='360' fill='url(#g)' />
-      <circle cx='560' cy='80' r='66' fill='rgba(255,255,255,0.15)' />
-      <circle cx='96' cy='300' r='90' fill='rgba(255,255,255,0.12)' />
-      <text x='32' y='54' fill='white' font-size='22' font-family='Inter,Arial,sans-serif' font-weight='700'>${title}</text>
-      <text x='32' y='86' fill='rgba(255,255,255,0.9)' font-size='15' font-family='Inter,Arial,sans-serif'>Mock dashboard card • ${seed}</text>
-    </svg>`;
+  severityClass(severity: string | undefined): string {
+    return `is-${severity || 'info'}`;
+  }
 
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  formatTimestamp(value: string | undefined): string {
+    if (!value) {
+      return '';
+    }
+    return new Date(value).toLocaleString();
+  }
+
+  private loadOverview(tab: DashboardTabType): void {
+    this.loadingState[tab] = true;
+    this.errorState[tab] = '';
+    this.dashboardService
+      .getOverview(tab)
+      .pipe(
+        catchError(() => {
+          this.errorState[tab] = 'dashboard.loadError';
+          return of(null);
+        }),
+        finalize(() => {
+          this.loadingState[tab] = false;
+        })
+      )
+      .subscribe((overview) => {
+        if (overview) {
+          this.overviews[tab] = overview;
+        }
+      });
   }
 }

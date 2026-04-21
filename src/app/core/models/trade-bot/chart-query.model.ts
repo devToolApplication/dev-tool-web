@@ -32,6 +32,7 @@ export interface TradeBotAreaData {
 export interface TradeBotPointData {
   name?: string;
   color?: string;
+  shape?: string;
   time: number;
   value: number;
 }

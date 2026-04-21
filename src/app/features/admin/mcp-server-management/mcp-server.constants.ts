@@ -9,7 +9,8 @@ export const MCP_CATEGORY_INITIAL_VALUE: McpCategoryCreateDto = {
   name: '',
   code: '',
   description: '',
-  status: 'ACTIVE'
+  status: 'ACTIVE',
+  metadata: []
 };
 
 export const MCP_TOOL_INITIAL_VALUE: McpToolCreateDto = {
@@ -32,7 +33,7 @@ export const MCP_TOOL_INITIAL_VALUE: McpToolCreateDto = {
     method: 'GET',
     url: '',
     params: {},
-    headers: {},
+    headers: [],
     body: ''
   },
   db: {

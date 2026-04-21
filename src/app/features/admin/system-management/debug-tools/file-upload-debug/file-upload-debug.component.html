@@ -1,0 +1,92 @@
+<section class="file-upload-debug-page">
+  <div class="page-header border-default bg-surface">
+    <div>
+      <h2>Debug File Upload</h2>
+      <p>POST /file-mcrs/v1/upload</p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      icon="pi pi-refresh"
+      label="Refresh Storage"
+      [loading]="loadingStorages"
+      [disabled]="loadingStorages || uploading"
+      (click)="loadStorages()"
+    ></button>
+  </div>
+
+  <section class="upload-panel border-default bg-surface">
+    <div class="field-grid">
+      <label class="field">
+        <span>Storage</span>
+        <p-select
+          [(ngModel)]="selectedStorageId"
+          [options]="storageOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Default PINATA storage"
+          [showClear]="true"
+          [loading]="loadingStorages"
+          class="w-full"
+        ></p-select>
+      </label>
+
+      <label class="field">
+        <span>File name override</span>
+        <input pInputText [(ngModel)]="fileName" placeholder="Leave blank to use selected file name" />
+      </label>
+
+      <label class="field full-width">
+        <span>Metadata JSON</span>
+        <textarea pTextarea [(ngModel)]="metadataJson" rows="6" spellcheck="false"></textarea>
+      </label>
+    </div>
+
+    <p-fileupload
+      mode="advanced"
+      [customUpload]="true"
+      [multiple]="false"
+      [maxFileSize]="104857600"
+      [disabled]="uploading"
+      chooseLabel="Choose"
+      uploadLabel="Upload"
+      cancelLabel="Clear"
+      (uploadHandler)="onUpload($event)"
+    ></p-fileupload>
+  </section>
+
+  @if (uploadError) {
+    <section class="result-panel border-default bg-surface error">
+      {{ uploadError }}
+    </section>
+  }
+
+  @if (uploadResult) {
+    <section class="result-panel border-default bg-surface">
+      <div class="result-header">
+        <h3>Upload Result</h3>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-external-link"
+          label="Open"
+          [disabled]="!uploadResult.fileUrl"
+          (click)="openUploadedFile()"
+        ></button>
+      </div>
+
+      <div class="result-grid">
+        <div><strong>ID:</strong> {{ uploadResult.id || '-' }}</div>
+        <div><strong>Storage:</strong> {{ uploadResult.storageId || '-' }}</div>
+        <div><strong>File:</strong> {{ uploadResult.fileName || '-' }}</div>
+        <div><strong>MIME:</strong> {{ uploadResult.mimeType || '-' }}</div>
+        <div class="full-width"><strong>URL:</strong> {{ uploadResult.fileUrl || '-' }}</div>
+        <div class="full-width">
+          <strong>Raw:</strong>
+          <pre>{{ uploadResult | json }}</pre>
+        </div>
+      </div>
+    </section>
+  }
+</section>

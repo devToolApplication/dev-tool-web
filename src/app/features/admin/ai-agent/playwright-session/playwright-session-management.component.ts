@@ -73,7 +73,9 @@ export class PlaywrightSessionManagementComponent implements OnInit {
       cdpEndpoint: session.cdpEndpoint || '',
       temporaryChatUrl: session.temporaryChatUrl || DEFAULT_TEMPORARY_CHAT_URL,
       enabled: session.enabled !== false,
-      timeoutMs: session.timeoutMs || 180000
+      timeoutMs: session.timeoutMs || 180000,
+      minIdleBeforeReuseMs: session.minIdleBeforeReuseMs ?? 15000,
+      globalMinStartIntervalMs: session.globalMinStartIntervalMs ?? 5000
     };
     this.formVisible = true;
   }
@@ -256,13 +258,17 @@ export class PlaywrightSessionManagementComponent implements OnInit {
     }
 
     const timeoutMs = Number(this.formModel.timeoutMs || 0);
+    const minIdleBeforeReuseMs = Number(this.formModel.minIdleBeforeReuseMs ?? 15000);
+    const globalMinStartIntervalMs = Number(this.formModel.globalMinStartIntervalMs ?? 5000);
     return {
       sessionId,
       name: this.formModel.name?.trim() || sessionId,
       cdpEndpoint,
       temporaryChatUrl: this.formModel.temporaryChatUrl?.trim() || DEFAULT_TEMPORARY_CHAT_URL,
       enabled: this.formModel.enabled !== false,
-      timeoutMs: timeoutMs > 0 ? timeoutMs : 180000
+      timeoutMs: timeoutMs > 0 ? timeoutMs : 180000,
+      minIdleBeforeReuseMs: minIdleBeforeReuseMs >= 0 ? minIdleBeforeReuseMs : 15000,
+      globalMinStartIntervalMs: globalMinStartIntervalMs >= 0 ? globalMinStartIntervalMs : 5000
     };
   }
 
@@ -273,7 +279,9 @@ export class PlaywrightSessionManagementComponent implements OnInit {
       cdpEndpoint: '',
       temporaryChatUrl: DEFAULT_TEMPORARY_CHAT_URL,
       enabled: true,
-      timeoutMs: 180000
+      timeoutMs: 180000,
+      minIdleBeforeReuseMs: 15000,
+      globalMinStartIntervalMs: 5000
     };
   }
 

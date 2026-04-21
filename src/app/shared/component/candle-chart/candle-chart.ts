@@ -40,6 +40,7 @@ export interface ChartBoxArea {
 export interface ChartPoint {
   name: string;
   color: string;
+  shape?: string;
   startTime: string;
   price: number;
 }
@@ -248,6 +249,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
           name: point.name,
           type: 'scatter' as const,
           data: [{ value: [point.startTime, point.price], itemStyle: { color: point.color } }],
+          symbol: this.resolvePointSymbol(point.shape),
+          symbolRotate: this.resolvePointRotation(point.shape),
           symbolSize: 10,
         }))
       : [];
@@ -401,5 +404,17 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       },
       true,
     );
+  }
+
+  private resolvePointSymbol(shape?: string): string {
+    const normalized = String(shape ?? '').trim();
+    if (normalized === 'arrowUp' || normalized === 'arrowDown') {
+      return 'arrow';
+    }
+    return normalized || 'circle';
+  }
+
+  private resolvePointRotation(shape?: string): number {
+    return String(shape ?? '').trim() === 'arrowDown' ? 180 : 0;
   }
 }

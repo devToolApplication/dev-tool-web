@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
-import { McpCategoryCreateDto, McpCategoryResponse, McpCategoryUpdateDto } from '../../../../../core/models/mcp-server/mcp-tool.model';
+import { McpCategoryCreateDto, McpCategoryResponse, McpCategoryUpdateDto, McpMetadataEntry } from '../../../../../core/models/mcp-server/mcp-tool.model';
 import { McpCategoryService } from '../../../../../core/services/ai-agent-service/mcp-category.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
@@ -23,6 +23,17 @@ export class McpCategoryFormComponent implements OnInit {
       { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('mcpCategory.nameRequired')] },
       { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('mcpCategory.codeRequired')] },
       { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
+      {
+        type: 'secret-metadata',
+        name: 'metadata',
+        label: 'mcpCategory.metadata',
+        width: 'full',
+        service: 'ai-agent-mcrs',
+        addButtonLabel: 'mcpCategory.addMetadata',
+        keyPlaceholder: 'mcpCategory.metadataKeyPlaceholder',
+        valuePlaceholder: 'mcpCategory.metadataValuePlaceholder',
+        secretPlaceholder: 'mcpCategory.metadataSecretPlaceholder'
+      },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };
@@ -53,7 +64,14 @@ export class McpCategoryFormComponent implements OnInit {
   }
 
   onSubmitForm(model: McpCategoryCreateDto): void {
-    const request$ = this.editId ? this.service.update(this.editId, model as McpCategoryUpdateDto) : this.service.create(model);
+    const payload: McpCategoryCreateDto = {
+      ...model,
+      name: (model.name ?? '').trim(),
+      code: (model.code ?? '').trim(),
+      description: (model.description ?? '').trim(),
+      metadata: this.normalizeMetadataEntries(model.metadata)
+    };
+    const request$ = this.editId ? this.service.update(this.editId, payload as McpCategoryUpdateDto) : this.service.create(payload);
     this.loading = true;
     this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
       next: () => {
@@ -87,7 +105,8 @@ export class McpCategoryFormComponent implements OnInit {
           name: detail.name,
           code: detail.code,
           description: detail.description ?? '',
-          status: detail.status ?? 'ACTIVE'
+          status: detail.status ?? 'ACTIVE',
+          metadata: this.normalizeMetadataEntries(detail.metadata)
         };
         this.rerenderForm();
       },
@@ -96,5 +115,26 @@ export class McpCategoryFormComponent implements OnInit {
         void this.router.navigate([MCP_TOOL_CONFIG_ROUTES.categoryList]);
       }
     });
+  }
+
+  private normalizeMetadataEntries(value: unknown): McpMetadataEntry[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.reduce<McpMetadataEntry[]>((acc, item) => {
+      const record = item && typeof item === 'object' && !Array.isArray(item) ? (item as Record<string, unknown>) : {};
+      const key = String(record['key'] ?? '').trim();
+      const metadataValue = String(record['value'] ?? '').trim();
+      if (!key || !metadataValue) {
+        return acc;
+      }
+      acc.push({
+        key,
+        type: record['type'] === 'SECRET' ? 'SECRET' : 'CONFIG',
+        value: metadataValue
+      });
+      return acc;
+    }, []);
   }
 }

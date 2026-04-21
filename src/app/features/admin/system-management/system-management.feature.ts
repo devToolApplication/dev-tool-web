@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { FileUploadDebugComponent } from './debug-tools/file-upload-debug/file-upload-debug.component';
 import { AiAgentConfigFormComponent } from './general-config/ai-agent-system/form/ai-agent-config-form.component';
 import { AiAgentConfigListComponent } from './general-config/ai-agent-system/list/ai-agent-config-list.component';
 import { AiAgentAskComponent } from './general-config/playwright-cdp-test/ai-agent-ask.component';
@@ -26,7 +27,8 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentConfigFormComponent,
   TradeBotConfigListComponent,
   TradeBotConfigFormComponent,
-  AiAgentAskComponent
+  AiAgentAskComponent,
+  FileUploadDebugComponent
 ];
 
 export const systemManagementRoutes: Routes = [
@@ -73,6 +75,10 @@ export const systemManagementRoutes: Routes = [
   {
     path: 'admin/system-management/system-ask',
     component: AiAgentAskComponent
+  },
+  {
+    path: 'admin/system-management/file-upload',
+    component: FileUploadDebugComponent
   },
   {
     path: 'admin/system-management/trade-bot-configs',

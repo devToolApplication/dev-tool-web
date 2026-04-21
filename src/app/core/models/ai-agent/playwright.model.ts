@@ -132,6 +132,8 @@ export interface PlaywrightSessionResponse {
   status?: PlaywrightSessionStatus;
   enabled?: boolean;
   timeoutMs?: number;
+  minIdleBeforeReuseMs?: number;
+  globalMinStartIntervalMs?: number;
   currentRequestId?: string;
   currentThreadId?: number;
   currentThreadName?: string;
@@ -150,4 +152,6 @@ export interface PlaywrightSessionUpsertRequest {
   temporaryChatUrl?: string;
   enabled?: boolean;
   timeoutMs?: number;
+  minIdleBeforeReuseMs?: number;
+  globalMinStartIntervalMs?: number;
 }

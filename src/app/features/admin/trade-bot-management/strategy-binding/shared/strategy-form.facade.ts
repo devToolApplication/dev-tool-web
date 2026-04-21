@@ -27,7 +27,6 @@ export interface StrategyReferenceBundle {
   strategies: StrategyResponse[];
   rules: StrategyRuleResponse[];
   ruleDefinitions: TradeBotConfigResponse[];
-  ruleConfigSchemas: TradeBotConfigResponse[];
   definitions: TradeBotConfigResponse[];
 }
 
@@ -74,16 +73,14 @@ export class StrategyFormFacade {
       strategies: this.referenceDataService.getStrategies(),
       rules: this.strategyRuleService.getAll({ status: 'ACTIVE' }),
       ruleDefinitions: this.tradeBotConfigService.getAll({ category: 'RULE_DEFINITIONS' }),
-      ruleConfigSchemas: this.tradeBotConfigService.getAll({ category: 'RULE_CONFIG_SCHEMAS' }),
       definitions: this.tradeBotConfigService.getAll({ category: 'STRATEGY_DEFINITIONS' })
     }).pipe(
-      map(({ exchanges, symbols, strategies, rules, ruleDefinitions, ruleConfigSchemas, definitions }) => ({
+      map(({ exchanges, symbols, strategies, rules, ruleDefinitions, definitions }) => ({
         exchanges,
         symbols,
         strategies,
         rules,
         ruleDefinitions,
-        ruleConfigSchemas,
         definitions
       }))
     );

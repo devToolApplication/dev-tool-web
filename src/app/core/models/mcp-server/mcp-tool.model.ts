@@ -3,6 +3,13 @@ import { UploadStorageStatus } from '../file-storage/upload-storage.model';
 export type McpToolCategory = string;
 export type McpToolType = 'endpoint' | 'db';
 export type McpEndpointMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type McpMetadataType = 'CONFIG' | 'SECRET';
+
+export interface McpMetadataEntry {
+  key: string;
+  type: McpMetadataType;
+  value: string;
+}
 
 export interface McpCategoryResponse {
   id: string;
@@ -10,6 +17,7 @@ export interface McpCategoryResponse {
   code: string;
   description?: string;
   status?: string;
+  metadata?: McpMetadataEntry[];
 }
 
 export interface McpCategoryCreateDto {
@@ -17,6 +25,7 @@ export interface McpCategoryCreateDto {
   code: string;
   description?: string;
   status: string;
+  metadata?: McpMetadataEntry[];
 }
 
 export interface McpCategoryUpdateDto {
@@ -24,13 +33,14 @@ export interface McpCategoryUpdateDto {
   code?: string;
   description?: string;
   status?: string;
+  metadata?: McpMetadataEntry[];
 }
 
 export interface McpEndpointConfig {
   method: McpEndpointMethod;
   url: string;
   params: Record<string, string>;
-  headers: Record<string, string>;
+  headers: McpMetadataEntry[];
   body: string;
 }
 

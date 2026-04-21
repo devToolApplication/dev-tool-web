@@ -1,55 +1,88 @@
-.dashboard-grid {
+.dashboard-detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.dashboard-card {
-  position: relative;
+.dashboard-panel {
   border: 1px solid var(--app-border);
-  border-radius: 1rem;
-  overflow: hidden;
+  border-radius: 0.5rem;
   background: var(--app-card-bg);
-  box-shadow: var(--app-shadow-lg);
-  backdrop-filter: blur(12px);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  box-shadow: var(--app-shadow-md);
+  overflow: hidden;
 }
 
-.dashboard-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--app-card-highlight);
-  pointer-events: none;
+.dashboard-panel header {
+  min-height: 48px;
+  padding: 0.9rem 1rem 0;
 }
 
-.dashboard-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--app-border-strong);
-  box-shadow: var(--app-shadow-xl);
-}
-
-.dashboard-card img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  display: block;
-  filter: saturate(1.1) brightness(0.92);
-}
-
-.dashboard-card h3 {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  color: var(--app-text);
-}
-
-.dashboard-card p {
+.dashboard-panel h3 {
   margin: 0;
-  color: var(--app-text-muted);
+  color: var(--app-text);
+  font-size: 0.98rem;
 }
 
-.dashboard-card div {
-  position: relative;
-  z-index: 1;
-  padding: 0.95rem;
+.dashboard-panel--resources {
+  grid-column: 1 / -1;
+}
+
+.resource-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.resource-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 68px;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: var(--app-card-bg-strong);
+}
+
+.resource-row strong,
+.resource-row span {
+  display: block;
+}
+
+.resource-row strong {
+  color: var(--app-text);
+  font-size: 0.94rem;
+}
+
+.resource-row span {
+  margin-top: 0.25rem;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+}
+
+.resource-row em {
+  color: var(--app-text);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.state-message {
+  border: 1px dashed var(--app-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background: var(--app-card-bg);
+  color: var(--app-text-soft);
+}
+
+.state-message--error {
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #dc2626;
+}
+
+@media (max-width: 900px) {
+  .dashboard-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }

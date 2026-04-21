@@ -51,6 +51,7 @@
           <th>Status</th>
           <th>CDP Endpoint</th>
           <th>Timeout</th>
+          <th>Throttle</th>
           <th>Current Thread</th>
           <th>Timeline</th>
           <th class="action-col">Actions</th>
@@ -79,6 +80,12 @@
             <div class="temporary-url">{{ session.temporaryChatUrl || '-' }}</div>
           </td>
           <td>{{ formatTimeout(session.timeoutMs) }}</td>
+          <td>
+            <div class="timeline-stack">
+              <span><strong>Reuse:</strong> {{ formatTimeout(session.minIdleBeforeReuseMs) }}</span>
+              <span><strong>Global:</strong> {{ formatTimeout(session.globalMinStartIntervalMs) }}</span>
+            </div>
+          </td>
           <td>
             <div>{{ threadDisplay(session) }}</div>
             @if (session.currentRequestId) {
@@ -138,7 +145,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="7">
+          <td colspan="8">
             <div class="empty-state">
               Chưa có Playwright session. Bấm <strong>Sync Default</strong> để tạo session từ env hoặc <strong>New Session</strong> để thêm CDP endpoint mới.
             </div>
@@ -184,6 +191,16 @@
     <label>
       <span>Lease Timeout (ms)</span>
       <input pInputText type="number" min="1000" name="timeoutMs" [(ngModel)]="formModel.timeoutMs" placeholder="180000" />
+    </label>
+
+    <label>
+      <span>Min Idle Before Reuse (ms)</span>
+      <input pInputText type="number" min="0" name="minIdleBeforeReuseMs" [(ngModel)]="formModel.minIdleBeforeReuseMs" placeholder="15000" />
+    </label>
+
+    <label>
+      <span>Global Start Interval (ms)</span>
+      <input pInputText type="number" min="0" name="globalMinStartIntervalMs" [(ngModel)]="formModel.globalMinStartIntervalMs" placeholder="5000" />
     </label>
 
     <label class="switch-field">

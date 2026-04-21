@@ -53,7 +53,6 @@ export class AiModelFormComponent implements OnInit {
         width: '1/2',
         options: [
           { label: 'NATIVE', value: 'NATIVE' },
-          { label: 'FAKE_PROMPT', value: 'FAKE_PROMPT' },
           { label: 'NONE', value: 'NONE' }
         ]
       },
@@ -140,7 +139,7 @@ export class AiModelFormComponent implements OnInit {
           defaultActive: detail.defaultActive,
           url: detail.url ?? '',
           apiType: detail.apiType ?? 'OPENAI_COMPATIBLE',
-          toolSupportMode: detail.toolSupportMode ?? 'FAKE_PROMPT',
+          toolSupportMode: detail.toolSupportMode ?? 'NATIVE',
           timeoutMs: detail.timeoutMs ?? 30000,
           maxContext: detail.maxContext ?? 0,
           metadata: detail.metadata ?? []

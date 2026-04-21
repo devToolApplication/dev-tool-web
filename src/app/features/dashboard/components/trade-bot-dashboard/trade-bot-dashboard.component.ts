@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { DashboardItem } from '../../dashboard.models';
+import { DashboardOverview } from '../../dashboard.models';
 
 @Component({
   selector: 'app-trade-bot-dashboard',
@@ -8,5 +8,7 @@ import { DashboardItem } from '../../dashboard.models';
   styleUrl: './trade-bot-dashboard.component.css'
 })
 export class TradeBotDashboardComponent {
-  @Input() items: DashboardItem[] = [];
+  @Input() overview: DashboardOverview | null = null;
+  @Input() loading = false;
+  @Input() error = '';
 }

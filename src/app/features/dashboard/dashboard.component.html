@@ -4,37 +4,65 @@
       <h1>{{ 'dashboard.title' | translateContent }}</h1>
       <p>{{ 'dashboard.description' | translateContent }}</p>
     </div>
+    <button class="refresh-button" type="button" [disabled]="loading" (click)="refreshActive()">
+      <i class="pi pi-refresh" aria-hidden="true"></i>
+      <span>{{ 'dashboard.refresh' | translateContent }}</span>
+    </button>
   </header>
 
-  <section class="metrics-grid">
-    @for (metric of metrics; track metric.label) {
-      <article class="metric-card">
-        <p>{{ metric.label | translateContent }}</p>
-        <h3>{{ metric.value }}</h3>
-        <span>{{ metric.change }}</span>
-      </article>
-    }
-  </section>
+  @if (activeOverview) {
+    <section class="metrics-grid">
+      @for (metric of activeOverview.metrics; track metric.key) {
+        <article class="metric-card" [ngClass]="severityClass(metric.severity)">
+          <p>{{ metric.label }}</p>
+          <h3>{{ metric.value }}@if (metric.unit) { <span>{{ metric.unit }}</span> }</h3>
+          @if (metric.trendLabel) {
+            <small>{{ metric.trendLabel }}</small>
+          }
+        </article>
+      }
+    </section>
 
-  <section class="overview-grid">
-    <article class="panel-card">
-      <h2>{{ 'dashboard.latestActivities' | translateContent }}</h2>
-      <ul>
-        @for (activity of activities; track activity) {
-          <li>{{ activity | translateContent }}</li>
+    <section class="overview-grid">
+      <article class="panel-card">
+        <h2>{{ 'dashboard.latestActivities' | translateContent }}</h2>
+        @if (activeActivities.length) {
+          <ul class="activity-list">
+            @for (activity of activeActivities; track activity.title + activity.timestamp) {
+              <li>
+                <div>
+                  <strong>{{ activity.title }}</strong>
+                  @if (activity.description) {
+                    <span>{{ activity.description }}</span>
+                  }
+                </div>
+                <em>{{ activity.status }}</em>
+                @if (activity.timestamp) {
+                  <time>{{ formatTimestamp(activity.timestamp) }}</time>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="state-message state-message--compact">{{ 'dashboard.noData' | translateContent }}</div>
         }
-      </ul>
-    </article>
+      </article>
 
-    <article class="panel-card">
-      <h2>{{ 'dashboard.quickActions' | translateContent }}</h2>
-      <div class="action-list">
-        <button type="button">{{ 'dashboard.createAgent' | translateContent }}</button>
-        <button type="button">{{ 'dashboard.openBotConfig' | translateContent }}</button>
-        <button type="button">{{ 'dashboard.viewStorageReport' | translateContent }}</button>
-      </div>
-    </article>
-  </section>
+      <article class="panel-card panel-card--status">
+        <h2>{{ 'dashboard.serviceStatus' | translateContent }}</h2>
+        <div class="status-row">
+          <span>{{ activeOverview.service }}</span>
+          @if (activeOverview.generatedAt) {
+            <time>{{ formatTimestamp(activeOverview.generatedAt) }}</time>
+          }
+        </div>
+      </article>
+    </section>
+  } @else if (loading) {
+    <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
+  } @else if (activeError) {
+    <div class="state-message state-message--error">{{ activeError | translateContent }}</div>
+  }
 
   <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
     <p-tablist>
@@ -45,27 +73,27 @@
 
     <p-tabpanels>
       <p-tabpanel value="ai-agent">
-        @if (loading && activeTab === 'ai-agent') {
-          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
-        } @else if (activeTab === 'ai-agent') {
-          <app-ai-agent-dashboard [items]="items"></app-ai-agent-dashboard>
-        }
+        <app-ai-agent-dashboard
+          [overview]="overviews['ai-agent'] ?? null"
+          [loading]="loadingState['ai-agent']"
+          [error]="errorState['ai-agent']">
+        </app-ai-agent-dashboard>
       </p-tabpanel>
 
       <p-tabpanel value="trade-bot">
-        @if (loading && activeTab === 'trade-bot') {
-          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
-        } @else if (activeTab === 'trade-bot') {
-          <app-trade-bot-dashboard [items]="items"></app-trade-bot-dashboard>
-        }
+        <app-trade-bot-dashboard
+          [overview]="overviews['trade-bot'] ?? null"
+          [loading]="loadingState['trade-bot']"
+          [error]="errorState['trade-bot']">
+        </app-trade-bot-dashboard>
       </p-tabpanel>
 
       <p-tabpanel value="file-storage">
-        @if (loading && activeTab === 'file-storage') {
-          <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
-        } @else if (activeTab === 'file-storage') {
-          <app-file-storage-dashboard [items]="items"></app-file-storage-dashboard>
-        }
+        <app-file-storage-dashboard
+          [overview]="overviews['file-storage'] ?? null"
+          [loading]="loadingState['file-storage']"
+          [error]="errorState['file-storage']">
+        </app-file-storage-dashboard>
       </p-tabpanel>
     </p-tabpanels>
   </p-tabs>

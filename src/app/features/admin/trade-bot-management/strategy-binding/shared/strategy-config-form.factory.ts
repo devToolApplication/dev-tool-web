@@ -1,5 +1,5 @@
 import { TradeBotConfigResponse } from '../../../../../core/models/trade-bot/config.model';
-import { FieldConfig, FieldType, FormConfig, GridWidth } from '../../../../../shared/ui/form-input/models/form-config.model';
+import { FieldConfig, FieldType, FormConfig, GridWidth, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
 
 export interface StrategyRuleSlotDefinition {
   slotCode: string;
@@ -129,17 +129,39 @@ function normalizeConfigField(field: unknown): FieldConfig | null {
     return null;
   }
 
-  const type = String(field['type'] ?? '').trim() as FieldType;
-  const name = String(field['name'] ?? '').trim();
+  const rawType = String(field['type'] ?? '').trim();
+  const type = (rawType === 'boolean' ? 'checkbox' : rawType) as FieldType;
+  const name = String(field['name'] ?? field['key'] ?? '').trim();
   if (!isSupportedFieldType(type) || !name) {
     return null;
   }
 
   const width = isGridWidth(field['width']) ? field['width'] : undefined;
-  return {
+  const helpText = String(field['helpText'] ?? field['description'] ?? '').trim();
+  const options = Array.isArray(field['options']) ? normalizeOptions(field['options']) : undefined;
+  const normalizedField: Record<string, unknown> = {
     ...((field as unknown) as FieldConfig),
+    name,
+    type,
+    ...(options ? { options } : {}),
+    ...(helpText ? { helpText } : {}),
     ...(width ? { width } : {})
   };
+  return normalizedField as unknown as FieldConfig;
+}
+
+function normalizeOptions(options: unknown[]): SelectOption[] {
+  return options
+    .map((option) => {
+      if (isRecord(option)) {
+        return {
+          label: String(option['label'] ?? option['value'] ?? '').trim(),
+          value: option['value'] as string | number
+        };
+      }
+      return { label: String(option), value: String(option) };
+    })
+    .filter((option) => option.label !== '');
 }
 
 function normalizeRuleSlots(ruleSlots: unknown[] | undefined): StrategyRuleSlotDefinition[] {

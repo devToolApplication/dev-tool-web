@@ -71,6 +71,7 @@ import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
+import { DashboardChartComponent } from '../features/dashboard/components/dashboard-chart/dashboard-chart.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
 import { TradeBotDashboardComponent } from '../features/dashboard/components/trade-bot-dashboard/trade-bot-dashboard.component';
@@ -106,6 +107,7 @@ const FEATURE = [
   DemoComponent,
   SettingsComponent,
   DashboardComponent,
+  DashboardChartComponent,
   AiAgentDashboardComponent,
   TradeBotDashboardComponent,
   FileStorageDashboardComponent,

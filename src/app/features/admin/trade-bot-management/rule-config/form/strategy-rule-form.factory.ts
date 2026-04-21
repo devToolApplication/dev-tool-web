@@ -18,7 +18,6 @@ export interface StrategyRuleCodeDefinition {
   description: string;
   ruleGroupCode: string;
   ruleGroupLabel: string;
-  configKey: string;
   configFields: FieldConfig[];
   initialValue: Record<string, unknown>;
 }
@@ -28,42 +27,18 @@ interface StrategyRuleDefinitionConfigValue {
   description?: string;
   ruleGroupCode?: string;
   ruleGroupLabel?: string;
-  configKey?: string;
   configFields?: unknown[];
   initialValue?: Record<string, unknown>;
-}
-
-interface StrategyRuleConfigSchemaValue {
-  label?: string;
-  description?: string;
-  configFields?: unknown[];
-  initialValue?: Record<string, unknown>;
-}
-
-interface StrategyRuleConfigSchemaDefinition {
-  key: string;
-  label: string;
-  description: string;
-  configFields: FieldConfig[];
-  initialValue: Record<string, unknown>;
 }
 
 let strategyRuleDefinitions: StrategyRuleCodeDefinition[] = [];
 let ruleDefinitionMap = buildRuleDefinitionMap(strategyRuleDefinitions);
 let strategyRuleCodeOptions = buildRuleCodeOptions(strategyRuleDefinitions);
-let strategyRuleConfigSchemaMap = new Map<string, StrategyRuleConfigSchemaDefinition>();
 
-export function configureStrategyRuleDefinitions(
-  definitions: TradeBotConfigResponse[] | null | undefined,
-  configSchemas?: TradeBotConfigResponse[] | null | undefined
-): void {
-  strategyRuleConfigSchemaMap = buildRuleConfigSchemaMap(configSchemas ?? []);
-
+export function configureStrategyRuleDefinitions(definitions: TradeBotConfigResponse[] | null | undefined): void {
   const resolvedDefinitions = (definitions ?? [])
     .filter((item) => item?.status === 'ACTIVE')
     .map(mapConfigToDefinition)
-    .filter((item): item is StrategyRuleCodeDefinition => item !== null)
-    .map((item) => applySharedSchema(item))
     .filter((item): item is StrategyRuleCodeDefinition => item !== null);
 
   updateRuleDefinitions(resolvedDefinitions);
@@ -74,15 +49,11 @@ export function getStrategyRuleDefaultCode(): string | null {
 }
 
 export function mapRuleDefinitionsToResponses(
-  definitions: TradeBotConfigResponse[] | null | undefined,
-  configSchemas?: TradeBotConfigResponse[] | null | undefined
+  definitions: TradeBotConfigResponse[] | null | undefined
 ): StrategyRuleResponse[] {
-  const schemaMap = buildRuleConfigSchemaMap(configSchemas ?? []);
   return (definitions ?? [])
     .filter((item) => item?.status === 'ACTIVE')
     .map(mapConfigToDefinition)
-    .filter((item): item is StrategyRuleCodeDefinition => item !== null)
-    .map((item) => applySharedSchema(item, schemaMap))
     .filter((item): item is StrategyRuleCodeDefinition => item !== null)
     .sort((left, right) => left.code.localeCompare(right.code))
     .map((item) => ({
@@ -107,7 +78,6 @@ export function resolveStrategyRuleDefinition(ruleCode: string | null | undefine
       description: 'tradeBot.strategyRule.definition.fallbackDescription',
       ruleGroupCode: '',
       ruleGroupLabel: '',
-      configKey: '',
       configFields: [],
       initialValue: {}
     }
@@ -247,16 +217,6 @@ function buildRuleCodeOptions(definitions: StrategyRuleCodeDefinition[]): Select
   return definitions.map((item) => ({ label: item.label, value: item.code }));
 }
 
-function buildRuleConfigSchemaMap(configs: TradeBotConfigResponse[]): Map<string, StrategyRuleConfigSchemaDefinition> {
-  return new Map(
-    configs
-      .filter((item) => item?.status === 'ACTIVE')
-      .map(mapConfigToSchema)
-      .filter((item): item is StrategyRuleConfigSchemaDefinition => item !== null)
-      .map((item) => [item.key, item] as const)
-  );
-}
-
 function mapConfigToDefinition(config: TradeBotConfigResponse): StrategyRuleCodeDefinition | null {
   if (!isRecord(config?.value)) {
     return null;
@@ -274,55 +234,8 @@ function mapConfigToDefinition(config: TradeBotConfigResponse): StrategyRuleCode
     description: String(rawValue.description ?? 'tradeBot.strategyRule.definition.fallbackDescription').trim(),
     ruleGroupCode: normalizeRuleCode(String(rawValue.ruleGroupCode ?? '')),
     ruleGroupLabel: String(rawValue.ruleGroupLabel ?? rawValue.ruleGroupCode ?? '').trim(),
-    configKey: normalizeRuleCode(String(rawValue.configKey ?? '')),
     configFields: normalizeConfigFields(rawValue.configFields),
     initialValue: isRecord(rawValue.initialValue) ? { ...rawValue.initialValue } : {}
-  };
-}
-
-function mapConfigToSchema(config: TradeBotConfigResponse): StrategyRuleConfigSchemaDefinition | null {
-  if (!isRecord(config?.value)) {
-    return null;
-  }
-
-  const rawValue = config.value as StrategyRuleConfigSchemaValue;
-  const key = normalizeRuleCode(config.key);
-  if (!key) {
-    return null;
-  }
-
-  return {
-    key,
-    label: String(rawValue.label ?? key).trim() || key,
-    description: String(rawValue.description ?? '').trim(),
-    configFields: normalizeConfigFields(rawValue.configFields),
-    initialValue: isRecord(rawValue.initialValue) ? { ...rawValue.initialValue } : {}
-  };
-}
-
-function applySharedSchema(
-  definition: StrategyRuleCodeDefinition | null,
-  schemaMap: Map<string, StrategyRuleConfigSchemaDefinition> = strategyRuleConfigSchemaMap
-): StrategyRuleCodeDefinition | null {
-  if (!definition) {
-    return null;
-  }
-  if (!definition.configKey) {
-    return definition;
-  }
-
-  const schema = schemaMap.get(definition.configKey);
-  if (!schema) {
-    return definition;
-  }
-
-  return {
-    ...definition,
-    configFields: schema.configFields,
-    initialValue: {
-      ...schema.initialValue,
-      ...definition.initialValue
-    }
   };
 }
 
@@ -337,18 +250,39 @@ function normalizeConfigField(field: unknown): FieldConfig | null {
     return null;
   }
 
-  const type = String(field['type'] ?? '').trim() as FieldType;
+  const rawType = String(field['type'] ?? '').trim();
+  const type = (rawType === 'boolean' ? 'checkbox' : rawType) as FieldType;
   const name = String(field['name'] ?? field['key'] ?? '').trim();
   if (!isSupportedFieldType(type) || !name) {
     return null;
   }
 
   const width = isGridWidth(field['width']) ? field['width'] : undefined;
-  return {
+  const helpText = String(field['helpText'] ?? field['description'] ?? '').trim();
+  const options = Array.isArray(field['options']) ? normalizeOptions(field['options']) : undefined;
+  const normalizedField: Record<string, unknown> = {
     ...(field as unknown as FieldConfig),
     name: name.startsWith('configJson.') ? name : `configJson.${name}`,
-    ...(width ? { width } : {})
+    type,
+    ...(width ? { width } : {}),
+    ...(options ? { options } : {}),
+    ...(helpText ? { helpText } : {})
   };
+  return normalizedField as unknown as FieldConfig;
+}
+
+function normalizeOptions(options: unknown[]): SelectOption[] {
+  return options
+    .map((option) => {
+      if (isRecord(option)) {
+        return {
+          label: String(option['label'] ?? option['value'] ?? '').trim(),
+          value: option['value'] as string | number
+        };
+      }
+      return { label: String(option), value: String(option) };
+    })
+    .filter((option) => option.label !== '');
 }
 
 function extractConfigKey(fieldName: string | undefined): string | null {

@@ -6,6 +6,7 @@ import {
   McpDbConfig,
   McpEndpointConfig,
   McpEndpointMethod,
+  McpMetadataEntry,
   McpToolCreateDto,
   McpToolDefinition,
   McpToolResponse,
@@ -92,6 +93,9 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
           { label: 'create-task', value: 'create-task' },
           { label: 'github', value: 'github' },
           { label: 'db', value: 'db' },
+          { label: 'elasticsearch', value: 'elasticsearch' },
+          { label: 'bulk', value: 'bulk' },
+          { label: 'indices', value: 'indices' },
           { label: 'analytics', value: 'analytics' },
           { label: 'code', value: 'code' },
           { label: 'notification', value: 'notification' }
@@ -123,8 +127,27 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
           },
           { type: 'text', name: 'url', label: 'mcpTool.url', width: 'full', validation: [Rules.required('mcpTool.urlRequired')] },
           { type: 'record', name: 'params', label: 'mcpTool.params', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: 'full' },
-          { type: 'record', name: 'headers', label: 'mcpTool.headers', keyLabel: 'key', valueLabel: 'value', addButtonLabel: 'addRow', width: 'full' },
-          { type: 'textarea', name: 'body', label: 'mcpTool.body', width: 'full', showZoomButton: true }
+          {
+            type: 'secret-metadata',
+            name: 'headers',
+            label: 'mcpTool.headers',
+            width: 'full',
+            service: 'ai-agent-mcrs',
+            addButtonLabel: 'mcpTool.addHeader',
+            keyPlaceholder: 'mcpTool.headerNamePlaceholder',
+            valuePlaceholder: 'mcpTool.headerValuePlaceholder',
+            secretPlaceholder: 'mcpTool.headerSecretPlaceholder'
+          },
+          {
+            type: 'textarea',
+            name: 'body',
+            label: 'mcpTool.body',
+            width: 'full',
+            rows: 12,
+            maxRows: 20,
+            showZoomButton: true,
+            helpText: 'mcpTool.bodyHint'
+          }
         ]
       },
       {
@@ -356,7 +379,7 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
         method: tool.endpoint?.method ?? 'GET',
         url: tool.endpoint?.url ?? '',
         params: { ...(tool.endpoint?.params ?? {}) },
-        headers: { ...(tool.endpoint?.headers ?? {}) },
+        headers: this.normalizeHeaderEntries(tool.endpoint?.headers),
         body: tool.endpoint?.body ?? ''
       },
       db: this.mapDbResponseToForm(tool.db),
@@ -450,8 +473,8 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
       method: (record['method'] as McpEndpointMethod) ?? 'GET',
       url: String(record['url'] ?? '').trim(),
       params: this.normalizeRecord(record['params']),
-      headers: this.normalizeRecord(record['headers']),
-      body: String(record['body'] ?? '').trim()
+      headers: this.normalizeHeaderEntries(record['headers']),
+      body: String(record['body'] ?? '')
     };
   }
 
@@ -477,6 +500,51 @@ export class McpToolFormComponent implements OnInit, OnDestroy {
       acc[normalizedKey] = String(item ?? '').trim();
       return acc;
     }, {});
+  }
+
+  private normalizeHeaderEntries(value: unknown): McpMetadataEntry[] {
+    if (Array.isArray(value)) {
+      return this.normalizeMetadataEntries(value);
+    }
+
+    if (!value || typeof value !== 'object') {
+      return [];
+    }
+
+    return Object.entries(value as Record<string, unknown>).reduce<McpMetadataEntry[]>((acc, [key, item]) => {
+      const normalizedKey = key.trim();
+      if (!normalizedKey) {
+        return acc;
+      }
+      acc.push({
+        key: normalizedKey,
+        type: 'CONFIG',
+        value: String(item ?? '').trim()
+      });
+      return acc;
+    }, []);
+  }
+
+  private normalizeMetadataEntries(value: unknown): McpMetadataEntry[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.reduce<McpMetadataEntry[]>((acc, item) => {
+      const record = item && typeof item === 'object' && !Array.isArray(item) ? (item as Record<string, unknown>) : {};
+      const key = String(record['key'] ?? '').trim();
+      const metadataValue = String(record['value'] ?? '').trim();
+      if (!key || !metadataValue) {
+        return acc;
+      }
+
+      acc.push({
+        key,
+        type: record['type'] === 'SECRET' ? 'SECRET' : 'CONFIG',
+        value: metadataValue
+      });
+      return acc;
+    }, []);
   }
 
   private normalizeTags(value: unknown): string[] {

@@ -247,6 +247,7 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
       points: (response.pointData ?? []).map((item) => ({
         name: item.name ?? 'Point',
         color: item.color ?? '#f59e0b',
+        shape: item.shape,
         startTime: this.formatChartTime(this.normalizePointTime(item.time)),
         price: item.value
       })),

@@ -120,7 +120,8 @@ export class StrategyRuleTestComponent implements OnInit {
       return;
     }
 
-    const interval = this.resolvePreviewInterval(this.rule.configJson);
+    const dataResource = this.resolveDataResource(exchange.code);
+    const interval = this.resolvePreviewInterval(this.rule.configJson, dataResource);
     const startTime = new Date(fromDate).getTime();
     const endTime = new Date(toDate).setHours(23, 59, 59, 999);
     this.previewing = true;
@@ -133,7 +134,7 @@ export class StrategyRuleTestComponent implements OnInit {
           endTime,
           this.rule.code,
           this.rule.configJson,
-          this.resolveDataResource(exchange.code)
+          dataResource
         )
       )
       .pipe(finalize(() => (this.previewing = false)))
@@ -143,8 +144,28 @@ export class StrategyRuleTestComponent implements OnInit {
       });
   }
 
-  private resolvePreviewInterval(configJson: Record<string, unknown>): string {
+  private resolvePreviewInterval(configJson: Record<string, unknown>, dataResource: string): string {
     const timeframe = String(configJson['trigger_timeframe'] ?? configJson['base_timeframe'] ?? 'M15').trim().toUpperCase();
+    if (dataResource === 'BINANCE') {
+      switch (timeframe) {
+        case 'M1':
+          return '1m';
+        case 'M5':
+          return '5m';
+        case 'M15':
+          return '15m';
+        case 'M30':
+          return '30m';
+        case 'H1':
+          return '1h';
+        case 'H4':
+          return '4h';
+        case 'D1':
+          return '1d';
+        default:
+          return timeframe.toLowerCase();
+      }
+    }
     switch (timeframe) {
       case 'M1':
         return 'm1';
@@ -207,6 +228,7 @@ export class StrategyRuleTestComponent implements OnInit {
       points: (response.pointData ?? []).map((item) => ({
         name: item.name ?? 'Point',
         color: item.color ?? '#f59e0b',
+        shape: item.shape,
         startTime: this.formatChartTime(this.normalizePointTime(item.time)),
         price: item.value
       })),

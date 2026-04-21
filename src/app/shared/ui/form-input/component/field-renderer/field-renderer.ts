@@ -73,6 +73,11 @@ export class FieldRenderer implements OnChanges {
     return this.field.type === 'array';
   }
 
+  get helpText(): string | undefined {
+    const config = this.field?.fieldConfig as { helpText?: string; description?: string } | undefined;
+    return config?.helpText || config?.description;
+  }
+
   onChangeValue(value: any) {
     this.field.setValue(value);
   }

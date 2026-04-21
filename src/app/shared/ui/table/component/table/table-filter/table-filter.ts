@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, computed, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { TableFilterField, TableFilterOption, TableFilterOptions } from '../../../models/table-config.model';
@@ -21,7 +21,6 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
   readonly draftValues = signal<Record<string, any>>({});
   readonly appliedValues = signal<Record<string, any>>({});
   readonly drawerOpen = signal(false);
-  readonly visibleAdvancedFields = computed(() => this.fields.filter((field) => !field.hidden));
 
   private readonly destroy$ = new Subject<void>();
   private initialized = false;
@@ -170,6 +169,10 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     return [];
+  }
+
+  visibleAdvancedFields(): TableFilterField[] {
+    return this.fields.filter((field) => !field.hidden);
   }
 
   get primaryFieldConfig(): TableFilterField | undefined {

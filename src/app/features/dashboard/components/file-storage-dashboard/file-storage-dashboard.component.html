@@ -1,11 +1,37 @@
-<div class="dashboard-grid">
-  @for (item of items; track item.id) {
-    <article class="dashboard-card">
-      <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" />
-      <div>
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.description }}</p>
+@if (loading) {
+  <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
+} @else if (error) {
+  <div class="state-message state-message--error">{{ error | translateContent }}</div>
+} @else if (overview) {
+  <div class="dashboard-detail-grid">
+    @for (chart of overview.charts; track chart.key) {
+      <article class="dashboard-panel">
+        <header>
+          <h3>{{ chart.title }}</h3>
+        </header>
+        <app-dashboard-chart [series]="chart"></app-dashboard-chart>
+      </article>
+    }
+
+    <article class="dashboard-panel dashboard-panel--resources">
+      <header>
+        <h3>{{ 'dashboard.resources' | translateContent }}</h3>
+      </header>
+      <div class="resource-list">
+        @for (resource of overview.resources; track resource.name) {
+          <div class="resource-row">
+            <div>
+              <strong>{{ resource.name }}</strong>
+              @if (resource.description) {
+                <span>{{ resource.description }}</span>
+              }
+            </div>
+            <em>{{ resource.value }}</em>
+          </div>
+        }
       </div>
     </article>
-  }
-</div>
+  </div>
+} @else {
+  <div class="state-message">{{ 'dashboard.noData' | translateContent }}</div>
+}

@@ -1,48 +1,34 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { DashboardItem, DashboardTabType } from './dashboard.models';
-
-interface PhotoResponse {
-  id: number;
-  title: string;
-  url: string;
-}
+import { environment } from '../../../enviroment/environment';
+import { BaseResponse } from '../../core/models/base-response.model';
+import { DashboardOverview, DashboardTabType } from './dashboard.models';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
+  private readonly endpoints: Record<DashboardTabType, string> = {
+    'ai-agent': `${environment.apiUrl.adminAiGenerator}/dashboard/overview`,
+    'trade-bot': `${environment.apiUrl.tradeBotAdminUrl}/dashboard/overview`,
+    'file-storage': `${environment.apiUrl.adminFileServiceUrl}/dashboard/overview`
+  };
+
   constructor(private readonly http: HttpClient) {}
 
-  getDashboardItems(tab: DashboardTabType): Observable<DashboardItem[]> {
-    const albumMap: Record<DashboardTabType, number> = {
-      'ai-agent': 1,
-      'trade-bot': 2,
-      'file-storage': 3
-    };
-
+  getOverview(tab: DashboardTabType): Observable<DashboardOverview> {
     return this.http
-      .get<PhotoResponse[]>(`https://jsonplaceholder.typicode.com/photos?albumId=${albumMap[tab]}&_limit=6`)
-      .pipe(
-        map((items) =>
-          items.map((item) => ({
-            id: item.id,
-            title: item.title,
-            description: this.buildDescription(tab, item.id),
-            imageUrl: item.url
-          }))
-        )
-      );
+      .get<BaseResponse<DashboardOverview>>(this.endpoints[tab])
+      .pipe(map((res) => this.normalizeOverview(res.data, tab)));
   }
 
-  private buildDescription(tab: DashboardTabType, id: number): string {
-    if (tab === 'ai-agent') {
-      return `AI Agent insight #${id} - theo dõi trạng thái xử lý prompt theo thời gian thực.`;
-    }
-
-    if (tab === 'trade-bot') {
-      return `Trade Bot strategy #${id} - hiệu suất bot và tín hiệu giao dịch gần nhất.`;
-    }
-
-    return `File Storage node #${id} - dung lượng và tình trạng đồng bộ của tài nguyên.`;
+  private normalizeOverview(data: DashboardOverview | undefined, tab: DashboardTabType): DashboardOverview {
+    return {
+      service: data?.service ?? tab,
+      generatedAt: data?.generatedAt,
+      metrics: data?.metrics ?? [],
+      charts: data?.charts ?? [],
+      activities: data?.activities ?? [],
+      resources: data?.resources ?? []
+    };
   }
 }

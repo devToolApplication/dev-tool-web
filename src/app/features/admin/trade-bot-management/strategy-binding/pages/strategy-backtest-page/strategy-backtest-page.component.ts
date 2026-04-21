@@ -211,15 +211,16 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
         }).pipe(
           switchMap(({ job, metric, orders }) => {
             const previewConfig = job.configJson ?? binding.configJson ?? {};
+            const dataResource = this.resolveDataResource(job.exchangeCode);
             return this.chartQueryService
               .getStrategyPreview(
                 job.providerSymbol || job.symbolCode,
-                this.resolveReplayInterval(previewConfig),
+                this.resolveReplayInterval(previewConfig, dataResource),
                 this.resolveReplayStartTime(job, orders.data ?? []),
                 this.resolveReplayEndTime(job, orders.data ?? []),
                 binding.strategyServiceName ?? job.strategyServiceName,
                 previewConfig,
-                this.resolveDataResource(job.exchangeCode)
+                dataResource
               )
               .pipe(
                 catchError(() => of({ candlestickData: [], lineData: [], areaData: [], pointData: [], indicatorData: [] })),
@@ -411,8 +412,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     return date;
   }
 
-  private resolveReplayInterval(config: Record<string, unknown>): string {
-    return this.toIntervalKey(String(config['trigger_timeframe'] ?? config['base_timeframe'] ?? 'M5'));
+  private resolveReplayInterval(config: Record<string, unknown>, dataResource: string): string {
+    return this.toIntervalKey(String(config['trigger_timeframe'] ?? config['base_timeframe'] ?? 'M5'), dataResource);
   }
 
   private resolveDataResource(exchangeCode?: string): string {
@@ -431,8 +432,28 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     return Math.max(jobEnd, lastOrderTime);
   }
 
-  private toIntervalKey(timeframe: string): string {
+  private toIntervalKey(timeframe: string, dataResource: string): string {
     const normalized = String(timeframe ?? '').trim().toUpperCase();
+    if (dataResource === 'BINANCE') {
+      switch (normalized) {
+        case 'M1':
+          return '1m';
+        case 'M5':
+          return '5m';
+        case 'M15':
+          return '15m';
+        case 'M30':
+          return '30m';
+        case 'H1':
+          return '1h';
+        case 'H4':
+          return '4h';
+        case 'D1':
+          return '1d';
+        default:
+          return normalized.toLowerCase() || '5m';
+      }
+    }
     switch (normalized) {
       case 'M1':
         return 'm1';

@@ -27,6 +27,8 @@ export interface ArrayState {
 export interface BaseFieldConfig {
   name: string;
   label?: string;
+  description?: string;
+  helpText?: string;
   width?: GridWidth;
   rules?: {
     visible?: string;
