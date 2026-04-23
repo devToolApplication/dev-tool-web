@@ -10,19 +10,26 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.aiAgentManagement',
         icon: 'pi pi-sparkles',
         items: [
-          { label: 'AI Playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/playground' },
-          { label: 'Agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
-          { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
-          { label: 'Prompt Templates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
-          { label: 'Execution Policies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
-          { label: 'Execution Traces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
-          { label: 'Playwright Sessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' },
           {
-            label: 'layout.menu.mcpServerManagement',
-            icon: 'pi pi-wrench',
+            label: 'Custom Agent',
+            icon: 'pi pi-sitemap',
             items: [
-              { label: 'layout.menu.mcpCategory', icon: 'pi pi-tags', routerLink: '/admin/mcp-tool-config/category' },
-              { label: 'layout.menu.mcpTool', icon: 'pi pi-wrench', routerLink: '/admin/mcp-tool-config/tool' }
+              { label: 'Playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/runtime/playground' },
+              { label: 'Agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
+              { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
+              { label: 'Prompt Templates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
+              { label: 'Execution Policies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
+              { label: 'Execution Traces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
+              { label: 'Playwright Sessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' }
+            ]
+          },
+          {
+            label: 'Codex Agent',
+            icon: 'pi pi-code',
+            items: [
+              { label: 'Login', icon: 'pi pi-key', routerLink: '/admin/codex-agent/login' },
+              { label: 'Playground', icon: 'pi pi-play-circle', routerLink: '/admin/codex-agent/playground' },
+              { label: 'Skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' }
             ]
           }
         ]

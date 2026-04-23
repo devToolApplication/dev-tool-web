@@ -5,8 +5,8 @@ import { settingsRoutes } from './features/settings/settings-routing.module';
 import { dashboardRoutes } from './features/dashboard/dashboard-routing.module';
 import { errorRoutes } from './features/error/error-routing.module';
 import { aiAgentAdminRoutes } from './features/admin/ai-agent/ai-agent.feature';
+import { codexAgentAdminRoutes } from './features/admin/codex-agent/codex-agent.feature';
 import { fileStorageRoutes } from './features/admin/file-storage-management/file-storage-management.feature';
-import { mcpServerRoutes } from './features/admin/mcp-server-management/mcp-server-management.feature';
 import { systemManagementRoutes } from './features/admin/system-management/system-management.feature';
 import { tradeBotRoutes } from './features/admin/trade-bot-management/trade-bot-management.feature';
 import { FeaturePlaceholderComponent } from './features/feature-placeholder/feature-placeholder.component';
@@ -16,8 +16,8 @@ const routes: Routes = [
   ...demoRouter,
   ...dashboardRoutes,
   ...aiAgentAdminRoutes,
+  ...codexAgentAdminRoutes,
   ...fileStorageRoutes,
-  ...mcpServerRoutes,
   ...systemManagementRoutes,
   ...tradeBotRoutes,
   ...errorRoutes,

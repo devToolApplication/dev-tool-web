@@ -15,6 +15,20 @@ export const AGENT_DEFINITION_INITIAL_VALUE: AgentDefinitionCreateDto = {
   executionPolicyJson: '',
   enabled: true,
   defaultActive: false,
-  status: 'ACTIVE',
-  toolIds: []
+  codexConfig: {
+    enabled: false,
+    model: '',
+    mode: '',
+    approvalPolicy: 'never',
+    workingDirectory: '',
+    additionalDirectories: [],
+    skipGitRepoCheck: true,
+    networkAccessEnabled: true,
+    webSearchEnabled: false,
+    webSearchMode: 'disabled',
+    mcpServerIds: [],
+    skillIds: [],
+    agentsInstruction: ''
+  },
+  status: 'ACTIVE'
 };

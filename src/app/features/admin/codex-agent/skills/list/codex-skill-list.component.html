@@ -3,10 +3,10 @@
     [config]="tableConfig"
     [data]="rows"
     [pageResponse]="pageResponse"
-    [loading]="tableLoading || loading"
+    [loading]="loading"
     (pageChange)="onPageChange($event)"
     (search)="onSearch($event)"
     (resetFilter)="onResetFilter()"
-    (create)="createTool()"
+    (create)="onCreate()"
   ></app-table>
 </section>
