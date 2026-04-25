@@ -5,7 +5,7 @@
 
 .login-card {
   border: 1px solid var(--app-border);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   background: var(--app-card-surface);
   padding: 1rem;
   box-shadow: var(--app-shadow-lg);
@@ -53,40 +53,10 @@
   grid-column: span 2;
 }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.status-pill.success {
-  color: #166534;
-  background: color-mix(in srgb, #22c55e 18%, transparent);
-}
-
-.status-pill.error {
-  color: #b42318;
-  background: color-mix(in srgb, #ef4444 18%, transparent);
-}
-
-.status-pill.warning {
-  color: #92400e;
-  background: color-mix(in srgb, #f59e0b 18%, transparent);
-}
-
-.status-pill.neutral {
-  color: var(--app-text-muted);
-  background: color-mix(in srgb, var(--app-border) 45%, transparent);
-}
-
 .code-box {
   display: inline-block;
   padding: 0.4rem 0.7rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: var(--app-input-bg);
   border: 1px solid var(--app-border);
   font-family: Consolas, monospace;
@@ -102,7 +72,7 @@
 .result-body {
   margin: 0;
   padding: 0.9rem;
-  border-radius: 0.85rem;
+  border-radius: 0.5rem;
   background: var(--app-input-bg);
   color: var(--app-input-text);
   border: 1px solid var(--app-border);
@@ -114,7 +84,7 @@
 .empty-state {
   padding: 1rem;
   border: 1px dashed var(--app-border);
-  border-radius: 0.85rem;
+  border-radius: 0.5rem;
   color: var(--app-text-muted);
 }
 

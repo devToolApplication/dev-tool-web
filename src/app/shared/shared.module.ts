@@ -67,6 +67,7 @@ import { SelectButton } from './component/select-button/select-button';
 import { SelectMulti } from './component/select-multi/select-multi';
 import { SelectTree } from './component/select-tree/select-tree';
 import { Select } from './component/select/select';
+import { Tag } from './component/tag/tag';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
@@ -144,6 +145,7 @@ const COMPONENTS = [
   SelectMulti,
   SelectTree,
   Select,
+  Tag,
   ToggleButton,
   ToggleSwitch,
   CandleChart,

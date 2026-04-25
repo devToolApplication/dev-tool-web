@@ -26,7 +26,7 @@
     <section class="result-card summary-card">
       <div class="result-header">
         <h3>Selected Agent</h3>
-        <span class="status-pill success">{{ selectedAgent.name }}</span>
+        <app-tag [value]="selectedAgent.name" severity="success"></app-tag>
       </div>
       <div class="detail-grid">
         <div><strong>Agent Code:</strong> {{ selectedAgent.code || '-' }}</div>
@@ -42,18 +42,24 @@
   <section class="result-card summary-card">
     <div class="result-header">
       <h3>MCP Tools</h3>
-      <span class="status-pill success">{{ enabledMcpServers.length }} servers</span>
+      <app-tag [value]="enabledMcpServers.length + ' servers'" severity="success"></app-tag>
     </div>
     <div class="mcp-toolbar">
-      <select class="mcp-select" [value]="selectedMcpServerId" (change)="onMcpServerChange($any($event.target).value)">
-        <option value="">Select MCP server</option>
-        @for (server of enabledMcpServers; track server.value) {
-          <option [value]="server.value">{{ server.label || server.value }}</option>
-        }
-      </select>
-      <button class="mcp-action" type="button" [disabled]="!selectedMcpServerId || mcpToolsLoading" (click)="loadMcpTools()">
-        {{ mcpToolsLoading ? 'Loading...' : 'Load Tools' }}
-      </button>
+      <app-select
+        label="MCP Server"
+        placeholder="Select MCP server"
+        [options]="mcpServerOptions"
+        [value]="selectedMcpServerId"
+        [showClear]="true"
+        (valueChange)="onMcpServerChange(($event || '').toString())"
+      ></app-select>
+      <app-button
+        icon="pi pi-download"
+        label="Load Tools"
+        [disabled]="!selectedMcpServerId || mcpToolsLoading"
+        [loading]="mcpToolsLoading"
+        (buttonClick)="loadMcpTools()"
+      ></app-button>
     </div>
 
     @if (mcpToolsError) {
@@ -79,9 +85,10 @@
     <section class="result-card">
       <div class="result-header">
         <h3>Execution Result</h3>
-        <span class="status-pill" [class.success]="result.success" [class.error]="!result.success">
-          {{ result.executionStatus || (result.success ? 'COMPLETED' : 'FAILED') }}
-        </span>
+        <app-tag
+          [value]="result.executionStatus || (result.success ? 'COMPLETED' : 'FAILED')"
+          [severity]="result.success ? 'success' : 'danger'"
+        ></app-tag>
       </div>
 
       <div class="detail-grid">

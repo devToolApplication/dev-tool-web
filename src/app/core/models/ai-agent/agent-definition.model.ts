@@ -12,6 +12,7 @@ export interface CodexAgentConfig {
   webSearchEnabled?: boolean;
   webSearchMode?: string;
   mcpServerIds?: string[];
+  mcpToolKeys?: string[];
   skillIds?: string[];
   agentsInstruction?: string;
 }

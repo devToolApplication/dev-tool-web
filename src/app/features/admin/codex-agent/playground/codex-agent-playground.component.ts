@@ -171,6 +171,13 @@ export class CodexAgentPlaygroundComponent implements OnInit {
     return (this.optionsSnapshot.mcpServers ?? []).filter((item) => item.enabled !== false);
   }
 
+  get mcpServerOptions(): { label: string; value: string }[] {
+    return this.enabledMcpServers.map((server) => ({
+      label: server.label || server.value,
+      value: server.value
+    }));
+  }
+
   onMcpServerChange(serverId: string): void {
     this.selectedMcpServerId = serverId;
     this.mcpTools = [];

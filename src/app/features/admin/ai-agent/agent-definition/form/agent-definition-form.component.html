@@ -1,7 +1,7 @@
 <app-base-crud-page
   [pageConfig]="{
-    title: editId ? 'Edit Agent Definition' : 'Create Agent Definition',
-    description: 'Configure agent, model, tools, prompt template and execution policy.',
+    title: pageTitle,
+    description: pageDescription,
     actions: [
       { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', goBack: true },
       { id: 'save', label: editId ? 'Update' : 'Create', icon: 'pi pi-save', submitForm: true, loading: loading }
@@ -12,5 +12,6 @@
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
   [submitting]="loading"
+  (valueChange)="onValueChange($event)"
   (formSubmit)="onSubmitForm($event)"
 ></app-base-crud-page>

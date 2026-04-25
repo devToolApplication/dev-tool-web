@@ -27,9 +27,10 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
             label: 'Codex Agent',
             icon: 'pi pi-code',
             items: [
-              { label: 'Login', icon: 'pi pi-key', routerLink: '/admin/codex-agent/login' },
-              { label: 'Playground', icon: 'pi pi-play-circle', routerLink: '/admin/codex-agent/playground' },
-              { label: 'Skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' }
+              { label: 'MCP Servers', icon: 'pi pi-share-alt', routerLink: '/admin/codex-agent/mcp-servers' },
+              { label: 'Skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' },
+              { label: 'Agents', icon: 'pi pi-sitemap', routerLink: '/admin/codex-agent/agents' },
+              { label: 'Chat History', icon: 'pi pi-comments', routerLink: '/admin/codex-agent/chat-history' }
             ]
           }
         ]

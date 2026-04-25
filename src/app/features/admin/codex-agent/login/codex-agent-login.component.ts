@@ -5,6 +5,8 @@ import { CodexAgentAdminService } from '../../../../core/services/codex-agent-se
 import { LoadingService } from '../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../core/ui-services/toast.service';
 
+type TagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast';
+
 @Component({
   selector: 'app-codex-agent-login',
   standalone: false,
@@ -117,6 +119,10 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
     return this.authStatus?.authenticated ? 'success' : 'warning';
   }
 
+  get authStatusSeverity(): TagSeverity {
+    return this.authStatus?.authenticated ? 'success' : 'warn';
+  }
+
   get sessionStateLabel(): string {
     return this.session?.state?.toUpperCase() || 'NO_SESSION';
   }
@@ -132,6 +138,20 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
         return 'warning';
       default:
         return 'neutral';
+    }
+  }
+
+  get sessionStateSeverity(): TagSeverity {
+    switch (this.session?.state) {
+      case 'authenticated':
+        return 'success';
+      case 'failed':
+      case 'expired':
+        return 'danger';
+      case 'pending':
+        return 'warn';
+      default:
+        return 'secondary';
     }
   }
 

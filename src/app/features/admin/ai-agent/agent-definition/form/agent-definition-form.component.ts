@@ -7,7 +7,7 @@ import { AgentDefinitionCreateDto, AgentDefinitionResponse, AgentDefinitionUpdat
 import { AiModelResponse } from '../../../../../core/models/ai-agent/ai-model.model';
 import { ExecutionPolicyConfigResponse } from '../../../../../core/models/ai-agent/execution-policy.model';
 import { PromptTemplateResponse } from '../../../../../core/models/ai-agent/prompt-template.model';
-import { CodexAgentOptionsResponse } from '../../../../../core/models/codex-agent/codex-agent-ask.model';
+import { CodexAgentMcpToolsResponse, CodexAgentOptionsResponse } from '../../../../../core/models/codex-agent/codex-agent-ask.model';
 import { CodexSkillResponse } from '../../../../../core/models/codex-agent/codex-skill.model';
 import { AgentDefinitionService } from '../../../../../core/services/ai-agent-service/agent-definition.service';
 import { AiModelService } from '../../../../../core/services/ai-agent-service/ai-model.service';
@@ -20,7 +20,7 @@ import { LoadingService } from '../../../../../core/ui-services/loading.service'
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
-import { AGENT_DEFINITION_INITIAL_VALUE, AGENT_DEFINITION_ROUTES } from '../agent-definition.constants';
+import { AGENT_DEFINITION_INITIAL_VALUE, AgentDefinitionManagementContext, getAgentDefinitionRoutes } from '../agent-definition.constants';
 
 @Component({
   selector: 'app-agent-definition-form',
@@ -120,6 +120,17 @@ export class AgentDefinitionFormComponent implements OnInit {
           },
           {
             type: 'select-multi',
+            name: 'mcpToolKeys',
+            label: 'Allowed MCP Tools',
+            width: 'full',
+            optionsExpression: 'context.extra?.codexMcpToolOptions || []',
+            rules: {
+              disabled: '!(model.codexConfig?.mcpServerIds?.length > 0)'
+            },
+            helpText: 'Format: serverId:toolName. Tool list loads from the selected MCP servers.'
+          },
+          {
+            type: 'select-multi',
             name: 'skillIds',
             label: 'Codex Skills',
             width: 'full',
@@ -142,6 +153,10 @@ export class AgentDefinitionFormComponent implements OnInit {
   loading = false;
   formInitialValue: AgentDefinitionCreateDto = this.createInitialValue();
   readonly formVisible = signal(true);
+  private readonly managementContext: AgentDefinitionManagementContext;
+  private readonly routes: ReturnType<typeof getAgentDefinitionRoutes>;
+  private readonly mcpServerLabelMap: Record<string, string> = {};
+  private readonly mcpToolOptionCatalog: Record<string, { label: string; value: string }[]> = {};
 
   constructor(
     private readonly agentDefinitionService: AgentDefinitionService,
@@ -155,13 +170,30 @@ export class AgentDefinitionFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly i18nService: I18nService
-  ) {}
+  ) {
+    this.managementContext = this.route.snapshot.data['managementContext'] === 'codex' ? 'codex' : 'ai';
+    this.routes = getAgentDefinitionRoutes(this.managementContext);
+  }
 
   ngOnInit(): void {
     this.loadOptions();
   }
 
+  get pageTitle(): string {
+    if (this.managementContext === 'codex') {
+      return this.editId ? 'Edit Codex Agent' : 'Create Codex Agent';
+    }
+    return this.editId ? 'Edit Agent Definition' : 'Create Agent Definition';
+  }
+
+  get pageDescription(): string {
+    return this.managementContext === 'codex'
+      ? 'Configure Codex runtime, skills, MCP servers and allowed MCP tools for this agent.'
+      : 'Configure agent, model, tools, prompt template and execution policy.';
+  }
+
   onSubmitForm(model: AgentDefinitionCreateDto): void {
+    const normalizedMcpServerIds = this.normalizeStringList(model.codexConfig?.mcpServerIds);
     const payload: AgentDefinitionCreateDto = {
       ...model,
       code: model.code?.trim() || '',
@@ -176,7 +208,8 @@ export class AgentDefinitionFormComponent implements OnInit {
             approvalPolicy: model.codexConfig.approvalPolicy?.trim() || '',
             workingDirectory: model.codexConfig.workingDirectory?.trim() || '',
             additionalDirectories: (model.codexConfig.additionalDirectories ?? []).map((item) => item?.trim()).filter((item) => !!item) as string[],
-            mcpServerIds: (model.codexConfig.mcpServerIds ?? []).filter((item) => !!item),
+            mcpServerIds: normalizedMcpServerIds,
+            mcpToolKeys: this.normalizeMcpToolKeys(normalizedMcpServerIds, model.codexConfig.mcpToolKeys),
             skillIds: (model.codexConfig.skillIds ?? []).filter((item) => !!item),
             agentsInstruction: model.codexConfig.agentsInstruction?.trim() || ''
           }
@@ -189,10 +222,14 @@ export class AgentDefinitionFormComponent implements OnInit {
     this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
-        void this.router.navigate([AGENT_DEFINITION_ROUTES.list]);
+        void this.router.navigate([this.routes.list]);
       },
       error: () => this.toastService.error('Save agent definition failed')
     });
+  }
+
+  onValueChange(model: AgentDefinitionCreateDto): void {
+    this.syncMcpToolOptions(model.codexConfig?.mcpServerIds ?? []);
   }
 
   private loadOptions(): void {
@@ -220,8 +257,10 @@ export class AgentDefinitionFormComponent implements OnInit {
           policyOptions: this.toPolicyOptions(policies),
           codexModeOptions: this.toCodexModeOptions(codexOptions),
           codexMcpServerOptions: this.toCodexMcpServerOptions(codexOptions),
+          codexMcpToolOptions: [],
           codexSkillOptions: this.toCodexSkillOptions(codexSkills)
         };
+        Object.assign(this.mcpServerLabelMap, this.toCodexMcpServerLabelMap(codexOptions));
         this.bindRouteMode();
       },
       error: () => {
@@ -231,6 +270,7 @@ export class AgentDefinitionFormComponent implements OnInit {
           policyOptions: [],
           codexModeOptions: [],
           codexMcpServerOptions: [],
+          codexMcpToolOptions: [],
           codexSkillOptions: []
         };
         this.toastService.error('Load agent form dependencies failed');
@@ -255,6 +295,7 @@ export class AgentDefinitionFormComponent implements OnInit {
       this.editId = null;
       this.formContext.mode = 'create';
       this.formInitialValue = this.createInitialValue();
+      this.syncMcpToolOptions(this.formInitialValue.codexConfig?.mcpServerIds ?? []);
       this.rerenderForm();
       return;
     }
@@ -286,16 +327,18 @@ export class AgentDefinitionFormComponent implements OnInit {
             webSearchEnabled: detail.codexConfig?.webSearchEnabled ?? false,
             webSearchMode: detail.codexConfig?.webSearchMode ?? 'disabled',
             mcpServerIds: detail.codexConfig?.mcpServerIds ?? [],
+            mcpToolKeys: detail.codexConfig?.mcpToolKeys ?? [],
             skillIds: detail.codexConfig?.skillIds ?? [],
             agentsInstruction: detail.codexConfig?.agentsInstruction ?? ''
           },
           status: detail.status ?? 'ACTIVE'
         };
+        this.syncMcpToolOptions(detail.codexConfig?.mcpServerIds ?? [], detail.codexConfig?.mcpToolKeys ?? []);
         this.rerenderForm();
       },
       error: () => {
         this.toastService.error('Load agent definition detail failed');
-        void this.router.navigate([AGENT_DEFINITION_ROUTES.list]);
+        void this.router.navigate([this.routes.list]);
       }
     });
   }
@@ -331,7 +374,101 @@ export class AgentDefinitionFormComponent implements OnInit {
       .map((item) => ({ label: item.label, value: item.value }));
   }
 
+  private toCodexMcpServerLabelMap(options: CodexAgentOptionsResponse): Record<string, string> {
+    return (options.mcpServers ?? []).reduce<Record<string, string>>((result, item) => {
+      result[item.value] = item.label || item.value;
+      return result;
+    }, {});
+  }
+
   private toCodexSkillOptions(items: CodexSkillResponse[]): { label: string; value: string }[] {
     return items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
+  }
+
+  private syncMcpToolOptions(serverIds: string[], selectedToolKeys: string[] = []): void {
+    const normalizedServerIds = this.normalizeStringList(serverIds);
+    if (normalizedServerIds.length === 0) {
+      this.updateFormExtra({ codexMcpToolOptions: [] });
+      return;
+    }
+
+    const missingServerIds = normalizedServerIds.filter((serverId) => !this.mcpToolOptionCatalog[serverId]);
+    if (missingServerIds.length === 0) {
+      this.updateMcpToolOptions(normalizedServerIds, selectedToolKeys);
+      return;
+    }
+
+    this.loadingService.track(
+      forkJoin(
+        missingServerIds.map((serverId) =>
+          this.codexAgentAdminService.getMcpServerTools(serverId).pipe(
+            catchError(() =>
+              of({
+                server: {
+                  value: serverId,
+                  label: this.mcpServerLabelMap[serverId] || serverId,
+                  enabled: true
+                },
+                tools: []
+              } as CodexAgentMcpToolsResponse)
+            )
+          )
+        )
+      )
+    ).subscribe({
+      next: (responses) => {
+        responses.forEach((response) => {
+          const serverId = response.server?.value || '';
+          if (!serverId) {
+            return;
+          }
+          this.mcpToolOptionCatalog[serverId] = (response.tools ?? []).map((tool) => ({
+            label: `[${this.mcpServerLabelMap[serverId] || serverId}] ${tool.name}`,
+            value: `${serverId}:${tool.name}`
+          }));
+        });
+        this.updateMcpToolOptions(normalizedServerIds, selectedToolKeys);
+      },
+      error: () => {
+        this.toastService.error('Load MCP tool options failed');
+        this.updateMcpToolOptions(normalizedServerIds, selectedToolKeys);
+      }
+    });
+  }
+
+  private updateMcpToolOptions(serverIds: string[], selectedToolKeys: string[] = []): void {
+    const options = serverIds.flatMap((serverId) => this.mcpToolOptionCatalog[serverId] ?? []);
+    const mergedOptions = [...options];
+    selectedToolKeys.forEach((toolKey) => {
+      if (!toolKey || mergedOptions.some((item) => item.value === toolKey)) {
+        return;
+      }
+      const [serverId, ...toolParts] = toolKey.split(':');
+      const toolName = toolParts.join(':');
+      mergedOptions.push({
+        label: `[${this.mcpServerLabelMap[serverId] || serverId}] ${toolName || toolKey}`,
+        value: toolKey
+      });
+    });
+    this.updateFormExtra({ codexMcpToolOptions: mergedOptions });
+  }
+
+  private updateFormExtra(extra: Record<string, unknown>): void {
+    this.formContext.extra = {
+      ...(this.formContext.extra ?? {}),
+      ...extra
+    };
+  }
+
+  private normalizeStringList(values: string[] | undefined | null): string[] {
+    return Array.from(new Set((values ?? []).map((item) => item?.trim()).filter((item) => !!item) as string[]));
+  }
+
+  private normalizeMcpToolKeys(serverIds: string[], toolKeys: string[] | undefined | null): string[] {
+    const allowedServers = new Set(serverIds);
+    return this.normalizeStringList(toolKeys).filter((toolKey) => {
+      const [serverId] = toolKey.split(':');
+      return !!serverId && allowedServers.has(serverId);
+    });
   }
 }

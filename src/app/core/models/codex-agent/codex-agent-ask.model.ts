@@ -51,6 +51,7 @@ export interface CodexAgentProfile {
   codexMode?: string;
   skillCount?: number;
   mcpServerIds?: string[];
+  mcpToolKeys?: string[];
 }
 
 export interface CodexUsageResponse {
@@ -75,6 +76,7 @@ export interface CodexAgentAskResponse {
   agentName?: string;
   materializedSkills?: string[];
   mcpServers?: string[];
+  mcpToolKeys?: string[];
   toolExecutions?: {
     callId?: string;
     toolName?: string;

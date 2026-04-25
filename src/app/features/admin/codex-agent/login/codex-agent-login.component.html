@@ -6,8 +6,22 @@
         <p>Start device auth, open the verification link in a browser, then enter the user code returned by the API.</p>
       </div>
       <div class="action-row">
-        <button pButton type="button" icon="pi pi-refresh" label="Refresh Status" class="p-button-text" [disabled]="loadingStatus" (click)="loadAuthStatus()"></button>
-        <button pButton type="button" icon="pi pi-key" label="Start Device Login" [loading]="startingLogin" [disabled]="startingLogin" (click)="startDeviceLogin()"></button>
+        <app-button
+          icon="pi pi-refresh"
+          label="Refresh Status"
+          severity="secondary"
+          [text]="true"
+          [loading]="loadingStatus"
+          [disabled]="loadingStatus"
+          (buttonClick)="loadAuthStatus()"
+        ></app-button>
+        <app-button
+          icon="pi pi-key"
+          label="Start Device Login"
+          [loading]="startingLogin"
+          [disabled]="startingLogin"
+          (buttonClick)="startDeviceLogin()"
+        ></app-button>
       </div>
     </div>
 
@@ -18,9 +32,7 @@
       </div>
       <div>
         <strong>Status:</strong>
-        <span class="status-pill" [class.success]="authStatusClass === 'success'" [class.warning]="authStatusClass === 'warning'">
-          {{ authStatusLabel }}
-        </span>
+        <app-tag [value]="authStatusLabel" [severity]="authStatusSeverity"></app-tag>
       </div>
       <div class="grid-span-2">
         <strong>Message:</strong>
@@ -36,9 +48,29 @@
         <p>While the session is pending, this page polls the backend every 2 seconds.</p>
       </div>
       <div class="action-row">
-        <button pButton type="button" icon="pi pi-refresh" label="Refresh Session" class="p-button-text" [disabled]="!session?.sessionId || refreshingSession" (click)="refreshSession()"></button>
-        <button pButton type="button" icon="pi pi-external-link" label="Open Verification Link" class="p-button-secondary" [disabled]="!session?.verificationUri" (click)="openVerificationLink()"></button>
-        <button pButton type="button" icon="pi pi-copy" label="Copy Code" class="p-button-secondary" [disabled]="!session?.userCode" (click)="copyUserCode()"></button>
+        <app-button
+          icon="pi pi-refresh"
+          label="Refresh Session"
+          severity="secondary"
+          [text]="true"
+          [loading]="refreshingSession"
+          [disabled]="!session?.sessionId || refreshingSession"
+          (buttonClick)="refreshSession()"
+        ></app-button>
+        <app-button
+          icon="pi pi-external-link"
+          label="Open Verification Link"
+          severity="secondary"
+          [disabled]="!session?.verificationUri"
+          (buttonClick)="openVerificationLink()"
+        ></app-button>
+        <app-button
+          icon="pi pi-copy"
+          label="Copy Code"
+          severity="secondary"
+          [disabled]="!session?.userCode"
+          (buttonClick)="copyUserCode()"
+        ></app-button>
       </div>
     </div>
 
@@ -50,14 +82,7 @@
         </div>
         <div>
           <strong>State:</strong>
-          <span
-            class="status-pill"
-            [class.success]="sessionStateClass === 'success'"
-            [class.error]="sessionStateClass === 'error'"
-            [class.warning]="sessionStateClass === 'warning'"
-            [class.neutral]="sessionStateClass === 'neutral'">
-            {{ sessionStateLabel }}
-          </span>
+          <app-tag [value]="sessionStateLabel" [severity]="sessionStateSeverity"></app-tag>
         </div>
         <div>
           <strong>User Code:</strong>
