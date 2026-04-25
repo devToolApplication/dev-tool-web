@@ -4,6 +4,7 @@ import { finalize } from 'rxjs/operators';
 import {
   CodexAgentAskRequest,
   CodexAgentAskResponse,
+  CodexAgentMcpTool,
   CodexAgentOptionItem,
   CodexAgentOptionsResponse,
   CodexAgentProfile
@@ -76,6 +77,10 @@ export class CodexAgentPlaygroundComponent implements OnInit {
   formInitialValue: CodexPlaygroundFormValue = { ...PLAYGROUND_INITIAL_VALUE };
   formValue: CodexPlaygroundFormValue = { ...PLAYGROUND_INITIAL_VALUE };
   result: CodexAgentAskResponse | null = null;
+  selectedMcpServerId = '';
+  mcpTools: CodexAgentMcpTool[] = [];
+  mcpToolsLoading = false;
+  mcpToolsError = '';
   optionsSnapshot: CodexAgentOptionsResponse = {
     defaultModel: '',
     defaultMode: '',
@@ -160,6 +165,41 @@ export class CodexAgentPlaygroundComponent implements OnInit {
 
   get selectedAgent(): CodexAgentProfile | null {
     return this.selectedAgentById(this.formValue.agentId || this.formInitialValue.agentId || '');
+  }
+
+  get enabledMcpServers() {
+    return (this.optionsSnapshot.mcpServers ?? []).filter((item) => item.enabled !== false);
+  }
+
+  onMcpServerChange(serverId: string): void {
+    this.selectedMcpServerId = serverId;
+    this.mcpTools = [];
+    this.mcpToolsError = '';
+  }
+
+  loadMcpTools(): void {
+    if (!this.selectedMcpServerId) {
+      this.toastService.error('Select an MCP server first');
+      return;
+    }
+
+    this.mcpToolsLoading = true;
+    this.mcpToolsError = '';
+    this.mcpTools = [];
+    this.loadingService.track(this.codexAgentAdminService.getMcpServerTools(this.selectedMcpServerId))
+      .pipe(finalize(() => (this.mcpToolsLoading = false)))
+      .subscribe({
+        next: (response) => {
+          this.mcpTools = response.tools ?? [];
+          if (this.mcpTools.length === 0) {
+            this.toastService.info('MCP server returned no tools');
+          }
+        },
+        error: () => {
+          this.mcpToolsError = 'Load MCP tools failed';
+          this.toastService.error(this.mcpToolsError);
+        }
+      });
   }
 
   private loadOptions(): void {

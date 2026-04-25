@@ -4,7 +4,13 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../../enviroment/environment';
 import { BaseResponse } from '../../models/base-response.model';
 import { CodexAgentAuthStatusResponse, CodexDeviceLoginSessionResponse } from '../../models/codex-agent/codex-agent-auth.model';
-import { CodexAgentAskRequest, CodexAgentAskResponse, CodexAgentOptionsResponse } from '../../models/codex-agent/codex-agent-ask.model';
+import {
+  CodexAgentAskRequest,
+  CodexAgentAskResponse,
+  CodexAgentMcpServersResponse,
+  CodexAgentMcpToolsResponse,
+  CodexAgentOptionsResponse
+} from '../../models/codex-agent/codex-agent-ask.model';
 
 @Injectable({ providedIn: 'root' })
 export class CodexAgentAdminService {
@@ -14,6 +20,14 @@ export class CodexAgentAdminService {
 
   getOptions(): Observable<CodexAgentOptionsResponse> {
     return this.http.get<BaseResponse<CodexAgentOptionsResponse>>(`${this.apiUrl}/options`).pipe(map((res) => res.data));
+  }
+
+  getMcpServers(): Observable<CodexAgentMcpServersResponse> {
+    return this.http.get<BaseResponse<CodexAgentMcpServersResponse>>(`${this.apiUrl}/mcp-servers`).pipe(map((res) => res.data));
+  }
+
+  getMcpServerTools(serverId: string): Observable<CodexAgentMcpToolsResponse> {
+    return this.http.get<BaseResponse<CodexAgentMcpToolsResponse>>(`${this.apiUrl}/mcp-servers/${serverId}/tools`).pipe(map((res) => res.data));
   }
 
   getAuthStatus(): Observable<CodexAgentAuthStatusResponse> {
