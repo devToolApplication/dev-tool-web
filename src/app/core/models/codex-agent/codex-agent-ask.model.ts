@@ -27,6 +27,21 @@ export interface CodexAgentMcpServer {
   reason?: string;
 }
 
+export interface CodexAgentMcpTool {
+  name: string;
+  description?: string;
+  inputSchema?: unknown;
+}
+
+export interface CodexAgentMcpToolsResponse {
+  server: CodexAgentMcpServer;
+  tools: CodexAgentMcpTool[];
+}
+
+export interface CodexAgentMcpServersResponse {
+  servers: CodexAgentMcpServer[];
+}
+
 export interface CodexAgentProfile {
   id: string;
   code: string;

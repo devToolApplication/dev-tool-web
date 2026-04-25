@@ -114,6 +114,74 @@
   color: var(--app-text-muted);
 }
 
+.mcp-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mcp-select,
+.mcp-action {
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  min-height: 2.65rem;
+}
+
+.mcp-select {
+  width: 100%;
+  background: var(--app-input-bg);
+  color: var(--app-input-text);
+  padding: 0 0.8rem;
+}
+
+.mcp-action {
+  background: var(--app-primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0 1rem;
+}
+
+.mcp-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.mcp-tool-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mcp-tool-item {
+  border: 1px solid var(--app-border);
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+}
+
+.mcp-tool-name {
+  font-weight: 700;
+}
+
+.mcp-tool-description {
+  color: var(--app-text-muted);
+  margin-top: 0.3rem;
+}
+
+.mcp-tool-schema {
+  margin: 0.75rem 0 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-input-bg);
+  color: var(--app-input-text);
+  font-family: Consolas, monospace;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 960px) {
   .detail-grid {
     grid-template-columns: 1fr;
@@ -124,5 +192,9 @@
   .step-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .mcp-toolbar {
+    grid-template-columns: 1fr;
   }
 }

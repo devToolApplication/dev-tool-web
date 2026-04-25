@@ -39,6 +39,42 @@
     </section>
   }
 
+  <section class="result-card summary-card">
+    <div class="result-header">
+      <h3>MCP Tools</h3>
+      <span class="status-pill success">{{ enabledMcpServers.length }} servers</span>
+    </div>
+    <div class="mcp-toolbar">
+      <select class="mcp-select" [value]="selectedMcpServerId" (change)="onMcpServerChange($any($event.target).value)">
+        <option value="">Select MCP server</option>
+        @for (server of enabledMcpServers; track server.value) {
+          <option [value]="server.value">{{ server.label || server.value }}</option>
+        }
+      </select>
+      <button class="mcp-action" type="button" [disabled]="!selectedMcpServerId || mcpToolsLoading" (click)="loadMcpTools()">
+        {{ mcpToolsLoading ? 'Loading...' : 'Load Tools' }}
+      </button>
+    </div>
+
+    @if (mcpToolsError) {
+      <div class="result-error">{{ mcpToolsError }}</div>
+    }
+
+    @if (mcpTools.length > 0) {
+      <div class="mcp-tool-list">
+        @for (tool of mcpTools; track tool.name) {
+          <article class="mcp-tool-item">
+            <div class="mcp-tool-name">{{ tool.name }}</div>
+            <div class="mcp-tool-description">{{ tool.description || '-' }}</div>
+            <pre class="mcp-tool-schema">{{ tool.inputSchema | json }}</pre>
+          </article>
+        }
+      </div>
+    } @else if (selectedMcpServerId && !mcpToolsLoading && !mcpToolsError) {
+      <div class="empty-state">No tools loaded.</div>
+    }
+  </section>
+
   @if (result) {
     <section class="result-card">
       <div class="result-header">
