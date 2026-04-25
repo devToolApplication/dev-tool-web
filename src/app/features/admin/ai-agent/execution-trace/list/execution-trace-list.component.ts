@@ -140,7 +140,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   }
 
   private openPlayground(session: ExecutionSessionResponse): void {
-    void this.router.navigate(['/admin/ai-agent/playground'], {
+    void this.router.navigate(['/admin/ai-agent/runtime/playground'], {
       queryParams: {
         agentId: session.agentId,
         userId: session.userId || undefined

@@ -1,15 +1,15 @@
 <section class="playground-page">
   <app-base-crud-page
     [pageConfig]="{
-      title: 'AI Agent Playground',
-      description: 'Run admin playground requests against agent runtime and inspect execution trace.',
+      title: 'Custom Agent Playground',
+      description: 'Run admin playground requests against the internal agent runtime and inspect execution trace.',
       actions: [
         { id: 'clear-result', label: 'Clear Result', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result && !steps.length },
         { id: 'run', label: 'Run Request', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
       ],
       infoSection: {
-        title: 'Runtime Test',
-        description: 'Select an agent to run the full runtime flow. Model Override is optional and, when set, replaces the agent model for this test.'
+        title: 'Custom Runtime',
+        description: 'Select an agent to run the full internal runtime flow. Model Override is optional and replaces the agent model for this test.'
       }
     }"
     [formConfig]="formConfig"
