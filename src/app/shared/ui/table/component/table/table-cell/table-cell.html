@@ -30,11 +30,14 @@
 
   @case ('actions') {
     <div class="table-actions">
-      @for (action of actions; track action.label) {
+      @for (action of actions; track action.id ?? action.label ?? action.icon) {
         <app-button
-          [label]="action.label"
+          [label]="action.showLabel === false ? '' : action.label"
           [icon]="action.icon"
+          [tooltip]="action.tooltip ?? action.label"
           [severity]="action.severity ?? null"
+          [text]="action.text ?? false"
+          [styleClass]="action.styleClass"
           [disabled]="isActionDisabled(action)"
           (buttonClick)="onActionClick(action)"
         ></app-button>

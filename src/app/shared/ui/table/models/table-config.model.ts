@@ -24,7 +24,12 @@ export type TableActionSeverity =
 
 export interface TableAction {
   label: string;
+  id?: string;
   icon?: string;
+  tooltip?: string;
+  showLabel?: boolean;
+  text?: boolean;
+  styleClass?: string;
   severity?: TableActionSeverity;
   disabled?: (rowData: any) => boolean;
   onClick: (rowData: any) => void;

@@ -82,7 +82,6 @@ import { NotFoundComponent } from '../features/error/not-found/not-found.compone
 import { FeaturePlaceholderComponent } from '../features/feature-placeholder/feature-placeholder.component';
 import { SettingsComponent } from '../features/settings/settings.component';
 import { AI_AGENT_FEATURE_COMPONENTS } from '../features/admin/ai-agent/ai-agent.feature';
-import { CODEX_AGENT_FEATURE_COMPONENTS } from '../features/admin/codex-agent/codex-agent.feature';
 import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage-management/file-storage-management.feature';
 import { SYSTEM_MANAGEMENT_FEATURE_COMPONENTS } from '../features/admin/system-management/system-management.feature';
 import { TRADE_BOT_FEATURE_COMPONENTS } from '../features/admin/trade-bot-management/trade-bot-management.feature';
@@ -116,7 +115,6 @@ const FEATURE = [
   NotFoundComponent,
   FeaturePlaceholderComponent,
   ...AI_AGENT_FEATURE_COMPONENTS,
-  ...CODEX_AGENT_FEATURE_COMPONENTS,
   ...FILE_STORAGE_FEATURE_COMPONENTS,
   ...SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,
   ...TRADE_BOT_FEATURE_COMPONENTS

@@ -7,5 +7,6 @@
   [type]="type"
   [text]="text"
   [styleClass]="styleClass"
+  [attr.title]="(tooltip || null) | translateContent"
   (onClick)="buttonClick.emit()"
 />
