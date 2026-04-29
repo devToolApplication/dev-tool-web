@@ -42,6 +42,7 @@ __screenshots__/
 # Storybook
 /storybook-static
 storybook-*.log
+ng-serve-*.log
 
 # System files
 .DS_Store

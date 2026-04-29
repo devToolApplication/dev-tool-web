@@ -49,7 +49,6 @@ export class AiAgentPlaygroundComponent implements OnInit {
         label: 'aiAgent.modelOverride',
         width: '1/2',
         optionsExpression: 'context.extra?.modelOptions || []',
-        validation: [Rules.required('aiAgent.validation.modelRequired')],
         showClear: true
       },
       {

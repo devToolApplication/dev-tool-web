@@ -7,14 +7,10 @@ import { AgentDefinitionCreateDto, AgentDefinitionResponse, AgentDefinitionUpdat
 import { AiModelResponse } from '../../../../../core/models/ai-agent/ai-model.model';
 import { ExecutionPolicyConfigResponse } from '../../../../../core/models/ai-agent/execution-policy.model';
 import { PromptTemplateResponse } from '../../../../../core/models/ai-agent/prompt-template.model';
-import { CodexAgentOptionsResponse } from '../../../../../core/models/codex-agent/codex-agent-ask.model';
-import { CodexSkillResponse } from '../../../../../core/models/codex-agent/codex-skill.model';
 import { AgentDefinitionService } from '../../../../../core/services/ai-agent-service/agent-definition.service';
 import { AiModelService } from '../../../../../core/services/ai-agent-service/ai-model.service';
 import { ExecutionPolicyService } from '../../../../../core/services/ai-agent-service/execution-policy.service';
 import { PromptTemplateService } from '../../../../../core/services/ai-agent-service/prompt-template.service';
-import { CodexAgentAdminService } from '../../../../../core/services/codex-agent-service/codex-agent-admin.service';
-import { CodexSkillService } from '../../../../../core/services/codex-agent-service/codex-skill.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
@@ -58,83 +54,7 @@ export class AgentDefinitionFormComponent implements OnInit {
       { type: 'checkbox', name: 'defaultActive', label: 'Default Active', width: '1/3' },
       { type: 'select', name: 'status', label: 'Status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
       { type: 'textarea', name: 'description', label: 'Description', width: 'full' },
-      { type: 'textarea', name: 'executionPolicyJson', label: 'Execution Policy JSON Override', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'Invalid JSON' },
-      {
-        type: 'group',
-        name: 'codexConfig',
-        label: 'Codex Runtime',
-        width: 'full',
-        children: [
-          { type: 'checkbox', name: 'enabled', label: 'Codex Enabled', width: '1/3' },
-          { type: 'text', name: 'model', label: 'Codex Model', width: '1/3' },
-          {
-            type: 'select',
-            name: 'mode',
-            label: 'Codex Mode',
-            width: '1/3',
-            optionsExpression: 'context.extra?.codexModeOptions || []',
-            showClear: true
-          },
-          {
-            type: 'select',
-            name: 'approvalPolicy',
-            label: 'Approval Policy',
-            width: '1/3',
-            options: [
-              { label: 'Never', value: 'never' },
-              { label: 'On Request', value: 'on-request' },
-              { label: 'On Failure', value: 'on-failure' },
-              { label: 'Untrusted', value: 'untrusted' }
-            ],
-            showClear: true
-          },
-          { type: 'checkbox', name: 'skipGitRepoCheck', label: 'Skip Git Repo Check', width: '1/3' },
-          { type: 'checkbox', name: 'networkAccessEnabled', label: 'Network Access', width: '1/3' },
-          { type: 'checkbox', name: 'webSearchEnabled', label: 'Web Search Enabled', width: '1/3' },
-          {
-            type: 'select',
-            name: 'webSearchMode',
-            label: 'Web Search Mode',
-            width: '1/3',
-            options: [
-              { label: 'Disabled', value: 'disabled' },
-              { label: 'Cached', value: 'cached' },
-              { label: 'Live', value: 'live' }
-            ],
-            showClear: true
-          },
-          { type: 'text', name: 'workingDirectory', label: 'Working Directory', width: 'full' },
-          {
-            type: 'input-multi',
-            name: 'additionalDirectories',
-            label: 'Additional Directories',
-            width: 'full',
-            placeholder: 'Add directory path'
-          },
-          {
-            type: 'select-multi',
-            name: 'mcpServerIds',
-            label: 'Allowed MCP Servers',
-            width: 'full',
-            optionsExpression: 'context.extra?.codexMcpServerOptions || []'
-          },
-          {
-            type: 'select-multi',
-            name: 'skillIds',
-            label: 'Codex Skills',
-            width: 'full',
-            optionsExpression: 'context.extra?.codexSkillOptions || []'
-          },
-          {
-            type: 'textarea',
-            name: 'agentsInstruction',
-            label: 'AGENTS.md Instructions',
-            width: 'full',
-            rows: 12,
-            showZoomButton: true
-          }
-        ]
-      }
+      { type: 'textarea', name: 'executionPolicyJson', label: 'Execution Policy JSON Override', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'Invalid JSON' }
     ]
   };
 
@@ -148,8 +68,6 @@ export class AgentDefinitionFormComponent implements OnInit {
     private readonly aiModelService: AiModelService,
     private readonly promptTemplateService: PromptTemplateService,
     private readonly executionPolicyService: ExecutionPolicyService,
-    private readonly codexAgentAdminService: CodexAgentAdminService,
-    private readonly codexSkillService: CodexSkillService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly route: ActivatedRoute,
@@ -161,26 +79,21 @@ export class AgentDefinitionFormComponent implements OnInit {
     this.loadOptions();
   }
 
+  get pageTitle(): string {
+    return this.editId ? 'Edit Agent Definition' : 'Create Agent Definition';
+  }
+
+  get pageDescription(): string {
+    return 'Configure agent, model, tools, prompt template and execution policy.';
+  }
+
   onSubmitForm(model: AgentDefinitionCreateDto): void {
     const payload: AgentDefinitionCreateDto = {
       ...model,
       code: model.code?.trim() || '',
       name: model.name?.trim() || '',
       description: model.description?.trim() || '',
-      executionPolicyJson: model.executionPolicyJson?.trim() || '',
-      codexConfig: model.codexConfig
-        ? {
-            ...model.codexConfig,
-            model: model.codexConfig.model?.trim() || '',
-            mode: model.codexConfig.mode?.trim() || '',
-            approvalPolicy: model.codexConfig.approvalPolicy?.trim() || '',
-            workingDirectory: model.codexConfig.workingDirectory?.trim() || '',
-            additionalDirectories: (model.codexConfig.additionalDirectories ?? []).map((item) => item?.trim()).filter((item) => !!item) as string[],
-            mcpServerIds: (model.codexConfig.mcpServerIds ?? []).filter((item) => !!item),
-            skillIds: (model.codexConfig.skillIds ?? []).filter((item) => !!item),
-            agentsInstruction: model.codexConfig.agentsInstruction?.trim() || ''
-          }
-        : undefined
+      executionPolicyJson: model.executionPolicyJson?.trim() || ''
     };
     const request$ = this.editId
       ? this.agentDefinitionService.update(this.editId, payload as AgentDefinitionUpdateDto)
@@ -201,26 +114,14 @@ export class AgentDefinitionFormComponent implements OnInit {
       forkJoin({
         models: this.aiModelService.getAll().pipe(catchError(() => of([] as AiModelResponse[]))),
         prompts: this.promptTemplateService.getAll().pipe(catchError(() => of([] as PromptTemplateResponse[]))),
-        policies: this.executionPolicyService.getAll().pipe(catchError(() => of([] as ExecutionPolicyConfigResponse[]))),
-        codexOptions: this.codexAgentAdminService.getOptions().pipe(catchError(() => of({
-          defaultModel: '',
-          defaultMode: '',
-          models: [],
-          modes: [],
-          mcpServers: [],
-          agents: []
-        } as CodexAgentOptionsResponse))),
-        codexSkills: this.codexSkillService.getAll({ enabled: true }).pipe(catchError(() => of([] as CodexSkillResponse[])))
+        policies: this.executionPolicyService.getAll().pipe(catchError(() => of([] as ExecutionPolicyConfigResponse[])))
       })
     ).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: ({ models, prompts, policies, codexOptions, codexSkills }) => {
+      next: ({ models, prompts, policies }) => {
         this.formContext.extra = {
           modelOptions: this.toModelOptions(models),
           promptOptions: this.toPromptOptions(prompts),
-          policyOptions: this.toPolicyOptions(policies),
-          codexModeOptions: this.toCodexModeOptions(codexOptions),
-          codexMcpServerOptions: this.toCodexMcpServerOptions(codexOptions),
-          codexSkillOptions: this.toCodexSkillOptions(codexSkills)
+          policyOptions: this.toPolicyOptions(policies)
         };
         this.bindRouteMode();
       },
@@ -228,10 +129,7 @@ export class AgentDefinitionFormComponent implements OnInit {
         this.formContext.extra = {
           modelOptions: [],
           promptOptions: [],
-          policyOptions: [],
-          codexModeOptions: [],
-          codexMcpServerOptions: [],
-          codexSkillOptions: []
+          policyOptions: []
         };
         this.toastService.error('Load agent form dependencies failed');
         this.bindRouteMode();
@@ -274,21 +172,6 @@ export class AgentDefinitionFormComponent implements OnInit {
           executionPolicyJson: detail.executionPolicyJson ?? '',
           enabled: detail.enabled ?? true,
           defaultActive: detail.defaultActive ?? false,
-          codexConfig: {
-            enabled: detail.codexConfig?.enabled ?? false,
-            model: detail.codexConfig?.model ?? '',
-            mode: detail.codexConfig?.mode ?? '',
-            approvalPolicy: detail.codexConfig?.approvalPolicy ?? 'never',
-            workingDirectory: detail.codexConfig?.workingDirectory ?? '',
-            additionalDirectories: detail.codexConfig?.additionalDirectories ?? [],
-            skipGitRepoCheck: detail.codexConfig?.skipGitRepoCheck ?? true,
-            networkAccessEnabled: detail.codexConfig?.networkAccessEnabled ?? true,
-            webSearchEnabled: detail.codexConfig?.webSearchEnabled ?? false,
-            webSearchMode: detail.codexConfig?.webSearchMode ?? 'disabled',
-            mcpServerIds: detail.codexConfig?.mcpServerIds ?? [],
-            skillIds: detail.codexConfig?.skillIds ?? [],
-            agentsInstruction: detail.codexConfig?.agentsInstruction ?? ''
-          },
           status: detail.status ?? 'ACTIVE'
         };
         this.rerenderForm();
@@ -318,20 +201,6 @@ export class AgentDefinitionFormComponent implements OnInit {
   }
 
   private toPolicyOptions(items: ExecutionPolicyConfigResponse[]): { label: string; value: string }[] {
-    return items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
-  }
-
-  private toCodexModeOptions(options: CodexAgentOptionsResponse): { label: string; value: string }[] {
-    return (options.modes ?? []).map((item) => ({ label: item.label, value: item.value }));
-  }
-
-  private toCodexMcpServerOptions(options: CodexAgentOptionsResponse): { label: string; value: string }[] {
-    return (options.mcpServers ?? [])
-      .filter((item) => item.enabled !== false)
-      .map((item) => ({ label: item.label, value: item.value }));
-  }
-
-  private toCodexSkillOptions(items: CodexSkillResponse[]): { label: string; value: string }[] {
     return items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
   }
 }

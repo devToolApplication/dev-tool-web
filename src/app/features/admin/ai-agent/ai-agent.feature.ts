@@ -63,8 +63,13 @@ export const aiAgentAdminRoutes: Routes = [
     component: ExecutionTraceListComponent
   },
   {
-    path: 'admin/ai-agent/playground',
+    path: 'admin/ai-agent/runtime/playground',
     component: AiAgentPlaygroundComponent
+  },
+  {
+    path: 'admin/ai-agent/playground',
+    redirectTo: 'admin/ai-agent/runtime/playground',
+    pathMatch: 'full'
   },
   {
     path: 'admin/ai-agent/playwright-sessions',
@@ -72,7 +77,7 @@ export const aiAgentAdminRoutes: Routes = [
   },
   {
     path: 'admin/ai-agent/system-ask',
-    redirectTo: 'admin/ai-agent/playground',
+    redirectTo: 'admin/ai-agent/runtime/playground',
     pathMatch: 'full'
   },
   {

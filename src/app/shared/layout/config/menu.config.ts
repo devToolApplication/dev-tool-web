@@ -22,15 +22,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
               { label: 'layout.menu.executionTraces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
               { label: 'layout.menu.playwrightSessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' }
             ]
-          },
-          {
-            label: 'layout.menu.codexAgent',
-            icon: 'pi pi-code',
-            items: [
-              { label: 'layout.menu.login', icon: 'pi pi-key', routerLink: '/admin/codex-agent/login' },
-              { label: 'layout.menu.playground', icon: 'pi pi-play-circle', routerLink: '/admin/codex-agent/playground' },
-              { label: 'layout.menu.skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' }
-            ]
           }
         ]
       },

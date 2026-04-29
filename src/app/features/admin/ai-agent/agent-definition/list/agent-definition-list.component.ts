@@ -18,48 +18,7 @@ import { AGENT_DEFINITION_ROUTES } from '../agent-definition.constants';
   templateUrl: './agent-definition-list.component.html'
 })
 export class AgentDefinitionListComponent extends BasePagedList<AgentDefinitionResponse> implements OnInit {
-  readonly tableConfig: TableConfig = {
-    title: 'Agent Definitions',
-    toolbar: { new: { visible: true, label: 'New Agent', icon: 'pi pi-plus', severity: 'success' } },
-    filters: [
-      { field: 'code', label: 'Code', placeholder: 'Search code' },
-      { field: 'name', label: 'Name', placeholder: 'Search name' },
-      {
-        field: 'enabled',
-        label: 'Enabled',
-        type: 'select',
-        options: [
-          { label: 'Yes', value: true },
-          { label: 'No', value: false }
-        ]
-      }
-    ],
-    filterOptions: { primaryField: 'name' },
-    columns: [
-      { field: 'code', header: 'Code', sortable: true },
-      { field: 'name', header: 'Name', sortable: true },
-      { field: 'modelConfigId', header: 'Model' },
-      { field: 'systemPromptTemplateId', header: 'Prompt Template' },
-      { field: 'executionPolicyId', header: 'Policy' },
-      { field: 'defaultActive', header: 'Default', type: 'boolean' },
-      { field: 'enabled', header: 'Enabled', type: 'boolean' },
-      { field: 'status', header: 'Status' },
-      {
-        field: 'actions',
-        header: 'Actions',
-        type: 'actions',
-        actions: [
-          { label: 'Playground', icon: 'pi pi-play', severity: 'help', onClick: (row) => this.openPlayground(row.id) },
-          { label: 'Codex', icon: 'pi pi-code', severity: 'contrast', onClick: (row) => this.openCodexPlayground(row.id) },
-          { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-          { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
-        ]
-      }
-    ],
-    pagination: true,
-    rows: DEFAULT_TABLE_ROWS,
-    rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
-  };
+  tableConfig!: TableConfig;
 
   loading = false;
 
@@ -72,6 +31,7 @@ export class AgentDefinitionListComponent extends BasePagedList<AgentDefinitionR
     private readonly i18nService: I18nService
   ) {
     super(route, router, DEFAULT_TABLE_ROWS);
+    this.tableConfig = this.createTableConfig();
   }
 
   ngOnInit(): void {
@@ -88,10 +48,6 @@ export class AgentDefinitionListComponent extends BasePagedList<AgentDefinitionR
 
   private openPlayground(id: string): void {
     void this.router.navigate(['/admin/ai-agent/runtime/playground'], { queryParams: { agentId: id } });
-  }
-
-  private openCodexPlayground(id: string): void {
-    void this.router.navigate(['/admin/codex-agent/playground'], { queryParams: { agentId: id } });
   }
 
   private remove(id: string): void {
@@ -111,5 +67,56 @@ export class AgentDefinitionListComponent extends BasePagedList<AgentDefinitionR
       next: (res: BasePageResponse<AgentDefinitionResponse>) => this.setPageResponse(res),
       error: () => this.toastService.error('Load agent definitions failed')
     });
+  }
+
+  private createTableConfig(): TableConfig {
+    return {
+      title: 'Agent Definitions',
+      toolbar: {
+        new: {
+          visible: true,
+          label: 'New Agent',
+          icon: 'pi pi-plus',
+          severity: 'success'
+        }
+      },
+      filters: [
+        { field: 'code', label: 'Code', placeholder: 'Search code' },
+        { field: 'name', label: 'Name', placeholder: 'Search name' },
+        {
+          field: 'enabled',
+          label: 'Enabled',
+          type: 'select',
+          options: [
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
+          ]
+        }
+      ],
+      filterOptions: { primaryField: 'name' },
+      columns: [
+        { field: 'code', header: 'Code', sortable: true },
+        { field: 'name', header: 'Name', sortable: true },
+        { field: 'modelConfigId', header: 'Model' },
+        { field: 'systemPromptTemplateId', header: 'Prompt Template' },
+        { field: 'executionPolicyId', header: 'Policy' },
+        { field: 'defaultActive', header: 'Default', type: 'boolean' },
+        { field: 'enabled', header: 'Enabled', type: 'boolean' },
+        { field: 'status', header: 'Status' },
+        {
+          field: 'actions',
+          header: 'Actions',
+          type: 'actions',
+          actions: [
+            { label: 'Playground', icon: 'pi pi-play', severity: 'help', onClick: (row) => this.openPlayground(row.id) },
+            { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
+            { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+          ]
+        }
+      ],
+      pagination: true,
+      rows: DEFAULT_TABLE_ROWS,
+      rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
+    };
   }
 }
