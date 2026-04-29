@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-auto-complete',
   standalone: false,
   templateUrl: './auto-complete.html',
-  styleUrl: './auto-complete.css'
+  styleUrl: './auto-complete.css',
+  providers: [provideValueAccessor(() => AutoComplete)]
 })
 export class AutoComplete extends BaseInput<string> {
   @Input() options: SelectOption[] = [];

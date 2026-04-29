@@ -14,7 +14,7 @@ export class FeaturePlaceholderComponent {
   readonly description$: Observable<string>;
 
   constructor(private readonly route: ActivatedRoute) {
-    this.title$ = this.route.data.pipe(map((data) => String(data['title'] ?? 'Tính năng')));
-    this.description$ = this.route.data.pipe(map((data) => String(data['description'] ?? 'Màn hình này đang được hoàn thiện.')));
+    this.title$ = this.route.data.pipe(map((data) => String(data['title'] ?? 'feature.placeholder.title')));
+    this.description$ = this.route.data.pipe(map((data) => String(data['description'] ?? 'feature.placeholder.description')));
   }
 }

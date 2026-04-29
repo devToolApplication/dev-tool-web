@@ -1,6 +1,5 @@
-import { Component, forwardRef, Input } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BaseInput } from '../base-input';
+import { Component, Input } from '@angular/core';
+import { BaseInput, provideValueAccessor } from '../base-input';
 
 export interface SelectOption {
   label: string;
@@ -12,6 +11,7 @@ export interface SelectOption {
   standalone: false,
   templateUrl: './select.html',
   styleUrls: ['./select.css'],
+  providers: [provideValueAccessor(() => Select)]
 })
 export class Select extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] | null = [];

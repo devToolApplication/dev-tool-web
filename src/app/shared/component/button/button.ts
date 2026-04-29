@@ -11,6 +11,7 @@ export class Button extends BaseInput<void> {
   @Input() icon?: string;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() text = false;
+  @Input() loading = false;
   @Input() severity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null = null;
 
   @Output() buttonClick = new EventEmitter<void>();

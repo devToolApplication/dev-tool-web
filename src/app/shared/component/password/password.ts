@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 
 @Component({
   selector: 'app-password',
   standalone: false,
   templateUrl: './password.html',
-  styleUrl: './password.css'
+  styleUrl: './password.css',
+  providers: [provideValueAccessor(() => Password)]
 })
 export class Password extends BaseInput<string> {
   @Input() feedback = true;

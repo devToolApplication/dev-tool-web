@@ -6,16 +6,15 @@
   <div class="card chart-toolbar-card mb-4">
     <div class="chart-toolbar-top">
       <div class="chart-field chart-field--fixed">
-        <label class="chart-label">{{ 'tradeBot.symbol' | translateContent }}</label>
-        <input type="text" pInputText class="w-full" [value]="syncConfig?.symbol ?? ''" disabled />
+        <app-input-text label="tradeBot.symbol" [value]="syncConfig?.symbol ?? ''" [disabled]="true"></app-input-text>
       </div>
       <div class="chart-field chart-field--fixed">
-        <label class="chart-label">{{ 'tradeBot.intervals' | translateContent }}</label>
-        <select class="w-full p-inputtext p-component" [(ngModel)]="selectedInterval" [disabled]="!syncConfig">
-          @for (interval of syncConfig?.intervals ?? []; track interval) {
-            <option [value]="interval">{{ interval }}</option>
-          }
-        </select>
+        <app-select
+          label="tradeBot.intervals"
+          [(ngModel)]="selectedInterval"
+          [options]="intervalOptions"
+          [disabled]="!syncConfig"
+        ></app-select>
       </div>
     </div>
 
@@ -24,15 +23,13 @@
       <div class="chart-range-controls">
         <div class="chart-field chart-field--grow">
           <label class="chart-sub-label">{{ 'tradeBot.dateRange' | translateContent }}</label>
-          <p-datepicker
-            appendTo="body"
-            inputStyleClass="w-full"
-            styleClass="w-full"
+          <app-date-picker
+            label="tradeBot.dateRange"
             [showTime]="true"
             hourFormat="24"
             selectionMode="range"
             [(ngModel)]="dateRange"
-          ></p-datepicker>
+          ></app-date-picker>
         </div>
       </div>
     </div>

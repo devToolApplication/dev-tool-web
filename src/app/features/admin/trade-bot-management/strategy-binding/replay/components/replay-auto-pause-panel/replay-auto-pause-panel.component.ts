@@ -18,4 +18,8 @@ export class ReplayAutoPausePanelComponent {
   readonly autoPauseOptions: Array<{ label: string; value: StrategyReplayEventType }> = REPLAY_EVENT_TYPE_OPTIONS.filter((item) =>
     ['setup-formed', 'order-placed', 'tp-hit', 'sl-hit', 'trade-closed'].includes(String(item.value))
   ) as Array<{ label: string; value: StrategyReplayEventType }>;
+
+  onEnabledChange(value: boolean | null): void {
+    this.enabledChange.emit(value === true);
+  }
 }

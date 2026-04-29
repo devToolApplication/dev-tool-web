@@ -1,43 +1,43 @@
 <section class="crud-page">
   <div class="header-row detail-header">
     <div>
-      <h2>Backtest Detail</h2>
+      <h2>{{ 'tradeBot.backtest.detail.title' | translateContent }}</h2>
       <p class="detail-subtitle">{{ job?.exchangeCode }} / {{ job?.symbolCode }} / {{ job?.strategyServiceName }}</p>
     </div>
-    <app-button label="Back" icon="pi pi-arrow-left" severity="secondary" (buttonClick)="onBack()"></app-button>
+    <app-button label="tradeBot.back" icon="pi pi-arrow-left" severity="secondary" (buttonClick)="onBack()"></app-button>
   </div>
 
   <div class="detail-grid">
     <div class="metric-card">
-      <span class="metric-label">Total Trades</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.totalTrades' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.totalTrades ?? 0 }}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Win Trades</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.winTrades' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.winTrades ?? 0 }}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Lose Trades</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.loseTrades' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.loseTrades ?? 0 }}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Win Rate</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.winRate' | translateContent }}</span>
       <strong class="metric-value">{{ (metric?.winRate ?? 0) | number:'1.2-2' }}%</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">PnL</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.pnl' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.pnl ?? 0 | number:'1.2-2' }}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Final Equity</span>
+      <span class="metric-label">{{ 'tradeBot.replay.metric.finalEquity' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.finalEquity ?? 0 | number:'1.2-2' }}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Max Drawdown</span>
+      <span class="metric-label">{{ 'tradeBot.backtest.detail.maxDrawdown' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.maxDrawdown ?? 0 | number:'1.2-2' }}%</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Profit Factor</span>
+      <span class="metric-label">{{ 'tradeBot.backtest.detail.profitFactor' | translateContent }}</span>
       <strong class="metric-value">{{ metric?.profitFactor ?? 0 | number:'1.2-2' }}</strong>
     </div>
   </div>

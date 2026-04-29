@@ -1,1 +1,7 @@
-<p-splitbutton [label]="label | translateContent" [icon]="icon" [model]="model | translateContent" (onClick)="buttonClick.emit()" />
+<p-splitbutton
+  [label]="label | translateContent"
+  [icon]="icon"
+  [model]="model | translateContent"
+  [expandAriaLabel]="expandAriaLabel | translateContent"
+  (onClick)="buttonClick.emit()"
+/>

@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 
 @Component({
   selector: 'app-toggle-button',
   standalone: false,
   templateUrl: './toggle-button.html',
-  styleUrl: './toggle-button.css'
+  styleUrl: './toggle-button.css',
+  providers: [provideValueAccessor(() => ToggleButton)]
 })
 export class ToggleButton extends BaseInput<boolean> {
   @Input() onLabel = 'on';

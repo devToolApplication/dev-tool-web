@@ -8,6 +8,6 @@ import { MenuItem } from 'primeng/api';
   styleUrl: './breadcrumb.css'
 })
 export class Breadcrumb {
-  @Input() home: MenuItem = { icon: 'pi pi-home' };
+  @Input() home: MenuItem = { icon: 'pi pi-home', label: 'Home' };
   @Input() items: MenuItem[] = [];
 }

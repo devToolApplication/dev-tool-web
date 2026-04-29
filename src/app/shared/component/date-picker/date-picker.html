@@ -8,6 +8,9 @@
         appendTo="body"
         [showIcon]="showIcon"
         [showClear]="true"
+        [showTime]="showTime"
+        [hourFormat]="hourFormat"
+        [selectionMode]="selectionMode"
         [placeholder]="(placeholder || '') | translateContent"
         [dateFormat]="dateFormat"
         [invalid]="invalid"
@@ -28,6 +31,9 @@
       appendTo="body"
       [showIcon]="showIcon"
       [showClear]="true"
+      [showTime]="showTime"
+      [hourFormat]="hourFormat"
+      [selectionMode]="selectionMode"
       [placeholder]="(placeholder || '') | translateContent"
       [dateFormat]="dateFormat"
       [invalid]="invalid"
@@ -45,7 +51,7 @@
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText | translateContent }}</small>
+  <small [id]="inputId + '-help'" class="text-surface-700">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {

@@ -1,7 +1,7 @@
 <section class="placeholder-page">
   <div class="placeholder-card">
-    <p class="placeholder-eyebrow">Admin</p>
-    <h2>{{ title$ | async }}</h2>
-    <p>{{ description$ | async }}</p>
+    <p class="placeholder-eyebrow">{{ 'layout.menu.admin' | translateContent }}</p>
+    <h2>{{ (title$ | async) | translateContent }}</h2>
+    <p>{{ (description$ | async) | translateContent }}</p>
   </div>
 </section>

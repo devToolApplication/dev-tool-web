@@ -22,7 +22,7 @@
 </p-floatlabel>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId">{{ helpText | translateContent }}</small>
+  <small [id]="inputId + '-help'" class="text-surface-700">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {

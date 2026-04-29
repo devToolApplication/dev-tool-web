@@ -11,25 +11,25 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-sparkles',
         items: [
           {
-            label: 'Custom Agent',
+            label: 'layout.menu.customAgent',
             icon: 'pi pi-sitemap',
             items: [
-              { label: 'Playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/runtime/playground' },
-              { label: 'Agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
+              { label: 'layout.menu.playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/runtime/playground' },
+              { label: 'layout.menu.agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
               { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
-              { label: 'Prompt Templates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
-              { label: 'Execution Policies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
-              { label: 'Execution Traces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
-              { label: 'Playwright Sessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' }
+              { label: 'layout.menu.promptTemplates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
+              { label: 'layout.menu.executionPolicies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
+              { label: 'layout.menu.executionTraces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
+              { label: 'layout.menu.playwrightSessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' }
             ]
           },
           {
-            label: 'Codex Agent',
+            label: 'layout.menu.codexAgent',
             icon: 'pi pi-code',
             items: [
-              { label: 'Login', icon: 'pi pi-key', routerLink: '/admin/codex-agent/login' },
-              { label: 'Playground', icon: 'pi pi-play-circle', routerLink: '/admin/codex-agent/playground' },
-              { label: 'Skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' }
+              { label: 'layout.menu.login', icon: 'pi pi-key', routerLink: '/admin/codex-agent/login' },
+              { label: 'layout.menu.playground', icon: 'pi pi-play-circle', routerLink: '/admin/codex-agent/playground' },
+              { label: 'layout.menu.skills', icon: 'pi pi-book', routerLink: '/admin/codex-agent/skills' }
             ]
           }
         ]
@@ -71,7 +71,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-cloud-upload',
         items: [
           { label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' },
-          { label: 'Uploaded Files', icon: 'pi pi-file', routerLink: '/admin/upload-storage/files' }
+          { label: 'layout.menu.uploadedFiles', icon: 'pi pi-file', routerLink: '/admin/upload-storage/files' }
         ]
       },
       {
@@ -79,10 +79,10 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-chart-line',
         items: [
           { label: 'layout.menu.dataSource', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' },
-          { label: 'Strategy Config', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' },
-          { label: 'Rule Config', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/rule-configs' },
+          { label: 'layout.menu.strategyConfig', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' },
+          { label: 'layout.menu.ruleConfig', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/rule-configs' },
           { label: 'layout.menu.strategyBinding', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/strategy-binding' },
-          { label: 'Backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
+          { label: 'layout.menu.backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
         ]
       },
     ]

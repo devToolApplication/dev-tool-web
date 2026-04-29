@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 
 type CodeMirrorModules = {
   EditorState: typeof import('@codemirror/state').EditorState;
@@ -18,7 +18,8 @@ type JsonEditorInstance = {
   selector: 'app-input-area',
   standalone: false,
   templateUrl: './input-area.html',
-  styleUrl: './input-area.css'
+  styleUrl: './input-area.css',
+  providers: [provideValueAccessor(() => InputArea)]
 })
 export class InputArea extends BaseInput<string> implements AfterViewInit, OnChanges, OnDestroy {
   @Input() rows = 5;

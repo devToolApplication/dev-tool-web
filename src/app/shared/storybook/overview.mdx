@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Shared/Overview" />
+
+# Shared UI Storybook
+
+Shared stories are split by component so each component and top-level UI surface has its own Storybook entry under `Shared/Components` or `Shared/UI`.
+
+## Checklist Coverage
+
+- First component rendered: `Shared/Components/Button`
+- More than 5 components covered: all shared form controls, actions, table, form input, chart and CRUD surface
+- More than 20 stories covered: each shared entry includes default and state variants
+- Controls enabled through story `args`
+- Responsive checks enabled through the Storybook Viewport toolbar
+- Interaction tests run through stories with `play` functions
+- Accessibility checks run through `@storybook/addon-a11y`
+- Visual tests and publishing run through Chromatic
+- Autodocs enabled globally with the `autodocs` tag
+
+## Commands
+
+```bash
+npm run storybook
+npm run build-storybook
+npm run test-storybook:ci
+npm run publish-storybook
+```
+
+Set `CHROMATIC_PROJECT_TOKEN` before running `publish-storybook` or the CI visual test step.

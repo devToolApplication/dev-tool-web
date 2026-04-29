@@ -20,4 +20,8 @@ export class ReplayEventLogPanelComponent {
     label: string;
     value: StrategyReplayEventType;
   }>;
+
+  onFilterChange(value: Array<string | number> | null): void {
+    this.filterChange.emit((value ?? []) as StrategyReplayEventType[]);
+  }
 }

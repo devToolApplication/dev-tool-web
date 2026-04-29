@@ -11,14 +11,17 @@
 
   <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto pr-1">
     @for (trade of trades; track trade.id) {
-      <button
-        type="button"
+      <article
+        role="button"
+        tabindex="0"
         class="rounded-xl border p-3 text-left transition"
         [ngClass]="{
           'border-primary bg-primary-50': trade.id === highlightedTradeId,
           'border-surface-200 bg-surface-0 hover:border-primary': trade.id !== highlightedTradeId
         }"
         (click)="tradeSelect.emit(trade)"
+        (keydown.enter)="tradeSelect.emit(trade)"
+        (keydown.space)="$event.preventDefault(); tradeSelect.emit(trade)"
       >
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
@@ -34,13 +37,14 @@
             {{ TEXT.RrAchieved | translateContent }}: {{ trade.rrAchieved ?? 0 | number:'1.2-2' }}
           </div>
         </div>
-        <button
-          pButton
-          type="button"
-          class="p-button-text p-button-sm"
-          [icon]="expandedTradeId === trade.id ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-          (click)="toggleExpanded(trade.id, $event)"
-        ></button>
+        <span (click)="$event.stopPropagation()">
+          <app-button
+            [text]="true"
+            styleClass="p-button-sm"
+            [icon]="expandedTradeId === trade.id ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+            (buttonClick)="toggleExpanded(trade.id)"
+          ></app-button>
+        </span>
       </div>
 
         @if (expandedTradeId === trade.id) {
@@ -55,7 +59,7 @@
             <div>{{ TEXT.Pnl | translateContent }}: {{ trade.pnl ?? '--' }}</div>
           </div>
         }
-      </button>
+      </article>
     }
   </div>
 </p-panel>

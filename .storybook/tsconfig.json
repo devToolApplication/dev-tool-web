@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.app.json",
+  "include": [
+    "./preview.ts",
+    "../src/app/shared/**/*.stories.ts",
+    "../src/app/shared/**/*.mdx"
+  ],
+  "exclude": [
+    "../src/**/*.spec.ts"
+  ]
+}

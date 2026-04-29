@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../../ui/form-input/models/form-config.model';
 
 @Component({
@@ -7,6 +7,7 @@ import { SelectOption } from '../../ui/form-input/models/form-config.model';
   standalone: false,
   templateUrl: './radio-button.html',
   styleUrl: './radio-button.css',
+  providers: [provideValueAccessor(() => RadioButton)]
 })
 export class RadioButton extends BaseInput<string | number> {
   @Input() options: SelectOption[] = [];

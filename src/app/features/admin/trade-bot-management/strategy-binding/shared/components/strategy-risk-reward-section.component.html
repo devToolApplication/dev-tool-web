@@ -10,25 +10,20 @@
 
   <div class="grid grid-cols-12 gap-4" [formGroup]="form">
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.EntryMode | translateContent }}</label>
-      <p-select class="w-full" [options]="entryModeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="entryMode"></p-select>
+      <app-select [label]="TEXT.EntryMode" [options]="entryModeOptions" formControlName="entryMode"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.StopLossMode | translateContent }}</label>
-      <p-select class="w-full" [options]="slModeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="slMode"></p-select>
+      <app-select [label]="TEXT.StopLossMode" [options]="slModeOptions" formControlName="slMode"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.TakeProfitRr | translateContent }}</label>
-      <p-inputNumber class="w-full" inputStyleClass="w-full" [min]="0.1" [step]="0.1" formControlName="tpRr"></p-inputNumber>
+      <app-input-number [label]="TEXT.TakeProfitRr" [min]="0.1" [step]="0.1" formControlName="tpRr"></app-input-number>
     </div>
 
     <div class="col-span-12 md:col-span-6">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.MaxTradesPerDay | translateContent }}</label>
-      <p-inputNumber class="w-full" inputStyleClass="w-full" [min]="1" [step]="1" formControlName="maxTradesPerDay"></p-inputNumber>
+      <app-input-number [label]="TEXT.MaxTradesPerDay" [min]="1" [step]="1" formControlName="maxTradesPerDay"></app-input-number>
     </div>
     <div class="col-span-12 md:col-span-6">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyValidity | translateContent }}</label>
-      <p-select class="w-full" [options]="validityOptions | translateContent" optionLabel="label" optionValue="value" formControlName="strategyValidity"></p-select>
+      <app-select [label]="TEXT.StrategyValidity" [options]="validityOptions" formControlName="strategyValidity"></app-select>
     </div>
   </div>
 </p-panel>

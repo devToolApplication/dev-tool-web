@@ -1,15 +1,15 @@
 <section class="playground-page">
   <app-base-crud-page
     [pageConfig]="{
-      title: 'Codex Agent Playground',
-      description: 'Run prompts against codex-sdk-api using agent-specific skills, AGENTS.md rules and allowed MCP servers.',
+      title: 'codexAgent.playground.title',
+      description: 'codexAgent.playground.description',
       actions: [
-        { id: 'clear-result', label: 'Clear Result', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result },
-        { id: 'run', label: 'Run Request', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
+        { id: 'clear-result', label: 'codexAgent.playground.clearResult', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result },
+        { id: 'run', label: 'codexAgent.playground.runRequest', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
       ],
       infoSection: {
-        title: 'Codex Run',
-        description: 'Select an agent to materialize its skills and AGENTS.md. Model and mode fields are optional overrides.'
+        title: 'codexAgent.playground.codexRun',
+        description: 'codexAgent.playground.codexRunDescription'
       }
     }"
     [formConfig]="formConfig"
@@ -25,39 +25,45 @@
   @if (selectedAgent) {
     <section class="result-card summary-card">
       <div class="result-header">
-        <h3>Selected Agent</h3>
+        <h3>{{ 'codexAgent.playground.selectedAgent' | translateContent }}</h3>
         <span class="status-pill success">{{ selectedAgent.name }}</span>
       </div>
       <div class="detail-grid">
-        <div><strong>Agent Code:</strong> {{ selectedAgent.code || '-' }}</div>
-        <div><strong>Codex Enabled:</strong> {{ selectedAgent.codexEnabled ? 'Yes' : 'No' }}</div>
-        <div><strong>Configured Model:</strong> {{ selectedAgent.codexModel || '-' }}</div>
-        <div><strong>Configured Mode:</strong> {{ selectedAgent.codexMode || '-' }}</div>
-        <div><strong>Skill Count:</strong> {{ selectedAgent.skillCount ?? 0 }}</div>
-        <div><strong>MCP Servers:</strong> {{ (selectedAgent.mcpServerIds?.length || 0) > 0 ? selectedAgent.mcpServerIds?.join(', ') : '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.agentCode' | translateContent }}:</strong> {{ selectedAgent.code || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.codexEnabled' | translateContent }}:</strong> {{ (selectedAgent.codexEnabled ? 'yes' : 'no') | translateContent }}</div>
+        <div><strong>{{ 'codexAgent.playground.configuredModel' | translateContent }}:</strong> {{ selectedAgent.codexModel || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.configuredMode' | translateContent }}:</strong> {{ selectedAgent.codexMode || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.skillCount' | translateContent }}:</strong> {{ selectedAgent.skillCount ?? 0 }}</div>
+        <div><strong>{{ 'codexAgent.playground.mcpServers' | translateContent }}:</strong> {{ (selectedAgent.mcpServerIds?.length || 0) > 0 ? selectedAgent.mcpServerIds?.join(', ') : '-' }}</div>
       </div>
     </section>
   }
 
   <section class="result-card summary-card">
     <div class="result-header">
-      <h3>MCP Tools</h3>
-      <span class="status-pill success">{{ enabledMcpServers.length }} servers</span>
+      <h3>{{ 'codexAgent.playground.mcpTools' | translateContent }}</h3>
+      <span class="status-pill success">{{ enabledMcpServers.length }} {{ 'codexAgent.playground.servers' | translateContent }}</span>
     </div>
     <div class="mcp-toolbar">
-      <select class="mcp-select" [value]="selectedMcpServerId" (change)="onMcpServerChange($any($event.target).value)">
-        <option value="">Select MCP server</option>
-        @for (server of enabledMcpServers; track server.value) {
-          <option [value]="server.value">{{ server.label || server.value }}</option>
-        }
-      </select>
-      <button class="mcp-action" type="button" [disabled]="!selectedMcpServerId || mcpToolsLoading" (click)="loadMcpTools()">
-        {{ mcpToolsLoading ? 'Loading...' : 'Load Tools' }}
-      </button>
+      <app-select
+        styleClass="mcp-select"
+        [value]="selectedMcpServerId"
+        (valueChange)="onMcpServerChange($event || '')"
+        [options]="mcpServerOptions"
+        placeholder="codexAgent.playground.selectMcpServer"
+        [showClear]="true"
+      ></app-select>
+      <app-button
+        styleClass="mcp-action"
+        label="codexAgent.playground.loadTools"
+        [loading]="mcpToolsLoading"
+        [disabled]="!selectedMcpServerId || mcpToolsLoading"
+        (buttonClick)="loadMcpTools()"
+      ></app-button>
     </div>
 
     @if (mcpToolsError) {
-      <div class="result-error">{{ mcpToolsError }}</div>
+      <div class="result-error">{{ mcpToolsError | translateContent }}</div>
     }
 
     @if (mcpTools.length > 0) {
@@ -71,55 +77,55 @@
         }
       </div>
     } @else if (selectedMcpServerId && !mcpToolsLoading && !mcpToolsError) {
-      <div class="empty-state">No tools loaded.</div>
+      <div class="empty-state">{{ 'codexAgent.playground.noToolsLoaded' | translateContent }}</div>
     }
   </section>
 
   @if (result) {
     <section class="result-card">
       <div class="result-header">
-        <h3>Execution Result</h3>
+        <h3>{{ 'codexAgent.playground.executionResult' | translateContent }}</h3>
         <span class="status-pill" [class.success]="result.success" [class.error]="!result.success">
           {{ result.executionStatus || (result.success ? 'COMPLETED' : 'FAILED') }}
         </span>
       </div>
 
       <div class="detail-grid">
-        <div><strong>Agent:</strong> {{ result.agentName || result.agentCode || '-' }}</div>
-        <div><strong>Model:</strong> {{ selectedModelLabel }}</div>
-        <div><strong>Mode:</strong> {{ selectedModeLabel }}</div>
-        <div><strong>Local Thread ID:</strong> {{ result.localThreadId || '-' }}</div>
-        <div><strong>Codex Thread ID:</strong> {{ result.codexThreadId || '-' }}</div>
-        <div><strong>Total Tokens:</strong> {{ result.totalToken ?? 0 }}</div>
-        <div><strong>Items:</strong> {{ result.iterationCount ?? 0 }}</div>
+        <div><strong>{{ 'codexAgent.playground.agent' | translateContent }}:</strong> {{ result.agentName || result.agentCode || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.model' | translateContent }}:</strong> {{ selectedModelLabel }}</div>
+        <div><strong>{{ 'codexAgent.playground.mode' | translateContent }}:</strong> {{ selectedModeLabel }}</div>
+        <div><strong>{{ 'codexAgent.playground.localThreadId' | translateContent }}:</strong> {{ result.localThreadId || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.codexThreadId' | translateContent }}:</strong> {{ result.codexThreadId || '-' }}</div>
+        <div><strong>{{ 'codexAgent.playground.totalTokens' | translateContent }}:</strong> {{ result.totalToken ?? 0 }}</div>
+        <div><strong>{{ 'codexAgent.playground.items' | translateContent }}:</strong> {{ result.iterationCount ?? 0 }}</div>
       </div>
 
       @if ((result.materializedSkills?.length || 0) > 0 || (result.mcpServers?.length || 0) > 0) {
         <div class="detail-grid usage-grid">
-          <div><strong>Materialized Skills:</strong> {{ (result.materializedSkills?.length || 0) > 0 ? result.materializedSkills?.join(', ') : '-' }}</div>
-          <div><strong>Allowed MCP Servers:</strong> {{ (result.mcpServers?.length || 0) > 0 ? result.mcpServers?.join(', ') : '-' }}</div>
+          <div><strong>{{ 'codexAgent.playground.materializedSkills' | translateContent }}:</strong> {{ (result.materializedSkills?.length || 0) > 0 ? result.materializedSkills?.join(', ') : '-' }}</div>
+          <div><strong>{{ 'codexAgent.playground.allowedMcpServers' | translateContent }}:</strong> {{ (result.mcpServers?.length || 0) > 0 ? result.mcpServers?.join(', ') : '-' }}</div>
         </div>
       }
 
       @if (result.codexUsage) {
         <div class="detail-grid usage-grid">
-          <div><strong>Input Tokens:</strong> {{ result.codexUsage.inputTokens ?? 0 }}</div>
-          <div><strong>Cached Input Tokens:</strong> {{ result.codexUsage.cachedInputTokens ?? 0 }}</div>
-          <div><strong>Output Tokens:</strong> {{ result.codexUsage.outputTokens ?? 0 }}</div>
-          <div><strong>Total Tokens:</strong> {{ result.codexUsage.totalTokens ?? 0 }}</div>
+          <div><strong>{{ 'codexAgent.playground.inputTokens' | translateContent }}:</strong> {{ result.codexUsage.inputTokens ?? 0 }}</div>
+          <div><strong>{{ 'codexAgent.playground.cachedInputTokens' | translateContent }}:</strong> {{ result.codexUsage.cachedInputTokens ?? 0 }}</div>
+          <div><strong>{{ 'codexAgent.playground.outputTokens' | translateContent }}:</strong> {{ result.codexUsage.outputTokens ?? 0 }}</div>
+          <div><strong>{{ 'codexAgent.playground.totalTokens' | translateContent }}:</strong> {{ result.codexUsage.totalTokens ?? 0 }}</div>
         </div>
       }
 
       @if (result.success) {
-        <div class="section-title">Answer</div>
+        <div class="section-title">{{ 'codexAgent.playground.answer' | translateContent }}</div>
         <pre class="result-body">{{ result.answer || '' }}</pre>
       } @else {
-        <div class="section-title">Error</div>
-        <div class="result-error">{{ result.errorMessage || 'Unknown Codex error' }}</div>
+        <div class="section-title">{{ 'codexAgent.playground.error' | translateContent }}</div>
+        <div class="result-error">{{ result.errorMessage || ('codexAgent.playground.unknownCodexError' | translateContent) }}</div>
       }
 
       @if ((result.toolExecutions?.length || 0) > 0) {
-        <div class="section-title">Tool Executions</div>
+        <div class="section-title">{{ 'codexAgent.playground.toolExecutions' | translateContent }}</div>
         <pre class="result-body">{{ result.toolExecutions | json }}</pre>
       }
     </section>

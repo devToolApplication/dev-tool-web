@@ -53,14 +53,14 @@ export class FileUploadDebugComponent implements OnInit {
           const defaultStorage = storages.find((item) => item.defaultActive && item.status === 'ACTIVE');
           this.selectedStorageId = this.selectedStorageId || defaultStorage?.id || null;
         },
-        error: () => this.toastService.error('Load upload storages failed')
+        error: () => this.toastService.error('systemManagement.fileUploadDebug.toast.loadStoragesFailed')
       });
   }
 
   onUpload(event: FileUploadHandlerEvent): void {
     const file = event.files?.[0];
     if (!file) {
-      this.toastService.error('Please choose a file');
+      this.toastService.error('systemManagement.fileUploadDebug.toast.chooseFileRequired');
       return;
     }
 
@@ -85,10 +85,10 @@ export class FileUploadDebugComponent implements OnInit {
       .subscribe({
         next: (result) => {
           this.uploadResult = result;
-          this.toastService.info('Upload file success');
+          this.toastService.info('systemManagement.fileUploadDebug.toast.uploadSuccess');
         },
         error: (error) => {
-          this.uploadError = error?.error?.errorMessage || error?.message || 'Upload file failed';
+          this.uploadError = error?.error?.errorMessage || error?.message || 'systemManagement.fileUploadDebug.toast.uploadFailed';
           this.toastService.error(this.uploadError);
         }
       });
@@ -109,7 +109,7 @@ export class FileUploadDebugComponent implements OnInit {
     try {
       const parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        this.toastService.error('Metadata must be a JSON object');
+        this.toastService.error('systemManagement.fileUploadDebug.toast.metadataObjectRequired');
         return null;
       }
 
@@ -118,7 +118,7 @@ export class FileUploadDebugComponent implements OnInit {
         return result;
       }, {});
     } catch {
-      this.toastService.error('Metadata JSON is invalid');
+      this.toastService.error('systemManagement.fileUploadDebug.toast.metadataInvalid');
       return null;
     }
   }

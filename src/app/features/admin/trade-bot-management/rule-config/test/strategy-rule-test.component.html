@@ -1,13 +1,13 @@
 <section class="crud-page flex flex-col gap-4">
   <div class="flex flex-col gap-3 rounded-2xl border border-surface-200 bg-surface-0 p-5 shadow-sm lg:flex-row lg:items-start lg:justify-between">
     <div>
-      <h2 class="m-0 text-2xl font-semibold">Test Rule</h2>
-      <p class="mt-2 text-sm text-surface-500">Preview the selected rule against chart data to verify overlays and signal logic.</p>
+      <h2 class="m-0 text-2xl font-semibold">{{ 'tradeBot.strategyRule.test.title' | translateContent }}</h2>
+      <p class="mt-2 text-sm text-surface-500">{{ 'tradeBot.strategyRule.test.description' | translateContent }}</p>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <button pButton type="button" class="p-button-text" icon="pi pi-arrow-left" label="Back" (click)="goBack()"></button>
-      <button pButton type="button" icon="pi pi-play" label="Run Preview" [loading]="previewing" (click)="runPreview()"></button>
+      <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
+      <app-button icon="pi pi-play" label="tradeBot.strategyRule.test.runPreview" [loading]="previewing" (buttonClick)="runPreview()"></app-button>
     </div>
   </div>
 
@@ -16,30 +16,26 @@
       <p-panel>
         <ng-template pTemplate="header">
           <div>
-            <div class="text-base font-semibold">Preview Setup</div>
+            <div class="text-base font-semibold">{{ 'tradeBot.strategyRule.test.previewSetup' | translateContent }}</div>
             <div class="text-sm text-surface-500">{{ rule?.code }} - {{ rule?.name }}</div>
           </div>
         </ng-template>
 
         <div class="grid grid-cols-12 gap-4" [formGroup]="form">
           <div class="col-span-12">
-            <label class="mb-2 block text-sm font-medium">Exchange</label>
-            <p-select class="w-full" [options]="exchangeOptions" optionLabel="label" optionValue="value" formControlName="exchangeId"></p-select>
+            <app-select label="tradeBot.strategy.field.exchange" [options]="exchangeOptions" formControlName="exchangeId"></app-select>
           </div>
           <div class="col-span-12">
-            <label class="mb-2 block text-sm font-medium">Symbol</label>
-            <p-select class="w-full" [options]="symbolOptions" optionLabel="label" optionValue="value" formControlName="symbolId"></p-select>
+            <app-select label="tradeBot.strategy.field.symbol" [options]="symbolOptions" formControlName="symbolId"></app-select>
           </div>
           <div class="col-span-12">
-            <label class="mb-2 block text-sm font-medium">From Date</label>
-            <p-datepicker appendTo="body" inputStyleClass="w-full" styleClass="w-full" [showIcon]="true" formControlName="fromDate"></p-datepicker>
+            <app-date-picker label="fromDate" [showIcon]="true" formControlName="fromDate"></app-date-picker>
           </div>
           <div class="col-span-12">
-            <label class="mb-2 block text-sm font-medium">To Date</label>
-            <p-datepicker appendTo="body" inputStyleClass="w-full" styleClass="w-full" [showIcon]="true" formControlName="toDate"></p-datepicker>
+            <app-date-picker label="toDate" [showIcon]="true" formControlName="toDate"></app-date-picker>
           </div>
           <div class="col-span-12">
-            <label class="mb-2 block text-sm font-medium">Rule JSON</label>
+            <label class="mb-2 block text-sm font-medium">{{ 'tradeBot.strategyRule.test.ruleJson' | translateContent }}</label>
             <pre class="m-0 max-h-72 overflow-auto rounded-xl bg-surface-900/95 p-3 text-xs text-surface-0">{{ rule?.configJson | json }}</pre>
           </div>
         </div>

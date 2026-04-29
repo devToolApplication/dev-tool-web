@@ -37,7 +37,7 @@ export class CodexAgentPlaygroundComponent implements OnInit {
       {
         type: 'select',
         name: 'agentId',
-        label: 'Agent',
+        label: 'codexAgent.playground.agent',
         width: '1/2',
         optionsExpression: 'context.extra?.agentOptions || []',
         showClear: true
@@ -45,7 +45,7 @@ export class CodexAgentPlaygroundComponent implements OnInit {
       {
         type: 'select',
         name: 'model',
-        label: 'Model Override',
+        label: 'codexAgent.playground.modelOverride',
         width: '1/4',
         optionsExpression: 'context.extra?.modelOptions || []',
         showClear: true
@@ -53,7 +53,7 @@ export class CodexAgentPlaygroundComponent implements OnInit {
       {
         type: 'select',
         name: 'mode',
-        label: 'Mode Override',
+        label: 'codexAgent.playground.modeOverride',
         width: '1/4',
         optionsExpression: 'context.extra?.modeOptions || []',
         showClear: true
@@ -61,11 +61,11 @@ export class CodexAgentPlaygroundComponent implements OnInit {
       {
         type: 'textarea',
         name: 'userPrompt',
-        label: 'User Prompt',
+        label: 'codexAgent.playground.userPrompt',
         width: 'full',
         rows: 10,
         showZoomButton: true,
-        validation: [Rules.required('User prompt is required')]
+        validation: [Rules.required('codexAgent.playground.validation.userPromptRequired')]
       }
     ]
   };
@@ -130,7 +130,7 @@ export class CodexAgentPlaygroundComponent implements OnInit {
     };
 
     if (!payload.userPrompt) {
-      this.toastService.error('User prompt is required');
+      this.toastService.error('codexAgent.playground.validation.userPromptRequired');
       return;
     }
 
@@ -140,12 +140,12 @@ export class CodexAgentPlaygroundComponent implements OnInit {
       next: (response) => {
         this.result = response;
         if (response.success) {
-          this.toastService.info('Codex run completed');
+          this.toastService.info('codexAgent.playground.toast.runCompleted');
         } else {
-          this.toastService.error(response.errorMessage || 'Codex run failed');
+          this.toastService.error(response.errorMessage || 'codexAgent.playground.toast.runFailed');
         }
       },
-      error: () => this.toastService.error('Codex run failed')
+      error: () => this.toastService.error('codexAgent.playground.toast.runFailed')
     });
   }
 
@@ -171,15 +171,22 @@ export class CodexAgentPlaygroundComponent implements OnInit {
     return (this.optionsSnapshot.mcpServers ?? []).filter((item) => item.enabled !== false);
   }
 
-  onMcpServerChange(serverId: string): void {
-    this.selectedMcpServerId = serverId;
+  get mcpServerOptions(): Array<{ label: string; value: string }> {
+    return this.enabledMcpServers.map((server) => ({
+      label: server.label || server.value,
+      value: server.value
+    }));
+  }
+
+  onMcpServerChange(serverId: string | number | boolean | null): void {
+    this.selectedMcpServerId = typeof serverId === 'string' ? serverId : '';
     this.mcpTools = [];
     this.mcpToolsError = '';
   }
 
   loadMcpTools(): void {
     if (!this.selectedMcpServerId) {
-      this.toastService.error('Select an MCP server first');
+      this.toastService.error('codexAgent.playground.toast.selectMcpServerFirst');
       return;
     }
 
@@ -192,11 +199,11 @@ export class CodexAgentPlaygroundComponent implements OnInit {
         next: (response) => {
           this.mcpTools = response.tools ?? [];
           if (this.mcpTools.length === 0) {
-            this.toastService.info('MCP server returned no tools');
+            this.toastService.info('codexAgent.playground.toast.noToolsReturned');
           }
         },
         error: () => {
-          this.mcpToolsError = 'Load MCP tools failed';
+          this.mcpToolsError = 'codexAgent.playground.toast.loadMcpToolsFailed';
           this.toastService.error(this.mcpToolsError);
         }
       });
@@ -220,7 +227,7 @@ export class CodexAgentPlaygroundComponent implements OnInit {
           modelOptions: [],
           modeOptions: []
         };
-        this.toastService.error('Load Codex options failed');
+        this.toastService.error('codexAgent.playground.toast.loadOptionsFailed');
         this.applyDefaults({
           defaultModel: '',
           defaultMode: '',

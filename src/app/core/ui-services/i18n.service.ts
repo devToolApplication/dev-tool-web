@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import commonTranslations from '../i18n/common/common.i18n.json';
 import aiAgentTranslations from '../i18n/features/ai-agent.i18n.json';
+import codexAgentTranslations from '../i18n/features/codex-agent.i18n.json';
 import dashboardTranslations from '../i18n/features/dashboard.i18n.json';
 import errorsTranslations from '../i18n/features/errors.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
@@ -24,6 +25,7 @@ const TRANSLATIONS: TranslationMap = {
     ...layoutTranslations.vi,
     ...dashboardTranslations.vi,
     ...aiAgentTranslations.vi,
+    ...codexAgentTranslations.vi,
     ...errorsTranslations.vi,
     ...settingsTranslations.vi,
     ...systemManagementTranslations.vi,
@@ -39,6 +41,7 @@ const TRANSLATIONS: TranslationMap = {
     ...layoutTranslations.en,
     ...dashboardTranslations.en,
     ...aiAgentTranslations.en,
+    ...codexAgentTranslations.en,
     ...errorsTranslations.en,
     ...settingsTranslations.en,
     ...systemManagementTranslations.en,

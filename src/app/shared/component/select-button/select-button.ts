@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-select-button',
   standalone: false,
   templateUrl: './select-button.html',
-  styleUrl: './select-button.css'
+  styleUrl: './select-button.css',
+  providers: [provideValueAccessor(() => SelectButton)]
 })
 export class SelectButton extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] = [];

@@ -13,7 +13,7 @@
 
 <app-base-popup
   [visible]="testPromptVisible"
-  [header]="'Test AI Prompt'"
+  header="aiAgent.aiModel.testPrompt.title"
   [subheader]="selectedModel ? (selectedModel.modelName + ' (' + selectedModel.providerModelType + ')') : ''"
   [size]="'lg'"
   [loading]="testPromptSubmitting"
@@ -35,22 +35,22 @@
   @if (testPromptAnswer) {
     <section class="result-card">
       <div class="result-header">
-        <h3>AI Response</h3>
-        <span class="token-count">Tokens: {{ testPromptAnswer.totalToken ?? 0 }} | Steps: {{ testPromptAnswer.iterationCount ?? 1 }}</span>
+        <h3>{{ 'aiAgent.aiModel.testPrompt.response' | translateContent }}</h3>
+        <span class="token-count">{{ 'aiAgent.aiModel.tokens' | translateContent }}: {{ testPromptAnswer.totalToken ?? 0 }} | {{ 'aiAgent.aiModel.steps' | translateContent }}: {{ testPromptAnswer.iterationCount ?? 1 }}</span>
       </div>
       @if (testPromptAnswer.sessionId || testPromptAnswer.executionStatus) {
-        <div class="result-meta">Session: {{ testPromptAnswer.sessionId || '-' }} | Status: {{ testPromptAnswer.executionStatus || '-' }}</div>
+        <div class="result-meta">{{ 'aiAgent.aiModel.session' | translateContent }}: {{ testPromptAnswer.sessionId || '-' }} | {{ 'status' | translateContent }}: {{ testPromptAnswer.executionStatus || '-' }}</div>
       }
       @if (testPromptAnswer.success) {
         <pre class="result-body">{{ testPromptAnswer.answer || '' }}</pre>
       } @else {
-        <div class="result-error">{{ testPromptAnswer.errorMessage || 'Unknown error' }}</div>
+        <div class="result-error">{{ testPromptAnswer.errorMessage || ('aiAgent.unknownError' | translateContent) }}</div>
       }
       @if ((testPromptAnswer.toolExecutions?.length || 0) > 0) {
         <section class="sub-result-card border-default bg-surface">
           <div class="sub-result-header">
-            <h4>Tool Executions</h4>
-            <span class="status-pill success">{{ testPromptAnswer.toolExecutions?.length }} tools</span>
+            <h4>{{ 'aiAgent.toolExecutions' | translateContent }}</h4>
+            <span class="status-pill success">{{ testPromptAnswer.toolExecutions?.length }} {{ 'aiAgent.tools' | translateContent }}</span>
           </div>
           <pre class="result-body">{{ testPromptAnswer.toolExecutions | json }}</pre>
         </section>
@@ -59,7 +59,7 @@
   }
 
   <div popup-footer>
-    <button pButton type="button" class="p-button-text" [disabled]="testPromptSubmitting" (click)="onPromptCancel()">Cancel</button>
-    <button pButton type="button" icon="pi pi-send" [loading]="testPromptSubmitting" (click)="onSubmitPrompt(testPromptFormValue)">Submit</button>
+    <app-button [text]="true" label="cancel" [disabled]="testPromptSubmitting" (buttonClick)="onPromptCancel()"></app-button>
+    <app-button icon="pi pi-send" label="submit" [loading]="testPromptSubmitting" (buttonClick)="onSubmitPrompt(testPromptFormValue)"></app-button>
   </div>
 </app-base-popup>

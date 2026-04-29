@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { SelectOption } from '../select/select';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 
 @Component({
   selector: 'app-select-multi',
   standalone: false,
   templateUrl: './select-multi.html',
-  styleUrl: './select-multi.css'
+  styleUrl: './select-multi.css',
+  providers: [provideValueAccessor(() => SelectMulti)]
 })
 export class SelectMulti extends BaseInput<Array<string | number>> {
   @Input() options: SelectOption[] = [];

@@ -53,8 +53,8 @@ export class FieldSecretMetadataRendererComponent {
 
   get typeOptions(): SelectOption[] {
     return this.config.typeOptions ?? [
-      { label: 'Config', value: 'CONFIG' },
-      { label: 'Secret', value: 'SECRET' }
+      { label: 'config', value: 'CONFIG' },
+      { label: 'secret', value: 'SECRET' }
     ];
   }
 

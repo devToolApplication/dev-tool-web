@@ -40,7 +40,7 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.authStatus = response;
       },
-      error: () => this.toastService.error('Load Codex auth status failed')
+      error: () => this.toastService.error('codexAgent.login.toast.loadAuthStatusFailed')
     });
   }
 
@@ -53,7 +53,7 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
         this.syncPolling();
         this.handleSessionStateChange(session, previousState, true);
       },
-      error: () => this.toastService.error('Start Codex device login failed')
+      error: () => this.toastService.error('codexAgent.login.toast.startDeviceLoginFailed')
     });
   }
 
@@ -73,7 +73,7 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
       },
       error: () => {
         if (showToastOnError) {
-          this.toastService.error('Refresh Codex device login session failed');
+          this.toastService.error('codexAgent.login.toast.refreshSessionFailed');
         }
       }
     });
@@ -94,23 +94,23 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
     }
 
     if (!navigator.clipboard) {
-      this.toastService.error('Clipboard is not available in this browser');
+      this.toastService.error('codexAgent.login.toast.clipboardUnavailable');
       return;
     }
 
     navigator.clipboard.writeText(userCode).then(() => {
-      this.toastService.success('User code copied');
+      this.toastService.success('codexAgent.login.toast.userCodeCopied');
     }).catch(() => {
-      this.toastService.error('Copy user code failed');
+      this.toastService.error('codexAgent.login.toast.copyUserCodeFailed');
     });
   }
 
   get authStatusLabel(): string {
     if (!this.authStatus) {
-      return 'UNKNOWN';
+      return 'codexAgent.login.status.unknown';
     }
 
-    return this.authStatus.authenticated ? 'AUTHENTICATED' : 'NOT_AUTHENTICATED';
+    return this.authStatus.authenticated ? 'codexAgent.login.status.authenticated' : 'codexAgent.login.status.notAuthenticated';
   }
 
   get authStatusClass(): string {
@@ -118,7 +118,7 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
   }
 
   get sessionStateLabel(): string {
-    return this.session?.state?.toUpperCase() || 'NO_SESSION';
+    return this.session?.state ? `codexAgent.login.sessionState.${this.session.state}` : 'codexAgent.login.sessionState.noSession';
   }
 
   get sessionStateClass(): string {
@@ -137,7 +137,7 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
 
   private handleSessionStateChange(session: CodexDeviceLoginSessionResponse, previousState?: string, started = false): void {
     if (started) {
-      this.toastService.info('Device login session is ready. Open the verification link and enter the code.');
+      this.toastService.info('codexAgent.login.toast.sessionReady');
     }
 
     if (session.state === previousState) {
@@ -145,19 +145,19 @@ export class CodexAgentLoginComponent implements OnInit, OnDestroy {
     }
 
     if (session.state === 'authenticated') {
-      this.toastService.success('Codex device login completed');
+      this.toastService.success('codexAgent.login.toast.loginCompleted');
       this.loadAuthStatus();
       return;
     }
 
     if (session.state === 'failed') {
-      this.toastService.error(session.message || 'Codex device login failed');
+      this.toastService.error(session.message || 'codexAgent.login.toast.loginFailed');
       this.loadAuthStatus();
       return;
     }
 
     if (session.state === 'expired') {
-      this.toastService.error(session.message || 'Codex device login expired');
+      this.toastService.error(session.message || 'codexAgent.login.toast.loginExpired');
       this.loadAuthStatus();
     }
   }

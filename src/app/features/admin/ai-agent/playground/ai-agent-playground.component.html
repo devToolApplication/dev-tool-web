@@ -1,15 +1,15 @@
 <section class="playground-page">
   <app-base-crud-page
     [pageConfig]="{
-      title: 'AI Agent Playground',
-      description: 'Run admin playground requests against agent runtime and inspect execution trace.',
+      title: 'aiAgent.playground.title',
+      description: 'aiAgent.playground.description',
       actions: [
-        { id: 'clear-result', label: 'Clear Result', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result && !steps.length },
-        { id: 'run', label: 'Run Request', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
+        { id: 'clear-result', label: 'aiAgent.playground.clearResult', icon: 'pi pi-times', buttonClass: 'p-button-text', disabled: !result && !steps.length },
+        { id: 'run', label: 'aiAgent.playground.runRequest', icon: 'pi pi-send', loading: running, disabled: loading || running, submitForm: true }
       ],
       infoSection: {
-        title: 'Runtime Test',
-        description: 'Select an agent to run the full runtime flow. Model Override is optional and, when set, replaces the agent model for this test.'
+        title: 'aiAgent.playground.runtimeTest',
+        description: 'aiAgent.playground.runtimeTestDescription'
       }
     }"
     [formConfig]="formConfig"
@@ -25,31 +25,31 @@
   @if (result) {
     <section class="result-card">
       <div class="result-header">
-        <h3>Execution Result</h3>
+        <h3>{{ 'aiAgent.playground.executionResult' | translateContent }}</h3>
         <span class="status-pill" [class.success]="result.success" [class.error]="!result.success">
           {{ result.executionStatus || (result.success ? 'COMPLETED' : 'FAILED') }}
         </span>
       </div>
 
       <div class="detail-grid">
-        <div><strong>Agent:</strong> {{ selectedAgentLabel }}</div>
-        <div><strong>Model Override:</strong> {{ selectedModelLabel }}</div>
-        <div><strong>Session ID:</strong> {{ result.sessionId || '-' }}</div>
-        <div><strong>User ID:</strong> {{ formValue.userId || '-' }}</div>
-        <div><strong>Total Tokens:</strong> {{ result.totalToken ?? 0 }}</div>
-        <div><strong>Iterations:</strong> {{ result.iterationCount ?? 0 }}</div>
+        <div><strong>{{ 'aiAgent.agent' | translateContent }}:</strong> {{ selectedAgentLabel }}</div>
+        <div><strong>{{ 'aiAgent.modelOverride' | translateContent }}:</strong> {{ selectedModelLabel }}</div>
+        <div><strong>{{ 'aiAgent.sessionId' | translateContent }}:</strong> {{ result.sessionId || '-' }}</div>
+        <div><strong>{{ 'aiAgent.userId' | translateContent }}:</strong> {{ formValue.userId || '-' }}</div>
+        <div><strong>{{ 'aiAgent.totalTokens' | translateContent }}:</strong> {{ result.totalToken ?? 0 }}</div>
+        <div><strong>{{ 'aiAgent.iterations' | translateContent }}:</strong> {{ result.iterationCount ?? 0 }}</div>
       </div>
 
       @if (result.success) {
-        <div class="section-title">Answer</div>
+        <div class="section-title">{{ 'aiAgent.answer' | translateContent }}</div>
         <pre class="result-body">{{ result.answer || '' }}</pre>
       } @else {
-        <div class="section-title">Error</div>
-        <div class="result-error">{{ result.errorMessage || 'Unknown runtime error' }}</div>
+        <div class="section-title">{{ 'aiAgent.error' | translateContent }}</div>
+        <div class="result-error">{{ result.errorMessage || ('aiAgent.playground.unknownRuntimeError' | translateContent) }}</div>
       }
 
       @if ((result.toolExecutions?.length || 0) > 0) {
-        <div class="section-title">Tool Executions</div>
+        <div class="section-title">{{ 'aiAgent.toolExecutions' | translateContent }}</div>
         <pre class="result-body">{{ result.toolExecutions | json }}</pre>
       }
     </section>
@@ -58,12 +58,12 @@
   @if (result?.sessionId) {
     <section class="trace-card">
       <div class="trace-header">
-        <h3>Execution Steps</h3>
-        <button pButton type="button" icon="pi pi-refresh" class="p-button-text" [loading]="traceLoading" (click)="refreshTrace()">Refresh Trace</button>
+        <h3>{{ 'aiAgent.playground.executionSteps' | translateContent }}</h3>
+        <app-button [text]="true" icon="pi pi-refresh" label="aiAgent.playground.refreshTrace" [loading]="traceLoading" (buttonClick)="refreshTrace()"></app-button>
       </div>
 
       @if (traceLoading) {
-        <div class="empty-state">Loading execution steps...</div>
+        <div class="empty-state">{{ 'aiAgent.playground.loadingExecutionSteps' | translateContent }}</div>
       } @else if (steps.length > 0) {
         <div class="step-list">
           @for (step of steps; track step.id) {
@@ -85,7 +85,7 @@
           }
         </div>
       } @else {
-        <div class="empty-state">No execution steps returned for this session yet.</div>
+        <div class="empty-state">{{ 'aiAgent.playground.noExecutionSteps' | translateContent }}</div>
       }
     </section>
   }

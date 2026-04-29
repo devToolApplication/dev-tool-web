@@ -85,6 +85,10 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
     this.loadChartData();
   }
 
+  get intervalOptions(): Array<{ label: string; value: string }> {
+    return (this.syncConfig?.intervals ?? []).map((interval) => ({ label: interval, value: interval }));
+  }
+
   onBack(): void {
     void this.router.navigate([TRADE_BOT_ROUTES.list]);
   }

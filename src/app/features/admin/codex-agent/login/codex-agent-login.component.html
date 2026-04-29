@@ -2,28 +2,28 @@
   <section class="login-card">
     <div class="card-header">
       <div>
-        <h2>Codex Device Login</h2>
-        <p>Start device auth, open the verification link in a browser, then enter the user code returned by the API.</p>
+        <h2>{{ 'codexAgent.login.title' | translateContent }}</h2>
+        <p>{{ 'codexAgent.login.description' | translateContent }}</p>
       </div>
       <div class="action-row">
-        <button pButton type="button" icon="pi pi-refresh" label="Refresh Status" class="p-button-text" [disabled]="loadingStatus" (click)="loadAuthStatus()"></button>
-        <button pButton type="button" icon="pi pi-key" label="Start Device Login" [loading]="startingLogin" [disabled]="startingLogin" (click)="startDeviceLogin()"></button>
+        <app-button [text]="true" icon="pi pi-refresh" label="codexAgent.login.refreshStatus" [disabled]="loadingStatus" (buttonClick)="loadAuthStatus()"></app-button>
+        <app-button icon="pi pi-key" label="codexAgent.login.startDeviceLogin" [loading]="startingLogin" [disabled]="startingLogin" (buttonClick)="startDeviceLogin()"></app-button>
       </div>
     </div>
 
     <div class="detail-grid">
       <div>
-        <strong>Mode:</strong>
+        <strong>{{ 'codexAgent.login.mode' | translateContent }}:</strong>
         <span>{{ authStatus?.mode || '-' }}</span>
       </div>
       <div>
-        <strong>Status:</strong>
+        <strong>{{ 'status' | translateContent }}:</strong>
         <span class="status-pill" [class.success]="authStatusClass === 'success'" [class.warning]="authStatusClass === 'warning'">
-          {{ authStatusLabel }}
+          {{ authStatusLabel | translateContent }}
         </span>
       </div>
       <div class="grid-span-2">
-        <strong>Message:</strong>
+        <strong>{{ 'codexAgent.login.message' | translateContent }}:</strong>
         <span>{{ authStatus?.message || '-' }}</span>
       </div>
     </div>
@@ -32,43 +32,43 @@
   <section class="login-card">
     <div class="card-header">
       <div>
-        <h3>Current Device Session</h3>
-        <p>While the session is pending, this page polls the backend every 2 seconds.</p>
+        <h3>{{ 'codexAgent.login.currentDeviceSession' | translateContent }}</h3>
+        <p>{{ 'codexAgent.login.sessionPollingDescription' | translateContent }}</p>
       </div>
       <div class="action-row">
-        <button pButton type="button" icon="pi pi-refresh" label="Refresh Session" class="p-button-text" [disabled]="!session?.sessionId || refreshingSession" (click)="refreshSession()"></button>
-        <button pButton type="button" icon="pi pi-external-link" label="Open Verification Link" class="p-button-secondary" [disabled]="!session?.verificationUri" (click)="openVerificationLink()"></button>
-        <button pButton type="button" icon="pi pi-copy" label="Copy Code" class="p-button-secondary" [disabled]="!session?.userCode" (click)="copyUserCode()"></button>
+        <app-button [text]="true" icon="pi pi-refresh" label="codexAgent.login.refreshSession" [disabled]="!session?.sessionId || refreshingSession" (buttonClick)="refreshSession()"></app-button>
+        <app-button severity="secondary" icon="pi pi-external-link" label="codexAgent.login.openVerificationLink" [disabled]="!session?.verificationUri" (buttonClick)="openVerificationLink()"></app-button>
+        <app-button severity="secondary" icon="pi pi-copy" label="codexAgent.login.copyCode" [disabled]="!session?.userCode" (buttonClick)="copyUserCode()"></app-button>
       </div>
     </div>
 
     @if (session) {
       <div class="detail-grid">
         <div>
-          <strong>Session ID:</strong>
+          <strong>{{ 'codexAgent.login.sessionId' | translateContent }}:</strong>
           <span>{{ session.sessionId }}</span>
         </div>
         <div>
-          <strong>State:</strong>
+          <strong>{{ 'codexAgent.login.state' | translateContent }}:</strong>
           <span
             class="status-pill"
             [class.success]="sessionStateClass === 'success'"
             [class.error]="sessionStateClass === 'error'"
             [class.warning]="sessionStateClass === 'warning'"
             [class.neutral]="sessionStateClass === 'neutral'">
-            {{ sessionStateLabel }}
+            {{ sessionStateLabel | translateContent }}
           </span>
         </div>
         <div>
-          <strong>User Code:</strong>
+          <strong>{{ 'codexAgent.login.userCode' | translateContent }}:</strong>
           <code class="code-box">{{ session.userCode || '-' }}</code>
         </div>
         <div>
-          <strong>Expires At:</strong>
+          <strong>{{ 'codexAgent.login.expiresAt' | translateContent }}:</strong>
           <span>{{ session.expiresAt || '-' }}</span>
         </div>
         <div class="grid-span-2">
-          <strong>Verification Link:</strong>
+          <strong>{{ 'codexAgent.login.verificationLink' | translateContent }}:</strong>
           @if (session.verificationUri) {
             <a [href]="session.verificationUri" target="_blank" rel="noopener noreferrer">{{ session.verificationUri }}</a>
           } @else {
@@ -76,30 +76,30 @@
           }
         </div>
         <div class="grid-span-2">
-          <strong>Message:</strong>
+          <strong>{{ 'codexAgent.login.message' | translateContent }}:</strong>
           <span>{{ session.message || '-' }}</span>
         </div>
         <div>
-          <strong>Authenticated At:</strong>
+          <strong>{{ 'codexAgent.login.authenticatedAt' | translateContent }}:</strong>
           <span>{{ session.authenticatedAt || '-' }}</span>
         </div>
         <div>
-          <strong>Failed At:</strong>
+          <strong>{{ 'codexAgent.login.failedAt' | translateContent }}:</strong>
           <span>{{ session.failedAt || '-' }}</span>
         </div>
       </div>
 
       @if (session.stdout) {
-        <div class="section-title">CLI Output</div>
+        <div class="section-title">{{ 'codexAgent.login.cliOutput' | translateContent }}</div>
         <pre class="result-body">{{ session.stdout }}</pre>
       }
 
       @if (session.stderr) {
-        <div class="section-title">CLI Error Output</div>
+        <div class="section-title">{{ 'codexAgent.login.cliErrorOutput' | translateContent }}</div>
         <pre class="result-body">{{ session.stderr }}</pre>
       }
     } @else {
-      <div class="empty-state">No device login session has been started yet.</div>
+      <div class="empty-state">{{ 'codexAgent.login.noSession' | translateContent }}</div>
     }
   </section>
 </section>

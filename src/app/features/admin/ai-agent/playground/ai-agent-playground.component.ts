@@ -38,7 +38,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
       {
         type: 'select',
         name: 'agentId',
-        label: 'Agent',
+        label: 'aiAgent.agent',
         width: '1/2',
         optionsExpression: 'context.extra?.agentOptions || []',
         showClear: true
@@ -46,23 +46,23 @@ export class AiAgentPlaygroundComponent implements OnInit {
       {
         type: 'select',
         name: 'modelId',
-        label: 'Model Override',
+        label: 'aiAgent.modelOverride',
         width: '1/2',
         optionsExpression: 'context.extra?.modelOptions || []',
-        validation: [Rules.required('Model is required')],
+        validation: [Rules.required('aiAgent.validation.modelRequired')],
         showClear: true
       },
       {
         type: 'text',
         name: 'userId',
-        label: 'User ID',
+        label: 'aiAgent.userId',
         width: '1/2',
-        placeholder: 'Optional user or correlation id'
+        placeholder: 'aiAgent.playground.optionalUserId'
       },
       {
         type: 'textarea',
         name: 'systemPrompt',
-        label: 'System Prompt Override',
+        label: 'aiAgent.systemPromptOverride',
         width: 'full',
         rows: 4,
         showZoomButton: true
@@ -70,11 +70,11 @@ export class AiAgentPlaygroundComponent implements OnInit {
       {
         type: 'textarea',
         name: 'userPrompt',
-        label: 'User Prompt',
+        label: 'aiAgent.userPrompt',
         width: 'full',
         rows: 10,
         showZoomButton: true,
-        validation: [Rules.required('User prompt is required')]
+        validation: [Rules.required('aiAgent.validation.userPromptRequired')]
       }
     ]
   };
@@ -130,7 +130,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
     };
 
     if (!payload.agentId && !payload.modelId) {
-      this.toastService.error('Choose an agent or a model override before running');
+      this.toastService.error('aiAgent.playground.validation.agentOrModelRequired');
       return;
     }
 
@@ -144,12 +144,12 @@ export class AiAgentPlaygroundComponent implements OnInit {
           this.loadSteps(response.sessionId);
         }
         if (response.success) {
-          this.toastService.info('Playground run completed');
+          this.toastService.info('aiAgent.playground.toast.runCompleted');
         } else {
-          this.toastService.error(response.errorMessage || 'Playground run failed');
+          this.toastService.error(response.errorMessage || 'aiAgent.playground.toast.runFailed');
         }
       },
-      error: () => this.toastService.error('Playground run failed')
+      error: () => this.toastService.error('aiAgent.playground.toast.runFailed')
     });
   }
 
@@ -206,7 +206,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
           agentOptions: [],
           modelOptions: []
         };
-        this.toastService.error('Load playground dependencies failed');
+        this.toastService.error('aiAgent.playground.toast.loadDependenciesFailed');
         this.applyQueryDefaults();
       }
     });
@@ -229,7 +229,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
       next: (steps) => {
         this.steps = steps;
       },
-      error: () => this.toastService.error('Load playground trace failed')
+      error: () => this.toastService.error('aiAgent.playground.toast.loadTraceFailed')
     });
   }
 

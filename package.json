@@ -7,7 +7,14 @@
     "build": "ng build",
     "build-prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "storybook": "ng run dev-tool-web:storybook",
+    "storybook:ci": "ng run dev-tool-web:storybook --host 127.0.0.1 --ci --open=false",
+    "build-storybook": "ng run dev-tool-web:build-storybook",
+    "test-storybook": "test-storybook --url http://127.0.0.1:6006",
+    "test-storybook:ci": "start-server-and-test storybook:ci http://127.0.0.1:6006 test-storybook",
+    "chromatic": "chromatic --build-script-name build-storybook --zip",
+    "publish-storybook": "chromatic --build-script-name build-storybook --zip --exit-zero-on-changes"
   },
   "prettier": {
     "printWidth": 100,
@@ -24,15 +31,15 @@
   "private": true,
   "packageManager": "npm@11.8.0",
   "dependencies": {
-    "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.6",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",
     "@angular/forms": "^21.1.0",
     "@angular/platform-browser": "^21.1.0",
     "@angular/router": "^21.1.0",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.6",
     "@primeuix/themes": "^2.0.3",
     "@stomp/stompjs": "^7.3.0",
     "@tailwindcss/postcss": "^4.1.18",
@@ -48,12 +55,24 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "21.1.3",
+    "@angular/animations": "21.1.3",
     "@angular/build": "^21.1.3",
     "@angular/cli": "^21.1.3",
     "@angular/compiler-cli": "^21.1.0",
+    "@angular/platform-browser-dynamic": "21.1.3",
+    "@chromatic-com/storybook": "5.1.2",
+    "@storybook/addon-a11y": "10.3.6",
+    "@storybook/addon-docs": "10.3.6",
+    "@storybook/angular": "10.3.6",
+    "@storybook/test-runner": "0.24.3",
     "@types/sockjs-client": "^1.5.4",
+    "chromatic": "16.6.1",
     "jsdom": "^27.1.0",
+    "start-server-and-test": "3.0.2",
+    "storybook": "10.3.6",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "zone.js": "0.16.0"
   }
 }

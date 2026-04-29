@@ -1,6 +1,6 @@
 <section class="demo-page bg-surface text-base-foreground border-default">
   <h2>{{ title }} Demo</h2>
-  <p class="description">Mỗi demo có các nút preset để thay đổi tham số component.</p>
+  <p class="description">{{ 'demo.description' | translateContent }}</p>
 
   @switch (section) {
     @case ('input-text') {
@@ -149,7 +149,7 @@
           label="Start date"
           [dateFormat]="dateFormat"
           [value]="dateValue"
-          (valueChange)="dateValue = $event"
+          (valueChange)="onDateValueChange($event)"
         ></app-date-picker>
       </div>
     }

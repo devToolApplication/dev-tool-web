@@ -28,13 +28,13 @@ interface ExecutionStepTimelineItem {
 })
 export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'Execution Traces',
+    title: 'aiAgent.executionTrace.title',
     filters: [
-      { field: 'agentId', label: 'Agent ID', placeholder: 'Filter by agent id' },
-      { field: 'userId', label: 'User ID', placeholder: 'Filter by user id' },
+      { field: 'agentId', label: 'aiAgent.agentId', placeholder: 'aiAgent.executionTrace.filterAgentId' },
+      { field: 'userId', label: 'aiAgent.userId', placeholder: 'aiAgent.executionTrace.filterUserId' },
       {
         field: 'status',
-        label: 'Status',
+        label: 'status',
         type: 'select',
         options: [
           { label: 'RUNNING', value: 'RUNNING' },
@@ -46,22 +46,22 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     ],
     filterOptions: { primaryField: 'agentId' },
     columns: [
-      { field: 'sessionId', header: 'Session ID', sortable: true },
-      { field: 'agentId', header: 'Agent ID' },
-      { field: 'userId', header: 'User ID' },
-      { field: 'status', header: 'Status', sortable: true },
-      { field: 'iterationCount', header: 'Iterations', sortable: true },
-      { field: 'totalTokens', header: 'Tokens', sortable: true },
-      { field: 'startedAt', header: 'Started At' },
-      { field: 'finishedAt', header: 'Finished At' },
+      { field: 'sessionId', header: 'aiAgent.sessionId', sortable: true },
+      { field: 'agentId', header: 'aiAgent.agentId' },
+      { field: 'userId', header: 'aiAgent.userId' },
+      { field: 'status', header: 'status', sortable: true },
+      { field: 'iterationCount', header: 'aiAgent.iterations', sortable: true },
+      { field: 'totalTokens', header: 'aiAgent.tokens', sortable: true },
+      { field: 'startedAt', header: 'aiAgent.startedAt' },
+      { field: 'finishedAt', header: 'aiAgent.finishedAt' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         actions: [
-          { label: 'View Steps', icon: 'pi pi-eye', severity: 'help', onClick: (row) => this.openSteps(row) },
+          { label: 'aiAgent.executionTrace.viewSteps', icon: 'pi pi-eye', severity: 'help', onClick: (row) => this.openSteps(row) },
           {
-            label: 'Playground',
+            label: 'aiAgent.playground.title',
             icon: 'pi pi-play',
             severity: 'info',
             disabled: (row) => !row.agentId,
@@ -119,7 +119,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
         this.selectedSteps = [...steps].sort((left, right) => left.stepNo - right.stepNo);
         this.selectedStepTimelineItems = this.selectedSteps.map((step) => this.toTimelineItem(step));
       },
-      error: () => this.toastService.error('Load execution steps failed')
+      error: () => this.toastService.error('aiAgent.executionTrace.toast.loadStepsFailed')
     });
   }
 
@@ -127,7 +127,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     this.loading = true;
     this.loadingService.track(this.service.getSessionPage(this.page, this.pageSize, ['startedAt,desc'], this.filters)).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (res: BasePageResponse<ExecutionSessionResponse>) => this.setPageResponse(res),
-      error: () => this.toastService.error('Load execution traces failed')
+      error: () => this.toastService.error('aiAgent.executionTrace.toast.loadTracesFailed')
     });
   }
 

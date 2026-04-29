@@ -11,5 +11,6 @@ export class ButtonSplit {
   @Input() label = 'actions';
   @Input() icon = 'pi pi-cog';
   @Input() model: MenuItem[] = [];
+  @Input() expandAriaLabel = 'Open actions menu';
   @Output() buttonClick = new EventEmitter<void>();
 }

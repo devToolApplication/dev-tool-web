@@ -14,8 +14,8 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <button pButton type="button" class="p-button-text" icon="pi pi-arrow-left" [label]="'tradeBot.back' | translateContent" (click)="goBack()"></button>
-      <button pButton type="button" icon="pi pi-save" [label]="TEXT.SaveStrategy | translateContent" [loading]="saving" (click)="save()"></button>
+      <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
+      <app-button icon="pi pi-save" [label]="TEXT.SaveStrategy" [loading]="saving" (buttonClick)="save()"></app-button>
     </div>
   </div>
 
@@ -35,8 +35,8 @@
           <ng-template pTemplate="header">
             <div class="flex w-full items-center justify-between gap-3">
               <div>
-                <div class="text-base font-semibold">Rule Slots</div>
-                <div class="text-sm text-surface-500">Select the rule for each slot. Strategy will use the selected rule configuration.</div>
+                <div class="text-base font-semibold">{{ 'tradeBot.strategy.form.ruleSlots' | translateContent }}</div>
+                <div class="text-sm text-surface-500">{{ 'tradeBot.strategy.form.ruleSlotsDescription' | translateContent }}</div>
               </div>
             </div>
           </ng-template>
@@ -45,28 +45,23 @@
             <form class="grid grid-cols-12 gap-4" [formGroup]="ruleSlotsForm">
               @for (slot of strategyDefinition.ruleSlots; track slot.slotCode) {
                 <div class="col-span-12 md:col-span-6">
-                  <label class="mb-2 block text-sm font-medium">
-                    {{ slot.label | translateContent }}
-                    @if (slot.required) {
-                      <span class="text-red-500">*</span>
-                    }
-                  </label>
-                  <p-select
-                    class="w-full"
+                  <app-select
+                    [label]="slot.label"
                     [options]="getRuleOptions(slot)"
-                    optionLabel="label"
-                    optionValue="value"
                     [formControlName]="slot.slotCode"
-                    (onChange)="onRuleSelectionChange(slot.slotCode)"
-                  ></p-select>
+                    (valueChange)="onRuleSelectionChange(slot.slotCode)"
+                    [required]="slot.required"
+                  ></app-select>
                   @if (ruleSlotsForm.controls[slot.slotCode]?.touched && ruleSlotsForm.controls[slot.slotCode]?.invalid) {
-                    <small class="text-red-500">Rule slot is required</small>
+                    <small class="text-red-500">{{ 'tradeBot.strategy.form.ruleSlotRequired' | translateContent }}</small>
                   }
                 </div>
               }
             </form>
           } @else {
-            <div class="rounded-xl border border-dashed border-surface-300 p-4 text-sm text-surface-500">This strategy has no rule slots in `STRATEGY_DEFINITIONS`.</div>
+            <div class="rounded-xl border border-dashed border-surface-300 p-4 text-sm text-surface-500">
+              {{ 'tradeBot.strategy.form.noRuleSlots' | translateContent }}
+            </div>
           }
         </p-panel>
 
@@ -75,7 +70,7 @@
             <div class="flex w-full items-center justify-between gap-3">
               <div>
                 <div class="text-base font-semibold">{{ 'tradeBot.strategy.form.selectedRuleTitle' | translateContent }}</div>
-                <div class="text-sm text-surface-500">Preview of the selected rule configuration for this strategy instance.</div>
+                <div class="text-sm text-surface-500">{{ 'tradeBot.strategy.form.selectedRuleDescription' | translateContent }}</div>
               </div>
             </div>
           </ng-template>
@@ -94,18 +89,16 @@
                   @if (detail.rule) {
                     <div class="mt-1 flex flex-wrap items-center justify-between gap-2">
                       <div class="text-sm text-surface-500">{{ detail.rule.name }}</div>
-                      <button
-                        pButton
-                        type="button"
-                        class="p-button-sm p-button-outlined"
+                      <app-button
+                        styleClass="p-button-sm p-button-outlined"
                         icon="pi pi-chart-line"
-                        label="Preview"
-                        (click)="goRulePreview(detail.rule.id)"
-                      ></button>
+                        label="preview"
+                        (buttonClick)="goRulePreview(detail.rule.id)"
+                      ></app-button>
                     </div>
                     <pre class="mt-4 max-h-72 overflow-auto rounded-xl bg-surface-900/95 p-4 text-xs text-surface-0">{{ detail.configJson | json }}</pre>
                   } @else {
-                    <div class="mt-2 text-sm text-surface-500">No rule selected for this slot.</div>
+                    <div class="mt-2 text-sm text-surface-500">{{ 'tradeBot.strategy.form.noRuleSelected' | translateContent }}</div>
                   }
                 </div>
               }
@@ -141,7 +134,7 @@
                   <p-tag [value]="(generalInfoForm.valid ? TEXT.GeneralInformationReady : TEXT.GeneralInformationNeedsReview) | translateContent" [severity]="generalInfoForm.valid ? 'success' : 'warn'"></p-tag>
                 </li>
                 <li class="flex items-center justify-between gap-2">
-                  <span>Rule Slots</span>
+                  <span>{{ 'tradeBot.strategy.form.ruleSlots' | translateContent }}</span>
                   <p-tag [value]="(ruleReady ? 'tradeBot.strategy.form.ruleReady' : 'tradeBot.strategy.form.ruleNeedsSelection') | translateContent" [severity]="ruleReady ? 'success' : 'warn'"></p-tag>
                 </li>
               </ul>

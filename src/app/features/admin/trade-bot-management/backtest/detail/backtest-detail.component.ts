@@ -17,22 +17,22 @@ import { TRADE_BOT_BACKTEST_ROUTES } from '../../trade-bot-admin.constants';
 })
 export class BacktestDetailComponent implements OnInit {
   readonly orderTableConfig: TableConfig = {
-    title: 'Backtest Orders',
+    title: 'tradeBot.replay.orders.title',
     filters: [
-      { field: 'orderSide', label: 'Order Side', placeholder: 'BUY / SELL' },
-      { field: 'result', label: 'Result', placeholder: 'WIN / LOSS' }
+      { field: 'orderSide', label: 'tradeBot.replay.field.side', placeholder: 'BUY / SELL' },
+      { field: 'result', label: 'tradeBot.replay.field.result', placeholder: 'WIN / LOSS' }
     ],
     filterOptions: { primaryField: 'result' },
     columns: [
-      { field: 'nyTradeDate', header: 'Trade Date', sortable: true },
-      { field: 'orderSide', header: 'Side', sortable: true },
-      { field: 'entryPrice', header: 'Entry', sortable: true, type: 'number' },
+      { field: 'nyTradeDate', header: 'tradeBot.replay.field.tradeDate', sortable: true },
+      { field: 'orderSide', header: 'tradeBot.replay.field.side', sortable: true },
+      { field: 'entryPrice', header: 'tradeBot.replay.field.entryPrice', sortable: true, type: 'number' },
       { field: 'stopLoss', header: 'SL', sortable: true, type: 'number' },
       { field: 'takeProfit', header: 'TP', sortable: true, type: 'number' },
-      { field: 'exitPrice', header: 'Exit', sortable: true, type: 'number' },
+      { field: 'exitPrice', header: 'tradeBot.replay.field.exitPrice', sortable: true, type: 'number' },
       { field: 'netPnl', header: 'Net PnL', sortable: true, type: 'number' },
-      { field: 'result', header: 'Result', sortable: true },
-      { field: 'exitReason', header: 'Exit Reason', sortable: true }
+      { field: 'result', header: 'tradeBot.replay.field.result', sortable: true },
+      { field: 'exitReason', header: 'tradeBot.replay.field.exitReason', sortable: true }
     ],
     pagination: true,
     scrollHeight: '32rem',
@@ -99,7 +99,7 @@ export class BacktestDetailComponent implements OnInit {
           this.orders = orders.data ?? [];
         },
         error: () => {
-          this.toastService.error('Load backtest detail failed');
+          this.toastService.error('tradeBot.backtest.detail.toast.loadFailed');
           void this.router.navigate([TRADE_BOT_BACKTEST_ROUTES.list]);
         }
       });
@@ -112,7 +112,7 @@ export class BacktestDetailComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (orders: BasePageResponse<BacktestOrderResponse>) => (this.orders = orders.data ?? []),
-        error: () => this.toastService.error('Load orders failed')
+        error: () => this.toastService.error('tradeBot.backtest.detail.toast.loadOrdersFailed')
       });
   }
 }

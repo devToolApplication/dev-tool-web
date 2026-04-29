@@ -12,7 +12,7 @@
 
 <app-base-popup
   [visible]="stepPopupVisible"
-  [header]="'Execution Step Trace'"
+  header="aiAgent.executionTrace.stepTrace"
   [subheader]="selectedSession?.sessionId || ''"
   [size]="'xl'"
   [loading]="stepLoading"
@@ -25,22 +25,22 @@
   @if (selectedSession) {
     <section class="session-card">
       <div class="session-grid">
-        <div><strong>Status:</strong> {{ selectedSession.status }}</div>
-        <div><strong>Agent:</strong> {{ selectedSession.agentId || '-' }}</div>
-        <div><strong>User:</strong> {{ selectedSession.userId || '-' }}</div>
-        <div><strong>Channel:</strong> {{ selectedSession.channel || '-' }}</div>
-        <div><strong>Tokens:</strong> {{ selectedSession.totalTokens ?? 0 }}</div>
-        <div><strong>Iterations:</strong> {{ selectedSession.iterationCount ?? 0 }}</div>
-        <div class="full-width"><strong>Input:</strong> {{ selectedSession.inputText || '-' }}</div>
+        <div><strong>{{ 'status' | translateContent }}:</strong> {{ selectedSession.status }}</div>
+        <div><strong>{{ 'aiAgent.agent' | translateContent }}:</strong> {{ selectedSession.agentId || '-' }}</div>
+        <div><strong>{{ 'aiAgent.user' | translateContent }}:</strong> {{ selectedSession.userId || '-' }}</div>
+        <div><strong>{{ 'aiAgent.channel' | translateContent }}:</strong> {{ selectedSession.channel || '-' }}</div>
+        <div><strong>{{ 'aiAgent.tokens' | translateContent }}:</strong> {{ selectedSession.totalTokens ?? 0 }}</div>
+        <div><strong>{{ 'aiAgent.iterations' | translateContent }}:</strong> {{ selectedSession.iterationCount ?? 0 }}</div>
+        <div class="full-width"><strong>{{ 'aiAgent.input' | translateContent }}:</strong> {{ selectedSession.inputText || '-' }}</div>
         @if (selectedSession.errorMessage) {
-          <div class="full-width error-text"><strong>Error:</strong> {{ selectedSession.errorMessage }}</div>
+          <div class="full-width error-text"><strong>{{ 'aiAgent.error' | translateContent }}:</strong> {{ selectedSession.errorMessage }}</div>
         }
       </div>
     </section>
   }
 
   @if (stepLoading) {
-    <div class="empty-state">Loading steps...</div>
+    <div class="empty-state">{{ 'aiAgent.executionTrace.loadingSteps' | translateContent }}</div>
   } @else if (selectedStepTimelineItems.length > 0) {
     <section class="step-timeline-wrapper">
       <ng-template #stepOppositeTemplate let-step>
@@ -72,11 +72,11 @@
       ></app-timeline>
     </section>
   } @else {
-    <div class="empty-state">No steps recorded for this session.</div>
+    <div class="empty-state">{{ 'aiAgent.executionTrace.noSteps' | translateContent }}</div>
   }
 
   <div popup-footer>
-    <button pButton type="button" class="p-button-text" [disabled]="stepLoading" (click)="closePopup()">Close</button>
-    <button pButton type="button" icon="pi pi-refresh" [loading]="stepLoading" [disabled]="!selectedSession" (click)="refreshSelectedSteps()">Refresh Steps</button>
+    <app-button [text]="true" label="close" [disabled]="stepLoading" (buttonClick)="closePopup()"></app-button>
+    <app-button icon="pi pi-refresh" label="aiAgent.executionTrace.refreshSteps" [loading]="stepLoading" [disabled]="!selectedSession" (buttonClick)="refreshSelectedSteps()"></app-button>
   </div>
 </app-base-popup>

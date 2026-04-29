@@ -193,6 +193,10 @@ export class DemoComponent {
     this.selectShowClear = mode === 'clear';
   }
 
+  onDateValueChange(value: Date | Date[] | null): void {
+    this.dateValue = value instanceof Date ? value : null;
+  }
+
   setTreeMode(mode: 'single' | 'multiple' | 'checkbox'): void {
     this.treeSelectionMode = mode;
     this.treeValue = null;

@@ -1,15 +1,15 @@
 <section class="ask-page">
   <app-base-crud-page
     [pageConfig]="{
-      title: 'Check ChatGPT CDP',
-      description: 'Goi Playwright ChatGPT va map response ve format chat/completions giong OpenAI.',
+      title: 'aiAgent.cdpTest.title',
+      description: 'aiAgent.cdpTest.description',
       actions: [
-        { id: 'check-cdp-chatgpt', label: 'Check CDP', icon: 'pi pi-link', loading: checkingConnection, disabled: checkingConnection || submittingChatGpt },
-        { id: 'chat-completions', label: 'Chat Completions', icon: 'pi pi-send', loading: submittingChatGpt, disabled: submittingChatGpt || checkingConnection, submitForm: true }
+        { id: 'check-cdp-chatgpt', label: 'aiAgent.cdpTest.checkCdp', icon: 'pi pi-link', loading: checkingConnection, disabled: checkingConnection || submittingChatGpt },
+        { id: 'chat-completions', label: 'aiAgent.cdpTest.chatCompletions', icon: 'pi pi-send', loading: submittingChatGpt, disabled: submittingChatGpt || checkingConnection, submitForm: true }
       ],
       infoSection: {
-        title: 'ChatGPT UI Bridge',
-        description: 'Chrome can mo voi remote debugging va tab ChatGPT da dang nhap san. Endpoint CDP duoc lay tu backend config.'
+        title: 'aiAgent.cdpTest.infoTitle',
+        description: 'aiAgent.cdpTest.infoDescription'
       }
     }"
     [formConfig]="chatGptFormConfig"
@@ -25,23 +25,23 @@
   @if (chatGptResult) {
     <section class="sub-result-card border-default bg-surface">
       <div class="sub-result-header">
-        <h4>OpenAI Compatible Result</h4>
-        <span class="status-pill success">Completed</span>
+        <h4>{{ 'aiAgent.cdpTest.openAiCompatibleResult' | translateContent }}</h4>
+        <span class="status-pill success">{{ 'completed' | translateContent }}</span>
       </div>
 
       <div class="detail-grid">
         <div><strong>ID:</strong> {{ chatGptResult.id || '-' }}</div>
-        <div><strong>Model:</strong> {{ chatGptResult.model || '-' }}</div>
-        <div><strong>Created:</strong> {{ chatGptResult.created ?? '-' }}</div>
-        <div><strong>Object:</strong> {{ chatGptResult.object || '-' }}</div>
-        <div><strong>Finish Reason:</strong> {{ chatGptResult.choices?.[0]?.finishReason || '-' }}</div>
-        <div><strong>Total Tokens:</strong> {{ chatGptResult.usage?.totalTokens ?? '-' }}</div>
+        <div><strong>{{ 'aiAgent.model' | translateContent }}:</strong> {{ chatGptResult.model || '-' }}</div>
+        <div><strong>{{ 'aiAgent.created' | translateContent }}:</strong> {{ chatGptResult.created ?? '-' }}</div>
+        <div><strong>{{ 'aiAgent.object' | translateContent }}:</strong> {{ chatGptResult.object || '-' }}</div>
+        <div><strong>{{ 'aiAgent.finishReason' | translateContent }}:</strong> {{ chatGptResult.choices?.[0]?.finishReason || '-' }}</div>
+        <div><strong>{{ 'aiAgent.totalTokens' | translateContent }}:</strong> {{ chatGptResult.usage?.totalTokens ?? '-' }}</div>
         <div class="full-width">
-          <strong>Content:</strong>
+          <strong>{{ 'content' | translateContent }}:</strong>
           <pre class="result-body">{{ chatGptResult.choices?.[0]?.message?.content || '-' }}</pre>
         </div>
         <div class="full-width">
-          <strong>Tool Calls:</strong>
+          <strong>{{ 'aiAgent.toolCalls' | translateContent }}:</strong>
           <pre class="result-body">{{ chatGptResult.choices?.[0]?.message?.toolCalls?.length ? (chatGptResult.choices?.[0]?.message?.toolCalls | json) : '[]' }}</pre>
         </div>
       </div>
@@ -51,16 +51,16 @@
   @if (connectionResult) {
     <section class="sub-result-card border-default bg-surface">
       <div class="sub-result-header">
-        <h4>CDP Result</h4>
+        <h4>{{ 'aiAgent.cdpTest.cdpResult' | translateContent }}</h4>
         <span class="status-pill" [class.success]="connectionResult.connected" [class.error]="!connectionResult.connected">
-          {{ connectionResult.connected ? 'Connected' : 'Failed' }}
+          {{ (connectionResult.connected ? 'aiAgent.cdpTest.connected' : 'aiAgent.cdpTest.failed') | translateContent }}
         </span>
       </div>
 
       <div class="detail-grid">
-        <div><strong>Browser:</strong> {{ connectionResult.browserVersion || '-' }}</div>
-        <div><strong>Contexts:</strong> {{ connectionResult.contextCount ?? 0 }}</div>
-        <div><strong>Pages:</strong> {{ connectionResult.pageCount ?? 0 }}</div>
+        <div><strong>{{ 'aiAgent.cdpTest.browser' | translateContent }}:</strong> {{ connectionResult.browserVersion || '-' }}</div>
+        <div><strong>{{ 'aiAgent.cdpTest.contexts' | translateContent }}:</strong> {{ connectionResult.contextCount ?? 0 }}</div>
+        <div><strong>{{ 'aiAgent.cdpTest.pages' | translateContent }}:</strong> {{ connectionResult.pageCount ?? 0 }}</div>
       </div>
 
       @if (connectionResult.errorMessage) {

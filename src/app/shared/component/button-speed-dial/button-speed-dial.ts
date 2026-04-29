@@ -13,4 +13,5 @@ export class ButtonSpeedDial {
   @Input() type: 'linear' | 'circle' | 'semi-circle' | 'quarter-circle' = 'linear';
   @Input() showIcon = 'pi pi-bars';
   @Input() hideIcon = 'pi pi-times';
+  @Input() ariaLabel = 'Open actions menu';
 }

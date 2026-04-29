@@ -1,35 +1,35 @@
 <section class="playwright-session-page">
   <header class="page-hero">
     <div>
-      <p class="eyebrow">AI Agent Runtime</p>
-      <h2>Playwright Sessions</h2>
+      <p class="eyebrow">{{ 'aiAgent.playwrightSessions.runtime' | translateContent }}</p>
+      <h2>{{ 'aiAgent.playwrightSessions.title' | translateContent }}</h2>
       <p class="hero-description">
-        Quản lý Chrome CDP sessions dùng cho ChatGPT temporary chat. Request mới chỉ lấy session đang rảnh; session treo có thể reset thủ công tại đây.
+        {{ 'aiAgent.playwrightSessions.description' | translateContent }}
       </p>
     </div>
 
     <div class="hero-actions">
-      <button pButton type="button" icon="pi pi-refresh" class="p-button-text" [loading]="loading" (click)="loadSessions()">Refresh</button>
-      <button pButton type="button" icon="pi pi-sync" severity="secondary" [loading]="syncing" (click)="syncDefaultSession()">Sync Default</button>
-      <button pButton type="button" icon="pi pi-plus" severity="success" (click)="openCreate()">New Session</button>
+      <app-button [text]="true" icon="pi pi-refresh" label="refresh" [loading]="loading" (buttonClick)="loadSessions()"></app-button>
+      <app-button icon="pi pi-sync" severity="secondary" label="aiAgent.playwrightSessions.syncDefault" [loading]="syncing" (buttonClick)="syncDefaultSession()"></app-button>
+      <app-button icon="pi pi-plus" severity="success" label="aiAgent.playwrightSessions.newSession" (buttonClick)="openCreate()"></app-button>
     </div>
   </header>
 
   <section class="stat-grid">
     <article class="stat-card">
-      <span>Total</span>
+      <span>{{ 'aiAgent.playwrightSessions.total' | translateContent }}</span>
       <strong>{{ totalCount }}</strong>
     </article>
     <article class="stat-card idle">
-      <span>Rảnh</span>
+      <span>{{ 'aiAgent.playwrightSessions.status.idle' | translateContent }}</span>
       <strong>{{ idleCount }}</strong>
     </article>
     <article class="stat-card busy">
-      <span>Đang xử lý</span>
+      <span>{{ 'aiAgent.playwrightSessions.status.busy' | translateContent }}</span>
       <strong>{{ busyCount }}</strong>
     </article>
     <article class="stat-card hung">
-      <span>Treo</span>
+      <span>{{ 'aiAgent.playwrightSessions.status.hung' | translateContent }}</span>
       <strong>{{ hungCount }}</strong>
     </article>
   </section>
@@ -47,14 +47,14 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th>Session</th>
-          <th>Status</th>
-          <th>CDP Endpoint</th>
-          <th>Timeout</th>
-          <th>Throttle</th>
-          <th>Current Thread</th>
-          <th>Timeline</th>
-          <th class="action-col">Actions</th>
+          <th>{{ 'aiAgent.playwrightSessions.session' | translateContent }}</th>
+          <th>{{ 'status' | translateContent }}</th>
+          <th>{{ 'aiAgent.playwrightSessions.cdpEndpoint' | translateContent }}</th>
+          <th>{{ 'timeout' | translateContent }}</th>
+          <th>{{ 'aiAgent.playwrightSessions.throttle' | translateContent }}</th>
+          <th>{{ 'aiAgent.playwrightSessions.currentThread' | translateContent }}</th>
+          <th>{{ 'aiAgent.playwrightSessions.timeline' | translateContent }}</th>
+          <th class="action-col">{{ 'actions' | translateContent }}</th>
         </tr>
       </ng-template>
 
@@ -66,9 +66,9 @@
           </td>
           <td>
             <div class="status-stack">
-              <p-tag [value]="statusLabel(session.status)" [severity]="statusSeverity(session.status)"></p-tag>
+              <p-tag [value]="statusLabel(session.status) | translateContent" [severity]="statusSeverity(session.status)"></p-tag>
               <span class="enabled-state" [class.off]="session.enabled === false">
-                {{ session.enabled === false ? 'Disabled' : 'Enabled' }}
+                {{ (session.enabled === false ? 'aiAgent.playwrightSessions.disabled' : 'enabled') | translateContent }}
               </span>
               @if (session.lastErrorMessage) {
                 <span class="error-line">{{ session.lastErrorMessage }}</span>
@@ -82,8 +82,8 @@
           <td>{{ formatTimeout(session.timeoutMs) }}</td>
           <td>
             <div class="timeline-stack">
-              <span><strong>Reuse:</strong> {{ formatTimeout(session.minIdleBeforeReuseMs) }}</span>
-              <span><strong>Global:</strong> {{ formatTimeout(session.globalMinStartIntervalMs) }}</span>
+              <span><strong>{{ 'aiAgent.playwrightSessions.reuse' | translateContent }}:</strong> {{ formatTimeout(session.minIdleBeforeReuseMs) }}</span>
+              <span><strong>{{ 'aiAgent.playwrightSessions.global' | translateContent }}:</strong> {{ formatTimeout(session.globalMinStartIntervalMs) }}</span>
             </div>
           </td>
           <td>
@@ -94,50 +94,41 @@
           </td>
           <td>
             <div class="timeline-stack">
-              <span><strong>Leased:</strong> {{ formatDateTime(session.leasedAt) }}</span>
-              <span><strong>Expires:</strong> {{ formatDateTime(session.leaseExpiresAt) }}</span>
-              <span><strong>Reset:</strong> {{ formatDateTime(session.lastResetAt) }}</span>
+              <span><strong>{{ 'aiAgent.playwrightSessions.leased' | translateContent }}:</strong> {{ formatDateTime(session.leasedAt) }}</span>
+              <span><strong>{{ 'aiAgent.playwrightSessions.expires' | translateContent }}:</strong> {{ formatDateTime(session.leaseExpiresAt) }}</span>
+              <span><strong>{{ 'aiAgent.playwrightSessions.reset' | translateContent }}:</strong> {{ formatDateTime(session.lastResetAt) }}</span>
             </div>
           </td>
           <td class="action-cell">
-            <button pButton type="button" icon="pi pi-pencil" class="p-button-text" severity="info" (click)="openEdit(session)">Edit</button>
-            <button
-              pButton
-              type="button"
+            <app-button [text]="true" icon="pi pi-pencil" severity="info" label="edit" (buttonClick)="openEdit(session)"></app-button>
+            <app-button
+              [text]="true"
               icon="pi pi-replay"
-              class="p-button-text"
               severity="help"
+              label="aiAgent.playwrightSessions.reset"
               [loading]="isActionLoading(session, 'reset')"
               [disabled]="session.status === 'BUSY'"
-              (click)="runSessionAction(session, 'reset')"
-            >
-              Reset
-            </button>
+              (buttonClick)="runSessionAction(session, 'reset')"
+            ></app-button>
             @if (session.enabled === false || session.status === 'DISABLED') {
-              <button
-                pButton
-                type="button"
+              <app-button
+                [text]="true"
                 icon="pi pi-check"
-                class="p-button-text"
                 severity="success"
+                label="aiAgent.playwrightSessions.enable"
                 [loading]="isActionLoading(session, 'enable')"
-                (click)="runSessionAction(session, 'enable')"
-              >
-                Enable
-              </button>
+                (buttonClick)="runSessionAction(session, 'enable')"
+              ></app-button>
             } @else {
-              <button
-                pButton
-                type="button"
+              <app-button
+                [text]="true"
                 icon="pi pi-ban"
-                class="p-button-text"
                 severity="danger"
+                label="aiAgent.playwrightSessions.disable"
                 [loading]="isActionLoading(session, 'disable')"
                 [disabled]="session.status === 'BUSY'"
-                (click)="runSessionAction(session, 'disable')"
-              >
-                Disable
-              </button>
+                (buttonClick)="runSessionAction(session, 'disable')"
+              ></app-button>
             }
           </td>
         </tr>
@@ -147,7 +138,7 @@
         <tr>
           <td colspan="8">
             <div class="empty-state">
-              Chưa có Playwright session. Bấm <strong>Sync Default</strong> để tạo session từ env hoặc <strong>New Session</strong> để thêm CDP endpoint mới.
+              {{ 'aiAgent.playwrightSessions.empty' | translateContent }}
             </div>
           </td>
         </tr>
@@ -158,8 +149,8 @@
 
 <app-base-popup
   [visible]="formVisible"
-  [header]="editMode ? 'Edit Playwright Session' : 'New Playwright Session'"
-  [subheader]="editMode ? (selectedSession?.sessionId || '') : 'Add a Chrome CDP endpoint to the session pool'"
+  [header]="editMode ? 'aiAgent.playwrightSessions.editSession' : 'aiAgent.playwrightSessions.newSession'"
+  [subheader]="editMode ? (selectedSession?.sessionId || '') : 'aiAgent.playwrightSessions.formDescription'"
   [size]="'lg'"
   [loading]="saving"
   [showDefaultCancel]="false"
@@ -168,49 +159,28 @@
   (cancel)="closeForm()"
 >
   <form class="session-form" #sessionForm="ngForm" (ngSubmit)="saveSession()">
-    <label>
-      <span>Session ID</span>
-      <input pInputText name="sessionId" [(ngModel)]="formModel.sessionId" [disabled]="editMode" placeholder="chrome-1" required />
-    </label>
+    <app-input-text label="aiAgent.playwrightSessions.sessionId" name="sessionId" [(ngModel)]="formModel.sessionId" [disabled]="editMode" placeholder="chrome-1" [required]="true"></app-input-text>
 
-    <label>
-      <span>Name</span>
-      <input pInputText name="name" [(ngModel)]="formModel.name" placeholder="Chrome CDP 1" />
-    </label>
+    <app-input-text label="name" name="name" [(ngModel)]="formModel.name" placeholder="Chrome CDP 1"></app-input-text>
 
-    <label class="full">
-      <span>CDP Endpoint</span>
-      <input pInputText name="cdpEndpoint" [(ngModel)]="formModel.cdpEndpoint" placeholder="http://127.0.0.1:9222" required />
-    </label>
+    <app-input-text class="full" label="aiAgent.playwrightSessions.cdpEndpoint" name="cdpEndpoint" [(ngModel)]="formModel.cdpEndpoint" placeholder="http://127.0.0.1:9222" [required]="true"></app-input-text>
 
-    <label class="full">
-      <span>Temporary Chat URL</span>
-      <input pInputText name="temporaryChatUrl" [(ngModel)]="formModel.temporaryChatUrl" placeholder="https://chatgpt.com/?temporary-chat=true" />
-    </label>
+    <app-input-text class="full" label="aiAgent.playwrightSessions.temporaryChatUrl" name="temporaryChatUrl" [(ngModel)]="formModel.temporaryChatUrl" placeholder="https://chatgpt.com/?temporary-chat=true"></app-input-text>
 
-    <label>
-      <span>Lease Timeout (ms)</span>
-      <input pInputText type="number" min="1000" name="timeoutMs" [(ngModel)]="formModel.timeoutMs" placeholder="180000" />
-    </label>
+    <app-input-number label="aiAgent.playwrightSessions.leaseTimeoutMs" name="timeoutMs" [(ngModel)]="formModel.timeoutMs" [min]="1000" placeholder="180000"></app-input-number>
 
-    <label>
-      <span>Min Idle Before Reuse (ms)</span>
-      <input pInputText type="number" min="0" name="minIdleBeforeReuseMs" [(ngModel)]="formModel.minIdleBeforeReuseMs" placeholder="15000" />
-    </label>
+    <app-input-number label="aiAgent.playwrightSessions.minIdleBeforeReuseMs" name="minIdleBeforeReuseMs" [(ngModel)]="formModel.minIdleBeforeReuseMs" [min]="0" placeholder="15000"></app-input-number>
 
-    <label>
-      <span>Global Start Interval (ms)</span>
-      <input pInputText type="number" min="0" name="globalMinStartIntervalMs" [(ngModel)]="formModel.globalMinStartIntervalMs" placeholder="5000" />
-    </label>
+    <app-input-number label="aiAgent.playwrightSessions.globalStartIntervalMs" name="globalMinStartIntervalMs" [(ngModel)]="formModel.globalMinStartIntervalMs" [min]="0" placeholder="5000"></app-input-number>
 
-    <label class="switch-field">
-      <span>Enabled</span>
-      <p-toggleswitch name="enabled" [(ngModel)]="formModel.enabled"></p-toggleswitch>
-    </label>
+    <div class="switch-field">
+      <span>{{ 'enabled' | translateContent }}</span>
+      <app-toggle-switch name="enabled" [(ngModel)]="formModel.enabled"></app-toggle-switch>
+    </div>
   </form>
 
   <div popup-footer>
-    <button pButton type="button" class="p-button-text" [disabled]="saving" (click)="closeForm()">Cancel</button>
-    <button pButton type="button" icon="pi pi-save" [loading]="saving" (click)="saveSession()">Save</button>
+    <app-button [text]="true" label="cancel" [disabled]="saving" (buttonClick)="closeForm()"></app-button>
+    <app-button icon="pi pi-save" label="save" [loading]="saving" (buttonClick)="saveSession()"></app-button>
   </div>
 </app-base-popup>

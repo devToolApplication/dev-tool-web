@@ -30,29 +30,29 @@ export class AiAgentAskComponent {
       {
         type: 'text',
         name: 'model',
-        label: 'Model',
+        label: 'aiAgent.model',
         width: 'full',
         placeholder: 'gpt-5-mini'
       },
       {
         type: 'textarea',
         name: 'systemPrompt',
-        label: 'System Prompt',
+        label: 'aiAgent.systemPrompt',
         width: 'full',
         rows: 4
       },
       {
         type: 'textarea',
         name: 'userPrompt',
-        label: 'User Prompt',
+        label: 'aiAgent.userPrompt',
         width: 'full',
         rows: 8,
-        validation: [Rules.required('User prompt is required')]
+        validation: [Rules.required('aiAgent.validation.userPromptRequired')]
       },
       {
         type: 'checkbox',
         name: 'clearBeforeType',
-        label: 'Xoa noi dung cu truoc khi nhap',
+        label: 'aiAgent.cdpTest.clearBeforeType',
         width: 'full'
       }
     ]
@@ -91,12 +91,12 @@ export class AiAgentAskComponent {
         next: (response: PlaywrightCdpConnectResponse) => {
           this.connectionResult = response;
           if (response.connected) {
-            this.toastService.info('CDP connected');
+            this.toastService.info('aiAgent.cdpTest.toast.cdpConnected');
             return;
           }
-          this.toastService.error(response.errorMessage || 'CDP check failed');
+          this.toastService.error(response.errorMessage || 'aiAgent.cdpTest.toast.cdpCheckFailed');
         },
-        error: () => this.toastService.error('CDP check failed')
+        error: () => this.toastService.error('aiAgent.cdpTest.toast.cdpCheckFailed')
       });
   }
 
@@ -138,9 +138,9 @@ export class AiAgentAskComponent {
       .subscribe({
         next: (response: PlaywrightOpenAiChatCompletionResponse) => {
           this.chatGptResult = response;
-          this.toastService.info('Chat completion success');
+          this.toastService.info('aiAgent.cdpTest.toast.chatCompletionSuccess');
         },
-        error: () => this.toastService.error('Chat completion failed')
+        error: () => this.toastService.error('aiAgent.cdpTest.toast.chatCompletionFailed')
       });
   }
 

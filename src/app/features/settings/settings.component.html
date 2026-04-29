@@ -16,7 +16,7 @@
               <h3>{{ t('settings.darkModeTitle') }}</h3>
               <p>{{ t('settings.darkModeDescription') }}</p>
             </div>
-            <p-toggleswitch [ngModel]="darkModeEnabled" (ngModelChange)="onDarkModeToggle($event)"></p-toggleswitch>
+            <app-toggle-switch [value]="darkModeEnabled" (valueChange)="onDarkModeToggle($event === true)"></app-toggle-switch>
           </div>
 
           <div class="setting-item border-default setting-item-column">
@@ -82,13 +82,12 @@
                   [value]="themeTokenValue.selectBackground"
                   (valueChange)="onThemeTokenChange('selectBackground', $event)"
                 ></app-select>
-                <input
-                  class="theme-manual-input"
-                  type="text"
+                <app-input-text
+                  styleClass="theme-manual-input"
                   [value]="themeTokenValue.selectBackground"
-                  [placeholder]="t('customCssValue')"
-                  (change)="onThemeTokenManualInput('selectBackground', $any($event.target).value)"
-                />
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput('selectBackground', $event || '')"
+                ></app-input-text>
               </div>
 
               <div class="theme-grid-item">
@@ -98,13 +97,12 @@
                   [value]="themeTokenValue.selectText"
                   (valueChange)="onThemeTokenChange('selectText', $event)"
                 ></app-select>
-                <input
-                  class="theme-manual-input"
-                  type="text"
+                <app-input-text
+                  styleClass="theme-manual-input"
                   [value]="themeTokenValue.selectText"
-                  [placeholder]="t('customCssValue')"
-                  (change)="onThemeTokenManualInput('selectText', $any($event.target).value)"
-                />
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput('selectText', $event || '')"
+                ></app-input-text>
               </div>
 
               <div class="theme-grid-item">
@@ -114,13 +112,12 @@
                   [value]="themeTokenValue.inputBackground"
                   (valueChange)="onThemeTokenChange('inputBackground', $event)"
                 ></app-select>
-                <input
-                  class="theme-manual-input"
-                  type="text"
+                <app-input-text
+                  styleClass="theme-manual-input"
                   [value]="themeTokenValue.inputBackground"
-                  [placeholder]="t('customCssValue')"
-                  (change)="onThemeTokenManualInput('inputBackground', $any($event.target).value)"
-                />
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput('inputBackground', $event || '')"
+                ></app-input-text>
               </div>
 
               <div class="theme-grid-item">
@@ -130,13 +127,12 @@
                   [value]="themeTokenValue.inputText"
                   (valueChange)="onThemeTokenChange('inputText', $event)"
                 ></app-select>
-                <input
-                  class="theme-manual-input"
-                  type="text"
+                <app-input-text
+                  styleClass="theme-manual-input"
                   [value]="themeTokenValue.inputText"
-                  [placeholder]="t('customCssValue')"
-                  (change)="onThemeTokenManualInput('inputText', $any($event.target).value)"
-                />
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput('inputText', $event || '')"
+                ></app-input-text>
               </div>
 
               <div class="theme-grid-item">
@@ -146,13 +142,12 @@
                   [value]="themeTokenValue.appText"
                   (valueChange)="onThemeTokenChange('appText', $event)"
                 ></app-select>
-                <input
-                  class="theme-manual-input"
-                  type="text"
+                <app-input-text
+                  styleClass="theme-manual-input"
                   [value]="themeTokenValue.appText"
-                  [placeholder]="t('customCssValue')"
-                  (change)="onThemeTokenManualInput('appText', $any($event.target).value)"
-                />
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput('appText', $event || '')"
+                ></app-input-text>
               </div>
             </div>
 

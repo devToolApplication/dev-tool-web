@@ -6,6 +6,7 @@ import {
   PlaywrightSessionUpsertRequest
 } from '../../../../core/models/ai-agent/playwright.model';
 import { PlaywrightAdminService } from '../../../../core/services/ai-agent-service/playwright-admin.service';
+import { I18nService } from '../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../core/ui-services/toast.service';
 
@@ -33,6 +34,7 @@ export class PlaywrightSessionManagementComponent implements OnInit {
 
   constructor(
     private readonly playwrightAdminService: PlaywrightAdminService,
+    private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService
   ) {}
@@ -107,11 +109,11 @@ export class PlaywrightSessionManagementComponent implements OnInit {
     this.saving = true;
     this.loadingService.track(request$).pipe(finalize(() => (this.saving = false))).subscribe({
       next: () => {
-        this.toastService.success(this.editMode ? 'Updated Playwright session' : 'Created Playwright session');
+        this.toastService.success(this.editMode ? 'aiAgent.playwrightSessions.toast.updated' : 'aiAgent.playwrightSessions.toast.created');
         this.closeForm();
         this.loadSessions();
       },
-      error: () => this.toastService.error(this.editMode ? 'Update Playwright session failed' : 'Create Playwright session failed')
+      error: () => this.toastService.error(this.editMode ? 'aiAgent.playwrightSessions.toast.updateFailed' : 'aiAgent.playwrightSessions.toast.createFailed')
     });
   }
 
@@ -119,10 +121,10 @@ export class PlaywrightSessionManagementComponent implements OnInit {
     this.syncing = true;
     this.loadingService.track(this.playwrightAdminService.syncDefaultSession()).pipe(finalize(() => (this.syncing = false))).subscribe({
       next: () => {
-        this.toastService.success('Synced default Playwright session');
+        this.toastService.success('aiAgent.playwrightSessions.toast.syncedDefault');
         this.loadSessions();
       },
-      error: () => this.toastService.error('Sync default Playwright session failed')
+      error: () => this.toastService.error('aiAgent.playwrightSessions.toast.syncDefaultFailed')
     });
   }
 
@@ -131,7 +133,7 @@ export class PlaywrightSessionManagementComponent implements OnInit {
       return;
     }
 
-    if (action === 'disable' && !window.confirm(`Disable Playwright session "${session.sessionId}"?`)) {
+    if (action === 'disable' && !window.confirm(`${this.i18nService.t('aiAgent.playwrightSessions.confirmDisable')} ${session.sessionId}?`)) {
       return;
     }
 
@@ -157,7 +159,7 @@ export class PlaywrightSessionManagementComponent implements OnInit {
       next: (sessions) => {
         this.sessions = [...sessions].sort((left, right) => (left.sessionId || '').localeCompare(right.sessionId || ''));
       },
-      error: () => this.toastService.error('Load Playwright sessions failed')
+      error: () => this.toastService.error('aiAgent.playwrightSessions.toast.loadFailed')
     });
   }
 
@@ -168,15 +170,15 @@ export class PlaywrightSessionManagementComponent implements OnInit {
   statusLabel(status?: PlaywrightSessionStatus): string {
     switch (status) {
       case 'IDLE':
-        return 'Rảnh';
+        return 'aiAgent.playwrightSessions.status.idle';
       case 'BUSY':
-        return 'Đang xử lý';
+        return 'aiAgent.playwrightSessions.status.busy';
       case 'HUNG':
-        return 'Treo';
+        return 'aiAgent.playwrightSessions.status.hung';
       case 'DISABLED':
-        return 'Tắt';
+        return 'aiAgent.playwrightSessions.status.disabled';
       default:
-        return 'Không rõ';
+        return 'aiAgent.playwrightSessions.status.unknown';
     }
   }
 
@@ -249,11 +251,11 @@ export class PlaywrightSessionManagementComponent implements OnInit {
     const sessionId = this.formModel.sessionId?.trim();
     const cdpEndpoint = this.formModel.cdpEndpoint?.trim();
     if (!sessionId) {
-      this.toastService.error('Session ID is required');
+      this.toastService.error('aiAgent.playwrightSessions.validation.sessionIdRequired');
       return null;
     }
     if (!cdpEndpoint) {
-      this.toastService.error('CDP endpoint is required');
+      this.toastService.error('aiAgent.playwrightSessions.validation.cdpEndpointRequired');
       return null;
     }
 
@@ -292,22 +294,22 @@ export class PlaywrightSessionManagementComponent implements OnInit {
   private actionSuccessMessage(action: SessionAction): string {
     switch (action) {
       case 'reset':
-        return 'Reset Playwright session thành rảnh';
+        return 'aiAgent.playwrightSessions.toast.resetSuccess';
       case 'enable':
-        return 'Enabled Playwright session';
+        return 'aiAgent.playwrightSessions.toast.enableSuccess';
       case 'disable':
-        return 'Disabled Playwright session';
+        return 'aiAgent.playwrightSessions.toast.disableSuccess';
     }
   }
 
   private actionErrorMessage(action: SessionAction): string {
     switch (action) {
       case 'reset':
-        return 'Reset Playwright session failed';
+        return 'aiAgent.playwrightSessions.toast.resetFailed';
       case 'enable':
-        return 'Enable Playwright session failed';
+        return 'aiAgent.playwrightSessions.toast.enableFailed';
       case 'disable':
-        return 'Disable Playwright session failed';
+        return 'aiAgent.playwrightSessions.toast.disableFailed';
     }
   }
 }

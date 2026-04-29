@@ -10,26 +10,26 @@
   </ng-template>
 
   <div class="flex flex-col gap-4">
-    <p-multiSelect
-      [options]="eventTypeOptions | translateContent"
-      [ngModel]="selectedFilters"
-      optionLabel="label"
-      optionValue="value"
-      [placeholder]="'tradeBot.filter.eventType' | translateContent"
-      styleClass="w-full"
-      (ngModelChange)="filterChange.emit($event)"
-    ></p-multiSelect>
+    <app-select-multi
+      [options]="eventTypeOptions"
+      [value]="selectedFilters"
+      placeholder="tradeBot.filter.eventType"
+      (valueChange)="onFilterChange($event)"
+    ></app-select-multi>
 
     <div class="flex max-h-[24rem] flex-col gap-2 overflow-auto pr-1">
       @for (event of events; track event.id) {
-        <button
-          type="button"
+        <article
+          role="button"
+          tabindex="0"
           class="rounded-xl border p-3 text-left transition"
           [ngClass]="{
             'border-primary bg-primary-50': event.id === selectedEventId,
             'border-surface-200 bg-surface-0 hover:border-primary': event.id !== selectedEventId
           }"
           (click)="eventSelect.emit(event)"
+          (keydown.enter)="eventSelect.emit(event)"
+          (keydown.space)="$event.preventDefault(); eventSelect.emit(event)"
         >
           <div class="flex items-center justify-between gap-2">
             <div class="font-medium">{{ event.title }}</div>
@@ -37,7 +37,7 @@
           </div>
           <div class="mt-1 text-sm text-surface-500">{{ event.candleTime | date:'MM-dd HH:mm' }}</div>
           <div class="mt-1 text-sm text-surface-600">{{ (event.message || TEXT.NoEventDetail) | translateContent }}</div>
-        </button>
+        </article>
       }
     </div>
   </div>

@@ -24,30 +24,30 @@ import { AI_MODEL_ROUTES } from '../ai-model.constants';
 })
 export class AiModelListComponent extends BasePagedList<AiModelResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'AI Models',
-    toolbar: { new: { visible: true, label: 'New AI Model', icon: 'pi pi-plus', severity: 'success' } },
+    title: 'aiAgent.aiModel.title',
+    toolbar: { new: { visible: true, label: 'aiAgent.aiModel.new', icon: 'pi pi-plus', severity: 'success' } },
     filters: [
-      { field: 'modelName', label: 'Model Name', placeholder: 'Search model name' },
-      { field: 'providerModelType', label: 'Provider', placeholder: 'Search provider' },
-      { field: 'modelType', label: 'Model Type', placeholder: 'Search model type' }
+      { field: 'modelName', label: 'aiAgent.aiModel.modelName', placeholder: 'aiAgent.aiModel.searchModelName' },
+      { field: 'providerModelType', label: 'aiAgent.aiModel.provider', placeholder: 'aiAgent.aiModel.searchProvider' },
+      { field: 'modelType', label: 'aiAgent.aiModel.modelType', placeholder: 'aiAgent.aiModel.searchModelType' }
     ],
     filterOptions: { primaryField: 'modelName' },
     columns: [
-      { field: 'code', header: 'Code', sortable: true },
-      { field: 'modelName', header: 'Model Name', sortable: true },
-      { field: 'providerModelType', header: 'Provider', sortable: true },
-      { field: 'modelType', header: 'Model Type', sortable: true },
-      { field: 'toolSupportMode', header: 'Tool Support', sortable: true },
-      { field: 'defaultActive', header: 'Default', type: 'boolean' },
-      { field: 'status', header: 'Status' },
+      { field: 'code', header: 'code', sortable: true },
+      { field: 'modelName', header: 'aiAgent.aiModel.modelName', sortable: true },
+      { field: 'providerModelType', header: 'aiAgent.aiModel.provider', sortable: true },
+      { field: 'modelType', header: 'aiAgent.aiModel.modelType', sortable: true },
+      { field: 'toolSupportMode', header: 'aiAgent.aiModel.toolSupport', sortable: true },
+      { field: 'defaultActive', header: 'default', type: 'boolean' },
+      { field: 'status', header: 'status' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         actions: [
-          { label: 'Test Prompt', icon: 'pi pi-comments', severity: 'help', onClick: (row) => this.openTestPrompt(row) },
-          { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-          { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+          { label: 'aiAgent.aiModel.testPrompt.action', icon: 'pi pi-comments', severity: 'help', onClick: (row) => this.openTestPrompt(row) },
+          { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
+          { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
         ]
       }
     ],
@@ -66,17 +66,17 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
       {
         type: 'textarea',
         name: 'systemPrompt',
-        label: 'System Prompt',
+        label: 'aiAgent.systemPrompt',
         width: 'full',
         rows: 4
       },
       {
         type: 'textarea',
         name: 'userPrompt',
-        label: 'User Prompt',
+        label: 'aiAgent.userPrompt',
         width: 'full',
         rows: 8,
-        validation: [Rules.required('User prompt is required')]
+        validation: [Rules.required('aiAgent.validation.userPromptRequired')]
       }
     ]
   };
@@ -156,7 +156,7 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
 
     const userPrompt = model.userPrompt?.trim() || '';
     if (!userPrompt) {
-      this.toastService.error('User prompt is required');
+      this.toastService.error('aiAgent.validation.userPromptRequired');
       return;
     }
 
@@ -172,11 +172,11 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
       next: (response) => {
         this.testPromptAnswer = response;
         if (!response.success) {
-          this.toastService.error(response.errorMessage || 'Ask AI failed');
+          this.toastService.error(response.errorMessage || 'aiAgent.aiModel.testPrompt.askFailed');
         }
       },
       error: () => {
-        this.toastService.error('Ask AI failed');
+        this.toastService.error('aiAgent.aiModel.testPrompt.askFailed');
       }
     });
   }
@@ -203,7 +203,7 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: BasePageResponse<AiModelResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error('Load AI model list failed')
+        error: () => this.toastService.error('aiAgent.aiModel.toast.loadListFailed')
       });
   }
 

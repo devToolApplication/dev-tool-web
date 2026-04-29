@@ -1,12 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { BaseInput } from '../base-input';
+import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-input-multi',
   standalone: false,
   templateUrl: './input-multi.html',
-  styleUrl: './input-multi.css'
+  styleUrl: './input-multi.css',
+  providers: [provideValueAccessor(() => InputMulti)]
 })
 export class InputMulti extends BaseInput<string[]> implements OnChanges {
   @Input() options: SelectOption[] = [];

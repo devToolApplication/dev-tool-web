@@ -16,8 +16,7 @@ export class ReplayTradeTimelinePanelComponent {
   expandedTradeId: string | null = null;
   readonly TEXT = TradeBotTextKey;
 
-  toggleExpanded(tradeId: string, event: Event): void {
-    event.stopPropagation();
+  toggleExpanded(tradeId: string): void {
     this.expandedTradeId = this.expandedTradeId === tradeId ? null : tradeId;
   }
 }

@@ -1,0 +1,42 @@
+name: Storybook
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+
+env:
+  CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+
+jobs:
+  storybook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Run Storybook interactions and accessibility tests
+        run: npm run test-storybook:ci
+
+      - name: Run visual tests and publish Storybook
+        if: env.CHROMATIC_PROJECT_TOKEN != ''
+        run: npm run chromatic -- --ci --exit-zero-on-changes

@@ -91,7 +91,7 @@ export class StrategyRuleTestComponent implements OnInit {
           this.runPreview();
         },
         error: () => {
-          this.toastService.error('Load rule test context failed');
+          this.toastService.error('tradeBot.strategyRule.toast.loadTestContextFailed');
           void this.router.navigate([STRATEGY_RULE_ROUTES.list]);
         }
       });
@@ -140,7 +140,7 @@ export class StrategyRuleTestComponent implements OnInit {
       .pipe(finalize(() => (this.previewing = false)))
       .subscribe({
         next: (response) => (this.chartPayload = this.mapChartPayload(response)),
-        error: (error) => this.toastService.error(error?.error?.errorMessage ?? 'Preview rule failed')
+        error: (error) => this.toastService.error(error?.error?.errorMessage ?? 'tradeBot.strategyRule.toast.previewFailed')
       });
   }
 

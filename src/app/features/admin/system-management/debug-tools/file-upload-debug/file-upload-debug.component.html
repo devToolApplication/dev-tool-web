@@ -1,89 +1,90 @@
 <section class="file-upload-debug-page">
   <div class="page-header border-default bg-surface">
     <div>
-      <h2>Debug File Upload</h2>
+      <h2>{{ 'systemManagement.fileUploadDebug.title' | translateContent }}</h2>
       <p>POST /file-mcrs/v1/upload</p>
     </div>
 
-    <button
-      pButton
-      type="button"
+    <app-button
       icon="pi pi-refresh"
-      label="Refresh Storage"
+      label="systemManagement.fileUploadDebug.refreshStorage"
       [loading]="loadingStorages"
       [disabled]="loadingStorages || uploading"
-      (click)="loadStorages()"
-    ></button>
+      (buttonClick)="loadStorages()"
+    ></app-button>
   </div>
 
   <section class="upload-panel border-default bg-surface">
     <div class="field-grid">
-      <label class="field">
-        <span>Storage</span>
-        <p-select
+      <div class="field">
+        <app-select
+          label="systemManagement.fileUploadDebug.storage"
           [(ngModel)]="selectedStorageId"
           [options]="storageOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Default PINATA storage"
+          placeholder="systemManagement.fileUploadDebug.defaultPinataStorage"
           [showClear]="true"
           [loading]="loadingStorages"
-          class="w-full"
-        ></p-select>
-      </label>
+        ></app-select>
+      </div>
 
-      <label class="field">
-        <span>File name override</span>
-        <input pInputText [(ngModel)]="fileName" placeholder="Leave blank to use selected file name" />
-      </label>
+      <div class="field">
+        <app-input-text
+          label="systemManagement.fileUploadDebug.fileNameOverride"
+          [(ngModel)]="fileName"
+          placeholder="systemManagement.fileUploadDebug.fileNameOverridePlaceholder"
+        ></app-input-text>
+      </div>
 
-      <label class="field full-width">
-        <span>Metadata JSON</span>
-        <textarea pTextarea [(ngModel)]="metadataJson" rows="6" spellcheck="false"></textarea>
-      </label>
+      <div class="field full-width">
+        <app-input-area
+          label="systemManagement.fileUploadDebug.metadataJson"
+          [(ngModel)]="metadataJson"
+          [rows]="6"
+          [maxRows]="8"
+          contentType="json"
+        ></app-input-area>
+      </div>
     </div>
 
-    <p-fileupload
+    <app-fileupload
       mode="advanced"
       [customUpload]="true"
       [multiple]="false"
       [maxFileSize]="104857600"
       [disabled]="uploading"
-      chooseLabel="Choose"
-      uploadLabel="Upload"
-      cancelLabel="Clear"
+      chooseLabel="chooseFile"
+      uploadLabel="upload"
+      cancelLabel="clear"
       (uploadHandler)="onUpload($event)"
-    ></p-fileupload>
+    ></app-fileupload>
   </section>
 
   @if (uploadError) {
     <section class="result-panel border-default bg-surface error">
-      {{ uploadError }}
+      {{ uploadError | translateContent }}
     </section>
   }
 
   @if (uploadResult) {
     <section class="result-panel border-default bg-surface">
       <div class="result-header">
-        <h3>Upload Result</h3>
-        <button
-          pButton
-          type="button"
+        <h3>{{ 'systemManagement.fileUploadDebug.uploadResult' | translateContent }}</h3>
+        <app-button
           icon="pi pi-external-link"
-          label="Open"
+          label="open"
           [disabled]="!uploadResult.fileUrl"
-          (click)="openUploadedFile()"
-        ></button>
+          (buttonClick)="openUploadedFile()"
+        ></app-button>
       </div>
 
       <div class="result-grid">
         <div><strong>ID:</strong> {{ uploadResult.id || '-' }}</div>
-        <div><strong>Storage:</strong> {{ uploadResult.storageId || '-' }}</div>
-        <div><strong>File:</strong> {{ uploadResult.fileName || '-' }}</div>
+        <div><strong>{{ 'systemManagement.fileUploadDebug.storage' | translateContent }}:</strong> {{ uploadResult.storageId || '-' }}</div>
+        <div><strong>{{ 'systemManagement.fileUploadDebug.file' | translateContent }}:</strong> {{ uploadResult.fileName || '-' }}</div>
         <div><strong>MIME:</strong> {{ uploadResult.mimeType || '-' }}</div>
         <div class="full-width"><strong>URL:</strong> {{ uploadResult.fileUrl || '-' }}</div>
         <div class="full-width">
-          <strong>Raw:</strong>
+          <strong>{{ 'systemManagement.fileUploadDebug.raw' | translateContent }}:</strong>
           <pre>{{ uploadResult | json }}</pre>
         </div>
       </div>

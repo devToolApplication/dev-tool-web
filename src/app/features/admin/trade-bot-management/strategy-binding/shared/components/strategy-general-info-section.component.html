@@ -11,8 +11,7 @@
 
   <div class="grid grid-cols-12 gap-4" [formGroup]="form">
     <div class="col-span-12 md:col-span-6">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.BindingName | translateContent }}</label>
-      <input pInputText class="w-full" formControlName="name" />
+      <app-input-text [label]="TEXT.BindingName" formControlName="name"></app-input-text>
       @if (form.controls.name.touched && form.controls.name.invalid) {
         <small class="text-red-500">
           {{ TEXT.BindingName | translateContent }} {{ 'tradeBot.validation.requiredSuffix' | translateContent }}
@@ -20,43 +19,34 @@
       }
     </div>
     <div class="col-span-12 md:col-span-3">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyCode | translateContent }}</label>
-      <input pInputText class="w-full" [value]="form.controls.strategyServiceName.getRawValue()" readonly />
+      <app-input-text [label]="TEXT.StrategyCode" formControlName="strategyServiceName" [readonly]="true"></app-input-text>
     </div>
     <div class="col-span-12 md:col-span-3">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.StrategyName | translateContent }}</label>
-      <input pInputText class="w-full" [value]="form.controls.strategyName.getRawValue()" readonly />
+      <app-input-text [label]="TEXT.StrategyName" formControlName="strategyName" [readonly]="true"></app-input-text>
     </div>
 
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.Exchange | translateContent }}</label>
-      <p-select class="w-full" [options]="exchangeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="exchangeId"></p-select>
+      <app-select [label]="TEXT.Exchange" [options]="exchangeOptions" formControlName="exchangeId"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.Symbol | translateContent }}</label>
-      <p-select class="w-full" [options]="symbolOptions | translateContent" optionLabel="label" optionValue="value" formControlName="symbolId"></p-select>
+      <app-select [label]="TEXT.Symbol" [options]="symbolOptions" formControlName="symbolId"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.MarketType | translateContent }}</label>
-      <p-select class="w-full" [options]="marketTypeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="marketType"></p-select>
+      <app-select [label]="TEXT.MarketType" [options]="marketTypeOptions" formControlName="marketType"></app-select>
     </div>
 
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.TradeSideMode | translateContent }}</label>
-      <p-select class="w-full" [options]="tradeSideModeOptions | translateContent" optionLabel="label" optionValue="value" formControlName="tradeSideMode"></p-select>
+      <app-select [label]="TEXT.TradeSideMode" [options]="tradeSideModeOptions" formControlName="tradeSideMode"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.ProviderSymbol | translateContent }}</label>
-      <input pInputText class="w-full" formControlName="providerSymbol" />
+      <app-input-text [label]="TEXT.ProviderSymbol" formControlName="providerSymbol"></app-input-text>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.Status | translateContent }}</label>
-      <p-select class="w-full" [options]="statusOptions | translateContent" optionLabel="label" optionValue="value" formControlName="status"></p-select>
+      <app-select [label]="TEXT.Status" [options]="statusOptions" formControlName="status"></app-select>
     </div>
 
     <div class="col-span-12">
-      <label class="mb-2 block text-sm font-medium">{{ TEXT.Description | translateContent }}</label>
-      <textarea pTextarea class="w-full" rows="3" formControlName="description"></textarea>
+      <app-input-area [label]="TEXT.Description" [rows]="3" formControlName="description"></app-input-area>
     </div>
   </div>
 </p-panel>

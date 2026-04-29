@@ -4,10 +4,13 @@
       <h1>{{ 'dashboard.title' | translateContent }}</h1>
       <p>{{ 'dashboard.description' | translateContent }}</p>
     </div>
-    <button class="refresh-button" type="button" [disabled]="loading" (click)="refreshActive()">
-      <i class="pi pi-refresh" aria-hidden="true"></i>
-      <span>{{ 'dashboard.refresh' | translateContent }}</span>
-    </button>
+    <app-button
+      styleClass="refresh-button"
+      icon="pi pi-refresh"
+      label="dashboard.refresh"
+      [disabled]="loading"
+      (buttonClick)="refreshActive()"
+    ></app-button>
   </header>
 
   @if (activeOverview) {

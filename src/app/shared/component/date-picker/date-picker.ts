@@ -15,9 +15,12 @@ import { BaseInput } from '../base-input';
     }
   ]
 })
-export class DatePicker extends BaseInput<Date | null> {
+export class DatePicker extends BaseInput<Date | Date[] | null> {
   @Input() showIcon = true;
   @Input() dateFormat = 'dd/mm/yy';
+  @Input() showTime = false;
+  @Input() hourFormat: '12' | '24' = '24';
+  @Input() selectionMode: 'single' | 'multiple' | 'range' = 'single';
 
   constructor() {
     super();
