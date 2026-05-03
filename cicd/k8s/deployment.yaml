@@ -59,6 +59,13 @@ spec:
     - host: devtool.103.77.243.66.nip.io
       http:
         paths:
+          - path: /storybook
+            pathType: Prefix
+            backend:
+              service:
+                name: ${SERVICE_NAME}
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:

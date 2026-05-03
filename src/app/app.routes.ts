@@ -8,6 +8,7 @@ import { aiAgentAdminRoutes } from './features/admin/ai-agent/ai-agent.feature';
 import { fileStorageRoutes } from './features/admin/file-storage-management/file-storage-management.feature';
 import { systemManagementRoutes } from './features/admin/system-management/system-management.feature';
 import { tradeBotRoutes } from './features/admin/trade-bot-management/trade-bot-management.feature';
+import { codexAgentAdminRoutes } from './features/admin/codex-agent/codex-agent.feature';
 import { FeaturePlaceholderComponent } from './features/feature-placeholder/feature-placeholder.component';
 
 const routes: Routes = [
@@ -18,6 +19,7 @@ const routes: Routes = [
   ...fileStorageRoutes,
   ...systemManagementRoutes,
   ...tradeBotRoutes,
+  ...codexAgentAdminRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
   { path: '**', redirectTo: '404' }

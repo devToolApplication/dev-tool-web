@@ -70,6 +70,7 @@ import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
+import { Tag } from './component/tag/tag';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
 import { DashboardChartComponent } from '../features/dashboard/components/dashboard-chart/dashboard-chart.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
@@ -84,6 +85,7 @@ import { AI_AGENT_FEATURE_COMPONENTS } from '../features/admin/ai-agent/ai-agent
 import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage-management/file-storage-management.feature';
 import { SYSTEM_MANAGEMENT_FEATURE_COMPONENTS } from '../features/admin/system-management/system-management.feature';
 import { TRADE_BOT_FEATURE_COMPONENTS } from '../features/admin/trade-bot-management/trade-bot-management.feature';
+import { CODEX_AGENT_FEATURE_COMPONENTS } from '../features/admin/codex-agent/codex-agent.feature';
 import { BaseLayoutComponent } from './layout/base/base.layout';
 import { HeaderComponent } from './layout/header/header.component';
 import { PageComponent } from './layout/page/page.component';
@@ -96,6 +98,7 @@ import { FieldRenderer } from './ui/form-input/component/field-renderer/field-re
 import { FieldSecretMetadataRendererComponent } from './ui/form-input/component/field-secret-metadata-renderer/field-secret-metadata-renderer';
 import { FieldTreeRendererComponent } from './ui/form-input/component/field-tree-renderer/field-tree-renderer';
 import { FormInput } from './ui/form-input/form-input';
+import { FieldGuidePanelComponent } from './ui/field-guide-panel/field-guide-panel.component';
 import { TableCellComponent } from './ui/table/component/table/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table/table-filter/table-filter';
 import { TableComponent } from './ui/table/component/table/table';
@@ -116,7 +119,8 @@ const FEATURE = [
   ...AI_AGENT_FEATURE_COMPONENTS,
   ...FILE_STORAGE_FEATURE_COMPONENTS,
   ...SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,
-  ...TRADE_BOT_FEATURE_COMPONENTS
+  ...TRADE_BOT_FEATURE_COMPONENTS,
+  ...CODEX_AGENT_FEATURE_COMPONENTS
 ];
 
 const COMPONENTS = [
@@ -144,11 +148,12 @@ const COMPONENTS = [
   Select,
   ToggleButton,
   ToggleSwitch,
+  Tag,
   CandleChart,
   TimelineComponent
 ];
 
-const UI = [FormInput, TableComponent];
+const UI = [FormInput, TableComponent, FieldGuidePanelComponent];
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,

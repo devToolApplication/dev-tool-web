@@ -29,6 +29,8 @@ pipeline {
                     npm ci
                     echo "Building Angular..."
                     npm run build-prod
+                    echo "Building Storybook..."
+                    npm run build-storybook
                     '''
                 }
             }

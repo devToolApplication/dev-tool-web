@@ -1,0 +1,30 @@
+<section>
+  <div class="rounded-2xl border border-surface-200 bg-surface-0 p-5 shadow-sm">
+    <h3 class="m-0 text-xl font-semibold">{{ title }}</h3>
+    @if (description) {
+      <p class="mt-2 text-sm text-surface-500">{{ description }}</p>
+    }
+
+    @if (fields.length) {
+      <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        @for (field of fields; track field.key) {
+          <div class="rounded-xl border border-surface-200 bg-surface-50 p-4">
+            <div class="text-xs font-bold uppercase tracking-wide text-surface-500">{{ field.label }}</div>
+            <div class="mt-2 break-words text-surface-900">{{ field.description }}</div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (selections.length) {
+      <div class="mt-4 grid gap-3 xl:grid-cols-2">
+        @for (selection of selections; track selection.title) {
+          <div class="rounded-xl border border-surface-200 p-4">
+            <div class="text-sm font-bold text-surface-900">{{ selection.title }}</div>
+            <div class="mt-2 break-words text-surface-900">{{ selection.description }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
