@@ -1,8 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { finalize, of } from 'rxjs';
 import { StrategyRuleCreateDto, StrategyRuleResponse, StrategyRuleUpdateDto } from '../../../../../core/models/trade-bot/strategy-rule.model';
-import { TradeBotConfigService } from '../../../../../core/services/trade-bot-service/config.service';
 import { StrategyRuleService } from '../../../../../core/services/trade-bot-service/strategy-rule.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
@@ -11,14 +10,17 @@ import { CrudPageConfig } from '../../../../../shared/ui/base-crud-page/base-cru
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { STRATEGY_RULE_ROUTES } from '../strategy-rule.constants';
 import {
+  StrategyRuleCodeDefinition,
   StrategyRuleFormValue,
+  buildEmptyStrategyRuleDefinition,
+  buildStrategyRuleDefinitionFromFormValue,
   buildStrategyRuleFormConfig,
   buildStrategyRuleInitialValue,
-  configureStrategyRuleDefinitions,
-  getStrategyRuleDefaultCode,
   mapApiConfigToRuleConfig,
   mapRuleConfigToApiPayload,
-  resolveStrategyRuleDefinition
+  mapRuleResponseToDefinition,
+  parseRuleConfigFieldsPayload,
+  parseRuleInitialValuePayload
 } from './strategy-rule-form.factory';
 
 @Component({
@@ -29,20 +31,20 @@ import {
 export class StrategyRuleFormComponent implements OnInit {
   readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formVisible = signal(true);
-  private static readonly RULE_DEFINITIONS_CONFIG_CATEGORY = 'RULE_DEFINITIONS';
 
   editId: string | null = null;
   loading = false;
   saving = false;
 
-  formConfig: FormConfig = buildStrategyRuleFormConfig(null);
-  formInitialValue: StrategyRuleFormValue = buildStrategyRuleInitialValue(null);
+  activeDefinition: StrategyRuleCodeDefinition = buildEmptyStrategyRuleDefinition();
+  formConfig: FormConfig = buildStrategyRuleFormConfig(this.activeDefinition);
+  formInitialValue: StrategyRuleFormValue = buildStrategyRuleInitialValue(this.activeDefinition);
   selectedRuleCode = this.formInitialValue.code;
+  private schemaSignature = this.buildSchemaSignature(this.activeDefinition);
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly tradeBotConfigService: TradeBotConfigService,
     private readonly service: StrategyRuleService,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
@@ -54,7 +56,7 @@ export class StrategyRuleFormComponent implements OnInit {
   }
 
   get ruleDefinition() {
-    return resolveStrategyRuleDefinition(this.selectedRuleCode);
+    return this.activeDefinition;
   }
 
   get pageConfig(): CrudPageConfig {
@@ -92,7 +94,14 @@ export class StrategyRuleFormComponent implements OnInit {
   }
 
   onSubmitForm(model: StrategyRuleFormValue): void {
-    const payload = this.buildPayload(model);
+    let payload: StrategyRuleCreateDto;
+    try {
+      payload = this.buildPayload(model);
+    } catch (error) {
+      this.toastService.error(error instanceof Error ? error.message : this.i18nService.t('tradeBot.strategyRule.toast.saveError'));
+      return;
+    }
+
     const request$ = this.editId ? this.service.update(this.editId, payload as StrategyRuleUpdateDto) : this.service.create(payload);
     this.saving = true;
     this.loadingService.track(request$).pipe(finalize(() => (this.saving = false))).subscribe({
@@ -113,18 +122,32 @@ export class StrategyRuleFormComponent implements OnInit {
 
   onFormValueChange(value: StrategyRuleFormValue): void {
     const nextCode = String(value.code ?? '').trim().toUpperCase();
-    if (!nextCode || nextCode === this.selectedRuleCode) {
+    let nextDefinition: StrategyRuleCodeDefinition;
+    try {
+      nextDefinition = buildStrategyRuleDefinitionFromFormValue(value);
+    } catch {
+      this.selectedRuleCode = nextCode;
       return;
     }
 
     this.selectedRuleCode = nextCode;
-    this.formInitialValue = buildStrategyRuleInitialValue(nextCode, {
+    this.activeDefinition = nextDefinition;
+
+    const nextSignature = this.buildSchemaSignature(nextDefinition);
+    if (nextSignature === this.schemaSignature) {
+      return;
+    }
+
+    this.schemaSignature = nextSignature;
+    this.formInitialValue = {
+      ...value,
       code: nextCode,
-      name: value.name ?? '',
-      status: value.status ?? 'ACTIVE',
-      description: value.description ?? ''
-    });
-    this.refreshForm(nextCode);
+      configJson: {
+        ...nextDefinition.initialValue,
+        ...(value.configJson ?? {})
+      }
+    };
+    this.refreshForm();
   }
 
   onPageAction(actionId: string): void {
@@ -152,19 +175,10 @@ export class StrategyRuleFormComponent implements OnInit {
     this.editId = id;
     this.loading = true;
     this.loadingService
-      .track(
-        forkJoin({
-          definitions: this.tradeBotConfigService
-            .getAll({ category: StrategyRuleFormComponent.RULE_DEFINITIONS_CONFIG_CATEGORY })
-            .pipe(catchError(() => of([]))),
-          rule: id ? this.service.getById(id) : of(null)
-        })
-      )
+      .track(id ? this.service.getById(id) : of(null))
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ definitions, rule }) => {
-          configureStrategyRuleDefinitions(definitions);
-
+        next: (rule) => {
           if (rule) {
             this.patchEditState(rule);
           } else {
@@ -180,39 +194,59 @@ export class StrategyRuleFormComponent implements OnInit {
 
   private patchEditState(rule: StrategyRuleResponse): void {
     const normalizedCode = String(rule.code ?? '').trim().toUpperCase();
+    const definition = mapRuleResponseToDefinition(rule);
+    this.activeDefinition = definition;
+    this.schemaSignature = this.buildSchemaSignature(definition);
     this.selectedRuleCode = normalizedCode;
     this.formContext.mode = 'edit';
-    this.formInitialValue = buildStrategyRuleInitialValue(normalizedCode, {
+    this.formInitialValue = buildStrategyRuleInitialValue(definition, {
       code: normalizedCode,
       name: rule.name ?? '',
+      ruleGroupCode: rule.ruleGroupCode ?? '',
+      ruleGroupLabel: rule.ruleGroupLabel ?? '',
+      implementationCode: rule.implementationCode ?? '',
       status: rule.status,
       description: rule.description ?? '',
-      configJson: mapApiConfigToRuleConfig(rule.configJson ?? {}, normalizedCode)
+      configJson: mapApiConfigToRuleConfig(rule.configJson ?? {}, definition)
     });
-    this.refreshForm(normalizedCode);
+    this.refreshForm();
   }
 
   private resetCreateState(): void {
-    const defaultCode = getStrategyRuleDefaultCode() ?? '';
-    this.selectedRuleCode = defaultCode;
+    const definition = buildEmptyStrategyRuleDefinition();
+    this.activeDefinition = definition;
+    this.schemaSignature = this.buildSchemaSignature(definition);
+    this.selectedRuleCode = '';
     this.formContext.mode = 'create';
-    this.formInitialValue = buildStrategyRuleInitialValue(defaultCode);
-    this.refreshForm(defaultCode);
+    this.formInitialValue = buildStrategyRuleInitialValue(definition);
+    this.refreshForm();
   }
 
   private buildPayload(model: StrategyRuleFormValue): StrategyRuleCreateDto {
     return {
       code: model.code.trim().toUpperCase(),
       name: model.name.trim(),
+      ruleGroupCode: model.ruleGroupCode.trim().toUpperCase() || undefined,
+      ruleGroupLabel: model.ruleGroupLabel.trim() || undefined,
+      implementationCode: model.implementationCode.trim().toUpperCase() || undefined,
       description: model.description.trim() || undefined,
       status: model.status,
+      configFields: parseRuleConfigFieldsPayload(model.configFieldsJson),
+      initialValue: parseRuleInitialValuePayload(model.initialValueJson),
       configJson: mapRuleConfigToApiPayload(model.configJson)
     };
   }
 
-  private refreshForm(ruleCode: string): void {
-    this.formConfig = buildStrategyRuleFormConfig(ruleCode);
+  private refreshForm(): void {
+    this.formConfig = buildStrategyRuleFormConfig(this.activeDefinition);
     this.rerenderForm();
+  }
+
+  private buildSchemaSignature(definition: StrategyRuleCodeDefinition): string {
+    return JSON.stringify({
+      configFields: definition.configFields,
+      initialValue: definition.initialValue
+    });
   }
 
   private rerenderForm(): void {

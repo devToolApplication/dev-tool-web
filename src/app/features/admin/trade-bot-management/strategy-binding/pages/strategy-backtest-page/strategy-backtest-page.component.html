@@ -1,24 +1,26 @@
 <section class="crud-page flex flex-col gap-4">
-  <div class="flex flex-col gap-3 rounded-2xl border border-surface-200 bg-surface-0 p-5 shadow-sm lg:flex-row lg:items-start lg:justify-between">
-    <div class="min-w-0">
-      <div class="flex flex-wrap items-center gap-2">
-        <h2 class="m-0 text-2xl font-semibold">{{ TEXT.BacktestReplayTitle | translateContent }}</h2>
-        @if (binding) {
-          <p-tag [value]="binding.strategyServiceName" severity="contrast"></p-tag>
-        }
-        @if (job) {
-          <p-tag [value]="job.status" severity="secondary"></p-tag>
-        }
+  <app-card class="page-header" [padding]="'lg'" [surface]="'strong'">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="m-0 text-2xl font-semibold">{{ TEXT.BacktestReplayTitle | translateContent }}</h2>
+          @if (binding) {
+            <p-tag [value]="binding.strategyServiceName" severity="contrast"></p-tag>
+          }
+          @if (job) {
+            <p-tag [value]="job.status" severity="secondary"></p-tag>
+          }
+        </div>
+        <p class="mt-2 text-sm text-surface-500">
+          {{ binding?.exchangeCode }} / {{ binding?.symbolCode }} / {{ binding?.providerSymbol }}
+        </p>
       </div>
-      <p class="mt-2 text-sm text-surface-500">
-        {{ binding?.exchangeCode }} / {{ binding?.symbolCode }} / {{ binding?.providerSymbol }}
-      </p>
+      <div class="flex flex-wrap items-center gap-2">
+        <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
+        <app-button icon="pi pi-play" [label]="TEXT.RunBacktest" [loading]="running" (buttonClick)="runBacktest()"></app-button>
+      </div>
     </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
-      <app-button icon="pi pi-play" [label]="TEXT.RunBacktest" [loading]="running" (buttonClick)="runBacktest()"></app-button>
-    </div>
-  </div>
+  </app-card>
 
   <p-panel>
     <ng-template pTemplate="header">
@@ -57,115 +59,95 @@
 
   @if (job || metric) {
     <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.TotalTrades | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.totalTrades ?? orders.length }}</div>
-    </div>
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.WinTrades | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.winTrades ?? 0 }}</div>
-    </div>
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.LoseTrades | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.loseTrades ?? 0 }}</div>
-    </div>
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.WinRate | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.winRate ?? 0 | number:'1.2-2' }}%</div>
-    </div>
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.Pnl | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.pnl ?? job?.pnl ?? 0 | number:'1.2-2' }}</div>
-    </div>
-    <div class="col-span-6 md:col-span-3 xl:col-span-2 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
-      <div class="text-xs uppercase tracking-wide text-surface-500">{{ TEXT.FinalEquity | translateContent }}</div>
-      <div class="mt-2 text-2xl font-semibold">{{ metric?.finalEquity ?? job?.finalEquity ?? 0 | number:'1.2-2' }}</div>
-    </div>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalTrades" [value]="metric?.totalTrades ?? orders.length"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinTrades" [value]="metric?.winTrades ?? 0"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.LoseTrades" [value]="metric?.loseTrades ?? 0"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinRate" [value]="(metric?.winRate ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.Pnl" [value]="(metric?.pnl ?? job?.pnl ?? 0) | number:'1.2-2'"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.FinalEquity" [value]="(metric?.finalEquity ?? job?.finalEquity ?? 0) | number:'1.2-2'"></app-summary-metric-card>
     </div>
   }
 
   @if (replayPayload) {
     <div class="backtest-replay-grid grid grid-cols-12 gap-4">
-    <div class="backtest-main-column col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
-      <app-base-replay-controls
-        [currentStep]="replay.currentStepIndex()"
-        [totalSteps]="replay.steps().length"
-        [playing]="replay.playing()"
-        [speed]="replay.speed()"
-        (playingChange)="replay.setPlaying($event)"
-        (previousStep)="replay.previousStep()"
-        (nextStep)="replay.nextStep()"
-        (fastForward)="replay.fastForward()"
-        (rewind)="replay.rewind()"
-        (previousEvent)="replay.previousEvent()"
-        (nextEvent)="replay.nextEvent()"
-        (seek)="replay.seek($event)"
-        (speedChange)="replay.setSpeed($event)"
-      ></app-base-replay-controls>
+      <div class="backtest-main-column col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
+        <app-base-replay-controls
+          [currentStep]="replay.currentStepIndex()"
+          [totalSteps]="replay.steps().length"
+          [playing]="replay.playing()"
+          [speed]="replay.speed()"
+          (playingChange)="replay.setPlaying($event)"
+          (previousStep)="replay.previousStep()"
+          (nextStep)="replay.nextStep()"
+          (fastForward)="replay.fastForward()"
+          (rewind)="replay.rewind()"
+          (previousEvent)="replay.previousEvent()"
+          (nextEvent)="replay.nextEvent()"
+          (seek)="replay.seek($event)"
+          (speedChange)="replay.setSpeed($event)"
+        ></app-base-replay-controls>
 
-      <p-panel>
-        <ng-template pTemplate="header">
-          <div class="flex w-full items-center justify-between gap-3">
-            <div>
-              <div class="text-base font-semibold">{{ TEXT.ReplayChart | translateContent }}</div>
-              <div class="text-sm text-surface-500">{{ TEXT.ReplayChartDesc | translateContent }}</div>
+        <p-panel>
+          <ng-template pTemplate="header">
+            <div class="flex w-full items-center justify-between gap-3">
+              <div>
+                <div class="text-base font-semibold">{{ TEXT.ReplayChart | translateContent }}</div>
+                <div class="text-sm text-surface-500">{{ TEXT.ReplayChartDesc | translateContent }}</div>
+              </div>
+              <p-tag [value]="currentStepLabel" severity="contrast"></p-tag>
             </div>
-            <p-tag [value]="currentStepLabel" severity="contrast"></p-tag>
-          </div>
-        </ng-template>
+          </ng-template>
 
-        <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
-      </p-panel>
+          <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
+        </p-panel>
 
-      <div class="rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
         <app-backtest-performance-chart [metric]="metric"></app-backtest-performance-chart>
+
+        <p-panel>
+          <ng-template pTemplate="header">
+            <div class="flex w-full items-center justify-between gap-3">
+              <div>
+                <div class="text-base font-semibold">{{ TEXT.BacktestOrders | translateContent }}</div>
+                <div class="text-sm text-surface-500">{{ TEXT.BacktestOrdersDesc | translateContent }}</div>
+              </div>
+            </div>
+          </ng-template>
+
+          <div class="backtest-orders-table-shell">
+            <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
+          </div>
+        </p-panel>
       </div>
 
-      <p-panel>
-        <ng-template pTemplate="header">
-          <div class="flex w-full items-center justify-between gap-3">
-            <div>
-              <div class="text-base font-semibold">{{ TEXT.BacktestOrders | translateContent }}</div>
-              <div class="text-sm text-surface-500">{{ TEXT.BacktestOrdersDesc | translateContent }}</div>
-            </div>
-          </div>
-        </ng-template>
+      <div class="backtest-side-column col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">
+        <app-replay-auto-pause-panel
+          [enabled]="replay.autoPauseEnabled()"
+          [selectedTypes]="replay.autoPauseEventTypes()"
+          (enabledChange)="replay.autoPauseEnabled.set($event)"
+          (toggleType)="replay.toggleAutoPauseEvent($event)"
+        ></app-replay-auto-pause-panel>
 
-        <div class="backtest-orders-table-shell">
-          <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
-        </div>
-      </p-panel>
-    </div>
+        <app-replay-step-explanation-panel
+          [step]="replay.currentStep()"
+          [rules]="currentRules"
+          [events]="replay.currentStepEvents()"
+          [activeTrade]="replay.activeTrade()"
+        ></app-replay-step-explanation-panel>
 
-    <div class="backtest-side-column col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">
-      <app-replay-auto-pause-panel
-        [enabled]="replay.autoPauseEnabled()"
-        [selectedTypes]="replay.autoPauseEventTypes()"
-        (enabledChange)="replay.autoPauseEnabled.set($event)"
-        (toggleType)="replay.toggleAutoPauseEvent($event)"
-      ></app-replay-auto-pause-panel>
+        <app-replay-trade-timeline-panel
+          [trades]="replay.trades()"
+          [highlightedTradeId]="replay.activeTrade()?.id || replay.selectedTradeId()"
+          (tradeSelect)="onTradeSelected($event)"
+        ></app-replay-trade-timeline-panel>
 
-      <app-replay-step-explanation-panel
-        [step]="replay.currentStep()"
-        [rules]="currentRules"
-        [events]="replay.currentStepEvents()"
-        [activeTrade]="replay.activeTrade()"
-      ></app-replay-step-explanation-panel>
-
-      <app-replay-trade-timeline-panel
-        [trades]="replay.trades()"
-        [highlightedTradeId]="replay.activeTrade()?.id || replay.selectedTradeId()"
-        (tradeSelect)="onTradeSelected($event)"
-      ></app-replay-trade-timeline-panel>
-
-      <app-replay-event-log-panel
-        [events]="replay.filteredEvents()"
-        [selectedEventId]="replay.selectedEventId()"
-        [selectedFilters]="replay.eventTypeFilters()"
-        (filterChange)="replay.setEventFilters($event)"
-        (eventSelect)="onEventSelected($event)"
-      ></app-replay-event-log-panel>
-    </div>
+        <app-replay-event-log-panel
+          [events]="replay.filteredEvents()"
+          [selectedEventId]="replay.selectedEventId()"
+          [selectedFilters]="replay.eventTypeFilters()"
+          (filterChange)="replay.setEventFilters($event)"
+          (eventSelect)="onEventSelected($event)"
+        ></app-replay-event-log-panel>
+      </div>
     </div>
   }
 </section>

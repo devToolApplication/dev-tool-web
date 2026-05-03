@@ -1,4 +1,3 @@
-import { TradeBotConfigResponse } from '../../../../../core/models/trade-bot/config.model';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import { StrategyRuleResponse, StrategyRuleStatus } from '../../../../../core/models/trade-bot/strategy-rule.model';
 import { FieldConfig, FieldType, FormConfig, GridWidth, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
@@ -7,8 +6,13 @@ import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rule
 export interface StrategyRuleFormValue {
   code: string;
   name: string;
+  ruleGroupCode: string;
+  ruleGroupLabel: string;
+  implementationCode: string;
   status: StrategyRuleStatus;
   description: string;
+  configFieldsJson: string;
+  initialValueJson: string;
   configJson: Record<string, unknown>;
 }
 
@@ -18,86 +22,19 @@ export interface StrategyRuleCodeDefinition {
   description: string;
   ruleGroupCode: string;
   ruleGroupLabel: string;
+  implementationCode: string;
   configFields: FieldConfig[];
   initialValue: Record<string, unknown>;
 }
 
-interface StrategyRuleDefinitionConfigValue {
-  label?: string;
-  description?: string;
-  ruleGroupCode?: string;
-  ruleGroupLabel?: string;
-  configFields?: unknown[];
-  initialValue?: Record<string, unknown>;
-}
-
-let strategyRuleDefinitions: StrategyRuleCodeDefinition[] = [];
-let ruleDefinitionMap = buildRuleDefinitionMap(strategyRuleDefinitions);
-let strategyRuleCodeOptions = buildRuleCodeOptions(strategyRuleDefinitions);
-
-export function configureStrategyRuleDefinitions(definitions: TradeBotConfigResponse[] | null | undefined): void {
-  const resolvedDefinitions = (definitions ?? [])
-    .filter((item) => item?.status === 'ACTIVE')
-    .map(mapConfigToDefinition)
-    .filter((item): item is StrategyRuleCodeDefinition => item !== null);
-
-  updateRuleDefinitions(resolvedDefinitions);
-}
-
-export function getStrategyRuleDefaultCode(): string | null {
-  return strategyRuleDefinitions[0]?.code ?? null;
-}
-
-export function mapRuleDefinitionsToResponses(
-  definitions: TradeBotConfigResponse[] | null | undefined
-): StrategyRuleResponse[] {
-  return (definitions ?? [])
-    .filter((item) => item?.status === 'ACTIVE')
-    .map(mapConfigToDefinition)
-    .filter((item): item is StrategyRuleCodeDefinition => item !== null)
-    .sort((left, right) => left.code.localeCompare(right.code))
-    .map((item) => ({
-      id: item.code,
-      code: item.code,
-      name: item.label,
-      ruleGroupCode: item.ruleGroupCode || undefined,
-      ruleGroupLabel: item.ruleGroupLabel || undefined,
-      configJson: { ...item.initialValue },
-      description: item.description,
-      status: 'ACTIVE'
-    }));
-}
-
-export function resolveStrategyRuleDefinition(ruleCode: string | null | undefined): StrategyRuleCodeDefinition {
-  const normalizedCode = normalizeRuleCode(ruleCode);
-  const fallbackCode = normalizedCode || getStrategyRuleDefaultCode() || '';
-  return (
-    ruleDefinitionMap.get(normalizedCode) ?? {
-      code: fallbackCode,
-      label: fallbackCode,
-      description: 'tradeBot.strategyRule.definition.fallbackDescription',
-      ruleGroupCode: '',
-      ruleGroupLabel: '',
-      configFields: [],
-      initialValue: {}
-    }
-  );
-}
-
-export function buildStrategyRuleFormConfig(ruleCode: string | null | undefined): FormConfig {
-  const definition = resolveStrategyRuleDefinition(ruleCode);
-  const codeOptions = ruleDefinitionMap.has(definition.code)
-    ? strategyRuleCodeOptions
-    : [{ label: definition.label, value: definition.code }, ...strategyRuleCodeOptions];
-
+export function buildStrategyRuleFormConfig(definition: StrategyRuleCodeDefinition): FormConfig {
   return {
     fields: [
       {
-        type: 'select',
+        type: 'text',
         name: 'code',
         label: 'tradeBot.strategyRule.field.code',
         width: '1/2',
-        options: codeOptions,
         validation: [Rules.required('tradeBot.strategyRule.validation.codeRequired')]
       },
       {
@@ -106,6 +43,24 @@ export function buildStrategyRuleFormConfig(ruleCode: string | null | undefined)
         label: 'tradeBot.strategyRule.field.name',
         width: '1/2',
         validation: [Rules.required('tradeBot.strategyRule.validation.nameRequired')]
+      },
+      {
+        type: 'text',
+        name: 'ruleGroupCode',
+        label: 'Rule group code',
+        width: '1/2'
+      },
+      {
+        type: 'text',
+        name: 'ruleGroupLabel',
+        label: 'Rule group label',
+        width: '1/2'
+      },
+      {
+        type: 'text',
+        name: 'implementationCode',
+        label: 'Implementation code',
+        width: '1/2'
       },
       {
         type: 'select',
@@ -121,58 +76,108 @@ export function buildStrategyRuleFormConfig(ruleCode: string | null | undefined)
         label: 'tradeBot.strategy.field.description',
         width: 'full'
       },
+      {
+        type: 'textarea',
+        name: 'configFieldsJson',
+        label: 'Config fields',
+        width: 'full',
+        rows: 8,
+        maxRows: 14,
+        showZoomButton: true,
+        contentType: 'json'
+      },
+      {
+        type: 'textarea',
+        name: 'initialValueJson',
+        label: 'Initial value',
+        width: 'full',
+        rows: 5,
+        maxRows: 10,
+        showZoomButton: true,
+        contentType: 'json'
+      },
       ...definition.configFields
     ]
   };
 }
 
-export function buildStrategyRuleSlotFormConfig(ruleCode: string | null | undefined): FormConfig {
-  const definition = resolveStrategyRuleDefinition(ruleCode);
-  return {
-    fields: definition.configFields.map((field) => ({
-      ...field,
-      name: extractConfigKey(field.name) ?? field.name
-    }))
-  };
-}
-
 export function buildStrategyRuleInitialValue(
-  ruleCode: string | null | undefined,
+  definition: StrategyRuleCodeDefinition,
   overrides: Partial<StrategyRuleFormValue> = {}
 ): StrategyRuleFormValue {
-  const definition = resolveStrategyRuleDefinition(ruleCode);
-
   return {
     code: definition.code,
     name: '',
+    ruleGroupCode: definition.ruleGroupCode,
+    ruleGroupLabel: definition.ruleGroupLabel,
+    implementationCode: definition.implementationCode,
     status: 'ACTIVE',
     description: '',
+    configFieldsJson: stringifyJson(definition.configFields.map(stripConfigFieldNamePrefix)),
+    initialValueJson: stringifyJson(definition.initialValue),
     configJson: { ...definition.initialValue },
     ...overrides
   };
 }
 
-export function buildStrategyRuleSlotInitialValue(
-  ruleCode: string | null | undefined,
-  rawConfig: Record<string, unknown> | undefined
-): Record<string, unknown> {
-  const definition = resolveStrategyRuleDefinition(ruleCode);
-  const mappedConfig = mapApiConfigToRuleConfig(rawConfig, ruleCode);
+export function buildEmptyStrategyRuleDefinition(): StrategyRuleCodeDefinition {
   return {
-    ...definition.initialValue,
-    ...mappedConfig
+    code: '',
+    label: '',
+    description: 'tradeBot.strategyRule.definition.fallbackDescription',
+    ruleGroupCode: '',
+    ruleGroupLabel: '',
+    implementationCode: '',
+    configFields: [],
+    initialValue: {}
   };
 }
 
-export function mapApiConfigToRuleConfig(rawConfig: Record<string, unknown> | undefined, ruleCode: string | null | undefined): Record<string, unknown> {
-  const definition = resolveStrategyRuleDefinition(ruleCode);
+export function buildStrategyRuleDefinitionFromFormValue(value: StrategyRuleFormValue): StrategyRuleCodeDefinition {
+  const rawConfigFields = parseJsonArray(value.configFieldsJson, []);
+  const configFields = normalizeConfigFields(rawConfigFields);
+  const initialValueFromFields = buildInitialValueFromFields(rawConfigFields);
+  const initialValue = {
+    ...initialValueFromFields,
+    ...parseJsonRecord(value.initialValueJson, {})
+  };
+
+  return {
+    code: normalizeCode(value.code),
+    label: value.name?.trim() || normalizeCode(value.code),
+    description: value.description?.trim() || 'tradeBot.strategyRule.definition.fallbackDescription',
+    ruleGroupCode: normalizeCode(value.ruleGroupCode),
+    ruleGroupLabel: value.ruleGroupLabel?.trim() || value.ruleGroupCode?.trim() || '',
+    implementationCode: normalizeCode(value.implementationCode),
+    configFields,
+    initialValue
+  };
+}
+
+export function mapRuleResponseToDefinition(rule: StrategyRuleResponse): StrategyRuleCodeDefinition {
+  const rawConfigFields = rule.configFields ?? [];
+  const configFields = normalizeConfigFields(rawConfigFields);
+  const initialValue = isRecord(rule.initialValue) ? { ...rule.initialValue } : buildInitialValueFromFields(rawConfigFields);
+  return {
+    code: normalizeCode(rule.code),
+    label: rule.name ?? rule.code,
+    description: rule.description ?? 'tradeBot.strategyRule.definition.fallbackDescription',
+    ruleGroupCode: normalizeCode(rule.ruleGroupCode),
+    ruleGroupLabel: rule.ruleGroupLabel ?? rule.ruleGroupCode ?? '',
+    implementationCode: normalizeCode(rule.implementationCode),
+    configFields,
+    initialValue
+  };
+}
+
+export function mapApiConfigToRuleConfig(rawConfig: Record<string, unknown> | undefined, definition: StrategyRuleCodeDefinition): Record<string, unknown> {
   const allowedKeys = new Set([
     ...Object.keys(definition.initialValue),
     ...definition.configFields.map((field) => extractConfigKey(field.name)).filter((key): key is string => !!key)
   ]);
   const mapped = { ...definition.initialValue };
 
-  if (allowedKeys.size === 0 && !ruleDefinitionMap.has(definition.code)) {
+  if (allowedKeys.size === 0) {
     return { ...(rawConfig ?? {}) };
   }
 
@@ -197,46 +202,35 @@ export function mapRuleConfigToApiPayload(model: Record<string, unknown> | undef
   return payload;
 }
 
-function normalizeRuleCode(ruleCode: string | null | undefined): string {
-  return String(ruleCode ?? '')
-    .trim()
-    .toUpperCase();
+export function parseRuleConfigFieldsPayload(configFieldsJson: string): Array<Record<string, unknown>> {
+  return parseJsonArray(configFieldsJson, []).filter(isRecord);
 }
 
-function updateRuleDefinitions(definitions: StrategyRuleCodeDefinition[]): void {
-  strategyRuleDefinitions = [...definitions].sort((left, right) => left.code.localeCompare(right.code));
-  ruleDefinitionMap = buildRuleDefinitionMap(strategyRuleDefinitions);
-  strategyRuleCodeOptions = buildRuleCodeOptions(strategyRuleDefinitions);
+export function parseRuleInitialValuePayload(initialValueJson: string): Record<string, unknown> {
+  return parseJsonRecord(initialValueJson, {});
 }
 
-function buildRuleDefinitionMap(definitions: StrategyRuleCodeDefinition[]): Map<string, StrategyRuleCodeDefinition> {
-  return new Map(definitions.map((item) => [item.code, item]));
-}
-
-function buildRuleCodeOptions(definitions: StrategyRuleCodeDefinition[]): SelectOption[] {
-  return definitions.map((item) => ({ label: item.label, value: item.code }));
-}
-
-function mapConfigToDefinition(config: TradeBotConfigResponse): StrategyRuleCodeDefinition | null {
-  if (!isRecord(config?.value)) {
-    return null;
-  }
-
-  const rawValue = config.value as StrategyRuleDefinitionConfigValue;
-  const code = normalizeRuleCode(config.key);
-  if (!code) {
-    return null;
-  }
-
+export function buildStrategyRuleSlotFormConfig(definition: StrategyRuleCodeDefinition): FormConfig {
   return {
-    code,
-    label: String(rawValue.label ?? code).trim() || code,
-    description: String(rawValue.description ?? 'tradeBot.strategyRule.definition.fallbackDescription').trim(),
-    ruleGroupCode: normalizeRuleCode(String(rawValue.ruleGroupCode ?? '')),
-    ruleGroupLabel: String(rawValue.ruleGroupLabel ?? rawValue.ruleGroupCode ?? '').trim(),
-    configFields: normalizeConfigFields(rawValue.configFields),
-    initialValue: isRecord(rawValue.initialValue) ? { ...rawValue.initialValue } : {}
+    fields: definition.configFields.map((field) => ({
+      ...field,
+      name: extractConfigKey(field.name) ?? field.name
+    }))
   };
+}
+
+export function buildStrategyRuleSlotInitialValue(
+  definition: StrategyRuleCodeDefinition,
+  rawConfig: Record<string, unknown> | undefined
+): Record<string, unknown> {
+  return {
+    ...definition.initialValue,
+    ...mapApiConfigToRuleConfig(rawConfig, definition)
+  };
+}
+
+export function stringifyJson(value: unknown): string {
+  return JSON.stringify(value ?? null, null, 2);
 }
 
 function normalizeConfigFields(configFields: unknown[] | undefined): FieldConfig[] {
@@ -257,12 +251,14 @@ function normalizeConfigField(field: unknown): FieldConfig | null {
     return null;
   }
 
+  const configKey = extractConfigKey(name) ?? name;
   const width = isGridWidth(field['width']) ? field['width'] : undefined;
   const helpText = String(field['helpText'] ?? field['description'] ?? '').trim();
   const options = Array.isArray(field['options']) ? normalizeOptions(field['options']) : undefined;
   const normalizedField: Record<string, unknown> = {
     ...(field as unknown as FieldConfig),
-    name: name.startsWith('configJson.') ? name : `configJson.${name}`,
+    key: configKey,
+    name: `configJson.${configKey}`,
     type,
     ...(width ? { width } : {}),
     ...(options ? { options } : {}),
@@ -285,11 +281,65 @@ function normalizeOptions(options: unknown[]): SelectOption[] {
     .filter((option) => option.label !== '');
 }
 
+function buildInitialValueFromFields(configFields: unknown[] | undefined): Record<string, unknown> {
+  const initialValue: Record<string, unknown> = {};
+  (configFields ?? []).forEach((field) => {
+    if (!isRecord(field)) {
+      return;
+    }
+    const key = extractConfigKey(String(field['key'] ?? field['name'] ?? ''));
+    if (key && Object.prototype.hasOwnProperty.call(field, 'defaultValue')) {
+      initialValue[key] = field['defaultValue'];
+    }
+  });
+  return initialValue;
+}
+
+function stripConfigFieldNamePrefix(field: FieldConfig): Record<string, unknown> {
+  const normalized = { ...(field as unknown as Record<string, unknown>) };
+  const key = extractConfigKey(String(normalized['key'] ?? normalized['name'] ?? ''));
+  if (key) {
+    normalized['key'] = key;
+    normalized['name'] = key;
+  }
+  return normalized;
+}
+
+function parseJsonArray(value: string | null | undefined, fallback: unknown[]): unknown[] {
+  const text = String(value ?? '').trim();
+  if (!text) {
+    return fallback;
+  }
+  const parsed = JSON.parse(text) as unknown;
+  if (!Array.isArray(parsed)) {
+    throw new Error('JSON value must be an array');
+  }
+  return parsed;
+}
+
+function parseJsonRecord(value: string | null | undefined, fallback: Record<string, unknown>): Record<string, unknown> {
+  const text = String(value ?? '').trim();
+  if (!text) {
+    return fallback;
+  }
+  const parsed = JSON.parse(text) as unknown;
+  if (!isRecord(parsed)) {
+    throw new Error('JSON value must be an object');
+  }
+  return parsed;
+}
+
 function extractConfigKey(fieldName: string | undefined): string | null {
   if (!fieldName) {
     return null;
   }
   return fieldName.startsWith('configJson.') ? fieldName.slice('configJson.'.length) : fieldName;
+}
+
+function normalizeCode(value: string | null | undefined): string {
+  return String(value ?? '')
+    .trim()
+    .toUpperCase();
 }
 
 function isSupportedFieldType(type: string): type is FieldType {

@@ -52,6 +52,8 @@ export interface NumberFieldConfig extends BaseFieldConfig {
   type: 'number';
   mode?: 'decimal' | 'currency';
   currency?: string;
+  suffix?: string;
+  prefix?: string;
   minFractionDigits?: number;
   maxFractionDigits?: number;
   step?: number;

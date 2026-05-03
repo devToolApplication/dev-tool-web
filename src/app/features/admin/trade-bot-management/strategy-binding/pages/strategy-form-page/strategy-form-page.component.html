@@ -31,6 +31,15 @@
           [statusOptions]="statusOptions"
         ></app-strategy-general-info-section>
 
+        <app-strategy-specific-config-section
+          #strategyConfigSection
+          [config]="strategyDefinition.formConfig"
+          [context]="{ user: null, mode: editId ? 'edit' : 'create', extra: {} }"
+          [initialValue]="strategyConfigInitialValue"
+          [subtitle]="strategyDefinition.description"
+          (configChange)="onStrategyConfigChange($event)"
+        ></app-strategy-specific-config-section>
+
         <p-panel>
           <ng-template pTemplate="header">
             <div class="flex w-full items-center justify-between gap-3">

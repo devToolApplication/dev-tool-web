@@ -2,3 +2,8 @@
   width: 100%;
   min-height: 420px;
 }
+
+:host {
+  display: block;
+  min-width: 0;
+}

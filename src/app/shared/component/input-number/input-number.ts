@@ -17,6 +17,8 @@ export class InputNumber extends BaseInput<number> {
   /* ========= Currency | Decimal ========= */
   @Input() mode?: 'decimal' | 'currency';
   @Input() currency?: string;
+  @Input() suffix?: string;
+  @Input() prefix?: string;
 
   /* ========= UI Options ========= */
   @Input() showClear = false;

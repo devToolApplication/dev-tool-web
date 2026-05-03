@@ -11,6 +11,7 @@ export type StrategyRoutePath =
   | 'inside-bar-breakout-mtf'
   | 'rsi-divergence-swing'
   | 'liquidity-sweep-fvg-reclaim'
+  | 'fvg-touch-retest'
   | 'pivot-sweep-rejection';
 
 export type StrategyUiFamily = 'breakout' | 'trend' | 'mean-reversion' | 'session' | 'pattern' | 'divergence' | 'liquidity' | 'price-action';

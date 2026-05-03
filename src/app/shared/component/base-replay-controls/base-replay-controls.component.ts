@@ -10,8 +10,15 @@ enum ReplayControlTextKey {
 @Component({
   selector: 'app-base-replay-controls',
   standalone: false,
+  styles: [`
+    :host {
+      display: block;
+      min-width: 0;
+    }
+  `],
   template: `
-    <div class="flex flex-col gap-3 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm">
+    <app-card [padding]="'md'" [surface]="'strong'">
+      <div class="flex flex-col gap-3 min-w-0">
       <div class="flex flex-wrap items-center gap-2">
         <button pButton type="button" icon="pi pi-fast-backward" severity="secondary" text (click)="rewind.emit()"></button>
         <button pButton type="button" icon="pi pi-chevron-left" severity="secondary" text (click)="previousStep.emit()"></button>
@@ -65,7 +72,8 @@ enum ReplayControlTextKey {
           ></p-select>
         </div>
       </div>
-    </div>
+      </div>
+    </app-card>
   `
 })
 export class BaseReplayControlsComponent {

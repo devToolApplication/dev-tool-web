@@ -1,4 +1,4 @@
-import { DestroyRef, Component, OnInit, inject } from '@angular/core';
+import { DestroyRef, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, finalize } from 'rxjs';
@@ -14,12 +14,18 @@ import { LoadingService } from '../../../../../../core/ui-services/loading.servi
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { STRATEGY_MANAGEMENT_ROUTES, STRATEGY_FAMILY_LABELS } from '../../strategy-management.constants';
 import { StrategyFormBuilders, StrategyGeneralInfoFormGroup } from '../../shared/strategy-form.builders';
-import { StrategyConfigDefinition, StrategyRuleSlotDefinition } from '../../shared/strategy-config-form.factory';
+import {
+  StrategyConfigDefinition,
+  StrategyRuleSlotDefinition,
+  mapApiConfigToStrategyConfig,
+  mapStrategyConfigToApiPayload
+} from '../../shared/strategy-config-form.factory';
 import { StrategyFormFacade, StrategyFormPageContext, StrategySelectOption } from '../../shared/strategy-form.facade';
 import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
 import { resolveStrategyUiMetadataByServiceName } from '../../shared/strategy-ui.registry';
 import { StrategyRuleResponse } from '../../../../../../core/models/trade-bot/strategy-rule.model';
 import { STRATEGY_RULE_ROUTES } from '../../../rule-config/strategy-rule.constants';
+import { StrategySpecificConfigSectionComponent } from '../../shared/components/strategy-specific-config-section.component';
 
 type RuleSlotFormGroup = FormGroup<Record<string, FormControl<string>>>;
 
@@ -35,13 +41,15 @@ export class StrategyFormPageComponent implements OnInit {
   readonly generalInfoForm: StrategyGeneralInfoFormGroup;
   readonly destroyRef = inject(DestroyRef);
   readonly TEXT = TradeBotTextKey;
+  @ViewChild('strategyConfigSection')
+  strategyConfigSection?: StrategySpecificConfigSectionComponent;
 
   editId: string | null = null;
   loaded = false;
   loading = false;
   saving = false;
 
-  strategyMeta = resolveStrategyUiMetadataByServiceName('FIRST_M15_NEWYORK');
+  strategyMeta = resolveStrategyUiMetadataByServiceName('FVG_TOUCH_RETEST');
   currentStrategy?: StrategyResponse;
   strategyDefinition: StrategyConfigDefinition = {
     code: '',
@@ -55,6 +63,8 @@ export class StrategyFormPageComponent implements OnInit {
   };
   referenceSymbols: SymbolResponse[] = [];
   availableRules: StrategyRuleResponse[] = [];
+  strategyConfigInitialValue: Record<string, unknown> = {};
+  strategyConfigModel: Record<string, unknown> = {};
 
   exchangeOptions: StrategySelectOption[] = [];
   symbolOptions: StrategySelectOption[] = [];
@@ -112,8 +122,9 @@ export class StrategyFormPageComponent implements OnInit {
   save(): void {
     this.generalInfoForm.markAllAsTouched();
     this.ruleSlotsForm.markAllAsTouched();
+    this.strategyConfigSection?.markAllAsTouched();
 
-    if (this.generalInfoForm.invalid || this.ruleSlotsForm.invalid) {
+    if (this.generalInfoForm.invalid || this.ruleSlotsForm.invalid || this.strategyConfigSection?.isValid() === false) {
       this.toastService.info(this.i18nService.t(TradeBotTextKey.ReviewStrategyBeforeSave));
       return;
     }
@@ -149,6 +160,10 @@ export class StrategyFormPageComponent implements OnInit {
 
   onRuleSelectionChange(slotCode: string): void {
     this.reconcileRuleGroupSelections(slotCode);
+  }
+
+  onStrategyConfigChange(value: Record<string, unknown>): void {
+    this.strategyConfigModel = value ?? {};
   }
 
   private getRuleOptionsForSlot(slot: StrategyRuleSlotDefinition, pinnedRuleGroupCode?: string | null): StrategySelectOption[] {
@@ -205,6 +220,8 @@ export class StrategyFormPageComponent implements OnInit {
     this.strategyMeta = resolveStrategyUiMetadataByServiceName(strategyServiceName);
     this.strategyDefinition = context.selectedDefinition;
     this.availableRules = context.references.rules ?? [];
+    this.strategyConfigInitialValue = { ...this.strategyDefinition.initialValue };
+    this.strategyConfigModel = { ...this.strategyConfigInitialValue };
 
     this.buildRuleSlotsForm(this.strategyDefinition.ruleSlots, context.binding?.selectedRules ?? []);
 
@@ -249,6 +266,8 @@ export class StrategyFormPageComponent implements OnInit {
       },
       { emitEvent: false }
     );
+    this.strategyConfigInitialValue = mapApiConfigToStrategyConfig(binding.configJson ?? {}, this.strategyDefinition);
+    this.strategyConfigModel = { ...this.strategyConfigInitialValue };
   }
 
   private resetCreateState(strategyServiceName: string, strategy: StrategyResponse | undefined, symbols: SymbolResponse[]): void {
@@ -269,10 +288,13 @@ export class StrategyFormPageComponent implements OnInit {
       },
       { emitEvent: false }
     );
+    this.strategyConfigInitialValue = { ...this.strategyDefinition.initialValue };
+    this.strategyConfigModel = { ...this.strategyConfigInitialValue };
   }
 
   private buildPayload(): TradeStrategyBindingCreateDto {
     const general = this.generalInfoForm.getRawValue();
+    const strategyConfig = this.strategyConfigSection?.getModel<Record<string, unknown>>() ?? this.strategyConfigModel;
 
     return {
       name: general.name.trim(),
@@ -284,7 +306,7 @@ export class StrategyFormPageComponent implements OnInit {
       providerSymbol: general.providerSymbol.trim(),
       description: general.description.trim() || undefined,
       status: general.status,
-      configJson: {},
+      configJson: mapStrategyConfigToApiPayload(strategyConfig),
       selectedRules: this.buildSelectedRulePayload()
     };
   }

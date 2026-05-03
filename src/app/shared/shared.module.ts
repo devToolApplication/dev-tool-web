@@ -99,6 +99,8 @@ import { FieldSecretMetadataRendererComponent } from './ui/form-input/component/
 import { FieldTreeRendererComponent } from './ui/form-input/component/field-tree-renderer/field-tree-renderer';
 import { FormInput } from './ui/form-input/form-input';
 import { FieldGuidePanelComponent } from './ui/field-guide-panel/field-guide-panel.component';
+import { CardComponent } from './ui/card/card.component';
+import { SummaryMetricCardComponent } from './ui/summary-metric-card/summary-metric-card.component';
 import { TableCellComponent } from './ui/table/component/table/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table/table-filter/table-filter';
 import { TableComponent } from './ui/table/component/table/table';
@@ -153,7 +155,7 @@ const COMPONENTS = [
   TimelineComponent
 ];
 
-const UI = [FormInput, TableComponent, FieldGuidePanelComponent];
+const UI = [FormInput, TableComponent, FieldGuidePanelComponent, CardComponent, SummaryMetricCardComponent];
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,

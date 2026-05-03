@@ -1,52 +1,28 @@
 <section class="crud-page">
-  <div class="header-row detail-header">
-    <div>
-      <h2>{{ 'tradeBot.backtest.detail.title' | translateContent }}</h2>
-      <p class="detail-subtitle">{{ job?.exchangeCode }} / {{ job?.symbolCode }} / {{ job?.strategyServiceName }}</p>
+  <app-card class="detail-header" [padding]="'lg'" [surface]="'strong'">
+    <div class="detail-header-content">
+      <div>
+        <h2>{{ 'tradeBot.backtest.detail.title' | translateContent }}</h2>
+        <p class="detail-subtitle">{{ job?.exchangeCode }} / {{ job?.symbolCode }} / {{ job?.strategyServiceName }}</p>
+      </div>
+      <app-button label="tradeBot.back" icon="pi pi-arrow-left" severity="secondary" (buttonClick)="onBack()"></app-button>
     </div>
-    <app-button label="tradeBot.back" icon="pi pi-arrow-left" severity="secondary" (buttonClick)="onBack()"></app-button>
-  </div>
+  </app-card>
 
   <div class="detail-grid">
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.totalTrades' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.totalTrades ?? 0 }}</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.winTrades' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.winTrades ?? 0 }}</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.loseTrades' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.loseTrades ?? 0 }}</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.winRate' | translateContent }}</span>
-      <strong class="metric-value">{{ (metric?.winRate ?? 0) | number:'1.2-2' }}%</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.pnl' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.pnl ?? 0 | number:'1.2-2' }}</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.replay.metric.finalEquity' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.finalEquity ?? 0 | number:'1.2-2' }}</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.backtest.detail.maxDrawdown' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.maxDrawdown ?? 0 | number:'1.2-2' }}%</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">{{ 'tradeBot.backtest.detail.profitFactor' | translateContent }}</span>
-      <strong class="metric-value">{{ metric?.profitFactor ?? 0 | number:'1.2-2' }}</strong>
-    </div>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.totalTrades'" [value]="metric?.totalTrades ?? 0"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.winTrades'" [value]="metric?.winTrades ?? 0"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.loseTrades'" [value]="metric?.loseTrades ?? 0"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.winRate'" [value]="(metric?.winRate ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.pnl'" [value]="(metric?.pnl ?? 0) | number:'1.2-2'"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.finalEquity'" [value]="(metric?.finalEquity ?? 0) | number:'1.2-2'"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.backtest.detail.maxDrawdown'" [value]="(metric?.maxDrawdown ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.backtest.detail.profitFactor'" [value]="(metric?.profitFactor ?? 0) | number:'1.2-2'"></app-summary-metric-card>
   </div>
 
-  <div class="card mb-4">
-    <app-backtest-performance-chart [metric]="metric"></app-backtest-performance-chart>
-  </div>
+  <app-backtest-performance-chart [metric]="metric"></app-backtest-performance-chart>
 
-  <div class="card detail-orders-card">
+  <app-card class="detail-orders-card" [padding]="'md'">
     <app-table
       [config]="orderTableConfig"
       [data]="orders"
@@ -54,5 +30,5 @@
       (search)="onSearchOrders($event)"
       (resetFilter)="onResetOrders()"
     ></app-table>
-  </div>
+  </app-card>
 </section>

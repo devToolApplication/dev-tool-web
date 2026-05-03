@@ -28,7 +28,12 @@ export class StrategyRuleListComponent extends BasePagedList<StrategyRuleRespons
     columns: [
       { field: 'code', header: 'Code', sortable: true },
       { field: 'name', header: 'Name', sortable: true },
+      { field: 'ruleGroupCode', header: 'Rule Group', sortable: true },
+      { field: 'implementationCode', header: 'Implementation', sortable: true },
       { field: 'status', header: 'Status', sortable: true },
+      { field: 'configFields', header: 'Config Fields', type: 'textarea', minWidth: '22rem' },
+      { field: 'initialValue', header: 'Initial Value', type: 'textarea', minWidth: '18rem' },
+      { field: 'configJson', header: 'Rule Config', type: 'textarea', minWidth: '18rem' },
       { field: 'description', header: 'Description', type: 'textarea' },
       {
         field: 'actions',

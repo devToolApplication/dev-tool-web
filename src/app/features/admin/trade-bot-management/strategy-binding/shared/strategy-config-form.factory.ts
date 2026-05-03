@@ -87,8 +87,8 @@ export function mapApiConfigToStrategyConfig(
 
   Object.entries(rawConfig ?? {}).forEach(([key, value]) => {
     const uiKey = key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
-    if (allowedKeys.size === 0 || allowedKeys.has(uiKey)) {
-      mapped[uiKey] = value;
+    if (allowedKeys.size === 0 || allowedKeys.has(uiKey) || allowedKeys.has(key)) {
+      mapped[allowedKeys.has(uiKey) ? uiKey : key] = value;
     }
   });
 
