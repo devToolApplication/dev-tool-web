@@ -7,9 +7,10 @@
 .page-header,
 .upload-panel,
 .result-panel {
-  border: 1px solid;
+  border: 1px solid var(--app-border);
   border-radius: 0.5rem;
   padding: 1rem;
+  background: var(--app-card-surface);
 }
 
 .page-header {
@@ -82,7 +83,8 @@
 }
 
 .result-panel.error {
-  color: #b42318;
+  border-color: var(--app-control-danger-border);
+  color: var(--app-control-danger-text);
   font-weight: 600;
 }
 

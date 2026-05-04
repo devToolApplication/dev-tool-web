@@ -74,5 +74,5 @@
 .theme-manual-input:focus {
   outline: none;
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--app-primary) 25%, transparent);
+  box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--app-primary) 25%, var(--app-transparent));
 }

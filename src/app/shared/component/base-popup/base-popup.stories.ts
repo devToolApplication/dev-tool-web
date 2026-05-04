@@ -53,7 +53,7 @@ export const Default: Story = {
           (cancel)="visible = false"
           (confirm)="visible = false"
         >
-          <p class="m-0 text-sm text-surface-600">
+          <p class="m-0 text-sm app-text-soft">
             This popup renders projected content and optional default footer actions.
           </p>
         </app-base-popup>

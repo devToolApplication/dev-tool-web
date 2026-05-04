@@ -54,40 +54,40 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 16%, transparent);
+  color: var(--app-chart-overlay-text);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-chart-overlay-text) 16%, var(--app-transparent));
 }
 
 .timeline-marker-user {
-  background: #0f766e;
+  background: var(--app-chart-success);
 }
 
 .timeline-marker-request {
-  background: #2563eb;
+  background: var(--app-chart-primary);
 }
 
 .timeline-marker-response {
-  background: #7c3aed;
+  background: var(--app-chart-violet);
 }
 
 .timeline-marker-tool-call {
-  background: #c2410c;
+  background: var(--app-chart-warning);
 }
 
 .timeline-marker-tool-result {
-  background: #15803d;
+  background: var(--app-chart-info);
 }
 
 .timeline-marker-final {
-  background: #4f46e5;
+  background: var(--app-chart-primary);
 }
 
 .timeline-marker-error {
-  background: #b42318;
+  background: var(--app-chart-danger);
 }
 
 .timeline-marker-default {
-  background: #475467;
+  background: var(--app-chart-muted);
 }
 
 .empty-state {
@@ -98,7 +98,7 @@
 }
 
 .error-text {
-  color: #b42318;
+  color: var(--app-control-danger-text);
 }
 
 .full-width {

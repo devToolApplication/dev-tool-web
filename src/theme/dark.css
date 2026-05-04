@@ -156,6 +156,32 @@
   --app-control-contrast-shadow:
     0 12px 28px rgba(4, 7, 20, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --app-chart-primary: #7a77ff;
+  --app-chart-success: #32c78c;
+  --app-chart-danger: #ff799d;
+  --app-chart-warning: #f6b949;
+  --app-chart-info: #62d9ff;
+  --app-chart-violet: #c28dff;
+  --app-chart-muted: #90a0ca;
+  --app-chart-candle-up: #32c78c;
+  --app-chart-candle-down: #ff799d;
+  --app-chart-volume-up: rgba(50, 199, 140, 0.55);
+  --app-chart-volume-down: rgba(255, 121, 157, 0.55);
+  --app-chart-grid: rgba(130, 164, 255, 0.2);
+  --app-chart-axis: #90a0ca;
+  --app-chart-overlay-text: #f3f6ff;
+  --app-chart-primary-fill: rgba(87, 129, 255, 0.2);
+  --app-chart-success-fill: rgba(50, 199, 140, 0.18);
+  --app-chart-danger-fill: rgba(255, 121, 157, 0.18);
+  --app-chart-warning-fill: rgba(246, 185, 73, 0.18);
+  --app-chart-info-fill: rgba(98, 217, 255, 0.18);
+  --app-chart-violet-fill: rgba(194, 141, 255, 0.18);
+  --app-chart-trend-up: var(--app-chart-success);
+  --app-chart-trend-down: var(--app-chart-danger);
+  --app-chart-trend-sideway: var(--app-chart-muted);
+  --app-chart-trend-up-fill: rgba(50, 199, 140, 0.16);
+  --app-chart-trend-down-fill: rgba(255, 121, 157, 0.16);
+  --app-chart-trend-sideway-fill: rgba(144, 160, 202, 0.14);
 
   --app-shadow-xs:
     0 10px 26px rgba(4, 7, 20, 0.26),

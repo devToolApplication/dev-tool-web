@@ -68,7 +68,7 @@
   width: 7rem;
   height: 7rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--app-primary) 12%, transparent);
+  background: var(--app-chart-primary-fill);
 }
 
 .stat-card span {
@@ -83,15 +83,15 @@
 }
 
 .stat-card.idle::after {
-  background: color-mix(in srgb, #22c55e 18%, transparent);
+  background: var(--app-chart-success-fill);
 }
 
 .stat-card.busy::after {
-  background: color-mix(in srgb, #3b82f6 18%, transparent);
+  background: var(--app-chart-info-fill);
 }
 
 .stat-card.hung::after {
-  background: color-mix(in srgb, #ef4444 18%, transparent);
+  background: var(--app-chart-danger-fill);
 }
 
 .table-card {
@@ -135,7 +135,7 @@ code {
 
 .enabled-state.off,
 .error-line {
-  color: #b42318;
+  color: var(--app-control-danger-text);
 }
 
 .error-line {

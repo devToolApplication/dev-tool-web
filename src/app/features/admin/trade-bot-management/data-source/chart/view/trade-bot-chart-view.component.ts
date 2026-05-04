@@ -8,7 +8,6 @@ import { SyncConfigService } from '../../../../../../core/services/trade-bot-ser
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
-import { CandleChartConfig, CandleChartPayload } from '../../../../../../shared/component/candle-chart/candle-chart';
 import { TRADE_BOT_ROUTES } from '../../../trade-bot.constants';
 
 @Component({
@@ -18,22 +17,7 @@ import { TRADE_BOT_ROUTES } from '../../../trade-bot.constants';
   styleUrl: './trade-bot-chart-view.component.css'
 })
 export class TradeBotChartViewComponent implements OnInit, OnDestroy {
-  readonly chartConfig: CandleChartConfig = {
-    showCandles: true,
-    showVolume: true,
-    showLines: true,
-    showBoxAreas: true,
-    showPoints: true,
-    showIndicators: true
-  };
-
-  chartPayload: CandleChartPayload = {
-    candles: [],
-    lines: [],
-    boxAreas: [],
-    points: [],
-    indicators: []
-  };
+  chartResponse: TradeBotCandleResponse | null = null;
 
   syncConfig: SyncConfigResponse | null = null;
   selectedInterval = '';
@@ -154,12 +138,11 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.ngZone.run(() => {
-            const nextPayload = this.mapChartPayload(response);
-            if (nextPayload.candles.length === 0) {
+            if ((response.candlestickData ?? []).length === 0) {
               return;
             }
 
-            this.chartPayload = nextPayload;
+            this.chartResponse = response;
           });
         },
         error: () => this.ngZone.run(() => this.toastService.error(this.i18nService.t('tradeBot.websocketDisconnected')))
@@ -185,8 +168,7 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
       }))
       .subscribe({
         next: (response) => {
-          const nextPayload = this.mapChartPayload(response);
-          if (nextPayload.candles.length === 0) {
+          if ((response.candlestickData ?? []).length === 0) {
             console.warn('[TradeBotChartView] ignore empty snapshot payload', {
               dataResource: this.syncConfig?.dataResource,
               symbol: this.syncConfig?.symbol,
@@ -200,7 +182,7 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.chartPayload = nextPayload;
+          this.chartResponse = response;
           if (rebindLiveData) {
             this.bindLiveData();
           }
@@ -211,68 +193,5 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
           }
         }
       });
-  }
-
-  private mapChartPayload(response: TradeBotCandleResponse): CandleChartPayload {
-    const candles = (response.candlestickData ?? [])
-      .slice()
-      .sort((left, right) => left.utcTimeStamp - right.utcTimeStamp)
-      .map((item) => ({
-        time: this.formatChartTime(item.utcTimeStamp),
-        open: item.open,
-        close: item.close,
-        high: item.high,
-        low: item.low,
-        volume: item.volume
-      }));
-
-    return {
-      candles,
-      lines: (response.lineData ?? [])
-        .filter((item) => item.from && item.to)
-        .map((item) => ({
-        name: item.name ?? 'Line',
-        color: item.color ?? '#0ea5e9',
-        start: item.from!.value,
-        end: item.to!.value,
-        startTime: this.formatChartTime(item.from!.time),
-        endTime: this.formatChartTime(item.to!.time)
-      })),
-      boxAreas: (response.areaData ?? [])
-        .filter((item) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
-        .map((item) => ({
-          name: item.name ?? 'Zone',
-          color: item.color ?? 'rgba(59, 130, 246, 0.18)',
-          startTime: this.formatChartTime(item.from!),
-          endTime: this.formatChartTime(item.to!),
-          high: item.maxPrice!,
-          low: item.minPrice!
-        })),
-      points: (response.pointData ?? []).map((item) => ({
-        name: item.name ?? 'Point',
-        color: item.color ?? '#f59e0b',
-        shape: item.shape,
-        startTime: this.formatChartTime(this.normalizePointTime(item.time)),
-        price: item.value
-      })),
-      indicators: (response.indicatorData ?? []).map((item) => ({
-        name: item.name ?? 'Indicator',
-        color: item.color ?? '#8b5cf6',
-        pane: item.type === 'SUBCHART' ? 'subchart' as const : 'overlay' as const,
-        values: (item.value ?? []).map((value) => (value == null ? null : Number(value)))
-      }))
-    };
-  }
-  private formatChartTime(value: number): string {
-    const date = new Date(value);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-  }
-
-  private normalizePointTime(value: number): number {
-    return value < 1_000_000_000_000 ? value * 1000 : value;
   }
 }

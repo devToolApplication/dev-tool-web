@@ -1,14 +1,5 @@
-<p-panel>
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.EventLog | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ TEXT.EventLogDesc | translateContent }}</div>
-      </div>
-      <p-tag [value]="events.length + ' ' + ('tradeBot.replay.eventLog.count' | translateContent)" severity="contrast"></p-tag>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.EventLog" [description]="TEXT.EventLogDesc">
+  <app-tag panel-actions [value]="events.length + ' ' + ('tradeBot.replay.eventLog.count' | translateContent)" severity="contrast"></app-tag>
   <div class="flex flex-col gap-4">
     <app-select-multi
       [options]="eventTypeOptions"
@@ -24,8 +15,8 @@
           tabindex="0"
           class="rounded-xl border p-3 text-left transition"
           [ngClass]="{
-            'border-primary bg-primary-50': event.id === selectedEventId,
-            'border-surface-200 bg-surface-0 hover:border-primary': event.id !== selectedEventId
+            'app-border-primary app-bg-primary-soft': event.id === selectedEventId,
+            'app-border app-bg-card app-hover-border-primary': event.id !== selectedEventId
           }"
           (click)="eventSelect.emit(event)"
           (keydown.enter)="eventSelect.emit(event)"
@@ -33,12 +24,12 @@
         >
           <div class="flex items-center justify-between gap-2">
             <div class="font-medium">{{ event.title }}</div>
-            <p-tag [value]="event.type" severity="secondary"></p-tag>
+            <app-tag [value]="event.type" severity="secondary"></app-tag>
           </div>
-          <div class="mt-1 text-sm text-surface-500">{{ event.candleTime | date:'MM-dd HH:mm' }}</div>
-          <div class="mt-1 text-sm text-surface-600">{{ (event.message || TEXT.NoEventDetail) | translateContent }}</div>
+          <div class="mt-1 text-sm app-text-muted">{{ event.candleTime | date:'MM-dd HH:mm' }}</div>
+          <div class="mt-1 text-sm app-text-soft">{{ (event.message || TEXT.NoEventDetail) | translateContent }}</div>
         </article>
       }
     </div>
   </div>
-</p-panel>
+</app-panel>

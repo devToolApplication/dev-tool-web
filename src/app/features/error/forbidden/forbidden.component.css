@@ -18,7 +18,7 @@
   height: 72px;
   margin: 0 auto 0.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--app-primary) 15%, transparent);
+  background: color-mix(in srgb, var(--app-primary) 15%, var(--app-transparent));
   color: var(--app-primary);
   font-size: 1.35rem;
   font-weight: 700;

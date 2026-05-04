@@ -67,37 +67,29 @@
     <div class="state-message state-message--error">{{ activeError | translateContent }}</div>
   }
 
-  <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
-    <p-tablist>
-      <p-tab value="ai-agent">{{ 'dashboard.tab.aiAgent' | translateContent }}</p-tab>
-      <p-tab value="trade-bot">{{ 'dashboard.tab.tradeBot' | translateContent }}</p-tab>
-      <p-tab value="file-storage">{{ 'dashboard.tab.fileStorage' | translateContent }}</p-tab>
-    </p-tablist>
+  <app-tabs [tabs]="tabItems" [value]="activeTab" (valueChange)="onTabChange($event)"></app-tabs>
 
-    <p-tabpanels>
-      <p-tabpanel value="ai-agent">
-        <app-ai-agent-dashboard
-          [overview]="overviews['ai-agent'] ?? null"
-          [loading]="loadingState['ai-agent']"
-          [error]="errorState['ai-agent']">
-        </app-ai-agent-dashboard>
-      </p-tabpanel>
+  @if (activeTab === 'ai-agent') {
+    <app-ai-agent-dashboard
+      [overview]="overviews['ai-agent'] ?? null"
+      [loading]="loadingState['ai-agent']"
+      [error]="errorState['ai-agent']">
+    </app-ai-agent-dashboard>
+  }
 
-      <p-tabpanel value="trade-bot">
-        <app-trade-bot-dashboard
-          [overview]="overviews['trade-bot'] ?? null"
-          [loading]="loadingState['trade-bot']"
-          [error]="errorState['trade-bot']">
-        </app-trade-bot-dashboard>
-      </p-tabpanel>
+  @if (activeTab === 'trade-bot') {
+    <app-trade-bot-dashboard
+      [overview]="overviews['trade-bot'] ?? null"
+      [loading]="loadingState['trade-bot']"
+      [error]="errorState['trade-bot']">
+    </app-trade-bot-dashboard>
+  }
 
-      <p-tabpanel value="file-storage">
-        <app-file-storage-dashboard
-          [overview]="overviews['file-storage'] ?? null"
-          [loading]="loadingState['file-storage']"
-          [error]="errorState['file-storage']">
-        </app-file-storage-dashboard>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
+  @if (activeTab === 'file-storage') {
+    <app-file-storage-dashboard
+      [overview]="overviews['file-storage'] ?? null"
+      [loading]="loadingState['file-storage']"
+      [error]="errorState['file-storage']">
+    </app-file-storage-dashboard>
+  }
 </section>

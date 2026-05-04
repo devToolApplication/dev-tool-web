@@ -25,18 +25,18 @@ const STORAGE_KEY = 'app-theme-custom';
 
 const DEFAULT_STATE: ThemeCustomState = {
   light: {
-    selectBackground: 'rgba(255, 255, 255, 0.98)',
-    selectText: '#13213f',
-    inputBackground: 'rgba(255, 255, 255, 0.92)',
-    inputText: '#13213f',
-    appText: '#13213f'
+    selectBackground: 'var(--app-surface-strong)',
+    selectText: 'var(--app-text)',
+    inputBackground: 'var(--app-input-bg)',
+    inputText: 'var(--app-text)',
+    appText: 'var(--app-text)'
   },
   dark: {
-    selectBackground: 'rgba(10, 14, 36, 0.96)',
-    selectText: '#f3f6ff',
-    inputBackground: 'rgba(10, 16, 41, 0.86)',
-    inputText: '#f3f6ff',
-    appText: '#f3f6ff'
+    selectBackground: 'var(--app-surface-strong)',
+    selectText: 'var(--app-text)',
+    inputBackground: 'var(--app-input-bg)',
+    inputText: 'var(--app-text)',
+    appText: 'var(--app-text)'
   }
 };
 

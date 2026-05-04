@@ -57,7 +57,7 @@
   border-radius: 0.75rem;
   overflow: hidden;
   background: var(--app-custom-input-bg, var(--app-input-bg));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 0 0 1px var(--app-border-soft);
 }
 
 .input-area__json-editor-host {
@@ -69,7 +69,7 @@
 }
 
 :host ::ng-deep .input-area__json-shell--invalid .input-area__json-editor {
-  border-color: #ff7aa7;
+  border-color: var(--app-control-danger-text);
 }
 
 :host ::ng-deep .input-area__json-editor .cm-editor {
@@ -97,18 +97,18 @@
 }
 
 :host ::ng-deep .input-area__json-editor .cm-gutters {
-  background: color-mix(in srgb, var(--app-custom-input-bg, var(--app-input-bg)) 92%, #000 8%);
+  background: color-mix(in srgb, var(--app-custom-input-bg, var(--app-input-bg)) 92%, var(--app-text) 8%);
   border-right: 1px solid var(--app-input-border);
   color: var(--app-text-muted);
 }
 
 :host ::ng-deep .input-area__json-editor .cm-activeLine,
 :host ::ng-deep .input-area__json-editor .cm-activeLineGutter {
-  background: rgba(59, 108, 255, 0.08);
+  background: var(--app-chart-primary-fill);
 }
 
 :host ::ng-deep .input-area__json-editor .cm-selectionBackground {
-  background: rgba(106, 169, 255, 0.18) !important;
+  background: var(--app-chart-info-fill) !important;
 }
 
 :host ::ng-deep .input-area__json-editor--dialog .cm-content {

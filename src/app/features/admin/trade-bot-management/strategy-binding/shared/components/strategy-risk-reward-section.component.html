@@ -1,13 +1,4 @@
-<p-panel [toggleable]="false">
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.RiskReward | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ TEXT.RiskRewardDesc | translateContent }}</div>
-      </div>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.RiskReward" [description]="TEXT.RiskRewardDesc">
   <div class="grid grid-cols-12 gap-4" [formGroup]="form">
     <div class="col-span-12 md:col-span-4">
       <app-select [label]="TEXT.EntryMode" [options]="entryModeOptions" formControlName="entryMode"></app-select>
@@ -26,4 +17,4 @@
       <app-select [label]="TEXT.StrategyValidity" [options]="validityOptions" formControlName="strategyValidity"></app-select>
     </div>
   </div>
-</p-panel>
+</app-panel>

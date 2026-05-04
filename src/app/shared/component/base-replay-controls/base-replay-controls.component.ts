@@ -30,7 +30,7 @@ enum ReplayControlTextKey {
         ></button>
         <button pButton type="button" icon="pi pi-chevron-right" severity="secondary" text (click)="nextStep.emit()"></button>
         <button pButton type="button" icon="pi pi-fast-forward" severity="secondary" text (click)="fastForward.emit()"></button>
-        <span class="ml-auto text-sm text-surface-500">{{ TEXT.Step | translateContent }} {{ currentStep + 1 }} / {{ totalSteps }}</span>
+        <span class="ml-auto text-sm app-text-muted">{{ TEXT.Step | translateContent }} {{ currentStep + 1 }} / {{ totalSteps }}</span>
       </div>
 
       <p-slider
@@ -61,7 +61,7 @@ enum ReplayControlTextKey {
           ></button>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-surface-500">{{ TEXT.Speed | translateContent }}</span>
+          <span class="text-sm app-text-muted">{{ TEXT.Speed | translateContent }}</span>
           <p-select
             [options]="speedOptions"
             [ngModel]="speed"

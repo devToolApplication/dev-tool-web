@@ -13,6 +13,10 @@ import { ThemeCustomToken, ThemeCustomizerService } from '../../core/ui-services
 export class SettingsComponent {
   activeTab = 'general';
   customThemeMode: ThemeMode = 'light';
+  readonly tabItems = [
+    { value: 'general', label: 'general' },
+    { value: 'theme', label: 'themeSettings' }
+  ];
 
   constructor(
     private readonly themeService: ThemeService,

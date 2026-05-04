@@ -1,4 +1,6 @@
 :root {
+  --app-transparent: transparent;
+
   /* Surface */
   --app-bg: #f6f8ff;
   --app-surface: rgba(255, 255, 255, 0.72);
@@ -183,6 +185,34 @@
     0 10px 24px rgba(44, 54, 84, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
+  /* Chart */
+  --app-chart-primary: #6f6cff;
+  --app-chart-success: #20b486;
+  --app-chart-danger: #c43d67;
+  --app-chart-warning: #a76a12;
+  --app-chart-info: #2a6fd6;
+  --app-chart-violet: #7d4fd1;
+  --app-chart-muted: #6e7a98;
+  --app-chart-candle-up: var(--app-chart-success);
+  --app-chart-candle-down: var(--app-chart-danger);
+  --app-chart-volume-up: rgba(32, 180, 134, 0.46);
+  --app-chart-volume-down: rgba(196, 61, 103, 0.46);
+  --app-chart-grid: rgba(133, 156, 221, 0.22);
+  --app-chart-axis: var(--app-text-muted);
+  --app-chart-overlay-text: #ffffff;
+  --app-chart-primary-fill: rgba(111, 108, 255, 0.14);
+  --app-chart-success-fill: rgba(32, 180, 134, 0.16);
+  --app-chart-danger-fill: rgba(196, 61, 103, 0.16);
+  --app-chart-warning-fill: rgba(167, 106, 18, 0.16);
+  --app-chart-info-fill: rgba(42, 111, 214, 0.16);
+  --app-chart-violet-fill: rgba(125, 79, 209, 0.16);
+  --app-chart-trend-up: var(--app-chart-success);
+  --app-chart-trend-down: var(--app-chart-danger);
+  --app-chart-trend-sideway: var(--app-chart-muted);
+  --app-chart-trend-up-fill: rgba(32, 180, 134, 0.14);
+  --app-chart-trend-down-fill: rgba(196, 61, 103, 0.14);
+  --app-chart-trend-sideway-fill: rgba(110, 122, 152, 0.12);
+
   /* Shadow scale */
   --app-shadow-xs:
     0 6px 18px rgba(111, 108, 255, 0.08),
@@ -210,4 +240,24 @@
   .bg-surface-alt { background: var(--app-surface-alt); }
   .text-base-foreground { color: var(--app-text); }
   .border-default { border-color: var(--app-border); }
+  .app-bg-base { background: var(--app-bg); }
+  .app-bg-surface { background: var(--app-surface); }
+  .app-bg-card { background: var(--app-card-surface); }
+  .app-bg-card-strong { background: var(--app-card-surface-strong); }
+  .app-bg-soft { background: var(--app-surface-soft); }
+  .app-bg-primary { background: var(--app-primary); }
+  .app-bg-primary-soft { background: var(--app-chart-primary-fill); }
+  .app-text { color: var(--app-text); }
+  .app-text-muted { color: var(--app-text-muted); }
+  .app-text-soft { color: var(--app-text-soft); }
+  .app-text-danger { color: var(--app-control-danger-text); }
+  .app-text-success { color: var(--app-control-success-text); }
+  .app-text-primary { color: var(--app-primary); }
+  .app-text-overlay { color: var(--app-chart-overlay-text); }
+  .app-border { border-color: var(--app-border); }
+  .app-border-soft { border-color: var(--app-border-soft); }
+  .app-border-strong { border-color: var(--app-border-strong); }
+  .app-border-primary { border-color: var(--app-primary); }
+  .app-hover-border-primary:hover { border-color: var(--app-primary); }
+  .app-shadow-sm { box-shadow: var(--app-shadow-sm); }
 }

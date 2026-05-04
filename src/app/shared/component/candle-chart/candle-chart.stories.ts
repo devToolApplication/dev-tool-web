@@ -25,7 +25,7 @@ const data: CandleChartPayload = {
   lines: [
     {
       name: 'Trend',
-      color: '#2563eb',
+      color: 'var(--app-chart-primary)',
       start: 101,
       end: 118,
       startTime: '09:00',
@@ -35,7 +35,7 @@ const data: CandleChartPayload = {
   boxAreas: [
     {
       name: 'Range',
-      color: 'rgba(59, 130, 246, 0.14)',
+      color: 'var(--app-chart-primary-fill)',
       startTime: '10:00',
       endTime: '13:00',
       high: 113,
@@ -43,19 +43,19 @@ const data: CandleChartPayload = {
     }
   ],
   points: [
-    { name: 'Entry', color: '#16a34a', shape: 'arrowUp', startTime: '11:00', price: 108 },
-    { name: 'Exit', color: '#dc2626', shape: 'arrowDown', startTime: '16:00', price: 116 }
+    { name: 'Entry', color: 'var(--app-chart-success)', shape: 'arrowUp', startTime: '11:00', price: 108 },
+    { name: 'Exit', color: 'var(--app-chart-danger)', shape: 'arrowDown', startTime: '16:00', price: 116 }
   ],
   indicators: [
     {
       name: 'MA',
-      color: '#f59e0b',
+      color: 'var(--app-chart-warning)',
       pane: 'overlay',
       values: [101, 103, 104, 107, 108, 110, 113, 115]
     },
     {
       name: 'RSI',
-      color: '#7c3aed',
+      color: 'var(--app-chart-violet)',
       pane: 'subchart',
       values: [44, 48, 57, 62, 55, 66, 71, 63]
     }

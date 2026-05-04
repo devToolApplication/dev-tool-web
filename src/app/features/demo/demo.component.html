@@ -1,4 +1,4 @@
-<section class="demo-page bg-surface text-base-foreground border-default">
+<section class="demo-page app-bg-surface app-text app-border">
   <h2>{{ title }} Demo</h2>
   <p class="description">{{ 'demo.description' | translateContent }}</p>
 
@@ -16,7 +16,7 @@
           (buttonClick)="setTextPreset('error')"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-input-text
           label="Input text"
           [placeholder]="textPlaceholder"
@@ -33,7 +33,7 @@
         <app-button label="Rows 3" severity="secondary" (buttonClick)="areaRows = 3"></app-button>
         <app-button label="Rows 6" severity="info" (buttonClick)="areaRows = 6"></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-input-area
           label="Input area"
           placeholder="Write your note"
@@ -57,7 +57,7 @@
           (buttonClick)="setNumberPreset('currency')"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-input-number
           label="Amount"
           placeholder="Enter amount"
@@ -83,7 +83,7 @@
           (buttonClick)="passwordFeedback = false"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-password
           label="Password"
           placeholder="Enter password"
@@ -107,7 +107,7 @@
           (buttonClick)="checkboxValue = false"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-check-box
           label="Enable notifications"
           [value]="checkboxValue"
@@ -117,7 +117,7 @@
     }
 
     @case ('radio-button') {
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-radio-button
           label="Role"
           [value]="radioValue"
@@ -144,7 +144,7 @@
           (buttonClick)="dateFormat = 'mm-dd-yy'"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-date-picker
           label="Start date"
           [dateFormat]="dateFormat"
@@ -167,7 +167,7 @@
           (buttonClick)="setSelectPreset('clear')"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-select
           label="Status"
           placeholder="Select status"
@@ -192,7 +192,7 @@
           (buttonClick)="multiEnableFilter = false"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-select-multi
           label="Framework"
           placeholder="Select frameworks"
@@ -226,7 +226,7 @@
           (buttonClick)="setTreeMode('checkbox')"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-select-tree
           label="Department"
           [options]="treeOptions"
@@ -250,7 +250,7 @@
           (buttonClick)="selectButtonMultiple = true"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-select-button
           label="Range"
           [multiple]="selectButtonMultiple"
@@ -262,7 +262,7 @@
     }
 
     @case ('toggle-button') {
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-toggle-button
           label="Status"
           onLabel="On"
@@ -274,7 +274,7 @@
     }
 
     @case ('toggle-switch') {
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-toggle-switch
           label="Notifications"
           [value]="toggleSwitchValue"
@@ -306,13 +306,13 @@
           (buttonClick)="setButtonPreset('text')"
         ></app-button>
       </div>
-      <div class="preview-card border-default button-preview">
+      <div class="preview-card app-border button-preview">
         <app-button label="Action" [severity]="buttonSeverity" [text]="buttonText"></app-button>
       </div>
     }
 
     @case ('button-split') {
-      <div class="preview-card border-default button-preview">
+      <div class="preview-card app-border button-preview">
         <app-button-split label="Actions" [model]="splitItems"></app-button-split>
       </div>
     }
@@ -330,7 +330,7 @@
           (buttonClick)="setSpeedDialPreset('circle')"
         ></app-button>
       </div>
-      <div class="preview-card border-default speed-dial-preview">
+      <div class="preview-card app-border speed-dial-preview">
         <app-button-speed-dial
           [model]="speedDialItems"
           [direction]="speedDialDirection"
@@ -340,13 +340,13 @@
     }
 
     @case ('breadcrumb') {
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
       </div>
     }
 
     @case ('paginator') {
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-paginator
           [first]="paginatorFirst"
           [rows]="paginatorRows"
@@ -397,7 +397,7 @@
           (buttonClick)="toggleCandleLayer('showPoints')"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-candle-chart [config]="candleConfig"></app-candle-chart>
       </div>
     }
@@ -425,7 +425,7 @@
           (buttonClick)="fileUploadMultiple = true"
         ></app-button>
       </div>
-      <div class="preview-card border-default">
+      <div class="preview-card app-border">
         <app-fileupload
           [mode]="fileUploadMode"
           [multiple]="fileUploadMultiple"

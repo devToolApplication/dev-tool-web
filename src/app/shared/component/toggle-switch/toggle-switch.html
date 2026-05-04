@@ -15,7 +15,7 @@
 </div>
 
 @if (helpText && !invalid) {
-  <small [id]="inputId + '-help'" class="text-surface-700">{{ helpText | translateContent }}</small>
+  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {

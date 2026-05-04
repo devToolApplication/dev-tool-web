@@ -8,10 +8,10 @@
 .placeholder-card {
   width: min(100%, 48rem);
   padding: 2rem;
-  border: 1px solid color-mix(in srgb, var(--app-border) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-border) 85%, var(--app-transparent));
   border-radius: 1.25rem;
   background: var(--app-surface);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--app-shadow-sm);
 }
 
 .placeholder-eyebrow {
@@ -20,7 +20,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--app-text) 55%, transparent);
+  color: color-mix(in srgb, var(--app-text) 55%, var(--app-transparent));
 }
 
 .placeholder-card h2 {

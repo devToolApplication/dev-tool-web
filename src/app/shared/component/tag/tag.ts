@@ -9,7 +9,7 @@ export type TagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' |
   styleUrl: './tag.css'
 })
 export class Tag {
-  @Input() value = '';
+  @Input() value: string | null | undefined = '';
   @Input() severity: TagSeverity = null;
   @Input() icon?: string;
   @Input() rounded = false;

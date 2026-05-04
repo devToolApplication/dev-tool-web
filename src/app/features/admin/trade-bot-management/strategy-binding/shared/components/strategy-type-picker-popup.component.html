@@ -10,7 +10,7 @@
 >
   <div popup-header class="flex flex-col gap-1">
     <span class="text-lg font-semibold">{{ TEXT.ChooseStrategyType | translateContent }}</span>
-    <small class="text-surface-500">{{ TEXT.ChooseStrategyTypeDesc | translateContent }}</small>
+    <small class="app-text-muted">{{ TEXT.ChooseStrategyTypeDesc | translateContent }}</small>
   </div>
 
   <div class="flex flex-col gap-4">
@@ -26,22 +26,22 @@
         <article
           role="button"
           tabindex="0"
-          class="col-span-12 rounded-xl border border-surface-200 bg-surface-0 p-4 text-left transition hover:border-primary"
+          class="strategy-type-card col-span-12 rounded-xl border app-border app-bg-card p-4 text-left transition"
           (click)="select.emit(item)"
           (keydown.enter)="select.emit(item)"
           (keydown.space)="$event.preventDefault(); select.emit(item)"
         >
           <div class="flex items-start gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-full text-white" [style.background]="item.accentColor">
+            <div class="strategy-type-icon flex h-10 w-10 items-center justify-center rounded-full" [style.--strategy-accent]="item.accentColor">
               <i [class]="item.icon"></i>
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-semibold">{{ item.name }}</span>
-                <p-tag [value]="STRATEGY_FAMILY_LABELS[item.family] || item.family" severity="secondary"></p-tag>
+                <app-tag [value]="STRATEGY_FAMILY_LABELS[item.family] || item.family" severity="secondary"></app-tag>
               </div>
-              <div class="text-sm text-surface-500">{{ item.serviceName }}</div>
-              <div class="mt-1 text-sm text-surface-700">{{ (item.shortDescription || item.description) | translateContent }}</div>
+              <div class="text-sm app-text-muted">{{ item.serviceName }}</div>
+              <div class="mt-1 text-sm app-text-soft">{{ (item.shortDescription || item.description) | translateContent }}</div>
             </div>
           </div>
         </article>

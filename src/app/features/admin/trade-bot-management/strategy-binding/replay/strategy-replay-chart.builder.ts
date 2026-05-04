@@ -162,7 +162,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.entryPrice,
           end: trade.entryPrice,
-          color: '#2563eb'
+          color: 'var(--app-chart-primary)'
         }
       },
       {
@@ -176,7 +176,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.stopLoss,
           end: trade.stopLoss,
-          color: '#dc2626'
+          color: 'var(--app-chart-danger)'
         }
       },
       {
@@ -190,7 +190,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.takeProfit,
           end: trade.takeProfit,
-          color: '#16a34a'
+          color: 'var(--app-chart-success)'
         }
       }
     ];

@@ -39,7 +39,7 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
           checkedBorderColor: 'var(--app-primary)',
           color: 'var(--app-custom-input-text)',
           hoverColor: 'var(--app-custom-input-text)',
-          checkedColor: '#ffffff'
+          checkedColor: 'var(--app-chart-overlay-text)'
         },
         content: {
           checkedBackground: 'transparent'
@@ -47,7 +47,7 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
         icon: {
           color: 'var(--app-custom-input-text)',
           hoverColor: 'var(--app-custom-input-text)',
-          checkedColor: '#ffffff'
+          checkedColor: 'var(--app-chart-overlay-text)'
         }
       },
       tabs: {

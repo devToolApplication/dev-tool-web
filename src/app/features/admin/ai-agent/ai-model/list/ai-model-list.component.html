@@ -47,7 +47,7 @@
         <div class="result-error">{{ testPromptAnswer.errorMessage || ('aiAgent.unknownError' | translateContent) }}</div>
       }
       @if ((testPromptAnswer.toolExecutions?.length || 0) > 0) {
-        <section class="sub-result-card border-default bg-surface">
+        <section class="sub-result-card app-border app-bg-surface">
           <div class="sub-result-header">
             <h4>{{ 'aiAgent.toolExecutions' | translateContent }}</h4>
             <span class="status-pill success">{{ testPromptAnswer.toolExecutions?.length }} {{ 'aiAgent.tools' | translateContent }}</span>

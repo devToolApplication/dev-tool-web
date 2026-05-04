@@ -9,6 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import type { ECharts } from 'echarts';
+import { resolveCssColor, resolveThemeColor } from '../../utils/theme-colors';
 
 export interface CandleData {
   time: string;
@@ -134,6 +135,19 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       return;
     }
 
+    const chartColors = {
+      candleUp: resolveThemeColor('--app-chart-candle-up', '--app-accent-green'),
+      candleDown: resolveThemeColor('--app-chart-candle-down', '--app-control-danger-text'),
+      volumeUp: resolveThemeColor('--app-chart-volume-up', '--app-chart-candle-up'),
+      volumeDown: resolveThemeColor('--app-chart-volume-down', '--app-chart-candle-down'),
+      axis: resolveThemeColor('--app-chart-axis', '--app-text-muted'),
+      grid: resolveThemeColor('--app-chart-grid', '--app-border-soft'),
+      overlayText: resolveThemeColor('--app-chart-overlay-text', '--app-overlay-text'),
+      labelText: resolveThemeColor('--app-text', '--app-overlay-text'),
+      labelBackground: resolveThemeColor('--app-overlay-bg', '--app-surface-strong'),
+      labelBorder: resolveThemeColor('--app-border', '--app-border-soft')
+    };
+
     const xAxis = this.data.candles.map((item) => item.time);
     const candleValues = this.data.candles.map((item) => [
       item.open,
@@ -164,7 +178,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
           lineStyle: {
             width: 2,
             type: 'dashed',
-            color: line.color,
+            color: resolveCssColor(line.color, '--app-chart-primary'),
           },
           encode: { x: 0, y: 1 },
           tooltip: { show: false },
@@ -187,14 +201,20 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
             label: {
               show: true,
               position: 'insideMiddleTop',
-              color: '#0f172a',
-              fontWeight: 600,
+              formatter: (params: { name?: string }) => params.name ?? '',
+              color: chartColors.labelText,
+              backgroundColor: chartColors.labelBackground,
+              borderColor: chartColors.labelBorder,
+              borderWidth: 1,
+              borderRadius: 4,
+              padding: [3, 6],
+              fontWeight: 700,
             },
             data: this.data.boxAreas.map((box) => ([
               {
                 name: box.name,
                 coord: [box.startTime, box.high],
-                itemStyle: { color: box.color },
+                itemStyle: { color: resolveCssColor(box.color, '--app-chart-primary-fill') },
               },
               {
                 coord: [box.endTime, box.low],
@@ -216,7 +236,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       yAxisIndex: 0,
       lineStyle: {
         width: indicator.name.toLowerCase().includes('middle') ? 1.4 : 1.8,
-        color: indicator.color,
+        color: resolveCssColor(indicator.color, '--app-chart-violet'),
         opacity: indicator.name.toLowerCase().includes('rsi ') ? 0.7 : 1,
       },
       encode: { x: 0, y: 1 },
@@ -236,7 +256,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       lineStyle: {
         width: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 1 : 1.8,
         type: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 'dashed' : 'solid',
-        color: indicator.color,
+        color: resolveCssColor(indicator.color, '--app-chart-violet'),
         opacity: indicator.name.toLowerCase().includes('overbought') || indicator.name.toLowerCase().includes('oversold') ? 0.75 : 1,
       },
       encode: { x: 0, y: 1 },
@@ -248,7 +268,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       ? this.data.points.map((point) => ({
           name: point.name,
           type: 'scatter' as const,
-          data: [{ value: [point.startTime, point.price], itemStyle: { color: point.color } }],
+          data: [{ value: [point.startTime, point.price], itemStyle: { color: resolveCssColor(point.color, '--app-chart-warning') } }],
           symbol: this.resolvePointSymbol(point.shape),
           symbolRotate: this.resolvePointRotation(point.shape),
           symbolSize: 10,
@@ -265,10 +285,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
         xAxisIndex: 0,
         yAxisIndex: 0,
         itemStyle: {
-          color: '#22c55e',
-          color0: '#ef4444',
-          borderColor: '#22c55e',
-          borderColor0: '#ef4444',
+          color: chartColors.candleUp,
+          color0: chartColors.candleDown,
+          borderColor: chartColors.candleUp,
+          borderColor0: chartColors.candleDown,
         },
       });
     }
@@ -284,8 +304,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
           itemStyle: {
             color:
               (this.data.candles[index]?.close ?? 0) >= (this.data.candles[index]?.open ?? 0)
-                ? 'rgba(34, 197, 94, 0.55)'
-                : 'rgba(239, 68, 68, 0.55)',
+                ? chartColors.volumeUp
+                : chartColors.volumeDown,
           },
         })),
         xAxisIndex: 1,
@@ -328,7 +348,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       gridIndex: index,
       data: xAxis,
       boundaryGap: true,
-      axisLine: { lineStyle: { color: '#64748b' } },
+      axisLine: { lineStyle: { color: chartColors.axis } },
       axisLabel: { show: index === bottomAxisIndex },
       min: 'dataMin',
       max: 'dataMax',
@@ -337,8 +357,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     const yAxes: any[] = [
       {
         scale: true,
-        axisLine: { lineStyle: { color: '#64748b' } },
-        splitLine: { lineStyle: { color: 'rgba(100, 116, 139, 0.2)' } },
+        axisLine: { lineStyle: { color: chartColors.axis } },
+        splitLine: { lineStyle: { color: chartColors.grid } },
       },
     ];
 
@@ -346,7 +366,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       yAxes.push({
         gridIndex: 1,
         scale: true,
-        axisLine: { lineStyle: { color: '#64748b' } },
+        axisLine: { lineStyle: { color: chartColors.axis } },
         splitLine: { show: false },
       });
     }
@@ -356,8 +376,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
         gridIndex: hasVolumePane ? 2 : 1,
         min: 0,
         max: 100,
-        axisLine: { lineStyle: { color: '#64748b' } },
-        splitLine: { lineStyle: { color: 'rgba(100, 116, 139, 0.14)' } },
+        axisLine: { lineStyle: { color: chartColors.axis } },
+        splitLine: { lineStyle: { color: resolveThemeColor('--app-chart-grid', '--app-border-soft') } },
       });
     }
 

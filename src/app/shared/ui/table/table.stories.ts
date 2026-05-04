@@ -180,7 +180,7 @@ export const Default: Story = {
           (export)="lastEvent = 'Export clicked'"
           (pageChange)="lastEvent = 'Page: ' + format($event)"
         ></app-table>
-        <p class="m-0 text-sm text-surface-500">{{ lastEvent }}</p>
+        <p class="m-0 text-sm app-text-muted">{{ lastEvent }}</p>
       </div>
     `
   }),

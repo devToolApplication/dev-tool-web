@@ -14,7 +14,7 @@ import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/mod
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
 import { MARKET_TYPE_OPTIONS, TRADE_BOT_BACKTEST_ROUTES, TRADE_SIDE_MODE_OPTIONS } from '../../trade-bot-admin.constants';
 import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategy-binding/strategy-management.constants';
-import { TradeBotTextKey } from '../../strategy-binding/shared/strategy-ui.enums';
+import { BACKTEST_RISK_MODE_OPTIONS, BacktestRiskMode, TradeBotTextKey } from '../../strategy-binding/shared/strategy-ui.enums';
 
 interface BacktestRunFormValue {
   bindingId: string;
@@ -28,10 +28,9 @@ interface BacktestRunFormValue {
   initialBalance: number;
   feeRate: number;
   slippageRate: number;
-  fixedQuantity: number | null;
-  fixedRiskAmount: number | null;
-  riskPercentPerTrade: number | null;
-  allowCompounding: boolean;
+  riskMode: BacktestRiskMode;
+  fixedRiskAmount: number;
+  riskPercentPerTrade: number;
 }
 
 type SelectOption = { label: string; value: string };
@@ -56,10 +55,36 @@ export class BacktestRunComponent implements OnInit {
       { type: 'date', name: 'toDate', label: 'toDate', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.toDateRequired')] },
       { type: 'number', name: 'feeRate', label: 'tradeBot.replay.field.feeRate', width: '1/3' },
       { type: 'number', name: 'slippageRate', label: 'tradeBot.replay.field.slippage', width: '1/3' },
-      { type: 'number', name: 'fixedQuantity', label: 'tradeBot.backtest.run.field.fixedQuantity', width: '1/3' },
-      { type: 'number', name: 'fixedRiskAmount', label: 'tradeBot.backtest.run.field.fixedRiskAmount', width: '1/3' },
-      { type: 'number', name: 'riskPercentPerTrade', label: 'tradeBot.replay.field.riskPerTrade', width: '1/3' },
-      { type: 'checkbox', name: 'allowCompounding', label: 'tradeBot.backtest.run.field.allowCompounding', width: '1/3' }
+      {
+        type: 'radio',
+        name: 'riskMode',
+        label: 'tradeBot.replay.field.riskMode',
+        width: '1/3',
+        options: [...BACKTEST_RISK_MODE_OPTIONS],
+        validation: [Rules.required('tradeBot.backtest.run.validation.riskModeRequired')]
+      },
+      {
+        type: 'number',
+        name: 'fixedRiskAmount',
+        label: 'tradeBot.backtest.run.field.fixedRiskAmount',
+        width: '1/3',
+        rules: { visible: 'model.riskMode === "FIXED_AMOUNT"' },
+        validation: [
+          Rules.required('tradeBot.backtest.run.validation.fixedRiskAmountRequired'),
+          Rules.min(0.01, 'tradeBot.backtest.run.validation.riskValuePositive')
+        ]
+      },
+      {
+        type: 'number',
+        name: 'riskPercentPerTrade',
+        label: 'tradeBot.replay.field.riskPercentRemainingBalance',
+        width: '1/3',
+        rules: { visible: 'model.riskMode === "EQUITY_PERCENT"' },
+        validation: [
+          Rules.required('tradeBot.backtest.run.validation.riskPercentRequired'),
+          Rules.min(0.01, 'tradeBot.backtest.run.validation.riskValuePositive')
+        ]
+      }
     ]
   };
 
@@ -78,10 +103,9 @@ export class BacktestRunComponent implements OnInit {
     initialBalance: 10000,
     feeRate: 0,
     slippageRate: 0,
-    fixedQuantity: null,
+    riskMode: BacktestRiskMode.EQUITY_PERCENT,
     fixedRiskAmount: 100,
-    riskPercentPerTrade: null,
-    allowCompounding: true
+    riskPercentPerTrade: 1
   };
 
   constructor(
@@ -122,12 +146,7 @@ export class BacktestRunComponent implements OnInit {
       initialBalance: Number(model.initialBalance),
       feeRate: Number(model.feeRate ?? 0),
       slippageRate: Number(model.slippageRate ?? 0),
-      riskConfig: {
-        fixedQuantity: model.fixedQuantity,
-        fixedRiskAmount: model.fixedRiskAmount,
-        riskPercentPerTrade: model.riskPercentPerTrade,
-        allowCompounding: model.allowCompounding
-      }
+      riskConfig: this.buildRiskConfig(model)
     };
 
     this.loading = true;
@@ -184,6 +203,20 @@ export class BacktestRunComponent implements OnInit {
   private rerenderForm(): void {
     this.formVisible.set(false);
     window.setTimeout(() => this.formVisible.set(true));
+  }
+
+  private buildRiskConfig(model: BacktestRunFormValue): Record<string, unknown> {
+    if (model.riskMode === BacktestRiskMode.FIXED_AMOUNT) {
+      return {
+        riskMode: BacktestRiskMode.FIXED_AMOUNT,
+        fixedRiskAmount: Number(model.fixedRiskAmount)
+      };
+    }
+
+    return {
+      riskMode: BacktestRiskMode.EQUITY_PERCENT,
+      riskPercentPerTrade: Number(model.riskPercentPerTrade)
+    };
   }
 
   private mapExchangeOptions(items: ExchangeResponse[]): SelectOption[] {

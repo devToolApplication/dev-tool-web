@@ -4,7 +4,7 @@
   border-radius: 1rem;
   background:
     linear-gradient(180deg, var(--app-surface-alt), var(--app-surface-soft));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--app-chart-overlay-text) 6%, var(--app-transparent));
 }
 
 .result-header {
@@ -33,7 +33,7 @@
 }
 
 .result-error {
-  color: #ffb4c7;
+  color: var(--app-control-danger-text);
   font-weight: 600;
 }
 

@@ -77,8 +77,8 @@
 }
 
 .state-message--error {
-  border-color: rgba(220, 38, 38, 0.4);
-  color: #dc2626;
+  border-color: var(--app-control-danger-border);
+  color: var(--app-control-danger-text);
 }
 
 @media (max-width: 900px) {

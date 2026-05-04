@@ -181,7 +181,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[], startTime: number): Re
         endTime: new Date(startTime + 48 * STEP_MS).toISOString(),
         high: firstTrade.takeProfit + 3,
         low: firstTrade.stopLoss - 3,
-        color: 'rgba(59,130,246,0.10)'
+        color: 'var(--app-chart-primary-fill)'
       }
     },
     {
@@ -195,7 +195,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[], startTime: number): Re
         endTime: new Date(firstTrade.exitTime ?? firstTrade.entryTime).toISOString(),
         start: firstTrade.entryPrice,
         end: firstTrade.entryPrice,
-        color: '#2563eb'
+        color: 'var(--app-chart-primary)'
       }
     },
     {
@@ -209,7 +209,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[], startTime: number): Re
         endTime: new Date(firstTrade.exitTime ?? firstTrade.entryTime).toISOString(),
         start: firstTrade.stopLoss,
         end: firstTrade.stopLoss,
-        color: '#dc2626'
+        color: 'var(--app-chart-danger)'
       }
     },
     {
@@ -223,7 +223,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[], startTime: number): Re
         endTime: new Date(firstTrade.exitTime ?? firstTrade.entryTime).toISOString(),
         start: firstTrade.takeProfit,
         end: firstTrade.takeProfit,
-        color: '#16a34a'
+        color: 'var(--app-chart-success)'
       }
     },
     {
@@ -237,7 +237,7 @@ function buildOverlays(trades: ReplayTradeTimelineItem[], startTime: number): Re
         endTime: new Date(firstTrade.entryTime + 3 * STEP_MS).toISOString(),
         high: firstTrade.entryPrice + 0.6,
         low: firstTrade.entryPrice - 0.4,
-        color: 'rgba(245,158,11,0.18)'
+        color: 'var(--app-chart-warning-fill)'
       }
     }
   ];

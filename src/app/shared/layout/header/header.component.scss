@@ -26,7 +26,7 @@
   height: 2rem;
   border: 0;
   border-radius: 8px;
-  background: transparent;
+  background: var(--app-transparent);
   color: var(--app-text);
   display: inline-flex;
   align-items: center;
@@ -40,7 +40,7 @@
 
 .avatar-button {
   border: 0;
-  background: transparent;
+  background: var(--app-transparent);
   border-radius: 9999px;
   cursor: pointer;
   padding: 0;
@@ -48,7 +48,7 @@
 }
 
 :host ::ng-deep .avatar-button .p-avatar {
-  background: color-mix(in srgb, var(--app-primary) 16%, transparent);
+  background: color-mix(in srgb, var(--app-primary) 16%, var(--app-transparent));
   color: var(--app-primary);
 }
 
@@ -57,7 +57,7 @@
 }
 
 :host ::ng-deep .p-breadcrumb {
-  background: transparent;
+  background: var(--app-transparent);
   border: 0;
   padding: 0;
 }

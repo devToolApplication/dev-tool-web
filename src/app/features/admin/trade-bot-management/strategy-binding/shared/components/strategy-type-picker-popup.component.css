@@ -1,3 +1,12 @@
 :host {
   display: block;
 }
+
+.strategy-type-card:hover {
+  border-color: var(--app-primary);
+}
+
+.strategy-type-icon {
+  background: var(--strategy-accent, var(--app-primary));
+  color: var(--app-chart-overlay-text);
+}

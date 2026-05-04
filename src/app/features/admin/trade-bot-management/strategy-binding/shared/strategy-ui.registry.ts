@@ -7,7 +7,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     icon: 'pi pi-bolt',
     displayOrder: 10,
     family: 'liquidity',
-    accentColor: '#16a34a',
+    accentColor: 'var(--app-chart-success)',
     shortDescription: 'Trade bullish and bearish FVG touch retests'
   }
 ];

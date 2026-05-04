@@ -109,7 +109,7 @@ export const Default: Story = {
       format: (value: unknown) => JSON.stringify(value, null, 2)
     },
     template: `
-      <div class="min-h-screen bg-surface-50 p-6">
+      <div class="min-h-screen app-bg-soft p-6">
         <app-base-crud-page
           [pageConfig]="pageConfig"
           [formConfig]="formConfig"
@@ -122,7 +122,7 @@ export const Default: Story = {
           (formSubmit)="lastEvent = 'Submitted: ' + format($event)"
         ></app-base-crud-page>
 
-        <div class="mx-auto mt-4 max-w-6xl rounded-lg border border-surface-200 bg-surface-0 p-4">
+        <div class="mx-auto mt-4 max-w-6xl rounded-lg border app-border app-bg-card p-4">
           <pre class="m-0 whitespace-pre-wrap text-xs">{{ lastEvent }}</pre>
         </div>
       </div>

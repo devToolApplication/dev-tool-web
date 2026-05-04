@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, of, Subscription, switchMap } from 'rxjs';
 import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
 import { CandleChartPayload, ChartBoxArea, ChartIndicatorSeries, ChartLine, ChartPoint } from '../../../../../../shared/component/candle-chart/candle-chart';
 import { BacktestJobResponse, BacktestMetricResponse, BacktestOrderResponse, BacktestRunDto } from '../../../../../../core/models/trade-bot/backtest.model';
@@ -17,7 +17,7 @@ import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategy-management.constants';
 import { StrategyReplayFacade } from '../../replay/strategy-replay.facade';
 import { buildChartReplayPayload } from '../../replay/strategy-replay-chart.builder';
-import { TradeBotTextKey } from '../../shared/strategy-ui.enums';
+import { BACKTEST_RISK_MODE_OPTIONS, BacktestRiskMode, TradeBotTextKey } from '../../shared/strategy-ui.enums';
 
 type BacktestRunFormGroup = FormGroup<{
   fromDate: FormControl<Date | null>;
@@ -25,7 +25,9 @@ type BacktestRunFormGroup = FormGroup<{
   initialBalance: FormControl<number>;
   feeRate: FormControl<number>;
   slippageRate: FormControl<number>;
-  riskPerTradePct: FormControl<number>;
+  riskMode: FormControl<BacktestRiskMode>;
+  fixedRiskAmount: FormControl<number>;
+  riskPercentPerTrade: FormControl<number>;
 }>;
 
 @Component({
@@ -37,6 +39,8 @@ type BacktestRunFormGroup = FormGroup<{
 })
 export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   readonly TEXT = TradeBotTextKey;
+  readonly riskModes = BacktestRiskMode;
+  readonly riskModeOptions = BACKTEST_RISK_MODE_OPTIONS;
   readonly chartConfig = {
     showCandles: true,
     showVolume: true,
@@ -74,6 +78,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   previewChartData: TradeBotCandleResponse | null = null;
   running = false;
   loadingOrders = false;
+  private readonly subscriptions = new Subscription();
 
   readonly runForm: BacktestRunFormGroup = new FormGroup({
     fromDate: new FormControl(this.toDateOffset(-30), { validators: [Validators.required] }),
@@ -81,7 +86,9 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     initialBalance: new FormControl(10_000, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
     feeRate: new FormControl(0.0005, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
     slippageRate: new FormControl(0.0002, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-    riskPerTradePct: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.01)] })
+    riskMode: new FormControl<BacktestRiskMode>(BacktestRiskMode.EQUITY_PERCENT, { nonNullable: true, validators: [Validators.required] }),
+    fixedRiskAmount: new FormControl(100, { nonNullable: true }),
+    riskPercentPerTrade: new FormControl(1, { nonNullable: true })
   });
 
   constructor(
@@ -97,6 +104,9 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.syncRiskValidators();
+    this.subscriptions.add(this.runForm.controls.riskMode.valueChanges.subscribe(() => this.syncRiskValidators()));
+
     const bindingId = this.route.snapshot.paramMap.get('id');
     if (!bindingId) {
       void this.router.navigate([STRATEGY_MANAGEMENT_ROUTES.list]);
@@ -121,6 +131,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
     this.replay.destroy();
   }
 
@@ -265,9 +276,21 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       initialBalance: formValue.initialBalance,
       feeRate: formValue.feeRate,
       slippageRate: formValue.slippageRate,
-      riskConfig: {
-        riskPerTradePct: formValue.riskPerTradePct
-      }
+      riskConfig: this.buildRiskConfig(formValue)
+    };
+  }
+
+  private buildRiskConfig(formValue: BacktestRunFormGroup['value']): Record<string, unknown> {
+    if (formValue.riskMode === BacktestRiskMode.FIXED_AMOUNT) {
+      return {
+        riskMode: BacktestRiskMode.FIXED_AMOUNT,
+        fixedRiskAmount: Number(formValue.fixedRiskAmount ?? 0)
+      };
+    }
+
+    return {
+      riskMode: BacktestRiskMode.EQUITY_PERCENT,
+      riskPercentPerTrade: Number(formValue.riskPercentPerTrade ?? 0)
     };
   }
 
@@ -278,15 +301,38 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
         initialBalance: tradeManagementRule?.['backtest_initial_balance'],
         feeRate: tradeManagementRule?.['backtest_fee_rate'],
         slippageRate: tradeManagementRule?.['backtest_slippage_rate'],
-        riskPerTradePct: tradeManagementRule?.['backtest_risk_per_trade_pct']
+        fixedRiskAmount: tradeManagementRule?.['backtest_fixed_risk_amount'],
+        riskPercentPerTrade: tradeManagementRule?.['backtest_risk_per_trade_pct']
       }) ??
       {};
+    const hasFixedRiskDefault = defaults['fixedRiskAmount'] != null;
+    const hasPercentRiskDefault = defaults['riskPercentPerTrade'] != null || defaults['riskPerTradePct'] != null;
+    const fixedRiskAmount = Number(defaults['fixedRiskAmount'] ?? 100);
+    const riskPercentPerTrade = Number(defaults['riskPercentPerTrade'] ?? defaults['riskPerTradePct'] ?? 1);
     this.runForm.patchValue({
       initialBalance: Number(defaults['initialBalance'] ?? 10_000),
       feeRate: Number(defaults['feeRate'] ?? 0.0005),
       slippageRate: Number(defaults['slippageRate'] ?? 0.0002),
-      riskPerTradePct: Number(defaults['riskPerTradePct'] ?? 1)
+      riskMode: hasFixedRiskDefault && !hasPercentRiskDefault ? BacktestRiskMode.FIXED_AMOUNT : BacktestRiskMode.EQUITY_PERCENT,
+      fixedRiskAmount,
+      riskPercentPerTrade
     });
+  }
+
+  private syncRiskValidators(): void {
+    const fixedRiskAmount = this.runForm.controls.fixedRiskAmount;
+    const riskPercentPerTrade = this.runForm.controls.riskPercentPerTrade;
+
+    if (this.runForm.controls.riskMode.value === BacktestRiskMode.FIXED_AMOUNT) {
+      fixedRiskAmount.setValidators([Validators.required, Validators.min(0.01)]);
+      riskPercentPerTrade.clearValidators();
+    } else {
+      riskPercentPerTrade.setValidators([Validators.required, Validators.min(0.01)]);
+      fixedRiskAmount.clearValidators();
+    }
+
+    fixedRiskAmount.updateValueAndValidity({ emitEvent: false });
+    riskPercentPerTrade.updateValueAndValidity({ emitEvent: false });
   }
 
   private findSelectedRuleConfig(
@@ -302,7 +348,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private toChartLine(payload: Record<string, unknown>, fallbackName: string): ChartLine {
     return {
       name: String(payload['label'] ?? fallbackName),
-      color: String(payload['color'] ?? '#2563eb'),
+      color: String(payload['color'] ?? 'var(--app-chart-primary)'),
       start: Number(payload['start'] ?? 0),
       end: Number(payload['end'] ?? payload['start'] ?? 0),
       startTime: String(payload['startTime'] ?? ''),
@@ -313,7 +359,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private toChartBoxArea(payload: Record<string, unknown>, fallbackName: string): ChartBoxArea {
     return {
       name: String(payload['label'] ?? fallbackName),
-      color: String(payload['color'] ?? 'rgba(37,99,235,0.08)'),
+      color: String(payload['color'] ?? 'var(--app-chart-primary-fill)'),
       startTime: String(payload['startTime'] ?? ''),
       endTime: String(payload['endTime'] ?? payload['startTime'] ?? ''),
       high: Number(payload['high'] ?? 0),
@@ -343,7 +389,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private toPreviewIndicators(stepCount: number): ChartIndicatorSeries[] {
     return (this.previewChartData?.indicatorData ?? []).map((indicator: TradeBotIndicatorData) => ({
       name: indicator.name ?? 'Indicator',
-      color: indicator.color ?? '#8b5cf6',
+      color: indicator.color ?? 'var(--app-chart-violet)',
       pane: indicator.type === 'SUBCHART' ? 'subchart' : 'overlay',
       values: (indicator.value ?? []).slice(0, stepCount).map((value: number | null) => (value == null ? null : Number(value)))
     }));
@@ -358,7 +404,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       .filter((item: TradeBotLineData) => (item.from?.time ?? 0) <= currentStepTime)
       .map((item: TradeBotLineData) => ({
         name: item.name ?? 'Line',
-        color: item.color ?? '#0ea5e9',
+        color: item.color ?? 'var(--app-chart-info)',
         start: Number(item.from?.value ?? 0),
         end: Number(item.to?.value ?? item.from?.value ?? 0),
         startTime: this.toIsoTime(item.from?.time ?? currentStepTime),
@@ -375,7 +421,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       .filter((item: TradeBotAreaData) => (item.from ?? 0) <= currentStepTime)
       .map((item: TradeBotAreaData) => ({
         name: item.name ?? 'Zone',
-        color: item.color ?? 'rgba(59, 130, 246, 0.18)',
+        color: item.color ?? 'var(--app-chart-primary-fill)',
         startTime: this.toIsoTime(item.from ?? currentStepTime),
         endTime: this.toIsoTime(Math.min(item.to ?? currentStepTime, currentStepTime)),
         high: Number(item.maxPrice ?? 0),
@@ -386,15 +432,15 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private colorForEvent(type: StrategyReplayEventType): string {
     switch (type) {
       case 'order-placed':
-        return '#2563eb';
+        return 'var(--app-chart-primary)';
       case 'tp-hit':
-        return '#16a34a';
+        return 'var(--app-chart-success)';
       case 'sl-hit':
-        return '#dc2626';
+        return 'var(--app-chart-danger)';
       case 'setup-formed':
-        return '#f59e0b';
+        return 'var(--app-chart-warning)';
       default:
-        return '#64748b';
+        return 'var(--app-chart-muted)';
     }
   }
 

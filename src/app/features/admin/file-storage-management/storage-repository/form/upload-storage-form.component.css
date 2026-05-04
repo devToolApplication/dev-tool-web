@@ -14,7 +14,7 @@
   margin-bottom: 0.75rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: color-mix(in srgb, var(--app-text) 80%, transparent);
+  color: color-mix(in srgb, var(--app-text) 80%, var(--app-transparent));
 }
 
 .metadata-row + .metadata-row {

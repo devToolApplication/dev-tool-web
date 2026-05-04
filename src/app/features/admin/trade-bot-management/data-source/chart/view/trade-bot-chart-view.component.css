@@ -52,7 +52,7 @@
 .chart-sub-label {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-color-secondary, #64748b);
+  color: var(--app-text-muted);
 }
 
 .chart-toolbar-actions {

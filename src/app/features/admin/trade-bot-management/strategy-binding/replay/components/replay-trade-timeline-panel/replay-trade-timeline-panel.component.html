@@ -1,14 +1,5 @@
-<p-panel>
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.TradeTimeline | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ TEXT.TradeTimelineDesc | translateContent }}</div>
-      </div>
-      <p-tag [value]="trades.length + ' ' + ('tradeBot.replay.tradeTimeline.count' | translateContent)" severity="contrast"></p-tag>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.TradeTimeline" [description]="TEXT.TradeTimelineDesc">
+  <app-tag panel-actions [value]="trades.length + ' ' + ('tradeBot.replay.tradeTimeline.count' | translateContent)" severity="contrast"></app-tag>
   <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto pr-1">
     @for (trade of trades; track trade.id) {
       <article
@@ -16,8 +7,8 @@
         tabindex="0"
         class="rounded-xl border p-3 text-left transition"
         [ngClass]="{
-          'border-primary bg-primary-50': trade.id === highlightedTradeId,
-          'border-surface-200 bg-surface-0 hover:border-primary': trade.id !== highlightedTradeId
+          'app-border-primary app-bg-primary-soft': trade.id === highlightedTradeId,
+          'app-border app-bg-card app-hover-border-primary': trade.id !== highlightedTradeId
         }"
         (click)="tradeSelect.emit(trade)"
         (keydown.enter)="tradeSelect.emit(trade)"
@@ -27,13 +18,13 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <span class="font-semibold">#{{ trade.index }}</span>
-            <p-tag [value]="trade.side" [severity]="trade.side === 'BUY' ? 'success' : 'danger'"></p-tag>
-            <p-tag [value]="trade.result" severity="secondary"></p-tag>
+            <app-tag [value]="trade.side" [severity]="trade.side === 'BUY' ? 'success' : 'danger'"></app-tag>
+            <app-tag [value]="trade.result" severity="secondary"></app-tag>
           </div>
-          <div class="mt-1 text-sm text-surface-500">
+          <div class="mt-1 text-sm app-text-muted">
             {{ TEXT.EntryTime | translateContent }} {{ trade.entryTime | date:'MM-dd HH:mm' }} | {{ trade.entryPrice }}
           </div>
-          <div class="mt-1 text-sm text-surface-600">
+          <div class="mt-1 text-sm app-text-soft">
             {{ TEXT.RrAchieved | translateContent }}: {{ trade.rrAchieved ?? 0 | number:'1.2-2' }}
           </div>
         </div>
@@ -48,7 +39,7 @@
       </div>
 
         @if (expandedTradeId === trade.id) {
-          <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-surface-600">
+          <div class="mt-3 grid grid-cols-2 gap-2 text-sm app-text-soft">
             <div>{{ TEXT.ExitTime | translateContent }}: {{ trade.exitTime ? (trade.exitTime | date:'MM-dd HH:mm') : '--' }}</div>
             <div>{{ TEXT.ExitPrice | translateContent }}: {{ trade.exitPrice ?? '--' }}</div>
             <div>{{ TEXT.StopLossPrice | translateContent }}: {{ trade.stopLoss }}</div>
@@ -62,4 +53,4 @@
       </article>
     }
   </div>
-</p-panel>
+</app-panel>

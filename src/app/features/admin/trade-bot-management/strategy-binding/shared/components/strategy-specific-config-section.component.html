@@ -1,13 +1,4 @@
-<p-panel [toggleable]="false">
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.StrategyConfiguration | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ subtitle | translateContent }}</div>
-      </div>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.StrategyConfiguration" [description]="subtitle">
   @if (visible()) {
     <app-form-input
       #configForm
@@ -18,4 +9,4 @@
       (valueChange)="configChange.emit($event)"
     ></app-form-input>
   }
-</p-panel>
+</app-panel>

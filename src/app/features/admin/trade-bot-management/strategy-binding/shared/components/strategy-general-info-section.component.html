@@ -1,19 +1,10 @@
-<p-panel [toggleable]="false">
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.GeneralInformation | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ TEXT.GeneralInformationDesc | translateContent }}</div>
-      </div>
-      <p-tag [value]="form.controls.strategyServiceName.getRawValue()" severity="contrast"></p-tag>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.GeneralInformation" [description]="TEXT.GeneralInformationDesc">
+  <app-tag panel-actions [value]="form.controls.strategyServiceName.getRawValue()" severity="contrast"></app-tag>
   <div class="grid grid-cols-12 gap-4" [formGroup]="form">
     <div class="col-span-12 md:col-span-6">
       <app-input-text [label]="TEXT.BindingName" formControlName="name"></app-input-text>
       @if (form.controls.name.touched && form.controls.name.invalid) {
-        <small class="text-red-500">
+        <small class="app-text-danger">
           {{ TEXT.BindingName | translateContent }} {{ 'tradeBot.validation.requiredSuffix' | translateContent }}
         </small>
       }
@@ -49,4 +40,4 @@
       <app-input-area [label]="TEXT.Description" [rows]="3" formControlName="description"></app-input-area>
     </div>
   </div>
-</p-panel>
+</app-panel>

@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import type { ECharts } from 'echarts';
 import { BacktestMetricResponse } from '../../../../../core/models/trade-bot/backtest.model';
+import { resolveThemeColor } from '../../../../../shared/utils/theme-colors';
 
 @Component({
   selector: 'app-backtest-performance-chart',
@@ -52,6 +53,13 @@ export class BacktestPerformanceChartComponent implements AfterViewInit, OnChang
       return;
     }
 
+    const chartColors = {
+      equityLine: resolveThemeColor('--app-chart-success'),
+      equityFill: resolveThemeColor('--app-chart-success-fill'),
+      drawdownLine: resolveThemeColor('--app-chart-danger'),
+      drawdownFill: resolveThemeColor('--app-chart-danger-fill')
+    };
+
     const equityCurve = this.metric?.equityCurve ?? [];
     const drawdownCurve = this.metric?.drawdownCurve ?? [];
     const categories = equityCurve.map((point) => this.formatTime(point.utcTimeStamp));
@@ -76,8 +84,8 @@ export class BacktestPerformanceChartComponent implements AfterViewInit, OnChang
             data: equityCurve.map((point) => point.value),
             smooth: true,
             showSymbol: false,
-            areaStyle: { color: 'rgba(22, 163, 74, 0.12)' },
-            lineStyle: { color: '#16a34a', width: 2 }
+            areaStyle: { color: chartColors.equityFill },
+            lineStyle: { color: chartColors.equityLine, width: 2 }
           },
           {
             name: 'Drawdown %',
@@ -87,8 +95,8 @@ export class BacktestPerformanceChartComponent implements AfterViewInit, OnChang
             data: drawdownCurve.map((point) => point.value),
             smooth: true,
             showSymbol: false,
-            areaStyle: { color: 'rgba(220, 38, 38, 0.16)' },
-            lineStyle: { color: '#dc2626', width: 2 }
+            areaStyle: { color: chartColors.drawdownFill },
+            lineStyle: { color: chartColors.drawdownLine, width: 2 }
           }
         ]
       },

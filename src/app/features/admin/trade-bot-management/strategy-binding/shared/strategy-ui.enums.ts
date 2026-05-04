@@ -99,7 +99,10 @@ export enum TradeBotTextKey {
   InitialBalance = 'tradeBot.replay.field.initialBalance',
   FeeRate = 'tradeBot.replay.field.feeRate',
   Slippage = 'tradeBot.replay.field.slippage',
+  RiskMode = 'tradeBot.replay.field.riskMode',
+  FixedRiskAmount = 'tradeBot.backtest.run.field.fixedRiskAmount',
   RiskPerTrade = 'tradeBot.replay.field.riskPerTrade',
+  RiskPercentRemainingBalance = 'tradeBot.replay.field.riskPercentRemainingBalance',
   TradeDate = 'tradeBot.replay.field.tradeDate',
   Side = 'tradeBot.replay.field.side',
   EntryTime = 'tradeBot.replay.field.entryTime',
@@ -179,7 +182,14 @@ export enum TradeBotTextKey {
   OptionReplayEventSessionStarted = 'tradeBot.option.replayEvent.sessionStarted',
   OptionReplayEventSessionEnded = 'tradeBot.option.replayEvent.sessionEnded',
   OptionReplayEventRulePass = 'tradeBot.option.replayEvent.rulePass',
-  OptionReplayEventRuleFail = 'tradeBot.option.replayEvent.ruleFail'
+  OptionReplayEventRuleFail = 'tradeBot.option.replayEvent.ruleFail',
+  OptionBacktestRiskFixedAmount = 'tradeBot.option.backtestRisk.fixedAmount',
+  OptionBacktestRiskEquityPercent = 'tradeBot.option.backtestRisk.equityPercent'
+}
+
+export enum BacktestRiskMode {
+  FIXED_AMOUNT = 'FIXED_AMOUNT',
+  EQUITY_PERCENT = 'EQUITY_PERCENT'
 }
 
 export enum StrategyEntryMode {
@@ -267,4 +277,9 @@ export const REPLAY_EVENT_TYPE_OPTIONS: SelectOption[] = [
   { label: TradeBotTextKey.OptionReplayEventSessionEnded, value: 'session-ended' },
   { label: TradeBotTextKey.OptionReplayEventRulePass, value: 'rule-pass' },
   { label: TradeBotTextKey.OptionReplayEventRuleFail, value: 'rule-fail' }
+];
+
+export const BACKTEST_RISK_MODE_OPTIONS: SelectOption[] = [
+  { label: TradeBotTextKey.OptionBacktestRiskFixedAmount, value: BacktestRiskMode.FIXED_AMOUNT },
+  { label: TradeBotTextKey.OptionBacktestRiskEquityPercent, value: BacktestRiskMode.EQUITY_PERCENT }
 ];

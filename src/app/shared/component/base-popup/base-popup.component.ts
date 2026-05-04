@@ -21,7 +21,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
     :host ::ng-deep .base-popup .p-dialog-header,
     :host ::ng-deep .base-popup .p-dialog-content,
     :host ::ng-deep .base-popup .p-dialog-footer {
-      background: transparent;
+      background: var(--app-transparent);
       color: inherit;
     }
 
@@ -75,11 +75,11 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
             @if (!hasProjectedHeader) {
               <div class="flex flex-col gap-1">
                 <span class="text-lg font-semibold">{{ header | translateContent }}</span>
-                <small *ngIf="subheader" class="text-surface-500">{{ subheader | translateContent }}</small>
+                <small *ngIf="subheader" class="app-text-muted">{{ subheader | translateContent }}</small>
               </div>
             }
           </div>
-          <p-tag *ngIf="loading" [value]="'loading' | translateContent" severity="info"></p-tag>
+          <app-tag *ngIf="loading" [value]="'loading' | translateContent" severity="info"></app-tag>
         </div>
       </ng-template>
 

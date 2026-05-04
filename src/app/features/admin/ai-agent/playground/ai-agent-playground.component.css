@@ -63,7 +63,7 @@
 }
 
 .result-error {
-  color: #b42318;
+  color: var(--app-control-danger-text);
   font-weight: 600;
 }
 
@@ -75,13 +75,13 @@
 }
 
 .status-pill.success {
-  color: #166534;
-  background: color-mix(in srgb, #22c55e 18%, transparent);
+  color: var(--app-control-success-text);
+  background: var(--app-chart-success-fill);
 }
 
 .status-pill.error {
-  color: #b42318;
-  background: color-mix(in srgb, #ef4444 18%, transparent);
+  color: var(--app-control-danger-text);
+  background: var(--app-chart-danger-fill);
 }
 
 .trace-card {

@@ -31,17 +31,17 @@ export const Default: Story = {
     template: `
       <div class="max-w-3xl p-4">
         <ng-template #opposite let-item>
-          <span class="text-sm text-surface-500">{{ item.time }}</span>
+          <span class="text-sm app-text-muted">{{ item.time }}</span>
         </ng-template>
         <ng-template #marker let-item>
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full app-bg-primary app-text-overlay">
             <i class="pi pi-check text-xs"></i>
           </span>
         </ng-template>
         <ng-template #content let-item>
           <div class="pb-4">
             <div class="font-semibold">{{ item.title }}</div>
-            <p class="m-0 mt-1 text-sm text-surface-500">{{ item.detail }}</p>
+            <p class="m-0 mt-1 text-sm app-text-muted">{{ item.detail }}</p>
           </div>
         </ng-template>
 

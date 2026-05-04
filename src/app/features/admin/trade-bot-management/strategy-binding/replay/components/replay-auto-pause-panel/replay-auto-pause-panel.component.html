@@ -1,17 +1,8 @@
-<p-panel>
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-3">
-      <div>
-        <div class="text-base font-semibold">{{ TEXT.AutoPause | translateContent }}</div>
-        <div class="text-sm text-surface-500">{{ TEXT.AutoPauseDesc | translateContent }}</div>
-      </div>
-      <app-toggle-switch [value]="enabled" (valueChange)="onEnabledChange($event)"></app-toggle-switch>
-    </div>
-  </ng-template>
-
+<app-panel [title]="TEXT.AutoPause" [description]="TEXT.AutoPauseDesc">
+  <app-toggle-switch panel-actions [value]="enabled" (valueChange)="onEnabledChange($event)"></app-toggle-switch>
   <div class="grid grid-cols-2 gap-3">
     @for (item of autoPauseOptions | translateContent; track item.value) {
-      <div class="flex items-center gap-2 rounded-xl border border-surface-200 p-3">
+      <div class="flex items-center gap-2 rounded-xl border app-border p-3">
         <app-check-box
           [label]="item.label"
           [disabled]="!enabled"
@@ -21,4 +12,4 @@
       </div>
     }
   </div>
-</p-panel>
+</app-panel>

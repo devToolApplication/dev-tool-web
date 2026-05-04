@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import type { ECharts } from 'echarts';
 import { DashboardChartSeries } from '../../dashboard.models';
+import { resolveThemeColor } from '../../../../shared/utils/theme-colors';
 
 @Component({
   selector: 'app-dashboard-chart',
@@ -53,7 +54,10 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
       return;
     }
 
-    const color = this.series.type === 'line' ? '#2563eb' : '#0f766e';
+    const color =
+      this.series.type === 'line'
+        ? resolveThemeColor('--app-chart-primary', '--app-primary')
+        : resolveThemeColor('--app-chart-success', '--app-chart-candle-up');
     this.chartInstance.setOption(
       {
         color: [color],
@@ -63,13 +67,13 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
           type: 'category',
           boundaryGap: this.series.type === 'bar',
           data: this.series.labels,
-          axisLabel: { color: '#64748b', fontSize: 11 }
+          axisLabel: { color: resolveThemeColor('--app-text-muted'), fontSize: 11 }
         },
         yAxis: {
           type: 'value',
           minInterval: 1,
-          splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.22)' } },
-          axisLabel: { color: '#64748b', fontSize: 11 }
+          splitLine: { lineStyle: { color: resolveThemeColor('--app-chart-grid', '--app-border-soft') } },
+          axisLabel: { color: resolveThemeColor('--app-text-muted'), fontSize: 11 }
         },
         series: [
           {
@@ -79,7 +83,7 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
             smooth: this.series.type === 'line',
             showSymbol: false,
             barMaxWidth: 34,
-            areaStyle: this.series.type === 'line' ? { color: 'rgba(37, 99, 235, 0.12)' } : undefined,
+            areaStyle: this.series.type === 'line' ? { color: resolveThemeColor('--app-chart-primary-fill', '--app-chart-info-fill') } : undefined,
             lineStyle: this.series.type === 'line' ? { width: 2 } : undefined,
             itemStyle: { borderRadius: this.series.type === 'bar' ? [4, 4, 0, 0] : 0 }
           }

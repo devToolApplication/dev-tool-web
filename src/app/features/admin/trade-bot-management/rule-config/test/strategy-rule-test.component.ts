@@ -10,7 +10,6 @@ import { ReferenceDataService } from '../../../../../core/services/trade-bot-ser
 import { StrategyRuleService } from '../../../../../core/services/trade-bot-service/strategy-rule.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { CandleChartConfig, CandleChartPayload } from '../../../../../shared/component/candle-chart/candle-chart';
 import { STRATEGY_RULE_ROUTES } from '../strategy-rule.constants';
 
 type RuleTestFormGroup = FormGroup<{
@@ -26,14 +25,6 @@ type RuleTestFormGroup = FormGroup<{
   templateUrl: './strategy-rule-test.component.html'
 })
 export class StrategyRuleTestComponent implements OnInit {
-  readonly chartConfig: CandleChartConfig = {
-    showCandles: true,
-    showVolume: true,
-    showLines: true,
-    showBoxAreas: true,
-    showPoints: true,
-    showIndicators: true
-  };
   readonly form: RuleTestFormGroup = new FormGroup({
     exchangeId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     symbolId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -46,7 +37,7 @@ export class StrategyRuleTestComponent implements OnInit {
   symbols: SymbolResponse[] = [];
   exchangeOptions: Array<{ label: string; value: string }> = [];
   symbolOptions: Array<{ label: string; value: string }> = [];
-  chartPayload: CandleChartPayload = { candles: [], lines: [], boxAreas: [], points: [], indicators: [] };
+  chartResponse: TradeBotCandleResponse | null = null;
   loading = false;
   previewing = false;
 
@@ -139,7 +130,7 @@ export class StrategyRuleTestComponent implements OnInit {
       )
       .pipe(finalize(() => (this.previewing = false)))
       .subscribe({
-        next: (response) => (this.chartPayload = this.mapChartPayload(response)),
+        next: (response) => (this.chartResponse = response),
         error: (error) => this.toastService.error(error?.error?.errorMessage ?? 'tradeBot.strategyRule.toast.previewFailed')
       });
   }
@@ -188,70 +179,6 @@ export class StrategyRuleTestComponent implements OnInit {
 
   private resolveDataResource(exchangeCode: string): string {
     return exchangeCode.toUpperCase().includes('OANDA') ? 'OANDA' : 'BINANCE';
-  }
-
-  private mapChartPayload(response: TradeBotCandleResponse): CandleChartPayload {
-    const candles = (response.candlestickData ?? [])
-      .slice()
-      .sort((left, right) => left.utcTimeStamp - right.utcTimeStamp)
-      .map((item) => ({
-        time: this.formatChartTime(item.utcTimeStamp),
-        open: item.open,
-        close: item.close,
-        high: item.high,
-        low: item.low,
-        volume: item.volume
-      }));
-
-    return {
-      candles,
-      lines: (response.lineData ?? [])
-        .filter((item) => item.from && item.to)
-        .map((item) => ({
-          name: item.name ?? 'Line',
-          color: item.color ?? '#0ea5e9',
-          start: item.from!.value,
-          end: item.to!.value,
-          startTime: this.formatChartTime(item.from!.time),
-          endTime: this.formatChartTime(item.to!.time)
-        })),
-      boxAreas: (response.areaData ?? [])
-        .filter((item) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
-        .map((item) => ({
-          name: item.name ?? 'Zone',
-          color: item.color ?? 'rgba(59, 130, 246, 0.18)',
-          startTime: this.formatChartTime(item.from!),
-          endTime: this.formatChartTime(item.to!),
-          high: item.maxPrice!,
-          low: item.minPrice!
-        })),
-      points: (response.pointData ?? []).map((item) => ({
-        name: item.name ?? 'Point',
-        color: item.color ?? '#f59e0b',
-        shape: item.shape,
-        startTime: this.formatChartTime(this.normalizePointTime(item.time)),
-        price: item.value
-      })),
-      indicators: (response.indicatorData ?? []).map((item) => ({
-        name: item.name ?? 'Indicator',
-        color: item.color ?? '#8b5cf6',
-        pane: item.type === 'SUBCHART' ? 'subchart' as const : 'overlay' as const,
-        values: (item.value ?? []).map((value) => (value == null ? null : Number(value)))
-      }))
-    };
-  }
-
-  private formatChartTime(value: number): string {
-    const date = new Date(value);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-  }
-
-  private normalizePointTime(value: number): number {
-    return value < 1_000_000_000_000 ? value * 1000 : value;
   }
 
   private toDateOffset(offsetDays: number): Date {

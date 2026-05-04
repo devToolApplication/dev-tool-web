@@ -5,13 +5,13 @@
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="m-0 text-2xl font-semibold">{{ TEXT.BacktestReplayTitle | translateContent }}</h2>
           @if (binding) {
-            <p-tag [value]="binding.strategyServiceName" severity="contrast"></p-tag>
+            <app-tag [value]="binding.strategyServiceName" severity="contrast"></app-tag>
           }
           @if (job) {
-            <p-tag [value]="job.status" severity="secondary"></p-tag>
+            <app-tag [value]="job.status" severity="secondary"></app-tag>
           }
         </div>
-        <p class="mt-2 text-sm text-surface-500">
+        <p class="mt-2 text-sm app-text-muted">
           {{ binding?.exchangeCode }} / {{ binding?.symbolCode }} / {{ binding?.providerSymbol }}
         </p>
       </div>
@@ -22,16 +22,7 @@
     </div>
   </app-card>
 
-  <p-panel>
-    <ng-template pTemplate="header">
-      <div class="flex w-full items-center justify-between gap-3">
-        <div>
-          <div class="text-base font-semibold">{{ TEXT.BacktestExecution | translateContent }}</div>
-          <div class="text-sm text-surface-500">{{ TEXT.BacktestExecutionDesc | translateContent }}</div>
-        </div>
-      </div>
-    </ng-template>
-
+  <app-panel [title]="TEXT.BacktestExecution" [description]="TEXT.BacktestExecutionDesc">
     <div class="grid grid-cols-12 gap-4" [formGroup]="runForm">
       <div class="col-span-12 md:col-span-3">
         <app-date-picker label="fromDate" formControlName="fromDate" [showIcon]="true" dateFormat="yy-mm-dd"></app-date-picker>
@@ -49,13 +40,22 @@
         <app-input-number [label]="TEXT.Slippage" [min]="0" [step]="0.0001" formControlName="slippageRate"></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-3">
-        <app-input-number [label]="TEXT.RiskPerTrade" [min]="0.01" [step]="0.1" formControlName="riskPerTradePct"></app-input-number>
+        <app-select-button [label]="TEXT.RiskMode" [options]="riskModeOptions" [allowEmpty]="false" formControlName="riskMode"></app-select-button>
       </div>
-      <div class="col-span-12 md:col-span-9 flex items-end">
-        <small class="text-surface-500">{{ TEXT.SlFirstRule | translateContent }}</small>
+      @if (runForm.controls.riskMode.value === riskModes.FIXED_AMOUNT) {
+        <div class="col-span-12 md:col-span-3">
+          <app-input-number [label]="TEXT.FixedRiskAmount" [min]="0.01" [step]="1" formControlName="fixedRiskAmount"></app-input-number>
+        </div>
+      } @else {
+        <div class="col-span-12 md:col-span-3">
+          <app-input-number [label]="TEXT.RiskPercentRemainingBalance" [min]="0.01" [step]="0.1" formControlName="riskPercentPerTrade"></app-input-number>
+        </div>
+      }
+      <div class="col-span-12 md:col-span-6 flex items-end">
+        <small class="app-text-muted">{{ TEXT.SlFirstRule | translateContent }}</small>
       </div>
     </div>
-  </p-panel>
+  </app-panel>
 
   @if (job || metric) {
     <div class="grid grid-cols-12 gap-4">
@@ -87,36 +87,18 @@
           (speedChange)="replay.setSpeed($event)"
         ></app-base-replay-controls>
 
-        <p-panel>
-          <ng-template pTemplate="header">
-            <div class="flex w-full items-center justify-between gap-3">
-              <div>
-                <div class="text-base font-semibold">{{ TEXT.ReplayChart | translateContent }}</div>
-                <div class="text-sm text-surface-500">{{ TEXT.ReplayChartDesc | translateContent }}</div>
-              </div>
-              <p-tag [value]="currentStepLabel" severity="contrast"></p-tag>
-            </div>
-          </ng-template>
-
+        <app-panel [title]="TEXT.ReplayChart" [description]="TEXT.ReplayChartDesc">
+          <app-tag panel-actions [value]="currentStepLabel" severity="contrast"></app-tag>
           <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
-        </p-panel>
+        </app-panel>
 
         <app-backtest-performance-chart [metric]="metric"></app-backtest-performance-chart>
 
-        <p-panel>
-          <ng-template pTemplate="header">
-            <div class="flex w-full items-center justify-between gap-3">
-              <div>
-                <div class="text-base font-semibold">{{ TEXT.BacktestOrders | translateContent }}</div>
-                <div class="text-sm text-surface-500">{{ TEXT.BacktestOrdersDesc | translateContent }}</div>
-              </div>
-            </div>
-          </ng-template>
-
+        <app-panel [title]="TEXT.BacktestOrders" [description]="TEXT.BacktestOrdersDesc">
           <div class="backtest-orders-table-shell">
             <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
           </div>
-        </p-panel>
+        </app-panel>
       </div>
 
       <div class="backtest-side-column col-span-12 xl:col-span-4 min-w-0 flex flex-col gap-4">

@@ -1,5 +1,5 @@
 <section class="file-upload-debug-page">
-  <div class="page-header border-default bg-surface">
+  <div class="page-header app-border app-bg-surface">
     <div>
       <h2>{{ 'systemManagement.fileUploadDebug.title' | translateContent }}</h2>
       <p>POST /file-mcrs/v1/upload</p>
@@ -14,7 +14,7 @@
     ></app-button>
   </div>
 
-  <section class="upload-panel border-default bg-surface">
+  <section class="upload-panel app-border app-bg-surface">
     <div class="field-grid">
       <div class="field">
         <app-select
@@ -60,13 +60,13 @@
   </section>
 
   @if (uploadError) {
-    <section class="result-panel border-default bg-surface error">
+    <section class="result-panel app-border app-bg-surface error">
       {{ uploadError | translateContent }}
     </section>
   }
 
   @if (uploadResult) {
-    <section class="result-panel border-default bg-surface">
+    <section class="result-panel app-border app-bg-surface">
       <div class="result-header">
         <h3>{{ 'systemManagement.fileUploadDebug.uploadResult' | translateContent }}</h3>
         <app-button

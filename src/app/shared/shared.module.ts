@@ -53,6 +53,8 @@ import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial
 import { ButtonSplit } from './component/button-split/button-split';
 import { Button } from './component/button/button';
 import { CandleChart } from './component/candle-chart/candle-chart';
+import { JsonPreviewComponent } from './component/json-preview/json-preview.component';
+import { TradeBotChartPreviewComponent } from './component/trade-bot-chart-preview/trade-bot-chart-preview.component';
 import { CheckBox } from './component/check-box/check-box';
 import { DatePicker } from './component/date-picker/date-picker';
 import { Fileupload } from './component/fileupload/fileupload';
@@ -61,7 +63,10 @@ import { InputMulti } from './component/input-multi/input-multi';
 import { InputNumber } from './component/input-number/input-number';
 import { InputText } from './component/input-text/input-text';
 import { Paginator } from './component/paginator/paginator';
+import { PanelComponent } from './component/panel/panel.component';
 import { Password } from './component/password/password';
+import { PrimeTableComponent } from './component/prime-table/prime-table.component';
+import { ProgressSpinnerComponent } from './component/progress-spinner/progress-spinner.component';
 import { RadioButton } from './component/radio-button/radio-button';
 import { SelectButton } from './component/select-button/select-button';
 import { SelectMulti } from './component/select-multi/select-multi';
@@ -70,6 +75,7 @@ import { Select } from './component/select/select';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
 import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
+import { TabsComponent } from './component/tabs/tabs.component';
 import { Tag } from './component/tag/tag';
 import { DashboardComponent } from '../features/dashboard/dashboard.component';
 import { DashboardChartComponent } from '../features/dashboard/components/dashboard-chart/dashboard-chart.component';
@@ -142,7 +148,10 @@ const COMPONENTS = [
   InputNumber,
   InputText,
   Paginator,
+  PanelComponent,
   Password,
+  PrimeTableComponent,
+  ProgressSpinnerComponent,
   RadioButton,
   SelectButton,
   SelectMulti,
@@ -150,8 +159,11 @@ const COMPONENTS = [
   Select,
   ToggleButton,
   ToggleSwitch,
+  TabsComponent,
   Tag,
   CandleChart,
+  JsonPreviewComponent,
+  TradeBotChartPreviewComponent,
   TimelineComponent
 ];
 

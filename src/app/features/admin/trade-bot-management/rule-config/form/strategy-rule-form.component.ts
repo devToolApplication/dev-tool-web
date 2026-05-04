@@ -40,7 +40,7 @@ export class StrategyRuleFormComponent implements OnInit {
   formConfig: FormConfig = buildStrategyRuleFormConfig(this.activeDefinition);
   formInitialValue: StrategyRuleFormValue = buildStrategyRuleInitialValue(this.activeDefinition);
   selectedRuleCode = this.formInitialValue.code;
-  private schemaSignature = this.buildSchemaSignature(this.activeDefinition);
+  private fieldSchemaSignature = this.buildFieldSchemaSignature(this.activeDefinition);
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -133,12 +133,12 @@ export class StrategyRuleFormComponent implements OnInit {
     this.selectedRuleCode = nextCode;
     this.activeDefinition = nextDefinition;
 
-    const nextSignature = this.buildSchemaSignature(nextDefinition);
-    if (nextSignature === this.schemaSignature) {
+    const nextSignature = this.buildFieldSchemaSignature(nextDefinition);
+    if (nextSignature === this.fieldSchemaSignature) {
       return;
     }
 
-    this.schemaSignature = nextSignature;
+    this.fieldSchemaSignature = nextSignature;
     this.formInitialValue = {
       ...value,
       code: nextCode,
@@ -196,7 +196,7 @@ export class StrategyRuleFormComponent implements OnInit {
     const normalizedCode = String(rule.code ?? '').trim().toUpperCase();
     const definition = mapRuleResponseToDefinition(rule);
     this.activeDefinition = definition;
-    this.schemaSignature = this.buildSchemaSignature(definition);
+    this.fieldSchemaSignature = this.buildFieldSchemaSignature(definition);
     this.selectedRuleCode = normalizedCode;
     this.formContext.mode = 'edit';
     this.formInitialValue = buildStrategyRuleInitialValue(definition, {
@@ -215,7 +215,7 @@ export class StrategyRuleFormComponent implements OnInit {
   private resetCreateState(): void {
     const definition = buildEmptyStrategyRuleDefinition();
     this.activeDefinition = definition;
-    this.schemaSignature = this.buildSchemaSignature(definition);
+    this.fieldSchemaSignature = this.buildFieldSchemaSignature(definition);
     this.selectedRuleCode = '';
     this.formContext.mode = 'create';
     this.formInitialValue = buildStrategyRuleInitialValue(definition);
@@ -242,15 +242,19 @@ export class StrategyRuleFormComponent implements OnInit {
     this.rerenderForm();
   }
 
-  private buildSchemaSignature(definition: StrategyRuleCodeDefinition): string {
+  private buildFieldSchemaSignature(definition: StrategyRuleCodeDefinition): string {
     return JSON.stringify({
-      configFields: definition.configFields,
-      initialValue: definition.initialValue
+      configFields: definition.configFields
     });
   }
 
   private rerenderForm(): void {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
     this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    window.setTimeout(() => {
+      this.formVisible.set(true);
+      window.requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
+    });
   }
 }

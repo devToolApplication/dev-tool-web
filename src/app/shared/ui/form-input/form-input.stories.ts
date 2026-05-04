@@ -262,12 +262,12 @@ export const Default: Story = {
         </section>
 
         <aside class="col-span-12 xl:col-span-4">
-          <div class="rounded-lg border border-surface-200 bg-surface-0 p-4">
+          <div class="rounded-lg border app-border app-bg-card p-4">
             <h3 class="m-0 mb-3 text-base font-semibold">Current model</h3>
             <pre class="m-0 max-h-96 overflow-auto text-xs">{{ currentModel }}</pre>
           </div>
 
-          <div class="mt-4 rounded-lg border border-surface-200 bg-surface-0 p-4">
+          <div class="mt-4 rounded-lg border app-border app-bg-card p-4">
             <h3 class="m-0 mb-3 text-base font-semibold">Last submit</h3>
             <pre class="m-0 max-h-80 overflow-auto text-xs">{{ submittedModel }}</pre>
           </div>

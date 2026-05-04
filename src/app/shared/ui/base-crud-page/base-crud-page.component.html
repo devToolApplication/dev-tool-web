@@ -1,9 +1,9 @@
 <section class="crud-page">
-  <div class="header-row flex flex-col gap-3 rounded-2xl border border-surface-200 bg-surface-0 p-5 shadow-sm lg:flex-row lg:items-start lg:justify-between">
+  <div class="header-row flex flex-col gap-3 rounded-2xl border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
     <div>
       <h2 class="m-0 text-2xl font-semibold">{{ pageConfig.title | translateContent }}</h2>
       @if (pageConfig.description) {
-        <p class="mt-2 text-sm text-surface-500">{{ pageConfig.description | translateContent }}</p>
+        <p class="mt-2 text-sm app-text-muted">{{ pageConfig.description | translateContent }}</p>
       }
     </div>
 
@@ -27,10 +27,10 @@
 
   <div class="form-wrap shadow-1">
     @if (pageConfig.infoSection) {
-      <div class="mb-4 rounded-xl border border-surface-200 bg-surface-50 p-4">
+      <div class="mb-4 rounded-xl border app-border app-bg-soft p-4">
         <div class="text-sm font-semibold">{{ pageConfig.infoSection.title | translateContent }}</div>
         @if (pageConfig.infoSection.description) {
-          <div class="mt-1 text-sm text-surface-600">{{ pageConfig.infoSection.description | translateContent }}</div>
+          <div class="mt-1 text-sm app-text-soft">{{ pageConfig.infoSection.description | translateContent }}</div>
         }
       </div>
     }
