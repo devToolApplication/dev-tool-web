@@ -5,7 +5,7 @@
   }
 
   @case ('number') {
-    {{ value | number }}
+    {{ value | number:column.format }}@if (column.suffix) { <span class="table-cell-suffix">{{ column.suffix }}</span> }
   }
 
   @case ('date') {

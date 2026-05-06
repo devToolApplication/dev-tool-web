@@ -1,7 +1,7 @@
 @if (field.visible()) {
   <div class="col-span-12">
     <p-fieldset
-      [legend]="field.label || 'Thong tin'"
+      [legend]="(field.label || 'general') | translateContent"
       class="w-full">
       <div class="flex justify-between mb-4">
         <app-button
@@ -15,7 +15,7 @@
 
       @for (item of field.value(); track $index; let i = $index) {
         <p-fieldset
-          [legend]="(field.label || 'Thong tin') + ' ' + (i + 1)"
+          [legend]="((field.label || 'general') | translateContent) + ' ' + (i + 1)"
           class="w-full mb-4">
           <div class="flex justify-end mb-2">
             <app-button

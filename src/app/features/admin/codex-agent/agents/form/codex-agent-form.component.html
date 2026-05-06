@@ -4,7 +4,7 @@
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
-  [submitting]="loading"
+  [submitting]="loading()"
   (formSubmit)="onSubmitForm($event)"
   (actionClick)="onActionClick($event)"
   (valueChange)="onFormValueChange($event)"
@@ -12,135 +12,135 @@
 
 <app-field-guide-panel
   class="mt-6"
-  [title]="'Field Guide'"
-  [description]="'Options and descriptions are loaded from Codex runtime metadata so the UI stays aligned with backend capabilities.'"
+  [title]="'codexAgent.form.fieldGuideTitle'"
+  [description]="'codexAgent.form.fieldGuideDescription'"
   [fields]="fieldGuideFields()"
   [selections]="fieldGuideSelections()"
 ></app-field-guide-panel>
 
 @if (editId) {
   <section class="mt-6 grid gap-4 xl:grid-cols-[1.35fr_1fr]">
-    <div class="rounded-2xl border app-border app-bg-card p-5 app-shadow-sm">
+    <app-card [padding]="'lg'">
       <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h3 class="m-0 text-xl font-semibold">Auth / Token Status</h3>
-          <p class="mt-2 text-sm app-text-muted">Token metadata comes from auth.json. Usage windows are refreshed from Codex runtime rate-limit APIs when available.</p>
+          <h3 class="m-0 text-xl font-semibold">{{ 'codexAgent.form.auth.title' | translateContent }}</h3>
+          <p class="mt-2 text-sm app-text-muted">{{ 'codexAgent.form.auth.description' | translateContent }}</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
           <app-tag [value]="authStatusLabel()" [severity]="authStatusSeverity()"></app-tag>
-          <button pButton type="button" icon="pi pi-key" label="Auth" [loading]="authDeviceLoading" (click)="startDeviceAuth()"></button>
-          <button pButton type="button" icon="pi pi-refresh" label="Refresh" [loading]="authLoading" (click)="reloadAuthStatus()"></button>
+          <app-button icon="pi pi-key" label="codexAgent.form.auth.start" [loading]="authDeviceLoading()" (buttonClick)="startDeviceAuth()"></app-button>
+          <app-button icon="pi pi-refresh" label="refresh" [loading]="authLoading()" (buttonClick)="reloadAuthStatus()"></app-button>
         </div>
       </div>
 
       @if (deviceLoginSession) {
-        <div class="mb-4 rounded-xl border app-border app-bg-soft p-4">
+        <div class="mb-4 border-y app-border app-bg-soft py-4">
           <div class="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
             <div>
-              <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Device Auth Link</div>
+              <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.deviceLink' | translateContent }}</div>
               <div class="mt-2 break-words app-text">
                 <a [href]="deviceLoginSession.verificationUri || '#'" target="_blank" rel="noreferrer" class="app-text-primary no-underline hover:underline">
-                  {{ displayValue(deviceLoginSession.verificationUri) }}
+                  {{ displayValue(deviceLoginSession.verificationUri) | translateContent }}
                 </a>
               </div>
             </div>
             <div>
-              <div class="text-xs font-bold uppercase tracking-wide app-text-muted">User Code</div>
-              <div class="mt-2 text-2xl font-bold tracking-wider app-text">{{ displayValue(deviceLoginSession.userCode) }}</div>
+              <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.userCode' | translateContent }}</div>
+              <div class="mt-2 text-2xl font-bold tracking-wider app-text">{{ displayValue(deviceLoginSession.userCode) | translateContent }}</div>
             </div>
           </div>
-          <div class="mt-3 text-sm app-text-muted">{{ displayValue(deviceLoginSession.message) }}</div>
+          <div class="mt-3 text-sm app-text-muted">{{ displayValue(deviceLoginSession.message) | translateContent }}</div>
         </div>
       }
 
-      @if (authLoading) {
-        <div class="py-4 app-text-muted">Loading auth status...</div>
+      @if (authLoading()) {
+        <div class="py-4 app-text-muted">{{ 'codexAgent.form.auth.loading' | translateContent }}</div>
       } @else if (authStatus) {
         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Plan</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.planType) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.plan' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.planType) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Mode</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.mode) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.mode' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.mode) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Account Email</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accountEmail) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.accountEmail' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accountEmail) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Account Id</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accountId) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.accountId' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accountId) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Last Refresh</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.lastRefreshAt) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.lastRefresh' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.lastRefreshAt) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Access Token Expires</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accessTokenExpiresAt) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.accessTokenExpires' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.accessTokenExpiresAt) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Subscription Until</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.subscriptionActiveUntil) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.subscriptionUntil' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.subscriptionActiveUntil) | translateContent }}</div>
           </div>
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Subscription Days Left</div>
-            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.subscriptionRemainingDays) }}</div>
+          <div class="min-w-0 border-t app-border pt-3">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.subscriptionDaysLeft' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ displayValue(authStatus.subscriptionRemainingDays) | translateContent }}</div>
           </div>
         </div>
 
-        <div class="mt-4 rounded-xl border app-border p-4">
-          <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Runtime Message</div>
-          <div class="mt-2 break-words app-text">{{ displayValue(authStatus.message) }}</div>
+        <div class="mt-4 border-t app-border pt-4">
+          <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.runtimeMessage' | translateContent }}</div>
+          <div class="mt-2 break-words app-text">{{ displayValue(authStatus.message) | translateContent }}</div>
         </div>
 
         @if (authStatus.limitSummary) {
-          <div class="mt-4 rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">Limit Summary</div>
-            <div class="mt-2 break-words app-text">{{ authStatus.limitSummary }}</div>
+          <div class="mt-4 border-t app-border pt-4">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ 'codexAgent.form.auth.limitSummary' | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ authStatus.limitSummary | translateContent }}</div>
           </div>
         }
       } @else {
-        <div class="py-4 app-text-muted">Auth status is unavailable.</div>
+        <div class="py-4 app-text-muted">{{ 'codexAgent.form.auth.unavailable' | translateContent }}</div>
       }
-    </div>
+    </app-card>
 
-    <div class="rounded-2xl border app-border app-bg-card p-5 app-shadow-sm">
+    <app-card [padding]="'lg'">
       <div>
-        <h3 class="m-0 text-xl font-semibold">Usage Windows</h3>
-        <p class="mt-2 text-sm app-text-muted">Shows exact runtime reset times and usage percentage when Codex exposes them, otherwise falls back to auth.json-derived hints.</p>
+        <h3 class="m-0 text-xl font-semibold">{{ 'codexAgent.form.usage.title' | translateContent }}</h3>
+        <p class="mt-2 text-sm app-text-muted">{{ 'codexAgent.form.usage.description' | translateContent }}</p>
       </div>
 
-      <div class="mt-4 grid gap-3">
-        <div class="rounded-xl border app-border p-4">
+      <div class="mt-4 grid gap-4">
+        <div class="border-t app-border pt-4">
           <div class="flex items-center justify-between gap-3">
-            <span class="text-sm font-bold app-text">Hourly</span>
+            <span class="text-sm font-bold app-text">{{ 'codexAgent.form.usage.hourly' | translateContent }}</span>
             <app-tag [value]="displayValue(authStatus?.usage?.hourly?.source)" severity="info"></app-tag>
           </div>
           <div class="mt-3 text-2xl font-bold app-text">{{ usageCounter(authStatus?.usage?.hourly) }}</div>
           <div class="mt-1 text-sm app-text-muted">{{ usageWindowLabel(authStatus?.usage?.hourly) }}</div>
-          <div class="mt-2 text-sm app-text-muted">Reset: {{ usageReset(authStatus?.usage?.hourly) }}</div>
-          @if (authStatus?.usage?.hourly?.note) {
-            <div class="mt-3 text-sm leading-6 app-text-soft">{{ authStatus?.usage?.hourly?.note }}</div>
+          <div class="mt-2 text-sm app-text-muted">{{ 'codexAgent.form.usage.reset' | translateContent }}: {{ usageReset(authStatus?.usage?.hourly) }}</div>
+          @if (authStatus?.usage?.hourly?.note; as hourlyNote) {
+            <div class="mt-3 text-sm leading-6 app-text-soft">{{ hourlyNote | translateContent }}</div>
           }
         </div>
 
-        <div class="rounded-xl border app-border p-4">
+        <div class="border-t app-border pt-4">
           <div class="flex items-center justify-between gap-3">
-            <span class="text-sm font-bold app-text">Weekly</span>
+            <span class="text-sm font-bold app-text">{{ 'codexAgent.form.usage.weekly' | translateContent }}</span>
             <app-tag [value]="displayValue(authStatus?.usage?.weekly?.source)" severity="info"></app-tag>
           </div>
           <div class="mt-3 text-2xl font-bold app-text">{{ usageCounter(authStatus?.usage?.weekly) }}</div>
           <div class="mt-1 text-sm app-text-muted">{{ usageWindowLabel(authStatus?.usage?.weekly) }}</div>
-          <div class="mt-2 text-sm app-text-muted">Reset: {{ usageReset(authStatus?.usage?.weekly) }}</div>
-          @if (authStatus?.usage?.weekly?.note) {
-            <div class="mt-3 text-sm leading-6 app-text-soft">{{ authStatus?.usage?.weekly?.note }}</div>
+          <div class="mt-2 text-sm app-text-muted">{{ 'codexAgent.form.usage.reset' | translateContent }}: {{ usageReset(authStatus?.usage?.weekly) }}</div>
+          @if (authStatus?.usage?.weekly?.note; as weeklyNote) {
+            <div class="mt-3 text-sm leading-6 app-text-soft">{{ weeklyNote | translateContent }}</div>
           }
         </div>
       </div>
-    </div>
+    </app-card>
   </section>
 }

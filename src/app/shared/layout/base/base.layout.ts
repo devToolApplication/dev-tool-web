@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
@@ -12,19 +13,25 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 })
 export class BaseLayoutComponent implements OnInit {
   readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;
-  sidebarVisible = true;
-  usePageWrapper = true;
+  readonly sidebarVisible = signal(true);
+  readonly usePageWrapper = signal(true);
 
-  private isMobileLayout = false;
+  private readonly isMobileLayout = signal(false);
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly destroyRef: DestroyRef
+  ) {}
 
   ngOnInit(): void {
     this.updateLayoutMode();
     this.updatePageWrapper(this.router.url);
 
     this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((event) => this.updatePageWrapper((event as NavigationEnd).urlAfterRedirects));
   }
 
@@ -34,29 +41,29 @@ export class BaseLayoutComponent implements OnInit {
   }
 
   onToggleSidebar(): void {
-    this.sidebarVisible = !this.sidebarVisible;
+    this.sidebarVisible.update((visible) => !visible);
   }
 
   closeSidebarOverlay(): void {
-    if (!this.isMobileLayout) {
+    if (!this.isMobileLayout()) {
       return;
     }
 
-    this.sidebarVisible = false;
+    this.sidebarVisible.set(false);
   }
 
   private updateLayoutMode(): void {
     const nextIsMobile = window.innerWidth < 992;
 
-    if (nextIsMobile === this.isMobileLayout) {
+    if (nextIsMobile === this.isMobileLayout()) {
       return;
     }
 
-    this.isMobileLayout = nextIsMobile;
-    this.sidebarVisible = !this.isMobileLayout;
+    this.isMobileLayout.set(nextIsMobile);
+    this.sidebarVisible.set(!this.isMobileLayout());
   }
 
   private updatePageWrapper(url: string): void {
-    this.usePageWrapper = !url.startsWith('/admin/dashboard');
+    this.usePageWrapper.set(!url.startsWith('/admin/dashboard'));
   }
 }

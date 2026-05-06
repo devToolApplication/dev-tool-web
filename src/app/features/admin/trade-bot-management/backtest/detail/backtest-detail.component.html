@@ -14,8 +14,10 @@
     <app-summary-metric-card [label]="'tradeBot.replay.metric.winTrades'" [value]="metric?.winTrades ?? 0"></app-summary-metric-card>
     <app-summary-metric-card [label]="'tradeBot.replay.metric.loseTrades'" [value]="metric?.loseTrades ?? 0"></app-summary-metric-card>
     <app-summary-metric-card [label]="'tradeBot.replay.metric.winRate'" [value]="(metric?.winRate ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
-    <app-summary-metric-card [label]="'tradeBot.replay.metric.pnl'" [value]="(metric?.pnl ?? 0) | number:'1.2-2'"></app-summary-metric-card>
-    <app-summary-metric-card [label]="'tradeBot.replay.metric.finalEquity'" [value]="(metric?.finalEquity ?? 0) | number:'1.2-2'"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.pnl'" [value]="(metric?.pnl ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.finalEquity'" [value]="(metric?.finalEquity ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.totalFee'" [value]="(metric?.totalFee ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+    <app-summary-metric-card [label]="'tradeBot.replay.metric.totalSlippage'" [value]="(metric?.totalSlippage ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
     <app-summary-metric-card [label]="'tradeBot.backtest.detail.maxDrawdown'" [value]="(metric?.maxDrawdown ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
     <app-summary-metric-card [label]="'tradeBot.backtest.detail.profitFactor'" [value]="(metric?.profitFactor ?? 0) | number:'1.2-2'"></app-summary-metric-card>
   </div>

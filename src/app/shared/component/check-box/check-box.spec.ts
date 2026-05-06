@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { CheckBox } from './check-box';
 
 describe('CheckBox', () => {
@@ -8,9 +12,9 @@ describe('CheckBox', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CheckBox]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CheckBox);
     component = fixture.componentInstance;

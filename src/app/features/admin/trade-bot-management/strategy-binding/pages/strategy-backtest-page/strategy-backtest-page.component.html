@@ -23,7 +23,7 @@
   </app-card>
 
   <app-panel [title]="TEXT.BacktestExecution" [description]="TEXT.BacktestExecutionDesc">
-    <div class="grid grid-cols-12 gap-4" [formGroup]="runForm">
+    <div class="grid grid-cols-12 items-end gap-4" [formGroup]="runForm">
       <div class="col-span-12 md:col-span-3">
         <app-date-picker label="fromDate" formControlName="fromDate" [showIcon]="true" dateFormat="yy-mm-dd"></app-date-picker>
       </div>
@@ -31,7 +31,7 @@
         <app-date-picker label="toDate" formControlName="toDate" [showIcon]="true" dateFormat="yy-mm-dd"></app-date-picker>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.InitialBalance" [min]="1" formControlName="initialBalance"></app-input-number>
+        <app-input-number [label]="TEXT.InitialBalance" [min]="1" suffix=" USD" formControlName="initialBalance"></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-2">
         <app-input-number [label]="TEXT.FeeRate" [min]="0" [step]="0.0001" formControlName="feeRate"></app-input-number>
@@ -44,7 +44,7 @@
       </div>
       @if (runForm.controls.riskMode.value === riskModes.FIXED_AMOUNT) {
         <div class="col-span-12 md:col-span-3">
-          <app-input-number [label]="TEXT.FixedRiskAmount" [min]="0.01" [step]="1" formControlName="fixedRiskAmount"></app-input-number>
+          <app-input-number [label]="TEXT.FixedRiskAmount" [min]="0.01" [step]="1" suffix=" USD" formControlName="fixedRiskAmount"></app-input-number>
         </div>
       } @else {
         <div class="col-span-12 md:col-span-3">
@@ -63,8 +63,10 @@
       <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinTrades" [value]="metric?.winTrades ?? 0"></app-summary-metric-card>
       <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.LoseTrades" [value]="metric?.loseTrades ?? 0"></app-summary-metric-card>
       <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinRate" [value]="(metric?.winRate ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.Pnl" [value]="(metric?.pnl ?? job?.pnl ?? 0) | number:'1.2-2'"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.FinalEquity" [value]="(metric?.finalEquity ?? job?.finalEquity ?? 0) | number:'1.2-2'"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.Pnl" [value]="(metric?.pnl ?? job?.pnl ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.FinalEquity" [value]="(metric?.finalEquity ?? job?.finalEquity ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalFee" [value]="(metric?.totalFee ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalSlippage" [value]="(metric?.totalSlippage ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
     </div>
   }
 

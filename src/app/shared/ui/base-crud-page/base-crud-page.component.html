@@ -1,5 +1,5 @@
 <section class="crud-page">
-  <div class="header-row flex flex-col gap-3 rounded-2xl border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
+  <div class="header-row flex flex-col gap-3 rounded-lg border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
     <div>
       <h2 class="m-0 text-2xl font-semibold">{{ pageConfig.title | translateContent }}</h2>
       @if (pageConfig.description) {
@@ -10,16 +10,15 @@
     @if (pageConfig.actions?.length) {
       <div class="header-actions flex flex-wrap items-center gap-2">
         @for (action of pageConfig.actions; track action.id) {
-          <button
-            pButton
+          <app-button
             [type]="action.type ?? 'button'"
-            [class]="action.buttonClass ?? ''"
+            [styleClass]="action.buttonClass ?? ''"
             [icon]="action.icon ?? ''"
-            [label]="action.label | translateContent"
+            [label]="action.label"
             [disabled]="action.disabled ?? false"
             [loading]="action.loading ?? false"
-            (click)="onActionClick(action)"
-          ></button>
+            (buttonClick)="onActionClick(action)"
+          ></app-button>
         }
       </div>
     }
@@ -27,7 +26,7 @@
 
   <div class="form-wrap shadow-1">
     @if (pageConfig.infoSection) {
-      <div class="mb-4 rounded-xl border app-border app-bg-soft p-4">
+      <div class="mb-4 rounded-lg border app-border app-bg-soft p-4">
         <div class="text-sm font-semibold">{{ pageConfig.infoSection.title | translateContent }}</div>
         @if (pageConfig.infoSection.description) {
           <div class="mt-1 text-sm app-text-soft">{{ pageConfig.infoSection.description | translateContent }}</div>

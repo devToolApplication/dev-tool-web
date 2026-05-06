@@ -1,0 +1,15 @@
+<div class="app-tabs" role="tablist">
+  @for (tab of tabs; track tab.value) {
+    <button
+      type="button"
+      class="app-tab"
+      role="tab"
+      [class.app-tab--active]="tab.value === value"
+      [disabled]="tab.disabled"
+      [attr.aria-selected]="tab.value === value"
+      (click)="valueChange.emit(tab.value)"
+    >
+      {{ tab.label | translateContent }}
+    </button>
+  }
+</div>

@@ -1,4 +1,4 @@
-import { DestroyRef, Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, finalize } from 'rxjs';
@@ -39,15 +39,14 @@ export class StrategyFormPageComponent implements OnInit {
   private static readonly SAME_GROUP_RULE_SELECTION_MODE = 'SAME_GROUP';
 
   readonly generalInfoForm: StrategyGeneralInfoFormGroup;
-  readonly destroyRef = inject(DestroyRef);
   readonly TEXT = TradeBotTextKey;
   @ViewChild('strategyConfigSection')
   strategyConfigSection?: StrategySpecificConfigSectionComponent;
 
   editId: string | null = null;
-  loaded = false;
-  loading = false;
-  saving = false;
+  readonly loaded = signal(false);
+  readonly loading = signal(false);
+  readonly saving = signal(false);
 
   strategyMeta = resolveStrategyUiMetadataByServiceName('FVG_TOUCH_RETEST');
   currentStrategy?: StrategyResponse;
@@ -81,7 +80,8 @@ export class StrategyFormPageComponent implements OnInit {
     private readonly facade: StrategyFormFacade,
     private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
-    private readonly toastService: ToastService
+    private readonly toastService: ToastService,
+    private readonly destroyRef: DestroyRef
   ) {
     this.generalInfoForm = this.formBuilders.createGeneralInfoForm();
   }
@@ -130,10 +130,13 @@ export class StrategyFormPageComponent implements OnInit {
     }
 
     const payload = this.buildPayload();
-    this.saving = true;
+    this.saving.set(true);
     this.loadingService
       .track(this.facade.save(this.editId, payload))
-      .pipe(finalize(() => (this.saving = false)))
+      .pipe(
+        finalize(() => this.saving.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: (binding) => {
           this.toastService.success(this.i18nService.t(this.editId ? TradeBotTextKey.UpdateStrategySuccess : TradeBotTextKey.SaveStrategySuccess));
@@ -187,18 +190,21 @@ export class StrategyFormPageComponent implements OnInit {
     const editId = params.get('id');
     const strategyServiceName = String(data['strategyServiceName'] ?? '');
 
-    this.loading = true;
-    this.loaded = false;
+    this.loading.set(true);
+    this.loaded.set(false);
 
     const request$ = editId ? this.facade.loadEditContext(editId) : this.facade.loadCreateContext(strategyServiceName);
     this.loadingService
       .track(request$)
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: (context) => {
           this.editId = editId;
           this.applyContext(context, strategyServiceName);
-          this.loaded = true;
+          this.loaded.set(true);
         },
         error: () => {
           this.toastService.error(this.i18nService.t(TradeBotTextKey.LoadStrategyFormFailed));

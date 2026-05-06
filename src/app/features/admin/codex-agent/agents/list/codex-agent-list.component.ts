@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
@@ -19,7 +19,7 @@ import { CODEX_AGENT_ROUTES } from '../codex-agent.constants';
 })
 export class CodexAgentListComponent extends BasePagedList<CodexAgentResponse> implements OnInit {
   tableConfig!: TableConfig;
-  loading = false;
+  readonly loading = signal(false);
 
   constructor(
     private readonly service: CodexAgentService,
@@ -46,64 +46,64 @@ export class CodexAgentListComponent extends BasePagedList<CodexAgentResponse> i
   }
 
   private remove(id: string): void {
-    this.loading = true;
-    this.loadingService.track(this.service.delete(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(this.service.delete(id)).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t('deleteSuccess'));
         this.loadPage();
       },
-      error: () => this.toastService.error('Delete Codex agent failed')
+      error: () => this.toastService.error('codexAgent.form.toast.deleteFailed')
     });
   }
 
   protected loadPage(): void {
-    this.loading = true;
-    this.loadingService.track(this.service.getPage(this.page, this.pageSize, ['name,asc'], this.filters)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(this.service.getPage(this.page, this.pageSize, ['name,asc'], this.filters)).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: (res: BasePageResponse<CodexAgentResponse>) => this.setPageResponse(res),
-      error: () => this.toastService.error('Load Codex agents failed')
+      error: () => this.toastService.error('codexAgent.form.toast.loadListFailed')
     });
   }
 
   private createTableConfig(): TableConfig {
     return {
-      title: 'Codex Agents',
+      title: 'codexAgent.form.listTitle',
       toolbar: {
         new: {
           visible: true,
-          label: 'New Codex Agent',
+          label: 'codexAgent.form.new',
           icon: 'pi pi-plus',
           severity: 'success'
         }
       },
       filters: [
-        { field: 'code', label: 'Code', placeholder: 'Search code' },
-        { field: 'name', label: 'Name', placeholder: 'Search name' },
+        { field: 'code', label: 'code', placeholder: 'codexAgent.form.searchCode' },
+        { field: 'name', label: 'name', placeholder: 'codexAgent.form.searchName' },
         {
           field: 'enabled',
-          label: 'Enabled',
+          label: 'enabled',
           type: 'select',
           options: [
-            { label: 'Yes', value: true },
-            { label: 'No', value: false }
+            { label: 'yes', value: true },
+            { label: 'no', value: false }
           ]
         }
       ],
       filterOptions: { primaryField: 'name' },
       columns: [
-        { field: 'code', header: 'Code', sortable: true },
-        { field: 'name', header: 'Name', sortable: true },
-        { field: 'model', header: 'Model' },
-        { field: 'reasoningEffort', header: 'Reasoning' },
-        { field: 'approvalPolicy', header: 'Approval' },
-        { field: 'enabled', header: 'Enabled', type: 'boolean' },
-        { field: 'status', header: 'Status' },
+        { field: 'code', header: 'code', sortable: true },
+        { field: 'name', header: 'name', sortable: true },
+        { field: 'model', header: 'codexAgent.form.model' },
+        { field: 'reasoningEffort', header: 'codexAgent.form.reasoningEffort' },
+        { field: 'approvalPolicy', header: 'codexAgent.form.approvalPolicy' },
+        { field: 'enabled', header: 'enabled', type: 'boolean' },
+        { field: 'status', header: 'status' },
         {
           field: 'actions',
-          header: 'Actions',
+          header: 'actions',
           type: 'actions',
           actions: [
-            { label: 'View Detail', icon: 'pi pi-eye', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-            { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+            { label: 'codexAgent.form.viewDetail', icon: 'pi pi-eye', severity: 'info', onClick: (row) => this.goEdit(row.id) },
+            { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
           ]
         }
       ],

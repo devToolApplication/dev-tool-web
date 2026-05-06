@@ -113,7 +113,7 @@
   maskStyleClass="input-area-zoom-dialog-mask"
   [maximizable]="true"
   [width]="'min(96vw, 72rem)'"
-  [header]="label || placeholder || 'Content'"
+  [header]="(label || placeholder || 'content') | translateContent"
   [showDefaultCancel]="false"
   [showDefaultConfirm]="false"
   [showFooter]="false"

@@ -1,7 +1,7 @@
-import {Component, effect, EventEmitter, inject, Injector, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import { Component, effect, EventEmitter, Injector, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import {createFormEngine} from './utils/form-engine';
 import {FormConfig, FormContext, GridWidth} from './models/form-config.model';
-import {getColClass} from './utils/form.utils'
+import { getColClass } from './utils/form.utils';
 
 @Component({
   selector: 'app-form-input',
@@ -10,8 +10,10 @@ import {getColClass} from './utils/form.utils'
   styleUrl: './form-input.css',
 })
 export class FormInput implements OnInit, OnChanges {
-  private readonly injector = inject(Injector);
   private suppressValueChange = true;
+
+  constructor(private readonly injector: Injector) {}
+
   @Input() config!: FormConfig;
   @Input() context!: FormContext;
   @Input() initialValue!: any;
@@ -78,7 +80,6 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   getCol(width?: GridWidth): string {
-    return getColClass(width)
+    return getColClass(width);
   }
-
 }

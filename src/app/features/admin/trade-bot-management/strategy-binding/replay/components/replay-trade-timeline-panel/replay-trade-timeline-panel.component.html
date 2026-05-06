@@ -22,10 +22,11 @@
             <app-tag [value]="trade.result" severity="secondary"></app-tag>
           </div>
           <div class="mt-1 text-sm app-text-muted">
-            {{ TEXT.EntryTime | translateContent }} {{ trade.entryTime | date:'MM-dd HH:mm' }} | {{ trade.entryPrice }}
+            {{ TEXT.EntryTime | translateContent }} {{ trade.entryTime | date:'MM-dd HH:mm' }} | {{ formatUsd(trade.entryPrice) }}
           </div>
-          <div class="mt-1 text-sm app-text-soft">
+          <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm app-text-soft">
             {{ TEXT.RrAchieved | translateContent }}: {{ trade.rrAchieved ?? 0 | number:'1.2-2' }}
+            <span>{{ TEXT.NetPnl | translateContent }}: {{ formatUsd(trade.pnl) }}</span>
           </div>
         </div>
         <span (click)="$event.stopPropagation()">
@@ -39,15 +40,71 @@
       </div>
 
         @if (expandedTradeId === trade.id) {
-          <div class="mt-3 grid grid-cols-2 gap-2 text-sm app-text-soft">
-            <div>{{ TEXT.ExitTime | translateContent }}: {{ trade.exitTime ? (trade.exitTime | date:'MM-dd HH:mm') : '--' }}</div>
-            <div>{{ TEXT.ExitPrice | translateContent }}: {{ trade.exitPrice ?? '--' }}</div>
-            <div>{{ TEXT.StopLossPrice | translateContent }}: {{ trade.stopLoss }}</div>
-            <div>{{ TEXT.TakeProfitPrice | translateContent }}: {{ trade.takeProfit }}</div>
-            <div>{{ TEXT.EntryReason | translateContent }}: {{ trade.entryReason || '--' }}</div>
-            <div>{{ TEXT.ExitReason | translateContent }}: {{ trade.exitReason || '--' }}</div>
-            <div>{{ TEXT.WinLoss | translateContent }}: {{ trade.result }}</div>
-            <div>{{ TEXT.Pnl | translateContent }}: {{ trade.pnl ?? '--' }}</div>
+          <div class="trade-detail-grid mt-3 text-sm app-text-soft">
+            <div class="trade-detail-row">
+              <span>{{ TEXT.ExitTime | translateContent }}</span>
+              <strong>{{ trade.exitTime ? (trade.exitTime | date:'MM-dd HH:mm') : '--' }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.ExitPrice | translateContent }}</span>
+              <strong>{{ formatUsd(trade.exitPrice) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.RawEntryPrice | translateContent }}</span>
+              <strong>{{ formatUsd(trade.rawEntryPrice) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.RawExitPrice | translateContent }}</span>
+              <strong>{{ formatUsd(trade.rawExitPrice) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.StopLossPrice | translateContent }}</span>
+              <strong>{{ formatUsd(trade.stopLoss) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.TakeProfitPrice | translateContent }}</span>
+              <strong>{{ formatUsd(trade.takeProfit) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.Quantity | translateContent }}</span>
+              <strong>{{ formatNumber(trade.quantity) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.RiskAmount | translateContent }}</span>
+              <strong>{{ formatUsd(trade.riskAmount) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.GrossPnl | translateContent }}</span>
+              <strong>{{ formatUsd(trade.grossPnl) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.FeePaid | translateContent }}</span>
+              <strong>{{ formatUsd(trade.feePaid) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.SlippagePaid | translateContent }}</span>
+              <strong>{{ formatUsd(trade.slippagePaid) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.TradingCost | translateContent }}</span>
+              <strong>{{ formatUsd(trade.tradingCost) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.NetPnl | translateContent }}</span>
+              <strong>{{ formatUsd(trade.pnl) }}</strong>
+            </div>
+            <div class="trade-detail-row">
+              <span>{{ TEXT.WinLoss | translateContent }}</span>
+              <strong>{{ trade.result }}</strong>
+            </div>
+            <div class="trade-detail-row trade-detail-row--wide">
+              <span>{{ TEXT.EntryReason | translateContent }}</span>
+              <strong>{{ trade.entryReason || '--' }}</strong>
+            </div>
+            <div class="trade-detail-row trade-detail-row--wide">
+              <span>{{ TEXT.ExitReason | translateContent }}</span>
+              <strong>{{ trade.exitReason || '--' }}</strong>
+            </div>
           </div>
         }
       </article>

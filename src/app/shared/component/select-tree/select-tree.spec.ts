@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { SelectTree } from './select-tree';
 
 describe('SelectTree', () => {
@@ -8,9 +12,9 @@ describe('SelectTree', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SelectTree]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SelectTree);
     component = fixture.componentInstance;

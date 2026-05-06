@@ -91,6 +91,7 @@ export interface TableColumn {
   type?: TableColumnType;
   sortable?: boolean;
   format?: string;
+  suffix?: string;
   currencyCode?: string;
   width?: string;
   minWidth?: string;

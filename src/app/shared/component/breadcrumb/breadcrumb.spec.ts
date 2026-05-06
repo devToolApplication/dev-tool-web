@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { Breadcrumb } from './breadcrumb';
 
 describe('Breadcrumb', () => {
@@ -8,9 +12,9 @@ describe('Breadcrumb', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [Breadcrumb]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Breadcrumb);
     component = fixture.componentInstance;

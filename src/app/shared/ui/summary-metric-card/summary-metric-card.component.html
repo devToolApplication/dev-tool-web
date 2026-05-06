@@ -1,0 +1,4 @@
+<app-card class="summary-metric-card" [padding]="'md'" [fullHeight]="true">
+  <span class="summary-metric-label">{{ label | translateContent }}</span>
+  <strong class="summary-metric-value">{{ (value ?? 'notAvailable') | translateContent }}{{ suffix }}</strong>
+</app-card>

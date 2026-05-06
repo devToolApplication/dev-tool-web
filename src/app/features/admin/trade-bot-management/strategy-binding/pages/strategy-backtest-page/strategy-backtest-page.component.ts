@@ -55,17 +55,20 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     columns: [
       { field: 'nyTradeDate', header: TradeBotTextKey.TradeDate, sortable: true },
       { field: 'orderSide', header: TradeBotTextKey.Side, sortable: true },
-      { field: 'entryPrice', header: TradeBotTextKey.EntryPrice, sortable: true, type: 'number' },
-      { field: 'stopLoss', header: 'SL', sortable: true, type: 'number' },
-      { field: 'takeProfit', header: 'TP', sortable: true, type: 'number' },
-      { field: 'exitPrice', header: TradeBotTextKey.ExitPrice, sortable: true, type: 'number' },
-      { field: 'netPnl', header: 'Net PnL', sortable: true, type: 'number' },
+      { field: 'entryPrice', header: TradeBotTextKey.EntryPrice, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'stopLoss', header: 'SL', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'takeProfit', header: 'TP', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'exitPrice', header: TradeBotTextKey.ExitPrice, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'grossPnl', header: TradeBotTextKey.GrossPnl, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'feePaid', header: TradeBotTextKey.FeePaid, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'slippagePaid', header: TradeBotTextKey.SlippagePaid, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'netPnl', header: TradeBotTextKey.NetPnl, sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
       { field: 'result', header: TradeBotTextKey.Result, sortable: true },
       { field: 'exitReason', header: TradeBotTextKey.ExitReason, sortable: true }
     ],
     pagination: true,
     scrollHeight: '28rem',
-    minWidth: '100%',
+    minWidth: '110rem',
     rows: 20,
     rowsPerPageOptions: [10, 20, 50, 100]
   };

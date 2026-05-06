@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { Button } from './button';
 
 describe('Button', () => {
@@ -8,9 +12,9 @@ describe('Button', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [Button]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Button);
     component = fixture.componentInstance;

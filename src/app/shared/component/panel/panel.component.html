@@ -1,0 +1,21 @@
+<app-card [padding]="'none'" [surface]="surface">
+  @if (title || description) {
+    <header class="app-panel-header">
+      <div class="app-panel-title-group">
+        @if (title) {
+          <div class="app-panel-title">{{ title | translateContent }}</div>
+        }
+        @if (description) {
+          <div class="app-panel-description">{{ description | translateContent }}</div>
+        }
+      </div>
+      <div class="app-panel-actions">
+        <ng-content select="[panel-actions]"></ng-content>
+      </div>
+    </header>
+  }
+
+  <div class="app-panel-body">
+    <ng-content></ng-content>
+  </div>
+</app-card>

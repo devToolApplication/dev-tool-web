@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.json-preview {
+  margin: 0;
+  max-height: 18rem;
+  overflow: auto;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 0.75rem;
+  background: var(--app-surface-soft);
+  color: var(--app-text);
+  padding: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

@@ -4,16 +4,16 @@ import { SelectButton } from './select-button';
 import type { SelectOption } from '../select/select';
 
 const options: SelectOption[] = [
-  { label: 'Draft', value: 'draft' },
-  { label: 'Active', value: 'active' },
-  { label: 'Paused', value: 'paused' }
+  { label: 'active', value: 'active' },
+  { label: 'inactive', value: 'inactive' },
+  { label: 'custom', value: 'custom' }
 ];
 
 const meta: Meta<SelectButton> = {
   title: 'Shared/Components/Select Button',
   component: SelectButton,
   args: {
-    label: 'Status',
+    label: 'status',
     options,
     value: 'active',
     allowEmpty: true
@@ -29,6 +29,27 @@ export const Default: Story = {};
 export const Multiple: Story = {
   args: {
     multiple: true,
-    value: ['draft', 'active'] as never
+    value: ['active', 'custom'] as never
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true
+  }
+};
+
+export const Invalid: Story = {
+  args: {
+    invalid: true,
+    errorMessage: 'selectValue'
+  }
+};
+
+export const Empty: Story = {
+  args: {
+    value: null,
+    options: [],
+    helpText: 'noDataFound'
   }
 };

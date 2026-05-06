@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { ButtonSplit } from './button-split';
 
 describe('ButtonSplit', () => {
@@ -8,9 +12,9 @@ describe('ButtonSplit', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ButtonSplit]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ButtonSplit);
     component = fixture.componentInstance;

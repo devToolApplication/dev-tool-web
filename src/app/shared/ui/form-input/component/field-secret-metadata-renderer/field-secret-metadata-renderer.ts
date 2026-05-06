@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, DestroyRef, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AiAgentSecretUserResponse, AiAgentSecretUserService } from '../../../../../core/services/ai-agent-service/ai-agent-secret-user.service';
 import { StorageSecretUserResponse, StorageSecretUserService } from '../../../../../core/services/file-service/storage-secret-user.service';
 import { FieldState, SecretMetadataFieldConfig, SelectOption } from '../../models/form-config.model';
@@ -17,12 +18,15 @@ interface MetadataEntry {
   templateUrl: './field-secret-metadata-renderer.html',
   styleUrl: './field-secret-metadata-renderer.css'
 })
-export class FieldSecretMetadataRendererComponent {
-  private readonly storageSecretUserService = inject(StorageSecretUserService);
-  private readonly aiAgentSecretUserService = inject(AiAgentSecretUserService);
-
+export class FieldSecretMetadataRendererComponent implements OnChanges {
   @Input({ required: true }) field!: FieldState;
   readonly serviceOptions = signal<SelectOption[]>([]);
+
+  constructor(
+    private readonly storageSecretUserService: StorageSecretUserService,
+    private readonly aiAgentSecretUserService: AiAgentSecretUserService,
+    private readonly destroyRef: DestroyRef
+  ) {}
 
   get config(): SecretMetadataFieldConfig {
     return this.field.fieldConfig as SecretMetadataFieldConfig;
@@ -88,18 +92,24 @@ export class FieldSecretMetadataRendererComponent {
 
   private loadOptions(): void {
     if (this.config.service === 'file-mcrs') {
-      this.storageSecretUserService.getAll().subscribe({
-        next: (items) => this.serviceOptions.set(this.mapStorageSecretOptions(items)),
-        error: () => this.serviceOptions.set([])
-      });
+      this.storageSecretUserService
+        .getAll()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (items) => this.serviceOptions.set(this.mapStorageSecretOptions(items)),
+          error: () => this.serviceOptions.set([])
+        });
       return;
     }
 
     if (this.config.service === 'ai-agent-mcrs') {
-      this.aiAgentSecretUserService.getAll().subscribe({
-        next: (items) => this.serviceOptions.set(this.mapAiAgentSecretOptions(items)),
-        error: () => this.serviceOptions.set([])
-      });
+      this.aiAgentSecretUserService
+        .getAll()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (items) => this.serviceOptions.set(this.mapAiAgentSecretOptions(items)),
+          error: () => this.serviceOptions.set([])
+        });
       return;
     }
 

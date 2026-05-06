@@ -17,7 +17,7 @@ export interface FieldGuideOptionItem {
   templateUrl: './field-guide-panel.component.html'
 })
 export class FieldGuidePanelComponent {
-  @Input() title = 'Field Guide';
+  @Input() title = 'fieldOptions';
   @Input() description = '';
   @Input() fields: FieldGuideFieldItem[] = [];
   @Input() selections: FieldGuideOptionItem[] = [];

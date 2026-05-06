@@ -1,5 +1,5 @@
 <section class="crud-page flex flex-col gap-4">
-  <div class="flex flex-col gap-3 rounded-2xl border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
+  <div class="flex flex-col gap-3 rounded-lg border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
     <div class="min-w-0">
       <div class="flex flex-wrap items-center gap-2">
         <h2 class="m-0 text-2xl font-semibold">{{ (editId ? TEXT.EditStrategyTitle : TEXT.CreateStrategyTitle) | translateContent }}</h2>
@@ -15,11 +15,11 @@
 
     <div class="flex flex-wrap items-center gap-2">
       <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
-      <app-button icon="pi pi-save" [label]="TEXT.SaveStrategy" [loading]="saving" (buttonClick)="save()"></app-button>
+      <app-button icon="pi pi-save" [label]="TEXT.SaveStrategy" [loading]="saving()" (buttonClick)="save()"></app-button>
     </div>
   </div>
 
-  @if (loaded) {
+  @if (loaded()) {
     <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 xl:col-span-8 flex flex-col gap-4">
         <app-strategy-general-info-section
@@ -59,7 +59,7 @@
               }
             </form>
           } @else {
-            <div class="rounded-xl border border-dashed app-border-strong p-4 text-sm app-text-muted">
+            <div class="rounded-lg border border-dashed app-border-strong p-4 text-sm app-text-muted">
               {{ 'tradeBot.strategy.form.noRuleSlots' | translateContent }}
             </div>
           }
@@ -69,7 +69,7 @@
           @if (selectedRuleDetails.length > 0) {
             <div class="flex flex-col gap-4">
               @for (detail of selectedRuleDetails; track detail.slot.slotCode) {
-                <div class="rounded-xl border app-border p-4">
+                <div class="rounded-lg border app-border p-4">
                   <div class="flex flex-wrap items-center gap-2">
                     <app-tag [value]="detail.slot.slotCode" severity="secondary"></app-tag>
                     @if (detail.rule) {
@@ -95,7 +95,7 @@
               }
             </div>
           } @else {
-            <div class="rounded-xl border border-dashed app-border-strong p-4 text-sm app-text-muted">{{ 'tradeBot.strategy.form.rulePreviewEmpty' | translateContent }}</div>
+            <div class="rounded-lg border border-dashed app-border-strong p-4 text-sm app-text-muted">{{ 'tradeBot.strategy.form.rulePreviewEmpty' | translateContent }}</div>
           }
         </app-panel>
       </div>
@@ -103,12 +103,12 @@
       <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
         <app-panel [title]="TEXT.FormGuide" [description]="TEXT.FormGuideDesc">
           <div class="flex flex-col gap-4 text-sm">
-            <div class="rounded-xl app-bg-soft p-3">
+            <div class="rounded-lg app-bg-soft p-3">
               <div class="font-semibold">{{ TEXT.RouteSourceOfTruth | translateContent }}</div>
               <div class="mt-1 app-text-soft">{{ routePathPreview }}</div>
             </div>
 
-            <div class="rounded-xl border app-border p-3">
+            <div class="rounded-lg border app-border p-3">
               <div class="font-semibold">{{ TEXT.ValidationSummary | translateContent }}</div>
               <ul class="mt-2 flex list-none flex-col gap-2 p-0">
                 <li class="flex items-center justify-between gap-2">
@@ -126,7 +126,7 @@
       </div>
     </div>
   } @else {
-    <div class="rounded-2xl border app-border app-bg-card p-8 text-center app-shadow-sm">
+    <div class="rounded-lg border app-border app-bg-card p-8 text-center app-shadow-sm">
       <app-progress-spinner strokeWidth="4"></app-progress-spinner>
     </div>
   }

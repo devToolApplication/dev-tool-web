@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.app-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  border: 1px solid var(--app-tab-list-border);
+  border-radius: 0.75rem;
+  padding: 0.35rem;
+  background: var(--app-tab-list-bg);
+}
+
+.app-tab {
+  min-height: 2.25rem;
+  border: 1px solid var(--app-transparent);
+  border-radius: 0.5rem;
+  padding: 0 0.85rem;
+  background: var(--app-transparent);
+  color: var(--app-tab-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-tab:hover {
+  border-color: var(--app-border-strong);
+  color: var(--app-text);
+}
+
+.app-tab--active {
+  border-color: var(--app-border-strong);
+  background: var(--app-tab-active-bg);
+  color: var(--app-tab-text-active);
+  box-shadow: var(--app-shadow-xs);
+}
+
+.app-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

@@ -1,16 +1,24 @@
+import { CUSTOM_ELEMENTS_SCHEMA, Pipe, PipeTransform } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
+import { provideSharedTesting } from './shared/testing/shared-test.providers';
+
+@Pipe({
+  name: 'translateContent',
+  standalone: false
+})
+class TranslateContentPipeStub implements PipeTransform {
+  transform(value: unknown): string {
+    return String(value ?? '');
+  }
+}
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterModule.forRoot([])
-      ],
-      declarations: [
-        AppComponent
-      ],
+      declarations: [AppComponent, TranslateContentPipeStub],
+      providers: provideSharedTesting(),
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
   });
 
@@ -20,10 +28,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the app shell', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, dev-tool-web');
+    expect(compiled.querySelector('app-base-layout')).toBeTruthy();
   });
 });

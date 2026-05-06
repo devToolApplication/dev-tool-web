@@ -6,10 +6,6 @@
 
 <div class="loading-overlay" [class.visible]="isLoading">
   <div class="loading-box" aria-live="polite" [attr.aria-label]="'loading' | translateContent">
-    <p-progressSpinner
-      strokeWidth="4"
-      fill="transparent"
-      animationDuration=".65s"
-    ></p-progressSpinner>
+    <app-progress-spinner strokeWidth="4"></app-progress-spinner>
   </div>
 </div>

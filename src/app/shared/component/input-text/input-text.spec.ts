@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { InputText } from './input-text';
 
 describe('InputText', () => {
@@ -8,9 +12,9 @@ describe('InputText', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [InputText]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(InputText);
     component = fixture.componentInstance;

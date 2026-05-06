@@ -3,7 +3,7 @@
     [config]="tableConfig"
     [data]="rows"
     [pageResponse]="pageResponse"
-    [loading]="loading"
+    [loading]="loading()"
     (pageChange)="onPageChange($event)"
     (search)="onSearch($event)"
     (resetFilter)="onResetFilter()"

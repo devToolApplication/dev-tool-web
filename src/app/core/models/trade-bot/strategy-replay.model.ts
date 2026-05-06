@@ -52,6 +52,14 @@ export interface ReplayTradeTimelineItem {
   exitPrice?: number;
   stopLoss: number;
   takeProfit: number;
+  rawEntryPrice?: number;
+  rawExitPrice?: number;
+  quantity?: number;
+  riskAmount?: number;
+  grossPnl?: number;
+  feePaid?: number;
+  slippagePaid?: number;
+  tradingCost?: number;
   result: 'TP' | 'SL' | 'BE' | 'OPEN';
   rrAchieved?: number;
   entryReason?: string;

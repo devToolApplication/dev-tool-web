@@ -3,3 +3,7 @@
   flex-wrap: nowrap;
   gap: 0.4rem;
 }
+
+.table-cell-suffix {
+  margin-left: 0.25rem;
+}

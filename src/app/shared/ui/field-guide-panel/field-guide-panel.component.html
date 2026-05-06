@@ -1,16 +1,16 @@
 <section>
-  <div class="rounded-2xl border app-border app-bg-card p-5 app-shadow-sm">
-    <h3 class="m-0 text-xl font-semibold">{{ title }}</h3>
+  <div class="rounded-lg border app-border app-bg-card p-5 app-shadow-sm">
+    <h3 class="m-0 text-xl font-semibold">{{ title | translateContent }}</h3>
     @if (description) {
-      <p class="mt-2 text-sm app-text-muted">{{ description }}</p>
+      <p class="mt-2 text-sm app-text-muted">{{ description | translateContent }}</p>
     }
 
     @if (fields.length) {
       <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         @for (field of fields; track field.key) {
-          <div class="rounded-xl border app-border app-bg-soft p-4">
-            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ field.label }}</div>
-            <div class="mt-2 break-words app-text">{{ field.description }}</div>
+          <div class="rounded-lg border app-border app-bg-soft p-4">
+            <div class="text-xs font-bold uppercase tracking-wide app-text-muted">{{ field.label | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ field.description | translateContent }}</div>
           </div>
         }
       </div>
@@ -19,9 +19,9 @@
     @if (selections.length) {
       <div class="mt-4 grid gap-3 xl:grid-cols-2">
         @for (selection of selections; track selection.title) {
-          <div class="rounded-xl border app-border p-4">
-            <div class="text-sm font-bold app-text">{{ selection.title }}</div>
-            <div class="mt-2 break-words app-text">{{ selection.description }}</div>
+          <div class="rounded-lg border app-border p-4">
+            <div class="text-sm font-bold app-text">{{ selection.title | translateContent }}</div>
+            <div class="mt-2 break-words app-text">{{ selection.description | translateContent }}</div>
           </div>
         }
       </div>

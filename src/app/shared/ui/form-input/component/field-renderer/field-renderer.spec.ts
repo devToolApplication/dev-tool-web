@@ -1,5 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../../../shared.module';
+import { createFieldState } from '../../../../testing/field-state.stub';
+import { provideSharedTesting } from '../../../../testing/shared-test.providers';
+
+
 import { FieldRenderer } from './field-renderer';
 
 describe('FieldRenderer', () => {
@@ -8,12 +13,14 @@ describe('FieldRenderer', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [FieldRenderer]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FieldRenderer);
     component = fixture.componentInstance;
+    component.field = createFieldState({ type: 'text', name: 'name', label: 'name' });
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

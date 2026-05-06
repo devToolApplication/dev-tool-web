@@ -27,7 +27,7 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
     components: {
       selectbutton: {
         root: {
-          borderRadius: '10px'
+          borderRadius: '0.5rem'
         }
       },
       togglebutton: {

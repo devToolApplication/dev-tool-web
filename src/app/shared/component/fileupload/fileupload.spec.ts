@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { Fileupload } from './fileupload';
 
 describe('Fileupload', () => {
@@ -8,9 +12,9 @@ describe('Fileupload', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [Fileupload]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Fileupload);
     component = fixture.componentInstance;

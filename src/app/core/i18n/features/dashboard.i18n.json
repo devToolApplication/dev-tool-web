@@ -1,17 +1,17 @@
 {
   "vi": {
-    "dashboard.title": "Dashboard quan tri he thong",
-    "dashboard.description": "Theo doi so lieu that tu AI Agent, Trade Bot va File service.",
-    "dashboard.latestActivities": "Hoat dong gan day",
-    "dashboard.serviceStatus": "Trang thai service",
-    "dashboard.resources": "Tai nguyen",
-    "dashboard.refresh": "Tai lai",
+    "dashboard.title": "Dashboard quản trị hệ thống",
+    "dashboard.description": "Theo dõi số liệu thật từ AI Agent, Trade Bot và File service.",
+    "dashboard.latestActivities": "Hoạt động gần đây",
+    "dashboard.serviceStatus": "Trạng thái service",
+    "dashboard.resources": "Tài nguyên",
+    "dashboard.refresh": "Tải lại",
     "dashboard.tab.aiAgent": "AI Agent",
     "dashboard.tab.tradeBot": "Trade Bot",
     "dashboard.tab.fileStorage": "File Storage",
-    "dashboard.loadingData": "Dang tai du lieu...",
-    "dashboard.noData": "Chua co du lieu",
-    "dashboard.loadError": "Khong tai duoc API dashboard"
+    "dashboard.loadingData": "Đang tải dữ liệu...",
+    "dashboard.noData": "Chưa có dữ liệu",
+    "dashboard.loadError": "Không tải được API dashboard"
   },
   "en": {
     "dashboard.title": "System Admin Dashboard",

@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { SharedModule } from '../../shared.module';
+import { provideSharedTesting } from '../../testing/shared-test.providers';
+
+
 import { Password } from './password';
 
 describe('Password', () => {
@@ -8,9 +12,9 @@ describe('Password', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [Password]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      providers: provideSharedTesting()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Password);
     component = fixture.componentInstance;

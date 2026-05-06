@@ -19,4 +19,26 @@ export class ReplayTradeTimelinePanelComponent {
   toggleExpanded(tradeId: string): void {
     this.expandedTradeId = this.expandedTradeId === tradeId ? null : tradeId;
   }
+
+  formatUsd(value: number | null | undefined): string {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return '--';
+    }
+    return `${numericValue.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 6
+    })} USD`;
+  }
+
+  formatNumber(value: number | null | undefined): string {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return '--';
+    }
+    return numericValue.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8
+    });
+  }
 }

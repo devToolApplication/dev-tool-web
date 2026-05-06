@@ -26,16 +26,20 @@ export class BacktestDetailComponent implements OnInit {
     columns: [
       { field: 'nyTradeDate', header: 'tradeBot.replay.field.tradeDate', sortable: true },
       { field: 'orderSide', header: 'tradeBot.replay.field.side', sortable: true },
-      { field: 'entryPrice', header: 'tradeBot.replay.field.entryPrice', sortable: true, type: 'number' },
-      { field: 'stopLoss', header: 'SL', sortable: true, type: 'number' },
-      { field: 'takeProfit', header: 'TP', sortable: true, type: 'number' },
-      { field: 'exitPrice', header: 'tradeBot.replay.field.exitPrice', sortable: true, type: 'number' },
-      { field: 'netPnl', header: 'Net PnL', sortable: true, type: 'number' },
+      { field: 'entryPrice', header: 'tradeBot.replay.field.entryPrice', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'stopLoss', header: 'SL', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'takeProfit', header: 'TP', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'exitPrice', header: 'tradeBot.replay.field.exitPrice', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'grossPnl', header: 'tradeBot.replay.field.grossPnl', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'feePaid', header: 'tradeBot.replay.field.feePaid', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'slippagePaid', header: 'tradeBot.replay.field.slippagePaid', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
+      { field: 'netPnl', header: 'tradeBot.replay.field.netPnl', sortable: true, type: 'number', format: '1.2-6', suffix: 'USD', minWidth: '10rem' },
       { field: 'result', header: 'tradeBot.replay.field.result', sortable: true },
       { field: 'exitReason', header: 'tradeBot.replay.field.exitReason', sortable: true }
     ],
     pagination: true,
     scrollHeight: '32rem',
+    minWidth: '110rem',
     rows: 20,
     rowsPerPageOptions: [10, 20, 50, 100]
   };

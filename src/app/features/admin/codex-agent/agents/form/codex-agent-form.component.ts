@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
@@ -35,64 +36,64 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       {
         type: 'text',
         name: 'code',
-        label: 'Code',
+        label: 'code',
         width: '1/2',
-        validation: [Rules.required('Code is required')],
-        helpText: 'Stable unique code used to create the per-agent CODEX_HOME folder name.'
+        validation: [Rules.required('codexAgent.form.validation.codeRequired')],
+        helpText: 'codexAgent.form.help.code'
       },
       {
         type: 'text',
         name: 'name',
-        label: 'Name',
+        label: 'name',
         width: '1/2',
-        validation: [Rules.required('Name is required')],
-        helpText: 'Display name shown in the management UI.'
+        validation: [Rules.required('codexAgent.form.validation.nameRequired')],
+        helpText: 'codexAgent.form.help.name'
       },
-      { type: 'select', name: 'model', label: 'Model', width: '1/2', optionsExpression: 'context.extra?.modelOptions || []' },
+      { type: 'select', name: 'model', label: 'codexAgent.form.model', width: '1/2', optionsExpression: 'context.extra?.modelOptions || []' },
       {
         type: 'select',
         name: 'reasoningEffort',
-        label: 'Reasoning Effort',
+        label: 'codexAgent.form.reasoningEffort',
         width: '1/2',
         optionsExpression: 'context.extra?.reasoningEffortOptions || []'
       },
       {
         type: 'select',
         name: 'sandboxMode',
-        label: 'Sandbox Mode',
+        label: 'codexAgent.form.sandboxMode',
         width: '1/2',
         optionsExpression: 'context.extra?.sandboxModeOptions || []'
       },
       {
         type: 'select',
         name: 'approvalPolicy',
-        label: 'Approval Policy',
+        label: 'codexAgent.form.approvalPolicy',
         width: '1/2',
         optionsExpression: 'context.extra?.approvalPolicyOptions || []'
       },
-      { type: 'checkbox', name: 'enabled', label: 'Enabled', width: '1/3' },
-      { type: 'select', name: 'status', label: 'Status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'text', name: 'installationId', label: 'Installation Id', width: '1/3', helpText: 'Optional installation id written into the agent home. Leave empty to inherit the shared project installation id.' },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full', helpText: 'Internal note describing when this Codex agent should be used.' },
-      { type: 'textarea', name: 'instruction', label: 'AGENTS.md Instruction', width: 'full', showZoomButton: true, helpText: 'Custom runtime instructions written into AGENTS.md for this agent.' },
+      { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
+      { type: 'select', name: 'status', label: 'status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'text', name: 'installationId', label: 'codexAgent.form.installationId', width: '1/3', helpText: 'codexAgent.form.help.installationId' },
+      { type: 'textarea', name: 'description', label: 'description', width: 'full', helpText: 'codexAgent.form.help.description' },
+      { type: 'textarea', name: 'instruction', label: 'codexAgent.form.agentsInstruction', width: 'full', showZoomButton: true, helpText: 'codexAgent.form.help.instruction' },
       {
         type: 'textarea',
         name: 'authJson',
-        label: 'auth.json Content',
+        label: 'codexAgent.form.authJson',
         width: 'full',
         showZoomButton: true,
         contentType: 'json',
-        jsonValidationMessage: 'Invalid JSON',
-        helpText: 'Paste the auth.json content used for auto-login. This also enables token/quota inspection in the detail panel.'
+        jsonValidationMessage: 'codexAgent.form.validation.invalidJson',
+        helpText: 'codexAgent.form.help.authJson'
       }
     ]
   };
 
   editId: string | null = null;
-  loading = false;
-  authLoading = false;
-  authDeviceLoading = false;
-  syncLoading = false;
+  readonly loading = signal(false);
+  readonly authLoading = signal(false);
+  readonly authDeviceLoading = signal(false);
+  readonly syncLoading = signal(false);
   formInitialValue: CodexAgentCreateDto = this.createInitialValue();
   readonly formVisible = signal(true);
   private authSessionPollTimer: number | null = null;
@@ -108,7 +109,8 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
     private readonly toastService: ToastService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly i18nService: I18nService
+    private readonly i18nService: I18nService,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
@@ -121,14 +123,14 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
 
   get pageConfig(): CrudPageConfig {
     return {
-      title: this.editId ? 'Edit Codex Agent' : 'Create Codex Agent',
-      description: 'Store agent runtime profile, auth.json content and per-agent CODEX_HOME settings.',
+      title: this.editId ? 'codexAgent.form.editTitle' : 'codexAgent.form.createTitle',
+      description: 'codexAgent.form.description',
       actions: [
-        { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', goBack: true },
+        { id: 'back', label: 'codexAgent.form.back', icon: 'pi pi-arrow-left', goBack: true },
         ...(this.editId
-          ? [{ id: 'sync-home', label: 'Sync Home', icon: 'pi pi-refresh', loading: this.syncLoading }]
+          ? [{ id: 'sync-home', label: 'codexAgent.form.syncHome', icon: 'pi pi-refresh', loading: this.syncLoading() }]
           : []),
-        { id: 'save', label: this.editId ? 'Update' : 'Create', icon: 'pi pi-save', submitForm: true, loading: this.loading }
+        { id: 'save', label: this.editId ? 'update' : 'create', icon: 'pi pi-save', submitForm: true, loading: this.loading() }
       ]
     };
   }
@@ -148,14 +150,20 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       ? this.codexAgentService.update(this.editId, payload as CodexAgentUpdateDto)
       : this.codexAgentService.create(payload);
 
-    this.loading = true;
-    this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (saved) => {
-        this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
-        void this.router.navigate([`${CODEX_AGENT_ROUTES.list}/edit`, saved.id]);
-      },
-      error: () => this.toastService.error('Save Codex agent failed')
-    });
+    this.loading.set(true);
+    this.loadingService
+      .track(request$)
+      .pipe(
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (saved) => {
+          this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
+          void this.router.navigate([`${CODEX_AGENT_ROUTES.list}/edit`, saved.id]);
+        },
+        error: () => this.toastService.error('codexAgent.form.toast.saveFailed')
+      });
   }
 
   onActionClick(actionId: string): void {
@@ -163,14 +171,20 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.syncLoading = true;
-    this.loadingService.track(this.codexAgentService.syncHome(this.editId)).pipe(finalize(() => (this.syncLoading = false))).subscribe({
-      next: (result) => {
-        this.toastService.info(`Synced CODEX_HOME: ${result.agentHome}`);
-        this.loadAuthStatus(this.editId!);
-      },
-      error: () => this.toastService.error('Sync CODEX_HOME failed')
-    });
+    this.syncLoading.set(true);
+    this.loadingService
+      .track(this.codexAgentService.syncHome(this.editId))
+      .pipe(
+        finalize(() => this.syncLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (result) => {
+          this.toastService.info(this.interpolate('codexAgent.form.toast.syncHomeSuccess', { path: result.agentHome }));
+          this.loadAuthStatus(this.editId!);
+        },
+        error: () => this.toastService.error('codexAgent.form.toast.syncHomeFailed')
+      });
   }
 
   startDeviceAuth(): void {
@@ -178,16 +192,22 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.authDeviceLoading = true;
+    this.authDeviceLoading.set(true);
     this.stopDeviceLoginPolling();
-    this.loadingService.track(this.codexAgentService.startDeviceLogin(this.editId)).pipe(finalize(() => (this.authDeviceLoading = false))).subscribe({
-      next: (session) => {
-        this.deviceLoginSession = session;
-        this.toastService.info('Device auth session created');
-        this.handleDeviceLoginSession(this.editId!, session);
-      },
-      error: () => this.toastService.error('Start device auth failed')
-    });
+    this.loadingService
+      .track(this.codexAgentService.startDeviceLogin(this.editId))
+      .pipe(
+        finalize(() => this.authDeviceLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (session) => {
+          this.deviceLoginSession = session;
+          this.toastService.info('codexAgent.form.toast.deviceAuthCreated');
+          this.handleDeviceLoginSession(this.editId!, session);
+        },
+        error: () => this.toastService.error('codexAgent.form.toast.startDeviceAuthFailed')
+      });
   }
 
   reloadAuthStatus(): void {
@@ -199,9 +219,9 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
 
   authStatusLabel(): string {
     if (!this.authStatus?.configured) {
-      return 'Not Configured';
+      return 'codexAgent.form.auth.notConfigured';
     }
-    return this.authStatus.authenticated ? 'Authenticated' : 'Expired / Missing Token';
+    return this.authStatus.authenticated ? 'codexAgent.form.auth.authenticated' : 'codexAgent.form.auth.expired';
   }
 
   authStatusSeverity(): 'success' | 'warn' | 'danger' | 'info' {
@@ -213,65 +233,65 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
 
   displayValue(value: string | number | null | undefined): string {
     if (value === null || value === undefined || value === '') {
-      return 'N/A';
+      return 'notAvailable';
     }
     return String(value);
   }
 
   usageCounter(window: CodexAgentUsageWindowResponse | undefined): string {
     if (!window) {
-      return 'N/A';
+      return this.i18nService.t('notAvailable');
     }
     if (this.hasNumber(window.remaining) && this.hasNumber(window.limit)) {
       return `${window.remaining} / ${window.limit}`;
     }
     if (this.hasNumber(window.remainingPercent)) {
-      return `${window.remainingPercent}% left`;
+      return this.interpolate('codexAgent.form.usage.percentLeft', { percent: window.remainingPercent });
     }
     if (this.hasNumber(window.usedPercent)) {
-      return `${window.usedPercent}% used`;
+      return this.interpolate('codexAgent.form.usage.percentUsed', { percent: window.usedPercent });
     }
     if (this.hasNumber(window.remaining)) {
       return String(window.remaining);
     }
     if (this.hasNumber(window.limit)) {
-      return `limit ${window.limit}`;
+      return this.interpolate('codexAgent.form.usage.limitOnly', { limit: window.limit });
     }
-    return 'N/A';
+    return this.i18nService.t('notAvailable');
   }
 
   usageReset(window: CodexAgentUsageWindowResponse | undefined): string {
     if (!window) {
-      return 'N/A';
+      return this.i18nService.t('notAvailable');
     }
     if (window.resetAt) {
       return `${this.formatLocalDateTime(window.resetAt)} (${this.relativeTimeToNow(window.resetAt)})`;
     }
     if (window.windowHours) {
-      return `${window.windowHours}h rolling window`;
+      return this.interpolate('codexAgent.form.usage.rollingWindowHours', { hours: window.windowHours });
     }
-    return window.resetMode || 'Unknown';
+    return this.i18nService.t(window.resetMode || 'unknown');
   }
 
   usageWindowLabel(window: CodexAgentUsageWindowResponse | undefined): string {
     if (!window?.windowHours) {
-      return 'Window unknown';
+      return this.i18nService.t('codexAgent.form.usage.windowUnknown');
     }
     if (window.windowHours % 24 === 0) {
-      return `${Math.round(window.windowHours / 24)}d window`;
+      return this.interpolate('codexAgent.form.usage.windowDays', { days: Math.round(window.windowHours / 24) });
     }
-    return `${window.windowHours}h window`;
+    return this.interpolate('codexAgent.form.usage.windowHours', { hours: window.windowHours });
   }
 
   fieldDescription(key: string): string {
-    return this.optionDescriptions[key] || 'N/A';
+    return this.optionDescriptions[key] || 'notAvailable';
   }
 
   optionDescription(list: CodexAgentOptionItemResponse[] | undefined, value: string | undefined | null): string {
     if (!value || !list?.length) {
-      return 'N/A';
+      return 'notAvailable';
     }
-    return list.find((item) => item.value === value)?.description || 'N/A';
+    return list.find((item) => item.value === value)?.description || 'notAvailable';
   }
 
   onFormValueChange(value: Partial<CodexAgentCreateDto>): void {
@@ -280,66 +300,72 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
 
   fieldGuideFields(): FieldGuideFieldItem[] {
     return [
-      { key: 'model', label: 'Model', description: this.fieldDescription('model') },
-      { key: 'reasoningEffort', label: 'Reasoning Effort', description: this.fieldDescription('reasoningEffort') },
-      { key: 'sandboxMode', label: 'Sandbox Mode', description: this.fieldDescription('sandboxMode') },
-      { key: 'approvalPolicy', label: 'Approval Policy', description: this.fieldDescription('approvalPolicy') }
+      { key: 'model', label: 'codexAgent.form.model', description: this.fieldDescription('model') },
+      { key: 'reasoningEffort', label: 'codexAgent.form.reasoningEffort', description: this.fieldDescription('reasoningEffort') },
+      { key: 'sandboxMode', label: 'codexAgent.form.sandboxMode', description: this.fieldDescription('sandboxMode') },
+      { key: 'approvalPolicy', label: 'codexAgent.form.approvalPolicy', description: this.fieldDescription('approvalPolicy') }
     ];
   }
 
   fieldGuideSelections(): FieldGuideOptionItem[] {
     return [
       {
-        title: 'Selected Model',
+        title: 'codexAgent.form.selectedModel',
         description: this.optionDescription(optionsOrEmpty(this.options?.models), this.currentFormValue.model ?? this.formInitialValue.model)
       },
       {
-        title: 'Selected Reasoning Effort',
+        title: 'codexAgent.form.selectedReasoningEffort',
         description: this.optionDescription(optionsOrEmpty(this.options?.reasoningEfforts), this.currentFormValue.reasoningEffort ?? this.formInitialValue.reasoningEffort)
       },
       {
-        title: 'Selected Sandbox Mode',
+        title: 'codexAgent.form.selectedSandboxMode',
         description: this.optionDescription(optionsOrEmpty(this.options?.sandboxModes), this.currentFormValue.sandboxMode ?? this.formInitialValue.sandboxMode)
       },
       {
-        title: 'Selected Approval Policy',
+        title: 'codexAgent.form.selectedApprovalPolicy',
         description: this.optionDescription(optionsOrEmpty(this.options?.approvalPolicies), this.currentFormValue.approvalPolicy ?? this.formInitialValue.approvalPolicy)
       }
     ];
   }
 
   private loadOptions(): void {
-    this.loading = true;
-    this.loadingService.track(this.codexAgentService.getOptions()).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (options) => {
-        this.options = options;
-        this.optionDescriptions = Object.fromEntries((options.fields ?? []).map((field: CodexAgentFieldDescriptionResponse) => [field.key, field.description]));
-        this.formContext.extra = {
-          modelOptions: this.toSelectOptions(options.models),
-          reasoningEffortOptions: this.toSelectOptions(options.reasoningEfforts),
-          sandboxModeOptions: this.toSelectOptions(options.sandboxModes),
-          approvalPolicyOptions: this.toSelectOptions(options.approvalPolicies)
-        };
-        this.bindRouteMode();
-      },
-      error: () => {
-        this.options = null;
-        this.optionDescriptions = {};
-        this.formContext.extra = {
-          modelOptions: [],
-          reasoningEffortOptions: [],
-          sandboxModeOptions: [],
-          approvalPolicyOptions: []
-        };
-        this.toastService.error('Load Codex options failed');
-        this.bindRouteMode();
-      }
-    });
+    this.loading.set(true);
+    this.loadingService
+      .track(this.codexAgentService.getOptions())
+      .pipe(
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (options) => {
+          this.options = options;
+          this.optionDescriptions = Object.fromEntries((options.fields ?? []).map((field: CodexAgentFieldDescriptionResponse) => [field.key, field.description]));
+          this.formContext.extra = {
+            modelOptions: this.toSelectOptions(options.models),
+            reasoningEffortOptions: this.toSelectOptions(options.reasoningEfforts),
+            sandboxModeOptions: this.toSelectOptions(options.sandboxModes),
+            approvalPolicyOptions: this.toSelectOptions(options.approvalPolicies)
+          };
+          this.bindRouteMode();
+        },
+        error: () => {
+          this.options = null;
+          this.optionDescriptions = {};
+          this.formContext.extra = {
+            modelOptions: [],
+            reasoningEffortOptions: [],
+            sandboxModeOptions: [],
+            approvalPolicyOptions: []
+          };
+          this.toastService.error('codexAgent.form.toast.loadOptionsFailed');
+          this.bindRouteMode();
+        }
+      });
   }
 
   private bindRouteMode(): void {
     this.applyRouteMode(this.route.snapshot.paramMap.get('id'));
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const id = params.get('id');
       if (id === this.editId) {
         return;
@@ -367,35 +393,41 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
   }
 
   private loadAgentDetail(id: string, preserveDeviceSession = false): void {
-    this.loading = true;
-    this.loadingService.track(this.codexAgentService.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (detail: CodexAgentResponse) => {
-        this.formInitialValue = {
-          code: detail.code,
-          name: detail.name,
-          description: detail.description ?? '',
-          model: detail.model ?? '',
-          reasoningEffort: detail.reasoningEffort ?? 'medium',
-          sandboxMode: detail.sandboxMode ?? 'workspace-write',
-          approvalPolicy: detail.approvalPolicy ?? 'on-request',
-          instruction: detail.instruction ?? '',
-          authJson: detail.authJson ?? '',
-          installationId: detail.installationId ?? '',
-          enabled: detail.enabled ?? true,
-          status: detail.status ?? 'ACTIVE'
-        };
-        this.currentFormValue = { ...this.formInitialValue };
-        if (!preserveDeviceSession) {
-          this.deviceLoginSession = null;
+    this.loading.set(true);
+    this.loadingService
+      .track(this.codexAgentService.getById(id))
+      .pipe(
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (detail: CodexAgentResponse) => {
+          this.formInitialValue = {
+            code: detail.code,
+            name: detail.name,
+            description: detail.description ?? '',
+            model: detail.model ?? '',
+            reasoningEffort: detail.reasoningEffort ?? 'medium',
+            sandboxMode: detail.sandboxMode ?? 'workspace-write',
+            approvalPolicy: detail.approvalPolicy ?? 'on-request',
+            instruction: detail.instruction ?? '',
+            authJson: detail.authJson ?? '',
+            installationId: detail.installationId ?? '',
+            enabled: detail.enabled ?? true,
+            status: detail.status ?? 'ACTIVE'
+          };
+          this.currentFormValue = { ...this.formInitialValue };
+          if (!preserveDeviceSession) {
+            this.deviceLoginSession = null;
+          }
+          this.rerenderForm();
+          this.loadAuthStatus(id);
+        },
+        error: () => {
+          this.toastService.error('codexAgent.form.toast.loadDetailFailed');
+          void this.router.navigate([CODEX_AGENT_ROUTES.list]);
         }
-        this.rerenderForm();
-        this.loadAuthStatus(id);
-      },
-      error: () => {
-        this.toastService.error('Load Codex agent detail failed');
-        void this.router.navigate([CODEX_AGENT_ROUTES.list]);
-      }
-    });
+      });
   }
 
   private handleDeviceLoginSession(id: string, session: CodexAgentDeviceLoginSessionResponse): void {
@@ -404,7 +436,7 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
     }
     if (session.state === 'authenticated') {
       this.stopDeviceLoginPolling();
-      this.toastService.info('Device auth completed');
+      this.toastService.info('codexAgent.form.toast.deviceAuthCompleted');
       this.loadAgentDetail(id, true);
       return;
     }
@@ -420,16 +452,19 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
   private scheduleDeviceLoginPolling(id: string, sessionId: string): void {
     this.stopDeviceLoginPolling();
     this.authSessionPollTimer = window.setTimeout(() => {
-      this.loadingService.track(this.codexAgentService.getDeviceLoginSession(id, sessionId)).subscribe({
-        next: (session) => {
-          this.deviceLoginSession = session;
-          this.handleDeviceLoginSession(id, session);
-        },
-        error: () => {
-          this.stopDeviceLoginPolling();
-          this.toastService.error('Load device auth session failed');
-        }
-      });
+      this.loadingService
+        .track(this.codexAgentService.getDeviceLoginSession(id, sessionId))
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (session) => {
+            this.deviceLoginSession = session;
+            this.handleDeviceLoginSession(id, session);
+          },
+          error: () => {
+            this.stopDeviceLoginPolling();
+            this.toastService.error('codexAgent.form.toast.loadDeviceAuthSessionFailed');
+          }
+        });
     }, 3000);
   }
 
@@ -441,16 +476,22 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
   }
 
   private loadAuthStatus(id: string): void {
-    this.authLoading = true;
-    this.loadingService.track(this.codexAgentService.getAuthStatus(id)).pipe(finalize(() => (this.authLoading = false))).subscribe({
-      next: (status) => {
-        this.authStatus = status;
-      },
-      error: () => {
-        this.authStatus = null;
-        this.toastService.error('Load auth status failed');
-      }
-    });
+    this.authLoading.set(true);
+    this.loadingService
+      .track(this.codexAgentService.getAuthStatus(id))
+      .pipe(
+        finalize(() => this.authLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (status) => {
+          this.authStatus = status;
+        },
+        error: () => {
+          this.authStatus = null;
+          this.toastService.error('codexAgent.form.toast.loadAuthStatusFailed');
+        }
+      });
   }
 
   private createInitialValue(): CodexAgentCreateDto {
@@ -499,10 +540,10 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
     const date = new Date(value);
     const diffMs = date.getTime() - Date.now();
     if (Number.isNaN(date.getTime())) {
-      return 'invalid time';
+      return this.i18nService.t('codexAgent.form.usage.invalidTime');
     }
     if (diffMs <= 0) {
-      return 'expired';
+      return this.i18nService.t('codexAgent.form.usage.expired');
     }
 
     const totalMinutes = Math.floor(diffMs / 60000);
@@ -521,7 +562,14 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       parts.push(`${minutes}m`);
     }
 
-    return `in ${parts.join(' ')}`;
+    return this.interpolate('codexAgent.form.usage.relativeFuture', { duration: parts.join(' ') });
+  }
+
+  private interpolate(key: string, values: Record<string, string | number>): string {
+    return Object.entries(values).reduce(
+      (message, [name, value]) => message.split(`{{${name}}}`).join(String(value)),
+      this.i18nService.t(key)
+    );
   }
 }
 

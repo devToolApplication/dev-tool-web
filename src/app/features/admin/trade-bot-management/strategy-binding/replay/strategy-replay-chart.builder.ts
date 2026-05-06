@@ -24,6 +24,14 @@ function normalizeTrade(order: BacktestOrderResponse, index: number, stepByTime:
     exitPrice: order.exitPrice,
     stopLoss: order.stopLoss,
     takeProfit: order.takeProfit,
+    rawEntryPrice: Number(order.metadataJson?.['rawEntryPrice'] ?? order.entryPrice),
+    rawExitPrice: Number(order.metadataJson?.['rawExitPrice'] ?? order.exitPrice),
+    quantity: order.quantity,
+    riskAmount: order.riskAmount,
+    grossPnl: order.grossPnl,
+    feePaid: order.feePaid,
+    slippagePaid: order.slippagePaid,
+    tradingCost: Number(((order.feePaid ?? 0) + (order.slippagePaid ?? 0)).toFixed(8)),
     result: order.result === 'WIN' ? 'TP' : order.result === 'LOSS' ? 'SL' : order.result === 'BREAKEVEN' ? 'BE' : 'OPEN',
     rrAchieved:
       order.orderSide === 'BUY'
