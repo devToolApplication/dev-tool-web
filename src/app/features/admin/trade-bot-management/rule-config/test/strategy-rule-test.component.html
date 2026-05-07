@@ -39,9 +39,12 @@
     </div>
 
     <div class="col-span-12 xl:col-span-8">
-      <div class="rounded-2xl border app-border app-bg-card p-4 app-shadow-sm">
-        <app-trade-bot-chart-preview [response]="chartResponse"></app-trade-bot-chart-preview>
-      </div>
+      <app-candle-chart-preview
+        title="tradeBot.strategyRule.test.chartPreview"
+        description="tradeBot.strategyRule.test.chartPreviewDescription"
+        [loading]="previewing"
+        [response]="chartResponse"
+      ></app-candle-chart-preview>
     </div>
   </div>
 </section>

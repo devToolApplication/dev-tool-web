@@ -34,10 +34,10 @@
         <app-input-number [label]="TEXT.InitialBalance" [min]="1" suffix=" USD" formControlName="initialBalance"></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.FeeRate" [min]="0" [step]="0.0001" formControlName="feeRate"></app-input-number>
+        <app-input-number [label]="TEXT.FeeRate" [min]="0" [step]="0.0001" suffix=" %" formControlName="feeRate"></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.Slippage" [min]="0" [step]="0.0001" formControlName="slippageRate"></app-input-number>
+        <app-input-number [label]="TEXT.Slippage" [min]="0" [step]="0.0001" suffix=" %" formControlName="slippageRate"></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-3">
         <app-select-button [label]="TEXT.RiskMode" [options]="riskModeOptions" [allowEmpty]="false" formControlName="riskMode"></app-select-button>
@@ -48,7 +48,7 @@
         </div>
       } @else {
         <div class="col-span-12 md:col-span-3">
-          <app-input-number [label]="TEXT.RiskPercentRemainingBalance" [min]="0.01" [step]="0.1" formControlName="riskPercentPerTrade"></app-input-number>
+          <app-input-number [label]="TEXT.RiskPercentRemainingBalance" [min]="0.01" [step]="0.1" suffix=" %" formControlName="riskPercentPerTrade"></app-input-number>
         </div>
       }
       <div class="col-span-12 md:col-span-6 flex items-end">
@@ -73,24 +73,24 @@
   @if (replayPayload) {
     <div class="backtest-replay-grid grid grid-cols-12 gap-4">
       <div class="backtest-main-column col-span-12 xl:col-span-8 min-w-0 flex flex-col gap-4">
-        <app-base-replay-controls
-          [currentStep]="replay.currentStepIndex()"
-          [totalSteps]="replay.steps().length"
-          [playing]="replay.playing()"
-          [speed]="replay.speed()"
-          (playingChange)="replay.setPlaying($event)"
-          (previousStep)="replay.previousStep()"
-          (nextStep)="replay.nextStep()"
-          (fastForward)="replay.fastForward()"
-          (rewind)="replay.rewind()"
-          (previousEvent)="replay.previousEvent()"
-          (nextEvent)="replay.nextEvent()"
-          (seek)="replay.seek($event)"
-          (speedChange)="replay.setSpeed($event)"
-        ></app-base-replay-controls>
-
         <app-panel [title]="TEXT.ReplayChart" [description]="TEXT.ReplayChartDesc">
           <app-tag panel-actions [value]="currentStepLabel" severity="contrast"></app-tag>
+          <app-base-replay-controls
+            [embedded]="true"
+            [currentStep]="replay.currentStepIndex()"
+            [totalSteps]="replay.steps().length"
+            [playing]="replay.playing()"
+            [speed]="replay.speed()"
+            (playingChange)="replay.setPlaying($event)"
+            (previousStep)="replay.previousStep()"
+            (nextStep)="replay.nextStep()"
+            (fastForward)="replay.fastForward()"
+            (rewind)="replay.rewind()"
+            (previousEvent)="replay.previousEvent()"
+            (nextEvent)="replay.nextEvent()"
+            (seek)="replay.seek($event)"
+            (speedChange)="replay.setSpeed($event)"
+          ></app-base-replay-controls>
           <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
         </app-panel>
 

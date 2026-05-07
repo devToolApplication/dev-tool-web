@@ -19,6 +19,8 @@ import { StrategyReplayFacade } from '../../replay/strategy-replay.facade';
 import { buildChartReplayPayload } from '../../replay/strategy-replay-chart.builder';
 import { BACKTEST_RISK_MODE_OPTIONS, BacktestRiskMode, TradeBotTextKey } from '../../shared/strategy-ui.enums';
 
+const MAX_REPLAY_CHART_CANDLES = 1000;
+
 type BacktestRunFormGroup = FormGroup<{
   fromDate: FormControl<Date | null>;
   toDate: FormControl<Date | null>;
@@ -148,9 +150,13 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   }
 
   get chartPayload(): CandleChartPayload {
-    const steps = this.replay.steps().slice(0, this.replay.currentStepIndex() + 1);
+    const currentStepIndex = this.replay.currentStepIndex();
+    const visibleStartStepIndex = Math.max(0, currentStepIndex - MAX_REPLAY_CHART_CANDLES + 1);
+    const steps = this.replay.steps().slice(visibleStartStepIndex, currentStepIndex + 1);
+    const visibleStartTime = steps[0]?.candleTime;
+    const currentStepTime = this.replay.currentStep()?.candleTime;
     const activeOverlays = this.replay.activeOverlaySlice();
-    const visibleEvents = this.replay.events().filter((event) => event.stepIndex <= this.replay.currentStepIndex());
+    const visibleEvents = this.replay.events().filter((event) => event.stepIndex >= visibleStartStepIndex && event.stepIndex <= currentStepIndex);
 
     return {
       candles: steps.map((step) => step.candle),
@@ -158,16 +164,16 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
         ...activeOverlays
           .filter((overlay) => ['entry', 'stop-loss', 'take-profit', 'indicator-line', 'bos', 'choch'].includes(overlay.type))
           .map((overlay) => this.toChartLine(overlay.payload, overlay.label)),
-        ...this.toPreviewLines(this.replay.currentStep()?.candleTime)
+        ...this.toPreviewLines(currentStepTime, visibleStartTime)
       ],
       boxAreas: [
         ...activeOverlays
           .filter((overlay) => ['session-zone', 'area-zone', 'order-block', 'fvg', 'liquidity'].includes(overlay.type))
           .map((overlay) => this.toChartBoxArea(overlay.payload, overlay.label)),
-        ...this.toPreviewAreas(this.replay.currentStep()?.candleTime)
+        ...this.toPreviewAreas(currentStepTime, visibleStartTime)
       ],
       points: visibleEvents.map((event) => this.toChartPoint(event)),
-      indicators: this.toPreviewIndicators(steps.length)
+      indicators: this.toPreviewIndicators(visibleStartStepIndex, currentStepIndex + 1)
     };
   }
 
@@ -389,22 +395,23 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     };
   }
 
-  private toPreviewIndicators(stepCount: number): ChartIndicatorSeries[] {
+  private toPreviewIndicators(startStepIndex: number, endStepIndex: number): ChartIndicatorSeries[] {
     return (this.previewChartData?.indicatorData ?? []).map((indicator: TradeBotIndicatorData) => ({
       name: indicator.name ?? 'Indicator',
       color: indicator.color ?? 'var(--app-chart-violet)',
       pane: indicator.type === 'SUBCHART' ? 'subchart' : 'overlay',
-      values: (indicator.value ?? []).slice(0, stepCount).map((value: number | null) => (value == null ? null : Number(value)))
+      values: (indicator.value ?? []).slice(startStepIndex, endStepIndex).map((value: number | null) => (value == null ? null : Number(value)))
     }));
   }
 
-  private toPreviewLines(currentStepTime?: number): ChartLine[] {
+  private toPreviewLines(currentStepTime?: number, visibleStartTime?: number): ChartLine[] {
     if (!currentStepTime) {
       return [];
     }
     return (this.previewChartData?.lineData ?? [])
       .filter((item: TradeBotLineData) => item.from && item.to)
       .filter((item: TradeBotLineData) => (item.from?.time ?? 0) <= currentStepTime)
+      .filter((item: TradeBotLineData) => visibleStartTime == null || (item.to?.time ?? item.from?.time ?? 0) >= visibleStartTime)
       .map((item: TradeBotLineData) => ({
         name: item.name ?? 'Line',
         color: item.color ?? 'var(--app-chart-info)',
@@ -415,15 +422,16 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       }));
   }
 
-  private toPreviewAreas(currentStepTime?: number): ChartBoxArea[] {
+  private toPreviewAreas(currentStepTime?: number, visibleStartTime?: number): ChartBoxArea[] {
     if (!currentStepTime) {
       return [];
     }
     return (this.previewChartData?.areaData ?? [])
       .filter((item: TradeBotAreaData) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
       .filter((item: TradeBotAreaData) => (item.from ?? 0) <= currentStepTime)
+      .filter((item: TradeBotAreaData) => visibleStartTime == null || (item.to ?? item.from ?? 0) >= visibleStartTime)
       .map((item: TradeBotAreaData) => ({
-        name: item.name ?? 'Zone',
+        ...(item.name ? { name: item.name } : {}),
         color: item.color ?? 'var(--app-chart-primary-fill)',
         startTime: this.toIsoTime(item.from ?? currentStepTime),
         endTime: this.toIsoTime(Math.min(item.to ?? currentStepTime, currentStepTime)),
@@ -462,7 +470,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   }
 
   private resolveReplayInterval(config: Record<string, unknown>, dataResource: string): string {
-    return this.toIntervalKey(String(config['trigger_timeframe'] ?? config['base_timeframe'] ?? 'M5'), dataResource);
+    return this.toIntervalKey(String(config['timeframe'] ?? config['trigger_timeframe'] ?? config['base_timeframe'] ?? 'M15'), dataResource);
   }
 
   private resolveDataResource(exchangeCode?: string): string {

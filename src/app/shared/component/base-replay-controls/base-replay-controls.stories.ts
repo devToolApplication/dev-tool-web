@@ -42,3 +42,31 @@ export const Default: Story = {
     `
   })
 };
+
+export const Embedded: Story = {
+  args: {
+    embedded: true
+  },
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <div class="max-w-3xl rounded-lg border app-border app-bg-card p-4">
+        <app-base-replay-controls
+          [embedded]="embedded"
+          [currentStep]="currentStep"
+          [totalSteps]="totalSteps"
+          [playing]="playing"
+          [speed]="speed"
+          (playingChange)="playing = $event"
+          (previousStep)="currentStep = currentStep > 0 ? currentStep - 1 : 0"
+          (nextStep)="currentStep = currentStep < totalSteps - 1 ? currentStep + 1 : currentStep"
+          (rewind)="currentStep = 0"
+          (fastForward)="currentStep = totalSteps - 1"
+          (seek)="currentStep = $event"
+          (speedChange)="speed = $event"
+        ></app-base-replay-controls>
+        <div class="h-64 rounded border app-border app-bg-soft"></div>
+      </div>
+    `
+  })
+};

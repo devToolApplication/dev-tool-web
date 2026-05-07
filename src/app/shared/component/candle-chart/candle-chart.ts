@@ -30,7 +30,7 @@ export interface ChartLine {
 }
 
 export interface ChartBoxArea {
-  name: string;
+  name?: string;
   color: string;
   startTime: string;
   endTime: string;
@@ -212,8 +212,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
             },
             data: this.data.boxAreas.map((box) => ([
               {
-                name: box.name,
+                ...(box.name ? { name: box.name } : {}),
                 coord: [box.startTime, box.high],
+                label: { show: Boolean(box.name) },
                 itemStyle: { color: resolveCssColor(box.color, '--app-chart-primary-fill') },
               },
               {

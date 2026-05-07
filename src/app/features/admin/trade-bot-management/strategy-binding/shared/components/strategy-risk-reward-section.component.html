@@ -7,11 +7,11 @@
       <app-select [label]="TEXT.StopLossMode" [options]="slModeOptions" formControlName="slMode"></app-select>
     </div>
     <div class="col-span-12 md:col-span-4">
-      <app-input-number [label]="TEXT.TakeProfitRr" [min]="0.1" [step]="0.1" formControlName="tpRr"></app-input-number>
+      <app-input-number [label]="TEXT.TakeProfitRr" [min]="0.1" [step]="0.1" suffix=" R" formControlName="tpRr"></app-input-number>
     </div>
 
     <div class="col-span-12 md:col-span-6">
-      <app-input-number [label]="TEXT.MaxTradesPerDay" [min]="1" [step]="1" formControlName="maxTradesPerDay"></app-input-number>
+      <app-input-number [label]="TEXT.MaxTradesPerDay" [min]="1" [step]="1" suffix=" trades" formControlName="maxTradesPerDay"></app-input-number>
     </div>
     <div class="col-span-12 md:col-span-6">
       <app-select [label]="TEXT.StrategyValidity" [options]="validityOptions" formControlName="strategyValidity"></app-select>

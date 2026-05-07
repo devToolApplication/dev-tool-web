@@ -15,65 +15,89 @@ enum ReplayControlTextKey {
       display: block;
       min-width: 0;
     }
+
+    .replay-controls {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .replay-controls--embedded {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--app-border);
+    }
   `],
   template: `
-    <app-card [padding]="'md'" [surface]="'strong'">
-      <div class="flex flex-col gap-3 min-w-0">
+    <ng-template #controls>
       <div class="flex flex-wrap items-center gap-2">
-        <button pButton type="button" icon="pi pi-fast-backward" severity="secondary" text (click)="rewind.emit()"></button>
-        <button pButton type="button" icon="pi pi-chevron-left" severity="secondary" text (click)="previousStep.emit()"></button>
-        <button
-          pButton
-          type="button"
-          [icon]="playing ? 'pi pi-pause' : 'pi pi-play'"
-          (click)="playingChange.emit(!playing)"
-        ></button>
-        <button pButton type="button" icon="pi pi-chevron-right" severity="secondary" text (click)="nextStep.emit()"></button>
-        <button pButton type="button" icon="pi pi-fast-forward" severity="secondary" text (click)="fastForward.emit()"></button>
-        <span class="ml-auto text-sm app-text-muted">{{ TEXT.Step | translateContent }} {{ currentStep + 1 }} / {{ totalSteps }}</span>
-      </div>
-
-      <p-slider
-        [min]="0"
-        [max]="sliderMax"
-        [step]="1"
-        [ngModel]="currentStep"
-        (ngModelChange)="seek.emit($event)"
-      ></p-slider>
-
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
+          <button pButton type="button" icon="pi pi-fast-backward" severity="secondary" text (click)="rewind.emit()"></button>
+          <button pButton type="button" icon="pi pi-chevron-left" severity="secondary" text (click)="previousStep.emit()"></button>
           <button
             pButton
             type="button"
-            class="p-button-text"
-            icon="pi pi-step-backward"
-            [label]="TEXT.PrevEvent | translateContent"
-            (click)="previousEvent.emit()"
+            [icon]="playing ? 'pi pi-pause' : 'pi pi-play'"
+            (click)="playingChange.emit(!playing)"
           ></button>
-          <button
-            pButton
-            type="button"
-            class="p-button-text"
-            icon="pi pi-step-forward"
-            [label]="TEXT.NextEvent | translateContent"
-            (click)="nextEvent.emit()"
-          ></button>
+          <button pButton type="button" icon="pi pi-chevron-right" severity="secondary" text (click)="nextStep.emit()"></button>
+          <button pButton type="button" icon="pi pi-fast-forward" severity="secondary" text (click)="fastForward.emit()"></button>
+          <span class="ml-auto text-sm app-text-muted">{{ TEXT.Step | translateContent }} {{ currentStep + 1 }} / {{ totalSteps }}</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm app-text-muted">{{ TEXT.Speed | translateContent }}</span>
-          <p-select
-            [options]="speedOptions"
-            [ngModel]="speed"
-            optionLabel="label"
-            optionValue="value"
-            (ngModelChange)="speedChange.emit($event)"
-            styleClass="w-40"
-          ></p-select>
+
+        <p-slider
+          [min]="0"
+          [max]="sliderMax"
+          [step]="1"
+          [ngModel]="currentStep"
+          (ngModelChange)="seek.emit($event)"
+        ></p-slider>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button
+              pButton
+              type="button"
+              class="p-button-text"
+              icon="pi pi-step-backward"
+              [label]="TEXT.PrevEvent | translateContent"
+              (click)="previousEvent.emit()"
+            ></button>
+            <button
+              pButton
+              type="button"
+              class="p-button-text"
+              icon="pi pi-step-forward"
+              [label]="TEXT.NextEvent | translateContent"
+              (click)="nextEvent.emit()"
+            ></button>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm app-text-muted">{{ TEXT.Speed | translateContent }}</span>
+            <p-select
+              [options]="speedOptions"
+              [ngModel]="speed"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              (ngModelChange)="speedChange.emit($event)"
+              styleClass="w-40"
+            ></p-select>
+          </div>
         </div>
+    </ng-template>
+
+    @if (embedded) {
+      <div class="replay-controls replay-controls--embedded">
+        <ng-container [ngTemplateOutlet]="controls"></ng-container>
       </div>
-      </div>
-    </app-card>
+    } @else {
+      <app-card [padding]="'md'" [surface]="'strong'">
+        <div class="replay-controls">
+          <ng-container [ngTemplateOutlet]="controls"></ng-container>
+        </div>
+      </app-card>
+    }
   `
 })
 export class BaseReplayControlsComponent {
@@ -81,6 +105,7 @@ export class BaseReplayControlsComponent {
   @Input() totalSteps = 0;
   @Input() playing = false;
   @Input() speed = 1;
+  @Input() embedded = false;
   @Input() speedOptions: Array<{ label: string; value: number }> = [
     { label: '0.5x', value: 0.5 },
     { label: '1x', value: 1 },

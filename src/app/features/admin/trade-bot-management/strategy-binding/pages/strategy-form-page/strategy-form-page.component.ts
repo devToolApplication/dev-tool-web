@@ -7,6 +7,7 @@ import { StrategyResponse, SymbolResponse } from '../../../../../../core/models/
 import {
   TradeStrategyBindingCreateDto,
   TradeStrategyBindingResponse,
+  TradeSideMode,
   TradeStrategySelectedRule
 } from '../../../../../../core/models/trade-bot/trade-strategy-binding.model';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
@@ -48,7 +49,7 @@ export class StrategyFormPageComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
 
-  strategyMeta = resolveStrategyUiMetadataByServiceName('FVG_TOUCH_RETEST');
+  strategyMeta = resolveStrategyUiMetadataByServiceName('FVG_TOUCH_RETEST_BUY');
   currentStrategy?: StrategyResponse;
   strategyDefinition: StrategyConfigDefinition = {
     code: '',
@@ -287,7 +288,7 @@ export class StrategyFormPageComponent implements OnInit {
         exchangeId: this.exchangeOptions[0]?.value ?? '',
         symbolId: defaultSymbol?.id ?? '',
         marketType: defaultSymbol?.marketType ?? this.marketTypeOptions[0]?.value ?? '',
-        tradeSideMode: 'BOTH',
+        tradeSideMode: this.defaultTradeSideMode(strategyServiceName),
         providerSymbol: defaultSymbol?.providerSymbol ?? defaultSymbol?.code ?? '',
         description: '',
         status: 'ACTIVE'
@@ -396,6 +397,19 @@ export class StrategyFormPageComponent implements OnInit {
     return String(value ?? '')
       .trim()
       .toUpperCase();
+  }
+
+  private defaultTradeSideMode(strategyServiceName: string): TradeSideMode {
+    const normalized = String(strategyServiceName ?? '')
+      .trim()
+      .toUpperCase();
+    if (normalized.endsWith('_BUY')) {
+      return 'LONG_ONLY';
+    }
+    if (normalized.endsWith('_SELL')) {
+      return 'SHORT_ONLY';
+    }
+    return 'BOTH';
   }
 
   private prefillProviderSymbol(symbolId: string): void {

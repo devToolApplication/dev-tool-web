@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
+import { debounceTime, finalize, forkJoin, Subscription } from 'rxjs';
 import { ExchangeResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
 import { TradeBotCandleResponse } from '../../../../../core/models/trade-bot/chart-query.model';
 import { StrategyRuleResponse } from '../../../../../core/models/trade-bot/strategy-rule.model';
@@ -24,7 +24,7 @@ type RuleTestFormGroup = FormGroup<{
   standalone: false,
   templateUrl: './strategy-rule-test.component.html'
 })
-export class StrategyRuleTestComponent implements OnInit {
+export class StrategyRuleTestComponent implements OnInit, OnDestroy {
   readonly form: RuleTestFormGroup = new FormGroup({
     exchangeId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     symbolId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -40,6 +40,10 @@ export class StrategyRuleTestComponent implements OnInit {
   chartResponse: TradeBotCandleResponse | null = null;
   loading = false;
   previewing = false;
+  private autoPreviewReady = false;
+  private readonly subscriptions = new Subscription();
+  private previewSubscription: Subscription | null = null;
+  private previewRequestSeq = 0;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -52,6 +56,14 @@ export class StrategyRuleTestComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.form.valueChanges.pipe(debounceTime(350)).subscribe(() => {
+        if (this.autoPreviewReady) {
+          this.runPreview(false);
+        }
+      })
+    );
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       void this.router.navigate([STRATEGY_RULE_ROUTES.list]);
@@ -75,11 +87,15 @@ export class StrategyRuleTestComponent implements OnInit {
           this.symbols = symbols;
           this.exchangeOptions = exchanges.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
           this.symbolOptions = symbols.map((item) => ({ label: `${item.code} (${item.marketType})`, value: item.id }));
-          this.form.patchValue({
-            exchangeId: exchanges[0]?.id ?? '',
-            symbolId: symbols[0]?.id ?? ''
-          });
-          this.runPreview();
+          this.form.patchValue(
+            {
+              exchangeId: exchanges[0]?.id ?? '',
+              symbolId: symbols[0]?.id ?? ''
+            },
+            { emitEvent: false }
+          );
+          this.autoPreviewReady = true;
+          this.runPreview(false);
         },
         error: () => {
           this.toastService.error('tradeBot.strategyRule.toast.loadTestContextFailed');
@@ -96,8 +112,10 @@ export class StrategyRuleTestComponent implements OnInit {
     void this.router.navigate([STRATEGY_RULE_ROUTES.edit(this.rule.id)]);
   }
 
-  runPreview(): void {
-    this.form.markAllAsTouched();
+  runPreview(markTouched = true): void {
+    if (markTouched) {
+      this.form.markAllAsTouched();
+    }
     if (this.form.invalid || !this.rule) {
       return;
     }
@@ -115,8 +133,10 @@ export class StrategyRuleTestComponent implements OnInit {
     const interval = this.resolvePreviewInterval(this.rule.configJson, dataResource);
     const startTime = new Date(fromDate).getTime();
     const endTime = new Date(toDate).setHours(23, 59, 59, 999);
+    const requestSeq = ++this.previewRequestSeq;
+    this.previewSubscription?.unsubscribe();
     this.previewing = true;
-    this.loadingService
+    this.previewSubscription = this.loadingService
       .track(
         this.chartQueryService.getRulePreview(
           symbol.providerSymbol ?? symbol.code,
@@ -128,15 +148,26 @@ export class StrategyRuleTestComponent implements OnInit {
           dataResource
         )
       )
-      .pipe(finalize(() => (this.previewing = false)))
+      .pipe(
+        finalize(() => {
+          if (requestSeq === this.previewRequestSeq) {
+            this.previewing = false;
+          }
+        })
+      )
       .subscribe({
         next: (response) => (this.chartResponse = response),
         error: (error) => this.toastService.error(error?.error?.errorMessage ?? 'tradeBot.strategyRule.toast.previewFailed')
       });
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.previewSubscription?.unsubscribe();
+  }
+
   private resolvePreviewInterval(configJson: Record<string, unknown>, dataResource: string): string {
-    const timeframe = String(configJson['trigger_timeframe'] ?? configJson['base_timeframe'] ?? 'M15').trim().toUpperCase();
+    const timeframe = String(configJson['timeframe'] ?? configJson['trigger_timeframe'] ?? configJson['base_timeframe'] ?? 'M15').trim().toUpperCase();
     if (dataResource === 'BINANCE') {
       switch (timeframe) {
         case 'M1':

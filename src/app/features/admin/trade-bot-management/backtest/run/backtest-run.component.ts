@@ -50,11 +50,11 @@ export class BacktestRunComponent implements OnInit {
       { type: 'select', name: 'strategyId', label: 'tradeBot.strategy.field.strategyName', width: '1/3', optionsExpression: 'context.extra?.strategyOptions || []', validation: [Rules.required('tradeBot.backtest.run.validation.strategyRequired')] },
       { type: 'select', name: 'marketType', label: 'tradeBot.strategy.field.marketType', width: '1/3', options: [...MARKET_TYPE_OPTIONS], validation: [Rules.required('tradeBot.backtest.run.validation.marketTypeRequired')] },
       { type: 'select', name: 'tradeSideMode', label: 'tradeBot.strategy.field.tradeSideMode', width: '1/3', options: [...TRADE_SIDE_MODE_OPTIONS], validation: [Rules.required('tradeBot.backtest.run.validation.tradeSideModeRequired')] },
-      { type: 'number', name: 'initialBalance', label: 'tradeBot.replay.field.initialBalance', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.initialBalanceRequired')] },
+      { type: 'number', name: 'initialBalance', label: 'tradeBot.replay.field.initialBalance', width: '1/3', suffix: ' USD', validation: [Rules.required('tradeBot.backtest.run.validation.initialBalanceRequired')] },
       { type: 'date', name: 'fromDate', label: 'fromDate', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.fromDateRequired')] },
       { type: 'date', name: 'toDate', label: 'toDate', width: '1/3', validation: [Rules.required('tradeBot.backtest.run.validation.toDateRequired')] },
-      { type: 'number', name: 'feeRate', label: 'tradeBot.replay.field.feeRate', width: '1/3' },
-      { type: 'number', name: 'slippageRate', label: 'tradeBot.replay.field.slippage', width: '1/3' },
+      { type: 'number', name: 'feeRate', label: 'tradeBot.replay.field.feeRate', width: '1/3', suffix: ' %' },
+      { type: 'number', name: 'slippageRate', label: 'tradeBot.replay.field.slippage', width: '1/3', suffix: ' %' },
       {
         type: 'radio',
         name: 'riskMode',
@@ -68,6 +68,7 @@ export class BacktestRunComponent implements OnInit {
         name: 'fixedRiskAmount',
         label: 'tradeBot.backtest.run.field.fixedRiskAmount',
         width: '1/3',
+        suffix: ' USD',
         rules: { visible: 'model.riskMode === "FIXED_AMOUNT"' },
         validation: [
           Rules.required('tradeBot.backtest.run.validation.fixedRiskAmountRequired'),
@@ -79,6 +80,7 @@ export class BacktestRunComponent implements OnInit {
         name: 'riskPercentPerTrade',
         label: 'tradeBot.replay.field.riskPercentRemainingBalance',
         width: '1/3',
+        suffix: ' %',
         rules: { visible: 'model.riskMode === "EQUITY_PERCENT"' },
         validation: [
           Rules.required('tradeBot.backtest.run.validation.riskPercentRequired'),

@@ -55,7 +55,7 @@ export class TradeBotChartPreviewComponent implements OnChanges {
       boxAreas: (response?.areaData ?? [])
         .filter((item) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
         .map((item) => ({
-          name: item.name ?? 'Zone',
+          ...(item.name ? { name: item.name } : {}),
           color: this.resolveAreaColor(item.name, item.color),
           startTime: this.formatChartTime(item.from!),
           endTime: this.formatChartTime(item.to!),
