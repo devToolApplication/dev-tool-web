@@ -8,7 +8,10 @@ const config: CandleChartConfig = {
   showLines: true,
   showBoxAreas: true,
   showPoints: true,
-  showIndicators: true
+  showIndicators: true,
+  symbol: 'AAPL',
+  interval: '1D',
+  exchange: 'NASDAQ',
 };
 
 const data: CandleChartPayload = {
@@ -20,7 +23,7 @@ const data: CandleChartPayload = {
     { time: '13:00', open: 111, close: 107, low: 105, high: 112, volume: 275 },
     { time: '14:00', open: 107, close: 114, low: 106, high: 115, volume: 330 },
     { time: '15:00', open: 114, close: 118, low: 112, high: 119, volume: 390 },
-    { time: '16:00', open: 118, close: 116, low: 114, high: 120, volume: 285 }
+    { time: '16:00', open: 118, close: 116, low: 114, high: 120, volume: 285 },
   ],
   lines: [
     {
@@ -29,8 +32,8 @@ const data: CandleChartPayload = {
       start: 101,
       end: 118,
       startTime: '09:00',
-      endTime: '16:00'
-    }
+      endTime: '16:00',
+    },
   ],
   boxAreas: [
     {
@@ -39,39 +42,51 @@ const data: CandleChartPayload = {
       startTime: '10:00',
       endTime: '13:00',
       high: 113,
-      low: 100
-    }
+      low: 100,
+    },
   ],
   points: [
-    { name: 'Entry', color: 'var(--app-chart-success)', shape: 'arrowUp', startTime: '11:00', price: 108 },
-    { name: 'Exit', color: 'var(--app-chart-danger)', shape: 'arrowDown', startTime: '16:00', price: 116 }
+    {
+      name: 'Entry',
+      color: 'var(--app-chart-success)',
+      shape: 'arrowUp',
+      startTime: '11:00',
+      price: 108,
+    },
+    {
+      name: 'Exit',
+      color: 'var(--app-chart-danger)',
+      shape: 'arrowDown',
+      startTime: '16:00',
+      price: 116,
+    },
   ],
   indicators: [
     {
       name: 'MA',
       color: 'var(--app-chart-warning)',
       pane: 'overlay',
-      values: [101, 103, 104, 107, 108, 110, 113, 115]
+      values: [101, 103, 104, 107, 108, 110, 113, 115],
     },
     {
       name: 'RSI',
       color: 'var(--app-chart-violet)',
       pane: 'subchart',
-      values: [44, 48, 57, 62, 55, 66, 71, 63]
-    }
-  ]
+      values: [44, 48, 57, 62, 55, 66, 71, 63],
+    },
+  ],
 };
 
 const meta: Meta<CandleChart> = {
   title: 'Shared/Components/Candle Chart',
   component: CandleChart,
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   args: {
     config,
-    data
-  }
+    data,
+  },
 };
 
 export default meta;
@@ -79,3 +94,46 @@ export default meta;
 type Story = StoryObj<CandleChart>;
 
 export const Default: Story = {};
+
+export const WithOverlayLabels: Story = {
+  args: {
+    config: {
+      ...config,
+      showOverlayLabels: true,
+      showPriceAxisLabels: true,
+    },
+  },
+};
+
+export const PriceOnly: Story = {
+  args: {
+    config: {
+      ...config,
+      showVolume: false,
+      showBoxAreas: false,
+      showPoints: false,
+      showIndicators: false,
+    },
+  },
+};
+
+export const WithoutPreviewBar: Story = {
+  args: {
+    config: {
+      ...config,
+      showPreviewBar: false,
+    },
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    data: {
+      candles: [],
+      lines: [],
+      boxAreas: [],
+      points: [],
+      indicators: [],
+    },
+  },
+};

@@ -5,6 +5,7 @@ import { SyncConfigResponse } from '../../../../../../core/models/trade-bot/sync
 import { TradeBotCandleResponse } from '../../../../../../core/models/trade-bot/chart-query.model';
 import { ChartQueryService } from '../../../../../../core/services/trade-bot-service/chart-query.service';
 import { SyncConfigService } from '../../../../../../core/services/trade-bot-service/sync-config.service';
+import { CandleChartConfig } from '../../../../../../shared/component/candle-chart/candle-chart';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
@@ -23,6 +24,7 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
   selectedInterval = '';
   dateRange: Date[] = [];
   loading = false;
+  chartConfig: CandleChartConfig = this.defaultChartConfig();
 
   private liveSubscription?: Subscription;
   private snapshotSubscription?: Subscription;
@@ -93,6 +95,7 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
           this.selectedInterval = selectedInterval;
           this.dateRange = [startDate, endDate];
           this.syncConfig = config;
+          this.syncChartConfig();
           this.initializeTimeoutId = null;
           this.loadChartData();
         });
@@ -117,7 +120,28 @@ export class TradeBotChartViewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.syncChartConfig();
     this.refreshChartSnapshot(startTime, endTime, true, true);
+  }
+
+  private syncChartConfig(): void {
+    this.chartConfig = {
+      ...this.chartConfig,
+      symbol: this.syncConfig?.symbol,
+      interval: this.selectedInterval,
+      exchange: this.syncConfig?.dataResource
+    };
+  }
+
+  private defaultChartConfig(): CandleChartConfig {
+    return {
+      showCandles: true,
+      showVolume: true,
+      showLines: true,
+      showBoxAreas: true,
+      showPoints: true,
+      showIndicators: true
+    };
   }
 
   private bindLiveData(): void {

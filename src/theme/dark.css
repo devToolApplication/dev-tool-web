@@ -182,6 +182,12 @@
   --app-chart-trend-up-fill: rgba(50, 199, 140, 0.16);
   --app-chart-trend-down-fill: rgba(255, 121, 157, 0.16);
   --app-chart-trend-sideway-fill: rgba(144, 160, 202, 0.14);
+  --app-finance-chart-bg: #080d24;
+  --app-finance-chart-grid: rgba(191, 204, 255, 0.07);
+  --app-finance-chart-border: rgba(191, 204, 255, 0.14);
+  --app-finance-chart-crosshair: rgba(181, 189, 223, 0.64);
+  --app-finance-chart-label-bg: rgba(10, 16, 41, 0.88);
+  --app-finance-chart-watermark: rgba(243, 246, 255, 0.07);
 
   --app-shadow-xs:
     0 10px 26px rgba(4, 7, 20, 0.26),

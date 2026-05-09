@@ -212,6 +212,12 @@
   --app-chart-trend-up-fill: rgba(32, 180, 134, 0.14);
   --app-chart-trend-down-fill: rgba(196, 61, 103, 0.14);
   --app-chart-trend-sideway-fill: rgba(110, 122, 152, 0.12);
+  --app-finance-chart-bg: #ffffff;
+  --app-finance-chart-grid: rgba(23, 32, 51, 0.045);
+  --app-finance-chart-border: rgba(23, 32, 51, 0.1);
+  --app-finance-chart-crosshair: rgba(110, 122, 152, 0.58);
+  --app-finance-chart-label-bg: rgba(255, 255, 255, 0.88);
+  --app-finance-chart-watermark: rgba(23, 32, 51, 0.06);
 
   /* Shadow scale */
   --app-shadow-xs:

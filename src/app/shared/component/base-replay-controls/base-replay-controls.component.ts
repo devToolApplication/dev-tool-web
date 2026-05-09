@@ -50,7 +50,7 @@ enum ReplayControlTextKey {
           [max]="sliderMax"
           [step]="1"
           [ngModel]="currentStep"
-          (ngModelChange)="seek.emit($event)"
+          (onSlideEnd)="commitSeek($event)"
         ></p-slider>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -127,5 +127,22 @@ export class BaseReplayControlsComponent {
 
   get sliderMax(): number {
     return Math.max(0, this.totalSteps - 1);
+  }
+
+  commitSeek(event: { value?: unknown }): void {
+    const step = this.coerceStep(event.value);
+    if (step === null) {
+      return;
+    }
+
+    this.seek.emit(step);
+  }
+
+  private coerceStep(value: unknown): number | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return null;
+    }
+
+    return Math.max(0, Math.min(this.sliderMax, Math.round(value)));
   }
 }

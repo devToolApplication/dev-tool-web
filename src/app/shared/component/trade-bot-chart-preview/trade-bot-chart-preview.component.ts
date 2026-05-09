@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { TradeBotCandleResponse } from '../../../core/models/trade-bot/chart-query.model';
+import { TradeBotChartResponse } from '../../../core/models/trade-bot/chart-query.model';
 import { CandleChartConfig, CandleChartPayload } from '../candle-chart/candle-chart';
 
 @Component({
@@ -9,7 +9,7 @@ import { CandleChartConfig, CandleChartPayload } from '../candle-chart/candle-ch
   styleUrl: './trade-bot-chart-preview.component.css'
 })
 export class TradeBotChartPreviewComponent implements OnChanges {
-  @Input() response: TradeBotCandleResponse | null = null;
+  @Input() response: TradeBotChartResponse | null = null;
   @Input() config: CandleChartConfig = {
     showCandles: true,
     showVolume: true,
@@ -27,12 +27,12 @@ export class TradeBotChartPreviewComponent implements OnChanges {
     }
   }
 
-  private mapChartPayload(response: TradeBotCandleResponse | null): CandleChartPayload {
+  private mapChartPayload(response: TradeBotChartResponse | null): CandleChartPayload {
     const candles = (response?.candlestickData ?? [])
       .slice()
       .sort((left, right) => left.utcTimeStamp - right.utcTimeStamp)
       .map((item) => ({
-        time: this.formatChartTime(item.utcTimeStamp),
+        time: this.normalizeChartTime(item.utcTimeStamp),
         open: item.open,
         close: item.close,
         high: item.high,
@@ -49,16 +49,16 @@ export class TradeBotChartPreviewComponent implements OnChanges {
           color: this.resolveDirectionalColor(item.name, item.color, 'var(--app-chart-info)'),
           start: item.from!.value,
           end: item.to!.value,
-          startTime: this.formatChartTime(item.from!.time),
-          endTime: this.formatChartTime(item.to!.time)
+          startTime: this.normalizeChartTime(item.from!.time),
+          endTime: this.normalizeChartTime(item.to!.time)
         })),
       boxAreas: (response?.areaData ?? [])
         .filter((item) => item.from != null && item.to != null && item.maxPrice != null && item.minPrice != null)
         .map((item) => ({
           ...(item.name ? { name: item.name } : {}),
           color: this.resolveAreaColor(item.name, item.color),
-          startTime: this.formatChartTime(item.from!),
-          endTime: this.formatChartTime(item.to!),
+          startTime: this.normalizeChartTime(item.from!),
+          endTime: this.normalizeChartTime(item.to!),
           high: item.maxPrice!,
           low: item.minPrice!
         })),
@@ -66,7 +66,7 @@ export class TradeBotChartPreviewComponent implements OnChanges {
         name: item.name ?? 'Point',
         color: this.resolveDirectionalColor(item.name, item.color, 'var(--app-chart-warning)'),
         shape: item.shape,
-        startTime: this.formatChartTime(this.normalizePointTime(item.time)),
+        startTime: this.normalizeChartTime(item.time),
         price: item.value
       })),
       indicators: (response?.indicatorData ?? []).map((item) => ({
@@ -120,16 +120,7 @@ export class TradeBotChartPreviewComponent implements OnChanges {
     return null;
   }
 
-  private formatChartTime(value: number): string {
-    const date = new Date(value);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-  }
-
-  private normalizePointTime(value: number): number {
+  private normalizeChartTime(value: number): number {
     return value < 1_000_000_000_000 ? value * 1000 : value;
   }
 

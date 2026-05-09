@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, finalize, forkJoin, Subscription } from 'rxjs';
 import { ExchangeResponse, SymbolResponse } from '../../../../../core/models/trade-bot/reference-data.model';
-import { TradeBotCandleResponse } from '../../../../../core/models/trade-bot/chart-query.model';
+import { TradeBotChartResponse } from '../../../../../core/models/trade-bot/chart-query.model';
 import { StrategyRuleResponse } from '../../../../../core/models/trade-bot/strategy-rule.model';
 import { ChartQueryService } from '../../../../../core/services/trade-bot-service/chart-query.service';
 import { ReferenceDataService } from '../../../../../core/services/trade-bot-service/reference-data.service';
@@ -37,7 +37,7 @@ export class StrategyRuleTestComponent implements OnInit, OnDestroy {
   symbols: SymbolResponse[] = [];
   exchangeOptions: Array<{ label: string; value: string }> = [];
   symbolOptions: Array<{ label: string; value: string }> = [];
-  chartResponse: TradeBotCandleResponse | null = null;
+  chartResponse: TradeBotChartResponse | null = null;
   loading = false;
   previewing = false;
   private autoPreviewReady = false;
@@ -138,15 +138,18 @@ export class StrategyRuleTestComponent implements OnInit, OnDestroy {
     this.previewing = true;
     this.previewSubscription = this.loadingService
       .track(
-        this.chartQueryService.getRulePreview(
-          symbol.providerSymbol ?? symbol.code,
-          interval,
-          startTime,
-          endTime,
-          this.rule.code,
-          this.rule.configJson,
-          dataResource
-        )
+        forkJoin({
+          candles: this.chartQueryService.getCandle(symbol.providerSymbol ?? symbol.code, interval, startTime, endTime, dataResource),
+          overlay: this.chartQueryService.getRuleOverlay(
+            symbol.providerSymbol ?? symbol.code,
+            interval,
+            startTime,
+            endTime,
+            this.rule.code,
+            this.rule.configJson,
+            dataResource
+          )
+        })
       )
       .pipe(
         finalize(() => {
@@ -156,7 +159,7 @@ export class StrategyRuleTestComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (response) => (this.chartResponse = response),
+        next: ({ candles, overlay }) => (this.chartResponse = this.chartQueryService.toChartResponse(candles, overlay)),
         error: (error) => this.toastService.error(error?.error?.errorMessage ?? 'tradeBot.strategyRule.toast.previewFailed')
       });
   }

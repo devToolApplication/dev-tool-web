@@ -47,8 +47,33 @@ export interface TradeBotIndicatorData {
 
 export interface TradeBotCandleResponse {
   candlestickData: TradeBotCandlestickData[];
+}
+
+export interface TradeBotOverlayResponse {
   lineData: TradeBotLineData[];
   areaData: TradeBotAreaData[];
   pointData: TradeBotPointData[];
   indicatorData: TradeBotIndicatorData[];
+}
+
+export type TradeBotChartResponse = TradeBotCandleResponse & Partial<TradeBotOverlayResponse>;
+
+export interface TradeSignalStreamRequest {
+  requestId: string;
+  dataResource: string;
+  symbol: string;
+  interval: string;
+  startTime: number;
+  endTime: number;
+  resultStartTime?: number;
+  ruleCode?: string;
+  strategyServiceName?: string;
+  showAreaLabels?: boolean;
+  configJson: Record<string, unknown>;
+}
+
+export interface TradeSignalStreamResponse {
+  requestId?: string;
+  data?: TradeBotOverlayResponse;
+  errorMessage?: string;
 }

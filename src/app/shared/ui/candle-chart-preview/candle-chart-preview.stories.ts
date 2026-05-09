@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
-import { TradeBotCandleResponse } from '../../../core/models/trade-bot/chart-query.model';
+import { TradeBotChartResponse } from '../../../core/models/trade-bot/chart-query.model';
 import { CandleChartPreviewComponent } from './candle-chart-preview.component';
 
 const baseTime = Date.UTC(2026, 0, 1, 9, 0, 0);
 
-const response: TradeBotCandleResponse = {
+const response: TradeBotChartResponse = {
   candlestickData: [
     { utcTimeStamp: baseTime, open: 100, high: 106, low: 98, close: 104, volume: 1200 },
     { utcTimeStamp: baseTime + 60_000, open: 104, high: 108, low: 103, close: 107, volume: 1480 },

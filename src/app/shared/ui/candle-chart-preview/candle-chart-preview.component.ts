@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { TradeBotCandleResponse } from '../../../core/models/trade-bot/chart-query.model';
+import { TradeBotChartResponse } from '../../../core/models/trade-bot/chart-query.model';
 import { CandleChartConfig } from '../../component/candle-chart/candle-chart';
 
 type CandleChartPreviewSurface = 'default' | 'strong';
@@ -11,7 +11,7 @@ type CandleChartPreviewSurface = 'default' | 'strong';
   styleUrl: './candle-chart-preview.component.css'
 })
 export class CandleChartPreviewComponent {
-  @Input() response: TradeBotCandleResponse | null = null;
+  @Input() response: TradeBotChartResponse | null = null;
   @Input() loading = false;
   @Input() title = '';
   @Input() description = '';

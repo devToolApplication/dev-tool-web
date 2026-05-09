@@ -3,7 +3,9 @@
     <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div class="min-w-0">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="m-0 text-2xl font-semibold">{{ TEXT.BacktestReplayTitle | translateContent }}</h2>
+          <h2 class="m-0 text-2xl font-semibold">
+            {{ TEXT.BacktestReplayTitle | translateContent }}
+          </h2>
           @if (binding) {
             <app-tag [value]="binding.strategyServiceName" severity="contrast"></app-tag>
           }
@@ -16,8 +18,18 @@
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <app-button [text]="true" icon="pi pi-arrow-left" label="tradeBot.back" (buttonClick)="goBack()"></app-button>
-        <app-button icon="pi pi-play" [label]="TEXT.RunBacktest" [loading]="running" (buttonClick)="runBacktest()"></app-button>
+        <app-button
+          [text]="true"
+          icon="pi pi-arrow-left"
+          label="tradeBot.back"
+          (buttonClick)="goBack()"
+        ></app-button>
+        <app-button
+          icon="pi pi-play"
+          [label]="TEXT.RunBacktest"
+          [loading]="running"
+          (buttonClick)="runBacktest()"
+        ></app-button>
       </div>
     </div>
   </app-card>
@@ -25,30 +37,74 @@
   <app-panel [title]="TEXT.BacktestExecution" [description]="TEXT.BacktestExecutionDesc">
     <div class="grid grid-cols-12 items-end gap-4" [formGroup]="runForm">
       <div class="col-span-12 md:col-span-3">
-        <app-date-picker label="fromDate" formControlName="fromDate" [showIcon]="true" dateFormat="yy-mm-dd"></app-date-picker>
+        <app-date-picker
+          label="fromDate"
+          formControlName="fromDate"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+        ></app-date-picker>
       </div>
       <div class="col-span-12 md:col-span-3">
-        <app-date-picker label="toDate" formControlName="toDate" [showIcon]="true" dateFormat="yy-mm-dd"></app-date-picker>
+        <app-date-picker
+          label="toDate"
+          formControlName="toDate"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+        ></app-date-picker>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.InitialBalance" [min]="1" suffix=" USD" formControlName="initialBalance"></app-input-number>
+        <app-input-number
+          [label]="TEXT.InitialBalance"
+          [min]="1"
+          suffix=" USD"
+          formControlName="initialBalance"
+        ></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.FeeRate" [min]="0" [step]="0.0001" suffix=" %" formControlName="feeRate"></app-input-number>
+        <app-input-number
+          [label]="TEXT.FeeRate"
+          [min]="0"
+          [step]="0.0001"
+          suffix=" %"
+          formControlName="feeRate"
+        ></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-2">
-        <app-input-number [label]="TEXT.Slippage" [min]="0" [step]="0.0001" suffix=" %" formControlName="slippageRate"></app-input-number>
+        <app-input-number
+          [label]="TEXT.Slippage"
+          [min]="0"
+          [step]="0.0001"
+          suffix=" %"
+          formControlName="slippageRate"
+        ></app-input-number>
       </div>
       <div class="col-span-12 md:col-span-3">
-        <app-select-button [label]="TEXT.RiskMode" [options]="riskModeOptions" [allowEmpty]="false" formControlName="riskMode"></app-select-button>
+        <app-select-button
+          [label]="TEXT.RiskMode"
+          [options]="riskModeOptions"
+          [allowEmpty]="false"
+          formControlName="riskMode"
+        ></app-select-button>
       </div>
       @if (runForm.controls.riskMode.value === riskModes.FIXED_AMOUNT) {
         <div class="col-span-12 md:col-span-3">
-          <app-input-number [label]="TEXT.FixedRiskAmount" [min]="0.01" [step]="1" suffix=" USD" formControlName="fixedRiskAmount"></app-input-number>
+          <app-input-number
+            [label]="TEXT.FixedRiskAmount"
+            [min]="0.01"
+            [step]="1"
+            suffix=" USD"
+            formControlName="fixedRiskAmount"
+          ></app-input-number>
         </div>
       } @else {
         <div class="col-span-12 md:col-span-3">
-          <app-input-number [label]="TEXT.RiskPercentRemainingBalance" [min]="0.01" [step]="0.1" suffix=" %" formControlName="riskPercentPerTrade"></app-input-number>
+          <app-input-number
+            [label]="TEXT.RiskPercentRemainingBalance"
+            [min]="0.01"
+            [step]="0.1"
+            suffix=" %"
+            formControlName="riskPercentPerTrade"
+          ></app-input-number>
         </div>
       }
       <div class="col-span-12 md:col-span-6 flex items-end">
@@ -59,14 +115,51 @@
 
   @if (job || metric) {
     <div class="grid grid-cols-12 gap-4">
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalTrades" [value]="metric?.totalTrades ?? orders.length"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinTrades" [value]="metric?.winTrades ?? 0"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.LoseTrades" [value]="metric?.loseTrades ?? 0"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.WinRate" [value]="(metric?.winRate ?? 0) | number:'1.2-2'" suffix="%"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.Pnl" [value]="(metric?.pnl ?? job?.pnl ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.FinalEquity" [value]="(metric?.finalEquity ?? job?.finalEquity ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalFee" [value]="(metric?.totalFee ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
-      <app-summary-metric-card class="col-span-6 md:col-span-3 xl:col-span-2" [label]="TEXT.TotalSlippage" [value]="(metric?.totalSlippage ?? 0) | number:'1.2-2'" suffix=" USD"></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.TotalTrades"
+        [value]="metric?.totalTrades ?? orders.length"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.WinTrades"
+        [value]="metric?.winTrades ?? 0"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.LoseTrades"
+        [value]="metric?.loseTrades ?? 0"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.WinRate"
+        [value]="metric?.winRate ?? 0 | number: '1.2-2'"
+        suffix="%"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.Pnl"
+        [value]="metric?.pnl ?? job?.pnl ?? 0 | number: '1.2-2'"
+        suffix=" USD"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.FinalEquity"
+        [value]="metric?.finalEquity ?? job?.finalEquity ?? 0 | number: '1.2-2'"
+        suffix=" USD"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.TotalFee"
+        [value]="metric?.totalFee ?? 0 | number: '1.2-2'"
+        suffix=" USD"
+      ></app-summary-metric-card>
+      <app-summary-metric-card
+        class="col-span-6 md:col-span-3 xl:col-span-2"
+        [label]="TEXT.TotalSlippage"
+        [value]="metric?.totalSlippage ?? 0 | number: '1.2-2'"
+        suffix=" USD"
+      ></app-summary-metric-card>
     </div>
   }
 
@@ -91,6 +184,95 @@
             (seek)="replay.seek($event)"
             (speedChange)="replay.setSpeed($event)"
           ></app-base-replay-controls>
+          <div class="backtest-chart-view-toolbar">
+            <app-select-button
+              class="backtest-chart-timeframe"
+              label="tradeBot.replay.chart.viewTimeframe"
+              [options]="chartTimeframeOptions"
+              [allowEmpty]="false"
+              [value]="chartViewTimeframe()"
+              [disabled]="chartViewLoading()"
+              (valueChange)="onChartTimeframeChange($event)"
+            ></app-select-button>
+            @if (chartOverlayOptions.length > 0) {
+              <div
+                class="backtest-chart-indicators"
+                role="group"
+                [attr.aria-label]="'tradeBot.replay.chart.indicators' | translateContent"
+              >
+                <span class="backtest-chart-indicators__label">{{
+                  'tradeBot.replay.chart.indicators' | translateContent
+                }}</span>
+                <div class="backtest-chart-overlay-tags">
+                  @for (option of chartOverlayOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="backtest-event-key backtest-chart-overlay-tag"
+                      [class.backtest-chart-overlay-tag--active]="
+                        isChartOverlaySelected(option.value)
+                      "
+                      [disabled]="chartViewLoading()"
+                      [attr.aria-pressed]="isChartOverlaySelected(option.value)"
+                      [title]="option.label"
+                      (click)="toggleChartOverlay(option.value)"
+                    >
+                      <span
+                        class="backtest-event-marker backtest-event-marker--shape-circle backtest-event-marker--session-started"
+                        aria-hidden="true"
+                      ></span>
+                      <span class="backtest-chart-overlay-tag__label">{{ option.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+            @if (chartViewLoading()) {
+              <app-tag
+                value="tradeBot.replay.chart.loadingTimeframe"
+                severity="info"
+                icon="pi pi-spin pi-spinner"
+              ></app-tag>
+            }
+            @if (rulePreviewSyncing()) {
+              <app-tag
+                value="tradeBot.replay.chart.syncingRules"
+                severity="info"
+                icon="pi pi-spin pi-spinner"
+              ></app-tag>
+            }
+          </div>
+          <div class="backtest-chart-event-toolbar">
+            <div class="backtest-chart-event-legend">
+              @for (item of visibleEventLegendItems; track item.type) {
+                <span class="backtest-event-key">
+                  <span
+                    class="backtest-event-marker"
+                    [ngClass]="eventMarkerClasses(item.type)"
+                    aria-hidden="true"
+                  ></span>
+                  <span>{{ item.label | translateContent }}</span>
+                </span>
+              }
+            </div>
+
+            @if (replay.currentStepEvents().length > 0) {
+              <div class="backtest-current-events">
+                @for (event of replay.currentStepEvents(); track event.id) {
+                  <span class="backtest-current-event">
+                    <span
+                      class="backtest-event-marker"
+                      [ngClass]="eventMarkerClasses(event.type)"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="backtest-current-event__type">{{
+                      eventLabel(event.type) | translateContent
+                    }}</span>
+                    <span class="backtest-current-event__title">{{ event.title }}</span>
+                  </span>
+                }
+              </div>
+            }
+          </div>
           <app-candle-chart [data]="chartPayload" [config]="chartConfig"></app-candle-chart>
         </app-panel>
 
@@ -98,7 +280,11 @@
 
         <app-panel [title]="TEXT.BacktestOrders" [description]="TEXT.BacktestOrdersDesc">
           <div class="backtest-orders-table-shell">
-            <app-table [config]="orderTableConfig" [data]="orders" [loading]="loadingOrders"></app-table>
+            <app-table
+              [config]="orderTableConfig"
+              [data]="orders"
+              [loading]="loadingOrders"
+            ></app-table>
           </div>
         </app-panel>
       </div>
