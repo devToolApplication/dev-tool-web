@@ -1,4 +1,8 @@
-import { BacktestJobResponse, BacktestMetricResponse, BacktestOrderResponse } from '../../../../../core/models/trade-bot/backtest.model';
+import {
+  BacktestJobResponse,
+  BacktestMetricResponse,
+  BacktestOrderResponse,
+} from '../../../../../core/models/trade-bot/backtest.model';
 import { TradeBotCandleResponse } from '../../../../../core/models/trade-bot/chart-query.model';
 import {
   ReplayOverlay,
@@ -7,12 +11,20 @@ import {
   ReplayStepEvent,
   ReplayTradeTimelineItem,
   StrategyReplayEventType,
-  StrategyReplayPayload
+  StrategyReplayPayload,
 } from '../../../../../core/models/trade-bot/strategy-replay.model';
 
-function normalizeTrade(order: BacktestOrderResponse, index: number, stepByTime: Map<number, number>): ReplayTradeTimelineItem {
+function normalizeTrade(
+  order: BacktestOrderResponse,
+  index: number,
+  stepByTime: Map<number, number>,
+): ReplayTradeTimelineItem {
   const entryStepIndex = resolveStepIndex(stepByTime, order.entryTime);
-  const exitStepIndex = resolveStepIndex(stepByTime, order.exitTime ?? order.entryTime, entryStepIndex);
+  const exitStepIndex = resolveStepIndex(
+    stepByTime,
+    order.exitTime ?? order.entryTime,
+    entryStepIndex,
+  );
 
   return {
     id: order.id,
@@ -32,20 +44,41 @@ function normalizeTrade(order: BacktestOrderResponse, index: number, stepByTime:
     feePaid: order.feePaid,
     slippagePaid: order.slippagePaid,
     tradingCost: Number(((order.feePaid ?? 0) + (order.slippagePaid ?? 0)).toFixed(8)),
-    result: order.result === 'WIN' ? 'TP' : order.result === 'LOSS' ? 'SL' : order.result === 'BREAKEVEN' ? 'BE' : 'OPEN',
+    result:
+      order.result === 'WIN'
+        ? 'TP'
+        : order.result === 'LOSS'
+          ? 'SL'
+          : order.result === 'BREAKEVEN'
+            ? 'BE'
+            : 'OPEN',
     rrAchieved:
       order.orderSide === 'BUY'
-        ? Number(((order.exitPrice - order.entryPrice) / Math.max(order.entryPrice - order.stopLoss, 0.0000001)).toFixed(2))
-        : Number(((order.entryPrice - order.exitPrice) / Math.max(order.stopLoss - order.entryPrice, 0.0000001)).toFixed(2)),
+        ? Number(
+            (
+              (order.exitPrice - order.entryPrice) /
+              Math.max(order.entryPrice - order.stopLoss, 0.0000001)
+            ).toFixed(2),
+          )
+        : Number(
+            (
+              (order.entryPrice - order.exitPrice) /
+              Math.max(order.stopLoss - order.entryPrice, 0.0000001)
+            ).toFixed(2),
+          ),
     entryReason: String(order.metadataJson?.['entryReason'] ?? 'Setup confirmed'),
     exitReason: order.exitReason ?? 'Replay exit',
     pnl: order.netPnl,
     activeFromStepIndex: entryStepIndex,
-    activeToStepIndex: exitStepIndex
+    activeToStepIndex: exitStepIndex,
   };
 }
 
-function resolveStepIndex(stepByTime: Map<number, number>, targetTime?: number, fallback = 0): number {
+function resolveStepIndex(
+  stepByTime: Map<number, number>,
+  targetTime?: number,
+  fallback = 0,
+): number {
   if (targetTime == null) {
     return fallback;
   }
@@ -72,20 +105,31 @@ function buildRuleSet(stepIndex: number, trade?: ReplayTradeTimelineItem): Repla
       key: 'chart-data',
       label: 'Chart data loaded',
       status: 'PASS',
-      message: 'Replay step is built from chart-data snapshot.'
+      message: 'Replay step is built from chart-data snapshot.',
     },
     {
       key: 'setup',
       label: 'Setup formed',
       status: stepIndex >= setupIndex ? 'PASS' : 'NEUTRAL',
-      message: stepIndex >= setupIndex ? trade?.entryReason ?? 'Setup context available.' : 'Waiting for setup context.'
+      message:
+        stepIndex >= setupIndex
+          ? (trade?.entryReason ?? 'Setup context available.')
+          : 'Waiting for setup context.',
     },
     {
       key: 'entry',
       label: 'Entry trigger',
-      status: trade && stepIndex === trade.activeFromStepIndex ? 'PASS' : trade && stepIndex > trade.activeFromStepIndex ? 'NEUTRAL' : 'FAIL',
-      message: trade && stepIndex === trade.activeFromStepIndex ? 'Order executed on this candle.' : 'No entry on this step.'
-    }
+      status:
+        trade && stepIndex === trade.activeFromStepIndex
+          ? 'PASS'
+          : trade && stepIndex > trade.activeFromStepIndex
+            ? 'NEUTRAL'
+            : 'FAIL',
+      message:
+        trade && stepIndex === trade.activeFromStepIndex
+          ? 'Order executed on this candle.'
+          : 'No entry on this step.',
+    },
   ];
 }
 
@@ -101,14 +145,15 @@ function buildEvents(trades: ReplayTradeTimelineItem[], steps: ReplayStep[]): Re
       stepIndex: 0,
       candleTime: steps[0].candleTime,
       title: 'Session started',
-      message: 'Replay started from chart data.'
-    }
+      message: 'Replay started from chart data.',
+    },
   ];
 
   trades.forEach((trade) => {
     const setupIndex = Math.max(0, trade.activeFromStepIndex - 1);
     const exitIndex = trade.activeToStepIndex ?? trade.activeFromStepIndex;
-    const exitType: StrategyReplayEventType = trade.result === 'TP' ? 'tp-hit' : trade.result === 'SL' ? 'sl-hit' : 'trade-closed';
+    const exitType: StrategyReplayEventType =
+      trade.result === 'TP' ? 'tp-hit' : trade.result === 'SL' ? 'sl-hit' : 'trade-closed';
 
     events.push(
       {
@@ -118,7 +163,7 @@ function buildEvents(trades: ReplayTradeTimelineItem[], steps: ReplayStep[]): Re
         candleTime: steps[setupIndex]?.candleTime ?? trade.entryTime,
         title: 'Setup formed',
         message: trade.entryReason,
-        tradeId: trade.id
+        tradeId: trade.id,
       },
       {
         id: `${trade.id}-entry`,
@@ -127,17 +172,22 @@ function buildEvents(trades: ReplayTradeTimelineItem[], steps: ReplayStep[]): Re
         candleTime: trade.entryTime,
         title: 'Order placed',
         message: `${trade.side} entry at ${trade.entryPrice}`,
-        tradeId: trade.id
+        tradeId: trade.id,
       },
       {
         id: `${trade.id}-exit`,
         type: exitType,
         stepIndex: exitIndex,
         candleTime: trade.exitTime ?? steps[exitIndex]?.candleTime ?? trade.entryTime,
-        title: trade.result === 'TP' ? 'Take profit hit' : trade.result === 'SL' ? 'Stop loss hit' : 'Trade closed',
+        title:
+          trade.result === 'TP'
+            ? 'Take profit hit'
+            : trade.result === 'SL'
+              ? 'Stop loss hit'
+              : 'Trade closed',
         message: trade.exitReason,
-        tradeId: trade.id
-      }
+        tradeId: trade.id,
+      },
     );
   });
 
@@ -147,22 +197,62 @@ function buildEvents(trades: ReplayTradeTimelineItem[], steps: ReplayStep[]): Re
     stepIndex: steps.length - 1,
     candleTime: steps[steps.length - 1].candleTime,
     title: 'Session ended',
-    message: 'Replay reached the last available candle.'
+    message: 'Replay reached the last available candle.',
   });
 
-  return events.sort((left, right) => left.stepIndex - right.stepIndex || left.candleTime - right.candleTime);
+  return events.sort(
+    (left, right) => left.stepIndex - right.stepIndex || left.candleTime - right.candleTime,
+  );
+}
+
+function formatReplayPrice(value: number): string {
+  return Number(value).toLocaleString(undefined, {
+    maximumFractionDigits: 6,
+  });
 }
 
 function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
   return trades.flatMap((trade) => {
     const startTime = new Date(trade.entryTime).toISOString();
     const endTime = new Date(trade.exitTime ?? trade.entryTime).toISOString();
+    const rewardLow = trade.side === 'BUY' ? trade.entryPrice : trade.takeProfit;
+    const rewardHigh = trade.side === 'BUY' ? trade.takeProfit : trade.entryPrice;
+    const riskLow = trade.side === 'BUY' ? trade.stopLoss : trade.entryPrice;
+    const riskHigh = trade.side === 'BUY' ? trade.entryPrice : trade.stopLoss;
 
     return [
       {
+        id: `reward-area-${trade.id}`,
+        type: 'area-zone',
+        label: `TP Area ${trade.index} @ ${formatReplayPrice(trade.takeProfit)}`,
+        visibleFromStepIndex: trade.activeFromStepIndex,
+        visibleToStepIndex: trade.activeToStepIndex,
+        payload: {
+          startTime,
+          endTime,
+          high: Math.max(rewardLow, rewardHigh),
+          low: Math.min(rewardLow, rewardHigh),
+          color: 'var(--app-chart-success-fill)',
+        },
+      },
+      {
+        id: `risk-area-${trade.id}`,
+        type: 'area-zone',
+        label: `SL Area ${trade.index} @ ${formatReplayPrice(trade.stopLoss)}`,
+        visibleFromStepIndex: trade.activeFromStepIndex,
+        visibleToStepIndex: trade.activeToStepIndex,
+        payload: {
+          startTime,
+          endTime,
+          high: Math.max(riskLow, riskHigh),
+          low: Math.min(riskLow, riskHigh),
+          color: 'var(--app-chart-danger-fill)',
+        },
+      },
+      {
         id: `entry-${trade.id}`,
         type: 'entry',
-        label: `Entry ${trade.index}`,
+        label: `Entry ${trade.index} @ ${formatReplayPrice(trade.entryPrice)}`,
         visibleFromStepIndex: trade.activeFromStepIndex,
         visibleToStepIndex: trade.activeToStepIndex,
         payload: {
@@ -170,13 +260,13 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.entryPrice,
           end: trade.entryPrice,
-          color: 'var(--app-chart-primary)'
-        }
+          color: 'var(--app-chart-primary)',
+        },
       },
       {
         id: `sl-${trade.id}`,
         type: 'stop-loss',
-        label: `SL ${trade.index}`,
+        label: `SL ${trade.index} @ ${formatReplayPrice(trade.stopLoss)}`,
         visibleFromStepIndex: trade.activeFromStepIndex,
         visibleToStepIndex: trade.activeToStepIndex,
         payload: {
@@ -184,13 +274,13 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.stopLoss,
           end: trade.stopLoss,
-          color: 'var(--app-chart-danger)'
-        }
+          color: 'var(--app-chart-danger)',
+        },
       },
       {
         id: `tp-${trade.id}`,
         type: 'take-profit',
-        label: `TP ${trade.index}`,
+        label: `TP ${trade.index} @ ${formatReplayPrice(trade.takeProfit)}`,
         visibleFromStepIndex: trade.activeFromStepIndex,
         visibleToStepIndex: trade.activeToStepIndex,
         payload: {
@@ -198,9 +288,9 @@ function buildOverlays(trades: ReplayTradeTimelineItem[]): ReplayOverlay[] {
           endTime,
           start: trade.takeProfit,
           end: trade.takeProfit,
-          color: 'var(--app-chart-success)'
-        }
-      }
+          color: 'var(--app-chart-success)',
+        },
+      },
     ];
   });
 }
@@ -209,9 +299,11 @@ export function buildChartReplayPayload(
   job: BacktestJobResponse,
   chartData: TradeBotCandleResponse,
   orders: BacktestOrderResponse[] = [],
-  _metric?: BacktestMetricResponse | null
+  _metric?: BacktestMetricResponse | null,
 ): StrategyReplayPayload {
-  const candles = (chartData.candlestickData ?? []).slice().sort((left, right) => left.utcTimeStamp - right.utcTimeStamp);
+  const candles = (chartData.candlestickData ?? [])
+    .slice()
+    .sort((left, right) => left.utcTimeStamp - right.utcTimeStamp);
   const stepByTime = new Map<number, number>();
 
   const steps: ReplayStep[] = candles.map((candle, index) => {
@@ -225,12 +317,12 @@ export function buildChartReplayPayload(
         high: candle.high,
         low: candle.low,
         close: candle.close,
-        volume: candle.volume
+        volume: candle.volume,
       },
       ruleExplanations: [],
       shortEvents: [],
       eventIds: [],
-      activeTradeIds: []
+      activeTradeIds: [],
     };
   });
 
@@ -238,7 +330,11 @@ export function buildChartReplayPayload(
 
   steps.forEach((step) => {
     step.activeTradeIds = normalizedTrades
-      .filter((trade) => step.index >= trade.activeFromStepIndex && step.index <= (trade.activeToStepIndex ?? trade.activeFromStepIndex))
+      .filter(
+        (trade) =>
+          step.index >= trade.activeFromStepIndex &&
+          step.index <= (trade.activeToStepIndex ?? trade.activeFromStepIndex),
+      )
       .map((trade) => trade.id);
     const activeTrade = normalizedTrades.find((trade) => step.activeTradeIds.includes(trade.id));
     step.ruleExplanations = buildRuleSet(step.index, activeTrade);
@@ -262,7 +358,7 @@ export function buildChartReplayPayload(
       steps: [],
       events: [],
       trades: normalizedTrades,
-      overlays: []
+      overlays: [],
     };
   }
 
@@ -274,6 +370,6 @@ export function buildChartReplayPayload(
     steps,
     events,
     trades: normalizedTrades,
-    overlays
+    overlays,
   };
 }

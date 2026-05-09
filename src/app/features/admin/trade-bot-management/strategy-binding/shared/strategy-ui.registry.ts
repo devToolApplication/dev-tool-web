@@ -8,7 +8,7 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     displayOrder: 10,
     family: 'liquidity',
     accentColor: 'var(--app-chart-success)',
-    shortDescription: 'Trade bullish FVG touch retests with PA support confluence'
+    shortDescription: 'Trade bullish FVG touch retests with PA support confluence',
   },
   {
     serviceName: 'FVG_TOUCH_RETEST_SELL',
@@ -17,18 +17,40 @@ export const STRATEGY_UI_REGISTRY: StrategyUiMetadata[] = [
     displayOrder: 11,
     family: 'liquidity',
     accentColor: 'var(--app-chart-danger)',
-    shortDescription: 'Trade bearish FVG touch retests with PA resistance confluence'
-  }
+    shortDescription: 'Trade bearish FVG touch retests with PA resistance confluence',
+  },
+  {
+    serviceName: 'SMC_EQUILIBRIUM_OB_LONG',
+    routePath: 'smc-equilibrium-ob-long',
+    icon: 'pi pi-chart-line',
+    displayOrder: 20,
+    family: 'liquidity',
+    accentColor: 'var(--app-chart-success)',
+    shortDescription: 'Long-only SMC setup from Equilibrium and bullish OB intersection',
+  },
+  {
+    serviceName: 'SMC_EQUILIBRIUM_OB_SHORT',
+    routePath: 'smc-equilibrium-ob-short',
+    icon: 'pi pi-chart-line',
+    displayOrder: 21,
+    family: 'liquidity',
+    accentColor: 'var(--app-chart-danger)',
+    shortDescription: 'Short-only SMC setup from Equilibrium and bearish OB intersection',
+  },
 ];
 
-export function resolveStrategyUiMetadataByServiceName(serviceName: string | null | undefined): StrategyUiMetadata | undefined {
+export function resolveStrategyUiMetadataByServiceName(
+  serviceName: string | null | undefined,
+): StrategyUiMetadata | undefined {
   if (!serviceName) {
     return undefined;
   }
   return STRATEGY_UI_REGISTRY.find((item) => item.serviceName === serviceName);
 }
 
-export function resolveStrategyUiMetadataByRoutePath(routePath: string | null | undefined): StrategyUiMetadata | undefined {
+export function resolveStrategyUiMetadataByRoutePath(
+  routePath: string | null | undefined,
+): StrategyUiMetadata | undefined {
   if (!routePath) {
     return undefined;
   }

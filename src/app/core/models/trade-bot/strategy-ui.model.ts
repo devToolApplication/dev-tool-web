@@ -13,9 +13,19 @@ export type StrategyRoutePath =
   | 'liquidity-sweep-fvg-reclaim'
   | 'fvg-touch-retest-buy'
   | 'fvg-touch-retest-sell'
+  | 'smc-equilibrium-ob-long'
+  | 'smc-equilibrium-ob-short'
   | 'pivot-sweep-rejection';
 
-export type StrategyUiFamily = 'breakout' | 'trend' | 'mean-reversion' | 'session' | 'pattern' | 'divergence' | 'liquidity' | 'price-action';
+export type StrategyUiFamily =
+  | 'breakout'
+  | 'trend'
+  | 'mean-reversion'
+  | 'session'
+  | 'pattern'
+  | 'divergence'
+  | 'liquidity'
+  | 'price-action';
 
 export interface StrategyUiMetadata {
   serviceName: string;

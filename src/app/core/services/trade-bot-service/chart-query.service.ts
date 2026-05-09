@@ -9,7 +9,7 @@ import {
   TradeBotCandleResponse,
   TradeBotOverlayResponse,
   TradeSignalStreamRequest,
-  TradeSignalStreamResponse
+  TradeSignalStreamResponse,
 } from '../../models/trade-bot/chart-query.model';
 
 export interface TradeRuleOverlayWsSession {
@@ -25,7 +25,13 @@ export class ChartQueryService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getCandle(symbol: string, interval: string, startTime: number, endTime: number, dataResource?: string): Observable<TradeBotCandleResponse> {
+  getCandle(
+    symbol: string,
+    interval: string,
+    startTime: number,
+    endTime: number,
+    dataResource?: string,
+  ): Observable<TradeBotCandleResponse> {
     let params = new HttpParams()
       .set('symbol', symbol)
       .set('interval', interval)
@@ -39,8 +45,8 @@ export class ChartQueryService {
       .get<BaseResponse<TradeBotCandleResponse>>(`${this.apiUrl}/data`, { params })
       .pipe(
         map((res) => ({
-          candlestickData: res.data?.candlestickData ?? []
-        }))
+          candlestickData: res.data?.candlestickData ?? [],
+        })),
       );
   }
 
@@ -51,7 +57,8 @@ export class ChartQueryService {
     endTime: number,
     strategyServiceName: string,
     configJson: Record<string, unknown>,
-    dataResource?: string
+    dataResource?: string,
+    options?: { showAreaLabels?: boolean; resultStartTime?: number },
   ): Observable<TradeBotOverlayResponse> {
     let params = new HttpParams()
       .set('symbol', symbol)
@@ -62,8 +69,17 @@ export class ChartQueryService {
       params = params.set('dataResource', dataResource);
     }
 
+    const body = {
+      strategyServiceName,
+      configJson,
+      ...(options?.showAreaLabels == null ? {} : { showAreaLabels: options.showAreaLabels }),
+      ...(options?.resultStartTime == null ? {} : { resultStartTime: options.resultStartTime }),
+    };
+
     return this.http
-      .post<BaseResponse<TradeBotOverlayResponse>>(`${this.apiUrl}/fetch/rule-overlay`, { strategyServiceName, configJson }, { params })
+      .post<
+        BaseResponse<TradeBotOverlayResponse>
+      >(`${this.apiUrl}/fetch/rule-overlay`, body, { params })
       .pipe(map((res) => this.normalizeOverlayResponse(res.data)));
   }
 
@@ -74,7 +90,7 @@ export class ChartQueryService {
     endTime: number,
     ruleCode: string,
     configJson: Record<string, unknown>,
-    dataResource?: string
+    dataResource?: string,
   ): Observable<TradeBotOverlayResponse> {
     let params = new HttpParams()
       .set('symbol', symbol)
@@ -86,11 +102,17 @@ export class ChartQueryService {
     }
 
     return this.http
-      .post<BaseResponse<TradeBotOverlayResponse>>(`${this.apiUrl}/fetch/rule-overlay`, { ruleCode, configJson }, { params })
+      .post<
+        BaseResponse<TradeBotOverlayResponse>
+      >(`${this.apiUrl}/fetch/rule-overlay`, { ruleCode, configJson }, { params })
       .pipe(map((res) => this.normalizeOverlayResponse(res.data)));
   }
 
-  createLiveCandleStream(dataResource: string, symbol: string, interval: string): Observable<TradeBotCandleResponse> {
+  createLiveCandleStream(
+    dataResource: string,
+    symbol: string,
+    interval: string,
+  ): Observable<TradeBotCandleResponse> {
     return new Observable<TradeBotCandleResponse>((subscriber) => {
       let stompClient: Client | null = null;
       let topicSubscription: StompSubscription | null = null;
@@ -101,7 +123,7 @@ export class ChartQueryService {
         reconnectDelay: 5000,
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
-        debug: () => undefined
+        debug: () => undefined,
       });
 
       stompClient.onConnect = () => {
@@ -109,13 +131,16 @@ export class ChartQueryService {
           return;
         }
 
-        topicSubscription = stompClient.subscribe(`/topic/market-data/${dataResource}/kline/${symbol}/${interval}`, (message: IMessage) => {
-          try {
-            subscriber.next(JSON.parse(message.body) as TradeBotCandleResponse);
-          } catch (error) {
-            subscriber.error(error);
-          }
-        });
+        topicSubscription = stompClient.subscribe(
+          `/topic/market-data/${dataResource}/kline/${symbol}/${interval}`,
+          (message: IMessage) => {
+            try {
+              subscriber.next(JSON.parse(message.body) as TradeBotCandleResponse);
+            } catch (error) {
+              subscriber.error(error);
+            }
+          },
+        );
       };
 
       stompClient.onStompError = (frame) => {
@@ -159,7 +184,7 @@ export class ChartQueryService {
 
       stompClient.publish({
         destination: '/app/chart-data/rule-overlay',
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       });
     };
 
@@ -168,7 +193,7 @@ export class ChartQueryService {
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: () => undefined
+      debug: () => undefined,
     });
 
     stompClient.onConnect = () => {
@@ -177,13 +202,16 @@ export class ChartQueryService {
       }
 
       connected = true;
-      topicSubscription = stompClient.subscribe(`/topic/chart-data/rule-overlay/${sessionId}`, (message: IMessage) => {
-        try {
-          responsesSubject.next(JSON.parse(message.body) as TradeSignalStreamResponse);
-        } catch (error) {
-          responsesSubject.error(error);
-        }
-      });
+      topicSubscription = stompClient.subscribe(
+        `/topic/chart-data/rule-overlay/${sessionId}`,
+        (message: IMessage) => {
+          try {
+            responsesSubject.next(JSON.parse(message.body) as TradeSignalStreamResponse);
+          } catch (error) {
+            responsesSubject.error(error);
+          }
+        },
+      );
 
       pendingRequests.splice(0).forEach((request) => publishRequest(request));
     };
@@ -226,7 +254,7 @@ export class ChartQueryService {
         topicSubscription?.unsubscribe();
         void stompClient?.deactivate();
         responsesSubject.complete();
-      }
+      },
     };
   }
 
@@ -237,10 +265,13 @@ export class ChartQueryService {
     return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  toChartResponse(candles: TradeBotCandleResponse, overlay?: TradeBotOverlayResponse | null): TradeBotChartResponse {
+  toChartResponse(
+    candles: TradeBotCandleResponse,
+    overlay?: TradeBotOverlayResponse | null,
+  ): TradeBotChartResponse {
     return {
       candlestickData: candles.candlestickData ?? [],
-      ...this.normalizeOverlayResponse(overlay)
+      ...this.normalizeOverlayResponse(overlay),
     };
   }
 
@@ -249,7 +280,7 @@ export class ChartQueryService {
       lineData: response?.lineData ?? [],
       areaData: response?.areaData ?? [],
       pointData: response?.pointData ?? [],
-      indicatorData: response?.indicatorData ?? []
+      indicatorData: response?.indicatorData ?? [],
     };
   }
 }

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of, Subscription, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, of, Subscription, switchMap, timeout } from 'rxjs';
 import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
 import {
   CandleData,
@@ -35,6 +35,7 @@ import {
   TradeBotLineData,
   TradeBotOverlayResponse,
   TradeBotPointData,
+  TradeSignalStreamRequest,
   TradeSignalStreamResponse,
 } from '../../../../../../core/models/trade-bot/chart-query.model';
 import {
@@ -89,6 +90,8 @@ const REPLAY_PREVIEW_AREA_LIMIT = 10;
 const REPLAY_PREVIEW_POINT_LIMIT = 24;
 const DEFAULT_REPLAY_TIMEFRAME = StrategyTimeframe.M15;
 const RULE_PREVIEW_SYNC_DELAY_MS = 80;
+const RULE_PREVIEW_WS_TIMEOUT_MS = 8_000;
+const RULE_PREVIEW_HTTP_TIMEOUT_MS = 15_000;
 
 type ChartOverlayKind = 'line' | 'area' | 'point' | 'indicator';
 type ChartOverlayOption = { kind: ChartOverlayKind; label: string; value: string };
@@ -228,6 +231,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   private rulePreviewWsSession: TradeRuleOverlayWsSession | null = null;
   private rulePreviewSyncEffect?: EffectRef;
   private rulePreviewSyncTimeoutId: number | null = null;
+  private rulePreviewRequestTimeoutId: number | null = null;
+  private rulePreviewHttpFallbackSubscription: Subscription | null = null;
   private rulePreviewInFlightRequestId = '';
   private pendingRulePreviewSync = false;
   private rulePreviewRequestSeq = 0;
@@ -504,11 +509,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
         next: (response) => this.ngZone.run(() => this.handleRulePreviewResponse(response)),
         error: () => {
           this.ngZone.run(() => {
-            this.rulePreviewWsSession?.close();
-            this.rulePreviewWsSession = null;
-            this.rulePreviewSyncing.set(false);
-            this.rulePreviewInFlightRequestId = '';
-            this.pendingRulePreviewSync = false;
+            this.resetRulePreviewSession();
+            this.finishRulePreviewRequest(this.rulePreviewInFlightRequestId);
             this.toastService.error(this.i18nService.t('tradeBot.websocketDisconnected'));
           });
         },
@@ -518,11 +520,18 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
   }
 
   private closeRulePreviewSession(): void {
-    this.rulePreviewWsSession?.close();
-    this.rulePreviewWsSession = null;
+    this.resetRulePreviewSession();
+    this.clearRulePreviewRequestTimeout();
+    this.rulePreviewHttpFallbackSubscription?.unsubscribe();
+    this.rulePreviewHttpFallbackSubscription = null;
     this.rulePreviewSyncing.set(false);
     this.rulePreviewInFlightRequestId = '';
     this.pendingRulePreviewSync = false;
+  }
+
+  private resetRulePreviewSession(): void {
+    this.rulePreviewWsSession?.close();
+    this.rulePreviewWsSession = null;
   }
 
   private scheduleRulePreviewSync(): void {
@@ -545,6 +554,15 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
 
     window.clearTimeout(this.rulePreviewSyncTimeoutId);
     this.rulePreviewSyncTimeoutId = null;
+  }
+
+  private clearRulePreviewRequestTimeout(): void {
+    if (this.rulePreviewRequestTimeoutId == null) {
+      return;
+    }
+
+    window.clearTimeout(this.rulePreviewRequestTimeoutId);
+    this.rulePreviewRequestTimeoutId = null;
   }
 
   private requestRulePreviewForCurrentStep(): void {
@@ -580,7 +598,8 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     this.rulePreviewInFlightRequestId = requestId;
     this.pendingRulePreviewSync = false;
     this.rulePreviewSyncing.set(true);
-    session.send({
+
+    const request: TradeSignalStreamRequest = {
       requestId,
       dataResource,
       symbol: job.providerSymbol || job.symbolCode,
@@ -591,7 +610,14 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       strategyServiceName: this.binding.strategyServiceName ?? job.strategyServiceName,
       configJson: this.resolveRulePreviewConfig(job),
       showAreaLabels: true,
-    });
+    };
+
+    this.startRulePreviewRequestTimeout(request);
+    try {
+      session.send(request);
+    } catch {
+      this.requestRulePreviewThroughHttp(request);
+    }
   }
 
   private handleRulePreviewResponse(response: TradeSignalStreamResponse): void {
@@ -599,6 +625,7 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.clearRulePreviewRequestTimeout();
     this.rulePreviewInFlightRequestId = '';
     if (!response.errorMessage && response.data) {
       this.previewChartData = this.mergeRulePreviewData(this.previewChartData, response.data);
@@ -615,6 +642,71 @@ export class StrategyBacktestPageComponent implements OnInit, OnDestroy {
     }
 
     this.changeDetectorRef.markForCheck();
+  }
+
+  private startRulePreviewRequestTimeout(request: TradeSignalStreamRequest): void {
+    this.clearRulePreviewRequestTimeout();
+    this.rulePreviewRequestTimeoutId = window.setTimeout(() => {
+      this.rulePreviewRequestTimeoutId = null;
+      if (this.rulePreviewInFlightRequestId !== request.requestId) {
+        return;
+      }
+
+      this.requestRulePreviewThroughHttp(request);
+    }, RULE_PREVIEW_WS_TIMEOUT_MS);
+  }
+
+  private requestRulePreviewThroughHttp(request: TradeSignalStreamRequest): void {
+    if (this.rulePreviewInFlightRequestId !== request.requestId) {
+      return;
+    }
+
+    this.resetRulePreviewSession();
+    this.clearRulePreviewRequestTimeout();
+    this.rulePreviewHttpFallbackSubscription?.unsubscribe();
+    this.rulePreviewHttpFallbackSubscription = this.chartQueryService
+      .getStrategyOverlay(
+        request.symbol,
+        request.interval,
+        request.startTime,
+        request.endTime,
+        request.strategyServiceName ?? '',
+        request.configJson,
+        request.dataResource,
+        {
+          showAreaLabels: request.showAreaLabels,
+          resultStartTime: request.resultStartTime,
+        },
+      )
+      .pipe(timeout(RULE_PREVIEW_HTTP_TIMEOUT_MS))
+      .subscribe({
+        next: (data) =>
+          this.ngZone.run(() =>
+            this.handleRulePreviewResponse({ requestId: request.requestId, data }),
+          ),
+        error: () =>
+          this.ngZone.run(() => {
+            this.finishRulePreviewRequest(request.requestId);
+            this.changeDetectorRef.markForCheck();
+          }),
+      });
+
+    this.subscriptions.add(this.rulePreviewHttpFallbackSubscription);
+  }
+
+  private finishRulePreviewRequest(requestId: string): void {
+    if (requestId && requestId !== this.rulePreviewInFlightRequestId) {
+      return;
+    }
+
+    this.clearRulePreviewRequestTimeout();
+    this.rulePreviewInFlightRequestId = '';
+    if (this.pendingRulePreviewSync) {
+      this.pendingRulePreviewSync = false;
+      this.scheduleRulePreviewSync();
+    } else {
+      this.rulePreviewSyncing.set(false);
+    }
   }
 
   private mergeRulePreviewData(
