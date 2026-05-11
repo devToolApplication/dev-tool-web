@@ -58,6 +58,9 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
         field: 'actions',
         header: 'actions',
         type: 'actions',
+        minWidth: '16rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           { label: 'aiAgent.executionTrace.viewSteps', icon: 'pi pi-eye', severity: 'help', onClick: (row) => this.openSteps(row) },
           {

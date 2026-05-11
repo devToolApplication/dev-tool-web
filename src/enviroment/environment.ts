@@ -21,6 +21,7 @@ export const environment = {
     adminFileServiceUrl: 'http://127.0.0.1:31000/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'http://127.0.0.1:31002/trade-bot-mcrs/v1/admin',
     tradeBotUrl: 'http://127.0.0.1:31002/trade-bot-mcrs/v1',
+    jobSchedulerAdminUrl: 'http://127.0.0.1:3001/v1/admin',
     // bpmEngineAdminUrl: 'http://127.0.0.1:31005/bpm-engine/v1/admin',
     bpmEngineAdminUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1/admin',
     // bpmEngineUrl: 'http://127.0.0.1:31005/bpm-engine/v1',

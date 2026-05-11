@@ -1,0 +1,19 @@
+<section class="crud-page">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="m-0 text-xl font-semibold app-text">{{ 'jobScheduler.runs.heading' | translateContent }}</h2>
+      <div class="mt-1 text-sm app-text-muted">{{ code }}</div>
+    </div>
+    <app-button icon="pi pi-arrow-left" label="back" severity="secondary" (buttonClick)="onBack()"></app-button>
+  </div>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading()"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+  ></app-table>
+</section>

@@ -95,6 +95,7 @@
           [style.maxWidth]="col.maxWidth ?? null"
           [frozen]="col.frozen ?? false"
           [alignFrozen]="col.alignFrozen ?? 'left'"
+          [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
         >
           {{ col.header | translateContent }}
           @if (col.sortable) {
@@ -115,6 +116,7 @@
           [style.maxWidth]="col.maxWidth ?? null"
           [frozen]="col.frozen ?? false"
           [alignFrozen]="col.alignFrozen ?? 'left'"
+          [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
         >
           <app-table-cell [column]="col" [rowData]="row"></app-table-cell>
         </td>

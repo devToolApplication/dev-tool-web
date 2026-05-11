@@ -58,6 +58,9 @@ export class PromptTemplateListComponent extends BasePagedList<PromptTemplateRes
         field: 'actions',
         header: 'Actions',
         type: 'actions',
+        minWidth: '12rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }

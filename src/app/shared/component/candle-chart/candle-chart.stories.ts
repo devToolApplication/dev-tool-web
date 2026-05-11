@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
-import { CandleChart, type CandleChartConfig, type CandleChartPayload } from './candle-chart';
+import {
+  CandleChart,
+  type CandleChartConfig,
+  type CandleChartPayload,
+  type ChartCandle,
+  type ChartOverlay,
+} from './candle-chart';
 
 const config: CandleChartConfig = {
   showCandles: true,
@@ -77,6 +83,37 @@ const data: CandleChartPayload = {
   ],
 };
 
+const candles: ChartCandle[] = data.candles.map((candle, index) => ({ ...candle, index }));
+
+const strategyOverlays: ChartOverlay[] = [
+  {
+    id: 'entry',
+    type: 'MARKER',
+    source: 'STRATEGY',
+    index: 3,
+    price: 111,
+    text: 'ENTRY BUY',
+    shape: 'arrowUp',
+    color: 'var(--app-chart-success)',
+  },
+  {
+    id: 'sl',
+    type: 'PRICE_LINE',
+    source: 'STRATEGY',
+    price: 106,
+    text: 'SL',
+    color: 'var(--app-chart-danger)',
+  },
+  {
+    id: 'tp',
+    type: 'PRICE_LINE',
+    source: 'STRATEGY',
+    price: 121,
+    text: 'TP',
+    color: 'var(--app-chart-success)',
+  },
+];
+
 const meta: Meta<CandleChart> = {
   title: 'Shared/Components/Candle Chart',
   component: CandleChart,
@@ -135,5 +172,66 @@ export const Empty: Story = {
       points: [],
       indicators: [],
     },
+  },
+};
+
+export const HistoricalRuntime: Story = {
+  args: {
+    mode: 'HISTORICAL',
+    config: {
+      ...config,
+      showToolbar: true,
+      showOverlayLabels: true,
+    },
+    candles,
+    overlays: strategyOverlays,
+  },
+};
+
+export const ReplayRuntime: Story = {
+  args: {
+    mode: 'REPLAY',
+    config: {
+      ...config,
+      showReplayControls: true,
+      showToolbar: true,
+      showOverlayLabels: true,
+    },
+    replayConfig: {
+      initialIndex: 2,
+      speedMs: 650,
+      loop: false,
+    },
+    candles,
+    overlays: strategyOverlays,
+  },
+};
+
+export const RealtimeReady: Story = {
+  args: {
+    mode: 'REALTIME',
+    config: {
+      ...config,
+      showToolbar: true,
+    },
+    realtimeConfig: {
+      enabled: false,
+      reconnect: true,
+    },
+    candles,
+  },
+};
+
+export const EvaluationOverlays: Story = {
+  args: {
+    mode: 'REPLAY',
+    config: {
+      ...config,
+      showReplayControls: true,
+      showDebugPanel: true,
+      showOverlayLabels: true,
+    },
+    candles,
+    overlays: strategyOverlays,
   },
 };

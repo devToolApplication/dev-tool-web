@@ -76,6 +76,9 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
         field: 'actions',
         header: 'action',
         type: 'actions',
+        minWidth: '12rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           {
             label: 'edit',

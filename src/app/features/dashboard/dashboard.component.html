@@ -77,14 +77,6 @@
     </app-ai-agent-dashboard>
   }
 
-  @if (activeTab === 'trade-bot') {
-    <app-trade-bot-dashboard
-      [overview]="overviews['trade-bot'] ?? null"
-      [loading]="loadingState['trade-bot']"
-      [error]="errorState['trade-bot']">
-    </app-trade-bot-dashboard>
-  }
-
   @if (activeTab === 'file-storage') {
     <app-file-storage-dashboard
       [overview]="overviews['file-storage'] ?? null"

@@ -7,6 +7,9 @@ import { StorageConfigFormComponent } from './general-config/storage-system/form
 import { StorageConfigListComponent } from './general-config/storage-system/list/storage-config-list.component';
 import { TradeBotConfigFormComponent } from './general-config/trade-bot-system/form/trade-bot-config-form.component';
 import { TradeBotConfigListComponent } from './general-config/trade-bot-system/list/trade-bot-config-list.component';
+import { JobConfigFormComponent } from './job-scheduler/form/job-config-form.component';
+import { JobConfigListComponent } from './job-scheduler/list/job-config-list.component';
+import { JobRunListComponent } from './job-scheduler/runs/job-run-list.component';
 import { AiAgentSecretFormComponent } from './secret-management/ai-agent-system/form/ai-agent-secret-form.component';
 import { AiAgentSecretListComponent } from './secret-management/ai-agent-system/list/ai-agent-secret-list.component';
 import { StorageSecretFormComponent } from './secret-management/storage-system/form/storage-secret-form.component';
@@ -27,6 +30,9 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentConfigFormComponent,
   TradeBotConfigListComponent,
   TradeBotConfigFormComponent,
+  JobConfigListComponent,
+  JobConfigFormComponent,
+  JobRunListComponent,
   AiAgentAskComponent,
   FileUploadDebugComponent
 ];
@@ -86,6 +92,15 @@ export const systemManagementRoutes: Routes = [
       { path: '', component: TradeBotConfigListComponent },
       { path: 'create', component: TradeBotConfigFormComponent },
       { path: 'edit/:id', component: TradeBotConfigFormComponent }
+    ]
+  },
+  {
+    path: 'admin/system-management/jobs',
+    children: [
+      { path: '', component: JobConfigListComponent },
+      { path: 'create', component: JobConfigFormComponent },
+      { path: 'edit/:code', component: JobConfigFormComponent },
+      { path: ':code/runs', component: JobRunListComponent }
     ]
   }
 ];

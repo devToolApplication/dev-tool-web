@@ -1,0 +1,28 @@
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG2008: Could not find stylesheet file './indicator-config-form.component.css'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/trade-bot-management/indicator-config/form/indicator-config-form.component.ts:35:12:
+[37m      35 │   styleUrl: [32m'./indicator-config-form.component.css'[37m
+         ╵             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG2008: Could not find stylesheet file './indicator-config-form.component.css'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/trade-bot-management/indicator-config/form/indicator-config-form.component.ts:31:12:
+[37m      31 │   styleUrl: [32m'./indicator-config-form.component.css'[37m
+         ╵             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG2008: Could not find stylesheet file './indicator-config-list.component.css'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/trade-bot-management/indicator-config/list/indicator-config-list.component.ts:22:12:
+[37m      22 │   styleUrl: [32m'./indicator-config-list.component.css'[37m
+         ╵             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS4113: This member cannot have an 'override' modifier because it is not declared in the base class 'BasePagedList<IndicatorConfigResponse>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/trade-bot-management/indicator-config/list/indicator-config-list.component.ts:104:11:
+[37m      104 │   override [32mngOnDestroy[37m(): void {
+          ╵            [32m~~~~~~~~~~~[0m
+
+[39m[22m

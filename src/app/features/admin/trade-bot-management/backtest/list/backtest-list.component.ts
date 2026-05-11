@@ -1,93 +1,104 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
-import { BacktestJobResponse } from '../../../../../core/models/trade-bot/backtest.model';
-import { BacktestService } from '../../../../../core/services/trade-bot-service/backtest.service';
+import { BacktestRunDto, BacktestRunResponse } from '../../../../../core/models/trade-bot/trading-system.model';
+import { TradingSystemService } from '../../../../../core/services/trade-bot-service/trading-system.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
+import { FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
-import { TRADE_BOT_BACKTEST_ROUTES } from '../../trade-bot-admin.constants';
-import { STRATEGY_MANAGEMENT_ROUTES } from '../../strategy-binding/strategy-management.constants';
-import { TradeBotTextKey } from '../../strategy-binding/shared/strategy-ui.enums';
+import { BACKTEST_RUN_FORM, TRADE_BOT_ROUTES } from '../../trade-bot-runtime.constants';
 
 @Component({
   selector: 'app-backtest-list',
   standalone: false,
   templateUrl: './backtest-list.component.html'
 })
-export class BacktestListComponent extends BasePagedList<BacktestJobResponse> implements OnInit {
+export class BacktestListComponent implements OnInit {
+  readonly formConfig = BACKTEST_RUN_FORM;
+  readonly formContext: FormContext = { user: null, mode: 'create' };
+  readonly loading = signal(false);
+  readonly runs = signal<BacktestRunResponse[]>([]);
+  readonly formInitialValue: BacktestRunDto = {
+    strategyCode: '',
+    symbol: 'XAUUSD',
+    timeframe: 'M15',
+    fromTime: '',
+    toTime: '',
+    initialBalance: 10000,
+    riskPerTradePct: 1,
+    feeRate: 0,
+    slippageRate: 0,
+    sameBarExitPolicy: 'SL_FIRST',
+    auditLevel: 'SUMMARY',
+    saveFailedEntrySummary: false
+  };
+
   readonly tableConfig: TableConfig = {
-    title: TradeBotTextKey.BacktestReplayTitle,
-    toolbar: { new: { visible: true, label: TradeBotTextKey.RunBacktest, icon: 'pi pi-play', severity: 'success' } },
-    filters: [
-      { field: 'exchangeCode', label: 'Exchange', placeholder: 'Filter exchange' },
-      { field: 'symbolCode', label: 'Symbol', placeholder: 'Filter symbol' },
-      { field: 'strategyServiceName', label: 'Strategy', placeholder: 'Filter strategy' },
-      { field: 'status', label: 'Status', placeholder: 'RUNNING / COMPLETED' }
-    ],
-    filterOptions: { primaryField: 'symbolCode' },
+    title: 'tradeBot.backtest.title',
     columns: [
-      { field: 'exchangeCode', header: 'Exchange', sortable: true },
-      { field: 'symbolCode', header: 'Symbol', sortable: true },
-      { field: 'strategyServiceName', header: 'Strategy', sortable: true },
-      { field: 'status', header: 'Status', sortable: true },
-      { field: 'totalTrades', header: 'Trades', sortable: true },
-      { field: 'pnl', header: 'PnL', sortable: true, type: 'number' },
-      { field: 'finalEquity', header: 'Final Equity', sortable: true, type: 'number' },
+      { field: 'runId', header: 'tradeBot.field.runId', minWidth: '18rem' },
+      { field: 'strategyCode', header: 'tradeBot.field.strategyCode' },
+      { field: 'symbol', header: 'tradeBot.field.symbol' },
+      { field: 'timeframe', header: 'tradeBot.field.timeframe' },
+      { field: 'status', header: 'tradeBot.field.status' },
+      { field: 'currentBalance', header: 'tradeBot.field.currentBalance', type: 'number' },
+      { field: 'startedAt', header: 'tradeBot.field.startedAt', type: 'date', minWidth: '13rem' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'tradeBot.field.actions',
         type: 'actions',
-        actions: [{ label: 'Detail', icon: 'pi pi-eye', severity: 'info', onClick: (row: BacktestJobResponse) => this.goDetail(row.id) }]
+        minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        actions: [{ label: 'tradeBot.action.detail', icon: 'pi pi-eye', severity: 'info', onClick: (row) => this.openDetail(row.runId) }]
       }
     ],
     pagination: true,
-    rows: DEFAULT_TABLE_ROWS,
-    rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
+    rows: 20,
+    minWidth: '86rem'
   };
 
-  loading = false;
-
   constructor(
-    private readonly service: BacktestService,
-    private readonly i18nService: I18nService,
+    private readonly service: TradingSystemService,
+    private readonly router: Router,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router
-  ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
-  }
+    private readonly i18nService: I18nService
+  ) {}
 
   ngOnInit(): void {
-    this.loadPage();
+    this.loadRuns();
   }
 
-  onCreate(): void {
-    void this.router.navigate([TRADE_BOT_BACKTEST_ROUTES.run]);
-  }
-
-  private goDetail(id: string): void {
-    const job = this.rows.find((item) => item.id === id);
-    if (job?.bindingId) {
-      void this.router.navigate([STRATEGY_MANAGEMENT_ROUTES.backtest(job.bindingId)], { queryParams: { jobId: job.id } });
-      return;
-    }
-    void this.router.navigate([`${TRADE_BOT_BACKTEST_ROUTES.list}/${id}`]);
-  }
-
-  protected loadPage(): void {
-    this.loading = true;
+  runBacktest(model: BacktestRunDto): void {
+    this.loading.set(true);
     this.loadingService
-      .track(this.service.getPage(this.page, this.pageSize, ['startedAt,desc'], this.filters))
-      .pipe(finalize(() => (this.loading = false)))
+      .track(this.service.runBacktest(model))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (res: BasePageResponse<BacktestJobResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error(this.i18nService.t(TradeBotTextKey.LoadReplayFailed))
+        next: (run) => {
+          this.toastService.info(this.i18nService.t('tradeBot.message.backtestCompleted'));
+          this.loadRuns();
+          this.openDetail(run.runId ?? run.id);
+        },
+        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.backtestFailed'))
       });
+  }
+
+  private loadRuns(): void {
+    this.loading.set(true);
+    this.loadingService
+      .track(this.service.getBacktests())
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (runs) => this.runs.set(runs),
+        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.loadFailed'))
+      });
+  }
+
+  private openDetail(runId: string): void {
+    void this.router.navigate([`${TRADE_BOT_ROUTES.backtests}/${runId}`]);
   }
 }

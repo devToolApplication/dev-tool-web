@@ -5,6 +5,7 @@ import codexAgentTranslations from '../i18n/features/codex-agent.i18n.json';
 import dashboardTranslations from '../i18n/features/dashboard.i18n.json';
 import errorsTranslations from '../i18n/features/errors.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
+import jobSchedulerTranslations from '../i18n/features/job-scheduler.i18n.json';
 import mailTranslations from '../i18n/features/mail.i18n.json';
 import mcpToolConfigTranslations from '../i18n/features/mcp-tool-config.i18n.json';
 import profileTranslations from '../i18n/features/profile.i18n.json';
@@ -26,6 +27,7 @@ const TRANSLATIONS: TranslationMap = {
     ...dashboardTranslations.vi,
     ...aiAgentTranslations.vi,
     ...codexAgentTranslations.vi,
+    ...jobSchedulerTranslations.vi,
     ...errorsTranslations.vi,
     ...settingsTranslations.vi,
     ...systemManagementTranslations.vi,
@@ -42,6 +44,7 @@ const TRANSLATIONS: TranslationMap = {
     ...dashboardTranslations.en,
     ...aiAgentTranslations.en,
     ...codexAgentTranslations.en,
+    ...jobSchedulerTranslations.en,
     ...errorsTranslations.en,
     ...settingsTranslations.en,
     ...systemManagementTranslations.en,

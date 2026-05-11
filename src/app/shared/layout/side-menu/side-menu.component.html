@@ -29,14 +29,16 @@
   @for (item of items; track item.label) {
     @let itemPath = parentPath + '/' + (item.label || 'item');
 
-    @if (item.items?.length) {
-      <button type="button" class="menu-link menu-link-parent" (click)="toggle(itemPath)">
+    @if (item.items) {
+      <button type="button" class="menu-link menu-link-parent" [disabled]="!item.items.length" (click)="item.items.length && toggle(itemPath)">
         <i [class]="item.icon || 'pi pi-circle'"></i>
         <span>{{ item.label | translateContent }}</span>
-        <i class="pi submenu-toggle" [class.pi-chevron-down]="isExpanded(itemPath)" [class.pi-chevron-right]="!isExpanded(itemPath)"></i>
+        @if (item.items.length) {
+          <i class="pi submenu-toggle" [class.pi-chevron-down]="isExpanded(itemPath)" [class.pi-chevron-right]="!isExpanded(itemPath)"></i>
+        }
       </button>
 
-      @if (isExpanded(itemPath)) {
+      @if (item.items.length && isExpanded(itemPath)) {
         <div class="submenu-wrap">
           <ng-container
             [ngTemplateOutlet]="menuItemsTemplate"

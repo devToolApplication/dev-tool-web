@@ -1,4 +1,4 @@
-export type DashboardTabType = 'ai-agent' | 'trade-bot' | 'file-storage';
+export type DashboardTabType = 'ai-agent' | 'file-storage';
 
 export interface DashboardMetric {
   key: string;

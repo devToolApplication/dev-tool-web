@@ -1,4 +1,89 @@
 <div class="candle-chart-wrapper">
+  @if (showToolbar) {
+    <div class="candle-chart-toolbar">
+      <div class="candle-chart-toolbar__group">
+        <span class="candle-chart-status" [class.candle-chart-status--active]="isPlaying">
+          {{ ('tradeBot.chart.status.' + store.status().toLowerCase()) | translateContent }}
+        </span>
+        @if (store.mode() === 'REALTIME') {
+          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.realtime' | translateContent }}</span>
+        } @else if (store.mode() === 'REPLAY') {
+          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.replay' | translateContent }}</span>
+        } @else {
+          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.historical' | translateContent }}</span>
+        }
+      </div>
+
+      @if (showReplayControls) {
+        <div class="candle-chart-toolbar__group candle-chart-toolbar__group--replay">
+          <button
+            type="button"
+            class="candle-chart-icon-button"
+            (click)="replayFirst()"
+            [attr.aria-label]="'tradeBot.chart.replay.first' | translateContent"
+          >
+            <span class="pi pi-step-backward" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="candle-chart-icon-button"
+            (click)="replayPrevious()"
+            [attr.aria-label]="'tradeBot.chart.replay.previous' | translateContent"
+          >
+            <span class="pi pi-chevron-left" aria-hidden="true"></span>
+          </button>
+          @if (isPlaying) {
+            <button
+              type="button"
+              class="candle-chart-icon-button candle-chart-icon-button--primary"
+              (click)="pauseReplay()"
+              [attr.aria-label]="'tradeBot.chart.replay.pause' | translateContent"
+            >
+              <span class="pi pi-pause" aria-hidden="true"></span>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="candle-chart-icon-button candle-chart-icon-button--primary"
+              (click)="playReplay()"
+              [attr.aria-label]="'tradeBot.chart.replay.play' | translateContent"
+            >
+              <span class="pi pi-play" aria-hidden="true"></span>
+            </button>
+          }
+          <button
+            type="button"
+            class="candle-chart-icon-button"
+            (click)="replayNext()"
+            [attr.aria-label]="'tradeBot.chart.replay.next' | translateContent"
+          >
+            <span class="pi pi-chevron-right" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="candle-chart-icon-button"
+            (click)="replayLast()"
+            [attr.aria-label]="'tradeBot.chart.replay.last' | translateContent"
+          >
+            <span class="pi pi-step-forward" aria-hidden="true"></span>
+          </button>
+
+          <select
+            #replaySpeed
+            class="candle-chart-speed-select"
+            [value]="store.speedMs()"
+            (change)="changeReplaySpeed(replaySpeed.value)"
+            [attr.aria-label]="'tradeBot.chart.replay.speed' | translateContent"
+          >
+            @for (speed of replaySpeedOptions; track speed.value) {
+              <option [value]="speed.value">{{ speed.label }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+  }
+
   <div class="candle-chart-stage" [style.height.px]="chartHeight">
     <div #chartRef class="candle-chart-canvas"></div>
 
@@ -50,6 +135,22 @@
     }
   </div>
 
+  @if (showReplayControls) {
+    <div class="candle-chart-timeline">
+      <span class="candle-chart-timeline__index">{{ currentIndex + 1 }} / {{ totalCandles || 0 }}</span>
+      <input
+        #replaySlider
+        type="range"
+        class="candle-chart-timeline__slider"
+        min="0"
+        [max]="totalCandles > 0 ? totalCandles - 1 : 0"
+        [value]="currentIndex"
+        (input)="seekReplay(replaySlider.value)"
+        [attr.aria-label]="'tradeBot.chart.replay.timeline' | translateContent"
+      />
+    </div>
+  }
+
   @if (showPreviewBar) {
     <div class="candle-chart-preview-bar">
       <div class="candle-chart-range-list" role="group">
@@ -68,6 +169,13 @@
       </div>
 
       <div class="candle-chart-preview-clock">{{ previewClockLabel() }}</div>
+    </div>
+  }
+
+  @if (showDebugPanel && latestEvaluation()) {
+    <div class="candle-chart-debug">
+      <div class="candle-chart-debug__title">{{ 'tradeBot.chart.debug.evaluation' | translateContent }}</div>
+      <pre>{{ latestEvaluationJson() }}</pre>
     </div>
   }
 </div>

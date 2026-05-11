@@ -1,15 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
-import { StrategyCreateDto, StrategyResponse, StrategyUpdateDto } from '../../../../../core/models/trade-bot/reference-data.model';
-import { StrategyConfigService } from '../../../../../core/services/trade-bot-service/strategy-config.service';
+import { StrategyConfigDto, StrategyConfigResponse } from '../../../../../core/models/trade-bot/trading-system.model';
+import { TradingSystemService } from '../../../../../core/services/trade-bot-service/trading-system.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
-import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
-import { STRATEGY_CONFIG_INITIAL_VALUE, STRATEGY_CONFIG_ROUTES } from '../strategy-config.constants';
+import { CrudPageConfig } from '../../../../../shared/ui/base-crud-page/base-crud-page.model';
+import { FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
+import { parseJson, stringifyJson } from '../../trade-bot-form-utils';
+import { STRATEGY_FORM, TRADE_BOT_ROUTES } from '../../trade-bot-runtime.constants';
 
 @Component({
   selector: 'app-strategy-config-form',
@@ -17,97 +17,90 @@ import { STRATEGY_CONFIG_INITIAL_VALUE, STRATEGY_CONFIG_ROUTES } from '../strate
   templateUrl: './strategy-config-form.component.html'
 })
 export class StrategyConfigFormComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
-  readonly formConfig: FormConfig = {
-    fields: [
-      { type: 'text', name: 'serviceName', label: 'tradeBot.strategy.field.strategyCode', width: '1/2', validation: [Rules.required('tradeBot.strategyConfig.validation.serviceNameRequired')] },
-      { type: 'text', name: 'name', label: 'tradeBot.strategy.field.strategyName', width: '1/2', validation: [Rules.required('tradeBot.strategyConfig.validation.strategyNameRequired')] },
-      { type: 'text', name: 'version', label: 'tradeBot.strategy.field.version', width: '1/2' },
-      { type: 'select', name: 'status', label: 'tradeBot.strategy.field.status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS], validation: [Rules.required('tradeBot.strategyConfig.validation.statusRequired')] },
-      { type: 'textarea', name: 'description', label: 'tradeBot.strategy.field.description', width: 'full' }
+  readonly formConfig = STRATEGY_FORM;
+  readonly formContext: FormContext = { user: null, mode: 'create' };
+  readonly submitting = signal(false);
+  readonly pageConfig: CrudPageConfig = {
+    title: 'tradeBot.strategy.formTitle',
+    actions: [
+      { id: 'back', label: 'tradeBot.action.back', icon: 'pi pi-arrow-left', goBack: true },
+      { id: 'save', label: 'tradeBot.action.save', icon: 'pi pi-save', submitForm: true, type: 'submit' }
     ]
   };
-
-  editId: string | null = null;
-  loading = false;
-  readonly formVisible = signal(true);
-  formInitialValue: StrategyCreateDto = { ...STRATEGY_CONFIG_INITIAL_VALUE };
+  formInitialValue: Record<string, unknown> = this.toFormValue();
+  private id: string | null = null;
 
   constructor(
+    private readonly service: TradingSystemService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly service: StrategyConfigService,
-    private readonly i18nService: I18nService,
     private readonly loadingService: LoadingService,
-    private readonly toastService: ToastService
+    private readonly toastService: ToastService,
+    private readonly i18nService: I18nService
   ) {}
 
   ngOnInit(): void {
-    this.bindRouteMode();
+    this.id = this.route.snapshot.paramMap.get('id');
+    if (this.id) {
+      this.load(this.id);
+    }
   }
 
-  onSubmitForm(model: StrategyCreateDto): void {
-    const payload: StrategyCreateDto = {
-      serviceName: model.serviceName.trim(),
-      name: model.name.trim(),
-      description: model.description?.trim() || undefined,
-      version: model.version?.trim() || undefined,
-      status: model.status
-    };
-    const request$ = this.editId ? this.service.update(this.editId, payload as StrategyUpdateDto) : this.service.create(payload);
-    this.loading = true;
-    this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: () => {
-        this.toastService.success(this.i18nService.t(this.editId ? 'tradeBot.strategyConfig.toast.updateSuccess' : 'tradeBot.strategyConfig.toast.createSuccess'));
-        void this.router.navigate([STRATEGY_CONFIG_ROUTES.list]);
-      },
-      error: (error) => this.toastService.error(error?.error?.errorMessage ?? this.i18nService.t('tradeBot.strategyConfig.toast.saveError'))
-    });
-  }
-
-  private bindRouteMode(): void {
-    this.applyRouteMode(this.route.snapshot.paramMap.get('id'));
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id === this.editId) {
-        return;
-      }
-      this.applyRouteMode(id);
-    });
-  }
-
-  private applyRouteMode(id: string | null): void {
-    if (!id) {
-      this.editId = null;
-      this.formContext.mode = 'create';
-      this.formInitialValue = { ...STRATEGY_CONFIG_INITIAL_VALUE };
-      this.rerenderForm();
+  submit(model: Record<string, unknown>): void {
+    let payload: StrategyConfigDto;
+    try {
+      payload = this.toPayload(model);
+    } catch {
+      this.toastService.error(this.i18nService.t('tradeBot.message.invalidJson'));
       return;
     }
-
-    this.editId = id;
-    this.formContext.mode = 'edit';
-    this.loading = true;
-    this.loadingService.track(this.service.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (detail: StrategyResponse) => {
-        this.formInitialValue = {
-          serviceName: detail.serviceName ?? '',
-          name: detail.name ?? '',
-          description: detail.description ?? '',
-          version: detail.version ?? '',
-          status: detail.status
-        };
-        this.rerenderForm();
-      },
-      error: () => {
-        this.toastService.error(this.i18nService.t('tradeBot.strategyConfig.toast.loadDetailError'));
-        void this.router.navigate([STRATEGY_CONFIG_ROUTES.list]);
-      }
-    });
+    this.submitting.set(true);
+    this.loadingService
+      .track(this.service.saveStrategyConfig(this.id, payload))
+      .pipe(finalize(() => this.submitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastService.info(this.i18nService.t('saveSuccess'));
+          void this.router.navigate([TRADE_BOT_ROUTES.strategies]);
+        },
+        error: () => this.toastService.error(this.i18nService.t('saveError'))
+      });
   }
 
-  private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+  private load(id: string): void {
+    this.submitting.set(true);
+    this.loadingService
+      .track(this.service.getStrategyConfig(id))
+      .pipe(finalize(() => this.submitting.set(false)))
+      .subscribe({
+        next: (res) => (this.formInitialValue = this.toFormValue(res)),
+        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.loadFailed'))
+      });
+  }
+
+  private toPayload(model: Record<string, unknown>): StrategyConfigDto {
+    return {
+      code: String(model['code'] ?? ''),
+      type: 'ENTRY_TP_SL',
+      strategyVersion: String(model['strategyVersion'] ?? 'LATEST'),
+      entryRule: String(model['entryRule'] ?? ''),
+      slRule: String(model['slRule'] ?? ''),
+      tpRule: String(model['tpRule'] ?? ''),
+      status: String(model['status'] ?? 'ACTIVE'),
+      config: parseJson(model['configText'], {})
+    };
+  }
+
+  private toFormValue(value?: StrategyConfigResponse): Record<string, unknown> {
+    return {
+      code: value?.code ?? '',
+      type: value?.type ?? 'ENTRY_TP_SL',
+      strategyVersion: value?.strategyVersion ?? 'LATEST',
+      entryRule: value?.entryRule ?? '',
+      slRule: value?.slRule ?? '',
+      tpRule: value?.tpRule ?? '',
+      status: value?.status ?? 'ACTIVE',
+      configText: stringifyJson(value?.config, { side: 'BUY' })
+    };
   }
 }

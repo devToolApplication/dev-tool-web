@@ -47,14 +47,12 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { BaseCrudPageComponent } from './ui/base-crud-page/base-crud-page.component';
 import { BasePopupComponent } from './component/base-popup/base-popup.component';
-import { BaseReplayControlsComponent } from './component/base-replay-controls/base-replay-controls.component';
 import { AutoComplete } from './component/auto-complete/auto-complete';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
 import { ButtonSplit } from './component/button-split/button-split';
 import { Button } from './component/button/button';
 import { CandleChart } from './component/candle-chart/candle-chart';
 import { JsonPreviewComponent } from './component/json-preview/json-preview.component';
-import { TradeBotChartPreviewComponent } from './component/trade-bot-chart-preview/trade-bot-chart-preview.component';
 import { CheckBox } from './component/check-box/check-box';
 import { DatePicker } from './component/date-picker/date-picker';
 import { Fileupload } from './component/fileupload/fileupload';
@@ -81,7 +79,6 @@ import { DashboardComponent } from '../features/dashboard/dashboard.component';
 import { DashboardChartComponent } from '../features/dashboard/components/dashboard-chart/dashboard-chart.component';
 import { AiAgentDashboardComponent } from '../features/dashboard/components/ai-agent-dashboard/ai-agent-dashboard.component';
 import { FileStorageDashboardComponent } from '../features/dashboard/components/file-storage-dashboard/file-storage-dashboard.component';
-import { TradeBotDashboardComponent } from '../features/dashboard/components/trade-bot-dashboard/trade-bot-dashboard.component';
 import { DemoComponent } from '../features/demo/demo.component';
 import { ForbiddenComponent } from '../features/error/forbidden/forbidden.component';
 import { NotFoundComponent } from '../features/error/not-found/not-found.component';
@@ -107,7 +104,6 @@ import { FormInput } from './ui/form-input/form-input';
 import { FieldGuidePanelComponent } from './ui/field-guide-panel/field-guide-panel.component';
 import { CardComponent } from './ui/card/card.component';
 import { SummaryMetricCardComponent } from './ui/summary-metric-card/summary-metric-card.component';
-import { CandleChartPreviewComponent } from './ui/candle-chart-preview/candle-chart-preview.component';
 import { TableCellComponent } from './ui/table/component/table/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table/table-filter/table-filter';
 import { TableComponent } from './ui/table/component/table/table';
@@ -120,7 +116,6 @@ const FEATURE = [
   DashboardComponent,
   DashboardChartComponent,
   AiAgentDashboardComponent,
-  TradeBotDashboardComponent,
   FileStorageDashboardComponent,
   ForbiddenComponent,
   NotFoundComponent,
@@ -135,7 +130,6 @@ const FEATURE = [
 const COMPONENTS = [
   BaseCrudPageComponent,
   BasePopupComponent,
-  BaseReplayControlsComponent,
   Breadcrumb,
   AutoComplete,
   ButtonSpeedDial,
@@ -164,11 +158,10 @@ const COMPONENTS = [
   Tag,
   CandleChart,
   JsonPreviewComponent,
-  TradeBotChartPreviewComponent,
   TimelineComponent
 ];
 
-const UI = [FormInput, TableComponent, FieldGuidePanelComponent, CardComponent, SummaryMetricCardComponent, CandleChartPreviewComponent];
+const UI = [FormInput, TableComponent, FieldGuidePanelComponent, CardComponent, SummaryMetricCardComponent];
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,

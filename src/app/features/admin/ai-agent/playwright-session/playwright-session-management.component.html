@@ -42,6 +42,8 @@
       [rows]="10"
       [rowsPerPageOptions]="[10, 20, 50]"
       [rowTrackBy]="trackBySessionId"
+      [scrollable]="true"
+      scrollHeight="flex"
       responsiveLayout="scroll"
       styleClass="playwright-session-table"
     >
@@ -54,7 +56,7 @@
           <th>{{ 'aiAgent.playwrightSessions.throttle' | translateContent }}</th>
           <th>{{ 'aiAgent.playwrightSessions.currentThread' | translateContent }}</th>
           <th>{{ 'aiAgent.playwrightSessions.timeline' | translateContent }}</th>
-          <th class="action-col">{{ 'actions' | translateContent }}</th>
+          <th pFrozenColumn alignFrozen="right" class="action-col">{{ 'actions' | translateContent }}</th>
         </tr>
       </ng-template>
 
@@ -99,7 +101,7 @@
               <span><strong>{{ 'aiAgent.playwrightSessions.reset' | translateContent }}:</strong> {{ formatDateTime(session.lastResetAt) }}</span>
             </div>
           </td>
-          <td class="action-cell">
+          <td pFrozenColumn alignFrozen="right" class="action-cell">
             <app-button [text]="true" icon="pi pi-pencil" severity="info" label="edit" (buttonClick)="openEdit(session)"></app-button>
             <app-button
               [text]="true"

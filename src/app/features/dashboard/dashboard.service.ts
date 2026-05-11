@@ -9,7 +9,6 @@ import { DashboardOverview, DashboardTabType } from './dashboard.models';
 export class DashboardService {
   private readonly endpoints: Record<DashboardTabType, string> = {
     'ai-agent': `${environment.apiUrl.adminAiGenerator}/dashboard/overview`,
-    'trade-bot': `${environment.apiUrl.tradeBotAdminUrl}/dashboard/overview`,
     'file-storage': `${environment.apiUrl.adminFileServiceUrl}/dashboard/overview`
   };
 

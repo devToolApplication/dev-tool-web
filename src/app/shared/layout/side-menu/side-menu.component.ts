@@ -20,6 +20,7 @@ export class SideMenuComponent {
 
   constructor() {
     this.expandedState.add('root/layout.menu.reports/layout.menu.analytics');
+    this.expandedState.add('root/layout.menu.admin/layout.menu.systemManagement');
   }
 
   isExpanded(path: string): boolean {

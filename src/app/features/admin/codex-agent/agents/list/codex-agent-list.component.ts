@@ -101,6 +101,9 @@ export class CodexAgentListComponent extends BasePagedList<CodexAgentResponse> i
           field: 'actions',
           header: 'actions',
           type: 'actions',
+          minWidth: '12rem',
+          frozen: true,
+          alignFrozen: 'right',
           actions: [
             { label: 'codexAgent.form.viewDetail', icon: 'pi pi-eye', severity: 'info', onClick: (row) => this.goEdit(row.id) },
             { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }

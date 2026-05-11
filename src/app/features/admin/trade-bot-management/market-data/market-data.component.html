@@ -1,0 +1,33 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.query' | translateContent }}</div>
+    <app-form-input
+      [config]="queryForm"
+      [context]="formContext"
+      [initialValue]="queryInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="loadCandles($event)"
+    ></app-form-input>
+  </app-card>
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.import' | translateContent }}</div>
+    <app-form-input
+      [config]="importForm"
+      [context]="formContext"
+      [initialValue]="importInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="importCandles($event)"
+    ></app-form-input>
+  </app-card>
+
+  @if (candles().length) {
+    <app-candle-chart
+      [mode]="'HISTORICAL'"
+      [config]="chartConfig()"
+      [candles]="chartCandles()"
+    ></app-candle-chart>
+  }
+
+  <app-table [config]="tableConfig" [data]="candles()" [loading]="loading()"></app-table>
+</section>

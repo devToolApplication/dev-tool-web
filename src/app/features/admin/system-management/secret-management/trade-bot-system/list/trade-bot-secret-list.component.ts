@@ -36,6 +36,9 @@ export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretRes
         field: 'actions',
         header: 'Actions',
         type: 'actions',
+        minWidth: '12rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row: TradeBotSecretResponse) => this.goEdit(row.id) },
           { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row: TradeBotSecretResponse) => this.remove(row.id) }

@@ -81,6 +81,16 @@
   border-color: var(--app-sidebar-link-hover-border);
 }
 
+.menu-link:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.menu-link:disabled:hover {
+  background: var(--app-sidebar-link-bg);
+  border-color: var(--app-transparent);
+}
+
 .menu-link.active {
   background: var(--app-sidebar-item-active-bg);
   color: var(--app-sidebar-item-active-text);

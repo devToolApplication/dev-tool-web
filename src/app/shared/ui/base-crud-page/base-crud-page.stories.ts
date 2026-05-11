@@ -144,3 +144,48 @@ export const FormHidden: Story = {
   },
   render: Default.render
 };
+
+export const WithBeforeFormContent: Story = {
+  args: {
+    pageConfig: {
+      ...pageConfig,
+      title: 'CRUD Shell With Preview'
+    },
+    formConfig,
+    formContext,
+    formInitialValue,
+    formVisible: true,
+    submitting: false
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      lastEvent: 'No action yet',
+      format: (value: unknown) => JSON.stringify(value, null, 2)
+    },
+    template: `
+      <div class="min-h-screen app-bg-soft p-6">
+        <app-base-crud-page
+          [pageConfig]="pageConfig"
+          [formConfig]="formConfig"
+          [formContext]="formContext"
+          [formInitialValue]="formInitialValue"
+          [formVisible]="formVisible"
+          [submitting]="submitting"
+          (actionClick)="lastEvent = 'Action: ' + $event"
+          (valueChange)="lastEvent = 'Value changed: ' + format($event)"
+          (formSubmit)="lastEvent = 'Submitted: ' + format($event)"
+        >
+          <div crud-page-before-form class="rounded-lg border app-border app-bg-card p-4 app-shadow-sm">
+            <div class="text-sm font-semibold">Projected preview</div>
+            <div class="mt-1 text-sm app-text-muted">Content in this slot renders above the form.</div>
+          </div>
+        </app-base-crud-page>
+
+        <div class="mx-auto mt-4 max-w-6xl rounded-lg border app-border app-bg-card p-4">
+          <pre class="m-0 whitespace-pre-wrap text-xs">{{ lastEvent }}</pre>
+        </div>
+      </div>
+    `
+  })
+};

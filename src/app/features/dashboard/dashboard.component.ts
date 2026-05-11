@@ -12,22 +12,19 @@ import { DashboardService } from './dashboard.service';
 export class DashboardComponent implements OnInit {
   activeTab: DashboardTabType = 'ai-agent';
 
-  readonly tabs: DashboardTabType[] = ['ai-agent', 'trade-bot', 'file-storage'];
+  readonly tabs: DashboardTabType[] = ['ai-agent', 'file-storage'];
   readonly tabItems = [
     { value: 'ai-agent', label: 'dashboard.tab.aiAgent' },
-    { value: 'trade-bot', label: 'dashboard.tab.tradeBot' },
     { value: 'file-storage', label: 'dashboard.tab.fileStorage' }
   ];
 
   readonly overviews: Partial<Record<DashboardTabType, DashboardOverview>> = {};
   readonly loadingState: Record<DashboardTabType, boolean> = {
     'ai-agent': false,
-    'trade-bot': false,
     'file-storage': false
   };
   readonly errorState: Record<DashboardTabType, string> = {
     'ai-agent': '',
-    'trade-bot': '',
     'file-storage': ''
   };
 

@@ -146,7 +146,14 @@ code {
 
 .action-col,
 .action-cell {
+  background: var(--app-card-bg-strong);
+  box-shadow: -10px 0 18px -18px color-mix(in srgb, var(--app-text) 45%, var(--app-transparent));
   min-width: 18rem;
+  z-index: 2;
+}
+
+.action-col {
+  z-index: 3;
 }
 
 .empty-state {

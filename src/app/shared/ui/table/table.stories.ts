@@ -121,6 +121,8 @@ const tableConfig: TableConfig = {
       header: 'Actions',
       type: 'actions',
       minWidth: '16rem',
+      frozen: true,
+      alignFrozen: 'right',
       actions: [
         {
           label: 'Edit',

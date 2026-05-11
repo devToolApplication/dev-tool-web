@@ -82,6 +82,16 @@
   min-width: 100%;
 }
 
+:host ::ng-deep .app-table-scrollable .app-table-actions-column {
+  background: var(--app-card-bg-strong);
+  box-shadow: -10px 0 18px -18px color-mix(in srgb, var(--app-text) 45%, var(--app-transparent));
+  z-index: 2;
+}
+
+:host ::ng-deep .app-table-scrollable .p-datatable-thead .app-table-actions-column {
+  z-index: 3;
+}
+
 @media (max-width: 767px) {
   .table-caption {
     flex-direction: column;

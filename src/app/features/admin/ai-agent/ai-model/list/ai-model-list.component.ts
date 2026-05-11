@@ -44,6 +44,9 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
         field: 'actions',
         header: 'actions',
         type: 'actions',
+        minWidth: '16rem',
+        frozen: true,
+        alignFrozen: 'right',
         actions: [
           { label: 'aiAgent.aiModel.testPrompt.action', icon: 'pi pi-comments', severity: 'help', onClick: (row) => this.openTestPrompt(row) },
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },

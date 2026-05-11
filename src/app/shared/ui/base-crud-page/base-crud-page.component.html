@@ -24,6 +24,8 @@
     }
   </div>
 
+  <ng-content select="[crud-page-before-form]"></ng-content>
+
   <div class="form-wrap shadow-1">
     @if (pageConfig.infoSection) {
       <div class="mb-4 rounded-lg border app-border app-bg-soft p-4">

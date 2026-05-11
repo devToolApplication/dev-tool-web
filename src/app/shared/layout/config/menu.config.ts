@@ -29,6 +29,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.systemManagement',
         icon: 'pi pi-cog',
         items: [
+          { label: 'layout.menu.jobScheduler', icon: 'pi pi-clock', routerLink: '/admin/system-management/jobs' },
           {
             label: 'layout.menu.secretManagement',
             icon: 'pi pi-key',
@@ -69,11 +70,12 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.tradeBotManagement',
         icon: 'pi pi-chart-line',
         items: [
-          { label: 'layout.menu.dataSource', icon: 'pi pi-database', routerLink: '/admin/trade-bot/data-source' },
-          { label: 'layout.menu.strategyConfig', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' },
-          { label: 'layout.menu.ruleConfig', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/rule-configs' },
-          { label: 'layout.menu.strategyBinding', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/strategy-binding' },
-          { label: 'layout.menu.backtest', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/backtests' }
+          { label: 'layout.menu.marketData', icon: 'pi pi-database', routerLink: '/admin/trade-bot/market-data' },
+          { label: 'layout.menu.indicatorConfigs', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/indicator-configs' },
+          { label: 'layout.menu.ruleConfigs', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/rule-configs' },
+          { label: 'layout.menu.strategyConfigs', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' },
+          { label: 'layout.menu.backtests', icon: 'pi pi-history', routerLink: '/admin/trade-bot/backtests' },
+          { label: 'layout.menu.replay', icon: 'pi pi-play-circle', routerLink: '/admin/trade-bot/replay' }
         ]
       },
     ]

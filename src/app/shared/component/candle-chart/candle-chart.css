@@ -13,6 +13,99 @@
   box-shadow: var(--app-shadow-sm);
 }
 
+.candle-chart-toolbar,
+.candle-chart-timeline,
+.candle-chart-debug {
+  border-top: 1px solid var(--app-finance-chart-border);
+  background: var(--app-finance-chart-bg);
+}
+
+.candle-chart-toolbar {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 0;
+  border-bottom: 1px solid var(--app-finance-chart-border);
+  padding: 0.45rem 0.65rem;
+}
+
+.candle-chart-toolbar__group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.candle-chart-toolbar__group--replay {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.candle-chart-status,
+.candle-chart-mode {
+  display: inline-flex;
+  min-height: 1.45rem;
+  align-items: center;
+  border: 1px solid var(--app-finance-chart-border);
+  border-radius: 999px;
+  padding: 0 0.55rem;
+  color: var(--app-chart-axis);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.candle-chart-status--active {
+  border-color: var(--app-control-success-border);
+  background: var(--app-control-success-bg);
+  color: var(--app-control-success-text);
+}
+
+.candle-chart-icon-button {
+  display: inline-flex;
+  width: 1.9rem;
+  height: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-finance-chart-border);
+  border-radius: 6px;
+  background: var(--app-control-neutral-bg);
+  color: var(--app-text-muted);
+  cursor: pointer;
+}
+
+.candle-chart-icon-button:hover,
+.candle-chart-speed-select:hover {
+  border-color: var(--app-border-strong);
+  color: var(--app-text);
+}
+
+.candle-chart-icon-button:focus-visible,
+.candle-chart-speed-select:focus-visible,
+.candle-chart-timeline__slider:focus-visible {
+  outline: 2px solid var(--app-finance-chart-crosshair);
+  outline-offset: 2px;
+}
+
+.candle-chart-icon-button--primary {
+  background: var(--app-control-accent-bg);
+  color: var(--app-control-contrast-text);
+}
+
+.candle-chart-speed-select {
+  height: 1.9rem;
+  border: 1px solid var(--app-finance-chart-border);
+  border-radius: 6px;
+  background: var(--app-input-bg);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .candle-chart-stage {
   position: relative;
   min-height: 360px;
@@ -156,6 +249,52 @@
   font-size: 0.75rem;
 }
 
+.candle-chart-timeline {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.65rem;
+}
+
+.candle-chart-timeline__index {
+  color: var(--app-chart-axis);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.candle-chart-timeline__slider {
+  width: 100%;
+  accent-color: var(--app-primary);
+}
+
+.candle-chart-debug {
+  padding: 0.65rem;
+}
+
+.candle-chart-debug__title {
+  margin-bottom: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.candle-chart-debug pre {
+  max-height: 12rem;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--app-finance-chart-border);
+  border-radius: 6px;
+  background: var(--app-surface-soft);
+  color: var(--app-text);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  padding: 0.6rem;
+}
+
 .candle-chart-range-list {
   display: flex;
   min-width: 0;
@@ -236,6 +375,15 @@
     align-items: stretch;
     flex-direction: column;
     gap: 0;
+  }
+
+  .candle-chart-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .candle-chart-toolbar__group--replay {
+    justify-content: flex-start;
   }
 
   .candle-chart-range-list {

@@ -107,6 +107,9 @@ export class AgentDefinitionListComponent extends BasePagedList<AgentDefinitionR
           field: 'actions',
           header: 'Actions',
           type: 'actions',
+          minWidth: '16rem',
+          frozen: true,
+          alignFrozen: 'right',
           actions: [
             { label: 'Playground', icon: 'pi pi-play', severity: 'help', onClick: (row) => this.openPlayground(row.id) },
             { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },

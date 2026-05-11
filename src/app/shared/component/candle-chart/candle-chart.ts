@@ -3,181 +3,95 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
+  Output,
   SimpleChanges,
   signal,
   ViewChild,
 } from '@angular/core';
+import { from, isObservable, of, Subscription } from 'rxjs';
+
+import { CandleChartEngineService, type CandleChartEngineRenderInput } from './candle-chart-engine.service';
+import { CandleChartLegacyAdapter } from './candle-chart-legacy-adapter.service';
 import type {
-  CandlestickData,
-  ChartOptions,
-  DeepPartial,
-  HistogramData,
-  IChartApi,
-  ISeriesApi,
-  ISeriesMarkersPluginApi,
-  LineData,
-  SeriesMarker,
-  Time,
-  UTCTimestamp,
-  WhitespaceData,
-} from 'lightweight-charts';
-import { resolveCssColor, resolveThemeColor } from '../../utils/theme-colors';
+  CandleChartBarChangedEvent,
+  CandleChartConfig,
+  CandleChartErrorEvent,
+  CandleChartEvaluateHandler,
+  CandleChartEvaluationResult,
+  CandleChartMode,
+  CandleChartPayload,
+  CandleChartRange,
+  CandleChartReplayStatusEvent,
+  CandleChartRuleEvaluation,
+  CandleChartStatus,
+  CandleChartStrategySignal,
+  ChartCandle,
+  ChartIndicator,
+  ChartOverlay,
+  EvaluationConfig,
+  RealtimeConfig,
+  RenderedBoxArea,
+  RenderedLineLabel,
+  ReplayConfig,
+  ResolvedCandleChartConfig,
+} from './candle-chart.models';
+import { CandleChartOverlayMapper } from './candle-chart-overlay.mapper';
+import { CandleChartRealtimeService } from './candle-chart-realtime.service';
+import { CandleChartReplayService, type CandleChartReplayStep } from './candle-chart-replay.service';
+import { CandleChartStoreService } from './candle-chart-store.service';
+import { CandleChartTimeUtil } from './candle-chart-time.util';
 
-type LightweightChartsModule = typeof import('lightweight-charts');
-type CandleChartTime = string | number | Time;
-type CandleChartRange = '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'ALL';
-type LineWidth = 1 | 2 | 3 | 4;
-type TimeBoundary = 'floor' | 'ceil' | 'nearest';
-
-export interface CandleData {
-  time: CandleChartTime;
-  open: number;
-  close: number;
-  high: number;
-  low: number;
-  volume?: number;
-}
-
-export interface ChartLine {
-  name: string;
-  color: string;
-  start: number;
-  end: number;
-  startTime: CandleChartTime;
-  endTime: CandleChartTime;
-}
-
-export interface ChartBoxArea {
-  name?: string;
-  color: string;
-  startTime: CandleChartTime;
-  endTime: CandleChartTime;
-  high: number;
-  low: number;
-}
-
-export interface ChartPoint {
-  name: string;
-  color: string;
-  shape?: string;
-  startTime: CandleChartTime;
-  price: number;
-  size?: number;
-}
-
-export interface ChartIndicatorSeries {
-  name: string;
-  color: string;
-  pane: 'overlay' | 'subchart';
-  values: Array<number | null>;
-}
-
-export interface CandleChartPayload {
-  candles: CandleData[];
-  lines: ChartLine[];
-  boxAreas: ChartBoxArea[];
-  points: ChartPoint[];
-  indicators: ChartIndicatorSeries[];
-}
-
-export interface CandleChartConfig {
-  showCandles: boolean;
-  showVolume: boolean;
-  showLines: boolean;
-  showBoxAreas: boolean;
-  showPoints: boolean;
-  showIndicators: boolean;
-  symbol?: string;
-  exchange?: string;
-  interval?: string;
-  height?: number;
-  showHeader?: boolean;
-  showAttribution?: boolean;
-  showLastPriceLine?: boolean;
-  showOverlayLabels?: boolean;
-  showPriceAxisLabels?: boolean;
-  showPreviewBar?: boolean;
-  watermark?: string;
-}
-
-interface NormalizedCandle {
-  source: CandleData;
-  time: Time;
-  sortTime: number;
-  key: string;
-}
-
-interface NormalizedBoxArea {
-  key: string;
-  name?: string;
-  color: string;
-  startTime: Time;
-  endTime: Time;
-  high: number;
-  low: number;
-}
-
-interface NormalizedLine {
-  key: string;
-  name: string;
-  color: string;
-  start: number;
-  end: number;
-  startTime: Time;
-  endTime: Time;
-}
-
-interface RenderedBoxArea {
-  key: string;
-  name?: string;
-  style: Record<string, string>;
-}
-
-interface RenderedLineLabel {
-  key: string;
-  name: string;
-  style: Record<string, string>;
-}
-
-interface CandleChartColors {
-  background: string;
-  muted: string;
-  grid: string;
-  border: string;
-  crosshair: string;
-  candleUp: string;
-  candleDown: string;
-  volumeUp: string;
-  volumeDown: string;
-}
-
-interface TimeNormalizationContext {
-  lookup: Map<string, Time>;
-  candles: NormalizedCandle[];
-}
+export * from './candle-chart.models';
 
 @Component({
   selector: 'app-candle-chart',
   standalone: false,
   templateUrl: './candle-chart.html',
   styleUrl: './candle-chart.css',
+  providers: [
+    CandleChartEngineService,
+    CandleChartLegacyAdapter,
+    CandleChartRealtimeService,
+    CandleChartReplayService,
+    CandleChartStoreService,
+    CandleChartTimeUtil,
+  ],
 })
 export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('chartRef', { static: true })
   chartRef!: ElementRef<HTMLDivElement>;
 
-  @Input() config: CandleChartConfig = this.defaultConfig();
+  @Input() config: CandleChartConfig = {};
   @Input() data: CandleChartPayload = this.emptyPayload();
+  @Input() mode: CandleChartMode | null = null;
+  @Input() symbol?: string;
+  @Input() timeframe?: string;
+  @Input() candles: ChartCandle[] | null = null;
+  @Input() indicators: ChartIndicator[] | null = null;
+  @Input() overlays: ChartOverlay[] | null = null;
+  @Input() replayConfig: ReplayConfig | null = null;
+  @Input() realtimeConfig: RealtimeConfig | null = null;
+  @Input() evaluationConfig: EvaluationConfig | null = null;
+  @Input() evaluateHandler: CandleChartEvaluateHandler | null = null;
 
-  latestCandle: CandleData | null = null;
+  @Output() readonly barChanged = new EventEmitter<CandleChartBarChangedEvent>();
+  @Output() readonly candleSelected = new EventEmitter<ChartCandle>();
+  @Output() readonly ruleEvaluated = new EventEmitter<CandleChartRuleEvaluation | Record<string, unknown>>();
+  @Output() readonly strategySignal = new EventEmitter<CandleChartStrategySignal | Record<string, unknown>>();
+  @Output() readonly replayStatusChanged = new EventEmitter<CandleChartReplayStatusEvent>();
+  @Output() readonly error = new EventEmitter<CandleChartErrorEvent>();
+
+  latestCandle: ChartCandle | null = null;
   renderedBoxAreas: RenderedBoxArea[] = [];
   renderedLineLabels: RenderedLineLabel[] = [];
   readonly selectedRange = signal<CandleChartRange>('ALL');
   readonly previewClockLabel = signal(this.buildClockLabel());
+  readonly latestEvaluation = signal<Record<string, unknown> | null>(null);
   readonly rangeOptions: Array<{ label: string; value: CandleChartRange }> = [
     { label: '1D', value: '1D' },
     { label: '5D', value: '5D' },
@@ -189,46 +103,76 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     { label: '5Y', value: '5Y' },
     { label: 'All', value: 'ALL' },
   ];
+  readonly replaySpeedOptions = [
+    { label: '0.25x', value: 1600 },
+    { label: '0.5x', value: 1000 },
+    { label: '1x', value: 650 },
+    { label: '2x', value: 300 },
+    { label: '4x', value: 120 },
+  ];
 
-  private lightweightChartsModule: LightweightChartsModule | null = null;
-  private chartInstance: IChartApi | null = null;
-  private candleSeries: ISeriesApi<'Candlestick'> | null = null;
-  private markersApi: ISeriesMarkersPluginApi<Time> | null = null;
-  private renderedSeries: Array<ISeriesApi<any>> = [];
-  private normalizedCandles: NormalizedCandle[] = [];
-  private activeBoxAreas: NormalizedBoxArea[] = [];
-  private activeLines: NormalizedLine[] = [];
+  private initialized = false;
+  private destroyed = false;
   private themeObserver: MutationObserver | null = null;
   private clockIntervalId: number | null = null;
-  private destroyed = false;
+  private evaluationSubscription: Subscription | null = null;
+  private lastRenderInput: CandleChartEngineRenderInput | null = null;
+  private evaluationOverlays: ChartOverlay[] = [];
+  private realtimeOverlayBuffer: ChartOverlay[] = [];
+  private forceSetDataOnNextRender = false;
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly engine: CandleChartEngineService,
+    private readonly legacyAdapter: CandleChartLegacyAdapter,
     private readonly ngZone: NgZone,
+    private readonly overlayMapper: CandleChartOverlayMapper,
+    readonly store: CandleChartStoreService,
+    private readonly realtimeService: CandleChartRealtimeService,
+    private readonly replayService: CandleChartReplayService,
   ) {}
 
   get chartHeight(): number {
-    return this.config.height ?? 520;
+    return this.resolvedConfig().height;
   }
 
   get showHeader(): boolean {
-    return this.config.showHeader !== false;
+    return this.resolvedConfig().showHeader;
+  }
+
+  get showToolbar(): boolean {
+    return this.resolvedConfig().showToolbar;
   }
 
   get showPreviewBar(): boolean {
-    return this.config.showPreviewBar !== false;
+    return this.resolvedConfig().showPreviewBar;
   }
 
-  get showOverlayLabels(): boolean {
-    return this.config.showOverlayLabels === true;
+  get showReplayControls(): boolean {
+    return this.store.mode() === 'REPLAY' && this.resolvedConfig().showReplayControls;
   }
 
-  get showPriceAxisLabels(): boolean {
-    return this.config.showPriceAxisLabels === true;
+  get showDebugPanel(): boolean {
+    return this.resolvedConfig().showDebugPanel;
   }
 
   get chartTitle(): string {
-    return [this.config.symbol, this.config.interval, this.config.exchange].filter(Boolean).join(' - ');
+    const config = this.resolvedConfig();
+    return [this.symbol ?? config.symbol, this.timeframe ?? config.timeframe ?? config.interval, config.exchange]
+      .filter(Boolean)
+      .join(' - ');
+  }
+
+  get currentIndex(): number {
+    return this.store.currentIndex();
+  }
+
+  get totalCandles(): number {
+    return this.store.candles().length;
+  }
+
+  get isPlaying(): boolean {
+    return this.store.status() === 'PLAYING';
   }
 
   get latestChange(): number {
@@ -261,13 +205,12 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.chartInstance) {
+    if (!this.initialized) {
       return;
     }
 
-    if (changes['data'] || changes['config']) {
-      this.render();
-    }
+    const resetIndex = Boolean(changes['candles'] || changes['data'] || changes['replayConfig']);
+    this.syncInputsAndRender(resetIndex);
   }
 
   ngOnDestroy(): void {
@@ -278,12 +221,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       this.clockIntervalId = null;
     }
     this.themeObserver?.disconnect();
-    this.clearSeries();
-    this.chartInstance?.timeScale().unsubscribeVisibleLogicalRangeChange(this.updateOverlayGeometry);
-    this.chartInstance?.remove();
-    this.chartInstance = null;
-    this.candleSeries = null;
-    this.markersApi = null;
+    this.evaluationSubscription?.unsubscribe();
+    this.replayService.pause();
+    this.realtimeService.disconnect();
+    this.engine.destroy();
   }
 
   formatPrice(value: number | undefined): string {
@@ -309,716 +250,345 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   applyRange(range: CandleChartRange): void {
     this.selectedRange.set(range);
-    this.applySelectedRange();
+    this.renderStore();
+  }
+
+  playReplay(): void {
+    if (this.store.mode() !== 'REPLAY') {
+      return;
+    }
+    this.replayService.play(this.currentIndex, this.totalCandles, this.currentReplayConfig(), (step) =>
+      this.applyReplayStep(step),
+    );
+  }
+
+  pauseReplay(): void {
+    this.replayService.pause();
+    this.store.setStatus(this.totalCandles ? 'PAUSED' : 'IDLE');
+    this.emitReplayStatus();
+  }
+
+  replayFirst(): void {
+    this.replayService.pause();
+    this.applyReplayStep(this.replayService.first(this.totalCandles), true);
+  }
+
+  replayPrevious(): void {
+    this.replayService.pause();
+    this.applyReplayStep(this.replayService.previous(this.currentIndex, this.totalCandles), true);
+  }
+
+  replayNext(): void {
+    this.replayService.pause();
+    this.applyReplayStep(this.replayService.next(this.currentIndex, this.totalCandles, this.currentReplayConfig()), true);
+  }
+
+  replayLast(): void {
+    this.replayService.pause();
+    this.applyReplayStep(this.replayService.last(this.totalCandles), true);
+  }
+
+  seekReplay(value: string): void {
+    this.replayService.pause();
+    this.applyReplayStep(this.replayService.seek(Number(value), this.totalCandles), true);
+  }
+
+  changeReplaySpeed(value: string): void {
+    const speedMs = Number(value);
+    this.store.speedMs.set(Number.isNaN(speedMs) ? 650 : speedMs);
+    if (this.isPlaying) {
+      this.playReplay();
+    }
+    this.emitReplayStatus();
+  }
+
+  latestEvaluationJson(): string {
+    return JSON.stringify(this.latestEvaluation() ?? {}, null, 2);
   }
 
   private async initializeChart(): Promise<void> {
-    this.lightweightChartsModule = await import('lightweight-charts');
+    this.syncInputState(true);
+    const input = this.createRenderInput();
+    this.lastRenderInput = input;
+    await this.engine.initialize(
+      this.chartRef.nativeElement,
+      input,
+      (state) => this.applyRenderState(state.latestCandle, state.renderedBoxAreas, state.renderedLineLabels),
+      (candle) => this.selectCandle(candle),
+    );
     if (this.destroyed) {
       return;
     }
-
-    const colors = this.resolveChartColors();
-    this.chartInstance = this.lightweightChartsModule.createChart(
-      this.chartRef.nativeElement,
-      this.buildChartOptions(colors),
-    );
-    this.chartInstance.timeScale().subscribeVisibleLogicalRangeChange(this.updateOverlayGeometry);
-    this.render();
+    this.initialized = true;
+    this.connectRealtimeIfNeeded();
+    if (this.store.mode() === 'REPLAY' && this.currentReplayConfig().autoPlay) {
+      this.playReplay();
+    }
   }
 
-  private readonly onResize = (): void => {
-    this.chartInstance?.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight, true);
-    this.updateOverlayGeometry();
-  };
+  private syncInputsAndRender(resetIndex: boolean): void {
+    this.syncInputState(resetIndex);
+    this.forceSetDataOnNextRender = resetIndex;
+    this.connectRealtimeIfNeeded();
+    this.renderStore();
+    if (resetIndex && this.store.mode() === 'REPLAY' && this.currentReplayConfig().autoPlay) {
+      this.playReplay();
+    }
+  }
 
-  private readonly updateOverlayGeometry = (): void => {
-    if (!this.chartInstance || !this.candleSeries) {
-      this.setRenderedBoxAreas([]);
-      this.setRenderedLineLabels([]);
+  private syncInputState(resetIndex: boolean): void {
+    const mode = this.resolveMode();
+    const candles = this.resolveInputCandles();
+    const indicators = this.resolveInputIndicators();
+    const overlays = this.resolveAllOverlays();
+    this.store.configure(mode, candles, indicators, overlays, this.currentReplayConfig(), resetIndex);
+  }
+
+  private renderStore(): void {
+    if (!this.initialized && !this.lastRenderInput) {
       return;
     }
+    const input = this.createRenderInput();
+    this.lastRenderInput = input;
+    this.engine.render(input);
+    this.forceSetDataOnNextRender = false;
+  }
 
-    const timeScale = this.chartInstance.timeScale();
-    const chartWidth = this.chartRef.nativeElement.clientWidth;
-    const nextAreas = this.activeBoxAreas.flatMap((area) => {
-      const startCoordinate = timeScale.timeToCoordinate(area.startTime);
-      const endCoordinate = timeScale.timeToCoordinate(area.endTime);
-      const highCoordinate = this.candleSeries?.priceToCoordinate(area.high);
-      const lowCoordinate = this.candleSeries?.priceToCoordinate(area.low);
-      if (
-        startCoordinate == null ||
-        endCoordinate == null ||
-        highCoordinate == null ||
-        lowCoordinate == null
-      ) {
-        return [];
-      }
+  private createRenderInput(): CandleChartEngineRenderInput {
+    const mode = this.store.mode();
+    const currentIndex = this.store.currentIndex();
+    const visibleCandles = this.store.visibleCandles();
+    return {
+      candles: visibleCandles,
+      indicators: this.store.indicators(),
+      overlays: this.filterOverlaysForVisibleIndex(this.store.overlays(), mode, currentIndex),
+      config: this.resolvedConfig(),
+      selectedRange: this.selectedRange(),
+      forceSetData: this.forceSetDataOnNextRender,
+    };
+  }
 
-      const left = Math.min(startCoordinate, endCoordinate);
-      const top = Math.min(highCoordinate, lowCoordinate);
-      const width = Math.max(Math.abs(endCoordinate - startCoordinate), 4);
-      const height = Math.max(Math.abs(lowCoordinate - highCoordinate), 6);
+  private applyReplayStep(step: CandleChartReplayStep, fromUserAction = false): void {
+    const candle = this.store.setCurrentIndex(step.index);
+    this.store.setStatus(step.status);
+    this.renderStore();
+    this.emitReplayStatus();
+    if (candle && (fromUserAction || step.status === 'PLAYING' || step.status === 'ENDED')) {
+      this.emitBarChanged(candle);
+    }
+  }
 
-      return [
-        {
-          key: area.key,
-          name: this.showOverlayLabels ? area.name : undefined,
-          style: {
-            left: `${left}px`,
-            top: `${top}px`,
-            width: `${width}px`,
-            height: `${height}px`,
-            background: area.color,
-            borderColor: area.color,
-          },
-        },
-      ];
+  private emitReplayStatus(): void {
+    this.replayStatusChanged.emit({
+      index: this.currentIndex,
+      status: this.store.status(),
+      speedMs: this.store.speedMs(),
     });
+  }
 
-    const nextLineLabels = this.showOverlayLabels
-      ? this.activeLines.flatMap((line) => {
-          if (!line.name) {
-            return [];
-          }
-          const startCoordinate = timeScale.timeToCoordinate(line.startTime);
-          const endCoordinate = timeScale.timeToCoordinate(line.endTime);
-          const startPriceCoordinate = this.candleSeries?.priceToCoordinate(line.start);
-          const endPriceCoordinate = this.candleSeries?.priceToCoordinate(line.end);
-          if (
-            startCoordinate == null ||
-            endCoordinate == null ||
-            startPriceCoordinate == null ||
-            endPriceCoordinate == null
-          ) {
-            return [];
-          }
-          if (Math.max(startCoordinate, endCoordinate) < -16 || Math.min(startCoordinate, endCoordinate) > chartWidth + 16) {
-            return [];
-          }
-          if (Math.abs(endCoordinate - startCoordinate) < 18) {
-            return [];
-          }
+  private emitBarChanged(candle: ChartCandle): void {
+    const event: CandleChartBarChangedEvent = {
+      index: this.currentIndex,
+      candle,
+      mode: this.store.mode(),
+      status: this.store.status(),
+    };
+    this.barChanged.emit(event);
+    this.evaluateCurrentBar(event);
+  }
 
-          return [
-            {
-              key: line.key,
-              name: line.name,
-              style: {
-                left: `${(startCoordinate + endCoordinate) / 2}px`,
-                top: `${(startPriceCoordinate + endPriceCoordinate) / 2}px`,
-                color: line.color,
-              },
-            },
-          ];
-        })
-      : [];
-
-    this.setRenderedBoxAreas(nextAreas);
-    this.setRenderedLineLabels(nextLineLabels);
-  };
-
-  private render(): void {
-    if (!this.chartInstance || !this.lightweightChartsModule) {
+  private evaluateCurrentBar(event: CandleChartBarChangedEvent): void {
+    const config = this.evaluationConfig;
+    const shouldEvaluate = config?.enabled === true || this.resolvedConfig().evaluateOnBarChange;
+    if (!shouldEvaluate || !this.evaluateHandler) {
+      return;
+    }
+    if (this.resolvedConfig().evaluateOnClosedCandleOnly && event.candle.closed === false) {
       return;
     }
 
-    const colors = this.resolveChartColors();
-    const normalizedCandles = this.normalizeCandles(this.data.candles);
-    const timeContext = this.buildTimeNormalizationContext(normalizedCandles);
-    const latestNormalizedCandle = normalizedCandles.at(-1);
-
-    this.latestCandle = latestNormalizedCandle?.source ?? null;
-    this.clearSeries();
-    this.normalizedCandles = normalizedCandles;
-    this.chartInstance.applyOptions(this.buildChartOptions(colors));
-    this.applyMainPriceScale(colors);
-
-    this.candleSeries = this.chartInstance.addSeries(
-      this.lightweightChartsModule.CandlestickSeries,
-      {
-        upColor: colors.candleUp,
-        downColor: colors.candleDown,
-        borderVisible: false,
-        wickUpColor: colors.candleUp,
-        wickDownColor: colors.candleDown,
-        priceLineVisible: this.config.showLastPriceLine !== false,
-        priceLineColor: this.latestTone === 'down' ? colors.candleDown : colors.candleUp,
-        priceLineStyle: this.lightweightChartsModule.LineStyle.Dotted,
-        priceLineWidth: 1,
-        visible: this.config.showCandles,
-        title: this.config.symbol ?? '',
-        lastValueVisible: this.showPriceAxisLabels,
-        priceFormat: {
-          type: 'price',
-          precision: 6,
-          minMove: 0.000001,
-        },
-      },
-    );
-    this.trackSeries(this.candleSeries);
-    this.candleSeries.setData(this.toCandlestickData(normalizedCandles));
-
-    if (this.config.showVolume) {
-      this.renderVolume(normalizedCandles, colors);
+    this.evaluationSubscription?.unsubscribe();
+    try {
+      const result = this.evaluateHandler(event);
+      const result$ = isObservable(result)
+        ? result
+        : result instanceof Promise
+          ? from(result)
+          : of(result);
+      this.evaluationSubscription = result$.subscribe({
+        next: (value) => this.applyEvaluationResult(value, event),
+        error: (detail) => this.emitError('Chart evaluation failed', detail),
+      });
+    } catch (detail) {
+      this.emitError('Chart evaluation failed', detail);
     }
+  }
 
-    if (this.config.showIndicators) {
-      this.renderIndicators(normalizedCandles, colors);
+  private applyEvaluationResult(
+    result: CandleChartEvaluationResult | null | undefined,
+    event: CandleChartBarChangedEvent,
+  ): void {
+    if (!result) {
+      return;
     }
-
-    this.activeLines = this.config.showLines ? this.normalizeLines(this.data.lines, timeContext) : [];
-    this.renderLines(colors);
-
-    this.activeBoxAreas = this.config.showBoxAreas
-      ? this.normalizeBoxAreas(this.data.boxAreas, timeContext)
-      : [];
-
-    if (this.config.showPoints) {
-      this.renderPoints(timeContext, colors);
+    this.latestEvaluation.set(result as Record<string, unknown>);
+    const trace = this.overlayMapper.resolveRuleTrace(result as Record<string, unknown>);
+    if (trace) {
+      this.ruleEvaluated.emit(trace);
     }
-
-    this.applySelectedRange();
+    const strategy = this.overlayMapper.resolveStrategySignal(result as Record<string, unknown>);
+    if (strategy) {
+      this.strategySignal.emit(strategy);
+    }
+    this.evaluationOverlays = this.overlayMapper.overlaysFromEvaluation(result, event);
+    this.store.overlays.set(this.resolveAllOverlays());
+    this.renderStore();
     this.changeDetectorRef.markForCheck();
   }
 
-  private renderVolume(normalizedCandles: NormalizedCandle[], colors: CandleChartColors): void {
-    if (!this.chartInstance || !this.lightweightChartsModule) {
+  private connectRealtimeIfNeeded(): void {
+    if (this.store.mode() !== 'REALTIME') {
+      this.realtimeService.disconnect();
       return;
     }
 
-    const volumeSeries = this.chartInstance.addSeries(
-      this.lightweightChartsModule.HistogramSeries,
-      {
-        color: colors.volumeUp,
-        priceScaleId: 'volume',
-        priceFormat: { type: 'volume' },
-        priceLineVisible: false,
-        lastValueVisible: this.showPriceAxisLabels,
+    this.realtimeService.connect(this.realtimeConfig, {
+      candle: (candle) => {
+        this.ngZone.run(() => {
+          const index = this.store.appendRealtimeCandle(candle);
+          const currentCandle = this.store.candles()[index];
+          this.store.setStatus('READY');
+          this.renderStore();
+          if (currentCandle) {
+            this.emitBarChanged(currentCandle);
+          }
+        });
       },
-    );
-    this.trackSeries(volumeSeries);
-    volumeSeries.setData(this.toVolumeData(normalizedCandles, colors));
-    this.chartInstance.priceScale('volume').applyOptions({
-      scaleMargins: {
-        top: 0.78,
-        bottom: 0,
+      overlay: (overlays) => {
+        this.ngZone.run(() => {
+          this.realtimeOverlayBuffer = overlays;
+          this.store.overlays.set(this.resolveAllOverlays());
+          this.renderStore();
+        });
       },
-      borderColor: colors.border,
-    });
-  }
-
-  private renderIndicators(normalizedCandles: NormalizedCandle[], colors: CandleChartColors): void {
-    if (!this.chartInstance || !this.lightweightChartsModule) {
-      return;
-    }
-
-    this.data.indicators.forEach((indicator) => {
-      const isSubchart = indicator.pane === 'subchart';
-      const series = this.chartInstance!.addSeries(
-        this.lightweightChartsModule!.LineSeries,
-        {
-          color: resolveCssColor(indicator.color, '--app-chart-violet'),
-          lineWidth: this.resolveIndicatorLineWidth(indicator.name),
-          lineStyle: this.resolveIndicatorLineStyle(indicator.name),
-          lastValueVisible: this.showOverlayLabels && this.showPriceAxisLabels,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-          priceFormat: {
-            type: 'price',
-            precision: 2,
-            minMove: 0.01,
-          },
-          title: this.showOverlayLabels ? indicator.name : '',
-        },
-        isSubchart ? 1 : 0,
-      );
-      this.trackSeries(series);
-      series.setData(this.toIndicatorData(normalizedCandles, indicator.values));
-      series.priceScale().applyOptions({
-        borderColor: colors.border,
-        scaleMargins: {
-          top: isSubchart ? 0.12 : 0.08,
-          bottom: isSubchart ? 0.12 : this.config.showVolume ? 0.24 : 0.08,
-        },
-      });
-    });
-  }
-
-  private renderLines(colors: CandleChartColors): void {
-    if (!this.chartInstance || !this.lightweightChartsModule) {
-      return;
-    }
-
-    this.activeLines.forEach((line) => {
-      if (this.compareTimes(line.startTime, line.endTime) >= 0) {
-        return;
-      }
-
-      const series = this.chartInstance!.addSeries(this.lightweightChartsModule!.LineSeries, {
-        color: line.color,
-        lineWidth: 2,
-        lineStyle: this.lightweightChartsModule!.LineStyle.Dashed,
-        lastValueVisible: false,
-        priceLineVisible: false,
-        crosshairMarkerVisible: false,
-        title: '',
-        priceFormat: {
-          type: 'price',
-          precision: 6,
-          minMove: 0.000001,
-        },
-      });
-      this.trackSeries(series);
-      series.setData([
-        { time: line.startTime, value: line.start },
-        { time: line.endTime, value: line.end },
-      ]);
-      series.priceScale().applyOptions({ borderColor: colors.border });
-    });
-  }
-
-  private renderPoints(timeContext: TimeNormalizationContext, _colors: CandleChartColors): void {
-    if (!this.candleSeries || !this.lightweightChartsModule) {
-      return;
-    }
-
-    const markers: Array<SeriesMarker<Time>> = this.data.points.map((point) => ({
-      time: this.normalizeExternalTime(point.startTime, timeContext, 'floor'),
-      position: 'atPriceMiddle',
-      price: point.price,
-      shape: this.resolveMarkerShape(point.shape),
-      color: resolveCssColor(point.color, '--app-chart-warning'),
-      ...(this.showOverlayLabels ? { text: point.name } : {}),
-      size: point.size ?? 1.15,
-    }));
-
-    this.markersApi = this.lightweightChartsModule.createSeriesMarkers(this.candleSeries, markers);
-  }
-
-  private clearSeries(): void {
-    if (!this.chartInstance) {
-      return;
-    }
-
-    this.markersApi?.setMarkers([]);
-    this.markersApi = null;
-    this.renderedSeries.forEach((series) => this.chartInstance?.removeSeries(series));
-    this.renderedSeries = [];
-    this.candleSeries = null;
-    this.normalizedCandles = [];
-    this.activeBoxAreas = [];
-    this.activeLines = [];
-    this.setRenderedBoxAreas([]);
-    this.setRenderedLineLabels([]);
-  }
-
-  private trackSeries<T extends ISeriesApi<any>>(series: T): T {
-    this.renderedSeries.push(series);
-    return series;
-  }
-
-  private applyMainPriceScale(colors: CandleChartColors): void {
-    this.chartInstance?.priceScale('right').applyOptions({
-      borderColor: colors.border,
-      scaleMargins: {
-        top: 0.08,
-        bottom: this.config.showVolume ? 0.24 : 0.08,
+      reset: (candles, overlays) => {
+        this.ngZone.run(() => {
+          this.realtimeOverlayBuffer = overlays;
+          this.store.replaceRealtimeState(candles, this.resolveAllOverlays());
+          this.renderStore();
+        });
       },
+      error: (event) => this.ngZone.run(() => this.emitError(event.message, event.detail)),
+      status: (status) => this.ngZone.run(() => this.store.setStatus(status)),
     });
   }
 
-  private buildChartOptions(colors: CandleChartColors): DeepPartial<ChartOptions> {
-    if (!this.lightweightChartsModule) {
-      return {};
-    }
+  private selectCandle(candle: ChartCandle): void {
+    this.ngZone.run(() => {
+      this.store.setSelectedCandle(candle);
+      this.candleSelected.emit(candle);
+      this.changeDetectorRef.markForCheck();
+    });
+  }
 
+  private applyRenderState(
+    latestCandle: ChartCandle | null,
+    renderedBoxAreas: RenderedBoxArea[],
+    renderedLineLabels: RenderedLineLabel[],
+  ): void {
+    this.ngZone.run(() => {
+      this.latestCandle = latestCandle;
+      this.renderedBoxAreas = this.resolvedConfig().showOverlayLabels ? renderedBoxAreas : [];
+      this.renderedLineLabels = this.resolvedConfig().showOverlayLabels ? renderedLineLabels : [];
+      this.changeDetectorRef.markForCheck();
+    });
+  }
+
+  private resolveMode(): CandleChartMode {
+    return this.mode ?? this.config.mode ?? 'HISTORICAL';
+  }
+
+  private resolvedConfig(): ResolvedCandleChartConfig {
+    const mode = this.resolveMode();
     return {
-      autoSize: true,
-      height: this.chartHeight,
-      layout: {
-        background: {
-          type: this.lightweightChartsModule.ColorType.Solid,
-          color: colors.background,
-        },
-        textColor: colors.muted,
-        fontSize: 12,
-        fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        panes: {
-          separatorColor: colors.border,
-          separatorHoverColor: colors.crosshair,
-        },
-        attributionLogo: this.config.showAttribution !== false,
-      },
-      grid: {
-        vertLines: {
-          color: colors.grid,
-          style: this.lightweightChartsModule.LineStyle.Solid,
-        },
-        horzLines: {
-          color: colors.grid,
-          style: this.lightweightChartsModule.LineStyle.Solid,
-        },
-      },
-      crosshair: {
-        mode: this.lightweightChartsModule.CrosshairMode.Normal,
-        vertLine: {
-          color: colors.crosshair,
-          labelBackgroundColor: colors.border,
-        },
-        horzLine: {
-          color: colors.crosshair,
-          labelBackgroundColor: colors.border,
-        },
-      },
-      leftPriceScale: {
-        visible: false,
-        borderColor: colors.border,
-      },
-      rightPriceScale: {
-        visible: true,
-        borderColor: colors.border,
-      },
-      timeScale: {
-        borderColor: colors.border,
-        timeVisible: true,
-        secondsVisible: false,
-        rightOffset: 4,
-        barSpacing: 8,
-        minBarSpacing: 2,
-      },
-      handleScroll: {
-        mouseWheel: true,
-        pressedMouseMove: true,
-        horzTouchDrag: true,
-        vertTouchDrag: true,
-      },
-      handleScale: {
-        axisPressedMouseMove: true,
-        mouseWheel: true,
-        pinch: true,
-      },
+      showCandles: true,
+      showVolume: true,
+      showLines: true,
+      showBoxAreas: true,
+      showPoints: true,
+      showIndicators: true,
+      showRules: true,
+      showStrategySignals: true,
+      showOverlayLabels: false,
+      showHeader: true,
+      showToolbar: true,
+      showReplayControls: mode === 'REPLAY',
+      showDebugPanel: false,
+      showAttribution: true,
+      showLastPriceLine: true,
+      showPriceAxisLabels: false,
+      showPreviewBar: true,
+      autoScrollToRealtime: true,
+      evaluateOnBarChange: false,
+      evaluateOnClosedCandleOnly: true,
+      evaluateLivePreview: false,
+      height: 520,
+      theme: 'AUTO',
+      ...this.config,
+      symbol: this.symbol ?? this.config.symbol,
+      timeframe: this.timeframe ?? this.config.timeframe ?? this.config.interval,
+      mode,
     };
   }
 
-  private toCandlestickData(normalizedCandles: NormalizedCandle[]): CandlestickData<Time>[] {
-    return normalizedCandles.map((item) => ({
-      time: item.time,
-      open: item.source.open,
-      high: item.source.high,
-      low: item.source.low,
-      close: item.source.close,
-    }));
+  private resolveInputCandles(): ChartCandle[] {
+    return this.candles
+      ? this.candles.map((candle, index) => ({ ...candle, index: candle.index ?? index }))
+      : this.legacyAdapter.candles(this.data);
   }
 
-  private toVolumeData(
-    normalizedCandles: NormalizedCandle[],
-    colors: CandleChartColors,
-  ): HistogramData<Time>[] {
-    return normalizedCandles.map((item) => ({
-      time: item.time,
-      value: item.source.volume ?? 0,
-      color: item.source.close >= item.source.open ? colors.volumeUp : colors.volumeDown,
-    }));
+  private resolveInputIndicators(): ChartIndicator[] {
+    return this.indicators ?? this.legacyAdapter.indicators(this.data);
   }
 
-  private toIndicatorData(
-    normalizedCandles: NormalizedCandle[],
-    values: Array<number | null>,
-  ): Array<LineData<Time> | WhitespaceData<Time>> {
-    return normalizedCandles.map((item, index) => {
-      const value = values[index];
-      return value == null || Number.isNaN(Number(value))
-        ? { time: item.time }
-        : { time: item.time, value: Number(value) };
+  private resolveInputOverlays(): ChartOverlay[] {
+    return this.overlays ?? this.legacyAdapter.overlays(this.data);
+  }
+
+  private resolveAllOverlays(): ChartOverlay[] {
+    return [...this.resolveInputOverlays(), ...this.realtimeOverlayBuffer, ...this.evaluationOverlays];
+  }
+
+  private filterOverlaysForVisibleIndex(
+    overlays: ChartOverlay[],
+    mode: CandleChartMode,
+    currentIndex: number,
+  ): ChartOverlay[] {
+    if (mode !== 'REPLAY') {
+      return overlays;
+    }
+    return overlays.filter((overlay) => {
+      const index = overlay.index ?? overlay.startIndex ?? overlay.endIndex;
+      return index == null || index <= currentIndex;
     });
   }
 
-  private normalizeCandles(candles: CandleData[]): NormalizedCandle[] {
-    const normalized = candles.map((candle, index) => {
-      const sortTime = this.toUnixSeconds(candle.time, index);
-      return {
-        source: candle,
-        time: sortTime as UTCTimestamp,
-        sortTime,
-        key: String(sortTime),
-      };
-    });
-
-    const byTime = new Map<string, NormalizedCandle>();
-    normalized
-      .sort((left, right) => left.sortTime - right.sortTime)
-      .forEach((item) => byTime.set(item.key, item));
-
-    return Array.from(byTime.values());
-  }
-
-  private applySelectedRange(): void {
-    if (!this.chartInstance) {
-      return;
-    }
-
-    const timeScale = this.chartInstance.timeScale();
-    const range = this.selectedRange();
-    if (range === 'ALL' || this.normalizedCandles.length === 0) {
-      timeScale.fitContent();
-      window.requestAnimationFrame(this.updateOverlayGeometry);
-      return;
-    }
-
-    const lastIndex = this.normalizedCandles.length - 1;
-    const startIndex = this.resolveRangeStartIndex(range, lastIndex);
-    timeScale.setVisibleLogicalRange({
-      from: Math.max(0, startIndex - 1),
-      to: lastIndex + 4,
-    });
-    window.requestAnimationFrame(this.updateOverlayGeometry);
-  }
-
-  private resolveRangeStartIndex(range: CandleChartRange, lastIndex: number): number {
-    const lastCandle = this.normalizedCandles[lastIndex];
-    if (!lastCandle) {
-      return 0;
-    }
-
-    const startTime = this.resolveRangeStartTime(range, lastCandle.sortTime);
-    if (startTime == null) {
-      return 0;
-    }
-
-    const index = this.normalizedCandles.findIndex((item) => item.sortTime >= startTime);
-    return index === -1 ? 0 : index;
-  }
-
-  private resolveRangeStartTime(range: CandleChartRange, endTime: number): number | null {
-    const daySeconds = 24 * 60 * 60;
-    switch (range) {
-      case '1D':
-        return endTime - daySeconds;
-      case '5D':
-        return endTime - 5 * daySeconds;
-      case '1M':
-        return endTime - 30 * daySeconds;
-      case '3M':
-        return endTime - 90 * daySeconds;
-      case '6M':
-        return endTime - 180 * daySeconds;
-      case 'YTD': {
-        const endDate = new Date(endTime * 1000);
-        return Date.UTC(endDate.getUTCFullYear(), 0, 1) / 1000;
-      }
-      case '1Y':
-        return endTime - 365 * daySeconds;
-      case '5Y':
-        return endTime - 5 * 365 * daySeconds;
-      case 'ALL':
-        return null;
-    }
-  }
-
-  private buildTimeNormalizationContext(candles: NormalizedCandle[]): TimeNormalizationContext {
-    const lookup = new Map<string, Time>();
-    candles.forEach((item) => {
-      lookup.set(String(item.source.time), item.time);
-      lookup.set(item.key, item.time);
-      lookup.set(String(item.sortTime * 1000), item.time);
-    });
-    return { lookup, candles };
-  }
-
-  private normalizeBoxAreas(
-    boxAreas: ChartBoxArea[],
-    timeContext: TimeNormalizationContext,
-  ): NormalizedBoxArea[] {
-    return boxAreas.map((box, index) => {
-      const startTime = this.normalizeExternalTime(box.startTime, timeContext, 'floor');
-      const endTime = this.normalizeExternalTime(box.endTime, timeContext, 'ceil');
-      const isReversed = this.compareTimes(startTime, endTime) > 0;
-
-      return {
-        key: `${String(box.startTime)}-${String(box.endTime)}-${index}`,
-        name: box.name,
-        color: resolveCssColor(box.color, '--app-chart-primary-fill'),
-        startTime: isReversed ? endTime : startTime,
-        endTime: isReversed ? startTime : endTime,
-        high: box.high,
-        low: box.low,
-      };
-    });
-  }
-
-  private normalizeLines(lines: ChartLine[], timeContext: TimeNormalizationContext): NormalizedLine[] {
-    return lines.flatMap((line, index) => {
-      let start = line.start;
-      let end = line.end;
-      let startTime = this.normalizeExternalTime(line.startTime, timeContext, 'floor');
-      let endTime = this.normalizeExternalTime(line.endTime, timeContext, 'ceil');
-
-      if (this.compareTimes(startTime, endTime) > 0) {
-        [start, end] = [end, start];
-        [startTime, endTime] = [endTime, startTime];
-      }
-
-      if (this.compareTimes(startTime, endTime) === 0) {
-        const expandedEndTime = this.nextCandleTime(startTime, timeContext);
-        if (expandedEndTime == null) {
-          return [];
-        }
-        endTime = expandedEndTime;
-      }
-
-      return [
-        {
-          key: `${String(line.startTime)}-${String(line.endTime)}-${index}`,
-          name: line.name,
-          color: resolveCssColor(line.color, '--app-chart-primary'),
-          start,
-          end,
-          startTime,
-          endTime,
-        },
-      ];
-    });
-  }
-
-  private normalizeExternalTime(
-    value: CandleChartTime,
-    timeContext: TimeNormalizationContext,
-    boundary: TimeBoundary,
-  ): Time {
-    const directMatch = timeContext.lookup.get(String(value));
-    if (directMatch != null) {
-      return directMatch;
-    }
-
-    const sortTime = this.toUnixSeconds(value, 0);
-    return this.resolveBoundaryTime(sortTime, timeContext.candles, boundary) ?? (sortTime as UTCTimestamp);
-  }
-
-  private toUnixSeconds(value: CandleChartTime, fallbackIndex: number): number {
-    if (typeof value === 'number') {
-      return value > 1_000_000_000_000 ? Math.floor(value / 1000) : Math.floor(value);
-    }
-
-    const rawValue = String(value ?? '').trim();
-    const timeOnly = rawValue.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-    if (timeOnly) {
-      return (
-        Date.UTC(2000, 0, 1, Number(timeOnly[1]), Number(timeOnly[2]), Number(timeOnly[3] ?? 0)) /
-        1000
-      );
-    }
-
-    const parsedTime = Date.parse(rawValue.replace(' ', 'T'));
-    if (!Number.isNaN(parsedTime)) {
-      return Math.floor(parsedTime / 1000);
-    }
-
-    return Date.UTC(2000, 0, 1, 0, fallbackIndex, 0) / 1000;
-  }
-
-  private resolveBoundaryTime(
-    sortTime: number,
-    candles: NormalizedCandle[],
-    boundary: TimeBoundary,
-  ): Time | null {
-    if (candles.length === 0) {
-      return null;
-    }
-
-    const ceilIndex = this.findFirstCandleIndexAtOrAfter(sortTime, candles);
-    const floorIndex = ceilIndex >= candles.length ? candles.length - 1 : Math.max(ceilIndex - 1, 0);
-
-    if (boundary === 'ceil') {
-      return candles[Math.min(ceilIndex, candles.length - 1)].time;
-    }
-
-    if (boundary === 'floor') {
-      if (ceilIndex < candles.length && candles[ceilIndex].sortTime === sortTime) {
-        return candles[ceilIndex].time;
-      }
-      return candles[floorIndex].time;
-    }
-
-    const ceilCandle = candles[Math.min(ceilIndex, candles.length - 1)];
-    const floorCandle = candles[floorIndex];
-    return Math.abs(ceilCandle.sortTime - sortTime) < Math.abs(sortTime - floorCandle.sortTime)
-      ? ceilCandle.time
-      : floorCandle.time;
-  }
-
-  private findFirstCandleIndexAtOrAfter(sortTime: number, candles: NormalizedCandle[]): number {
-    let low = 0;
-    let high = candles.length;
-    while (low < high) {
-      const middle = Math.floor((low + high) / 2);
-      if (candles[middle].sortTime < sortTime) {
-        low = middle + 1;
-      } else {
-        high = middle;
-      }
-    }
-    return low;
-  }
-
-  private nextCandleTime(time: Time, timeContext: TimeNormalizationContext): Time | null {
-    const sortTime = this.toTimeSortValue(time);
-    const index = timeContext.candles.findIndex((candle) => candle.sortTime > sortTime);
-    return index === -1 ? null : timeContext.candles[index].time;
-  }
-
-  private compareTimes(left: Time, right: Time): number {
-    return this.toTimeSortValue(left) - this.toTimeSortValue(right);
-  }
-
-  private toTimeSortValue(time: Time): number {
-    if (typeof time === 'number') {
-      return time;
-    }
-    if (typeof time === 'string') {
-      const parsed = Date.parse(time.replace(' ', 'T'));
-      return Number.isNaN(parsed) ? 0 : Math.floor(parsed / 1000);
-    }
-    return Date.UTC(time.year, time.month - 1, time.day) / 1000;
-  }
-
-  private resolveIndicatorLineWidth(name: string): LineWidth {
-    const normalized = name.toLowerCase();
-    return normalized.includes('middle') ||
-      normalized.includes('overbought') ||
-      normalized.includes('oversold')
-      ? 1
-      : 2;
-  }
-
-  private resolveIndicatorLineStyle(name: string): number {
-    const normalized = name.toLowerCase();
-    return normalized.includes('overbought') || normalized.includes('oversold')
-      ? this.lightweightChartsModule!.LineStyle.Dashed
-      : this.lightweightChartsModule!.LineStyle.Solid;
-  }
-
-  private resolveMarkerShape(shape?: string): SeriesMarker<Time>['shape'] {
-    const normalized = String(shape ?? '').trim();
-    if (normalized === 'arrowUp' || normalized === 'arrowDown' || normalized === 'square') {
-      return normalized;
-    }
-    return 'circle';
-  }
-
-  private resolveChartColors(): CandleChartColors {
+  private currentReplayConfig(): ReplayConfig {
     return {
-      background: resolveThemeColor('--app-finance-chart-bg', '--app-bg'),
-      muted: resolveThemeColor('--app-chart-axis', '--app-text-muted'),
-      grid: resolveThemeColor('--app-finance-chart-grid', '--app-chart-grid'),
-      border: resolveThemeColor('--app-finance-chart-border', '--app-border-soft'),
-      crosshair: resolveThemeColor('--app-finance-chart-crosshair', '--app-chart-axis'),
-      candleUp: resolveThemeColor('--app-chart-candle-up', '--app-accent-green'),
-      candleDown: resolveThemeColor('--app-chart-candle-down', '--app-control-danger-text'),
-      volumeUp: resolveThemeColor('--app-chart-volume-up', '--app-chart-candle-up'),
-      volumeDown: resolveThemeColor('--app-chart-volume-down', '--app-chart-candle-down'),
+      loop: false,
+      ...this.replayConfig,
+      speedMs: this.store.speedMs(),
     };
   }
+
+  private emitError(message: string, detail?: unknown): void {
+    this.store.setStatus('ERROR');
+    this.error.emit({ message, detail });
+  }
+
+  private readonly onResize = (): void => {
+    this.engine.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight);
+  };
 
   private observeThemeChanges(): void {
     if (typeof MutationObserver === 'undefined') {
@@ -1026,28 +596,13 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     this.themeObserver = new MutationObserver(() => {
-      if (!this.chartInstance) {
-        return;
+      if (this.lastRenderInput) {
+        this.engine.refreshTheme(this.lastRenderInput);
       }
-      this.render();
     });
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'data-theme'],
-    });
-  }
-
-  private setRenderedBoxAreas(nextAreas: RenderedBoxArea[]): void {
-    this.ngZone.run(() => {
-      this.renderedBoxAreas = nextAreas;
-      this.changeDetectorRef.markForCheck();
-    });
-  }
-
-  private setRenderedLineLabels(nextLabels: RenderedLineLabel[]): void {
-    this.ngZone.run(() => {
-      this.renderedLineLabels = nextLabels;
-      this.changeDetectorRef.markForCheck();
     });
   }
 
@@ -1070,17 +625,6 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
         : `${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetRemainder).padStart(2, '0')}`;
 
     return `${hours}:${minutes}:${seconds} UTC${offset}`;
-  }
-
-  private defaultConfig(): CandleChartConfig {
-    return {
-      showCandles: true,
-      showVolume: true,
-      showLines: true,
-      showBoxAreas: true,
-      showPoints: true,
-      showIndicators: true,
-    };
   }
 
   private emptyPayload(): CandleChartPayload {
