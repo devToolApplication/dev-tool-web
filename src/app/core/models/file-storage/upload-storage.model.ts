@@ -1,12 +1,25 @@
 export type UploadStorageType = 'PINATA';
 
 export type UploadStorageStatus = 'ACTIVE' | 'INACTIVE' | 'DELETE';
-export type UploadStorageMetadataType = 'CONFIG' | 'SECRET';
+export type UploadStorageMetadataType = 'RAW_TEXT' | 'KEYCLOAK_AUTH' | 'BASIC_AUTH' | 'CONFIG' | 'SECRET';
+
+export type UploadStorageKeycloakGrantType = 'CLIENT_CREDENTIALS' | 'PASSWORD';
+
+export interface UploadStorageMetadataConfig {
+  tokenUrl?: string;
+  clientId?: string;
+  clientSecretId?: string;
+  grantType?: UploadStorageKeycloakGrantType;
+  username?: string;
+  passwordSecretId?: string;
+  scope?: string;
+}
 
 export interface UploadStorageMetadataEntry {
   key: string;
   type: UploadStorageMetadataType;
-  value: string;
+  value?: string;
+  config?: UploadStorageMetadataConfig;
 }
 
 export interface UploadStorageResponse {

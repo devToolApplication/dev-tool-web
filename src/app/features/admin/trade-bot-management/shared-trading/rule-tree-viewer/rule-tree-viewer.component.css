@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.rule-tree {
+  overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+}
+
+.rule-tree-header,
+.rule-tree-row {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.6fr) minmax(8rem, 0.8fr) minmax(8rem, 0.6fr) minmax(7rem, 0.5fr) minmax(14rem, 1.5fr);
+  gap: 0.75rem;
+  min-width: 58rem;
+  align-items: center;
+  padding: 0.75rem;
+}
+
+.rule-tree-header {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--app-surface-soft);
+}
+
+.rule-tree-row + .rule-tree-row {
+  border-top: 1px solid var(--app-border);
+}
+
+.rule-tree-code,
+.rule-tree-message {
+  overflow-wrap: anywhere;
+}
+
+.rule-tree-empty {
+  border: 1px dashed var(--app-border);
+  border-radius: 8px;
+  padding: 1rem;
+}

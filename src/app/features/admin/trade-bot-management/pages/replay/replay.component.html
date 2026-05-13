@@ -1,0 +1,139 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.init' | translateContent }}</div>
+    <app-form-input
+      [config]="replayForm"
+      [context]="formContext"
+      [initialValue]="replayInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="initReplay($event)"
+    ></app-form-input>
+  </app-card>
+
+  @if (replay()) {
+    <app-candle-chart
+      [mode]="'REPLAY'"
+      [config]="chartConfig()"
+      [candles]="chartCandles()"
+      [indicators]="chartIndicators()"
+      [replayConfig]="replayConfig()"
+      [evaluationConfig]="chartEvaluationConfig()"
+      [evaluateHandler]="evaluateCurrentBar"
+      (strategySignal)="onChartStrategySignal($event)"
+      (ruleEvaluated)="onChartRuleEvaluated($event)"
+      (error)="onChartError()"
+    ></app-candle-chart>
+
+    <app-card>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-lg font-semibold">{{ 'tradeBot.replay.controls' | translateContent }}</div>
+        <app-tag [value]="replayStatus()" severity="info"></app-tag>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <app-button
+          icon="pi pi-step-backward"
+          label="tradeBot.chart.replay.previous"
+          severity="secondary"
+          (buttonClick)="sendReplayCommand('PREVIOUS_CANDLE')"
+        ></app-button>
+        <app-button
+          icon="pi pi-play"
+          label="tradeBot.chart.replay.play"
+          severity="success"
+          (buttonClick)="playReplay()"
+        ></app-button>
+        <app-button
+          icon="pi pi-pause"
+          label="tradeBot.chart.replay.pause"
+          severity="warn"
+          (buttonClick)="sendReplayCommand('PAUSE_REPLAY')"
+        ></app-button>
+        <app-button
+          icon="pi pi-step-forward"
+          label="tradeBot.chart.replay.next"
+          severity="secondary"
+          (buttonClick)="sendReplayCommand('NEXT_CANDLE')"
+        ></app-button>
+        <app-button
+          icon="pi pi-stop"
+          label="tradeBot.chart.replay.stop"
+          severity="danger"
+          (buttonClick)="sendReplayCommand('STOP_REPLAY')"
+        ></app-button>
+        <app-button
+          icon="pi pi-angle-double-right"
+          label="tradeBot.chart.replay.speedFast"
+          severity="secondary"
+          (buttonClick)="changeReplaySpeed(250)"
+        ></app-button>
+        <app-button
+          icon="pi pi-forward"
+          label="tradeBot.chart.replay.speedNormal"
+          severity="secondary"
+          (buttonClick)="changeReplaySpeed(650)"
+        ></app-button>
+        <app-button
+          icon="pi pi-angle-right"
+          label="tradeBot.chart.replay.speedSlow"
+          severity="secondary"
+          (buttonClick)="changeReplaySpeed(1500)"
+        ></app-button>
+        <app-button
+          icon="pi pi-fast-forward"
+          label="tradeBot.chart.replay.last"
+          severity="secondary"
+          (buttonClick)="jumpReplay((replay()?.candles?.length ?? 1) - 1)"
+        ></app-button>
+      </div>
+    </app-card>
+
+    <app-table [config]="candleTableConfig" [data]="replay()?.candles ?? []" [loading]="loading()"></app-table>
+
+    <app-card>
+      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.overlays' | translateContent }}</div>
+      <app-json-preview>{{ replayJson() }}</app-json-preview>
+    </app-card>
+
+    @if (replayEvent()) {
+      <app-card>
+        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.event' | translateContent }}</div>
+        <app-json-preview>{{ replayEventJson() }}</app-json-preview>
+      </app-card>
+    }
+  }
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.evaluate' | translateContent }}</div>
+    <app-form-input
+      [config]="evaluateForm"
+      [context]="formContext"
+      [initialValue]="evaluateInitialValue"
+      [showSubmit]="false"
+      [submitting]="loading()"
+      (valueChange)="evaluateModel.set($event)"
+      (formSubmit)="evaluateTrace($event)"
+    ></app-form-input>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <app-button
+        icon="pi pi-sitemap"
+        label="tradeBot.action.evaluateTrace"
+        [loading]="loading()"
+        (buttonClick)="evaluateTrace(evaluateModel())"
+      ></app-button>
+      <app-button
+        icon="pi pi-bolt"
+        label="tradeBot.action.evaluateStrategy"
+        severity="info"
+        [loading]="loading()"
+        (buttonClick)="evaluateStrategy(evaluateModel())"
+      ></app-button>
+    </div>
+  </app-card>
+
+  @if (evaluation()) {
+    <app-card>
+      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.evaluation' | translateContent }}</div>
+      <app-json-preview>{{ evaluationJson() }}</app-json-preview>
+    </app-card>
+  }
+</section>

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from '../../shared/component/select/select';
-import { CandleChartConfig } from '../../shared/component/candle-chart/candle-chart';
+import { CandleChartConfig } from '../admin/trade-bot-management/shared-trading/candle-chart/candle-chart';
 
 export type DemoSection =
   | 'input-text'

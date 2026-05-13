@@ -1,0 +1,37 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.fastBacktest' | translateContent }}</div>
+    <app-form-input
+      [config]="sandboxForm"
+      [context]="formContext"
+      [initialValue]="sandboxInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="runFastBacktest($event)"
+    ></app-form-input>
+  </app-card>
+
+  @if (fastBacktest()) {
+    <app-card>
+      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.result' | translateContent }}</div>
+      <app-json-preview>{{ fastBacktestJson() }}</app-json-preview>
+    </app-card>
+  }
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.evaluateBar' | translateContent }}</div>
+    <app-form-input
+      [config]="evaluateBarForm"
+      [context]="formContext"
+      [initialValue]="evaluateInitialValue"
+      [submitting]="evaluateLoading()"
+      (formSubmit)="evaluate($event)"
+    ></app-form-input>
+  </app-card>
+
+  @if (evaluateBar()) {
+    <app-card>
+      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.evaluateResult' | translateContent }}</div>
+      <app-json-preview>{{ evaluateBarJson() }}</app-json-preview>
+    </app-card>
+  }
+</section>

@@ -51,7 +51,7 @@ import { AutoComplete } from './component/auto-complete/auto-complete';
 import { ButtonSpeedDial } from './component/button-speed-dial/button-speed-dial';
 import { ButtonSplit } from './component/button-split/button-split';
 import { Button } from './component/button/button';
-import { CandleChart } from './component/candle-chart/candle-chart';
+import { CandleChart } from '../features/admin/trade-bot-management/shared-trading/candle-chart/candle-chart';
 import { JsonPreviewComponent } from './component/json-preview/json-preview.component';
 import { CheckBox } from './component/check-box/check-box';
 import { DatePicker } from './component/date-picker/date-picker';
@@ -86,6 +86,7 @@ import { FeaturePlaceholderComponent } from '../features/feature-placeholder/fea
 import { SettingsComponent } from '../features/settings/settings.component';
 import { AI_AGENT_FEATURE_COMPONENTS } from '../features/admin/ai-agent/ai-agent.feature';
 import { FILE_STORAGE_FEATURE_COMPONENTS } from '../features/admin/file-storage-management/file-storage-management.feature';
+import { JOB_SCHEDULER_FEATURE_COMPONENTS } from '../features/admin/job-scheduler/job-scheduler.feature';
 import { SYSTEM_MANAGEMENT_FEATURE_COMPONENTS } from '../features/admin/system-management/system-management.feature';
 import { TRADE_BOT_FEATURE_COMPONENTS } from '../features/admin/trade-bot-management/trade-bot-management.feature';
 import { CODEX_AGENT_FEATURE_COMPONENTS } from '../features/admin/codex-agent/codex-agent.feature';
@@ -103,10 +104,14 @@ import { FieldTreeRendererComponent } from './ui/form-input/component/field-tree
 import { FormInput } from './ui/form-input/form-input';
 import { FieldGuidePanelComponent } from './ui/field-guide-panel/field-guide-panel.component';
 import { CardComponent } from './ui/card/card.component';
+import { DataQualityWarningComponent } from '../features/admin/trade-bot-management/shared-trading/data-quality-warning/data-quality-warning.component';
+import { RuleTreeViewerComponent } from '../features/admin/trade-bot-management/shared-trading/rule-tree-viewer/rule-tree-viewer.component';
 import { SummaryMetricCardComponent } from './ui/summary-metric-card/summary-metric-card.component';
+import { RealtimeProgressBarComponent } from './ui/realtime-progress-bar/realtime-progress-bar.component';
 import { TableCellComponent } from './ui/table/component/table/table-cell/table-cell';
 import { TableFilterComponent } from './ui/table/component/table/table-filter/table-filter';
 import { TableComponent } from './ui/table/component/table/table';
+import { TradeDetailDrawerComponent } from '../features/admin/trade-bot-management/shared-trading/trade-detail-drawer/trade-detail-drawer.component';
 
 const PIPE = [TranslateContentPipe];
 
@@ -122,6 +127,7 @@ const FEATURE = [
   FeaturePlaceholderComponent,
   ...AI_AGENT_FEATURE_COMPONENTS,
   ...FILE_STORAGE_FEATURE_COMPONENTS,
+  ...JOB_SCHEDULER_FEATURE_COMPONENTS,
   ...SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,
   ...TRADE_BOT_FEATURE_COMPONENTS,
   ...CODEX_AGENT_FEATURE_COMPONENTS
@@ -161,7 +167,17 @@ const COMPONENTS = [
   TimelineComponent
 ];
 
-const UI = [FormInput, TableComponent, FieldGuidePanelComponent, CardComponent, SummaryMetricCardComponent];
+const UI = [
+  FormInput,
+  TableComponent,
+  FieldGuidePanelComponent,
+  CardComponent,
+  SummaryMetricCardComponent,
+  RealtimeProgressBarComponent,
+  DataQualityWarningComponent,
+  RuleTreeViewerComponent,
+  TradeDetailDrawerComponent
+];
 const UI_COMPONENT = [
   FieldRenderer,
   FieldArrayRenderer,

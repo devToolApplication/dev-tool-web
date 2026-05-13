@@ -1,0 +1,117 @@
+<section class="flex flex-col gap-4">
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    @for (metric of summaryCards(); track metric.label) {
+      <app-summary-metric-card
+        [label]="metric.label"
+        [value]="metric.value"
+        [suffix]="metric.suffix ?? ''"
+      ></app-summary-metric-card>
+    }
+  </div>
+
+  <app-card>
+    <div class="mb-3 flex flex-col gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="text-lg font-semibold">{{ 'tradeBot.backtest.detail' | translateContent }}</div>
+        <app-button
+          icon="pi pi-download"
+          label="tradeBot.action.exportReport"
+          severity="secondary"
+          [loading]="loading()"
+          (buttonClick)="exportReport()"
+        ></app-button>
+      </div>
+      <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
+    </div>
+
+    @switch (activeTab()) {
+      @case ('overview') {
+        <div class="flex flex-col gap-4">
+          <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            @for (fact of runFacts(); track fact.label) {
+              <div class="rounded-lg border app-border app-bg-soft p-3">
+                <div class="text-xs font-semibold uppercase app-text-muted">{{ fact.label | translateContent }}</div>
+                <div class="mt-1 break-words font-medium app-text">{{ fact.value ?? '-' }}</div>
+              </div>
+            }
+          </div>
+          <app-table [config]="metricTableConfig" [data]="metricRows()" [loading]="loading()"></app-table>
+        </div>
+      }
+      @case ('chart') {
+        <div class="flex flex-col gap-3">
+          <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
+          @if (chartCandles().length) {
+            <app-candle-chart
+              [mode]="'HISTORICAL'"
+              [config]="chartConfig()"
+              [candles]="chartCandles()"
+              [overlays]="chartOverlays()"
+            ></app-candle-chart>
+          } @else {
+            <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">
+              {{ 'tradeBot.dataQuality.noCandles' | translateContent }}
+            </div>
+          }
+        </div>
+      }
+      @case ('trades') {
+        <app-table [config]="tradeTableConfig" [data]="trades()" [loading]="loading()"></app-table>
+      }
+      @case ('orders') {
+        <div class="flex flex-col gap-4">
+          <app-table [config]="orderTableConfig" [data]="orders()" [loading]="loading()"></app-table>
+          <app-table [config]="orderTableConfig" [data]="fills()" [loading]="loading()"></app-table>
+          <app-table [config]="positionTableConfig" [data]="positions()" [loading]="loading()"></app-table>
+        </div>
+      }
+      @case ('equity') {
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div class="rounded-lg border app-border p-4">
+              <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.equity' | translateContent }}</div>
+              <div class="backtest-trend">
+                @for (point of equityTrend(); track $index) {
+                  <span class="backtest-trend-bar backtest-trend-bar--equity" [style.height.%]="point.height" [attr.title]="point.value"></span>
+                }
+              </div>
+            </div>
+            <div class="rounded-lg border app-border p-4">
+              <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.drawdown' | translateContent }}</div>
+              <div class="backtest-trend">
+                @for (point of drawdownTrend(); track $index) {
+                  <span class="backtest-trend-bar backtest-trend-bar--drawdown" [style.height.%]="point.height" [attr.title]="point.value"></span>
+                }
+              </div>
+            </div>
+          </div>
+          <app-table [config]="curveTableConfig" [data]="equityRows().concat(drawdownRows())" [loading]="loading()"></app-table>
+        </div>
+      }
+      @case ('ruleTrace') {
+        <app-rule-tree-viewer [trace]="trace()"></app-rule-tree-viewer>
+      }
+      @case ('snapshots') {
+        <div class="flex flex-col gap-4">
+          <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
+          <app-json-preview>{{ snapshotJson() }}</app-json-preview>
+          @if (reportExport()) {
+            <app-json-preview>{{ reportJson() }}</app-json-preview>
+          }
+        </div>
+      }
+      @case ('logs') {
+        <app-table [config]="eventTableConfig" [data]="events()" [loading]="loading()"></app-table>
+      }
+    }
+  </app-card>
+
+  <app-trade-detail-drawer
+    [trade]="selectedTrade()"
+    [orders]="allOrdersAndFills()"
+    [events]="events()"
+    [trace]="selectedTradeTrace()"
+    (close)="closeTradeDrawer()"
+  ></app-trade-detail-drawer>
+</section>

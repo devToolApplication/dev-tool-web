@@ -1,0 +1,10 @@
+.realtime-progress {
+  border-width: 1px;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.progress-fill {
+  background: var(--p-primary-color);
+  transition: width 160ms ease;
+}

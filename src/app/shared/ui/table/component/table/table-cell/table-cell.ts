@@ -20,6 +20,10 @@ export class TableCellComponent {
     return this.column.actions ?? [];
   }
 
+  get dateValue(): Date | null {
+    return this.normalizeDateValue(this.value);
+  }
+
   isActionDisabled(action: TableAction): boolean {
     return action.disabled?.(this.rowData) ?? false;
   }
@@ -46,6 +50,57 @@ export class TableCellComponent {
     } catch {
       return String(value);
     }
+  }
+
+  private normalizeDateValue(value: unknown, depth = 0): Date | null {
+    if (value == null || value === '' || depth > 3) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return this.validDateOrNull(value);
+    }
+
+    if (typeof value === 'string') {
+      const numericValue = Number(value);
+      if (value.trim() !== '' && Number.isFinite(numericValue)) {
+        return this.normalizeDateValue(numericValue, depth + 1);
+      }
+
+      return this.validDateOrNull(new Date(value));
+    }
+
+    if (typeof value === 'number') {
+      const epochMillis = Math.abs(value) < 100000000000 ? value * 1000 : value;
+      return this.validDateOrNull(new Date(epochMillis));
+    }
+
+    if (typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+      const candidates = [
+        record['$date'],
+        record['$numberLong'],
+        record['date'],
+        record['value'],
+        record['iso'],
+        record['timestamp'],
+        record['time'],
+        record['epochMillis']
+      ];
+
+      for (const candidate of candidates) {
+        const normalized = this.normalizeDateValue(candidate, depth + 1);
+        if (normalized) {
+          return normalized;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private validDateOrNull(value: Date): Date | null {
+    return Number.isNaN(value.getTime()) ? null : value;
   }
 }
 

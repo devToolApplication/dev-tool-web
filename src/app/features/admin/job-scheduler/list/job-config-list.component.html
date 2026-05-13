@@ -1,0 +1,15 @@
+<section class="crud-page">
+  <div class="mb-3">
+    <app-realtime-progress-bar [state]="progress()" [showCancel]="false"></app-realtime-progress-bar>
+  </div>
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [loading]="loading()"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="onCreate()"
+  ></app-table>
+</section>

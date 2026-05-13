@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Injector, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, effect, EventEmitter, Injector, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import {createFormEngine} from './utils/form-engine';
 import {FormConfig, FormContext, GridWidth} from './models/form-config.model';
 import { getColClass } from './utils/form.utils';
@@ -11,6 +11,7 @@ import { getColClass } from './utils/form.utils';
 })
 export class FormInput implements OnInit, OnChanges {
   private suppressValueChange = true;
+  private readonly engineRevision = signal(0);
 
   constructor(private readonly injector: Injector) {}
 
@@ -25,13 +26,13 @@ export class FormInput implements OnInit, OnChanges {
   engine: any;
 
   ngOnInit() {
-    this.engine = createFormEngine(
-      this.config,
-      this.context,
-      this.initialValue
-    );
+    this.rebuildEngine();
 
     effect(() => {
+      this.engineRevision();
+      if (!this.engine) {
+        return;
+      }
       const model = this.engine.model();
       if (this.suppressValueChange) {
         this.suppressValueChange = false;
@@ -44,6 +45,11 @@ export class FormInput implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.engine) {
+      return;
+    }
+
+    if (changes['config']?.currentValue) {
+      this.rebuildEngine();
       return;
     }
 
@@ -81,5 +87,11 @@ export class FormInput implements OnInit, OnChanges {
 
   getCol(width?: GridWidth): string {
     return getColClass(width);
+  }
+
+  private rebuildEngine(): void {
+    this.suppressValueChange = true;
+    this.engine = createFormEngine(this.config, this.context, this.initialValue);
+    this.engineRevision.update((revision) => revision + 1);
   }
 }

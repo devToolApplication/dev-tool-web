@@ -133,11 +133,19 @@ export interface SecretMetadataFieldConfig extends BaseFieldConfig {
   options?: SelectOption[];
   optionsExpression?: string;
   typeOptions?: SelectOption[];
+  grantTypeOptions?: SelectOption[];
   addButtonLabel?: string;
   keyPlaceholder?: string;
   typePlaceholder?: string;
   valuePlaceholder?: string;
   secretPlaceholder?: string;
+  grantTypePlaceholder?: string;
+  tokenUrlPlaceholder?: string;
+  clientIdPlaceholder?: string;
+  clientSecretPlaceholder?: string;
+  usernamePlaceholder?: string;
+  passwordPlaceholder?: string;
+  scopePlaceholder?: string;
 }
 
 export type FieldConfig =

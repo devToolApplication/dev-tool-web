@@ -66,7 +66,12 @@ export class AiModelFormComponent implements OnInit {
         name: 'metadata',
         label: 'Metadata',
         width: 'full',
-        service: 'ai-agent-mcrs'
+        service: 'ai-agent-mcrs',
+        valuePlaceholder: 'metadataValue',
+        tokenUrlPlaceholder: 'tokenUrl',
+        clientIdPlaceholder: 'clientId',
+        clientSecretPlaceholder: 'selectClientSecret',
+        passwordPlaceholder: 'selectPasswordSecret'
       },
       { type: 'textarea', name: 'description', label: 'Description', width: 'full' }
     ]

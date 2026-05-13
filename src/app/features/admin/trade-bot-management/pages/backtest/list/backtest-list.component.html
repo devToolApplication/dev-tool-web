@@ -1,0 +1,17 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.backtest.run' | translateContent }}</div>
+    <app-form-input
+      [config]="formConfig"
+      [context]="formContext"
+      [initialValue]="formInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="runBacktest($event)"
+    ></app-form-input>
+    <div class="mt-3">
+      <app-realtime-progress-bar [state]="progress()" [showCancel]="true" (cancel)="cancelBacktest()"></app-realtime-progress-bar>
+    </div>
+  </app-card>
+
+  <app-table [config]="tableConfig" [data]="runs()" [loading]="loading()"></app-table>
+</section>

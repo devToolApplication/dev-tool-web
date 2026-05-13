@@ -8,7 +8,7 @@ import { LoadingService } from '../../../../../core/ui-services/loading.service'
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
-import { UPLOAD_STORAGE_INITIAL_VALUE, UPLOAD_STORAGE_METADATA_TYPE_OPTIONS } from '../upload-storage.constants';
+import { UPLOAD_STORAGE_INITIAL_VALUE } from '../upload-storage.constants';
 
 @Component({
   selector: 'app-upload-storage-form',
@@ -45,7 +45,12 @@ export class UploadStorageFormComponent implements OnInit {
         name: 'metadata',
         label: 'secretMetadata',
         width: 'full',
-        service: 'file-mcrs'
+        service: 'file-mcrs',
+        valuePlaceholder: 'metadataValue',
+        tokenUrlPlaceholder: 'tokenUrl',
+        clientIdPlaceholder: 'clientId',
+        clientSecretPlaceholder: 'selectClientSecret',
+        passwordPlaceholder: 'selectPasswordSecret'
       },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]

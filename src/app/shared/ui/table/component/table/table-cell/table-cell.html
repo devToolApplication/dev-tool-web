@@ -9,7 +9,7 @@
   }
 
   @case ('date') {
-    {{ value | date:(column.format ?? 'dd/MM/yyyy') }}
+    {{ dateValue | date:(column.format ?? 'dd/MM/yyyy') }}
   }
 
   @case ('currency') {

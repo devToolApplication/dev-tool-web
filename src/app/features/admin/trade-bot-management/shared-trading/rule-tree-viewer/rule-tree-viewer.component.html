@@ -1,0 +1,22 @@
+@if (rows().length) {
+  <section class="rule-tree">
+    <div class="rule-tree-header">
+      <span>{{ 'tradeBot.ruleTrace.rule' | translateContent }}</span>
+      <span>{{ 'tradeBot.ruleTrace.operator' | translateContent }}</span>
+      <span>{{ 'tradeBot.ruleTrace.status' | translateContent }}</span>
+      <span>{{ 'tradeBot.ruleTrace.indicators' | translateContent }}</span>
+      <span>{{ 'tradeBot.ruleTrace.reason' | translateContent }}</span>
+    </div>
+    @for (row of rows(); track row.id + row.depth) {
+      <div class="rule-tree-row">
+        <span class="rule-tree-code app-text" [style.padding-left.rem]="row.depth * 1.25">{{ row.code }}</span>
+        <span>{{ row.operator }}</span>
+        <span><app-tag [value]="row.status" [severity]="row.severity"></app-tag></span>
+        <span>{{ row.indicatorCount }}</span>
+        <span class="rule-tree-message">{{ row.message || '-' }}</span>
+      </div>
+    }
+  </section>
+} @else {
+  <div class="rule-tree-empty app-text-muted">{{ 'tradeBot.ruleTrace.empty' | translateContent }}</div>
+}

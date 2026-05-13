@@ -1,0 +1,24 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="text-lg font-semibold">{{ 'tradeBot.cache.title' | translateContent }}</div>
+      <div class="flex flex-wrap gap-2">
+        <app-button icon="pi pi-refresh" label="tradeBot.action.refresh" severity="secondary" [loading]="loading()" (buttonClick)="load()"></app-button>
+        <app-button icon="pi pi-trash" label="tradeBot.action.clearLocalCache" severity="danger" [loading]="loading()" (buttonClick)="clearLocal()"></app-button>
+      </div>
+    </div>
+    <app-json-preview>{{ statsJson() }}</app-json-preview>
+  </app-card>
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.cache.evict' | translateContent }}</div>
+    <app-form-input
+      [config]="evictForm"
+      [context]="formContext"
+      [initialValue]="evictModel()"
+      [submitting]="loading()"
+      (valueChange)="evictModel.set($event)"
+      (formSubmit)="evict($event)"
+    ></app-form-input>
+  </app-card>
+</section>

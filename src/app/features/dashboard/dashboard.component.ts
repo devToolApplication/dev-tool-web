@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { catchError, finalize, of } from 'rxjs';
 import { DashboardActivity, DashboardOverview, DashboardTabType } from './dashboard.models';
 import { DashboardService } from './dashboard.service';
@@ -7,7 +7,8 @@ import { DashboardService } from './dashboard.service';
   selector: 'app-dashboard',
   standalone: false,
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
   activeTab: DashboardTabType = 'ai-agent';
@@ -28,10 +29,15 @@ export class DashboardComponent implements OnInit {
     'file-storage': ''
   };
 
-  constructor(private readonly dashboardService: DashboardService) {}
+  constructor(
+    private readonly dashboardService: DashboardService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.tabs.forEach((tab) => this.loadOverview(tab));
+    setTimeout(() => {
+      this.tabs.forEach((tab) => this.loadOverview(tab));
+    });
   }
 
   get activeOverview(): DashboardOverview | null {
@@ -78,23 +84,38 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadOverview(tab: DashboardTabType): void {
-    this.loadingState[tab] = true;
-    this.errorState[tab] = '';
+    this.deferStateUpdate(() => {
+      this.loadingState[tab] = true;
+      this.errorState[tab] = '';
+    });
     this.dashboardService
       .getOverview(tab)
       .pipe(
         catchError(() => {
-          this.errorState[tab] = 'dashboard.loadError';
+          this.deferStateUpdate(() => {
+            this.errorState[tab] = 'dashboard.loadError';
+          });
           return of(null);
         }),
         finalize(() => {
-          this.loadingState[tab] = false;
+          this.deferStateUpdate(() => {
+            this.loadingState[tab] = false;
+          });
         })
       )
       .subscribe((overview) => {
         if (overview) {
-          this.overviews[tab] = overview;
+          this.deferStateUpdate(() => {
+            this.overviews[tab] = overview;
+          });
         }
       });
+  }
+
+  private deferStateUpdate(update: () => void): void {
+    setTimeout(() => {
+      update();
+      this.cdr.markForCheck();
+    });
   }
 }

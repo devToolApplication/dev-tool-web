@@ -1,0 +1,15 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.logs.filters' | translateContent }}</div>
+    <app-form-input
+      [config]="filterForm"
+      [context]="formContext"
+      [initialValue]="filterModel()"
+      [submitting]="loading()"
+      (valueChange)="filterModel.set($event)"
+      (formSubmit)="load($event)"
+    ></app-form-input>
+  </app-card>
+
+  <app-table [config]="tableConfig" [data]="logs()" [loading]="loading()"></app-table>
+</section>

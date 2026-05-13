@@ -134,6 +134,16 @@ const formConfig: FormConfig = {
       addButtonLabel: 'Add metadata'
     },
     {
+      type: 'secret-metadata',
+      name: 'secretMetadata',
+      label: 'secretMetadata',
+      width: 'full',
+      options: [
+        { label: 'Keycloak client secret', value: 'secret-keycloak-client' },
+        { label: 'Basic auth password', value: 'secret-basic-password' }
+      ]
+    },
+    {
       type: 'group',
       name: 'risk',
       label: 'Risk settings',
@@ -208,6 +218,32 @@ const initialValue = {
     exchange: 'binance',
     account: 'paper'
   },
+  secretMetadata: [
+    {
+      key: 'X-Trace-Source',
+      type: 'RAW_TEXT',
+      value: 'storybook'
+    },
+    {
+      key: 'Authorization',
+      type: 'BASIC_AUTH',
+      config: {
+        username: 'service-user',
+        passwordSecretId: 'secret-basic-password'
+      }
+    },
+    {
+      key: 'Authorization',
+      type: 'KEYCLOAK_AUTH',
+      config: {
+        tokenUrl: 'https://auth.example.com/realms/demo/protocol/openid-connect/token',
+        clientId: 'demo-client',
+        clientSecretId: 'secret-keycloak-client',
+        grantType: 'CLIENT_CREDENTIALS',
+        scope: 'openid profile'
+      }
+    }
+  ],
   risk: {
     maxDrawdown: 8,
     profile: 'medium'

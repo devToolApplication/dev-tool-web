@@ -2,6 +2,9 @@
 
 ## Classification
 
+- `features/admin/trade-bot-management/shared-trading`
+  Use for trading-domain reusable UI such as candle charts, overlay controls, rule tree viewers, trade drawers, and order/fill/equity presentation. These components are not global primitives, so they should not be placed in root `shared/component`.
+
 - `shared/component`
   Use only for small UI primitives and input-like controls.
   Examples: button wrappers, input controls, tags, toggles, small reusable atoms.
@@ -29,6 +32,7 @@
 ## Review Checklist
 
 - Is this a small primitive? Put it in `shared/component`.
+- Is this reusable only inside trading screens? Put it in `features/admin/trade-bot-management/shared-trading`.
 - Is this a composed section/panel/block? Put it in `shared/ui`.
 - Are you introducing a new CSS file? Check first whether app utility/token classes already solve it.
 - Is the feature screen holding too much layout markup? Extract the repeated block into `shared/ui`.

@@ -1,0 +1,61 @@
+<section class="flex flex-col gap-4">
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.query' | translateContent }}</div>
+    <app-form-input
+      [config]="queryForm"
+      [context]="formContext"
+      [initialValue]="queryInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="loadCandles($event)"
+    ></app-form-input>
+  </app-card>
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sync.title' | translateContent }}</div>
+    <app-form-input
+      [config]="syncForm"
+      [context]="formContext"
+      [initialValue]="syncInitialValue"
+      [submitting]="syncLoading()"
+      (formSubmit)="syncBinanceUsdm($event)"
+    ></app-form-input>
+    <div class="mt-3">
+      <app-realtime-progress-bar [state]="syncProgress()" [showCancel]="true" (cancel)="cancelSync()"></app-realtime-progress-bar>
+    </div>
+  </app-card>
+
+  <app-card>
+    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.import' | translateContent }}</div>
+    <app-form-input
+      [config]="importForm"
+      [context]="formContext"
+      [initialValue]="importInitialValue"
+      [submitting]="loading()"
+      (formSubmit)="importCandles($event)"
+    ></app-form-input>
+  </app-card>
+
+  @if (candles().length) {
+    <app-data-quality-warning [candles]="candles()" [gaps]="gaps()"></app-data-quality-warning>
+    <app-candle-chart
+      [mode]="'HISTORICAL'"
+      [config]="chartConfig()"
+      [candles]="chartCandles()"
+    ></app-candle-chart>
+  } @else {
+    <app-data-quality-warning [candles]="candles()" [gaps]="gaps()"></app-data-quality-warning>
+  }
+
+  <app-table [config]="tableConfig" [data]="candles()" [loading]="loading()"></app-table>
+
+  @if (selectedRawCandle()) {
+    <app-card>
+      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.rawCandle' | translateContent }}</div>
+      <app-json-preview>{{ rawCandleJson() }}</app-json-preview>
+    </app-card>
+  }
+
+  <app-table [config]="syncRunTableConfig" [data]="syncRuns()" [loading]="syncLoading()"></app-table>
+
+  <app-table [config]="gapTableConfig" [data]="gaps()" [loading]="syncLoading()"></app-table>
+</section>

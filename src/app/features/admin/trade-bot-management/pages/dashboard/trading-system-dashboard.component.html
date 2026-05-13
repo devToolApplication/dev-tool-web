@@ -1,0 +1,18 @@
+<section class="flex flex-col gap-4">
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    @for (card of cards(); track card.label) {
+      <app-summary-metric-card [label]="card.label" [value]="card.value"></app-summary-metric-card>
+    }
+  </div>
+
+  <app-card>
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <div class="text-lg font-semibold">{{ 'tradeBot.dashboard.title' | translateContent }}</div>
+      <app-button icon="pi pi-refresh" label="tradeBot.action.refresh" severity="secondary" [loading]="loading()" (buttonClick)="load()"></app-button>
+    </div>
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <app-table [config]="syncRunTableConfig" [data]="syncRuns()" [loading]="loading()"></app-table>
+      <app-table [config]="backtestTableConfig" [data]="backtests()" [loading]="loading()"></app-table>
+    </div>
+  </app-card>
+</section>
