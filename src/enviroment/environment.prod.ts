@@ -18,7 +18,7 @@ export const environment = {
     adminFileServiceUrl: 'https://api.103.77.243.66.nip.io/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'https://api.103.77.243.66.nip.io/trade-bot-mcrs/v1/admin',
     tradeBotUrl: 'https://api.103.77.243.66.nip.io/trade-bot-mcrs/v1',
-    jobSchedulerAdminUrl: 'https://api.103.77.243.66.nip.io/job-scheduler-api/v1/admin',
+    jobSchedulerAdminUrl: 'https://api.103.77.243.66.nip.io/job-service/v1/admin',
     bpmEngineAdminUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1/admin',
     bpmEngineUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1'
   },
