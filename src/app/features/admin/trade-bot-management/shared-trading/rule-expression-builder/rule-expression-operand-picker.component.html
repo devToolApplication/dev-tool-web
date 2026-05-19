@@ -1,0 +1,91 @@
+<div class="rule-expression-operand">
+  <div class="rule-expression-operand__type">
+    <app-select
+      [label]="label"
+      [options]="operandTypeOptions"
+      [value]="resolvedOperand.type"
+      [disabled]="readonlyOrDisabled"
+      (valueChange)="updateType($event)"
+    ></app-select>
+  </div>
+
+  <div class="rule-expression-operand__details">
+    @if (resolvedOperand.type === 'indicator') {
+      <app-select
+        label="tradeBot.ruleExpression.field.indicator"
+        [options]="indicatorOptions()"
+        [value]="resolvedOperand.indicatorCode || null"
+        [disabled]="readonlyOrDisabled"
+        [showClear]="true"
+        (valueChange)="updateIndicatorCode($event)"
+      ></app-select>
+    } @else if (resolvedOperand.type === 'indicatorOutput') {
+      <app-select
+        label="tradeBot.ruleExpression.field.indicator"
+        [options]="indicatorOptions()"
+        [value]="resolvedOperand.indicatorCode || null"
+        [disabled]="readonlyOrDisabled"
+        [showClear]="true"
+        (valueChange)="updateIndicatorCode($event)"
+      ></app-select>
+      <app-select
+        label="tradeBot.ruleExpression.field.output"
+        [options]="outputOptions"
+        [value]="resolvedOperand.outputName || 'VALUE'"
+        [disabled]="readonlyOrDisabled"
+        (valueChange)="updateOutputName($event)"
+      ></app-select>
+    } @else if (resolvedOperand.type === 'priceSeries') {
+      <app-select
+        label="tradeBot.ruleExpression.field.priceSeries"
+        [options]="priceSeriesOptions()"
+        [value]="resolvedOperand.series || 'CLOSE'"
+        [disabled]="readonlyOrDisabled"
+        (valueChange)="updatePriceSeries($event)"
+      ></app-select>
+    } @else if (resolvedOperand.type === 'ruleRef') {
+      <app-select
+        label="tradeBot.ruleExpression.field.ruleRef"
+        [options]="ruleOptions()"
+        [value]="resolvedOperand.ruleCode || null"
+        [disabled]="readonlyOrDisabled"
+        [showClear]="true"
+        (valueChange)="updateRuleCode($event)"
+      ></app-select>
+    } @else {
+      <app-select
+        label="tradeBot.ruleExpression.field.constantType"
+        [options]="constantTypeOptions"
+        [value]="resolvedOperand.valueType || 'number'"
+        [disabled]="readonlyOrDisabled"
+        (valueChange)="updateConstantType($event)"
+      ></app-select>
+
+      @if ((resolvedOperand.valueType || 'number') === 'number') {
+        <app-input-number
+          label="tradeBot.ruleExpression.field.constantNumber"
+          suffix=" value"
+          [value]="$any(resolvedOperand.value)"
+          [disabled]="readonlyOrDisabled"
+          (valueChange)="updateConstantNumber($event)"
+        ></app-input-number>
+      } @else if (resolvedOperand.valueType === 'boolean') {
+        <app-select
+          label="tradeBot.ruleExpression.field.constantBoolean"
+          [options]="booleanOptions"
+          [value]="resolvedOperand.value === true"
+          [disabled]="readonlyOrDisabled"
+          (valueChange)="updateConstantBoolean($event)"
+        ></app-select>
+      } @else {
+        <app-input-text
+          label="tradeBot.ruleExpression.field.constantText"
+          [value]="$any(resolvedOperand.value || '')"
+          [disabled]="readonlyOrDisabled"
+          (valueChange)="updateConstantText($event)"
+        ></app-input-text>
+      }
+    }
+  </div>
+</div>
+

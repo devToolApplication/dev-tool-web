@@ -1,0 +1,170 @@
+<section class="rule-expression-builder" [class.rule-expression-builder--disabled]="readonlyOrDisabled">
+  <div class="rule-expression-builder__header">
+    <div>
+      <div class="rule-expression-builder__title">{{ 'tradeBot.ruleExpression.title' | translateContent }}</div>
+      <div class="rule-expression-builder__subtitle">{{ 'tradeBot.ruleExpression.subtitle' | translateContent }}</div>
+    </div>
+
+    <div class="rule-expression-builder__status">
+      <app-tag
+        [value]="validation().errors.length ? 'tradeBot.ruleExpression.invalid' : 'tradeBot.ruleExpression.valid'"
+        [severity]="validation().errors.length ? 'danger' : 'success'"
+      ></app-tag>
+      @if (validation().warnings.length) {
+        <app-tag value="tradeBot.ruleExpression.warning" severity="warn"></app-tag>
+      }
+    </div>
+  </div>
+
+  <div class="rule-expression-preview" aria-live="polite">
+    <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.preview' | translateContent }}</div>
+    <div class="rule-expression-preview__text">
+      @if (preview()) {
+        {{ preview() }}
+      } @else {
+        <span class="app-text-muted">{{ 'tradeBot.ruleExpression.emptyPreview' | translateContent }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="rule-expression-palette">
+    <app-button
+      icon="pi pi-plus-circle"
+      label="tradeBot.ruleExpression.action.condition"
+      severity="info"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addCondition()"
+    ></app-button>
+    <app-button
+      icon="pi pi-link"
+      label="tradeBot.ruleExpression.action.ruleRef"
+      severity="secondary"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addRuleRef()"
+    ></app-button>
+    <app-button
+      icon="pi pi-sitemap"
+      label="tradeBot.ruleExpression.group.AND"
+      severity="secondary"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addGroup('AND')"
+    ></app-button>
+    <app-button
+      icon="pi pi-share-alt"
+      label="tradeBot.ruleExpression.group.OR"
+      severity="secondary"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addGroup('OR')"
+    ></app-button>
+    <app-button
+      icon="pi pi-code"
+      label="tradeBot.ruleExpression.group.XOR"
+      severity="secondary"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addGroup('XOR')"
+    ></app-button>
+    <app-button
+      icon="pi pi-ban"
+      label="tradeBot.ruleExpression.group.NOT"
+      severity="secondary"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="addNot()"
+    ></app-button>
+    <app-button
+      icon="pi pi-times"
+      label="tradeBot.ruleExpression.action.clear"
+      severity="danger"
+      [text]="true"
+      [disabled]="readonlyOrDisabled || !expression().root"
+      (buttonClick)="clearExpression()"
+    ></app-button>
+  </div>
+
+  @if (validation().issues.length) {
+    <div class="rule-expression-summary">
+      @for (issue of validation().issues; track issue.message + issue.path) {
+        <div class="rule-expression-issue" [class.rule-expression-issue--warning]="issue.severity === 'warning'">
+          {{ issue.message | translateContent }}
+        </div>
+      }
+    </div>
+  }
+
+  <div class="rule-expression-builder__layout">
+    <section class="rule-expression-tree-panel">
+      <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.tree' | translateContent }}</div>
+      @if (expression().root; as rootNode) {
+        <app-rule-expression-node
+          [node]="rootNode"
+          [selectedNodeId]="selectedNodeId()"
+          [issues]="validation().issues"
+          [readonly]="readonly"
+          [disabled]="disabled"
+          (selectNode)="selectNode($event)"
+          (addChild)="onAddChild($event)"
+          (removeNode)="onRemoveNode($event)"
+          (duplicateNode)="onDuplicateNode($event)"
+          (toggleDisabled)="onToggleDisabled($event)"
+          (wrapNode)="onWrapNode($event)"
+        ></app-rule-expression-node>
+      } @else {
+        <div class="rule-expression-empty">{{ 'tradeBot.ruleExpression.emptyTree' | translateContent }}</div>
+      }
+    </section>
+
+    <app-rule-expression-panel
+      [node]="selectedNode()"
+      [issues]="validation().issues"
+      [indicatorConfigs]="indicatorConfigs"
+      [ruleConfigs]="ruleConfigs"
+      [currentRuleId]="currentRuleId"
+      [readonly]="readonly"
+      [disabled]="disabled"
+      (nodeChange)="onNodeChange($event)"
+      (removeNode)="onRemoveNode($event)"
+      (duplicateNode)="onDuplicateNode($event)"
+    ></app-rule-expression-panel>
+  </div>
+
+  <section class="rule-expression-dependencies">
+    <div>
+      <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.dependencies' | translateContent }}</div>
+      <div class="rule-expression-section-subtitle">{{ 'tradeBot.ruleExpression.dependenciesSubtitle' | translateContent }}</div>
+    </div>
+    <div class="rule-expression-dependencies__groups">
+      <div class="rule-expression-dependencies__group">
+        <span>{{ 'tradeBot.ruleExpression.dependency.indicators' | translateContent }}</span>
+        @if (dependencies().indicatorCodes.length) {
+          @for (code of dependencies().indicatorCodes; track code) {
+            <app-tag [value]="code" severity="info"></app-tag>
+          }
+        } @else {
+          <span class="app-text-muted">{{ 'noDataFound' | translateContent }}</span>
+        }
+      </div>
+      <div class="rule-expression-dependencies__group">
+        <span>{{ 'tradeBot.ruleExpression.dependency.rules' | translateContent }}</span>
+        @if (dependencies().ruleCodes.length) {
+          @for (code of dependencies().ruleCodes; track code) {
+            <app-tag [value]="code" severity="secondary"></app-tag>
+          }
+        } @else {
+          <span class="app-text-muted">{{ 'noDataFound' | translateContent }}</span>
+        }
+      </div>
+      <div class="rule-expression-dependencies__group">
+        <span>{{ 'tradeBot.ruleExpression.dependency.priceSeries' | translateContent }}</span>
+        @if (dependencies().priceSeries.length) {
+          @for (series of dependencies().priceSeries; track series) {
+            <app-tag [value]="series" severity="success"></app-tag>
+          }
+        } @else {
+          <span class="app-text-muted">{{ 'noDataFound' | translateContent }}</span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <app-rule-expression-json-preview [value]="expression()"></app-rule-expression-json-preview>
+</section>
+

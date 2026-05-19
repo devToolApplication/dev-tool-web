@@ -1,0 +1,20 @@
+<section class="rule-expression-json">
+  <div class="rule-expression-json__header">
+    <div>
+      <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.debugJson' | translateContent }}</div>
+      <div class="rule-expression-section-subtitle">{{ 'tradeBot.ruleExpression.debugJsonSubtitle' | translateContent }}</div>
+    </div>
+    <app-button
+      [icon]="collapsed() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+      [label]="collapsed() ? 'tradeBot.ruleExpression.showJson' : 'tradeBot.ruleExpression.hideJson'"
+      severity="secondary"
+      [text]="true"
+      (buttonClick)="toggle()"
+    ></app-button>
+  </div>
+
+  @if (!collapsed()) {
+    <pre class="rule-expression-json__content">{{ jsonText() }}</pre>
+  }
+</section>
+
