@@ -23,6 +23,8 @@
   --app-border: rgba(130, 164, 255, 0.34);
   --app-border-soft: rgba(191, 204, 255, 0.14);
   --app-border-strong: rgba(109, 159, 255, 0.52);
+  --app-primary: var(--app-custom-dark-primary);
+  --app-control-on-primary: #ffffff;
 
   --app-input-bg: rgba(10, 16, 41, 0.78);
   --app-input-text: #f3f6ff;

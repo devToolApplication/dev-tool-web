@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { AiModelFormComponent } from './ai-model/form/ai-model-form.component';
 import { AiModelListComponent } from './ai-model/list/ai-model-list.component';
 import { AgentDefinitionFormComponent } from './agent-definition/form/agent-definition-form.component';
@@ -30,32 +31,32 @@ export const aiAgentAdminRoutes: Routes = [
     path: 'admin/ai-agent/models',
     children: [
       { path: '', component: AiModelListComponent },
-      { path: 'create', component: AiModelFormComponent },
-      { path: 'edit/:id', component: AiModelFormComponent }
+      { path: 'create', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/ai-agent/agents',
     children: [
       { path: '', component: AgentDefinitionListComponent },
-      { path: 'create', component: AgentDefinitionFormComponent },
-      { path: 'edit/:id', component: AgentDefinitionFormComponent }
+      { path: 'create', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/ai-agent/prompt-templates',
     children: [
       { path: '', component: PromptTemplateListComponent },
-      { path: 'create', component: PromptTemplateFormComponent },
-      { path: 'edit/:id', component: PromptTemplateFormComponent }
+      { path: 'create', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/ai-agent/execution-policies',
     children: [
       { path: '', component: ExecutionPolicyListComponent },
-      { path: 'create', component: ExecutionPolicyFormComponent },
-      { path: 'edit/:id', component: ExecutionPolicyFormComponent }
+      { path: 'create', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {

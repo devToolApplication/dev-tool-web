@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
@@ -13,6 +13,7 @@ import { TradingSystemService } from '../../../../../../core/services/trade-bot-
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { CrudPageConfig } from '../../../../../../shared/ui/base-crud-page/base-crud-page.model';
 import { FieldConfig, FormConfig, FormContext, SelectOption } from '../../../../../../shared/ui/form-input/models/form-config.model';
 import {
@@ -20,13 +21,10 @@ import {
   asRecord,
   cloneFormConfig,
   formTemplateSignature,
-  formTemplateText,
   hasFormTemplateFields,
-  parseFormTemplateText,
-  stringValue,
-  tryParseFormTemplateText
+  stringValue
 } from '../../../config-template-form.utils';
-import { parseJson, stringifyJson } from '../../../trade-bot-form-utils';
+import { parseJson, stringifyJson, toUniqueTextOptions } from '../../../trade-bot-form-utils';
 import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.constants';
 
 @Component({
@@ -35,6 +33,8 @@ import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.con
   templateUrl: './indicator-config-form.component.html'
 })
 export class IndicatorConfigFormComponent implements OnInit {
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
   formConfig: FormConfig = { fields: [] };
   formContext: FormContext = { user: null, mode: 'create' };
   readonly submitting = signal(false);
@@ -87,6 +87,7 @@ export class IndicatorConfigFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastService.info(this.i18nService.t('saveSuccess'));
+          this.crudPage?.markFormPristine();
           void this.router.navigate([TRADE_BOT_ROUTES.indicators]);
         },
         error: () => this.toastService.error(this.i18nService.t('saveError'))
@@ -99,19 +100,22 @@ export class IndicatorConfigFormComponent implements OnInit {
       ...model,
       executorVersion: this.resolveVersion(executor, model['executorVersion'])
     };
-    const parsedTemplate = this.usesConfig(executor)
-      ? tryParseFormTemplateText(normalizedModel['formTemplateText'])
-      : { invalid: false };
-    if (parsedTemplate.invalid) {
-      return;
-    }
 
-    const signature = formTemplateSignature(parsedTemplate.template);
+    const template = this.templateForExecutor(executor) ?? (executor === this.currentExecutor ? this.currentFormTemplate : undefined);
+    const signature = formTemplateSignature(template);
     if (executor === this.currentExecutor && signature === this.currentTemplateSignature) {
       return;
     }
 
-    this.applyTemplateState(normalizedModel, parsedTemplate.template, executor);
+    this.applyTemplateState(normalizedModel, template, executor);
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
   }
 
   private loadInitialData(): void {
@@ -143,7 +147,7 @@ export class IndicatorConfigFormComponent implements OnInit {
   private toPayload(model: Record<string, unknown>): IndicatorConfigDto {
     const executor = String(model['executor'] ?? '');
     const usesConfig = this.usesConfig(executor);
-    const template = usesConfig ? parseFormTemplateText(model['formTemplateText']) : undefined;
+    const template = usesConfig ? this.currentFormTemplate : undefined;
     const basePayload = {
       code: String(model['code'] ?? ''),
       executor,
@@ -157,7 +161,7 @@ export class IndicatorConfigFormComponent implements OnInit {
         ...basePayload,
         config: {},
         children: this.childrenFromSelections(asRecord(model['childSelections']), this.childSlots(executor)),
-        overlay: parseJson(model['overlayText'], {})
+        overlay: asRecord(model['overlay'])
       };
     }
 
@@ -166,7 +170,7 @@ export class IndicatorConfigFormComponent implements OnInit {
         ...basePayload,
         config: parseJson(model['configText'], {}),
         children: parseJson(model['childrenText'], []),
-        overlay: parseJson(model['overlayText'], {})
+        overlay: asRecord(model['overlay'])
       };
     }
 
@@ -190,10 +194,8 @@ export class IndicatorConfigFormComponent implements OnInit {
       children: value?.children ?? [],
       childSelections: this.childrenToSelections(value?.children),
       overlay: value?.overlay ?? {},
-      formTemplateText: formTemplateText(value?.formTemplate),
       configText: stringifyJson(value?.config, {}),
-      childrenText: stringifyJson(value?.children, []),
-      overlayText: stringifyJson(value?.overlay, {})
+      childrenText: stringifyJson(value?.children, [])
     };
   }
 
@@ -201,13 +203,15 @@ export class IndicatorConfigFormComponent implements OnInit {
     const executor = this.executors[0]?.executor ?? '';
     const executorVersion = this.executors[0]?.latestVersion ?? 'LATEST';
     const initialValue = { ...this.toFormValue(), executor, executorVersion };
-    this.applyTemplateState(initialValue, undefined, executor);
+    this.applyTemplateState(initialValue, this.templateForExecutor(executor), executor);
   }
 
   private applyExistingConfig(value: IndicatorConfigResponse): void {
     const executorVersion = this.resolveVersion(value.executor, value.executorVersion);
     const initialValue = { ...this.toFormValue(value), executorVersion };
-    const template = hasFormTemplateFields(value.formTemplate) ? cloneFormConfig(value.formTemplate) : undefined;
+    const template = hasFormTemplateFields(value.formTemplate)
+      ? cloneFormConfig(value.formTemplate)
+      : this.templateForExecutor(value.executor);
     this.applyTemplateState(initialValue, template, value.executor);
   }
 
@@ -218,6 +222,7 @@ export class IndicatorConfigFormComponent implements OnInit {
     this.currentExecutor = currentExecutor;
     this.formInitialValue = this.withLegacyTexts(model);
     this.formConfig = this.buildFormConfig(this.currentFormTemplate, currentExecutor);
+    this.updateTemplateFallbackInfo(currentExecutor, this.currentFormTemplate);
   }
 
   private withLegacyTexts(value: Record<string, unknown>): Record<string, unknown> {
@@ -226,7 +231,7 @@ export class IndicatorConfigFormComponent implements OnInit {
       childSelections: value['childSelections'] ?? this.childrenToSelections(asArray<IndicatorChildConfig>(value['children'])),
       configText: value['configText'] ?? stringifyJson(value['config'], {}),
       childrenText: value['childrenText'] ?? stringifyJson(value['children'], []),
-      overlayText: value['overlayText'] ?? stringifyJson(value['overlay'], {})
+      overlay: value['overlay'] ?? {}
     };
   }
 
@@ -234,61 +239,127 @@ export class IndicatorConfigFormComponent implements OnInit {
     const templateFields = !this.usesConfig(currentExecutor)
       ? this.compositeFields(currentExecutor)
       : hasFormTemplateFields(template)
-        ? template.fields
+        ? this.templateFieldsWithCommonOverlay(template.fields)
         : this.legacyFields();
     return {
-      fields: [...this.staticFields(currentExecutor), ...templateFields]
+      fields: [...this.staticFieldGroups(currentExecutor), ...templateFields]
     };
   }
 
-  private staticFields(currentExecutor: string): FieldConfig[] {
+  private templateFieldsWithCommonOverlay(fields: FieldConfig[]): FieldConfig[] {
+    const normalizedFields = fields.map((field) => this.normalizeTemplateField(field));
+    return this.hasField(normalizedFields, 'overlay')
+      ? normalizedFields
+      : [...normalizedFields, this.overlayRecordField()];
+  }
+
+  private normalizeTemplateField(field: FieldConfig): FieldConfig {
+    if (field.name === 'overlay' && field.type !== 'record') {
+      return this.overlayRecordField(field.label);
+    }
+
+    if (field.type === 'group') {
+      return {
+        ...field,
+        children: field.children.map((child) => this.normalizeTemplateField(child))
+      };
+    }
+
+    if (field.type === 'array') {
+      return {
+        ...field,
+        itemConfig: field.itemConfig.map((child) => this.normalizeTemplateField(child))
+      };
+    }
+
+    if (field.type === 'tree') {
+      return {
+        ...field,
+        children: field.children?.map((child) => this.normalizeTemplateField(child))
+      };
+    }
+
+    return field;
+  }
+
+  private hasField(fields: FieldConfig[], name: string): boolean {
+    return fields.some((field) => {
+      if (field.name === name) {
+        return true;
+      }
+      if (field.type === 'group') {
+        return this.hasField(field.children, name);
+      }
+      if (field.type === 'array') {
+        return this.hasField(field.itemConfig, name);
+      }
+      if (field.type === 'tree') {
+        return this.hasField(field.children ?? [], name);
+      }
+      return false;
+    });
+  }
+
+  private updateTemplateFallbackInfo(executor: string, template?: FormConfig): void {
+    this.pageConfig.infoSection = executor && this.usesConfig(executor) && !hasFormTemplateFields(template)
+      ? {
+          title: 'tradeBot.message.missingFormTemplateTitle',
+          description: 'tradeBot.message.missingIndicatorFormTemplateDescription'
+        }
+      : null;
+  }
+
+  private staticFieldGroups(currentExecutor: string): FieldConfig[] {
     const useExecutorSelect = this.shouldUseExecutorSelect(currentExecutor);
     const versionOptions = this.versionOptions(currentExecutor);
     return [
-      { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [this.requiredRule()] },
-      !useExecutorSelect
-        ? { name: 'executor', type: 'text', label: 'tradeBot.field.executor', width: '1/3', validation: [this.requiredRule()] }
-        : {
-            name: 'executor',
-            type: 'select',
-            label: 'tradeBot.field.executor',
-            width: '1/3',
-            options: this.executors.map((item) => ({ label: item.executor, value: item.executor })),
-            validation: [this.requiredRule()]
-          },
-      !useExecutorSelect || !versionOptions.length
-        ? { name: 'executorVersion', type: 'text', label: 'tradeBot.field.executorVersion', width: '1/3' }
-        : {
-            name: 'executorVersion',
-            type: 'select',
-            label: 'tradeBot.field.executorVersion',
-            width: '1/3',
-            options: versionOptions
-          },
-      { name: 'displayType', type: 'text', label: 'tradeBot.field.displayType', width: '1/3' },
-      { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/3' },
-      ...(!this.usesConfig(currentExecutor)
-        ? []
-        : [
-            {
-              name: 'formTemplateText',
-              type: 'textarea',
-              label: 'tradeBot.field.formTemplateJson',
-              contentType: 'json',
-              jsonValidationMessage: 'tradeBot.message.invalidJson',
-              rows: 10,
-              maxRows: 24,
-              showZoomButton: true,
-              width: 'full'
-            } as FieldConfig
-          ])
+      {
+        name: 'basicInfo',
+        type: 'group',
+        label: 'general',
+        width: 'full',
+        flat: true,
+        children: [
+          { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [this.requiredRule()] },
+          { name: 'displayType', type: 'auto-complete', label: 'tradeBot.field.displayType', options: this.displayTypeOptions(), width: '1/3' },
+          { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/3' }
+        ]
+      },
+      {
+        name: 'executorInfo',
+        type: 'group',
+        label: 'tradeBot.field.executor',
+        width: 'full',
+        flat: true,
+        children: [
+          !useExecutorSelect
+            ? { name: 'executor', type: 'text', label: 'tradeBot.field.executor', width: '1/2', validation: [this.requiredRule()] }
+            : {
+                name: 'executor',
+                type: 'select',
+                label: 'tradeBot.field.executor',
+                width: '1/2',
+                options: this.executors.map((item) => ({ label: item.executor, value: item.executor })),
+                validation: [this.requiredRule()]
+              },
+          !useExecutorSelect || !versionOptions.length
+            ? { name: 'executorVersion', type: 'text', label: 'tradeBot.field.executorVersion', width: '1/2' }
+            : {
+                name: 'executorVersion',
+                type: 'select',
+                label: 'tradeBot.field.executorVersion',
+                width: '1/2',
+                options: versionOptions
+              }
+        ]
+      }
     ];
   }
 
   private compositeFields(currentExecutor: string): FieldConfig[] {
     return [
       ...this.childSlotFields(currentExecutor),
-      this.overlayTextField()
+      this.overlayRecordField()
     ];
   }
 
@@ -318,20 +389,49 @@ export class IndicatorConfigFormComponent implements OnInit {
 
   private legacyFields(): FieldConfig[] {
     return [
-      { name: 'configText', type: 'textarea', label: 'tradeBot.field.configJson', contentType: 'json', rows: 8, maxRows: 16, showZoomButton: true },
-      { name: 'childrenText', type: 'textarea', label: 'tradeBot.field.childrenJson', contentType: 'json', rows: 5, maxRows: 12, showZoomButton: true },
-      this.overlayTextField()
+      this.overlayRecordField(),
+      this.advancedJsonGroup([
+        this.jsonTextField('configText', 'tradeBot.field.configJson', 8, 16),
+        this.jsonTextField('childrenText', 'tradeBot.field.childrenJson', 5, 12)
+      ])
     ];
   }
 
-  private overlayTextField(): FieldConfig {
+  private overlayRecordField(label = 'tradeBot.template.overlay'): FieldConfig {
     return {
-      name: 'overlayText',
+      name: 'overlay',
+      type: 'record',
+      label,
+      keyLabel: 'tradeBot.template.overlayKey',
+      valueLabel: 'tradeBot.template.overlayValue',
+      addButtonLabel: 'addRow',
+      width: 'full'
+    };
+  }
+
+  private advancedJsonGroup(children: FieldConfig[]): FieldConfig {
+    return {
+      name: 'advancedJson',
+      type: 'group',
+      label: 'shared.form.advancedJson',
+      width: 'full',
+      flat: true,
+      collapsible: true,
+      collapsed: true,
+      density: 'compact',
+      children
+    };
+  }
+
+  private jsonTextField(name: string, label: string, rows: number, maxRows: number): FieldConfig {
+    return {
+      name,
       type: 'textarea',
-      label: 'tradeBot.field.overlayJson',
+      label,
       contentType: 'json',
-      rows: 5,
-      maxRows: 12,
+      jsonValidationMessage: 'tradeBot.message.invalidJson',
+      rows,
+      maxRows,
       showZoomButton: true,
       width: 'full'
     };
@@ -390,6 +490,11 @@ export class IndicatorConfigFormComponent implements OnInit {
     return this.executors.find((item) => item.executor === executor);
   }
 
+  private templateForExecutor(executor: string): FormConfig | undefined {
+    const template = this.executorMeta(executor)?.formTemplate;
+    return hasFormTemplateFields(template) ? cloneFormConfig(template) : undefined;
+  }
+
   private shouldUseExecutorSelect(executor: string): boolean {
     return this.executors.length > 0 && (!executor || this.executors.some((item) => item.executor === executor));
   }
@@ -397,6 +502,10 @@ export class IndicatorConfigFormComponent implements OnInit {
   private versionOptions(executor: string): Array<{ label: string; value: string }> {
     const versions = this.executors.find((item) => item.executor === executor)?.versions ?? [];
     return versions.map((version) => ({ label: version, value: version }));
+  }
+
+  private displayTypeOptions(): SelectOption[] {
+    return toUniqueTextOptions(this.indicatorConfigs, (indicator) => indicator.displayType);
   }
 
   private resolveVersion(executor: string, value: unknown): string {

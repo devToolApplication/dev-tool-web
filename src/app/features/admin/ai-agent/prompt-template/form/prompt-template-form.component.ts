@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
@@ -7,6 +8,8 @@ import { PromptTemplateService } from '../../../../../core/services/ai-agent-ser
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../../shared/ui/base-crud-page/base-crud-page.component';
+import { CrudPageConfig } from '../../../../../shared/ui/base-crud-page/base-crud-page.model';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
 import { PROMPT_TEMPLATE_INITIAL_VALUE, PROMPT_TEMPLATE_ROUTES } from '../prompt-template.constants';
@@ -17,15 +20,17 @@ import { PROMPT_TEMPLATE_INITIAL_VALUE, PROMPT_TEMPLATE_ROUTES } from '../prompt
   templateUrl: './prompt-template-form.component.html'
 })
 export class PromptTemplateFormComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create' };
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
+  formContext: FormContext = { user: null, mode: 'create' };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'code', label: 'Code', width: '1/2', validation: [Rules.required('Code is required')] },
-      { type: 'text', name: 'name', label: 'Name', width: '1/2', validation: [Rules.required('Name is required')] },
+      { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('aiAgent.promptTemplate.validation.codeRequired')] },
+      { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('aiAgent.promptTemplate.validation.nameRequired')] },
       {
         type: 'select',
         name: 'templateType',
-        label: 'Template Type',
+        label: 'aiAgent.promptTemplate.templateType',
         width: '1/3',
         options: [
           { label: 'SYSTEM', value: 'SYSTEM' },
@@ -33,25 +38,25 @@ export class PromptTemplateFormComponent implements OnInit {
           { label: 'TOOL_PROTOCOL', value: 'TOOL_PROTOCOL' },
           { label: 'AGENT', value: 'AGENT' }
         ],
-        validation: [Rules.required('Template type is required')]
+        validation: [Rules.required('aiAgent.promptTemplate.validation.templateTypeRequired')]
       },
-      { type: 'number', name: 'version', label: 'Version', width: '1/3' },
-      { type: 'checkbox', name: 'enabled', label: 'Enabled', width: '1/3' },
-      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'number', name: 'version', label: 'aiAgent.promptTemplate.version', width: '1/3' },
+      { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
+      { type: 'select', name: 'status', label: 'status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
       {
         type: 'textarea',
         name: 'content',
-        label: 'Template Content',
+        label: 'aiAgent.promptTemplate.content',
         width: 'full',
         rows: 14,
         showZoomButton: true,
-        validation: [Rules.required('Template content is required')]
+        validation: [Rules.required('aiAgent.promptTemplate.validation.contentRequired')]
       }
     ]
   };
 
   editId: string | null = null;
-  loading = false;
+  readonly loading = signal(false);
   formInitialValue: PromptTemplateCreateDto = { ...PROMPT_TEMPLATE_INITIAL_VALUE };
   readonly formVisible = signal(true);
 
@@ -59,6 +64,7 @@ export class PromptTemplateFormComponent implements OnInit {
     private readonly service: PromptTemplateService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly destroyRef: DestroyRef,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly i18nService: I18nService
@@ -66,13 +72,28 @@ export class PromptTemplateFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.applyRouteMode(this.route.snapshot.paramMap.get('id'));
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const id = params.get('id');
       if (id === this.editId) {
         return;
       }
       this.applyRouteMode(id);
     });
+  }
+
+  get pageConfig(): CrudPageConfig {
+    return {
+      title: this.editId ? 'aiAgent.promptTemplate.editTitle' : 'aiAgent.promptTemplate.createTitle',
+      description: 'aiAgent.promptTemplate.formDescription',
+      actions: [
+        { id: 'back', label: 'back', icon: 'pi pi-arrow-left', goBack: true, backLink: PROMPT_TEMPLATE_ROUTES.list, severity: 'secondary', text: true },
+        { id: 'submit', label: this.editId ? 'update' : 'create', icon: 'pi pi-save', loading: this.loading(), submitForm: true }
+      ],
+      infoSection: {
+        title: 'aiAgent.promptTemplate.infoTitle',
+        description: 'aiAgent.promptTemplate.infoDescription'
+      }
+    };
   }
 
   onSubmitForm(model: PromptTemplateCreateDto): void {
@@ -83,19 +104,27 @@ export class PromptTemplateFormComponent implements OnInit {
       content: model.content?.trim() || ''
     };
     const request$ = this.editId ? this.service.update(this.editId, payload as PromptTemplateUpdateDto) : this.service.create(payload);
-    this.loading = true;
-    this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(request$).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
+        this.crudPage?.markFormPristine();
         void this.router.navigate([PROMPT_TEMPLATE_ROUTES.list]);
       },
-      error: () => this.toastService.error('Save prompt template failed')
+      error: () => this.toastService.error('aiAgent.promptTemplate.toast.saveFailed')
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
+  }
+
   private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    this.formContext = { ...this.formContext, extra: { ...(this.formContext.extra ?? {}) } };
   }
 
   private applyRouteMode(id: string | null): void {
@@ -109,8 +138,8 @@ export class PromptTemplateFormComponent implements OnInit {
 
     this.editId = id;
     this.formContext.mode = 'edit';
-    this.loading = true;
-    this.loadingService.track(this.service.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(this.service.getById(id)).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: (detail: PromptTemplateResponse) => {
         this.formInitialValue = {
           code: detail.code ?? '',
@@ -124,7 +153,7 @@ export class PromptTemplateFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load prompt template detail failed');
+        this.toastService.error('aiAgent.promptTemplate.toast.loadDetailFailed');
         void this.router.navigate([PROMPT_TEMPLATE_ROUTES.list]);
       }
     });

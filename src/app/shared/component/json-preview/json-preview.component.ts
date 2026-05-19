@@ -6,4 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './json-preview.component.html',
   styleUrl: './json-preview.component.css'
 })
+/**
+ * @deprecated Use shared/ui/data-display/json-viewer for new JSON display.
+ */
 export class JsonPreviewComponent {}

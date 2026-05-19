@@ -47,14 +47,16 @@ export function createFormEngine<TModel extends object>(
             ctxSignal,
             expr,
             arrayState,
-            arrays
+            arrays,
+            undefined,
+            config.validators ?? {}
           )
         );
 
         return;
       }
 
-      fields.push(createNestedFieldState(path, field, model, ctxSignal, expr, arrays, groupName));
+      fields.push(createNestedFieldState(path, field, model, ctxSignal, expr, arrays, groupName, undefined, config.validators ?? {}));
 
     });
   }
@@ -71,7 +73,7 @@ export function createFormEngine<TModel extends object>(
 
   function reset(value: TModel) {
     model.set(value);
-    fields.forEach(f => f.touched.set(false));
+    fields.forEach(resetFieldState);
   }
 
   function patchValue(value: Partial<TModel>) {
@@ -88,4 +90,20 @@ export function createFormEngine<TModel extends object>(
     patchValue,
     context: ctxSignal
   };
+}
+
+function resetFieldState(field: FieldState | ArrayFieldState): void {
+  field.touched.set(false);
+  field.dirty.set(false);
+  field.externalErrors.set(null);
+  field.focusing.set(false);
+  field.blurred.set(false);
+
+  if (!('children' in field)) {
+    return;
+  }
+
+  const rawChildren = field.children;
+  const children = typeof rawChildren === 'function' ? rawChildren() : rawChildren;
+  children.flat().forEach((child) => resetFieldState(child));
 }

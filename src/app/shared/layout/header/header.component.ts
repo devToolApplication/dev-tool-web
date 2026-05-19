@@ -1,12 +1,21 @@
-import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, NgZone, OnInit, Output, ViewChild, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Route, Router, Routes } from '@angular/router';
-import { filter, Subject, takeUntil } from 'rxjs';
+import { filter } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { TieredMenu } from 'primeng/tieredmenu';
 import { KeycloakService } from '../../../core/auth/keycloak.service';
-import { I18nService } from '../../../core/ui-services/i18n.service';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
 import { AppMenuItem } from '../side-menu/side-menu.component';
+
+interface AppShellUserInfo {
+  family_name?: string;
+  given_name?: string;
+  name?: string;
+  preferred_username?: string;
+  realm_access?: { roles?: string[] };
+  resource_access?: Record<string, { roles?: string[] }>;
+}
 
 @Component({
   selector: 'app-header',
@@ -14,46 +23,56 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnInit {
   @Input() sidebarVisible = true;
+  @Input() sidebarCollapsed = false;
+  @Input() sidebarOpen = false;
+  @Input() mobileLayout = false;
   @Output() toggleSidebar = new EventEmitter<void>();
   @ViewChild('userMenu') userMenu!: TieredMenu;
 
   readonly homeItem: MenuItem = {
     icon: 'pi pi-home',
-    routerLink: '/'
+    routerLink: '/admin/dashboard'
   };
+  readonly pageTitle = signal('layout.brandName');
+  readonly userDisplayName = signal('layout.userUnknown');
+  readonly userRoleLabel = signal('layout.roleFallback');
+  readonly userInitials = signal('DT');
+
   accountMenuItems: MenuItem[] = [];
   breadcrumbItems: MenuItem[] = [];
-
-  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly router: Router,
     private readonly zone: NgZone,
     private readonly keycloakService: KeycloakService,
-    private readonly i18nService: I18nService
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
+    this.updateUserSummary();
     this.buildAccountMenuItems();
     this.updateBreadcrumb();
 
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => this.updateBreadcrumb());
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
+  }
+
+  toggleSidebarLabel(): string {
+    if (this.mobileLayout) {
+      return this.sidebarOpen ? 'layout.hideMenu' : 'layout.showMenu';
+    }
+
+    return this.sidebarCollapsed ? 'layout.expandMenu' : 'layout.collapseMenu';
   }
 
   toggleAccountMenu(event: Event): void {
@@ -63,12 +82,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private buildAccountMenuItems(): void {
     this.accountMenuItems = [
       {
-        label: this.i18nService.t('layout.settings'),
+        label: 'layout.settings',
         icon: 'pi pi-cog',
         command: () => this.openSettings()
       },
       {
-        label: this.i18nService.t('layout.logout'),
+        label: 'layout.logout',
         icon: 'pi pi-sign-out',
         command: () => this.logout()
       }
@@ -111,9 +130,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
 
     this.breadcrumbItems = [...breadcrumbItems, ...extraItems];
+    this.pageTitle.set(this.resolveRouteTitle() ?? this.breadcrumbItems.at(-1)?.label ?? 'layout.brandName');
   }
 
   private formatSegmentLabel(segment: string): string {
+    if (segment === 'create') {
+      return 'layout.route.create';
+    }
+
+    if (segment === 'edit') {
+      return 'layout.route.edit';
+    }
+
     const normalized = segment.replace(/[-_]+/g, ' ');
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   }
@@ -199,5 +227,62 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     return routeSegments.every((routeSegment, index) => routeSegment.startsWith(':') || routeSegment === urlSegments[index]);
+  }
+
+  private resolveRouteTitle(): string | undefined {
+    let currentRoute = this.router.routerState.snapshot.root;
+
+    while (currentRoute.firstChild) {
+      currentRoute = currentRoute.firstChild;
+    }
+
+    const title = currentRoute.data?.['title'];
+    return typeof title === 'string' && title.trim() ? title : undefined;
+  }
+
+  private updateUserSummary(): void {
+    const userInfo = this.keycloakService.userInfo as AppShellUserInfo | undefined;
+    const displayName = this.resolveDisplayName(userInfo);
+    const role = this.resolveRoleLabel(userInfo);
+
+    this.userDisplayName.set(displayName);
+    this.userRoleLabel.set(role ?? 'layout.roleFallback');
+    this.userInitials.set(this.resolveInitials(displayName));
+  }
+
+  private resolveDisplayName(userInfo: AppShellUserInfo | undefined): string {
+    const fullName = [userInfo?.given_name, userInfo?.family_name].filter(Boolean).join(' ').trim();
+
+    return userInfo?.name?.trim() || fullName || userInfo?.preferred_username?.trim() || 'layout.userUnknown';
+  }
+
+  private resolveRoleLabel(userInfo: AppShellUserInfo | undefined): string {
+    const realmRoles = userInfo?.realm_access?.roles ?? [];
+    const resourceRoles = Object.values(userInfo?.resource_access ?? {}).flatMap((access) => access.roles ?? []);
+    const roles = [...realmRoles, ...resourceRoles];
+
+    if (roles.some((role) => role === 'SUPER_ADMIN' || role === 'ADMIN')) {
+      return 'layout.roleAdmin';
+    }
+
+    return 'layout.roleFallback';
+  }
+
+  private resolveInitials(displayName: string): string {
+    if (displayName.startsWith('layout.')) {
+      return 'DT';
+    }
+
+    const tokens = displayName.trim().split(/\s+/).filter(Boolean);
+
+    if (!tokens.length) {
+      return 'DT';
+    }
+
+    const initials = tokens.length === 1
+      ? tokens[0].slice(0, 2)
+      : `${tokens[0][0]}${tokens[tokens.length - 1][0]}`;
+
+    return initials.toUpperCase();
   }
 }

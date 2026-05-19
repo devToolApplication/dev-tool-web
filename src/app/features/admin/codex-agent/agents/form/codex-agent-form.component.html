@@ -8,7 +8,15 @@
   (formSubmit)="onSubmitForm($event)"
   (actionClick)="onActionClick($event)"
   (valueChange)="onFormValueChange($event)"
-></app-base-crud-page>
+>
+  @if (dependenciesError()) {
+    <app-alert
+      crud-page-before-form
+      variant="warning"
+      [message]="dependenciesError()"
+    ></app-alert>
+  }
+</app-base-crud-page>
 
 <app-field-guide-panel
   class="mt-6"

@@ -1,78 +1,175 @@
-.settings-page {
+:host {
+  display: block;
+}
+
+.settings-summary-grid,
+.settings-grid,
+.settings-token-grid {
   display: grid;
-  gap: 1rem;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid;
-}
-
-.description {
-  margin: 0;
-  opacity: 0.8;
-}
-
-.settings-section {
-  display: grid;
-  gap: 1rem;
-  padding-top: 1rem;
-}
-
-.setting-item {
-  border: 1px solid;
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.setting-item h3,
-.setting-item p {
-  margin: 0;
-}
-
-.setting-item-column {
-  align-items: stretch;
-  gap: 1rem;
-}
-
-.setting-item-column app-select,
-.setting-item-column app-select-button {
-  min-width: 16rem;
-}
-
-.theme-mode-row {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 0.75rem;
 }
 
-.theme-grid-item {
-  display: grid;
-  gap: 0.5rem;
+.settings-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
-.theme-grid-item label {
-  font-size: 0.86rem;
-  opacity: 0.85;
+.settings-summary-card,
+.settings-panel,
+.settings-theme-header,
+.settings-token,
+.settings-toolbar {
+  border: 1px solid;
+  border-radius: 8px;
 }
 
-.theme-manual-input {
+.settings-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+}
+
+.settings-summary-icon,
+.settings-panel-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
   height: 2.25rem;
   border-radius: 8px;
-  border: 1px solid var(--app-border);
-  background: var(--app-input-bg);
-  color: var(--app-input-text);
-  padding: 0 0.75rem;
+  background: var(--app-control-info-bg);
+  color: var(--app-control-info-text);
 }
 
-.theme-manual-input:focus {
-  outline: none;
-  border-color: var(--app-primary);
-  box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--app-primary) 25%, var(--app-transparent));
+.settings-summary-label,
+.settings-token-value,
+.settings-panel-copy p,
+.settings-theme-header p,
+.settings-token-header p {
+  font-size: 0.8125rem;
+}
+
+.settings-summary-value,
+.settings-panel-copy h3,
+.settings-theme-header h3,
+.settings-token-header h3 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.settings-toolbar {
+  padding: 0.5rem;
+}
+
+.settings-grid {
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+.settings-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.75fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.settings-panel-main,
+.settings-token-header,
+.settings-theme-header,
+.settings-theme-actions,
+.settings-token-value {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-panel-copy {
+  min-width: 0;
+}
+
+.settings-panel-copy p,
+.settings-theme-header p,
+.settings-token-header p {
+  margin: 0.25rem 0 0;
+}
+
+.settings-control,
+.settings-token-controls {
+  min-width: 0;
+}
+
+.settings-theme-workspace {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.settings-theme-header {
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.settings-theme-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.settings-token-grid {
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.settings-token {
+  display: grid;
+  gap: 0.875rem;
+  padding: 1rem;
+}
+
+.settings-token-header {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.settings-token-swatch {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.settings-token-value {
+  justify-content: space-between;
+  padding: 0.5rem 0.625rem;
+  border-radius: 8px;
+  background: var(--app-surface-soft);
+}
+
+.settings-token-value code {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--app-text);
+}
+
+.settings-token-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 56rem) {
+  .settings-panel,
+  .settings-theme-header {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-theme-header,
+  .settings-theme-actions {
+    align-items: stretch;
+  }
+
+  .settings-panel,
+  .settings-theme-header,
+  .settings-theme-actions {
+    display: grid;
+  }
 }

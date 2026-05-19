@@ -11,7 +11,7 @@ const options: SelectOption[] = [
 ];
 
 const meta: Meta<AutoComplete> = {
-  title: 'Shared/Components/Auto Complete',
+  title: 'Shared/Components/Form Controls/Auto Complete',
   component: AutoComplete,
   args: {
     label: 'Technology',

@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { TableAction, TableColumn } from '../../../models/table-config.model';
+import { Component, EventEmitter, HostListener, Input, Output, TemplateRef, signal } from '@angular/core';
+import { PermissionService } from '../../../../../../core/auth/permission.service';
+import { ConfirmDialogService } from '../../../../overlay/confirm-dialog/confirm-dialog.service';
+import { TableAction, TableBadgeVariant, TableColumn } from '../../../models/table-config.model';
 import { getValueByPath } from '../../../utils/object.util';
 
 @Component({
@@ -11,25 +13,130 @@ import { getValueByPath } from '../../../utils/object.util';
 export class TableCellComponent {
   @Input() column!: TableColumn;
   @Input() rowData!: any;
+  @Input() customTemplates: Record<string, TemplateRef<any>> = {};
+  @Output() actionClick = new EventEmitter<{ action: TableAction; row: any }>();
+
+  readonly jsonOpen = signal(false);
+  readonly actionsOpen = signal(false);
+
+  constructor(
+    private readonly confirmDialogService: ConfirmDialogService,
+    private readonly permissionService: PermissionService
+  ) {}
 
   get value(): any {
-    return getValueByPath(this.rowData, this.column.field);
+    return this.column.valueGetter ? this.column.valueGetter(this.rowData) : getValueByPath(this.rowData, this.column.field);
   }
 
   get actions(): TableAction[] {
-    return this.column.actions ?? [];
+    return (this.column.actions ?? []).filter((action) => (action.visible?.(this.rowData) ?? true) && this.canRenderAction(action));
+  }
+
+  get primaryActions(): TableAction[] {
+    const explicit = this.actions.filter((action) => action.placement !== 'more');
+    return this.actions.length > 3 ? explicit.slice(0, 2) : explicit;
+  }
+
+  get moreActions(): TableAction[] {
+    const explicitMore = this.actions.filter((action) => action.placement === 'more');
+    const overflow = this.actions.filter((action) => action.placement !== 'more').slice(2);
+    return this.actions.length > 3 ? [...overflow, ...explicitMore] : explicitMore;
+  }
+
+  get hasMoreActions(): boolean {
+    return this.moreActions.length > 0;
+  }
+
+  get formattedValue(): string | number | null | undefined {
+    return this.column.formatter?.(this.rowData, this.value);
+  }
+
+  get customTemplate(): TemplateRef<any> | null {
+    return this.column.customTemplateKey ? this.customTemplates[this.column.customTemplateKey] ?? null : null;
   }
 
   get dateValue(): Date | null {
     return this.normalizeDateValue(this.value);
   }
 
-  isActionDisabled(action: TableAction): boolean {
-    return action.disabled?.(this.rowData) ?? false;
+  get badgeVariant(): TableBadgeVariant {
+    const key = String(this.value ?? '');
+    return this.column.badgeMap?.[key] ?? 'default';
   }
 
-  onActionClick(action: TableAction): void {
-    action.onClick(this.rowData);
+  get semanticClass(): string {
+    const semantic = this.column.semanticFn?.(this.rowData, this.value) ?? this.defaultSemantic(this.value);
+    return `table-cell-semantic table-cell-semantic--${semantic}`;
+  }
+
+  get linkTarget(): string | any[] | null {
+    if (!this.column.link) {
+      return null;
+    }
+    return typeof this.column.link === 'function' ? this.column.link(this.rowData) : this.column.link;
+  }
+
+  isActionDisabled(action: TableAction): boolean {
+    return (action.disabled?.(this.rowData) ?? false) || !this.hasPermission(action);
+  }
+
+  actionTooltip(action: TableAction): string {
+    if (!this.hasPermission(action)) {
+      return action.permissionDeniedTooltip ?? 'shared.permission.deniedAction';
+    }
+
+    return action.tooltipFn?.(this.rowData) ?? action.tooltip ?? action.label;
+  }
+
+  actionSeverity(action: TableAction) {
+    if (action.severity !== undefined) {
+      return action.severity;
+    }
+    switch (action.variant) {
+      case 'primary':
+        return 'info';
+      case 'warning':
+        return 'warn';
+      case 'danger':
+        return 'danger';
+      case 'ghost':
+      case 'default':
+      default:
+        return null;
+    }
+  }
+
+  async onActionClick(action: TableAction): Promise<void> {
+    if (this.isActionDisabled(action)) {
+      return;
+    }
+
+    const confirmConfig = action.confirm ?? this.defaultDangerConfirm(action);
+    if (confirmConfig) {
+      const confirmed = await this.confirmDialogService.confirm({
+        title: confirmConfig.title,
+        message: confirmConfig.message,
+        confirmText: confirmConfig.confirmText,
+        cancelText: confirmConfig.cancelText,
+        variant: confirmConfig.variant ?? (action.variant === 'danger' ? 'danger' : 'warning')
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    this.actionsOpen.set(false);
+    this.actionClick.emit({ action, row: this.rowData });
+  }
+
+  toggleActions(): void {
+    this.actionsOpen.update((value) => !value);
+  }
+
+  @HostListener('document:keydown.escape')
+  closeActions(): void {
+    this.actionsOpen.set(false);
   }
 
   formatArrayValue(value: unknown): string {
@@ -50,6 +157,78 @@ export class TableCellComponent {
     } catch {
       return String(value);
     }
+  }
+
+  formatJsonValue(value: unknown): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+
+  formatNumber(value: unknown, fallbackFormat = '1.0-3'): string {
+    return Number.isFinite(Number(value)) ? fallbackFormat : '';
+  }
+
+  formatDuration(value: unknown): string {
+    const millis = Number(value);
+    if (!Number.isFinite(millis)) {
+      return String(value ?? '');
+    }
+    if (millis < 1000) {
+      return `${millis} ms`;
+    }
+    const seconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+    }
+    if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    }
+    return `${seconds}s`;
+  }
+
+  async copyValue(value: unknown = this.value): Promise<void> {
+    const text = typeof value === 'string' ? value : this.formatJsonValue(value);
+    if (!text) {
+      return;
+    }
+    try {
+      await navigator.clipboard?.writeText(text);
+    } catch {
+      this.fallbackCopy(text);
+    }
+  }
+
+  private defaultSemantic(value: unknown): 'positive' | 'negative' | 'neutral' {
+    const numericValue = Number(value ?? 0);
+    if (numericValue > 0) {
+      return 'positive';
+    }
+    if (numericValue < 0) {
+      return 'negative';
+    }
+    return 'neutral';
+  }
+
+  private fallbackCopy(text: string): void {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
   }
 
   private normalizeDateValue(value: unknown, depth = 0): Date | null {
@@ -101,6 +280,29 @@ export class TableCellComponent {
 
   private validDateOrNull(value: Date): Date | null {
     return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  private defaultDangerConfirm(action: TableAction): TableAction['confirm'] | null {
+    if (action.variant !== 'danger' && action.severity !== 'danger') {
+      return null;
+    }
+
+    return {
+      message: 'shared.confirm.dangerAction',
+      variant: 'danger'
+    };
+  }
+
+  private canRenderAction(action: TableAction): boolean {
+    if (action.permissionMode === 'hide' && !this.hasPermission(action)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private hasPermission(action: TableAction): boolean {
+    return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
   }
 }
 

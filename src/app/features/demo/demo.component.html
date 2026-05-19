@@ -341,7 +341,10 @@
 
     @case ('breadcrumb') {
       <div class="preview-card app-border">
-        <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+        <app-page-header
+          title="Breadcrumb"
+          [breadcrumb]="pageBreadcrumbItems"
+        ></app-page-header>
       </div>
     }
 

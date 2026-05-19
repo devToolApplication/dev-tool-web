@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { BasePopupComponent } from './base-popup.component';
 
 const meta: Meta<BasePopupComponent> = {
-  title: 'Shared/Components/Base Popup',
+  title: 'Shared/Components/Feedback Overlay/Base Popup',
   component: BasePopupComponent,
   parameters: {
     layout: 'padded'

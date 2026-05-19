@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { InputNumber } from './input-number';
 
 const meta: Meta<InputNumber> = {
-  title: 'Shared/Components/Input Number',
+  title: 'Shared/Components/Form Controls/Input Number',
   component: InputNumber,
   args: {
     label: 'Capital',

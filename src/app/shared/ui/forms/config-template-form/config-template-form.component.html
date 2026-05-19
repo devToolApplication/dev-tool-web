@@ -1,0 +1,53 @@
+<app-section-panel [title]="title" [subtitle]="description">
+  <app-form-input
+    [config]="config"
+    [context]="context"
+    [initialValue]="formInitialValue()"
+    [submitting]="submitting"
+    (formSubmit)="formSubmit.emit($event)"
+    (valueChange)="onValueChange($event)"
+  ></app-form-input>
+</app-section-panel>
+
+@if (showAdvancedJson) {
+  <app-section-panel
+    title="shared.form.advancedJson"
+    [collapsible]="true"
+    [collapsed]="advancedCollapsed"
+    density="compact"
+  >
+    @if (advancedJsonEditable) {
+      <div class="config-template-form__advanced">
+        <app-input-area
+          label="shared.form.advancedJson"
+          contentType="json"
+          [rows]="10"
+          [maxRows]="24"
+          [value]="advancedJsonText()"
+          [invalid]="!!advancedJsonError()"
+          [errorMessage]="advancedJsonError() || undefined"
+          (valueChange)="onAdvancedJsonChange($event)"
+        ></app-input-area>
+        <div class="config-template-form__advanced-actions">
+          <app-button
+            size="small"
+            severity="success"
+            icon="pi pi-check"
+            label="shared.form.applyJson"
+            (buttonClick)="applyAdvancedJson()"
+          ></app-button>
+          <app-button
+            size="small"
+            severity="secondary"
+            [text]="true"
+            icon="pi pi-refresh"
+            label="shared.form.resetJson"
+            (buttonClick)="resetAdvancedJson()"
+          ></app-button>
+        </div>
+      </div>
+    } @else {
+      <app-json-viewer [value]="currentValue()" [collapsed]="true"></app-json-viewer>
+    }
+  </app-section-panel>
+}

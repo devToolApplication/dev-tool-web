@@ -4,5 +4,6 @@
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [submitting]="submitting()"
+  (valueChange)="onValueChange($event)"
   (formSubmit)="submit($event)"
 ></app-base-crud-page>

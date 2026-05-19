@@ -3,24 +3,43 @@ import { FormInput } from './form-input';
 import type { FormConfig, FormContext } from './models/form-config.model';
 
 const formConfig: FormConfig = {
+  sections: [
+    {
+      id: 'general',
+      title: 'shared.form.section.general',
+      description: 'Core identity and state.'
+    },
+    {
+      id: 'workflow',
+      title: 'Workflow settings',
+      description: 'Ownership, channels, and operator notes.'
+    },
+    {
+      id: 'advanced',
+      title: 'shared.form.advancedJson',
+      description: 'Structured metadata, endpoints, and nested limits.'
+    }
+  ],
   fields: [
     {
       type: 'text',
       name: 'name',
-      label: 'Strategy name',
-      placeholder: 'Enter strategy name',
+      label: 'Workflow name',
+      sectionId: 'general',
+      placeholder: 'Enter workflow name',
       width: '1/2',
       validation: [
         {
           expression: 'value == null || String(value).trim() === ""',
-          message: 'Strategy name is required'
+          message: 'Workflow name is required'
         }
       ]
     },
     {
       type: 'number',
-      name: 'capital',
-      label: 'Capital',
+      name: 'budget',
+      label: 'Budget',
+      sectionId: 'general',
       width: '1/2',
       mode: 'currency',
       currency: 'USD',
@@ -29,7 +48,7 @@ const formConfig: FormConfig = {
       validation: [
         {
           expression: 'value == null || value <= 0',
-          message: 'Capital must be greater than 0'
+          message: 'Budget must be greater than 0'
         }
       ]
     },
@@ -37,6 +56,7 @@ const formConfig: FormConfig = {
       type: 'select',
       name: 'status',
       label: 'Status',
+      sectionId: 'general',
       placeholder: 'Choose status',
       width: '1/3',
       showClear: true,
@@ -48,24 +68,27 @@ const formConfig: FormConfig = {
     },
     {
       type: 'radio',
-      name: 'market',
-      label: 'Market',
+      name: 'channelType',
+      label: 'Channel type',
+      sectionId: 'general',
       width: '1/3',
       options: [
-        { label: 'Spot', value: 'spot' },
-        { label: 'Futures', value: 'futures' }
+        { label: 'Internal', value: 'internal' },
+        { label: 'External', value: 'external' }
       ]
     },
     {
       type: 'checkbox',
       name: 'enabled',
       label: 'Enabled',
+      sectionId: 'general',
       width: '1/3'
     },
     {
       type: 'select-multi',
       name: 'channels',
       label: 'Channels',
+      sectionId: 'workflow',
       placeholder: 'Choose channels',
       width: '1/2',
       options: [
@@ -76,26 +99,29 @@ const formConfig: FormConfig = {
     },
     {
       type: 'input-multi',
-      name: 'symbols',
-      label: 'Symbols',
-      placeholder: 'Type symbol and press enter',
+      name: 'codes',
+      label: 'Codes',
+      sectionId: 'workflow',
+      placeholder: 'Type code and press enter',
       width: '1/2',
       options: [
-        { label: 'BTCUSDT', value: 'BTCUSDT' },
-        { label: 'ETHUSDT', value: 'ETHUSDT' },
-        { label: 'SOLUSDT', value: 'SOLUSDT' }
+        { label: 'PRD', value: 'PRD' },
+        { label: 'OPS', value: 'OPS' },
+        { label: 'QA', value: 'QA' }
       ]
     },
     {
       type: 'date',
       name: 'startDate',
       label: 'Start date',
+      sectionId: 'workflow',
       width: '1/2'
     },
     {
       type: 'auto-complete',
       name: 'owner',
       label: 'Owner',
+      sectionId: 'workflow',
       placeholder: 'Owner name',
       width: '1/2',
       options: [
@@ -108,7 +134,8 @@ const formConfig: FormConfig = {
       type: 'textarea',
       name: 'description',
       label: 'Description',
-      placeholder: 'Describe strategy rules',
+      sectionId: 'workflow',
+      placeholder: 'Describe the workflow',
       width: 'full',
       rows: 4,
       showZoomButton: true
@@ -117,7 +144,8 @@ const formConfig: FormConfig = {
       type: 'textarea',
       name: 'jsonConfig',
       label: 'JSON config',
-      placeholder: '{ "risk": "medium" }',
+      sectionId: 'advanced',
+      placeholder: '{ "priority": "medium" }',
       width: 'full',
       rows: 6,
       showZoomButton: true,
@@ -128,15 +156,54 @@ const formConfig: FormConfig = {
       type: 'record',
       name: 'metadata',
       label: 'Metadata',
+      sectionId: 'advanced',
       width: 'full',
       keyLabel: 'Key',
       valueLabel: 'Value',
       addButtonLabel: 'Add metadata'
     },
     {
+      type: 'tree',
+      name: 'permissions',
+      label: 'Permission tree',
+      description: 'Search, review, and bulk-select operational permissions.',
+      sectionId: 'advanced',
+      width: 'full',
+      treeConfig: {
+        mode: 'select',
+        selectionMode: 'checkbox',
+        selectStrategy: 'leafOnly',
+        searchable: true,
+        showSelectedPanel: true,
+        showFilterTabs: true,
+        showToolbar: true,
+        showNodeActions: false,
+        showPath: true,
+        showBadges: true,
+        showCounts: true,
+        selectionPresets: [
+          {
+            id: 'view-only',
+            label: 'View only',
+            icon: 'pi pi-eye',
+            clearBeforeApply: true,
+            match: { codeIncludes: ['view'], leafOnly: true }
+          },
+          {
+            id: 'editor',
+            label: 'Editor',
+            icon: 'pi pi-pencil',
+            clearBeforeApply: true,
+            match: { codeIncludes: ['view', 'create', 'update'], leafOnly: true }
+          }
+        ]
+      }
+    },
+    {
       type: 'secret-metadata',
       name: 'secretMetadata',
       label: 'secretMetadata',
+      sectionId: 'advanced',
       width: 'full',
       options: [
         { label: 'Keycloak client secret', value: 'secret-keycloak-client' },
@@ -145,14 +212,15 @@ const formConfig: FormConfig = {
     },
     {
       type: 'group',
-      name: 'risk',
-      label: 'Risk settings',
+      name: 'limits',
+      label: 'Limit settings',
+      sectionId: 'advanced',
       width: 'full',
       children: [
         {
           type: 'number',
-          name: 'maxDrawdown',
-          label: 'Max drawdown',
+          name: 'maxItems',
+          label: 'Max items',
           width: '1/2',
           minFractionDigits: 0,
           maxFractionDigits: 0
@@ -161,7 +229,7 @@ const formConfig: FormConfig = {
           type: 'select',
           name: 'profile',
           label: 'Profile',
-          placeholder: 'Choose risk profile',
+          placeholder: 'Choose profile',
           width: '1/2',
           options: [
             { label: 'Low', value: 'low' },
@@ -175,6 +243,7 @@ const formConfig: FormConfig = {
       type: 'array',
       name: 'endpoints',
       label: 'Endpoints',
+      sectionId: 'advanced',
       width: 'full',
       itemConfig: [
         {
@@ -203,21 +272,76 @@ const context: FormContext = {
 };
 
 const initialValue = {
-  name: 'Breakout Alpha',
-  capital: 125000,
+  name: 'Approval Flow',
+  budget: 125000,
   status: 'active',
-  market: 'futures',
+  channelType: 'external',
   enabled: true,
   channels: ['email', 'webhook'],
-  symbols: ['BTCUSDT', 'ETHUSDT'],
+  codes: ['PRD', 'OPS'],
   startDate: new Date(2026, 3, 29),
   owner: 'Nguyen An',
-  description: 'Enter on breakout with volume confirmation.',
-  jsonConfig: '{\n  "risk": "medium",\n  "timeframe": "1h"\n}',
+  description: 'Workflow for approval requests.',
+  jsonConfig: '{\n  "priority": "medium",\n  "batchSize": 100\n}',
   metadata: {
     exchange: 'binance',
     account: 'paper'
   },
+  permissions: [
+    {
+      id: 'system',
+      key: 'system',
+      label: 'System Management',
+      code: 'SYS',
+      type: 'module',
+      children: [
+        {
+          id: 'system-user',
+          key: 'system-user',
+          label: 'User',
+          code: 'SYS_USER',
+          type: 'resource',
+          children: [
+            { id: 'system-user-view', key: 'system-user-view', label: 'View', code: 'USER_VIEW', type: 'action', checked: true },
+            { id: 'system-user-create', key: 'system-user-create', label: 'Create', code: 'USER_CREATE', type: 'action', checked: true },
+            { id: 'system-user-update', key: 'system-user-update', label: 'Update', code: 'USER_UPDATE', type: 'action' },
+            { id: 'system-user-delete', key: 'system-user-delete', label: 'Delete', code: 'USER_DELETE', type: 'action', severity: 'danger' }
+          ]
+        },
+        {
+          id: 'system-role',
+          key: 'system-role',
+          label: 'Role',
+          code: 'SYS_ROLE',
+          type: 'resource',
+          children: [
+            { id: 'system-role-view', key: 'system-role-view', label: 'View', code: 'ROLE_VIEW', type: 'action', checked: true },
+            { id: 'system-role-admin', key: 'system-role-admin', label: 'Admin', code: 'ROLE_ADMIN', type: 'action', severity: 'critical' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'storage',
+      key: 'storage',
+      label: 'Storage',
+      code: 'STORAGE',
+      type: 'module',
+      children: [
+        {
+          id: 'storage-file',
+          key: 'storage-file',
+          label: 'File',
+          code: 'STORAGE_FILE',
+          type: 'resource',
+          children: [
+            { id: 'storage-file-view', key: 'storage-file-view', label: 'View', code: 'FILE_VIEW', type: 'action', checked: true },
+            { id: 'storage-file-delete', key: 'storage-file-delete', label: 'Delete', code: 'FILE_DELETE', type: 'action', severity: 'danger' }
+          ]
+        }
+      ]
+    }
+  ],
   secretMetadata: [
     {
       key: 'X-Trace-Source',
@@ -244,8 +368,8 @@ const initialValue = {
       }
     }
   ],
-  risk: {
-    maxDrawdown: 8,
+  limits: {
+    maxItems: 8,
     profile: 'medium'
   },
   endpoints: [
@@ -300,12 +424,12 @@ export const Default: Story = {
         <aside class="col-span-12 xl:col-span-4">
           <div class="rounded-lg border app-border app-bg-card p-4">
             <h3 class="m-0 mb-3 text-base font-semibold">Current model</h3>
-            <pre class="m-0 max-h-96 overflow-auto text-xs">{{ currentModel }}</pre>
+            <pre class="m-0 max-h-96 overflow-auto text-xs" tabindex="0" aria-label="Current model JSON">{{ currentModel }}</pre>
           </div>
 
           <div class="mt-4 rounded-lg border app-border app-bg-card p-4">
             <h3 class="m-0 mb-3 text-base font-semibold">Last submit</h3>
-            <pre class="m-0 max-h-80 overflow-auto text-xs">{{ submittedModel }}</pre>
+            <pre class="m-0 max-h-80 overflow-auto text-xs" tabindex="0" aria-label="Last submit JSON">{{ submittedModel }}</pre>
           </div>
         </aside>
       </div>
@@ -320,6 +444,49 @@ export const Submitting: Story = {
     initialValue,
     showSubmit: true,
     submitting: true
+  },
+  render: Default.render
+};
+
+export const WithErrors: Story = {
+  args: {
+    config: formConfig,
+    context,
+    initialValue: {
+      ...initialValue,
+      name: '',
+      budget: 0,
+      jsonConfig: '{ invalid'
+    },
+    showSubmit: true,
+    submitting: false,
+    apiFieldErrors: {
+      status: 'Status is required for active workflows'
+    }
+  },
+  render: Default.render
+};
+
+export const Loading: Story = {
+  args: {
+    config: formConfig,
+    context,
+    initialValue,
+    showSubmit: true,
+    loading: true
+  },
+  render: Default.render
+};
+
+export const ReadonlyDetail: Story = {
+  args: {
+    config: formConfig,
+    context: {
+      ...context,
+      mode: 'view'
+    },
+    initialValue,
+    showSubmit: true
   },
   render: Default.render
 };

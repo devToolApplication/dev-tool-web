@@ -1,11 +1,17 @@
 import { signal, computed } from '@angular/core';
 import { ExpressionEngine } from './expression.engine';
 import {
+  isRequiredByConfig,
+  resolveDisabledExpression,
+  resolveVisibleExpression
+} from './form.utils';
+import {
   GroupFieldConfig,
   GroupFieldState,
   FieldState,
   ArrayFieldState,
   ArrayState,
+  FormCustomValidator,
   TreeFieldConfig
 } from '../models/form-config.model';
 import { createNestedFieldState } from './create-nested-field-state';
@@ -17,26 +23,30 @@ export function createFieldGroupState<TFormModel extends object>(
   contextSignal: any,
   expr: ExpressionEngine,
   arrays: Record<string, ArrayState>,
-  treeTemplate?: TreeFieldConfig
+  treeTemplate?: TreeFieldConfig,
+  validators: Record<string, FormCustomValidator> = {}
 ): GroupFieldState {
 
   const touched = signal(false);
   const focusing = signal(false);
   const blurred = signal(false);
   const dirty = signal(false);
+  const externalErrors = signal<Record<string, string> | null>(null);
 
-  const children: Array<FieldState | ArrayFieldState> = config.children.map((child) =>
-    createNestedFieldState(
-      `${path}.${child.name}`,
+  const children: Array<FieldState | ArrayFieldState> = config.children.map((child) => {
+    const childPath = config.flat ? child.name : `${path}.${child.name}`;
+    return createNestedFieldState(
+      childPath,
       child,
       modelSignal,
       contextSignal,
       expr,
       arrays,
       config.name,
-      treeTemplate
-    )
-  );
+      treeTemplate,
+      validators
+    );
+  });
 
   const buildCtx = () => ({
     model: modelSignal(),
@@ -45,23 +55,26 @@ export function createFieldGroupState<TFormModel extends object>(
   });
 
   const visible = computed(() => {
-    if (!config.rules?.visible) return true;
-    return !!expr.evaluate(config.rules.visible, buildCtx());
+    const expression = resolveVisibleExpression(config);
+    if (!expression) return true;
+    return !!expr.evaluate(expression, buildCtx());
   });
 
   const disabled = computed(() => {
-    if (!config.rules?.disabled) return false;
-    return !!expr.evaluate(config.rules.disabled, buildCtx());
+    const expression = resolveDisabledExpression(config);
+    if (!expression) return false;
+    return !!expr.evaluate(expression, buildCtx());
   });
+  const required = computed(() => visible() && isRequiredByConfig(config, expr, buildCtx()));
   const value = computed(() => null);
   const options = computed(() => []);
-  const errors = computed(() => null);
+  const errors = computed(() => externalErrors());
   const valid = computed(() => {
     if (!visible()) {
       return true;
     }
 
-    return children.every(c => c.valid());
+    return !errors() && children.every(c => c.valid());
   });
 
   function setValue(_: unknown) {}
@@ -87,9 +100,11 @@ export function createFieldGroupState<TFormModel extends object>(
     focusing,
     blurred,
     dirty,
+    externalErrors,
 
     visible,
     disabled,
+    required,
 
     value,
     setValue,

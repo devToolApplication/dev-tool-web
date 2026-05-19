@@ -22,7 +22,26 @@ describe('IndicatorConfigFormComponent', () => {
 
   beforeEach(async () => {
     const executors: ExecutorVersionResponse[] = [
-      { executor: 'PIVOT_HIGH', latestVersion: 'v1', versions: ['v1'], usesConfig: true, childSlots: [] },
+      {
+        executor: 'PIVOT_HIGH',
+        latestVersion: 'v1',
+        versions: ['v1'],
+        usesConfig: true,
+        childSlots: [],
+        formTemplate: {
+          fields: [
+            {
+              name: 'config',
+              type: 'group',
+              label: 'tradeBot.template.config',
+              children: [
+                { name: 'left', type: 'number', label: 'tradeBot.template.leftBars', suffix: 'bars' },
+                { name: 'right', type: 'number', label: 'tradeBot.template.rightBars', suffix: 'bars' }
+              ]
+            }
+          ]
+        }
+      },
       { executor: 'PIVOT_LOW', latestVersion: 'v1', versions: ['v1'], usesConfig: true, childSlots: [] },
       {
         executor: 'ZIGZAG',
@@ -131,7 +150,17 @@ describe('IndicatorConfigFormComponent', () => {
     expect(fieldNames).not.toContain('configText');
     expect(fieldNames).not.toContain('childrenText');
     expect(fieldNames).toContain('childSelections');
-    expect(fieldNames).toContain('overlayText');
+    expect(fieldNames).toContain('overlay');
+
+    const basicInfoField = component.formConfig.fields.find((field) => field.name === 'basicInfo');
+    expect(basicInfoField?.type).toBe('group');
+    if (basicInfoField?.type === 'group') {
+      const displayTypeField = basicInfoField.children.find((field) => field.name === 'displayType');
+      expect(displayTypeField?.type).toBe('auto-complete');
+      if (displayTypeField?.type === 'auto-complete') {
+        expect(displayTypeField.options).toContainEqual({ label: 'POINT', value: 'POINT' });
+      }
+    }
 
     const childrenField = component.formConfig.fields.find((field) => field.name === 'childSelections');
     expect(childrenField?.type).toBe('group');
@@ -159,7 +188,7 @@ describe('IndicatorConfigFormComponent', () => {
         pivotHigh: 'PH_FAST',
         pivotLow: 'PL_FAST'
       },
-      overlayText: '{"label":"ZigZag"}'
+      overlay: { label: 'ZigZag' }
     });
 
     expect(payload.config).toEqual({});
@@ -168,5 +197,100 @@ describe('IndicatorConfigFormComponent', () => {
       { slotCode: 'pivotLow', indicatorCode: 'PL_FAST', config: {} }
     ]);
     expect(payload.overlay).toEqual({ label: 'ZigZag' });
+  });
+
+  it('shows a warning and keeps raw JSON inside advanced fields when executor template is missing', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    (component as any).applyTemplateState(
+      {
+        code: 'TEST_PIVOT',
+        executor: 'PIVOT_HIGH',
+        executorVersion: 'v1',
+        displayType: 'POINT',
+        status: 'ACTIVE',
+        config: { left: 2 },
+        children: [],
+        overlay: {}
+      },
+      undefined,
+      'PIVOT_HIGH'
+    );
+
+    expect(component.pageConfig.infoSection?.title).toBe('tradeBot.message.missingFormTemplateTitle');
+    const fieldNames = component.formConfig.fields.map((field) => field.name);
+    expect(fieldNames).not.toContain('configText');
+    expect(fieldNames).not.toContain('childrenText');
+    expect(fieldNames).toContain('advancedJson');
+
+    const advancedJson = component.formConfig.fields.find((field) => field.name === 'advancedJson');
+    expect(advancedJson?.type).toBe('group');
+    if (advancedJson?.type === 'group') {
+      expect(advancedJson.collapsed).toBe(true);
+      expect(advancedJson.children.map((field) => field.name)).toEqual(['configText', 'childrenText']);
+    }
+  });
+
+  it('adds overlay as a common editable section when indicator template omits overlay', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    (component as any).applyTemplateState(
+      {
+        code: 'TEST_PIVOT',
+        executor: 'PIVOT_HIGH',
+        executorVersion: 'v1',
+        displayType: 'POINT',
+        status: 'ACTIVE',
+        config: { left: 2 },
+        children: [],
+        overlay: { color: 'green' }
+      },
+      {
+        fields: [
+          {
+            name: 'config',
+            type: 'group',
+            label: 'tradeBot.template.config',
+            children: [{ name: 'left', type: 'number', label: 'tradeBot.template.leftBars' }]
+          }
+        ]
+      },
+      'PIVOT_HIGH'
+    );
+
+    const fieldNames = component.formConfig.fields.map((field) => field.name);
+    expect(fieldNames).toContain('config');
+    expect(fieldNames).toContain('overlay');
+    expect(component.pageConfig.infoSection).toBeNull();
+  });
+
+  it('uses executor formTemplate metadata to build standard indicator config fields', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onValueChange({
+      code: 'TEST_PIVOT_HIGH',
+      executor: 'PIVOT_HIGH',
+      executorVersion: 'v1',
+      displayType: 'POINT',
+      status: 'ACTIVE',
+      config: { left: 2, right: 2 },
+      children: [],
+      overlay: {}
+    });
+
+    const fieldNames = component.formConfig.fields.map((field) => field.name);
+    expect(fieldNames).toContain('config');
+    expect(fieldNames).toContain('overlay');
+    expect(fieldNames).not.toContain('advancedJson');
+    expect(component.pageConfig.infoSection).toBeNull();
+
+    const configField = component.formConfig.fields.find((field) => field.name === 'config');
+    expect(configField?.type).toBe('group');
+    if (configField?.type === 'group') {
+      expect(configField.children.map((field) => field.name)).toEqual(['left', 'right']);
+    }
   });
 });

@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -14,6 +15,7 @@ import { PromptTemplateService } from '../../../../../core/services/ai-agent-ser
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
 import { AGENT_DEFINITION_INITIAL_VALUE, AGENT_DEFINITION_ROUTES } from '../agent-definition.constants';
@@ -24,42 +26,45 @@ import { AGENT_DEFINITION_INITIAL_VALUE, AGENT_DEFINITION_ROUTES } from '../agen
   templateUrl: './agent-definition-form.component.html'
 })
 export class AgentDefinitionFormComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
+  formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'code', label: 'Code', width: '1/2', validation: [Rules.required('Code is required')] },
-      { type: 'text', name: 'name', label: 'Name', width: '1/2', validation: [Rules.required('Name is required')] },
+      { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('aiAgent.agentDefinition.validation.codeRequired')] },
+      { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('aiAgent.agentDefinition.validation.nameRequired')] },
       {
         type: 'select',
         name: 'modelConfigId',
-        label: 'Model',
+        label: 'aiAgent.model',
         width: '1/2',
         optionsExpression: 'context.extra?.modelOptions || []'
       },
       {
         type: 'select',
         name: 'systemPromptTemplateId',
-        label: 'Prompt Template',
+        label: 'aiAgent.promptTemplate',
         width: '1/2',
         optionsExpression: 'context.extra?.promptOptions || []'
       },
       {
         type: 'select',
         name: 'executionPolicyId',
-        label: 'Execution Policy',
+        label: 'aiAgent.executionPolicy',
         width: '1/2',
         optionsExpression: 'context.extra?.policyOptions || []'
       },
-      { type: 'checkbox', name: 'enabled', label: 'Enabled', width: '1/3' },
-      { type: 'checkbox', name: 'defaultActive', label: 'Default Active', width: '1/3' },
-      { type: 'select', name: 'status', label: 'Status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' },
-      { type: 'textarea', name: 'executionPolicyJson', label: 'Execution Policy JSON Override', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'Invalid JSON' }
+      { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
+      { type: 'checkbox', name: 'defaultActive', label: 'aiAgent.agentDefinition.defaultActive', width: '1/3' },
+      { type: 'select', name: 'status', label: 'status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
+      { type: 'textarea', name: 'description', label: 'description', width: 'full' },
+      { type: 'textarea', name: 'executionPolicyJson', label: 'aiAgent.agentDefinition.executionPolicyJsonOverride', width: 'full', showZoomButton: true, contentType: 'json', jsonValidationMessage: 'shared.json.invalid' }
     ]
   };
 
   editId: string | null = null;
-  loading = false;
+  readonly loading = signal(false);
+  dependenciesError = '';
   formInitialValue: AgentDefinitionCreateDto = this.createInitialValue();
   readonly formVisible = signal(true);
 
@@ -70,6 +75,7 @@ export class AgentDefinitionFormComponent implements OnInit {
     private readonly executionPolicyService: ExecutionPolicyService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
+    private readonly destroyRef: DestroyRef,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly i18nService: I18nService
@@ -80,11 +86,11 @@ export class AgentDefinitionFormComponent implements OnInit {
   }
 
   get pageTitle(): string {
-    return this.editId ? 'Edit Agent Definition' : 'Create Agent Definition';
+    return this.editId ? 'aiAgent.agentDefinition.editTitle' : 'aiAgent.agentDefinition.createTitle';
   }
 
   get pageDescription(): string {
-    return 'Configure agent, model, tools, prompt template and execution policy.';
+    return 'aiAgent.agentDefinition.formDescription';
   }
 
   onSubmitForm(model: AgentDefinitionCreateDto): void {
@@ -98,25 +104,35 @@ export class AgentDefinitionFormComponent implements OnInit {
     const request$ = this.editId
       ? this.agentDefinitionService.update(this.editId, payload as AgentDefinitionUpdateDto)
       : this.agentDefinitionService.create(payload);
-    this.loading = true;
-    this.loadingService.track(request$).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(request$).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
+        this.crudPage?.markFormPristine();
         void this.router.navigate([AGENT_DEFINITION_ROUTES.list]);
       },
-      error: () => this.toastService.error('Save agent definition failed')
+      error: () => this.toastService.error('aiAgent.agentDefinition.toast.saveFailed')
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
+  }
+
   private loadOptions(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.dependenciesError = '';
     this.loadingService.track(
       forkJoin({
-        models: this.aiModelService.getAll().pipe(catchError(() => of([] as AiModelResponse[]))),
-        prompts: this.promptTemplateService.getAll().pipe(catchError(() => of([] as PromptTemplateResponse[]))),
-        policies: this.executionPolicyService.getAll().pipe(catchError(() => of([] as ExecutionPolicyConfigResponse[])))
+        models: this.aiModelService.getAll().pipe(catchError(() => this.handleDependencyLoadError<AiModelResponse>())),
+        prompts: this.promptTemplateService.getAll().pipe(catchError(() => this.handleDependencyLoadError<PromptTemplateResponse>())),
+        policies: this.executionPolicyService.getAll().pipe(catchError(() => this.handleDependencyLoadError<ExecutionPolicyConfigResponse>()))
       })
-    ).pipe(finalize(() => (this.loading = false))).subscribe({
+    ).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: ({ models, prompts, policies }) => {
         this.formContext.extra = {
           modelOptions: this.toModelOptions(models),
@@ -131,7 +147,8 @@ export class AgentDefinitionFormComponent implements OnInit {
           promptOptions: [],
           policyOptions: []
         };
-        this.toastService.error('Load agent form dependencies failed');
+        this.dependenciesError = 'aiAgent.agentDefinition.dependenciesUnavailable';
+        this.toastService.error('aiAgent.agentDefinition.toast.loadDependenciesFailed');
         this.bindRouteMode();
       }
     });
@@ -139,7 +156,7 @@ export class AgentDefinitionFormComponent implements OnInit {
 
   private bindRouteMode(): void {
     this.applyRouteMode(this.route.snapshot.paramMap.get('id'));
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const id = params.get('id');
       if (id === this.editId) {
         return;
@@ -159,8 +176,8 @@ export class AgentDefinitionFormComponent implements OnInit {
 
     this.editId = id;
     this.formContext.mode = 'edit';
-    this.loading = true;
-    this.loadingService.track(this.agentDefinitionService.getById(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loading.set(true);
+    this.loadingService.track(this.agentDefinitionService.getById(id)).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: (detail: AgentDefinitionResponse) => {
         this.formInitialValue = {
           code: detail.code,
@@ -177,7 +194,7 @@ export class AgentDefinitionFormComponent implements OnInit {
         this.rerenderForm();
       },
       error: () => {
-        this.toastService.error('Load agent definition detail failed');
+        this.toastService.error('aiAgent.agentDefinition.toast.loadDetailFailed');
         void this.router.navigate([AGENT_DEFINITION_ROUTES.list]);
       }
     });
@@ -188,8 +205,7 @@ export class AgentDefinitionFormComponent implements OnInit {
   }
 
   private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    this.formContext = { ...this.formContext, extra: { ...(this.formContext.extra ?? {}) } };
   }
 
   private toModelOptions(items: AiModelResponse[]): { label: string; value: string }[] {
@@ -202,5 +218,10 @@ export class AgentDefinitionFormComponent implements OnInit {
 
   private toPolicyOptions(items: ExecutionPolicyConfigResponse[]): { label: string; value: string }[] {
     return items.map((item) => ({ label: `${item.name}${item.code ? ` (${item.code})` : ''}`, value: item.id }));
+  }
+
+  private handleDependencyLoadError<T>() {
+    this.dependenciesError = 'aiAgent.agentDefinition.dependenciesUnavailable';
+    return of([] as T[]);
   }
 }

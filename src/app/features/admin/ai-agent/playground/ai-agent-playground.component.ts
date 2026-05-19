@@ -12,6 +12,8 @@ import { AiModelService } from '../../../../core/services/ai-agent-service/ai-mo
 import { ExecutionTraceService } from '../../../../core/services/ai-agent-service/execution-trace.service';
 import { LoadingService } from '../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../core/ui-services/toast.service';
+import { BadgeVariant } from '../../../../shared/ui/data-display/badge/badge.component';
+import { KeyValueItem } from '../../../../shared/ui/data-display/key-value-list/key-value-list.component';
 import { FormConfig, FormContext } from '../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../shared/ui/form-input/utils/validation-rules';
 
@@ -32,7 +34,7 @@ const PLAYGROUND_INITIAL_VALUE: PlaygroundFormValue = {
   styleUrl: './ai-agent-playground.component.css'
 })
 export class AiAgentPlaygroundComponent implements OnInit {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
+  formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formConfig: FormConfig = {
     fields: [
       {
@@ -83,6 +85,8 @@ export class AiAgentPlaygroundComponent implements OnInit {
   loading = false;
   running = false;
   traceLoading = false;
+  traceError = '';
+  dependenciesError = '';
   formInitialValue: PlaygroundFormValue = { ...PLAYGROUND_INITIAL_VALUE };
   formValue: PlaygroundFormValue = { ...PLAYGROUND_INITIAL_VALUE };
   result: AiAgentAskResponse | null = null;
@@ -136,6 +140,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
     this.running = true;
     this.result = null;
     this.steps = [];
+    this.traceError = '';
     this.loadingService.track(this.aiAgentAdminService.ask(payload)).pipe(finalize(() => (this.running = false))).subscribe({
       next: (response) => {
         this.result = response;
@@ -173,6 +178,38 @@ export class AiAgentPlaygroundComponent implements OnInit {
     return this.getOptionLabel('modelOptions', this.formValue.modelId || this.formInitialValue.modelId || '');
   }
 
+  get resultSummaryItems(): KeyValueItem[] {
+    const currentResult = this.result;
+    if (!currentResult) {
+      return [];
+    }
+
+    return [
+      { label: 'aiAgent.agent', value: this.selectedAgentLabel },
+      { label: 'aiAgent.modelOverride', value: this.selectedModelLabel },
+      { label: 'aiAgent.sessionId', value: currentResult.sessionId, type: 'copyable' },
+      { label: 'aiAgent.userId', value: this.formValue.userId || this.formInitialValue.userId, type: 'copyable' },
+      { label: 'aiAgent.totalTokens', value: currentResult.totalToken ?? 0, type: 'number', format: '1.0-0' },
+      { label: 'aiAgent.iterations', value: currentResult.iterationCount ?? 0, type: 'number', format: '1.0-0' }
+    ];
+  }
+
+  get resultStatusLabel(): string {
+    if (!this.result) {
+      return '-';
+    }
+
+    return this.result.executionStatus || (this.result.success ? 'COMPLETED' : 'FAILED');
+  }
+
+  get resultStatusVariant(): BadgeVariant {
+    if (!this.result) {
+      return 'muted';
+    }
+
+    return this.result.success ? 'success' : 'danger';
+  }
+
   formatPayload(payloadJson?: string): string {
     if (!payloadJson?.trim()) {
       return '{}';
@@ -187,6 +224,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
 
   private loadDependencies(): void {
     this.loading = true;
+    this.dependenciesError = '';
     this.loadingService.track(
       forkJoin({
         agents: this.agentDefinitionService.getAll({ enabled: true }),
@@ -205,6 +243,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
           agentOptions: [],
           modelOptions: []
         };
+        this.dependenciesError = 'aiAgent.playground.dependenciesUnavailable';
         this.toastService.error('aiAgent.playground.toast.loadDependenciesFailed');
         this.applyQueryDefaults();
       }
@@ -224,22 +263,26 @@ export class AiAgentPlaygroundComponent implements OnInit {
 
   private loadSteps(sessionId: string): void {
     this.traceLoading = true;
+    this.traceError = '';
     this.loadingService.track(this.executionTraceService.getSteps(sessionId)).pipe(finalize(() => (this.traceLoading = false))).subscribe({
       next: (steps) => {
         this.steps = steps;
       },
-      error: () => this.toastService.error('aiAgent.playground.toast.loadTraceFailed')
+      error: () => {
+        this.traceError = 'aiAgent.playground.toast.loadTraceFailed';
+        this.toastService.error('aiAgent.playground.toast.loadTraceFailed');
+      }
     });
   }
 
   private clearResult(): void {
     this.result = null;
     this.steps = [];
+    this.traceError = '';
   }
 
   private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    this.formContext = { ...this.formContext, extra: { ...(this.formContext.extra ?? {}) } };
   }
 
   private toAgentOptions(items: AgentDefinitionResponse[]): { label: string; value: string }[] {

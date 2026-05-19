@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.field-block {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.field-block__header {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.field-block label {
+  color: var(--app-text);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.field-block label span {
+  color: var(--app-control-danger-text);
+}
+
+.field-block small {
+  color: var(--app-text-muted);
+}
+
+.field-block__control {
+  min-width: 0;
+}

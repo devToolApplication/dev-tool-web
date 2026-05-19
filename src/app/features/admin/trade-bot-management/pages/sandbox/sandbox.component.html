@@ -1,37 +1,87 @@
-<section class="flex flex-col gap-4">
+<app-page-shell title="tradeBot.sandbox.title" layout="wide">
   <app-card>
-    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.fastBacktest' | translateContent }}</div>
-    <app-form-input
-      [config]="sandboxForm"
-      [context]="formContext"
-      [initialValue]="sandboxInitialValue"
-      [submitting]="loading()"
-      (formSubmit)="runFastBacktest($event)"
-    ></app-form-input>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-xl font-semibold">{{ 'tradeBot.sandbox.title' | translateContent }}</div>
+        <div class="app-text-muted">{{ 'tradeBot.sandbox.subtitle' | translateContent }}</div>
+      </div>
+      <app-button icon="pi pi-code" label="tradeBot.action.viewJson" severity="secondary" (buttonClick)="openRaw()"></app-button>
+    </div>
   </app-card>
 
-  @if (fastBacktest()) {
-    <app-card>
-      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.result' | translateContent }}</div>
-      <app-json-preview>{{ fastBacktestJson() }}</app-json-preview>
-    </app-card>
-  }
-
   <app-card>
-    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.evaluateBar' | translateContent }}</div>
-    <app-form-input
-      [config]="evaluateBarForm"
-      [context]="formContext"
-      [initialValue]="evaluateInitialValue"
-      [submitting]="evaluateLoading()"
-      (formSubmit)="evaluate($event)"
-    ></app-form-input>
+    <div class="mb-3">
+      <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="activeTab.set($event)"></app-tabs>
+    </div>
+
+    @switch (activeTab()) {
+      @case ('fastBacktest') {
+        <div class="flex flex-col gap-4">
+          <app-form-input
+            [config]="sandboxForm"
+            [context]="formContext"
+            [initialValue]="sandboxInitialValue"
+            [submitting]="loading()"
+            (formSubmit)="runFastBacktest($event)"
+          ></app-form-input>
+
+          @if (fastBacktest()) {
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+              @for (metric of fastBacktestSummary(); track metric.label) {
+                <app-summary-metric-card [label]="metric.label" [value]="metric.value" [suffix]="metric.suffix ?? ''"></app-summary-metric-card>
+              }
+            </div>
+          }
+        </div>
+      }
+      @case ('evaluateBar') {
+        <div class="flex flex-col gap-4">
+          <app-form-input
+            [config]="evaluateBarForm"
+            [context]="formContext"
+            [initialValue]="evaluateInitialValue"
+            [submitting]="evaluateLoading()"
+            (formSubmit)="evaluate($event)"
+          ></app-form-input>
+
+          @if (evaluateBar()) {
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              @for (metric of evaluateSummary(); track metric.label) {
+                <app-summary-metric-card [label]="metric.label" [value]="metric.value"></app-summary-metric-card>
+              }
+            </div>
+            <app-rule-tree-viewer [trace]="evaluateBar()?.ruleTrace ?? evaluateBar()?.trace ?? {}"></app-rule-tree-viewer>
+          }
+        </div>
+      }
+      @case ('history') {
+        <app-table
+          [config]="historyTableConfig"
+          [data]="history()"
+          [loading]="loading() || evaluateLoading()"
+          [error]="error()"
+        ></app-table>
+      }
+      @case ('raw') {
+        <div class="flex flex-col gap-3">
+          <p-fieldset [legend]="'tradeBot.sandbox.result' | translateContent" [toggleable]="true" [collapsed]="true">
+            <app-json-viewer [value]="fastBacktestJson()" [collapsed]="true"></app-json-viewer>
+          </p-fieldset>
+          <p-fieldset [legend]="'tradeBot.sandbox.evaluateResult' | translateContent" [toggleable]="true" [collapsed]="true">
+            <app-json-viewer [value]="evaluateBarJson()" [collapsed]="true"></app-json-viewer>
+          </p-fieldset>
+        </div>
+      }
+    }
   </app-card>
 
-  @if (evaluateBar()) {
-    <app-card>
-      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sandbox.evaluateResult' | translateContent }}</div>
-      <app-json-preview>{{ evaluateBarJson() }}</app-json-preview>
-    </app-card>
-  }
-</section>
+  <app-drawer
+    [open]="rawDialogVisible()"
+    (openChange)="handleRawOpenChange($event)"
+    (closed)="closeRaw()"
+    title="tradeBot.common.advancedRawJson"
+    size="lg"
+  >
+    <app-json-viewer [value]="rawJson()" [collapsed]="true"></app-json-viewer>
+  </app-drawer>
+</app-page-shell>

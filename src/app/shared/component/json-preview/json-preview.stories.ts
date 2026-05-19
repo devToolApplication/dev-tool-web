@@ -3,14 +3,17 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { JsonPreviewComponent } from './json-preview.component';
 
 const meta: Meta<JsonPreviewComponent> = {
-  title: 'Shared/Components/JsonPreview',
+  title: 'Shared/Components/Data Display/Json Preview',
   component: JsonPreviewComponent,
   render: () => ({
-    template: `<app-json-preview>{
+    props: {
+      jsonText: `{
   "status": "ACTIVE",
   "count": 3,
   "items": ["alpha", "beta", "gamma"]
-}</app-json-preview>`
+}`
+    },
+    template: `<app-json-preview>{{ jsonText }}</app-json-preview>`
   })
 };
 

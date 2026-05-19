@@ -1,4 +1,4 @@
-<section class="flex flex-col gap-4">
+<app-page-shell title="tradeBot.backtest.detail" layout="wide">
   <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
     @for (metric of summaryCards(); track metric.label) {
       <app-summary-metric-card
@@ -36,7 +36,7 @@
               </div>
             }
           </div>
-          <app-table [config]="metricTableConfig" [data]="metricRows()" [loading]="loading()"></app-table>
+          <app-table [config]="metricTableConfig" [data]="metricRows()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
         </div>
       }
       @case ('chart') {
@@ -48,6 +48,7 @@
               [config]="chartConfig()"
               [candles]="chartCandles()"
               [overlays]="chartOverlays()"
+              (rangeBoundaryReached)="loadMoreChartCandles($event)"
             ></app-candle-chart>
           } @else {
             <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">
@@ -57,13 +58,13 @@
         </div>
       }
       @case ('trades') {
-        <app-table [config]="tradeTableConfig" [data]="trades()" [loading]="loading()"></app-table>
+        <app-table [config]="tradeTableConfig" [data]="trades()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
       }
       @case ('orders') {
         <div class="flex flex-col gap-4">
-          <app-table [config]="orderTableConfig" [data]="orders()" [loading]="loading()"></app-table>
-          <app-table [config]="orderTableConfig" [data]="fills()" [loading]="loading()"></app-table>
-          <app-table [config]="positionTableConfig" [data]="positions()" [loading]="loading()"></app-table>
+          <app-table [config]="orderTableConfig" [data]="orders()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
+          <app-table [config]="orderTableConfig" [data]="fills()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
+          <app-table [config]="positionTableConfig" [data]="positions()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
         </div>
       }
       @case ('equity') {
@@ -86,7 +87,7 @@
               </div>
             </div>
           </div>
-          <app-table [config]="curveTableConfig" [data]="equityRows().concat(drawdownRows())" [loading]="loading()"></app-table>
+          <app-table [config]="curveTableConfig" [data]="equityRows().concat(drawdownRows())" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
         </div>
       }
       @case ('ruleTrace') {
@@ -95,14 +96,14 @@
       @case ('snapshots') {
         <div class="flex flex-col gap-4">
           <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
-          <app-json-preview>{{ snapshotJson() }}</app-json-preview>
+          <app-json-viewer [value]="snapshotJson()" [collapsed]="true"></app-json-viewer>
           @if (reportExport()) {
-            <app-json-preview>{{ reportJson() }}</app-json-preview>
+            <app-json-viewer [value]="reportJson()" [collapsed]="true"></app-json-viewer>
           }
         </div>
       }
       @case ('logs') {
-        <app-table [config]="eventTableConfig" [data]="events()" [loading]="loading()"></app-table>
+        <app-table [config]="eventTableConfig" [data]="events()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
       }
     }
   </app-card>
@@ -114,4 +115,4 @@
     [trace]="selectedTradeTrace()"
     (close)="closeTradeDrawer()"
   ></app-trade-detail-drawer>
-</section>
+</app-page-shell>

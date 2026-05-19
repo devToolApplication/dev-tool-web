@@ -1,157 +1,170 @@
-<section class="settings-page app-bg-surface app-text app-border">
-  <h2>{{ t('settings.title') }}</h2>
-  <p class="description">{{ t('settings.description') }}</p>
+<app-page-shell title="settings.title" subtitle="settings.description" layout="wide">
+  <section page-summary class="settings-summary-grid">
+    @for (item of settingsSummary(); track item.label) {
+      <article class="settings-summary-card app-border app-bg-card">
+        <i [attr.class]="'settings-summary-icon ' + item.icon" aria-hidden="true"></i>
+        <div>
+          <div class="settings-summary-label app-text-muted">{{ item.label | translateContent }}</div>
+          <div class="settings-summary-value app-text">{{ item.value | translateContent }}</div>
+        </div>
+      </article>
+    }
+  </section>
 
-  <app-tabs [tabs]="tabItems" [value]="activeTab" (valueChange)="onTabChange($event)"></app-tabs>
+  <div page-toolbar class="settings-toolbar app-border app-bg-card">
+    <app-tabs [tabs]="tabItems" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
+  </div>
 
-  @if (activeTab === 'general') {
-        <div class="settings-section">
-          <div class="setting-item app-border">
-            <div>
-              <h3>{{ t('settings.darkModeTitle') }}</h3>
-              <p>{{ t('settings.darkModeDescription') }}</p>
+  @switch (activeTab()) {
+    @case ('general') {
+      <section class="settings-grid" [attr.aria-label]="'settings.tab.general' | translateContent">
+        <article class="settings-panel app-border app-bg-card">
+          <div class="settings-panel-main">
+            <span class="settings-panel-icon" aria-hidden="true">
+              <i [attr.class]="generalPanels[0].icon"></i>
+            </span>
+            <div class="settings-panel-copy">
+              <h3>{{ generalPanels[0].title | translateContent }}</h3>
+              <p class="app-text-muted">{{ generalPanels[0].description | translateContent }}</p>
             </div>
-            <app-toggle-switch [value]="darkModeEnabled" (valueChange)="onDarkModeToggle($event === true)"></app-toggle-switch>
           </div>
+          <div class="settings-control">
+            <app-toggle-switch
+              label="settings.enabled"
+              [value]="themeMode() === 'dark'"
+              (valueChange)="onDarkModeToggle($event === true)"
+            ></app-toggle-switch>
+          </div>
+        </article>
 
-          <div class="setting-item app-border setting-item-column">
-            <div>
-              <h3>{{ t('settings.themeModeTitle') }}</h3>
-              <p>{{ t('settings.themeModeDescription') }}</p>
+        <article class="settings-panel app-border app-bg-card">
+          <div class="settings-panel-main">
+            <span class="settings-panel-icon" aria-hidden="true">
+              <i [attr.class]="generalPanels[1].icon"></i>
+            </span>
+            <div class="settings-panel-copy">
+              <h3>{{ generalPanels[1].title | translateContent }}</h3>
+              <p class="app-text-muted">{{ generalPanels[1].description | translateContent }}</p>
             </div>
+          </div>
+          <div class="settings-control">
             <app-select-button
+              label="settings.themeModeTitle"
               [options]="themeModeOptions"
-              [value]="themeMode"
+              [value]="themeMode()"
+              [allowEmpty]="false"
               (valueChange)="onThemeModeChange($event)"
             ></app-select-button>
           </div>
+        </article>
 
-          <div class="setting-item app-border setting-item-column">
-            <div>
-              <h3>{{ t('settings.themePresetTitle') }}</h3>
-              <p>{{ t('settings.themePresetDescription') }}</p>
+        <article class="settings-panel app-border app-bg-card">
+          <div class="settings-panel-main">
+            <span class="settings-panel-icon" aria-hidden="true">
+              <i [attr.class]="generalPanels[2].icon"></i>
+            </span>
+            <div class="settings-panel-copy">
+              <h3>{{ generalPanels[2].title | translateContent }}</h3>
+              <p class="app-text-muted">{{ generalPanels[2].description | translateContent }}</p>
             </div>
+          </div>
+          <div class="settings-control">
             <app-select
+              label="settings.themePresetTitle"
               [options]="themePresetOptions"
-              [value]="themePreset"
+              [value]="themePreset()"
               (valueChange)="onThemePresetChange($event)"
             ></app-select>
           </div>
+        </article>
 
-          <div class="setting-item app-border">
-            <div>
-              <h3>{{ t('settings.languageTitle') }}</h3>
-              <p>{{ t('settings.languageDescription') }}</p>
+        <article class="settings-panel app-border app-bg-card">
+          <div class="settings-panel-main">
+            <span class="settings-panel-icon" aria-hidden="true">
+              <i [attr.class]="generalPanels[3].icon"></i>
+            </span>
+            <div class="settings-panel-copy">
+              <h3>{{ generalPanels[3].title | translateContent }}</h3>
+              <p class="app-text-muted">{{ generalPanels[3].description | translateContent }}</p>
             </div>
+          </div>
+          <div class="settings-control">
             <app-select-button
+              label="settings.languageTitle"
               [options]="languageOptions"
-              [value]="language"
+              [value]="language()"
+              [allowEmpty]="false"
               (valueChange)="onLanguageChange($event)"
             ></app-select-button>
           </div>
-        </div>
-  }
+        </article>
+      </section>
+    }
 
-  @if (activeTab === 'theme') {
-        <div class="settings-section">
-          <div class="setting-item app-border setting-item-column">
-            <div>
-              <h3>{{ t('settings.customThemeTitle') }}</h3>
-              <p>{{ t('settings.customThemeDescription') }}</p>
-            </div>
+    @case ('theme') {
+      <section class="settings-theme-workspace">
+        <div class="settings-theme-header app-border app-bg-card">
+          <div>
+            <h3>{{ 'settings.customThemeTitle' | translateContent }}</h3>
+            <p class="app-text-muted">{{ 'settings.customThemeDescription' | translateContent }}</p>
+          </div>
 
-            <div class="theme-mode-row">
-              <label>{{ t('settings.customThemeMode') }}</label>
-              <app-select-button
-                [options]="customModeOptions"
-                [value]="customThemeMode"
-                (valueChange)="onCustomModeChange($event)"
-              ></app-select-button>
-            </div>
-
-            <div class="theme-grid">
-              <div class="theme-grid-item">
-                <label>{{ t('settings.selectBackground') }}</label>
-                <app-select
-                  [options]="themeTokenOptions.selectBackground"
-                  [value]="themeTokenValue.selectBackground"
-                  (valueChange)="onThemeTokenChange('selectBackground', $event)"
-                ></app-select>
-                <app-input-text
-                  styleClass="theme-manual-input"
-                  [value]="themeTokenValue.selectBackground"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput('selectBackground', $event || '')"
-                ></app-input-text>
-              </div>
-
-              <div class="theme-grid-item">
-                <label>{{ t('settings.selectText') }}</label>
-                <app-select
-                  [options]="themeTokenOptions.selectText"
-                  [value]="themeTokenValue.selectText"
-                  (valueChange)="onThemeTokenChange('selectText', $event)"
-                ></app-select>
-                <app-input-text
-                  styleClass="theme-manual-input"
-                  [value]="themeTokenValue.selectText"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput('selectText', $event || '')"
-                ></app-input-text>
-              </div>
-
-              <div class="theme-grid-item">
-                <label>{{ t('settings.inputBackground') }}</label>
-                <app-select
-                  [options]="themeTokenOptions.inputBackground"
-                  [value]="themeTokenValue.inputBackground"
-                  (valueChange)="onThemeTokenChange('inputBackground', $event)"
-                ></app-select>
-                <app-input-text
-                  styleClass="theme-manual-input"
-                  [value]="themeTokenValue.inputBackground"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput('inputBackground', $event || '')"
-                ></app-input-text>
-              </div>
-
-              <div class="theme-grid-item">
-                <label>{{ t('settings.inputText') }}</label>
-                <app-select
-                  [options]="themeTokenOptions.inputText"
-                  [value]="themeTokenValue.inputText"
-                  (valueChange)="onThemeTokenChange('inputText', $event)"
-                ></app-select>
-                <app-input-text
-                  styleClass="theme-manual-input"
-                  [value]="themeTokenValue.inputText"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput('inputText', $event || '')"
-                ></app-input-text>
-              </div>
-
-              <div class="theme-grid-item">
-                <label>{{ t('settings.appText') }}</label>
-                <app-select
-                  [options]="themeTokenOptions.appText"
-                  [value]="themeTokenValue.appText"
-                  (valueChange)="onThemeTokenChange('appText', $event)"
-                ></app-select>
-                <app-input-text
-                  styleClass="theme-manual-input"
-                  [value]="themeTokenValue.appText"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput('appText', $event || '')"
-                ></app-input-text>
-              </div>
-            </div>
-
+          <div class="settings-theme-actions">
+            <app-select-button
+              label="settings.customThemeMode"
+              [options]="customModeOptions"
+              [value]="customThemeMode()"
+              [allowEmpty]="false"
+              (valueChange)="onCustomModeChange($event)"
+            ></app-select-button>
             <app-button
+              icon="pi pi-refresh"
               severity="secondary"
-              [label]="t('reset')"
+              label="reset"
               (buttonClick)="onResetThemeConfig()"
             ></app-button>
           </div>
         </div>
+
+        <div class="settings-token-grid">
+          @for (field of themeTokenFields; track field.token) {
+            <article class="settings-token app-border app-bg-card">
+              <div class="settings-token-header">
+                <div>
+                  <h3>{{ field.label | translateContent }}</h3>
+                  <p class="app-text-muted">{{ field.description | translateContent }}</p>
+                </div>
+                <span
+                  class="settings-token-swatch app-border"
+                  [style.background]="themeTokenValue()[field.token]"
+                  [attr.title]="themeTokenValue()[field.token]"
+                  aria-hidden="true"
+                ></span>
+              </div>
+
+              <div class="settings-token-value app-text-soft">
+                <span>{{ 'settings.activeValue' | translateContent }}</span>
+                <code>{{ themeTokenValue()[field.token] }}</code>
+              </div>
+
+              <div class="settings-token-controls">
+                <app-select
+                  label="settings.presetValue"
+                  [options]="themeTokenOptions()[field.token]"
+                  [value]="themeTokenValue()[field.token]"
+                  (valueChange)="onThemeTokenChange(field.token, $event)"
+                ></app-select>
+                <app-input-text
+                  label="settings.manualValue"
+                  [value]="themeTokenValue()[field.token]"
+                  placeholder="customCssValue"
+                  (valueChange)="onThemeTokenManualInput(field.token, $event || '')"
+                ></app-input-text>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
   }
-</section>
+</app-page-shell>

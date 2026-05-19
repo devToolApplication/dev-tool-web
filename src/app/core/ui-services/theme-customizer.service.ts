@@ -3,6 +3,11 @@ import { Injectable } from '@angular/core';
 export type ThemeMode = 'light' | 'dark';
 
 export type ThemeCustomToken =
+  | 'primary'
+  | 'surface'
+  | 'border'
+  | 'successText'
+  | 'dangerText'
   | 'selectBackground'
   | 'selectText'
   | 'inputBackground'
@@ -25,6 +30,11 @@ const STORAGE_KEY = 'app-theme-custom';
 
 const DEFAULT_STATE: ThemeCustomState = {
   light: {
+    primary: '#2563eb',
+    surface: '#ffffff',
+    border: '#d8dee8',
+    successText: '#047857',
+    dangerText: '#be123c',
     selectBackground: 'var(--app-surface-strong)',
     selectText: 'var(--app-text)',
     inputBackground: 'var(--app-input-bg)',
@@ -32,6 +42,11 @@ const DEFAULT_STATE: ThemeCustomState = {
     appText: 'var(--app-text)'
   },
   dark: {
+    primary: '#60a5fa',
+    surface: '#111827',
+    border: '#263244',
+    successText: '#86efac',
+    dangerText: '#fda4af',
     selectBackground: 'var(--app-surface-strong)',
     selectText: 'var(--app-text)',
     inputBackground: 'var(--app-input-bg)',
@@ -42,6 +57,11 @@ const DEFAULT_STATE: ThemeCustomState = {
 
 const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
   light: {
+    primary: '--app-custom-light-primary',
+    surface: '--app-custom-light-surface',
+    border: '--app-custom-light-border',
+    successText: '--app-custom-light-success-text',
+    dangerText: '--app-custom-light-danger-text',
     selectBackground: '--app-custom-light-select-bg',
     selectText: '--app-custom-light-select-text',
     inputBackground: '--app-custom-light-input-bg',
@@ -49,6 +69,11 @@ const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
     appText: '--app-custom-light-text'
   },
   dark: {
+    primary: '--app-custom-dark-primary',
+    surface: '--app-custom-dark-surface',
+    border: '--app-custom-dark-border',
+    successText: '--app-custom-dark-success-text',
+    dangerText: '--app-custom-dark-danger-text',
     selectBackground: '--app-custom-dark-select-bg',
     selectText: '--app-custom-dark-select-text',
     inputBackground: '--app-custom-dark-input-bg',
@@ -58,6 +83,36 @@ const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
 };
 
 const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
+  primary: [
+    { label: 'blue', value: '#2563eb' },
+    { label: 'cyan', value: '#0891b2' },
+    { label: 'violet', value: '#7c3aed' },
+    { label: 'green', value: '#059669' }
+  ],
+  surface: [
+    { label: 'white', value: '#ffffff' },
+    { label: 'slate50', value: '#f8fafc' },
+    { label: 'surface0', value: 'var(--p-surface-0)' },
+    { label: 'surface50', value: 'var(--p-surface-50)' }
+  ],
+  border: [
+    { label: 'slateBorder', value: '#d8dee8' },
+    { label: 'slateSoft', value: '#e2e8f0' },
+    { label: 'surface200', value: 'var(--p-surface-200)' },
+    { label: 'surface300', value: 'var(--p-surface-300)' }
+  ],
+  successText: [
+    { label: 'green', value: '#047857' },
+    { label: 'emerald', value: '#059669' },
+    { label: 'chartSuccess', value: 'var(--app-chart-success)' },
+    { label: 'primeGreen', value: 'var(--p-green-700)' }
+  ],
+  dangerText: [
+    { label: 'rose', value: '#be123c' },
+    { label: 'red', value: '#dc2626' },
+    { label: 'chartDanger', value: 'var(--app-chart-danger)' },
+    { label: 'primeRed', value: 'var(--p-red-700)' }
+  ],
   selectBackground: [
     { label: 'contentBackground', value: 'var(--p-content-background)' },
     { label: 'surface0', value: 'var(--p-surface-0)' },
@@ -149,6 +204,11 @@ export class ThemeCustomizerService {
       const parsed = JSON.parse(raw) as Partial<ThemeCustomState>;
       this.state = {
         light: {
+          primary: parsed.light?.primary ?? DEFAULT_STATE.light.primary,
+          surface: parsed.light?.surface ?? DEFAULT_STATE.light.surface,
+          border: parsed.light?.border ?? DEFAULT_STATE.light.border,
+          successText: parsed.light?.successText ?? DEFAULT_STATE.light.successText,
+          dangerText: parsed.light?.dangerText ?? DEFAULT_STATE.light.dangerText,
           selectBackground: parsed.light?.selectBackground ?? DEFAULT_STATE.light.selectBackground,
           selectText: parsed.light?.selectText ?? DEFAULT_STATE.light.selectText,
           inputBackground: parsed.light?.inputBackground ?? DEFAULT_STATE.light.inputBackground,
@@ -156,6 +216,11 @@ export class ThemeCustomizerService {
           appText: parsed.light?.appText ?? DEFAULT_STATE.light.appText
         },
         dark: {
+          primary: parsed.dark?.primary ?? DEFAULT_STATE.dark.primary,
+          surface: parsed.dark?.surface ?? DEFAULT_STATE.dark.surface,
+          border: parsed.dark?.border ?? DEFAULT_STATE.dark.border,
+          successText: parsed.dark?.successText ?? DEFAULT_STATE.dark.successText,
+          dangerText: parsed.dark?.dangerText ?? DEFAULT_STATE.dark.dangerText,
           selectBackground: parsed.dark?.selectBackground ?? DEFAULT_STATE.dark.selectBackground,
           selectText: parsed.dark?.selectText ?? DEFAULT_STATE.dark.selectText,
           inputBackground: parsed.dark?.inputBackground ?? DEFAULT_STATE.dark.inputBackground,

@@ -1,0 +1,60 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.json-viewer {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-card-surface);
+}
+
+.json-viewer--invalid {
+  border-color: var(--app-control-danger-border);
+}
+
+.json-viewer__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.json-viewer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.json-viewer__search {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.json-viewer__search app-input-text {
+  flex: 1 1 auto;
+  min-width: 12rem;
+}
+
+.json-viewer__body {
+  max-height: min(32rem, 70vh);
+  min-width: 0;
+  margin: 0;
+  overflow: auto;
+  padding: 0.75rem;
+  color: var(--app-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

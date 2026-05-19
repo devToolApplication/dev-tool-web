@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { DatePicker } from './date-picker';
 
 const meta: Meta<DatePicker> = {
-  title: 'Shared/Components/Date Picker',
+  title: 'Shared/Components/Form Controls/Date Picker',
   component: DatePicker,
   args: {
     label: 'Start date',

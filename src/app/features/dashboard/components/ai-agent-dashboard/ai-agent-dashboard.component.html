@@ -1,37 +1,50 @@
 @if (loading) {
-  <div class="state-message">{{ 'dashboard.loadingData' | translateContent }}</div>
+  <app-loading-skeleton type="detail" [rows]="6"></app-loading-skeleton>
 } @else if (error) {
-  <div class="state-message state-message--error">{{ error | translateContent }}</div>
+  <app-error-state [message]="error"></app-error-state>
 } @else if (overview) {
   <div class="dashboard-detail-grid">
     @for (chart of overview.charts; track chart.key) {
-      <article class="dashboard-panel">
-        <header>
-          <h3>{{ chart.title }}</h3>
-        </header>
+      <app-section-panel
+        [title]="chart.title"
+        density="compact"
+      >
         <app-dashboard-chart [series]="chart"></app-dashboard-chart>
-      </article>
+      </app-section-panel>
     }
 
-    <article class="dashboard-panel dashboard-panel--resources">
-      <header>
-        <h3>{{ 'dashboard.resources' | translateContent }}</h3>
-      </header>
-      <div class="resource-list">
-        @for (resource of overview.resources; track resource.name) {
-          <div class="resource-row">
-            <div>
-              <strong>{{ resource.name }}</strong>
-              @if (resource.description) {
-                <span>{{ resource.description }}</span>
-              }
+    <app-section-panel
+      title="dashboard.resources"
+      density="compact"
+      [empty]="overview.resources.length === 0"
+      emptyTitle="dashboard.emptyResources"
+    >
+      @if (overview.resources.length) {
+        <div class="resource-list">
+          @for (resource of overview.resources; track resource.name) {
+            <div class="resource-row">
+              <div>
+                <strong>{{ resource.name | translateContent }}</strong>
+                @if (resource.description) {
+                  <span>{{ resource.description | translateContent }}</span>
+                }
+              </div>
+              <div class="resource-meta">
+                @if (resource.status) {
+                  <app-badge
+                    [label]="resource.status"
+                    [variant]="resourceVariant(resource.status)"
+                    size="sm"
+                  ></app-badge>
+                }
+                <strong>{{ resource.value || '-' }}</strong>
+              </div>
             </div>
-            <em>{{ resource.value }}</em>
-          </div>
-        }
-      </div>
-    </article>
+          }
+        </div>
+      }
+    </app-section-panel>
   </div>
 } @else {
-  <div class="state-message">{{ 'dashboard.noData' | translateContent }}</div>
+  <app-empty-state title="dashboard.noData"></app-empty-state>
 }

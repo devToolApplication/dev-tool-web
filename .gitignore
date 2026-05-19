@@ -30,11 +30,13 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
+/.tmp
 /.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
 /libpeerconnection.log
+debug.log
 testem.log
 /typings
 __screenshots__/

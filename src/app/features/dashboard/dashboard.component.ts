@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
-import { DashboardActivity, DashboardOverview, DashboardTabType } from './dashboard.models';
+import { BadgeVariant } from '../../shared/ui/data-display/badge/badge.component';
+import { KeyValueItem } from '../../shared/ui/data-display/key-value-list/key-value-list.component';
+import { ActionToolbarAction } from '../../shared/ui/layout/action-toolbar/action-toolbar.component';
+import { DashboardActivity, DashboardMetric, DashboardOverview, DashboardResource, DashboardTabType } from './dashboard.models';
 import { DashboardService } from './dashboard.service';
 
 @Component({
@@ -31,6 +35,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private readonly dashboardService: DashboardService,
+    private readonly router: Router,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
@@ -48,12 +53,74 @@ export class DashboardComponent implements OnInit {
     return this.activeOverview?.activities ?? [];
   }
 
+  get activeResources(): DashboardResource[] {
+    return this.activeOverview?.resources ?? [];
+  }
+
   get loading(): boolean {
     return this.loadingState[this.activeTab];
   }
 
   get activeError(): string {
     return this.errorState[this.activeTab];
+  }
+
+  get dashboardActions(): ActionToolbarAction[] {
+    return [
+      {
+        id: 'refresh',
+        label: 'dashboard.refresh',
+        icon: 'pi pi-refresh',
+        variant: 'primary',
+        placement: 'primary',
+        loading: this.loading,
+        disabled: this.loading
+      }
+    ];
+  }
+
+  get quickActions(): ActionToolbarAction[] {
+    if (this.activeTab === 'file-storage') {
+      return [
+        { id: 'storage-repository', label: 'layout.menu.storageRepository', icon: 'pi pi-database', variant: 'primary', placement: 'primary' },
+        { id: 'uploaded-files', label: 'layout.menu.uploadedFiles', icon: 'pi pi-file', placement: 'secondary' }
+      ];
+    }
+
+    return [
+      { id: 'ai-playground', label: 'layout.menu.playground', icon: 'pi pi-play-circle', variant: 'primary', placement: 'primary' },
+      { id: 'execution-traces', label: 'layout.menu.executionTraces', icon: 'pi pi-history', placement: 'secondary' },
+      { id: 'ai-models', label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', placement: 'secondary' }
+    ];
+  }
+
+  get needsAttentionItems(): Array<{ title: string; description?: string; status?: string }> {
+    const overview = this.activeOverview;
+    if (!overview) {
+      return [];
+    }
+
+    const importantStatuses = new Set(['warning', 'danger', 'failed', 'error', 'degraded', 'pending']);
+    const fromMetrics = overview.metrics
+      .filter((metric) => importantStatuses.has(String(metric.severity ?? '').toLowerCase()))
+      .map((metric) => ({ title: metric.label, description: String(metric.value ?? ''), status: metric.severity }));
+    const fromResources = overview.resources
+      .filter((resource) => importantStatuses.has(String(resource.status ?? '').toLowerCase()))
+      .map((resource) => ({ title: resource.name, description: resource.description ?? resource.value, status: resource.status }));
+
+    return [...fromMetrics, ...fromResources].slice(0, 6);
+  }
+
+  get serviceStatusItems(): KeyValueItem[] {
+    const overview = this.activeOverview;
+    if (!overview) {
+      return [];
+    }
+
+    return [
+      { label: 'dashboard.service', value: overview.service || '-', type: 'copyable' },
+      { label: 'dashboard.generatedAt', value: overview.generatedAt || '-', type: overview.generatedAt ? 'datetime' : 'text' }
+    ];
   }
 
   onTabChange(value: string | number | undefined): void {
@@ -72,8 +139,47 @@ export class DashboardComponent implements OnInit {
     this.loadOverview(this.activeTab);
   }
 
-  severityClass(severity: string | undefined): string {
-    return `is-${severity || 'info'}`;
+  onDashboardAction(action: ActionToolbarAction): void {
+    if (action.id === 'refresh') {
+      this.refreshActive();
+      return;
+    }
+
+    const routes: Record<string, string> = {
+      'ai-playground': '/admin/ai-agent/runtime/playground',
+      'execution-traces': '/admin/ai-agent/execution-traces',
+      'ai-models': '/admin/ai-agent/models',
+      'storage-repository': '/admin/upload-storage/storage',
+      'uploaded-files': '/admin/upload-storage/files'
+    };
+    const route = routes[action.id];
+    if (route) {
+      void this.router.navigate([route]);
+    }
+  }
+
+  metricRouterLink(tab: DashboardTabType, metric: DashboardMetric): string {
+    if (tab === 'file-storage') {
+      return '/admin/upload-storage/files';
+    }
+
+    if (String(metric.severity ?? '').toLowerCase() === 'danger') {
+      return '/admin/ai-agent/execution-traces';
+    }
+
+    return '/admin/ai-agent/runtime/playground';
+  }
+
+  metricVariant(severity: string | undefined): BadgeVariant {
+    switch (severity) {
+      case 'success':
+      case 'info':
+      case 'warning':
+      case 'danger':
+        return severity;
+      default:
+        return 'default';
+    }
   }
 
   formatTimestamp(value: string | undefined): string {

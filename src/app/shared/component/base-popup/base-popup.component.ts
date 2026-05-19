@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, EventEmitter, Input, Output } from '@angular/core';
 
 type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -6,7 +6,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
   selector: 'app-base-popup',
   standalone: false,
   styles: [`
-    :host ::ng-deep .base-popup.p-dialog {
+    ::ng-deep .base-popup.p-dialog {
       border: 1px solid var(--app-border-strong);
       border-radius: 1.2rem;
       background:
@@ -18,34 +18,34 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
       overflow: hidden;
     }
 
-    :host ::ng-deep .base-popup .p-dialog-header,
-    :host ::ng-deep .base-popup .p-dialog-content,
-    :host ::ng-deep .base-popup .p-dialog-footer {
+    ::ng-deep .base-popup .p-dialog-header,
+    ::ng-deep .base-popup .p-dialog-content,
+    ::ng-deep .base-popup .p-dialog-footer {
       background: var(--app-transparent);
       color: inherit;
     }
 
-    :host ::ng-deep .base-popup .p-dialog-header {
+    ::ng-deep .base-popup .p-dialog-header {
       padding: 1.35rem 1.4rem 0.85rem;
       border-bottom: 1px solid var(--app-border-soft);
     }
 
-    :host ::ng-deep .base-popup .p-dialog-content {
+    ::ng-deep .base-popup .p-dialog-content {
       padding: 1.1rem 1.4rem;
     }
 
-    :host ::ng-deep .base-popup .p-dialog-footer {
+    ::ng-deep .base-popup .p-dialog-footer {
       padding: 0.95rem 1.4rem 1.25rem;
       border-top: 1px solid var(--app-border-soft);
     }
 
-    :host ::ng-deep .base-popup .p-dialog-header-icon {
+    ::ng-deep .base-popup .p-dialog-header-icon {
       color: var(--app-text-muted);
       background: var(--app-surface-soft);
       border: 1px solid var(--app-border-soft);
     }
 
-    :host ::ng-deep .base-popup .p-dialog-header-icon:hover {
+    ::ng-deep .base-popup .p-dialog-header-icon:hover {
       background: var(--app-surface-alt);
       color: var(--app-text);
     }
@@ -55,6 +55,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
       [visible]="visible"
       [modal]="modal"
       [appendTo]="appendTo"
+      [baseZIndex]="baseZIndex"
       [position]="position"
       [maskStyleClass]="maskStyleClass"
       [dismissableMask]="dismissableMask"
@@ -102,7 +103,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
     </p-dialog>
   `
 })
-export class BasePopupComponent {
+export class BasePopupComponent implements AfterViewChecked {
   @Input() visible = false;
   @Input() header = '';
   @Input() subheader = '';
@@ -110,7 +111,8 @@ export class BasePopupComponent {
   @Input() width?: string;
   @Input() loading = false;
   @Input() modal = true;
-  @Input() appendTo: HTMLElement | 'body' | null = null;
+  @Input() appendTo: HTMLElement | 'body' | null = 'body';
+  @Input() baseZIndex = 2400;
   @Input() maskStyleClass = '';
   @Input() position: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'topleft' | 'topright' | 'bottomleft' | 'bottomright' = 'center';
   @Input() dismissableMask = false;
@@ -129,6 +131,20 @@ export class BasePopupComponent {
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() hide = new EventEmitter<void>();
+
+  constructor(private readonly host: ElementRef<HTMLElement>) {}
+
+  ngAfterViewChecked(): void {
+    const dialog = this.host.nativeElement.querySelector<HTMLElement>('.base-popup[role="dialog"]');
+    if (!dialog || dialog.getAttribute('aria-label')) {
+      return;
+    }
+    dialog.setAttribute('aria-label', this.resolvedAriaLabel);
+  }
+
+  get resolvedAriaLabel(): string {
+    return this.header || this.subheader || 'dialog';
+  }
 
   get sizeClass(): string {
     return `base-popup--${this.size}`;

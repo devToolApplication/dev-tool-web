@@ -8,8 +8,14 @@ import {
 import { PlaywrightAdminService } from '../../../../../core/services/ai-agent-service/playwright-admin.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BadgeVariant } from '../../../../../shared/ui/data-display/badge/badge.component';
+import { KeyValueItem } from '../../../../../shared/ui/data-display/key-value-list/key-value-list.component';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
+
+const CHAT_GPT_MODEL_OPTIONS = [
+  { label: 'gpt-5-mini', value: 'gpt-5-mini' }
+];
 
 @Component({
   selector: 'app-ai-agent-ask',
@@ -20,7 +26,10 @@ import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rule
 export class AiAgentAskComponent {
   readonly formContext: FormContext = {
     user: null,
-    mode: 'create'
+    mode: 'create',
+    extra: {
+      modelOptions: CHAT_GPT_MODEL_OPTIONS
+    }
   };
 
   readonly formVisible = signal(true);
@@ -28,10 +37,11 @@ export class AiAgentAskComponent {
   readonly chatGptFormConfig: FormConfig = {
     fields: [
       {
-        type: 'text',
+        type: 'auto-complete',
         name: 'model',
         label: 'aiAgent.model',
         width: 'full',
+        optionsExpression: 'context.extra?.modelOptions || []',
         placeholder: 'gpt-5-mini'
       },
       {
@@ -100,6 +110,53 @@ export class AiAgentAskComponent {
       });
   }
 
+  get chatGptSummaryItems(): KeyValueItem[] {
+    const result = this.chatGptResult;
+    if (!result) {
+      return [];
+    }
+
+    const finishReason = result.choices?.[0]?.finishReason || '';
+
+    return [
+      { label: 'id', value: result.id, type: 'copyable' },
+      { label: 'aiAgent.model', value: result.model },
+      { label: 'aiAgent.created', value: result.created, type: result.created == null ? 'text' : 'number', format: '1.0-0' },
+      { label: 'aiAgent.object', value: result.object },
+      { label: 'aiAgent.finishReason', value: finishReason, type: 'badge', variant: this.finishReasonVariant(finishReason) },
+      { label: 'aiAgent.totalTokens', value: result.usage?.totalTokens, type: 'number', format: '1.0-0' }
+    ];
+  }
+
+  get chatGptToolCallItems(): KeyValueItem[] {
+    return this.chatGptResult
+      ? [
+          {
+            label: 'aiAgent.toolCalls',
+            value: this.chatGptResult.choices?.[0]?.message?.toolCalls ?? [],
+            type: 'json'
+          }
+        ]
+      : [];
+  }
+
+  get connectionSummaryItems(): KeyValueItem[] {
+    const result = this.connectionResult;
+    if (!result) {
+      return [];
+    }
+
+    return [
+      { label: 'aiAgent.cdpTest.browser', value: result.browserVersion },
+      { label: 'aiAgent.cdpTest.contexts', value: result.contextCount ?? 0, type: 'number', format: '1.0-0' },
+      { label: 'aiAgent.cdpTest.pages', value: result.pageCount ?? 0, type: 'number', format: '1.0-0' }
+    ];
+  }
+
+  connectionVariant(connected: boolean): BadgeVariant {
+    return connected ? 'success' : 'danger';
+  }
+
   onChatGptValueChange(model: {
     model?: string;
     systemPrompt?: string;
@@ -153,5 +210,18 @@ export class AiAgentAskComponent {
   private normalizeOptional(value: string): string | undefined {
     const normalized = value.trim();
     return normalized ? normalized : undefined;
+  }
+
+  private finishReasonVariant(reason: string): BadgeVariant {
+    switch (reason) {
+      case 'stop':
+        return 'success';
+      case 'tool_calls':
+        return 'info';
+      case 'length':
+        return 'warning';
+      default:
+        return 'muted';
+    }
   }
 }

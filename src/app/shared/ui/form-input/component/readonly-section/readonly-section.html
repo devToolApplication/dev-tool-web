@@ -1,0 +1,25 @@
+@if (field.visible()) {
+  <app-section-panel
+    [title]="field.label || 'general'"
+    [subtitle]="helpText"
+    density="compact"
+  >
+    @if (field.type === 'array' || field.type === 'tree') {
+      <app-json-viewer [value]="field.value()" [collapsed]="true"></app-json-viewer>
+    } @else {
+      <div class="readonly-section__grid">
+        @for (child of children; track child.path) {
+          @if (isArrayField(child)) {
+            <app-readonly-section class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child"></app-readonly-section>
+          } @else if (isGroupField(child)) {
+            <app-readonly-section class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child"></app-readonly-section>
+          } @else if (isTreeField(child)) {
+            <app-readonly-section class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child"></app-readonly-section>
+          } @else {
+            <app-readonly-field class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child"></app-readonly-field>
+          }
+        }
+      </div>
+    }
+  </app-section-panel>
+}

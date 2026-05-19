@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { FileUploadDebugComponent } from './debug-tools/file-upload-debug/file-upload-debug.component';
 import { AiAgentConfigFormComponent } from './general-config/ai-agent-system/form/ai-agent-config-form.component';
 import { AiAgentConfigListComponent } from './general-config/ai-agent-system/list/ai-agent-config-list.component';
@@ -36,40 +37,40 @@ export const systemManagementRoutes: Routes = [
     path: 'admin/system-management/storage-secrets',
     children: [
       { path: '', component: StorageSecretListComponent },
-      { path: 'create', component: StorageSecretFormComponent },
-      { path: 'edit/:id', component: StorageSecretFormComponent }
+      { path: 'create', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/system-management/storage-configs',
     children: [
       { path: '', component: StorageConfigListComponent },
-      { path: 'create', component: StorageConfigFormComponent },
-      { path: 'edit/:id', component: StorageConfigFormComponent }
+      { path: 'create', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/system-management/ai-agent-secrets',
     children: [
       { path: '', component: AiAgentSecretListComponent },
-      { path: 'create', component: AiAgentSecretFormComponent },
-      { path: 'edit/:id', component: AiAgentSecretFormComponent }
+      { path: 'create', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/system-management/trade-bot-secrets',
     children: [
       { path: '', component: TradeBotSecretListComponent },
-      { path: 'create', component: TradeBotSecretFormComponent },
-      { path: 'edit/:id', component: TradeBotSecretFormComponent }
+      { path: 'create', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
     path: 'admin/system-management/ai-agent-configs',
     children: [
       { path: '', component: AiAgentConfigListComponent },
-      { path: 'create', component: AiAgentConfigFormComponent },
-      { path: 'edit/:id', component: AiAgentConfigFormComponent }
+      { path: 'create', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {
@@ -84,8 +85,8 @@ export const systemManagementRoutes: Routes = [
     path: 'admin/system-management/trade-bot-configs',
     children: [
       { path: '', component: TradeBotConfigListComponent },
-      { path: 'create', component: TradeBotConfigFormComponent },
-      { path: 'edit/:id', component: TradeBotConfigFormComponent }
+      { path: 'create', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   }
 ];

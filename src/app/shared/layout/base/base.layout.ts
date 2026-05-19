@@ -13,10 +13,12 @@ import { AppMenuItem } from '../side-menu/side-menu.component';
 })
 export class BaseLayoutComponent implements OnInit {
   readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;
-  readonly sidebarVisible = signal(true);
+  readonly sidebarCollapsed = signal(false);
+  readonly sidebarOverlayOpen = signal(false);
   readonly usePageWrapper = signal(true);
+  readonly isMobileLayout = signal(false);
 
-  private readonly isMobileLayout = signal(false);
+  private readonly sidebarCollapsedStorageKey = 'dev-tool.sidebarCollapsed';
 
   constructor(
     private readonly router: Router,
@@ -24,6 +26,7 @@ export class BaseLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.sidebarCollapsed.set(this.readStoredBoolean(this.sidebarCollapsedStorageKey));
     this.updateLayoutMode();
     this.updatePageWrapper(this.router.url);
 
@@ -41,7 +44,16 @@ export class BaseLayoutComponent implements OnInit {
   }
 
   onToggleSidebar(): void {
-    this.sidebarVisible.update((visible) => !visible);
+    if (this.isMobileLayout()) {
+      this.sidebarOverlayOpen.update((open) => !open);
+      return;
+    }
+
+    this.sidebarCollapsed.update((collapsed) => {
+      const nextCollapsed = !collapsed;
+      this.storeBoolean(this.sidebarCollapsedStorageKey, nextCollapsed);
+      return nextCollapsed;
+    });
   }
 
   closeSidebarOverlay(): void {
@@ -49,21 +61,37 @@ export class BaseLayoutComponent implements OnInit {
       return;
     }
 
-    this.sidebarVisible.set(false);
+    this.sidebarOverlayOpen.set(false);
   }
 
   private updateLayoutMode(): void {
-    const nextIsMobile = window.innerWidth < 992;
+    const nextIsMobile = typeof window !== 'undefined' && window.innerWidth < 992;
 
     if (nextIsMobile === this.isMobileLayout()) {
       return;
     }
 
     this.isMobileLayout.set(nextIsMobile);
-    this.sidebarVisible.set(!this.isMobileLayout());
+    this.sidebarOverlayOpen.set(false);
   }
 
   private updatePageWrapper(url: string): void {
     this.usePageWrapper.set(!url.startsWith('/admin/dashboard'));
+  }
+
+  private readStoredBoolean(key: string): boolean {
+    if (typeof localStorage === 'undefined') {
+      return false;
+    }
+
+    return localStorage.getItem(key) === 'true';
+  }
+
+  private storeBoolean(key: string, value: boolean): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    localStorage.setItem(key, String(value));
   }
 }

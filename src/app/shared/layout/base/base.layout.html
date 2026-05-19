@@ -1,12 +1,26 @@
-<div class="layout" [class.sidebar-collapsed]="!sidebarVisible()">
-  <div class="sidebar-shell">
-    <app-side-menu [items]="menuItems"></app-side-menu>
+<div
+  class="layout"
+  [class.mobile-layout]="isMobileLayout()"
+  [class.sidebar-collapsed]="sidebarCollapsed() && !isMobileLayout()"
+  [class.sidebar-overlay-open]="sidebarOverlayOpen() && isMobileLayout()"
+>
+  <div class="sidebar-shell" [attr.aria-hidden]="isMobileLayout() && !sidebarOverlayOpen()">
+    <app-side-menu
+      [items]="menuItems"
+      [collapsed]="sidebarCollapsed() && !isMobileLayout()"
+      (navigate)="closeSidebarOverlay()"
+    ></app-side-menu>
   </div>
 
   <div class="layout-mask" (click)="closeSidebarOverlay()"></div>
 
   <div class="content-area">
-    <app-header [sidebarVisible]="sidebarVisible()" (toggleSidebar)="onToggleSidebar()"></app-header>
+    <app-header
+      [mobileLayout]="isMobileLayout()"
+      [sidebarCollapsed]="sidebarCollapsed()"
+      [sidebarOpen]="sidebarOverlayOpen()"
+      (toggleSidebar)="onToggleSidebar()"
+    ></app-header>
 
     <main class="main-content">
       @if (usePageWrapper()) {

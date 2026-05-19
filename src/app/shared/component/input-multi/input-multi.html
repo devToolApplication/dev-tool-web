@@ -15,6 +15,7 @@
     [addOnTab]="false"
     [separator]="','"
     [fluid]="fluid"
+    [ariaLabel]="(label || placeholder || inputId) | translateContent"
     [placeholder]="(placeholder || '') | translateContent"
     [invalid]="invalid"
     [styleClass]="styleClass"
@@ -28,7 +29,7 @@
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

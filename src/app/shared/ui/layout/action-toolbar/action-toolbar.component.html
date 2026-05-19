@@ -1,0 +1,62 @@
+<div class="action-toolbar">
+  @for (action of visibleActions('primary'); track action.id) {
+    <app-button
+      size="small"
+      [label]="action.label"
+      [icon]="action.icon"
+      [severity]="severity(action)"
+      [disabled]="isActionDisabled(action)"
+      [loading]="action.loading ?? false"
+      [tooltip]="actionTooltip(action)"
+      (buttonClick)="emitAction(action)"
+    ></app-button>
+  }
+
+  @for (action of visibleActions('secondary'); track action.id) {
+    <app-button
+      size="small"
+      [label]="action.label"
+      [icon]="action.icon"
+      [severity]="severity(action)"
+      [text]="action.variant === 'ghost'"
+      [disabled]="isActionDisabled(action)"
+      [loading]="action.loading ?? false"
+      [tooltip]="actionTooltip(action)"
+      (buttonClick)="emitAction(action)"
+    ></app-button>
+  }
+
+  @if (hasMoreActions) {
+    <div class="action-toolbar__more-wrap">
+    <app-button
+      class="action-toolbar__more"
+      size="small"
+      label="showMore"
+      icon="pi pi-ellipsis-h"
+      severity="secondary"
+      [text]="true"
+      tooltip="showMore"
+      (buttonClick)="toggleMore()"
+    ></app-button>
+
+      @if (moreOpen()) {
+        <div class="action-toolbar__menu" role="menu">
+          @for (action of moreActions; track action.id) {
+            <app-button
+              class="action-toolbar__menu-item"
+              size="small"
+              [label]="action.label"
+              [icon]="action.icon"
+              [severity]="severity(action)"
+              [text]="action.variant !== 'primary'"
+              [disabled]="isActionDisabled(action)"
+              [loading]="action.loading ?? false"
+              [tooltip]="actionTooltip(action)"
+              (buttonClick)="emitAction(action)"
+            ></app-button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

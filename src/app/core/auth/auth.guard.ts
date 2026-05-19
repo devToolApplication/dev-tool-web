@@ -8,6 +8,6 @@ export class AuthGuard implements CanActivate {
   constructor(private keycloak: KeycloakService) {}
 
   canActivate(): boolean {
-    return !!this.keycloak.token;
+    return this.keycloak.authenticated;
   }
 }

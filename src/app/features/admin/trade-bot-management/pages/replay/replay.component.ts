@@ -1,14 +1,16 @@
 import { Component, DestroyRef, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, map, Observable } from 'rxjs';
-import { ReplayInitDto, ReplayInitResponse } from '../../../../../core/models/trade-bot/trading-system.model';
+import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { BacktestRunResponse, ReplayInitDto, ReplayInitResponse } from '../../../../../core/models/trade-bot/trading-system.model';
 import { RealtimeProgressEvent } from '../../../../../core/models/realtime/realtime.model';
 import { RealtimeWebSocketService, ReplayCommandType } from '../../../../../core/services/realtime/realtime-websocket.service';
 import { ReplayService } from '../../../../../core/services/trade-bot-service/replay.service';
 import { StrategyDebugService } from '../../../../../core/services/trade-bot-service/strategy-debug.service';
+import { TradingSystemService } from '../../../../../core/services/trade-bot-service/trading-system.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { AppTabItem } from '../../../../../shared/component/tabs/tabs.component';
 import {
   CandleChartBarChangedEvent,
   CandleChartConfig,
@@ -32,12 +34,21 @@ import { parseJson } from '../../trade-bot-form-utils';
 export class ReplayComponent {
   readonly replayForm = REPLAY_INIT_FORM;
   readonly evaluateForm = EVALUATE_FORM;
-  readonly formContext: FormContext = { user: null, mode: 'create' };
+  formContext: FormContext = { user: null, mode: 'create', extra: { strategyOptions: [], runOptions: [] } };
   readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
   readonly replay = signal<ReplayInitResponse | null>(null);
   readonly replayEvent = signal<RealtimeProgressEvent | null>(null);
   readonly evaluation = signal<Record<string, unknown> | null>(null);
+  readonly selectedCandle = signal<ChartCandle | null>(null);
   readonly replaySpeed = signal(650);
+  readonly activeTab = signal('ruleTrace');
+  readonly tabs: AppTabItem[] = [
+    { label: 'tradeBot.replay.ruleTrace', value: 'ruleTrace' },
+    { label: 'tradeBot.replay.candles', value: 'candles' },
+    { label: 'tradeBot.replay.overlays', value: 'overlays' },
+    { label: 'tradeBot.replay.rawEvents', value: 'rawEvents' }
+  ];
   readonly chartConfig = computed<CandleChartConfig>(() => ({
     showCandles: true,
     showVolume: true,
@@ -89,8 +100,39 @@ export class ReplayComponent {
     toTime: '',
     overlayCodesText: '[]'
   };
+  readonly replayModel = signal<Record<string, unknown>>(this.replayInitialValue);
   readonly evaluateInitialValue = { runId: '', index: 0 };
   readonly evaluateModel = signal<Record<string, unknown>>(this.evaluateInitialValue);
+  readonly replayFacts = computed(() => [
+    { label: 'tradeBot.field.strategyCode', value: this.replay()?.strategyCode ?? '-' },
+    { label: 'tradeBot.field.symbol', value: this.replay()?.symbol ?? '-' },
+    { label: 'tradeBot.field.timeframe', value: this.replay()?.timeframe ?? '-' },
+    { label: 'tradeBot.replay.currentIndex', value: this.replay()?.currentIndex ?? 0 },
+    { label: 'tradeBot.replay.candleCount', value: this.replay()?.candles?.length ?? 0 },
+    { label: 'tradeBot.field.status', value: this.replayStatus() }
+  ]);
+  readonly selectedCandleFacts = computed(() => {
+    const candle = this.selectedCandle();
+    return [
+      { label: 'tradeBot.field.openTime', value: candle?.openTime ?? '-' },
+      { label: 'tradeBot.field.open', value: candle?.open ?? '-' },
+      { label: 'tradeBot.field.high', value: candle?.high ?? '-' },
+      { label: 'tradeBot.field.low', value: candle?.low ?? '-' },
+      { label: 'tradeBot.field.close', value: candle?.close ?? '-' },
+      { label: 'tradeBot.field.volume', value: candle?.volume ?? '-' }
+    ];
+  });
+  readonly overlayRows = computed(() =>
+    Object.entries(this.replay()?.overlay?.overlays ?? {}).map(([name, value]) => ({
+      name,
+      count: Array.isArray(value) ? value.length : value && typeof value === 'object' ? Object.keys(value).length : value ? 1 : 0,
+      raw: value
+    }))
+  );
+  readonly evaluationTrace = computed<Record<string, unknown>>(() => {
+    const evaluation = this.evaluation();
+    return ((evaluation?.['ruleTrace'] ?? evaluation?.['trace'] ?? evaluation) as Record<string, unknown>) ?? {};
+  });
   readonly chartEvaluationConfig = computed<EvaluationConfig>(() => {
     const runId = String(this.evaluateModel()['runId'] ?? '');
     return {
@@ -120,19 +162,36 @@ export class ReplayComponent {
     rows: 25,
     minWidth: '68rem'
   };
+  readonly overlayTableConfig: TableConfig = {
+    title: 'tradeBot.replay.overlays',
+    columns: [
+      { field: 'name', header: 'tradeBot.field.name', type: 'copyable', minWidth: '16rem' },
+      { field: 'count', header: 'tradeBot.field.count', type: 'number' },
+      { field: 'raw', header: 'tradeBot.field.preview', type: 'json', minWidth: '24rem' }
+    ],
+    pagination: true,
+    rows: 10,
+    scrollable: true,
+    minWidth: '56rem'
+  };
 
   constructor(
     private readonly service: ReplayService,
     private readonly strategyDebugService: StrategyDebugService,
+    private readonly tradingSystemService: TradingSystemService,
     private readonly realtimeWebSocketService: RealtimeWebSocketService,
     private readonly loadingService: LoadingService,
     private readonly overlayMapper: CandleChartOverlayMapper,
     private readonly toastService: ToastService,
     private readonly i18nService: I18nService,
     private readonly destroyRef: DestroyRef
-  ) {}
+  ) {
+    this.loadStrategyOptions();
+    this.loadRunOptions();
+  }
 
   initReplay(model: Record<string, unknown>): void {
+    this.replayModel.set(model);
     let payload: ReplayInitDto;
     try {
       payload = {
@@ -142,8 +201,8 @@ export class ReplayComponent {
         source: optionalText(model['source']),
         marketType: optionalText(model['marketType']),
         feedCode: optionalText(model['feedCode']),
-        fromTime: String(model['fromTime'] ?? ''),
-        toTime: String(model['toTime'] ?? ''),
+        fromTime: isoText(model['fromTime']),
+        toTime: isoText(model['toTime']),
         overlayCodes: parseJson(model['overlayCodesText'], [])
       };
     } catch {
@@ -151,15 +210,22 @@ export class ReplayComponent {
       return;
     }
     this.loading.set(true);
+    this.error.set(null);
     this.loadingService
       .track(this.service.initReplay(payload))
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => {
           this.replay.set(response);
+          this.selectedCandle.set(this.chartCandles()[response.currentIndex] ?? this.chartCandles()[0] ?? null);
+          this.error.set(null);
           this.watchReplay(response);
         },
-        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.loadFailed'))
+        error: () => {
+          const message = this.i18nService.t('tradeBot.message.loadFailed');
+          this.error.set(message);
+          this.toastService.error(message);
+        }
       });
   }
 
@@ -187,6 +253,13 @@ export class ReplayComponent {
     this.sendReplayCommand('JUMP_TO_INDEX', { index });
   }
 
+  resetReplay(): void {
+    this.replay.set(null);
+    this.replayEvent.set(null);
+    this.evaluation.set(null);
+    this.selectedCandle.set(null);
+  }
+
   replayStatus(): string {
     return this.replayEvent()?.status ?? 'IDLE';
   }
@@ -207,20 +280,25 @@ export class ReplayComponent {
     this.evaluation.set(trace);
   }
 
+  onChartCandleSelected(candle: ChartCandle): void {
+    this.selectedCandle.set(candle);
+    this.evaluateModel.set({ ...this.evaluateModel(), index: candle.index });
+  }
+
   onChartError(): void {
     this.toastService.error(this.i18nService.t('tradeBot.message.evaluateFailed'));
   }
 
-  replayJson(): string {
-    return JSON.stringify(this.replay()?.overlay?.overlays ?? {}, null, 2);
+  replayJson(): unknown {
+    return this.replay()?.overlay?.overlays ?? {};
   }
 
-  evaluationJson(): string {
-    return JSON.stringify(this.evaluation() ?? {}, null, 2);
+  evaluationJson(): unknown {
+    return this.evaluation() ?? {};
   }
 
-  replayEventJson(): string {
-    return JSON.stringify(this.replayEvent(), null, 2);
+  replayEventJson(): RealtimeProgressEvent | null {
+    return this.replayEvent();
   }
 
   private watchReplay(response: ReplayInitResponse): void {
@@ -236,6 +314,7 @@ export class ReplayComponent {
         const current = this.replay();
         if (current && Number.isFinite(index)) {
           this.replay.set({ ...current, currentIndex: index });
+          this.selectedCandle.set(this.chartCandles()[index] ?? this.selectedCandle());
         }
         if (event.payload) {
           this.evaluation.set(event.payload);
@@ -247,18 +326,78 @@ export class ReplayComponent {
     const runId = String(model['runId'] ?? '');
     const index = Number(model['index'] ?? 0);
     this.loading.set(true);
+    this.error.set(null);
     const request = trace ? this.strategyDebugService.evaluateTrace(runId, index) : this.strategyDebugService.evaluateStrategy(runId, index);
     this.loadingService
       .track(request)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => this.evaluation.set(response),
-        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.evaluateFailed'))
+        next: (response) => {
+          this.evaluation.set(response);
+          this.error.set(null);
+        },
+        error: () => {
+          const message = this.i18nService.t('tradeBot.message.evaluateFailed');
+          this.error.set(message);
+          this.toastService.error(message);
+        }
       });
+  }
+
+  private loadStrategyOptions(): void {
+    this.tradingSystemService
+      .getStrategyConfigs({ status: 'ACTIVE' })
+      .pipe(catchError(() => of([])))
+      .subscribe((strategies) => {
+        this.patchFormContextExtra({
+          strategyOptions: strategies.map((strategy) => ({
+            label: `${strategy.code} - ${strategy.strategyVersion}`,
+            value: strategy.code
+          }))
+        });
+      });
+  }
+
+  private loadRunOptions(): void {
+    this.tradingSystemService
+      .getBacktests()
+      .pipe(catchError(() => of([] as BacktestRunResponse[])))
+      .subscribe((runs) => {
+        this.patchFormContextExtra({
+          runOptions: runs
+            .map((run) => {
+              const runId = String(run.runId ?? '').trim();
+              return runId
+                ? {
+                    label: `${runId} - ${run.strategyCode} / ${run.symbol} / ${run.status}`,
+                    value: runId
+                  }
+                : null;
+            })
+            .filter((option): option is { label: string; value: string } => option !== null)
+        });
+      });
+  }
+
+  private patchFormContextExtra(extra: Record<string, unknown>): void {
+    this.formContext = {
+      ...this.formContext,
+      extra: {
+        ...this.formContext.extra,
+        ...extra
+      }
+    };
   }
 }
 
 function optionalText(value: unknown): string | undefined {
   const text = String(value ?? '').trim();
   return text || undefined;
+}
+
+function isoText(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  return String(value ?? '');
 }

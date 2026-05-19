@@ -14,7 +14,7 @@ const rows: DemoRow[] = [
 ];
 
 const meta: Meta<PrimeTableComponent<DemoRow>> = {
-  title: 'Shared/Components/PrimeTable',
+  title: 'Shared/Components/Data Display/Prime Table',
   component: PrimeTableComponent,
   args: {
     value: rows,

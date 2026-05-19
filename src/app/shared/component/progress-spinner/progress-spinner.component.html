@@ -1,1 +1,5 @@
-<p-progressSpinner [strokeWidth]="strokeWidth" [styleClass]="styleClass"></p-progressSpinner>
+<p-progressSpinner
+  [strokeWidth]="strokeWidth"
+  [styleClass]="styleClass"
+  [attr.aria-label]="ariaLabel | translateContent"
+></p-progressSpinner>

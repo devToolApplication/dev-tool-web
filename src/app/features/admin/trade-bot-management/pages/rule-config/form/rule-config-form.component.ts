@@ -1,9 +1,10 @@
-import { Component, DestroyRef, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
   ExecutorVersionResponse,
+  IndicatorConfigResponse,
   RuleConfigDto,
   RuleConfigResponse
 } from '../../../../../../core/models/trade-bot/trading-system.model';
@@ -11,18 +12,25 @@ import { TradingSystemService } from '../../../../../../core/services/trade-bot-
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { CrudPageConfig } from '../../../../../../shared/ui/base-crud-page/base-crud-page.model';
-import { FieldConfig, FormConfig, FormContext } from '../../../../../../shared/ui/form-input/models/form-config.model';
+import {
+  FieldConfig,
+  FormConfig,
+  FormContext,
+  FormValidationError,
+  FormValidationHelpers,
+  SelectOption,
+  TreeFormNode,
+  TreePickerOption
+} from '../../../../../../shared/ui/form-input/models/form-config.model';
 import {
   asArray,
   asRecord,
   cloneFormConfig,
   formTemplateSignature,
-  formTemplateText,
   hasFormTemplateFields,
-  parseFormTemplateText,
-  stringValue,
-  tryParseFormTemplateText
+  stringValue
 } from '../../../config-template-form.utils';
 import { parseJson, stringifyJson } from '../../../trade-bot-form-utils';
 import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.constants';
@@ -33,6 +41,8 @@ import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.con
   templateUrl: './rule-config-form.component.html'
 })
 export class RuleConfigFormComponent implements OnInit {
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
   formConfig: FormConfig = { fields: [] };
   formContext: FormContext = { user: null, mode: 'create' };
   readonly submitting = signal(false);
@@ -46,6 +56,8 @@ export class RuleConfigFormComponent implements OnInit {
   formInitialValue: Record<string, unknown> = this.toFormValue();
   private id: string | null = null;
   private executors: ExecutorVersionResponse[] = [];
+  private indicatorConfigs: IndicatorConfigResponse[] = [];
+  private ruleConfigs: RuleConfigResponse[] = [];
   private currentFormTemplate?: FormConfig;
   private currentTemplateSignature = '';
   private currentExecutor = '';
@@ -84,6 +96,7 @@ export class RuleConfigFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastService.info(this.i18nService.t('saveSuccess'));
+          this.crudPage?.markFormPristine();
           void this.router.navigate([TRADE_BOT_ROUTES.rules]);
         },
         error: () => this.toastService.error(this.i18nService.t('saveError'))
@@ -96,17 +109,22 @@ export class RuleConfigFormComponent implements OnInit {
       ...model,
       executorVersion: this.resolveVersion(executor, model['executorVersion'])
     };
-    const parsedTemplate = tryParseFormTemplateText(normalizedModel['formTemplateText']);
-    if (parsedTemplate.invalid) {
-      return;
-    }
 
-    const signature = formTemplateSignature(parsedTemplate.template);
+    const template = this.templateForExecutor(executor) ?? (executor === this.currentExecutor ? this.currentFormTemplate : undefined);
+    const signature = formTemplateSignature(template);
     if (executor === this.currentExecutor && signature === this.currentTemplateSignature) {
       return;
     }
 
-    this.applyTemplateState(normalizedModel, parsedTemplate.template, executor);
+    this.applyTemplateState(normalizedModel, template, executor);
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
   }
 
   private loadInitialData(): void {
@@ -116,13 +134,17 @@ export class RuleConfigFormComponent implements OnInit {
       .track(
         forkJoin({
           executors: this.service.getRuleExecutors().pipe(catchError(() => of([] as ExecutorVersionResponse[]))),
+          indicatorConfigs: this.service.getIndicatorConfigs().pipe(catchError(() => of([] as IndicatorConfigResponse[]))),
+          ruleConfigs: this.service.getRuleConfigs().pipe(catchError(() => of([] as RuleConfigResponse[]))),
           detail: detail$
         })
       )
       .pipe(finalize(() => this.submitting.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ executors, detail }) => {
+        next: ({ executors, indicatorConfigs, ruleConfigs, detail }) => {
           this.executors = executors;
+          this.indicatorConfigs = indicatorConfigs;
+          this.ruleConfigs = ruleConfigs;
           if (detail) {
             this.applyExistingConfig(detail);
             return;
@@ -134,7 +156,7 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   private toPayload(model: Record<string, unknown>): RuleConfigDto {
-    const template = parseFormTemplateText(model['formTemplateText']);
+    const template = this.currentFormTemplate;
     const basePayload = {
       code: String(model['code'] ?? ''),
       executor: String(model['executor'] ?? ''),
@@ -145,18 +167,18 @@ export class RuleConfigFormComponent implements OnInit {
     if (!template) {
       return {
         ...basePayload,
-        indicators: parseJson(model['indicatorsText'], []),
+        indicators: this.indicatorsFromModel(model),
         config: parseJson(model['configText'], {}),
-        childRules: parseJson(model['childRulesText'], []),
-        overlay: parseJson(model['overlayText'], {})
+        childRules: this.ruleTreeToPayload(asArray<TreeFormNode>(model['childRules'])),
+        overlay: asRecord(model['overlay'])
       };
     }
 
     return {
       ...basePayload,
-      indicators: asArray<string>(model['indicators']).map((item) => String(item ?? '').trim()).filter(Boolean),
+      indicators: this.indicatorsFromModel(model),
       config: asRecord(model['config']),
-      childRules: asArray(model['childRules']),
+      childRules: this.ruleTreeToPayload(asArray<TreeFormNode>(model['childRules'])),
       overlay: asRecord(model['overlay']),
       formTemplate: template
     };
@@ -170,13 +192,9 @@ export class RuleConfigFormComponent implements OnInit {
       status: value?.status ?? 'ACTIVE',
       indicators: value?.indicators ?? [],
       config: value?.config ?? {},
-      childRules: value?.childRules ?? [],
+      childRules: this.ruleConfigsToTree(value?.childRules),
       overlay: value?.overlay ?? {},
-      formTemplateText: formTemplateText(value?.formTemplate),
-      indicatorsText: stringifyJson(value?.indicators, []),
-      configText: stringifyJson(value?.config, {}),
-      childRulesText: stringifyJson(value?.childRules, []),
-      overlayText: stringifyJson(value?.overlay, {})
+      configText: stringifyJson(value?.config, {})
     };
   }
 
@@ -184,13 +202,15 @@ export class RuleConfigFormComponent implements OnInit {
     const executor = this.executors[0]?.executor ?? '';
     const executorVersion = this.executors[0]?.latestVersion ?? 'LATEST';
     const initialValue = { ...this.toFormValue(), executor, executorVersion };
-    this.applyTemplateState(initialValue, undefined, executor);
+    this.applyTemplateState(initialValue, this.templateForExecutor(executor), executor);
   }
 
   private applyExistingConfig(value: RuleConfigResponse): void {
     const executorVersion = this.resolveVersion(value.executor, value.executorVersion);
     const initialValue = { ...this.toFormValue(value), executorVersion };
-    const template = hasFormTemplateFields(value.formTemplate) ? cloneFormConfig(value.formTemplate) : undefined;
+    const template = hasFormTemplateFields(value.formTemplate)
+      ? cloneFormConfig(value.formTemplate)
+      : this.templateForExecutor(value.executor);
     this.applyTemplateState(initialValue, template, value.executor);
   }
 
@@ -200,71 +220,487 @@ export class RuleConfigFormComponent implements OnInit {
     this.currentExecutor = currentExecutor;
     this.formInitialValue = this.withLegacyTexts(model);
     this.formConfig = this.buildFormConfig(this.currentFormTemplate, currentExecutor);
+    this.updateTemplateFallbackInfo(currentExecutor, this.currentFormTemplate);
   }
 
   private withLegacyTexts(value: Record<string, unknown>): Record<string, unknown> {
     return {
       ...value,
-      indicatorsText: value['indicatorsText'] ?? stringifyJson(value['indicators'], []),
       configText: value['configText'] ?? stringifyJson(value['config'], {}),
-      childRulesText: value['childRulesText'] ?? stringifyJson(value['childRules'], []),
-      overlayText: value['overlayText'] ?? stringifyJson(value['overlay'], {})
+      childRules: this.normalizeRuleTreeValue(value['childRules']),
+      overlay: value['overlay'] ?? {}
     };
   }
 
   private buildFormConfig(template?: FormConfig, currentExecutor = ''): FormConfig {
-    const templateFields = hasFormTemplateFields(template) ? template.fields : this.legacyFields();
+    const templateFields = hasFormTemplateFields(template)
+      ? this.templateFieldsWithCommonRuleFields(template.fields)
+      : this.legacyFields();
     return {
-      fields: [...this.staticFields(currentExecutor), ...templateFields]
+      fields: [...this.staticFieldGroups(currentExecutor), ...templateFields],
+      validators: {
+        ruleChildRules: (value, context) => this.validateRuleChildRules(value, context.formValue, context.helpers)
+      }
     };
   }
 
-  private staticFields(currentExecutor: string): FieldConfig[] {
+  private updateTemplateFallbackInfo(executor: string, template?: FormConfig): void {
+    this.pageConfig.infoSection = executor && !hasFormTemplateFields(template)
+      ? {
+          title: 'tradeBot.message.missingFormTemplateTitle',
+          description: 'tradeBot.message.missingRuleFormTemplateDescription'
+        }
+      : null;
+  }
+
+  private staticFieldGroups(currentExecutor: string): FieldConfig[] {
     const useExecutorSelect = this.shouldUseExecutorSelect(currentExecutor);
     const versionOptions = this.versionOptions(currentExecutor);
     return [
-      { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [this.requiredRule()] },
-      !useExecutorSelect
-        ? { name: 'executor', type: 'text', label: 'tradeBot.field.executor', width: '1/3', validation: [this.requiredRule()] }
-        : {
-            name: 'executor',
-            type: 'select',
-            label: 'tradeBot.field.executor',
-            width: '1/3',
-            options: this.executors.map((item) => ({ label: item.executor, value: item.executor })),
-            validation: [this.requiredRule()]
-          },
-      !useExecutorSelect || !versionOptions.length
-        ? { name: 'executorVersion', type: 'text', label: 'tradeBot.field.executorVersion', width: '1/3' }
-        : {
-            name: 'executorVersion',
-            type: 'select',
-            label: 'tradeBot.field.executorVersion',
-            width: '1/3',
-            options: versionOptions
-          },
-      { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/3' },
       {
-        name: 'formTemplateText',
-        type: 'textarea',
-        label: 'tradeBot.field.formTemplateJson',
-        contentType: 'json',
-        jsonValidationMessage: 'tradeBot.message.invalidJson',
-        rows: 10,
-        maxRows: 24,
-        showZoomButton: true,
-        width: 'full'
+        name: 'basicInfo',
+        type: 'group',
+        label: 'general',
+        width: 'full',
+        flat: true,
+        children: [
+          { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/2', validation: [this.requiredRule()] },
+          { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/2' }
+        ]
+      },
+      {
+        name: 'executorInfo',
+        type: 'group',
+        label: 'tradeBot.field.executor',
+        width: 'full',
+        flat: true,
+        children: [
+          !useExecutorSelect
+            ? { name: 'executor', type: 'text', label: 'tradeBot.field.executor', width: '1/2', validation: [this.requiredRule()] }
+            : {
+                name: 'executor',
+                type: 'select',
+                label: 'tradeBot.field.executor',
+                width: '1/2',
+                options: this.executors.map((item) => ({ label: item.executor, value: item.executor })),
+                validation: [this.requiredRule()]
+              },
+          !useExecutorSelect || !versionOptions.length
+            ? { name: 'executorVersion', type: 'text', label: 'tradeBot.field.executorVersion', width: '1/2' }
+            : {
+                name: 'executorVersion',
+                type: 'select',
+                label: 'tradeBot.field.executorVersion',
+                width: '1/2',
+                options: versionOptions
+              }
+        ]
       }
     ];
   }
 
   private legacyFields(): FieldConfig[] {
     return [
-      { name: 'indicatorsText', type: 'textarea', label: 'tradeBot.field.indicatorsJson', contentType: 'json', rows: 4, maxRows: 10, showZoomButton: true },
-      { name: 'configText', type: 'textarea', label: 'tradeBot.field.configJson', contentType: 'json', rows: 8, maxRows: 16, showZoomButton: true },
-      { name: 'childRulesText', type: 'textarea', label: 'tradeBot.field.childRulesJson', contentType: 'json', rows: 5, maxRows: 12, showZoomButton: true },
-      { name: 'overlayText', type: 'textarea', label: 'tradeBot.field.overlayJson', contentType: 'json', rows: 5, maxRows: 12, showZoomButton: true }
+      this.indicatorsField(),
+      this.childRulesTreeField(),
+      this.overlayRecordField(),
+      this.advancedJsonGroup([
+        this.jsonTextField('configText', 'tradeBot.field.configJson', 8, 16)
+      ])
     ];
+  }
+
+  private normalizeTemplateFields(fields: FieldConfig[]): FieldConfig[] {
+    return fields.map((field) => this.normalizeTemplateField(field));
+  }
+
+  private templateFieldsWithCommonRuleFields(fields: FieldConfig[]): FieldConfig[] {
+    const normalizedFields = this.normalizeTemplateFields(fields);
+    const commonFields: FieldConfig[] = [];
+
+    if (!this.hasField(normalizedFields, 'indicators')) {
+      commonFields.push(this.indicatorsField());
+    }
+    if (!this.hasField(normalizedFields, 'childRules')) {
+      commonFields.push(this.childRulesTreeField());
+    }
+    if (!this.hasField(normalizedFields, 'overlay')) {
+      commonFields.push(this.overlayRecordField());
+    }
+
+    return [...normalizedFields, ...commonFields];
+  }
+
+  private hasField(fields: FieldConfig[], name: string): boolean {
+    return fields.some((field) => {
+      if (field.name === name) {
+        return true;
+      }
+      if (field.type === 'group') {
+        return this.hasField(field.children, name);
+      }
+      if (field.type === 'array') {
+        return this.hasField(field.itemConfig, name);
+      }
+      if (field.type === 'tree') {
+        return this.hasField(field.children ?? [], name);
+      }
+      return false;
+    });
+  }
+
+  private normalizeTemplateField(field: FieldConfig): FieldConfig {
+    if (field.name === 'indicators') {
+      return { ...this.indicatorsField(), label: field.label ?? 'tradeBot.template.indicators', validation: field.validation };
+    }
+
+    if (field.name === 'childRules') {
+      const childRulesField = this.childRulesTreeField();
+      return {
+        ...childRulesField,
+        label: field.label ?? 'tradeBot.template.childRules',
+        validation: [...(childRulesField.validation ?? []), ...(field.validation ?? [])]
+      };
+    }
+
+    if (field.name === 'overlay' && field.type !== 'record') {
+      return this.overlayRecordField(field.label);
+    }
+
+    if (field.type === 'group') {
+      return {
+        ...field,
+        children: field.children.map((child) => this.normalizeTemplateField(child))
+      };
+    }
+
+    if (field.type === 'array') {
+      return {
+        ...field,
+        itemConfig: field.itemConfig.map((child) => this.normalizeTemplateField(child))
+      };
+    }
+
+    if (field.type === 'tree') {
+      const childRulesTreeField = this.childRulesTreeField();
+      return {
+        ...field,
+        validation: [...(childRulesTreeField.validation ?? []), ...(field.validation ?? [])],
+        treeConfig: {
+          ...(childRulesTreeField.type === 'tree' ? childRulesTreeField.treeConfig : {}),
+          ...(field.treeConfig ?? {})
+        },
+        pickerOptions: field.pickerOptions?.length ? field.pickerOptions : this.rulePickerOptions()
+      };
+    }
+
+    return field;
+  }
+
+  private indicatorsField(): FieldConfig {
+    return {
+      name: 'indicators',
+      type: 'input-multi',
+      label: 'tradeBot.template.indicators',
+      placeholder: 'tradeBot.template.indicatorsPlaceholder',
+      options: this.indicatorOptions(),
+      width: 'full'
+    };
+  }
+
+  private childRulesTreeField(): FieldConfig {
+    return {
+      name: 'childRules',
+      type: 'tree',
+      label: 'tradeBot.template.childRules',
+      width: 'full',
+      pickerOptions: this.rulePickerOptions(),
+      treeConfig: {
+        mode: 'builder',
+        allowAddNode: true,
+        allowRemoveNode: true,
+        allowReplaceNode: true,
+        allowMoveNode: true,
+        replaceBehavior: 'keep-children',
+        picker: {
+          enabled: true,
+          mode: 'drawer',
+          searchable: true
+        },
+        advancedJson: {
+          enabled: true,
+          collapsedByDefault: true
+        }
+      },
+      validation: [
+        {
+          type: 'expression',
+          expression: 'helpers.countTreeNodes(value) > 20',
+          message: 'tradeBot.validation.maxChildRules'
+        },
+        {
+          type: 'expression',
+          expression: 'helpers.hasDuplicate(value, "ruleCode")',
+          message: 'tradeBot.validation.duplicateChildRules'
+        },
+        {
+          type: 'custom',
+          validator: 'ruleChildRules',
+          message: 'tradeBot.validation.invalidChildRules'
+        }
+      ]
+    };
+  }
+
+  private overlayRecordField(label = 'tradeBot.template.overlay'): FieldConfig {
+    return {
+      name: 'overlay',
+      type: 'record',
+      label,
+      keyLabel: 'tradeBot.template.overlayKey',
+      valueLabel: 'tradeBot.template.overlayValue',
+      addButtonLabel: 'addRow',
+      width: 'full'
+    };
+  }
+
+  private advancedJsonGroup(children: FieldConfig[]): FieldConfig {
+    return {
+      name: 'advancedJson',
+      type: 'group',
+      label: 'shared.form.advancedJson',
+      width: 'full',
+      flat: true,
+      collapsible: true,
+      collapsed: true,
+      density: 'compact',
+      children
+    };
+  }
+
+  private jsonTextField(name: string, label: string, rows: number, maxRows: number): FieldConfig {
+    return {
+      name,
+      type: 'textarea',
+      label,
+      contentType: 'json',
+      jsonValidationMessage: 'tradeBot.message.invalidJson',
+      rows,
+      maxRows,
+      showZoomButton: true,
+      width: 'full'
+    };
+  }
+
+  private indicatorsFromModel(model: Record<string, unknown>): string[] {
+    return asArray<string>(model['indicators'])
+      .map((item) => String(item ?? '').trim())
+      .filter(Boolean)
+      .filter((item, index, list) => list.indexOf(item) === index);
+  }
+
+  private indicatorOptions(): SelectOption[] {
+    return this.indicatorConfigs
+      .map((item) => ({
+        label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
+        value: item.code
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  private rulePickerOptions(): TreePickerOption[] {
+    return this.ruleConfigs
+      .filter((item) => item.id !== this.id)
+      .map((item) => ({
+        id: `rule-${item.code}`,
+        label: item.code,
+        value: { ruleCode: item.code, config: {} },
+        subtitle: `${item.executor}/${item.executorVersion}`,
+        badges: item.status
+          ? [{ label: item.status, variant: item.status === 'ACTIVE' ? 'success' as const : 'muted' as const }]
+          : [],
+        data: {
+          sourceId: item.id,
+          ruleCode: item.code,
+          executor: item.executor,
+          status: item.status
+        }
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  private normalizeRuleTreeValue(value: unknown): TreeFormNode[] {
+    const items = asArray<Record<string, unknown>>(value);
+    if (!items.length) {
+      return [];
+    }
+
+    const alreadyTreeNodes = items.every((item) => typeof item['id'] === 'string' && typeof item['label'] === 'string');
+    return alreadyTreeNodes ? (items as unknown as TreeFormNode[]) : this.ruleConfigsToTree(items);
+  }
+
+  private ruleConfigsToTree(value?: Array<Record<string, unknown>>, parentPath = 'rule'): TreeFormNode[] {
+    return asArray<Record<string, unknown>>(value).map((item, index) => {
+      const ruleCode = stringValue(item['ruleCode'] ?? item['code'], `rule_${index + 1}`);
+      const slotCode = stringValue(item['slotCode']);
+      const children = asArray<Record<string, unknown>>(item['childRules'] ?? item['children']);
+      const referencedRule = this.ruleConfigs.find((rule) => rule.code === ruleCode);
+      const nodeValue = { ...item };
+      delete nodeValue['childRules'];
+      delete nodeValue['children'];
+
+      return {
+        id: this.ruleNodeId(parentPath, ruleCode, index),
+        label: ruleCode,
+        value: nodeValue,
+        subtitle: slotCode || undefined,
+        data: {
+          sourceId: referencedRule?.id,
+          ruleCode,
+          slotCode: slotCode || undefined,
+          executor: referencedRule?.executor,
+          status: referencedRule?.status
+        },
+        children: this.ruleConfigsToTree(children, `${parentPath}-${index}`)
+      };
+    });
+  }
+
+  private ruleTreeToPayload(nodes: TreeFormNode[]): Array<Record<string, unknown>> {
+    return nodes.map((node) => {
+      const base = { ...asRecord(node.value) };
+      const data = asRecord(node.data);
+      const ruleCode = stringValue(base['ruleCode'] ?? data['ruleCode'] ?? node.label);
+      const slotCode = stringValue(base['slotCode'] ?? data['slotCode']);
+      const children = this.ruleTreeToPayload(node.children ?? []);
+
+      const result: Record<string, unknown> = {
+        ...base,
+        ruleCode
+      };
+
+      if (slotCode) {
+        result['slotCode'] = slotCode;
+      }
+      if (children.length) {
+        result['childRules'] = children;
+      }
+
+      return result;
+    });
+  }
+
+  private validateRuleChildRules(
+    value: unknown,
+    formValue: Record<string, unknown>,
+    helpers: FormValidationHelpers
+  ): true | FormValidationError[] {
+    const currentCode = stringValue(formValue['code']);
+    const currentId = stringValue(this.id);
+    const errors: FormValidationError[] = [];
+
+    helpers.flattenTree(value).forEach((node) => {
+      const nodeValue = asRecord(node.value);
+      const data = asRecord(node.data);
+      const ruleCode = stringValue(nodeValue['ruleCode'] ?? data['ruleCode'] ?? node.label);
+      const sourceId = stringValue(data['sourceId'] ?? data['sourceOptionId']);
+      const status = stringValue(data['status']);
+
+      if (currentCode && ruleCode === currentCode) {
+        errors.push({ message: 'tradeBot.validation.selfChildRule', nodeId: node.id });
+      }
+
+      if (currentId && sourceId === currentId) {
+        errors.push({ message: 'tradeBot.validation.selfChildRule', nodeId: node.id });
+      }
+
+      if (node.disabled || status === 'INACTIVE' || status === 'DISABLED') {
+        errors.push({ message: 'tradeBot.validation.inactiveChildRule', nodeId: node.id, severity: 'warning' });
+      }
+
+      const circularPath = currentCode && ruleCode ? this.circularDependencyPath(currentCode, ruleCode) : null;
+      if (circularPath) {
+        errors.push({
+          message: `Circular child rule dependency: ${circularPath.join(' -> ')}`,
+          nodeId: node.id
+        });
+      }
+    });
+
+    return errors.length ? errors : true;
+  }
+
+  private circularDependencyPath(currentCode: string, candidateCode: string): string[] | null {
+    if (!currentCode || !candidateCode || currentCode === candidateCode) {
+      return null;
+    }
+
+    const childPath = this.findRuleDependencyPath(candidateCode, currentCode, new Set([currentCode]));
+    return childPath ? [currentCode, ...childPath] : null;
+  }
+
+  private findRuleDependencyPath(fromCode: string, targetCode: string, visited: Set<string>): string[] | null {
+    if (fromCode === targetCode) {
+      return [fromCode];
+    }
+    if (visited.has(fromCode)) {
+      return null;
+    }
+
+    visited.add(fromCode);
+    const rule = this.ruleConfigs.find((item) => item.code === fromCode);
+    if (!rule) {
+      return null;
+    }
+
+    for (const childPath of this.childRulePaths(rule.childRules)) {
+      const childCode = childPath[0];
+      if (!childCode) {
+        continue;
+      }
+
+      const targetIndex = childPath.indexOf(targetCode);
+      if (targetIndex >= 0) {
+        return [fromCode, ...childPath.slice(0, targetIndex + 1)];
+      }
+
+      if (childCode === targetCode) {
+        return [fromCode, targetCode];
+      }
+
+      const path = this.findRuleDependencyPath(childCode, targetCode, new Set(visited));
+      if (path) {
+        return [fromCode, ...path];
+      }
+    }
+
+    return null;
+  }
+
+  private childRulePaths(childRules: Array<Record<string, unknown>>): string[][] {
+    return asArray<Record<string, unknown>>(childRules).flatMap((child) => {
+      const code = stringValue(child['ruleCode'] ?? child['code']);
+      const nested = asArray<Record<string, unknown>>(child['childRules'] ?? child['children']);
+      const nestedPaths = this.childRulePaths(nested);
+
+      if (!code) {
+        return nestedPaths;
+      }
+
+      return [
+        [code],
+        ...nestedPaths.map((path) => [code, ...path])
+      ];
+    });
+  }
+
+  private ruleNodeId(parentPath: string, ruleCode: string, index: number): string {
+    return `${parentPath}-${index}-${ruleCode}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+  }
+
+  private templateForExecutor(executor: string): FormConfig | undefined {
+    const template = this.executors.find((item) => item.executor === executor)?.formTemplate;
+    return hasFormTemplateFields(template) ? cloneFormConfig(template) : undefined;
   }
 
   private shouldUseExecutorSelect(executor: string): boolean {

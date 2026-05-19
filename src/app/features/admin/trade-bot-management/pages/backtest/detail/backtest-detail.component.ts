@@ -18,7 +18,12 @@ import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { AppTabItem } from '../../../../../../shared/component/tabs/tabs.component';
-import { CandleChartConfig, ChartCandle, ChartOverlay } from '../../../shared-trading/candle-chart/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../shared-trading/candle-chart/candle-chart';
+import {
+  buildAdjacentCandleWindow,
+  CANDLE_CHART_WINDOW_LIMIT,
+  mergeCandlesByOpenTime
+} from '../../../shared-trading/candle-chart/candle-window-loader';
 import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
 
 @Component({
@@ -29,6 +34,8 @@ import { TableConfig } from '../../../../../../shared/ui/table/models/table-conf
 })
 export class BacktestDetailComponent implements OnInit {
   readonly loading = signal(false);
+  readonly chartLoading = signal(false);
+  readonly error = signal<string | null>(null);
   readonly run = signal<BacktestRunResponse | null>(null);
   readonly trades = signal<BacktestTradeResponse[]>([]);
   readonly metrics = signal<BacktestMetricResponse | null>(null);
@@ -103,7 +110,11 @@ export class BacktestDetailComponent implements OnInit {
     height: 460,
     showOverlayLabels: true,
     showToolbar: true,
-    showDebugPanel: false
+    showDebugPanel: false,
+    loading: this.chartLoading() && this.chartCandlesRaw().length === 0,
+    lazyLoadOnPan: true,
+    lazyLoadThresholdBars: 32,
+    preserveViewportOnDataUpdate: true
   }));
 
   readonly chartCandles = computed<ChartCandle[]>(() =>
@@ -132,12 +143,12 @@ export class BacktestDetailComponent implements OnInit {
     title: 'tradeBot.backtest.trades',
     columns: [
       { field: 'tradeId', header: 'tradeBot.field.tradeId', minWidth: '18rem' },
-      { field: 'side', header: 'tradeBot.field.side' },
+      { field: 'side', header: 'tradeBot.field.side', type: 'badge' },
       { field: 'entryIndex', header: 'tradeBot.field.entryIndex', type: 'number' },
       { field: 'exitIndex', header: 'tradeBot.field.exitIndex', type: 'number' },
       { field: 'entryPrice', header: 'tradeBot.field.entryPrice', type: 'number' },
       { field: 'exitPrice', header: 'tradeBot.field.exitPrice', type: 'number' },
-      { field: 'pnl', header: 'tradeBot.field.pnl', type: 'number' },
+      { field: 'pnl', header: 'tradeBot.field.pnl', type: 'semantic-number' },
       {
         field: 'actions',
         header: 'tradeBot.field.actions',
@@ -169,11 +180,11 @@ export class BacktestDetailComponent implements OnInit {
   readonly orderTableConfig: TableConfig = {
     title: 'tradeBot.backtest.orders',
     columns: [
-      { field: 'orderId', header: 'tradeBot.field.orderId', minWidth: '18rem' },
-      { field: 'tradeId', header: 'tradeBot.field.tradeId', minWidth: '18rem' },
-      { field: 'side', header: 'tradeBot.field.side' },
+      { field: 'orderId', header: 'tradeBot.field.orderId', type: 'copyable', minWidth: '18rem' },
+      { field: 'tradeId', header: 'tradeBot.field.tradeId', type: 'copyable', minWidth: '18rem' },
+      { field: 'side', header: 'tradeBot.field.side', type: 'badge' },
       { field: 'type', header: 'tradeBot.field.type' },
-      { field: 'status', header: 'tradeBot.field.status' },
+      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
       { field: 'price', header: 'tradeBot.field.price', type: 'number' },
       { field: 'quantity', header: 'tradeBot.field.quantity', type: 'number' },
       { field: 'fee', header: 'tradeBot.field.fee', type: 'number' },
@@ -188,14 +199,14 @@ export class BacktestDetailComponent implements OnInit {
   readonly positionTableConfig: TableConfig = {
     title: 'tradeBot.backtest.positions',
     columns: [
-      { field: 'positionId', header: 'tradeBot.field.positionId', minWidth: '18rem' },
-      { field: 'tradeId', header: 'tradeBot.field.tradeId', minWidth: '18rem' },
-      { field: 'side', header: 'tradeBot.field.side' },
-      { field: 'status', header: 'tradeBot.field.status' },
+      { field: 'positionId', header: 'tradeBot.field.positionId', type: 'copyable', minWidth: '18rem' },
+      { field: 'tradeId', header: 'tradeBot.field.tradeId', type: 'copyable', minWidth: '18rem' },
+      { field: 'side', header: 'tradeBot.field.side', type: 'badge' },
+      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
       { field: 'entryPrice', header: 'tradeBot.field.entryPrice', type: 'number' },
       { field: 'exitPrice', header: 'tradeBot.field.exitPrice', type: 'number' },
       { field: 'quantity', header: 'tradeBot.field.quantity', type: 'number' },
-      { field: 'pnl', header: 'tradeBot.field.pnl', type: 'number' }
+      { field: 'pnl', header: 'tradeBot.field.pnl', type: 'semantic-number' }
     ],
     pagination: true,
     rows: 20,
@@ -230,6 +241,7 @@ export class BacktestDetailComponent implements OnInit {
   };
 
   private runId = '';
+  private readonly loadedTabs = new Set<string>();
 
   constructor(
     private readonly service: BacktestReviewService,
@@ -243,7 +255,7 @@ export class BacktestDetailComponent implements OnInit {
   ngOnInit(): void {
     this.runId = this.route.snapshot.paramMap.get('runId') ?? '';
     this.activeTab.set(resolveTab(this.route.snapshot.paramMap.get('reviewTab')));
-    this.load();
+    this.loadInitial();
   }
 
   traceJson(): string {
@@ -294,11 +306,23 @@ export class BacktestDetailComponent implements OnInit {
     this.activeTab.set(tab);
     const routeSuffix = tab === 'overview' ? [] : [tabRoute(tab)];
     void this.router.navigate(['/admin/trade-bot/backtests', this.runId, ...routeSuffix]);
+    this.loadTab(tab);
   }
 
   closeTradeDrawer(): void {
     this.selectedTrade.set(null);
     this.selectedTradeTrace.set(null);
+  }
+
+  retryActiveTab(): void {
+    const tab = this.activeTab();
+    if (tab === 'overview') {
+      this.loadedTabs.clear();
+      this.loadInitial();
+      return;
+    }
+    this.loadedTabs.delete(tab);
+    this.loadTab(tab);
   }
 
   exportReport(): void {
@@ -312,53 +336,170 @@ export class BacktestDetailComponent implements OnInit {
       });
   }
 
-  private load(): void {
+  private loadInitial(): void {
     this.loading.set(true);
+    this.error.set(null);
     this.loadingService
       .track(
         forkJoin({
           run: this.service.getBacktest(this.runId),
-          trades: this.service.getBacktestTrades(this.runId),
-          metrics: this.service.getBacktestMetrics(this.runId),
-          equity: this.service.getBacktestEquityCurve(this.runId),
-          drawdown: this.service.getBacktestDrawdownCurve(this.runId),
-          events: this.service.getBacktestReviewEvents(this.runId),
-          review: this.service.getBacktestReview(this.runId),
-          chartReview: this.service.getBacktestReviewChart(this.runId),
-          reviewTrades: this.service.getBacktestReviewTrades(this.runId),
-          ordersFills: this.service.getBacktestReviewOrdersFills(this.runId),
-          configSnapshot: this.service.getBacktestReviewConfigSnapshot(this.runId),
-          marketDataSnapshot: this.service.getBacktestReviewMarketDataSnapshot(this.runId)
+          metrics: this.service.getBacktestMetrics(this.runId)
         })
       )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (res) => {
           this.run.set(res.run);
-          this.trades.set(res.trades);
           this.metrics.set(res.metrics);
-          this.equity.set(res.equity);
-          this.drawdown.set(res.drawdown);
-          this.events.set(res.events);
-          this.review.set(res.review);
-          this.chartReview.set(res.chartReview);
-          this.trades.set(res.reviewTrades.length ? res.reviewTrades : res.trades);
-          this.reviewOrders.set(res.ordersFills.orders);
-          this.reviewFills.set(res.ordersFills.fills);
-          this.reviewPositions.set(res.ordersFills.positions?.length ? res.ordersFills.positions : (res.review.positions ?? []));
-          this.configSnapshot.set(res.configSnapshot);
-          this.marketDataSnapshot.set(res.marketDataSnapshot);
-          if (res.chartReview.candles?.length) {
-            this.chartCandlesRaw.set(res.chartReview.candles);
-          } else {
-            this.loadChartCandles(res.run);
-          }
+          this.error.set(null);
+          this.loadTab(this.activeTab());
         },
-        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.loadFailed'))
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadTab(tab: string): void {
+    if (this.loadedTabs.has(tab)) {
+      return;
+    }
+    switch (tab) {
+      case 'chart':
+        this.loadChartReview();
+        break;
+      case 'trades':
+        this.loadTrades();
+        break;
+      case 'orders':
+        this.loadOrdersAndFills();
+        break;
+      case 'equity':
+        this.loadEquityCurves();
+        break;
+      case 'snapshots':
+        this.loadSnapshots();
+        break;
+      case 'logs':
+        this.loadLogs();
+        break;
+      default:
+        this.loadedTabs.add(tab);
+    }
+  }
+
+  private loadChartReview(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(this.service.getBacktestReviewChart(this.runId, false))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (chartReview) => {
+          this.chartReview.set(chartReview);
+          if (this.run()) {
+            this.loadChartCandles(this.run()!);
+          }
+          this.loadedTabs.add('chart');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadTrades(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(forkJoin({
+        trades: this.service.getBacktestTrades(this.runId),
+        reviewTrades: this.service.getBacktestReviewTrades(this.runId)
+      }))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: ({ trades, reviewTrades }) => {
+          this.trades.set(reviewTrades.length ? reviewTrades : trades);
+          this.loadedTabs.add('trades');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadOrdersAndFills(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(this.service.getBacktestReviewOrdersFills(this.runId))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (ordersFills) => {
+          this.reviewOrders.set(ordersFills.orders);
+          this.reviewFills.set(ordersFills.fills);
+          this.reviewPositions.set(ordersFills.positions ?? []);
+          this.loadedTabs.add('orders');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadEquityCurves(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(forkJoin({
+        equity: this.service.getBacktestEquityCurve(this.runId),
+        drawdown: this.service.getBacktestDrawdownCurve(this.runId)
+      }))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: ({ equity, drawdown }) => {
+          this.equity.set(equity);
+          this.drawdown.set(drawdown);
+          this.loadedTabs.add('equity');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadSnapshots(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(forkJoin({
+        configSnapshot: this.service.getBacktestReviewConfigSnapshot(this.runId),
+        marketDataSnapshot: this.service.getBacktestReviewMarketDataSnapshot(this.runId)
+      }))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: ({ configSnapshot, marketDataSnapshot }) => {
+          this.configSnapshot.set(configSnapshot);
+          this.marketDataSnapshot.set(marketDataSnapshot);
+          this.loadedTabs.add('snapshots');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
+      });
+  }
+
+  private loadLogs(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.loadingService
+      .track(this.service.getBacktestReviewEvents(this.runId, { limit: 200 }))
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (events) => {
+          this.events.set(events);
+          this.loadedTabs.add('logs');
+          this.error.set(null);
+        },
+        error: () => this.showError('tradeBot.message.loadFailed')
       });
   }
 
   private loadChartCandles(run: BacktestRunResponse): void {
+    this.chartLoading.set(true);
     this.service
       .getCandles({
         symbol: run.symbol,
@@ -368,16 +509,53 @@ export class BacktestDetailComponent implements OnInit {
         feedCode: run.feedCode,
         from: run.fromTime,
         to: run.toTime,
-        limit: 1000
+        limit: CANDLE_CHART_WINDOW_LIMIT,
+        latest: true
       })
+      .pipe(finalize(() => this.chartLoading.set(false)))
       .subscribe({
         next: (candles) => this.chartCandlesRaw.set(candles),
         error: () => this.chartCandlesRaw.set([])
       });
   }
 
+  loadMoreChartCandles(event: CandleChartRangeBoundaryEvent): void {
+    const run = this.run();
+    if (!run || this.chartLoading()) {
+      return;
+    }
+    const window = buildAdjacentCandleWindow({
+      direction: event.direction,
+      timeframe: run.timeframe,
+      firstOpenTime: event.firstCandle?.openTime ?? event.firstCandle?.time,
+      lastOpenTime: event.lastCandle?.openTime ?? event.lastCandle?.time,
+      minTime: run.fromTime,
+      maxTime: run.toTime,
+      limit: CANDLE_CHART_WINDOW_LIMIT
+    });
+    if (!window) {
+      return;
+    }
+    this.chartLoading.set(true);
+    this.service
+      .getCandles({
+        symbol: run.symbol,
+        timeframe: run.timeframe,
+        source: run.source,
+        marketType: run.marketType,
+        feedCode: run.feedCode,
+        ...window
+      })
+      .pipe(finalize(() => this.chartLoading.set(false)))
+      .subscribe({
+        next: (candles) => this.chartCandlesRaw.set(mergeCandlesByOpenTime(this.chartCandlesRaw(), candles)),
+        error: () => undefined
+      });
+  }
+
   private loadTrace(tradeId: string): void {
     this.loading.set(true);
+    this.error.set(null);
     this.loadingService
       .track(this.service.getBacktestReviewRuleTrace(this.runId, tradeId))
       .pipe(finalize(() => this.loading.set(false)))
@@ -385,19 +563,29 @@ export class BacktestDetailComponent implements OnInit {
         next: (trace) => {
           this.trace.set(trace);
           this.activeTab.set('ruleTrace');
+          this.error.set(null);
           void this.router.navigate(['/admin/trade-bot/backtests', this.runId, 'rule-trace']);
         },
-        error: () => this.toastService.error(this.i18nService.t('tradeBot.message.traceMissing'))
+        error: () => this.showError('tradeBot.message.traceMissing')
       });
   }
 
   private openTrade(trade: BacktestTradeResponse): void {
     this.selectedTrade.set(trade);
     this.selectedTradeTrace.set(null);
+    if (!this.events().length) {
+      this.loadLogs();
+    }
     this.service.getBacktestReviewRuleTrace(this.runId, trade.tradeId).subscribe({
       next: (trace) => this.selectedTradeTrace.set(trace),
       error: () => this.selectedTradeTrace.set(null)
     });
+  }
+
+  private showError(messageKey: string): void {
+    const message = this.i18nService.t(messageKey);
+    this.error.set(message);
+    this.toastService.error(message);
   }
 }
 

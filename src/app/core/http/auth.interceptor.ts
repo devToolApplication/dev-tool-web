@@ -1,17 +1,18 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { KeycloakService } from '../auth/keycloak.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  private keycloak = inject(KeycloakService);
+  constructor(private readonly keycloak: KeycloakService) {}
 
   intercept(
     req: HttpRequest<any>,
@@ -28,6 +29,14 @@ export class AuthInterceptor implements HttpInterceptor {
       });
     }
 
-    return next.handle(req);
+    return next.handle(req).pipe(
+      catchError((error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === 401) {
+          this.keycloak.handleUnauthorized();
+        }
+
+        return throwError(() => error);
+      })
+    );
   }
 }

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { ProgressSpinnerComponent } from './progress-spinner.component';
 
 const meta: Meta<ProgressSpinnerComponent> = {
-  title: 'Shared/Components/ProgressSpinner',
+  title: 'Shared/Components/Feedback Overlay/Progress Spinner',
   component: ProgressSpinnerComponent,
   args: {
     strokeWidth: '4'

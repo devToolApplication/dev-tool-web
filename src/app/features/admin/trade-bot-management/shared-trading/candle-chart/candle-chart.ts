@@ -26,6 +26,7 @@ import type {
   CandleChartMode,
   CandleChartPayload,
   CandleChartRange,
+  CandleChartRangeBoundaryEvent,
   CandleChartReplayStatusEvent,
   CandleChartRuleEvaluation,
   CandleChartStatus,
@@ -85,11 +86,21 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   @Output() readonly strategySignal = new EventEmitter<CandleChartStrategySignal | Record<string, unknown>>();
   @Output() readonly replayStatusChanged = new EventEmitter<CandleChartReplayStatusEvent>();
   @Output() readonly error = new EventEmitter<CandleChartErrorEvent>();
+  @Output() readonly rangeBoundaryReached = new EventEmitter<CandleChartRangeBoundaryEvent>();
 
   latestCandle: ChartCandle | null = null;
   renderedBoxAreas: RenderedBoxArea[] = [];
   renderedLineLabels: RenderedLineLabel[] = [];
   readonly selectedRange = signal<CandleChartRange>('ALL');
+  readonly fullscreen = signal(false);
+  readonly overlayFilters = signal<Record<string, boolean>>({
+    entries: true,
+    exits: true,
+    stopLoss: true,
+    takeProfit: true,
+    indicators: true,
+    failedEntries: true,
+  });
   readonly previewClockLabel = signal(this.buildClockLabel());
   readonly latestEvaluation = signal<Record<string, unknown> | null>(null);
   readonly rangeOptions: Array<{ label: string; value: CandleChartRange }> = [
@@ -110,6 +121,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     { label: '2x', value: 300 },
     { label: '4x', value: 120 },
   ];
+  readonly overlayToggleOptions = [
+    { key: 'entries', label: 'tradeBot.chart.overlay.entries' },
+    { key: 'exits', label: 'tradeBot.chart.overlay.exits' },
+    { key: 'stopLoss', label: 'tradeBot.chart.overlay.stopLoss' },
+    { key: 'takeProfit', label: 'tradeBot.chart.overlay.takeProfit' },
+    { key: 'indicators', label: 'tradeBot.chart.overlay.indicators' },
+    { key: 'failedEntries', label: 'tradeBot.chart.overlay.failedEntries' },
+  ];
 
   private initialized = false;
   private destroyed = false;
@@ -120,6 +139,12 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   private evaluationOverlays: ChartOverlay[] = [];
   private realtimeOverlayBuffer: ChartOverlay[] = [];
   private forceSetDataOnNextRender = false;
+  private forceFitContentOnNextRender = true;
+  private lastRangeBoundaryKey = '';
+  private readonly lastRangeBoundaryEmitAt: Record<CandleChartRangeBoundaryEvent['direction'], number> = {
+    PAST: 0,
+    FUTURE: 0,
+  };
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -133,6 +158,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   ) {}
 
   get chartHeight(): number {
+    if (this.fullscreen()) {
+      return Math.max(360, window.innerHeight - 128);
+    }
     return this.resolvedConfig().height;
   }
 
@@ -161,6 +189,33 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     return [this.symbol ?? config.symbol, this.timeframe ?? config.timeframe ?? config.interval, config.exchange]
       .filter(Boolean)
       .join(' - ');
+  }
+
+  get showStateOverlay(): boolean {
+    const config = this.resolvedConfig();
+    return config.loading === true || !!config.errorMessage || this.totalCandles === 0;
+  }
+
+  get stateOverlaySeverity(): 'loading' | 'error' | 'empty' {
+    const config = this.resolvedConfig();
+    if (config.loading) {
+      return 'loading';
+    }
+    if (config.errorMessage) {
+      return 'error';
+    }
+    return 'empty';
+  }
+
+  get stateOverlayMessage(): string {
+    const config = this.resolvedConfig();
+    if (config.loading) {
+      return 'tradeBot.chart.state.loading';
+    }
+    if (config.errorMessage) {
+      return config.errorMessage;
+    }
+    return 'tradeBot.chart.state.empty';
   }
 
   get currentIndex(): number {
@@ -200,7 +255,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     void this.initializeChart();
     this.refreshPreviewClock();
     this.clockIntervalId = window.setInterval(() => this.refreshPreviewClock(), 1000);
-    window.addEventListener('resize', this.onResize);
+    this.ngZone.runOutsideAngular(() => window.addEventListener('resize', this.onResize));
     this.observeThemeChanges();
   }
 
@@ -250,7 +305,64 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   applyRange(range: CandleChartRange): void {
     this.selectedRange.set(range);
+    this.forceFitContentOnNextRender = true;
     this.renderStore();
+  }
+
+  fitContent(): void {
+    this.applyRange('ALL');
+  }
+
+  toggleFullscreen(): void {
+    this.fullscreen.update((value) => !value);
+    window.setTimeout(() => this.onResize());
+  }
+
+  exportChartImage(): void {
+    const canvas = this.chartRef.nativeElement.querySelector('canvas');
+    if (!canvas) {
+      return;
+    }
+    const link = document.createElement('a');
+    link.download = `${this.chartTitle || 'chart'}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  toggleOverlayFilter(key: string): void {
+    this.overlayFilters.update((filters) => ({ ...filters, [key]: !filters[key] }));
+    this.store.overlays.set(this.resolveAllOverlays());
+    this.renderStore();
+  }
+
+  overlayFilterEnabled(key: string): boolean {
+    return this.overlayFilters()[key] !== false;
+  }
+
+  overlayToggleButtonClass(key: string): string {
+    return [
+      'candle-chart-toggle-button',
+      this.overlayFilterEnabled(key) ? 'candle-chart-toggle-button--active' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  rangeButtonClass(range: CandleChartRange): string {
+    return ['candle-chart-range-button', this.selectedRange() === range ? 'candle-chart-range-button--active' : '']
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  legendItems(): Array<{ label: string; value: number; color: string }> {
+    const overlays = this.store.overlays();
+    return [
+      { label: 'tradeBot.chart.overlay.indicators', value: this.store.indicators().length, color: 'var(--app-finance-chart-crosshair)' },
+      { label: 'tradeBot.chart.overlay.entries', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['ENTRY', 'BUY', 'LONG'])).length, color: 'var(--app-chart-candle-up)' },
+      { label: 'tradeBot.chart.overlay.exits', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['EXIT', 'SELL', 'CLOSE'])).length, color: 'var(--app-chart-candle-down)' },
+      { label: 'tradeBot.chart.overlay.stopLoss', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['SL', 'STOP'])).length, color: 'var(--app-chart-candle-down)' },
+      { label: 'tradeBot.chart.overlay.takeProfit', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['TP', 'TAKE'])).length, color: 'var(--app-chart-candle-up)' },
+    ].filter((item) => item.value > 0);
   }
 
   playReplay(): void {
@@ -288,12 +400,12 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.applyReplayStep(this.replayService.last(this.totalCandles), true);
   }
 
-  seekReplay(value: string): void {
+  seekReplay(value: string | number | null | undefined): void {
     this.replayService.pause();
     this.applyReplayStep(this.replayService.seek(Number(value), this.totalCandles), true);
   }
 
-  changeReplaySpeed(value: string): void {
+  changeReplaySpeed(value: string | number | boolean | null | undefined): void {
     const speedMs = Number(value);
     this.store.speedMs.set(Number.isNaN(speedMs) ? 650 : speedMs);
     if (this.isPlaying) {
@@ -302,19 +414,18 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.emitReplayStatus();
   }
 
-  latestEvaluationJson(): string {
-    return JSON.stringify(this.latestEvaluation() ?? {}, null, 2);
-  }
-
   private async initializeChart(): Promise<void> {
     this.syncInputState(true);
     const input = this.createRenderInput();
     this.lastRenderInput = input;
-    await this.engine.initialize(
-      this.chartRef.nativeElement,
-      input,
-      (state) => this.applyRenderState(state.latestCandle, state.renderedBoxAreas, state.renderedLineLabels),
-      (candle) => this.selectCandle(candle),
+    await this.ngZone.runOutsideAngular(() =>
+      this.engine.initialize(
+        this.chartRef.nativeElement,
+        input,
+        (state) => this.applyRenderState(state.latestCandle, state.renderedBoxAreas, state.renderedLineLabels),
+        (candle) => this.selectCandle(candle),
+        (range, candleCount) => this.handleVisibleRangeChange(range, candleCount),
+      ),
     );
     if (this.destroyed) {
       return;
@@ -350,8 +461,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     }
     const input = this.createRenderInput();
     this.lastRenderInput = input;
-    this.engine.render(input);
+    this.ngZone.runOutsideAngular(() => this.engine.render(input));
     this.forceSetDataOnNextRender = false;
+    this.forceFitContentOnNextRender = false;
   }
 
   private createRenderInput(): CandleChartEngineRenderInput {
@@ -365,6 +477,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       config: this.resolvedConfig(),
       selectedRange: this.selectedRange(),
       forceSetData: this.forceSetDataOnNextRender,
+      fitContent: !this.resolvedConfig().preserveViewportOnDataUpdate || this.forceFitContentOnNextRender,
     };
   }
 
@@ -529,6 +642,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       showPriceAxisLabels: false,
       showPreviewBar: true,
       autoScrollToRealtime: true,
+      lazyLoadOnPan: false,
+      lazyLoadThresholdBars: 24,
+      preserveViewportOnDataUpdate: false,
       evaluateOnBarChange: false,
       evaluateOnClosedCandleOnly: true,
       evaluateLivePreview: false,
@@ -548,6 +664,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private resolveInputIndicators(): ChartIndicator[] {
+    if (!this.overlayFilters()['indicators']) {
+      return [];
+    }
     return this.indicators ?? this.legacyAdapter.indicators(this.data);
   }
 
@@ -556,7 +675,37 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private resolveAllOverlays(): ChartOverlay[] {
-    return [...this.resolveInputOverlays(), ...this.realtimeOverlayBuffer, ...this.evaluationOverlays];
+    return [...this.resolveInputOverlays(), ...this.realtimeOverlayBuffer, ...this.evaluationOverlays].filter((overlay) =>
+      this.overlayAllowed(overlay),
+    );
+  }
+
+  private overlayAllowed(overlay: ChartOverlay): boolean {
+    const filters = this.overlayFilters();
+    if (!filters['failedEntries'] && this.overlayMatches(overlay, ['FAIL', 'FAILED', 'REJECT'])) {
+      return false;
+    }
+    if (!filters['stopLoss'] && this.overlayMatches(overlay, ['SL', 'STOP'])) {
+      return false;
+    }
+    if (!filters['takeProfit'] && this.overlayMatches(overlay, ['TP', 'TAKE'])) {
+      return false;
+    }
+    if (!filters['entries'] && this.overlayMatches(overlay, ['ENTRY', 'BUY', 'LONG'])) {
+      return false;
+    }
+    if (!filters['exits'] && this.overlayMatches(overlay, ['EXIT', 'SELL', 'CLOSE'])) {
+      return false;
+    }
+    return true;
+  }
+
+  private overlayMatches(overlay: ChartOverlay, tokens: string[]): boolean {
+    const text = [overlay.id, overlay.text, overlay.source, overlay.sourceCode, overlay.type, overlay.shape]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
+    return tokens.some((token) => text.includes(token));
   }
 
   private filterOverlaysForVisibleIndex(
@@ -586,8 +735,46 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.error.emit({ message, detail });
   }
 
+  private handleVisibleRangeChange(range: { from: number; to: number } | null, candleCount: number): void {
+    const config = this.resolvedConfig();
+    if (!config.lazyLoadOnPan || !range || candleCount <= 0) {
+      return;
+    }
+
+    const threshold = Math.max(4, config.lazyLoadThresholdBars);
+    const candles = this.store.candles();
+    const firstCandle = candles[0] ?? null;
+    const lastCandle = candles.at(-1) ?? null;
+    if (range.from <= threshold) {
+      this.emitRangeBoundary('PAST', firstCandle, lastCandle);
+      return;
+    }
+    if (range.to >= candleCount - threshold) {
+      this.emitRangeBoundary('FUTURE', firstCandle, lastCandle);
+    }
+  }
+
+  private emitRangeBoundary(
+    direction: CandleChartRangeBoundaryEvent['direction'],
+    firstCandle: ChartCandle | null,
+    lastCandle: ChartCandle | null,
+  ): void {
+    const edgeTime = direction === 'PAST' ? firstCandle?.openTime ?? firstCandle?.time : lastCandle?.openTime ?? lastCandle?.time;
+    const key = `${direction}:${edgeTime ?? 'none'}`;
+    if (key === this.lastRangeBoundaryKey) {
+      return;
+    }
+    const now = Date.now();
+    if (now - this.lastRangeBoundaryEmitAt[direction] < 450) {
+      return;
+    }
+    this.lastRangeBoundaryKey = key;
+    this.lastRangeBoundaryEmitAt[direction] = now;
+    this.ngZone.run(() => this.rangeBoundaryReached.emit({ direction, firstCandle, lastCandle }));
+  }
+
   private readonly onResize = (): void => {
-    this.engine.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight);
+    this.ngZone.runOutsideAngular(() => this.engine.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight));
   };
 
   private observeThemeChanges(): void {

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { ToggleButton } from './toggle-button';
 
 const meta: Meta<ToggleButton> = {
-  title: 'Shared/Components/Toggle Button',
+  title: 'Shared/Components/Form Controls/Toggle Button',
   component: ToggleButton,
   args: {
     label: 'Mode',

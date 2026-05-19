@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
-import { SelectOption } from '../../ui/form-input/models/form-config.model';
+import { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-radio-button',

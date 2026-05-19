@@ -1,11 +1,15 @@
 <div>
   @if (field.visible()) {
+    @if (readonlyMode) {
+      <app-readonly-field [field]="field"></app-readonly-field>
+    } @else {
     @switch (field.type) {
       @case ('text') {
         <app-input-text
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
           [label]="field.label"
+          [required]="field.required()"
           [placeholder]="textConfig?.placeholder"
           [value]="field.value()"
           [disabled]="field.disabled()"
@@ -17,13 +21,71 @@
       @case ('number') {
         <app-input-number
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
           [label]="field.label"
+          [required]="field.required()"
           [value]="field.value()"
           [disabled]="field.disabled()"
-          [mode]="numberConfig?.mode"
+          [mode]="resolvedNumberMode"
           [currency]="numberConfig?.currency"
-          [suffix]="numberConfig?.suffix"
+          [suffix]="resolvedNumberSuffix"
+          [prefix]="numberConfig?.prefix"
+          [minFractionDigits]="numberConfig?.minFractionDigits"
+          [maxFractionDigits]="numberConfig?.maxFractionDigits"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()" />
+      }
+      @case ('decimal') {
+        <app-input-number
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [mode]="resolvedNumberMode"
+          [currency]="numberConfig?.currency"
+          [suffix]="resolvedNumberSuffix"
+          [prefix]="numberConfig?.prefix"
+          [minFractionDigits]="numberConfig?.minFractionDigits"
+          [maxFractionDigits]="numberConfig?.maxFractionDigits"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()" />
+      }
+      @case ('percent') {
+        <app-input-number
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [mode]="resolvedNumberMode"
+          [currency]="numberConfig?.currency"
+          [suffix]="resolvedNumberSuffix"
+          [prefix]="numberConfig?.prefix"
+          [minFractionDigits]="numberConfig?.minFractionDigits"
+          [maxFractionDigits]="numberConfig?.maxFractionDigits"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()" />
+      }
+      @case ('currency') {
+        <app-input-number
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [mode]="resolvedNumberMode"
+          [currency]="numberConfig?.currency"
+          [suffix]="resolvedNumberSuffix"
           [prefix]="numberConfig?.prefix"
           [minFractionDigits]="numberConfig?.minFractionDigits"
           [maxFractionDigits]="numberConfig?.maxFractionDigits"
@@ -35,13 +97,14 @@
       @case ('select') {
         <app-select
           [label]="field.label"
+          [required]="field.required()"
           [value]="field.value()"
           [options]="field.options()"
           [placeholder]="selectConfig?.placeholder"
           [showClear]="selectConfig?.showClear ?? false"
           [disabled]="field.disabled()"
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
           [helpText]="helpText"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
@@ -51,10 +114,25 @@
       @case ('checkbox') {
         <app-check-box
             [label]="field.label"
+            [required]="field.required()"
             [value]="field.value()"
             [disabled]="field.disabled()"
             [invalid]="showInvalid"
-            [errorMessage]="field.errors()?.['custom']"
+            [errorMessage]="firstErrorMessage"
+            [helpText]="helpText"
+            (valueChange)="onChangeValue($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </app-check-box>
+      }
+      @case ('boolean') {
+        <app-check-box
+            [label]="field.label"
+            [required]="field.required()"
+            [value]="field.value()"
+            [disabled]="field.disabled()"
+            [invalid]="showInvalid"
+            [errorMessage]="firstErrorMessage"
             [helpText]="helpText"
             (valueChange)="onChangeValue($event)"
             (focus)="onFocus()"
@@ -64,10 +142,25 @@
        @case ('date') {
         <app-date-picker
             [label]="field.label"
+            [required]="field.required()"
             [value]="field.value()"
             [disabled]="field.disabled()"
             [invalid]="showInvalid"
-            [errorMessage]="field.errors()?.['custom']"
+            [errorMessage]="firstErrorMessage"
+            [helpText]="helpText"
+            (valueChange)="field.setValue($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </app-date-picker>
+      }
+       @case ('datetime') {
+        <app-date-picker
+            [label]="field.label"
+            [required]="field.required()"
+            [value]="field.value()"
+            [disabled]="field.disabled()"
+            [invalid]="showInvalid"
+            [errorMessage]="firstErrorMessage"
             [helpText]="helpText"
             (valueChange)="field.setValue($event)"
             (focus)="onFocus()"
@@ -77,11 +170,12 @@
       @case ('radio') {
         <app-radio-button
             [label]="field.label"
+            [required]="field.required()"
             [value]="field.value()"
             [options]="field.options()"
             [disabled]="field.disabled()"
             [invalid]="showInvalid"
-            [errorMessage]="field.errors()?.['custom']"
+            [errorMessage]="firstErrorMessage"
             [helpText]="helpText"
             (valueChange)="field.setValue($event)"
             (focus)="onFocus()"
@@ -91,12 +185,29 @@
       @case ('select-multi') {
         <app-select-multi
           [label]="field.label"
+          [required]="field.required()"
           [value]="field.value()"
           [options]="field.options()"
           [placeholder]="selectConfig?.placeholder"
           [disabled]="field.disabled()"
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-select-multi>
+      }
+      @case ('multi-select') {
+        <app-select-multi
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [options]="field.options()"
+          [placeholder]="selectConfig?.placeholder"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
           [helpText]="helpText"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
@@ -107,11 +218,28 @@
       @case ('auto-complete') {
         <app-auto-complete
           [label]="field.label"
+          [required]="field.required()"
           [value]="field.value()"
           [options]="field.options()"
           [disabled]="field.disabled()"
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
+          [placeholder]="autoCompleteConfig?.placeholder"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-auto-complete>
+      }
+      @case ('autocomplete') {
+        <app-auto-complete
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
           [placeholder]="autoCompleteConfig?.placeholder"
           [helpText]="helpText"
           (valueChange)="field.setValue($event)"
@@ -127,11 +255,28 @@
       @case ('input-multi') {
         <app-input-multi
           [label]="field.label"
+          [required]="field.required()"
           [value]="field.value()"
           [options]="field.options()"
           [disabled]="field.disabled()"
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
+          [placeholder]="inputMultiConfig?.placeholder"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-input-multi>
+      }
+      @case ('tags') {
+        <app-input-multi
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [options]="field.options()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
           [placeholder]="inputMultiConfig?.placeholder"
           [helpText]="helpText"
           (valueChange)="field.setValue($event)"
@@ -147,21 +292,43 @@
       @case ('textarea') {
         <app-input-area
           [invalid]="showInvalid"
-          [errorMessage]="field.errors()?.['custom']"
+          [errorMessage]="firstErrorMessage"
           [label]="field.label"
+          [required]="field.required()"
           [placeholder]="textConfig?.placeholder"
           [value]="field.value()"
           [disabled]="field.disabled()"
           [helpText]="helpText"
-          [rows]="textConfig?.rows ?? 5"
-          [maxRows]="textConfig?.maxRows ?? 5"
+          [rows]="resolvedTextRows"
+          [maxRows]="resolvedTextMaxRows"
           [showZoomButton]="textConfig?.showZoomButton ?? false"
-          [contentType]="textConfig?.contentType ?? 'text'"
+          [contentType]="resolvedTextContentType"
           (valueChange)="field.setValue($event)"
           (focus)="onFocus()"
           (blur)="onBlur()">
         </app-input-area>
       }
+      @case ('json') {
+        <app-json-field-block
+          [field]="field"
+          [textConfig]="textConfig"
+          [submitted]="submitted"
+        ></app-json-field-block>
+      }
+      @case ('code') {
+        <app-json-field-block
+          [field]="field"
+          [textConfig]="textConfig"
+          [submitted]="submitted"
+        ></app-json-field-block>
+      }
+      @default {
+        <app-alert
+          variant="warning"
+          message="shared.form.unsupportedFieldType"
+        ></app-alert>
+      }
+    }
     }
   }
 </div>

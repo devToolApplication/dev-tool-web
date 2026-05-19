@@ -16,6 +16,8 @@
               icon="pi pi-window-maximize"
               class="p-button-text p-button-sm input-area__zoom-button"
               [disabled]="disabled"
+              [attr.aria-label]="'shared.inputArea.expand' | translateContent"
+              [attr.title]="'shared.inputArea.expand' | translateContent"
               (click)="openZoom()"
             ></button>
           </div>
@@ -34,6 +36,8 @@
               icon="pi pi-window-maximize"
               class="p-button-text p-button-sm input-area__zoom-button"
               [disabled]="disabled"
+              [attr.aria-label]="'shared.inputArea.expand' | translateContent"
+              [attr.title]="'shared.inputArea.expand' | translateContent"
               (click)="openZoom()"
             ></button>
           </div>
@@ -95,7 +99,7 @@
     </p-floatlabel>
   }
 
-  @if (helpText && !invalid) {
+  @if (helpText) {
     <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
   }
 

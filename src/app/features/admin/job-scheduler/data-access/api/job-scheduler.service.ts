@@ -25,8 +25,8 @@ export class JobSchedulerService {
     );
   }
 
-  getPage(page = 0, size = 10, filters: Record<string, any> = {}): Observable<JobConfigPageResponse> {
-    const params = this.toParams({ page, size, ...filters });
+  getPage(page = 0, size = 10, filters: Record<string, any> = {}, sort: string[] = []): Observable<JobConfigPageResponse> {
+    const params = this.withSort(this.toParams({ page, size, ...filters }), sort);
     return this.http.get<BaseResponse<BasePageResponse<JobConfigResponse>>>(this.apiUrl, { params }).pipe(
       map((res) => normalizeBasePageResponse(res.data, page, size))
     );
@@ -74,11 +74,19 @@ export class JobSchedulerService {
     );
   }
 
-  getRuns(code: string, page = 0, size = 10, filters: Record<string, any> = {}): Observable<JobRunPageResponse> {
-    const params = this.toParams({ page, size, ...filters });
+  getRuns(code: string, page = 0, size = 10, filters: Record<string, any> = {}, sort: string[] = []): Observable<JobRunPageResponse> {
+    const params = this.withSort(this.toParams({ page, size, ...filters }), sort);
     return this.http.get<BaseResponse<BasePageResponse<JobRunResponse>>>(`${this.apiUrl}/${encodeURIComponent(code)}/runs`, { params }).pipe(
       map((res) => normalizeBasePageResponse(res.data, page, size))
     );
+  }
+
+  private withSort(source: HttpParams, sort: string[]): HttpParams {
+    let params = source;
+    sort.forEach((item) => {
+      params = params.append('sort', item);
+    });
+    return params;
   }
 
   private toParams(values: Record<string, any>): HttpParams {

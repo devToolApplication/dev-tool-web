@@ -1,0 +1,27 @@
+<div class="field-block" [class.field-block--invalid]="invalid">
+  @if (label || helpText) {
+    <div class="field-block__header">
+      @if (label) {
+        <label [attr.for]="inputId">
+          {{ label | translateContent }}
+          @if (required) {
+            <span aria-hidden="true">*</span>
+          }
+        </label>
+      }
+      @if (helpText) {
+        <small>{{ helpText | translateContent }}</small>
+      }
+    </div>
+  }
+
+  <div class="field-block__control">
+    <ng-content></ng-content>
+  </div>
+
+  @if (invalid && errorMessage) {
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage | translateContent }}
+    </p-message>
+  }
+</div>

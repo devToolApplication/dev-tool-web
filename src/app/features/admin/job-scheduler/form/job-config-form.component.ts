@@ -1,8 +1,9 @@
-import { Component, DestroyRef, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
+  JobConfigPageResponse,
   JobAuthTypeOptionResponse,
   JobConfigFormModel,
   JobConfigResponse,
@@ -12,6 +13,7 @@ import { JobSchedulerService } from '../data-access/api/job-scheduler.service';
 import { I18nService } from '../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { CrudPageConfig } from '../../../../shared/ui/base-crud-page/base-crud-page.model';
 import { FormConfig, FormContext } from '../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../shared/ui/form-input/utils/validation-rules';
@@ -20,6 +22,37 @@ import {
   JOB_HTTP_METHOD_OPTIONS,
   JOB_SCHEDULER_ROUTES
 } from '../job-scheduler.constants';
+import { toUniqueTextOptions } from '../../../form-option-utils';
+
+const JOB_CRON_PRESET_VALUES = [
+  '*/5 * * * *',
+  '*/15 * * * *',
+  '0 * * * *',
+  '0 0 * * *',
+  '0 0 * * 0',
+  '0 0 1 * *'
+];
+
+const JOB_API_KEY_HEADER_NAME_VALUES = [
+  'x-api-key',
+  'X-API-Key',
+  'Authorization'
+];
+
+const JOB_KEYCLOAK_SCOPE_VALUES = [
+  'openid',
+  'profile',
+  'email'
+];
+
+const JOB_KEYCLOAK_TOKEN_FIELD_VALUES = [
+  'access_token',
+  'token'
+];
+
+const JOB_KEYCLOAK_HEADER_PREFIX_VALUES = [
+  'Bearer'
+];
 
 @Component({
   selector: 'app-job-config-form',
@@ -27,7 +60,9 @@ import {
   templateUrl: './job-config-form.component.html'
 })
 export class JobConfigFormComponent implements OnInit {
-  readonly formContext: FormContext = {
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
+  formContext: FormContext = {
     user: null,
     mode: 'create',
     extra: {
@@ -85,29 +120,39 @@ export class JobConfigFormComponent implements OnInit {
     ).subscribe({
       next: (saved) => {
         this.toastService.info(this.i18nService.t(this.editCode ? 'updateSuccess' : 'createSuccess'));
+        this.crudPage?.markFormPristine();
         void this.router.navigate([`${JOB_SCHEDULER_ROUTES.list}/edit`, saved.code]);
       },
       error: () => this.toastService.error('jobScheduler.toast.saveFailed')
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
+  }
+
   private loadAuthTypes(): void {
     this.loading.set(true);
-    this.loadingService.track(this.service.getAuthTypes()).pipe(
+    const authTypes$ = this.service.getAuthTypes().pipe(
+      catchError(() => {
+        this.toastService.error('jobScheduler.toast.loadAuthTypesFailed');
+        return of({ authTypes: [] });
+      })
+    );
+    const existingJobs$ = this.service.getPage(0, 500, {}, ['code,asc']).pipe(
+      catchError(() => of({ data: [] } as JobConfigPageResponse))
+    );
+
+    this.loadingService.track(forkJoin({ authTypes: authTypes$, existingJobs: existingJobs$ })).pipe(
       finalize(() => this.loading.set(false)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (res) => {
-        this.formContext.extra = {
-          authTypeOptions: this.toAuthTypeOptions(res.authTypes)
-        };
-        this.bindRouteMode();
-      },
-      error: () => {
-        this.formContext.extra = {
-          authTypeOptions: this.toAuthTypeOptions([])
-        };
-        this.toastService.error('jobScheduler.toast.loadAuthTypesFailed');
+      next: ({ authTypes, existingJobs }) => {
+        this.formContext.extra = this.toFormOptions(authTypes.authTypes, existingJobs.data);
         this.bindRouteMode();
       }
     });
@@ -171,8 +216,22 @@ export class JobConfigFormComponent implements OnInit {
         },
         { type: 'text', name: 'name', label: 'name', width: '1/3', validation: [Rules.required('jobScheduler.validation.nameRequired')] },
         { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
-        { type: 'text', name: 'cron', label: 'jobScheduler.field.cron', width: '1/3', validation: [Rules.required('jobScheduler.validation.cronRequired')] },
-        { type: 'text', name: 'timezone', label: 'jobScheduler.field.timezone', width: '1/3', validation: [Rules.required('jobScheduler.validation.timezoneRequired')] },
+        {
+          type: 'auto-complete',
+          name: 'cron',
+          label: 'jobScheduler.field.cron',
+          width: '1/3',
+          optionsExpression: 'context.extra?.cronOptions || []',
+          validation: [Rules.required('jobScheduler.validation.cronRequired')]
+        },
+        {
+          type: 'auto-complete',
+          name: 'timezone',
+          label: 'jobScheduler.field.timezone',
+          width: '1/3',
+          optionsExpression: 'context.extra?.timezoneOptions || []',
+          validation: [Rules.required('jobScheduler.validation.timezoneRequired')]
+        },
         { type: 'number', name: 'retry.maxAttempts', label: 'jobScheduler.field.maxAttempts', width: '1/3', suffix: 'attempts', validation: [Rules.min(1), Rules.max(10)] },
         { type: 'textarea', name: 'description', label: 'description', width: 'full', rows: 3, maxRows: 6 },
         {
@@ -182,7 +241,14 @@ export class JobConfigFormComponent implements OnInit {
           width: 'full',
           children: [
             { type: 'select', name: 'method', label: 'jobScheduler.field.method', width: '1/3', options: JOB_HTTP_METHOD_OPTIONS, validation: [Rules.required('jobScheduler.validation.methodRequired')] },
-            { type: 'text', name: 'url', label: 'jobScheduler.field.url', width: '1/3', validation: [Rules.required('jobScheduler.validation.urlRequired')] },
+            {
+              type: 'auto-complete',
+              name: 'url',
+              label: 'jobScheduler.field.url',
+              width: '1/3',
+              optionsExpression: 'context.extra?.urlOptions || []',
+              validation: [Rules.required('jobScheduler.validation.urlRequired')]
+            },
             { type: 'number', name: 'timeoutMs', label: 'jobScheduler.field.timeoutMs', width: '1/3', suffix: 'ms', validation: [Rules.min(1000), Rules.max(300000)] },
             { type: 'record', name: 'headers', label: 'jobScheduler.field.headers', keyLabel: 'jobScheduler.field.headerName', valueLabel: 'jobScheduler.field.headerValue', addButtonLabel: 'addRow', width: 'full' },
             {
@@ -205,18 +271,88 @@ export class JobConfigFormComponent implements OnInit {
           width: 'full',
           children: [
             { type: 'select', name: 'type', label: 'jobScheduler.field.authType', width: '1/2', optionsExpression: 'context.extra?.authTypeOptions || []' },
-            { type: 'text', name: 'basic.username', label: 'jobScheduler.field.username', width: '1/2', rules: { visible: 'model.auth?.type === "BASIC"' }, validation: [Rules.required('jobScheduler.validation.usernameRequired')] },
+            {
+              type: 'auto-complete',
+              name: 'basic.username',
+              label: 'jobScheduler.field.username',
+              width: '1/2',
+              optionsExpression: 'context.extra?.basicUsernameOptions || []',
+              rules: { visible: 'model.auth?.type === "BASIC"' },
+              validation: [Rules.required('jobScheduler.validation.usernameRequired')]
+            },
             { type: 'text', name: 'basic.password', label: 'jobScheduler.field.password', width: '1/2', rules: { visible: 'model.auth?.type === "BASIC"' }, validation: [Rules.required('jobScheduler.validation.passwordRequired')] },
-            { type: 'text', name: 'apiKey.headerName', label: 'jobScheduler.field.headerName', width: '1/2', rules: { visible: 'model.auth?.type === "API_KEY"' }, validation: [Rules.required('jobScheduler.validation.headerNameRequired')] },
+            {
+              type: 'auto-complete',
+              name: 'apiKey.headerName',
+              label: 'jobScheduler.field.headerName',
+              width: '1/2',
+              optionsExpression: 'context.extra?.apiKeyHeaderNameOptions || []',
+              rules: { visible: 'model.auth?.type === "API_KEY"' },
+              validation: [Rules.required('jobScheduler.validation.headerNameRequired')]
+            },
             { type: 'text', name: 'apiKey.value', label: 'jobScheduler.field.apiKeyValue', width: '1/2', rules: { visible: 'model.auth?.type === "API_KEY"' }, validation: [Rules.required('jobScheduler.validation.apiKeyRequired')] },
-            { type: 'text', name: 'keycloak.baseUrl', label: 'jobScheduler.field.keycloakBaseUrl', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.keycloakBaseUrlRequired')] },
-            { type: 'text', name: 'keycloak.realm', label: 'jobScheduler.field.realm', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.realmRequired')] },
-            { type: 'text', name: 'keycloak.clientId', label: 'jobScheduler.field.clientId', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.clientIdRequired')] },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.baseUrl',
+              label: 'jobScheduler.field.keycloakBaseUrl',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakBaseUrlOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' },
+              validation: [Rules.required('jobScheduler.validation.keycloakBaseUrlRequired')]
+            },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.realm',
+              label: 'jobScheduler.field.realm',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakRealmOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' },
+              validation: [Rules.required('jobScheduler.validation.realmRequired')]
+            },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.clientId',
+              label: 'jobScheduler.field.clientId',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakClientIdOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' },
+              validation: [Rules.required('jobScheduler.validation.clientIdRequired')]
+            },
             { type: 'text', name: 'keycloak.clientSecret', label: 'jobScheduler.field.clientSecret', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.clientSecretRequired')] },
-            { type: 'text', name: 'keycloak.scope', label: 'jobScheduler.field.scope', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' } },
-            { type: 'text', name: 'keycloak.tokenField', label: 'jobScheduler.field.tokenField', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.tokenFieldRequired')] },
-            { type: 'text', name: 'keycloak.headerName', label: 'jobScheduler.field.headerName', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }, validation: [Rules.required('jobScheduler.validation.headerNameRequired')] },
-            { type: 'text', name: 'keycloak.headerPrefix', label: 'jobScheduler.field.headerPrefix', width: '1/2', rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' } }
+            {
+              type: 'auto-complete',
+              name: 'keycloak.scope',
+              label: 'jobScheduler.field.scope',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakScopeOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }
+            },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.tokenField',
+              label: 'jobScheduler.field.tokenField',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakTokenFieldOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' },
+              validation: [Rules.required('jobScheduler.validation.tokenFieldRequired')]
+            },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.headerName',
+              label: 'jobScheduler.field.headerName',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakHeaderNameOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' },
+              validation: [Rules.required('jobScheduler.validation.headerNameRequired')]
+            },
+            {
+              type: 'auto-complete',
+              name: 'keycloak.headerPrefix',
+              label: 'jobScheduler.field.headerPrefix',
+              width: '1/2',
+              optionsExpression: 'context.extra?.keycloakHeaderPrefixOptions || []',
+              rules: { visible: 'model.auth?.type === "KEYCLOAK_CLIENT_CREDENTIALS"' }
+            }
           ]
         }
       ]
@@ -340,17 +476,66 @@ export class JobConfigFormComponent implements OnInit {
     const options = items.length
       ? items
       : [
-          { type: 'NONE', label: 'No Auth' },
-          { type: 'BASIC', label: 'Basic Auth' },
-          { type: 'API_KEY', label: 'API Key' },
-          { type: 'KEYCLOAK_CLIENT_CREDENTIALS', label: 'Keycloak Client Credentials' }
+          { type: 'NONE', label: 'jobScheduler.auth.none' },
+          { type: 'BASIC', label: 'jobScheduler.auth.basic' },
+          { type: 'API_KEY', label: 'jobScheduler.auth.apiKey' },
+          { type: 'KEYCLOAK_CLIENT_CREDENTIALS', label: 'jobScheduler.auth.keycloakClientCredentials' }
         ];
     return options.map((item) => ({ label: item.label, value: item.type }));
   }
 
+  private toFormOptions(authTypes: JobAuthTypeOptionResponse[], jobs: JobConfigResponse[]) {
+    return {
+      authTypeOptions: this.toAuthTypeOptions(authTypes),
+      timezoneOptions: this.toTimezoneOptions(),
+      cronOptions: this.toTextOptions([...JOB_CRON_PRESET_VALUES, ...jobs.map((job) => job.cron)]),
+      urlOptions: this.toTextOptions(jobs.map((job) => job.target?.url)),
+      basicUsernameOptions: this.toTextOptions(jobs.map((job) => job.auth?.basic?.username)),
+      apiKeyHeaderNameOptions: this.toTextOptions([
+        ...JOB_API_KEY_HEADER_NAME_VALUES,
+        ...jobs.map((job) => job.auth?.apiKey?.headerName)
+      ]),
+      keycloakBaseUrlOptions: this.toTextOptions(jobs.map((job) => job.auth?.keycloak?.baseUrl)),
+      keycloakRealmOptions: this.toTextOptions(jobs.map((job) => job.auth?.keycloak?.realm)),
+      keycloakClientIdOptions: this.toTextOptions(jobs.map((job) => job.auth?.keycloak?.clientId)),
+      keycloakScopeOptions: this.toTextOptions([
+        ...JOB_KEYCLOAK_SCOPE_VALUES,
+        ...jobs.map((job) => job.auth?.keycloak?.scope)
+      ]),
+      keycloakTokenFieldOptions: this.toTextOptions([
+        ...JOB_KEYCLOAK_TOKEN_FIELD_VALUES,
+        ...jobs.map((job) => job.auth?.keycloak?.tokenField)
+      ]),
+      keycloakHeaderNameOptions: this.toTextOptions([
+        'Authorization',
+        ...jobs.map((job) => job.auth?.keycloak?.headerName)
+      ]),
+      keycloakHeaderPrefixOptions: this.toTextOptions([
+        ...JOB_KEYCLOAK_HEADER_PREFIX_VALUES,
+        ...jobs.map((job) => job.auth?.keycloak?.headerPrefix)
+      ])
+    };
+  }
+
+  private toTextOptions(values: readonly unknown[]) {
+    return toUniqueTextOptions(values, (value) => value);
+  }
+
+  private toTimezoneOptions() {
+    const supportedValuesOf = (Intl as unknown as { supportedValuesOf?: (key: 'timeZone') => string[] }).supportedValuesOf;
+    const values = supportedValuesOf?.('timeZone') ?? [
+      'UTC',
+      'Asia/Bangkok',
+      'Asia/Singapore',
+      'Asia/Tokyo',
+      'Europe/London',
+      'America/New_York'
+    ];
+
+    return values.map((value) => ({ label: value, value }));
+  }
+
   private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    this.formContext = { ...this.formContext, extra: { ...(this.formContext.extra ?? {}) } };
   }
 }
-

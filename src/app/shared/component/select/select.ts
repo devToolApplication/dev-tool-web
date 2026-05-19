@@ -4,6 +4,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
 export interface SelectOption {
   label: string;
   value: string | number | boolean | null;
+  disabled?: boolean;
 }
 
 @Component({

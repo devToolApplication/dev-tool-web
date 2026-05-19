@@ -1,0 +1,14 @@
+<span class="copyable-text" [attr.title]="text">
+  <span class="copyable-text__value">{{ displayText }}</span>
+  @if (canCopy) {
+    <button
+      type="button"
+      class="copyable-text__button"
+      [attr.aria-label]="'copy' | translateContent"
+      [attr.title]="'copy' | translateContent"
+      (click)="copy($event)"
+    >
+      <i class="pi" [class.pi-copy]="!copiedState()" [class.pi-check]="copiedState()" aria-hidden="true"></i>
+    </button>
+  }
+</span>

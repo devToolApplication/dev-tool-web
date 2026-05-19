@@ -1,6 +1,6 @@
 ﻿# indicator-config
 
-Indicator config dùng typed form/table. Indicator thường vẫn nhập config qua form template hoặc JSON legacy. Composite indicator không nhập config trực tiếp; màn form render selector child indicator theo metadata từ backend.
+Indicator config dùng dynamic form từ metadata `indicator-executors` để người dùng cấu hình bằng UI thay vì nhập JSON trực tiếp. Indicator thường lấy field nghiệp vụ từ `formTemplate`; raw JSON chỉ còn là fallback Advanced JSON khi executor chưa có template. Composite indicator không nhập config trực tiếp; màn form render selector child indicator theo metadata từ backend.
 
 ## Composite Indicator
 

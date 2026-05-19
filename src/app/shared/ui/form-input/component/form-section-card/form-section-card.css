@@ -1,0 +1,88 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form-section-card {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-card-surface);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.form-section-card--error {
+  border-color: var(--app-control-danger-border);
+}
+
+.form-section-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.form-section-card--compact .form-section-card__header {
+  padding: 0.75rem 0.75rem 0.625rem;
+}
+
+.form-section-card--spacious .form-section-card__header {
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.form-section-card__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.form-section-card h3,
+.form-section-card p {
+  margin: 0;
+}
+
+.form-section-card h3 {
+  color: var(--app-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.form-section-card p {
+  margin-top: 0.25rem;
+  color: var(--app-text-muted);
+}
+
+.form-section-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.form-section-card__body {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.form-section-card--compact .form-section-card__body {
+  padding: 0.75rem;
+}
+
+.form-section-card--spacious .form-section-card__body {
+  padding: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .form-section-card__header {
+    display: grid;
+  }
+
+  .form-section-card__meta {
+    justify-content: flex-start;
+  }
+}

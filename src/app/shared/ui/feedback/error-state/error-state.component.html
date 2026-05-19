@@ -1,0 +1,42 @@
+<section
+  class="error-state"
+  [class.error-state--compact]="compact"
+  [class]="'error-state--' + resolvedVariant"
+  role="alert"
+>
+  <div class="error-state__icon" aria-hidden="true">
+    <i [class]="resolvedIcon"></i>
+  </div>
+
+  <div class="error-state__body">
+    <h3>{{ title | translateContent }}</h3>
+    <p>{{ resolvedMessage | translateContent }}</p>
+    @if (errorCode) {
+      <span class="error-state__code">{{ errorCode }}</span>
+    }
+  </div>
+
+  @if (retryLabel || (showCopyDetail && hasDetail)) {
+    <div class="error-state__actions">
+      @if (retryLabel) {
+        <app-button
+          size="small"
+          severity="danger"
+          icon="pi pi-refresh"
+          [label]="retryLabel"
+          (buttonClick)="retry.emit()"
+        ></app-button>
+      }
+      @if (showCopyDetail && hasDetail) {
+        <app-button
+          size="small"
+          severity="secondary"
+          [text]="true"
+          icon="pi pi-copy"
+          label="shared.error.copyDetail"
+          (buttonClick)="onCopyDetail()"
+        ></app-button>
+      }
+    </div>
+  }
+</section>

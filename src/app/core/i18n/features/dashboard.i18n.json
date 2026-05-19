@@ -1,16 +1,25 @@
 {
   "vi": {
-    "dashboard.title": "Dashboard quản trị hệ thống",
+    "dashboard.title": "Bảng điều khiển quản trị hệ thống",
     "dashboard.description": "Theo dõi số liệu thật từ AI Agent và File service.",
     "dashboard.latestActivities": "Hoạt động gần đây",
     "dashboard.serviceStatus": "Trạng thái service",
     "dashboard.resources": "Tài nguyên",
+    "dashboard.quickActions": "Thao tác nhanh",
+    "dashboard.needsAttention": "Cần chú ý",
     "dashboard.refresh": "Tải lại",
     "dashboard.tab.aiAgent": "AI Agent",
     "dashboard.tab.fileStorage": "File Storage",
     "dashboard.loadingData": "Đang tải dữ liệu...",
     "dashboard.noData": "Chưa có dữ liệu",
-    "dashboard.loadError": "Không tải được API dashboard"
+    "dashboard.loadError": "Không tải được API dashboard",
+    "dashboard.overview": "Tổng quan",
+    "dashboard.detail": "Chi tiết dashboard",
+    "dashboard.service": "Service",
+    "dashboard.generatedAt": "Cập nhật lúc",
+    "dashboard.emptyActivities": "Chưa có hoạt động",
+    "dashboard.noAttention": "Không có vấn đề cần xử lý",
+    "dashboard.emptyResources": "Chưa có tài nguyên"
   },
   "en": {
     "dashboard.title": "System Admin Dashboard",
@@ -18,11 +27,20 @@
     "dashboard.latestActivities": "Latest activity",
     "dashboard.serviceStatus": "Service status",
     "dashboard.resources": "Resources",
+    "dashboard.quickActions": "Quick actions",
+    "dashboard.needsAttention": "Needs attention",
     "dashboard.refresh": "Refresh",
     "dashboard.tab.aiAgent": "AI Agent",
     "dashboard.tab.fileStorage": "File Storage",
     "dashboard.loadingData": "Loading data...",
     "dashboard.noData": "No data",
-    "dashboard.loadError": "Dashboard API could not be loaded"
+    "dashboard.loadError": "Dashboard API could not be loaded",
+    "dashboard.overview": "Overview",
+    "dashboard.detail": "Dashboard detail",
+    "dashboard.service": "Service",
+    "dashboard.generatedAt": "Updated at",
+    "dashboard.emptyActivities": "No recent activity",
+    "dashboard.noAttention": "No issues need attention",
+    "dashboard.emptyResources": "No resources"
   }
 }

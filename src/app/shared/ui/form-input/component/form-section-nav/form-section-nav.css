@@ -1,0 +1,120 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form-section-nav {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.form-section-nav__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.625rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.625rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--app-transparent);
+  color: var(--app-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.form-section-nav__item:hover:not(:disabled),
+.form-section-nav__item--active {
+  border-color: var(--app-border);
+  background: var(--app-surface-soft);
+}
+
+.form-section-nav__item--error {
+  border-color: var(--app-control-danger-border);
+}
+
+.form-section-nav__item--warning {
+  border-color: var(--app-control-warn-border);
+}
+
+.form-section-nav__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-section-nav__text {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.form-section-nav__text strong,
+.form-section-nav__text small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-section-nav__text strong {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.form-section-nav__text small,
+.form-section-nav__meta span {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}
+
+.form-section-nav__meta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  color: var(--app-control-success-text);
+}
+
+.form-section-nav--tabs {
+  position: static;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.form-section-nav--tabs .form-section-nav__item {
+  min-width: 12rem;
+}
+
+@media (max-width: 1024px) {
+  .form-section-nav {
+    position: static;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .form-section-nav__item {
+    min-width: 12rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-section-nav,
+  .form-section-nav--tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+    overflow-x: visible;
+  }
+
+  .form-section-nav__item,
+  .form-section-nav--tabs .form-section-nav__item {
+    width: 100%;
+    min-width: 0;
+  }
+}

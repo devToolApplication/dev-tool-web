@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { TabsComponent } from './tabs.component';
 
 const meta: Meta<TabsComponent> = {
-  title: 'Shared/Components/Tabs',
+  title: 'Shared/Components/Navigation/Tabs',
   component: TabsComponent,
   args: {
     value: 'general',

@@ -11,6 +11,7 @@
     [typeahead]="enableTypeahead"
     [fluid]="fluid"
     [placeholder]="(placeholder || '') | translateContent"
+    [ariaLabel]="(label || placeholder || inputId) | translateContent"
     [invalid]="invalid"
     [styleClass]="styleClass"
     (completeMethod)="onSearch($any($event.query || ''))"
@@ -21,7 +22,7 @@
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

@@ -14,7 +14,7 @@
   />
 </div>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

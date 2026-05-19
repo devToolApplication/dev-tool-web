@@ -47,8 +47,8 @@ export class BacktestReviewService {
     return this.tradingSystemService.getBacktestReview(runId);
   }
 
-  getBacktestReviewChart(runId: string): Observable<BacktestChartReviewResponse> {
-    return this.tradingSystemService.getBacktestReviewChart(runId);
+  getBacktestReviewChart(runId: string, includeCandles = true): Observable<BacktestChartReviewResponse> {
+    return this.tradingSystemService.getBacktestReviewChart(runId, includeCandles);
   }
 
   getBacktestReviewTrades(runId: string): Observable<BacktestTradeResponse[]> {

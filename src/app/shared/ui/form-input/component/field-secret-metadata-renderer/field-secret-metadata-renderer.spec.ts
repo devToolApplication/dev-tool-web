@@ -1,9 +1,11 @@
-import { signal, WritableSignal } from '@angular/core';
+import { SimpleChange, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
 import { SharedModule } from '../../../../shared.module';
 import { provideSharedTesting } from '../../../../testing/shared-test.providers';
 import { FieldState } from '../../models/form-config.model';
+import { FORM_INPUT_OPTIONS_LOADERS } from '../../utils/form-input-options-loader';
 import { FieldSecretMetadataRendererComponent } from './field-secret-metadata-renderer';
 
 describe('FieldSecretMetadataRendererComponent', () => {
@@ -13,7 +15,17 @@ describe('FieldSecretMetadataRendererComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: [
+        ...provideSharedTesting(),
+        {
+          provide: FORM_INPUT_OPTIONS_LOADERS,
+          multi: true,
+          useValue: {
+            source: 'test-secrets',
+            load: () => of([{ label: 'Runtime / Password', value: 'secret-password' }])
+          }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldSecretMetadataRendererComponent);
@@ -54,15 +66,28 @@ describe('FieldSecretMetadataRendererComponent', () => {
       config: undefined
     });
   });
+
+  it('loads secret options through a generic options source', () => {
+    const model = signal<unknown[]>([]);
+    component.field = createField(model, { optionsSource: 'test-secrets', options: [] });
+    component.ngOnChanges({ field: new SimpleChange(undefined, component.field, true) });
+    fixture.detectChanges();
+
+    expect(component.secretOptions).toEqual([{ label: 'Runtime / Password', value: 'secret-password' }]);
+  });
 });
 
-function createField(model: WritableSignal<unknown[]>): FieldState {
+function createField(
+  model: WritableSignal<unknown[]>,
+  overrides: Partial<FieldState['fieldConfig']> = {}
+): FieldState {
   return {
     fieldConfig: {
       type: 'secret-metadata',
       name: 'metadata',
       label: 'secretMetadata',
-      options: [{ label: 'Password', value: 'secret-password' }]
+      options: [{ label: 'Password', value: 'secret-password' }],
+      ...overrides
     },
     type: 'secret-metadata',
     name: 'metadata',
@@ -74,8 +99,10 @@ function createField(model: WritableSignal<unknown[]>): FieldState {
     focusing: signal(false),
     blurred: signal(false),
     dirty: signal(false),
+    externalErrors: signal(null),
     visible: signal(true),
     disabled: signal(false),
+    required: signal(false),
     options: signal([{ label: 'Password', value: 'secret-password' }]),
     errors: signal(null),
     valid: signal(true),

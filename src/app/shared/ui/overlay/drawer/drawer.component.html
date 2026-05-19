@@ -1,0 +1,65 @@
+@if (open) {
+  <div #overlay class="app-drawer" [class.app-drawer--open]="open" [class]="'app-drawer--' + side">
+    <button
+      type="button"
+      class="app-drawer__backdrop"
+      [attr.aria-label]="'close' | translateContent"
+      (click)="onBackdropClick()"
+    ></button>
+
+    <div
+      #panel
+      class="app-drawer__panel"
+      [class]="'app-drawer__panel--' + size + ' app-drawer__panel--' + side"
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      [attr.aria-label]="(title || 'shared.drawer.title') | translateContent"
+    >
+      <header class="app-drawer__header">
+        <div class="app-drawer__heading">
+          <ng-content select="[drawer-header]"></ng-content>
+          @if (title) {
+            <h2>{{ title | translateContent }}</h2>
+          }
+          @if (subtitle) {
+            <p>{{ subtitle | translateContent }}</p>
+          }
+        </div>
+
+        <app-button
+          icon="pi pi-times"
+          label="close"
+          severity="secondary"
+          [text]="true"
+          [disabled]="loading"
+          (buttonClick)="close()"
+        ></app-button>
+      </header>
+
+      <section class="app-drawer__body">
+        @if (loading) {
+          <app-loading-skeleton type="detail" [rows]="5"></app-loading-skeleton>
+        } @else if (error) {
+          <app-error-state
+            [message]="error"
+            retryLabel="retry"
+            (retry)="retry.emit()"
+          ></app-error-state>
+        } @else if (empty) {
+          <app-empty-state
+            [title]="emptyTitle"
+            [description]="emptyDescription"
+            size="compact"
+          ></app-empty-state>
+        } @else {
+          <ng-content></ng-content>
+        }
+      </section>
+
+      <footer class="app-drawer__footer">
+        <ng-content select="[drawer-footer]"></ng-content>
+      </footer>
+    </div>
+  </div>
+}

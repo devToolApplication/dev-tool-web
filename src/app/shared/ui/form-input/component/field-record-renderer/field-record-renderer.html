@@ -30,6 +30,14 @@
       </div>
     }
 
+    @if (!recordEntries.length) {
+      <app-empty-state
+        title="shared.empty.title"
+        [description]="field.label || 'notAvailable'"
+        size="compact"
+      ></app-empty-state>
+    }
+
     <app-button
       type="button"
       severity="secondary"

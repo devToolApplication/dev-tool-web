@@ -20,8 +20,10 @@ describe('FieldRecordRenderer', () => {
       focusing: signal(false),
       blurred: signal(false),
       dirty: signal(false),
+      externalErrors: signal(null),
       visible: signal(true),
       disabled: signal(false),
+      required: signal(false),
       options: signal([]),
       errors: signal(null),
       valid: signal(true),
@@ -40,12 +42,12 @@ describe('FieldRecordRenderer', () => {
     expect(component.recordEntries).toEqual([{ key: 'language', value: 'TypeScript' }]);
   });
 
-  it('should add a new empty row', () => {
+  it('should add a new row with a generated key', () => {
     component.onRecordAdd();
 
     expect(component.field.value()).toEqual({
       language: 'TypeScript',
-      '': ''
+      key_2: ''
     });
   });
 

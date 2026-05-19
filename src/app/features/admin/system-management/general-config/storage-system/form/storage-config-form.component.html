@@ -1,20 +1,20 @@
 <app-base-crud-page
   [pageConfig]="{
-    title: 'Storage Config - ' + (editId ? 'Edit' : 'Create'),
-    description: 'Manage storage-related configuration values shared by the file management services.',
+    title: editId ? 'systemManagement.storageConfig.form.editTitle' : 'systemManagement.storageConfig.form.createTitle',
+    description: 'systemManagement.storageConfig.form.description',
     actions: [
-      { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
-      { id: 'submit', label: 'Save', icon: 'pi pi-save', loading: loading, submitForm: true }
+      { id: 'back', label: 'back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'save', icon: 'pi pi-save', loading: loading(), submitForm: true }
     ],
     infoSection: {
-      title: 'Storage Service Config',
-      description: 'Capture the category, key, and payload that downstream storage integrations will read during execution.'
+      title: 'systemManagement.storageConfig.form.infoTitle',
+      description: 'systemManagement.storageConfig.form.infoDescription'
     }
   }"
   [formConfig]="formConfig"
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
-  [submitting]="loading"
+  [submitting]="loading()"
   (formSubmit)="onSubmitForm($event)"
 ></app-base-crud-page>

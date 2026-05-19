@@ -179,6 +179,13 @@ export class DemoComponent {
     return this.section.replace('-', ' ').replace(/\b\w/g, (x) => x.toUpperCase());
   }
 
+  get pageBreadcrumbItems(): Array<{ label: string; routerLink?: string | any[] }> {
+    return this.breadcrumbItems.map((item) => ({
+      label: String(item.label ?? ''),
+      routerLink: item.routerLink
+    }));
+  }
+
   setTextPreset(mode: 'normal' | 'error'): void {
     this.textInvalid = mode === 'error';
     this.textPlaceholder = mode === 'error' ? 'Invalid input demo' : 'Type something...';

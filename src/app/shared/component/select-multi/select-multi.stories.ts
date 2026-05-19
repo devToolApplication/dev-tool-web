@@ -11,7 +11,7 @@ const options: SelectOption[] = [
 ];
 
 const meta: Meta<SelectMulti> = {
-  title: 'Shared/Components/Select Multi',
+  title: 'Shared/Components/Form Controls/Select Multi',
   component: SelectMulti,
   args: {
     label: 'Tags',

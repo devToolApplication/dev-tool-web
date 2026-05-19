@@ -36,6 +36,7 @@ docs/runbooks      troubleshoot vận hành FE
 | Sửa state/store | `architecture/state-management.md`, `development/add-new-store.md` |
 | Sửa shared component/ui | `ui/shared-component-standard.md`, `ui/shared-ui-standard.md`, `architecture/component-file-standard.md` |
 | Sửa Job Scheduler | `features/job-scheduler.md`, `architecture/api-client.md` |
+| Sửa Data Form | `architecture/folder-structure.md`, `features/data-form.md`, `ui/dynamic-form.md`, `architecture/api-client.md` |
 
 ## Merge Checklist
 

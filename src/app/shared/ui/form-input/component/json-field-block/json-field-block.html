@@ -1,0 +1,83 @@
+@if (field.visible()) {
+  @if (readonlyMode) {
+    <app-readonly-field [field]="field"></app-readonly-field>
+  } @else {
+    <app-field-block
+      [label]="field.label"
+      [helpText]="helpText"
+      [required]="field.required()"
+      [invalid]="showInvalid || !!localError()"
+      [errorMessage]="localError() || firstErrorMessage"
+    >
+      <section class="json-field-block" [class.json-field-block--invalid]="showInvalid || !!localError()">
+        <header class="json-field-block__toolbar">
+          <app-badge
+            [label]="contentType === 'json' ? 'JSON' : 'code'"
+            variant="muted"
+            icon="pi pi-code"
+          ></app-badge>
+          <div class="json-field-block__actions">
+            @if (canValidateJson) {
+              <app-button
+                type="button"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                icon="pi pi-align-left"
+                label="shared.form.actions.formatJson"
+                [disabled]="field.disabled()"
+                (buttonClick)="formatJson()"
+              ></app-button>
+              <app-button
+                type="button"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                icon="pi pi-check-circle"
+                label="shared.form.actions.validateJson"
+                (buttonClick)="validateJson()"
+              ></app-button>
+            }
+            <app-button
+              type="button"
+              size="small"
+              severity="secondary"
+              [text]="true"
+              icon="pi pi-copy"
+              [label]="copied() ? 'copied' : 'copy'"
+              (buttonClick)="copy()"
+            ></app-button>
+            <app-button
+              type="button"
+              size="small"
+              severity="secondary"
+              [text]="true"
+              icon="pi pi-window-maximize"
+              label="shared.inputArea.expand"
+              [disabled]="field.disabled()"
+              (buttonClick)="expand()"
+            ></app-button>
+          </div>
+        </header>
+
+        <app-input-area
+          #editor
+          [invalid]="showInvalid || !!localError()"
+          [errorMessage]="localError() || firstErrorMessage"
+          [label]="field.label"
+          [required]="field.required()"
+          [placeholder]="textConfig?.placeholder"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [rows]="rows"
+          [maxRows]="maxRows"
+          [showZoomButton]="false"
+          [contentType]="contentType"
+          (valueChange)="onValueChange($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()"
+        ></app-input-area>
+      </section>
+    </app-field-block>
+  }
+}

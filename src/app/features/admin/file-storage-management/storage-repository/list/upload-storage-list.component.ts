@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { UploadStorageResponse } from '../../../../../core/models/file-storage/upload-storage.model';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
@@ -19,6 +17,10 @@ import { TableConfig } from '../../../../../shared/ui/table/models/table-config.
 export class UploadStorageListComponent extends BasePagedList<UploadStorageResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'uploadStorage.viewTitle',
+    stateKey: 'file-storage.upload-storages',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'uploadStorage.loadListError',
     filters: [
       { field: 'name', label: 'name', placeholder: 'uploadStorage.namePlaceholder' },
       {
@@ -62,16 +64,23 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
         label: 'export',
         icon: 'pi pi-upload',
         severity: 'help'
-      }
+      },
+      columnVisibility: { visible: true },
+      density: { visible: true }
     },
     columns: [
-      { field: 'id', header: 'id', sortable: true },
+      { field: 'id', header: 'id', type: 'copyable', sortable: true },
       { field: 'name', header: 'name', sortable: true },
       { field: 'storageType', header: 'storageType' },
-      { field: 'status', header: 'status' },
+      {
+        field: 'status',
+        header: 'status',
+        type: 'badge',
+        badgeMap: { ACTIVE: 'success', INACTIVE: 'muted', DELETE: 'danger' }
+      },
       { field: 'defaultActive', header: 'default', type: 'boolean' },
-      { field: 'apiDomain', header: 'apiDomain' },
-      { field: 'apiPath', header: 'apiPath' },
+      { field: 'apiDomain', header: 'apiDomain', type: 'copyable' },
+      { field: 'apiPath', header: 'apiPath', type: 'copyable' },
       {
         field: 'actions',
         header: 'action',
@@ -90,7 +99,8 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
             label: 'delete',
             icon: 'pi pi-trash',
             severity: 'danger',
-            disabled: () => this.loading,
+            variant: 'danger',
+            confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
             onClick: (row) => this.removeById(row.id)
           }
         ]
@@ -100,9 +110,6 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
     rows: 10,
     rowsPerPageOptions: [5, 10, 20, 50]
   };
-
-  tableLoading = false;
-  loading = false;
 
   selectedStorageId: string | null = null;
 
@@ -114,7 +121,7 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
     private readonly route: ActivatedRoute,
     private readonly i18nService: I18nService
   ) {
-    super(route, router, 10);
+    super(route, router, 10, ['name,asc']);
   }
 
   ngOnInit(): void {
@@ -122,27 +129,25 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
   }
 
   protected loadPage(): void {
-    this.tableLoading = true;
-
-    this.loadingService
-      .track(
+    this.runPageRequest(
+      this.loadingService.track(
         this.uploadStorageService.getPage(
           this.page,
           this.pageSize,
-          ['name,asc'],
+          this.sorts,
           this.filters as Record<string, string | number | boolean>
         )
-      )
-      .pipe(finalize(() => (this.tableLoading = false)))
-      .subscribe({
-        next: (res: BasePageResponse<UploadStorageResponse>) => {
-          this.setPageResponse(res);
+      ),
+      {
+        errorMessage: 'uploadStorage.loadListError',
+        onSuccess: () => {
           if (this.selectedStorageId && !this.rows.some((row) => row.id === this.selectedStorageId)) {
             this.selectedStorageId = null;
           }
         },
-        error: () => this.toastService.error(this.i18nService.t('uploadStorage.loadListError'))
-      });
+        onError: () => this.toastService.error(this.i18nService.t('uploadStorage.loadListError'))
+      }
+    );
   }
 
   goCreate(): void {
@@ -179,10 +184,8 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
   }
 
   private removeById(id: string): void {
-    this.loading = true;
     this.loadingService
       .track(this.uploadStorageService.delete(id))
-      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
           this.toastService.info(this.i18nService.t('uploadStorage.deleteSuccess'));

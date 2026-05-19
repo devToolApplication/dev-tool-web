@@ -1,15 +1,27 @@
 @switch (column.type ?? 'text') {
 
   @case ('text') {
-    {{ value }}
+    <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{ formattedValue ?? value }}</span>
   }
 
   @case ('number') {
-    {{ value | number:column.format }}@if (column.suffix) { <span class="table-cell-suffix">{{ column.suffix }}</span> }
+    @if (column.prefix) { <span class="table-cell-suffix">{{ column.prefix }}</span> }{{ value | number:(column.format ?? '1.0-3') }}@if (column.suffix) { <span class="table-cell-suffix">{{ column.suffix }}</span> }
+  }
+
+  @case ('semantic-number') {
+    <span [class]="semanticClass">{{ value | number:(column.format ?? '1.2-2') }}</span>
+  }
+
+  @case ('percent') {
+    {{ value | number:(column.format ?? '1.0-2') }}<span class="table-cell-suffix">%</span>
   }
 
   @case ('date') {
     {{ dateValue | date:(column.format ?? 'dd/MM/yyyy') }}
+  }
+
+  @case ('datetime') {
+    {{ dateValue | date:(column.format ?? 'dd/MM/yyyy HH:mm:ss') }}
   }
 
   @case ('currency') {
@@ -18,39 +30,176 @@
 
   @case ('boolean') {
     @if (value) {
-      <i class="pi pi-check app-text-success"></i>
+      <span class="table-cell-boolean">
+        <i class="pi pi-check app-text-success" aria-hidden="true"></i>
+        <span>{{ 'yes' | translateContent }}</span>
+      </span>
     } @else {
-      <i class="pi pi-times app-text-danger"></i>
+      <span class="table-cell-boolean">
+        <i class="pi pi-times app-text-danger" aria-hidden="true"></i>
+        <span>{{ 'no' | translateContent }}</span>
+      </span>
     }
   }
 
+  @case ('badge') {
+    <app-badge [label]="value == null ? '' : '' + value" [variant]="badgeVariant"></app-badge>
+  }
+
+  @case ('copyable') {
+    <app-copyable-text [value]="value" [shorten]="true"></app-copyable-text>
+  }
+
+  @case ('link') {
+    @if (linkTarget) {
+      <a class="table-link" [routerLink]="linkTarget">{{ value }}</a>
+    } @else {
+      <span class="table-link">{{ value }}</span>
+    }
+  }
+
+  @case ('json') {
+    @if (column.jsonDisplayMode === 'inline-preview') {
+      <div class="table-json-preview">{{ formatJsonValue(value) }}</div>
+    } @else {
+      <app-button
+        icon="pi pi-code"
+        label="shared.json.view"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="jsonOpen.set(true)"
+      ></app-button>
+      <app-drawer
+        [open]="jsonOpen()"
+        title="shared.json.title"
+        size="lg"
+        (closed)="jsonOpen.set(false)"
+      >
+        <app-json-viewer [value]="value" [collapsed]="true"></app-json-viewer>
+      </app-drawer>
+    }
+  }
+
+  @case ('duration') {
+    {{ formatDuration(value) }}
+  }
+
   @case ('array') {
-    {{ formatArrayValue(value) }}
+    @if (value?.length) {
+      <div class="table-tag-list">
+        @for (item of value.slice(0, column.maxVisibleTags ?? 3); track item) {
+          <app-badge [label]="item == null ? '' : '' + item" variant="muted" size="sm"></app-badge>
+        }
+        @if (value.length > (column.maxVisibleTags ?? 3)) {
+          <app-badge [label]="'+' + (value.length - (column.maxVisibleTags ?? 3))" variant="default" size="sm"></app-badge>
+        }
+      </div>
+    } @else {
+      <span>-</span>
+    }
+  }
+
+  @case ('tag-list') {
+    @if (value?.length) {
+      <div class="table-tag-list">
+        @for (item of value.slice(0, column.maxVisibleTags ?? 3); track item) {
+          <app-badge [label]="item == null ? '' : '' + item" variant="muted" size="sm"></app-badge>
+        }
+        @if (value.length > (column.maxVisibleTags ?? 3)) {
+          <app-badge [label]="'+' + (value.length - (column.maxVisibleTags ?? 3))" variant="default" size="sm"></app-badge>
+        }
+      </div>
+    } @else {
+      <span>-</span>
+    }
   }
 
   @case ('actions') {
-    <div class="table-actions">
-      @for (action of actions; track action.id ?? action.label ?? action.icon) {
+    <div class="table-actions" (click)="$event.stopPropagation()">
+      @for (action of primaryActions; track action.id ?? action.label ?? action.icon) {
         <app-button
           [label]="action.showLabel === false ? '' : action.label"
           [icon]="action.icon"
-          [tooltip]="action.tooltip ?? action.label"
-          [severity]="action.severity ?? null"
-          [text]="action.text ?? false"
+          [tooltip]="actionTooltip(action)"
+          [severity]="actionSeverity(action)"
+          [text]="action.text ?? action.variant === 'ghost'"
           [styleClass]="action.styleClass"
           [disabled]="isActionDisabled(action)"
           (buttonClick)="onActionClick(action)"
         ></app-button>
       }
+
+      @if (hasMoreActions) {
+        <div class="table-actions__more-wrap">
+          <app-button
+            icon="pi pi-ellipsis-h"
+            label="showMore"
+            tooltip="showMore"
+            severity="secondary"
+            [text]="true"
+            (buttonClick)="toggleActions()"
+          ></app-button>
+          @if (actionsOpen()) {
+            <div class="table-actions__menu" role="menu">
+              @for (action of moreActions; track action.id ?? action.label ?? action.icon) {
+                <app-button
+                  class="table-actions__menu-item"
+                  [label]="action.label"
+                  [icon]="action.icon"
+                  [tooltip]="actionTooltip(action)"
+                  [severity]="actionSeverity(action)"
+                  [text]="action.text ?? action.variant !== 'primary'"
+                  [styleClass]="action.styleClass"
+                  [disabled]="isActionDisabled(action)"
+                  (buttonClick)="onActionClick(action)"
+                ></app-button>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
   }
 
   @case ('group') {
-    {{ value | json }}
+    <app-button
+      icon="pi pi-list"
+      label="shared.json.view"
+      severity="secondary"
+      [text]="true"
+      (buttonClick)="jsonOpen.set(true)"
+    ></app-button>
+    <app-drawer
+      [open]="jsonOpen()"
+      title="shared.json.title"
+      size="lg"
+      (closed)="jsonOpen.set(false)"
+    >
+      <app-json-viewer [value]="value" [collapsed]="true"></app-json-viewer>
+    </app-drawer>
+  }
+
+  @case ('custom') {
+    @if (customTemplate) {
+      <ng-container
+        [ngTemplateOutlet]="customTemplate"
+        [ngTemplateOutletContext]="{ $implicit: rowData, row: rowData, value: value, column: column }"
+      ></ng-container>
+    } @else {
+      <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{ formattedValue ?? value }}</span>
+    }
   }
 
   @case ('textarea') {
-    <textarea pTextarea [ngModel]="formatTextareaValue(value)" rows="6" [disabled]="true" class="w-full"></textarea>
+    <app-input-area
+      label=""
+      [value]="formatTextareaValue(value)"
+      [readonly]="true"
+      [disabled]="true"
+      [rows]="6"
+      [maxRows]="8"
+      contentType="text"
+    ></app-input-area>
   }
 
   @default {

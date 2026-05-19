@@ -1,16 +1,29 @@
 import { Observable } from 'rxjs';
 import { ValidationRule } from '../../form-input/models/form-config.model';
 
+export type TableBadgeVariant = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
+export type TableDensity = 'compact' | 'comfortable' | 'spacious';
+
 export type TableColumnType =
   | 'text'
   | 'number'
+  | 'semantic-number'
   | 'date'
+  | 'datetime'
   | 'currency'
+  | 'percent'
+  | 'duration'
+  | 'boolean'
+  | 'badge'
+  | 'tag-list'
+  | 'copyable'
+  | 'link'
+  | 'json'
+  | 'custom'
+  | 'actions'
   | 'array'
   | 'group'
-  | 'textarea'
-  | 'boolean'
-  | 'actions';
+  | 'textarea';
 
 export type TableActionSeverity =
   | 'secondary'
@@ -27,15 +40,59 @@ export interface TableAction {
   id?: string;
   icon?: string;
   tooltip?: string;
+  tooltipFn?: (rowData: any) => string;
   showLabel?: boolean;
   text?: boolean;
   styleClass?: string;
   severity?: TableActionSeverity;
+  variant?: 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
+  placement?: 'primary' | 'more';
+  permissions?: readonly string[];
+  permissionMode?: 'hide' | 'disable';
+  permissionDeniedTooltip?: string;
+  visible?: (rowData: any) => boolean;
   disabled?: (rowData: any) => boolean;
+  confirm?: {
+    title?: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'warning' | 'danger';
+  };
   onClick: (rowData: any) => void;
 }
 
-export type TableFilterType = 'text' | 'select' | 'multi-select' | 'boolean' | 'date' | 'date-range';
+export interface TableBulkAction {
+  id: string;
+  label: string;
+  icon?: string;
+  tooltip?: string;
+  severity?: TableActionSeverity;
+  variant?: 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
+  permissions?: readonly string[];
+  permissionMode?: 'hide' | 'disable';
+  permissionDeniedTooltip?: string;
+  visible?: boolean;
+  disabled?: boolean;
+  confirm?: {
+    title?: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'warning' | 'danger';
+  };
+  onClick?: (rows: any[]) => void;
+}
+
+export type TableFilterType =
+  | 'text'
+  | 'select'
+  | 'multi-select'
+  | 'boolean'
+  | 'date'
+  | 'date-range'
+  | 'number-range'
+  | 'autocomplete';
 
 export interface TableFilterOption {
   label: string;
@@ -61,6 +118,9 @@ export interface TableFilterField {
   options?: TableFilterOption[];
   optionsLoader?: TableFilterOptionsLoader;
   optionsExpression?: string;
+  loading?: boolean;
+  error?: string | null;
+  emptyMessage?: string;
   hidden?: boolean;
   quick?: boolean;
   defaultValue?: any;
@@ -89,30 +149,60 @@ export interface TableColumn {
   field: string;
   header: string;
   type?: TableColumnType;
+  visible?: boolean;
+  hideable?: boolean;
   sortable?: boolean;
   format?: string;
   suffix?: string;
+  prefix?: string;
   currencyCode?: string;
   width?: string;
   minWidth?: string;
   maxWidth?: string;
+  align?: 'left' | 'center' | 'right';
   frozen?: boolean;
   alignFrozen?: 'left' | 'right';
   actions?: TableAction[];
+  link?: string | ((rowData: any) => string | any[]);
+  tooltip?: boolean | ((rowData: any) => string);
+  valueGetter?: (rowData: any) => unknown;
+  formatter?: (rowData: any, value: unknown) => string | number | null | undefined;
+  badgeMap?: Record<string, TableBadgeVariant>;
+  semanticFn?: (rowData: any, value: unknown) => 'positive' | 'negative' | 'neutral' | 'info' | 'warning' | 'danger';
+  maxVisibleTags?: number;
+  jsonDisplayMode?: 'button' | 'inline-preview';
+  customTemplateKey?: string;
+}
+
+export interface TableSelectionConfig {
+  mode: 'single' | 'multiple';
+  showSelectAll?: boolean;
+  selectAllScopeLabel?: string;
 }
 
 export interface TableConfig {
   columns: TableColumn[];
   title?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  emptyFilteredTitle?: string;
+  emptyFilteredDescription?: string;
+  errorTitle?: string;
   filters?: TableFilterField[];
   filterOptions?: TableFilterOptions;
   toolbar?: TableToolbarConfig;
+  density?: TableDensity;
   pagination?: boolean;
+  rowClickable?: boolean;
+  rowKey?: string | ((rowData: any) => string | number | boolean | null | undefined);
+  dataKey?: string | ((rowData: any) => string | number | boolean | null | undefined);
+  selection?: TableSelectionConfig;
   rows?: number;
   rowsPerPageOptions?: number[];
   scrollable?: boolean;
   scrollHeight?: string;
   minWidth?: string;
+  stateKey?: string;
 }
 
 export interface TableToolbarButtonConfig {
@@ -121,6 +211,28 @@ export interface TableToolbarButtonConfig {
   icon?: string;
   severity?: TableActionSeverity;
   disabled?: boolean;
+  permissions?: readonly string[];
+  permissionMode?: 'hide' | 'disable';
+  permissionDeniedTooltip?: string;
+}
+
+export interface TableToolbarSearchConfig {
+  visible?: boolean;
+  field?: string;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+export interface TableToolbarColumnVisibilityConfig {
+  visible?: boolean;
+  label?: string;
+  placeholder?: string;
+}
+
+export interface TableToolbarDensityConfig {
+  visible?: boolean;
+  label?: string;
 }
 
 export interface TableToolbarImportConfig extends TableToolbarButtonConfig {
@@ -129,9 +241,19 @@ export interface TableToolbarImportConfig extends TableToolbarButtonConfig {
   chooseLabel?: string;
 }
 
+export interface TableToolbarExportConfig extends TableToolbarButtonConfig {
+  fileName?: string;
+  currentData?: boolean;
+}
+
 export interface TableToolbarConfig {
   new?: TableToolbarButtonConfig;
   delete?: TableToolbarButtonConfig;
+  refresh?: TableToolbarButtonConfig;
+  search?: TableToolbarSearchConfig;
+  columnVisibility?: TableToolbarColumnVisibilityConfig;
+  density?: TableToolbarDensityConfig;
   import?: TableToolbarImportConfig;
-  export?: TableToolbarButtonConfig;
+  export?: TableToolbarExportConfig;
+  bulkActions?: TableBulkAction[];
 }

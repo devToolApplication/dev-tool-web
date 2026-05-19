@@ -4,7 +4,6 @@ import { finalize } from 'rxjs';
 import { AiAgentAskRequest, AiAgentAskResponse } from '../../../../../core/models/ai-agent/ai-agent-ask.model';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
 import { AiModelResponse } from '../../../../../core/models/ai-agent/ai-model.model';
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { AiAgentAdminService } from '../../../../../core/services/ai-agent-service/ai-agent-admin.service';
 import { AiModelService } from '../../../../../core/services/ai-agent-service/ai-model.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
@@ -25,7 +24,15 @@ import { AI_MODEL_ROUTES } from '../ai-model.constants';
 export class AiModelListComponent extends BasePagedList<AiModelResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'aiAgent.aiModel.title',
-    toolbar: { new: { visible: true, label: 'aiAgent.aiModel.new', icon: 'pi pi-plus', severity: 'success' } },
+    stateKey: 'ai-agent.ai-models',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'aiAgent.aiModel.loadErrorTitle',
+    toolbar: {
+      new: { visible: true, label: 'aiAgent.aiModel.new', icon: 'pi pi-plus', severity: 'success' },
+      columnVisibility: { visible: true },
+      density: { visible: true }
+    },
     filters: [
       { field: 'modelName', label: 'aiAgent.aiModel.modelName', placeholder: 'aiAgent.aiModel.searchModelName' },
       { field: 'providerModelType', label: 'aiAgent.aiModel.provider', placeholder: 'aiAgent.aiModel.searchProvider' },
@@ -33,13 +40,18 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
     ],
     filterOptions: { primaryField: 'modelName' },
     columns: [
-      { field: 'code', header: 'code', sortable: true },
+      { field: 'code', header: 'code', type: 'copyable', sortable: true },
       { field: 'modelName', header: 'aiAgent.aiModel.modelName', sortable: true },
       { field: 'providerModelType', header: 'aiAgent.aiModel.provider', sortable: true },
       { field: 'modelType', header: 'aiAgent.aiModel.modelType', sortable: true },
       { field: 'toolSupportMode', header: 'aiAgent.aiModel.toolSupport', sortable: true },
       { field: 'defaultActive', header: 'default', type: 'boolean' },
-      { field: 'status', header: 'status' },
+      {
+        field: 'status',
+        header: 'status',
+        type: 'badge',
+        badgeMap: { ACTIVE: 'success', INACTIVE: 'muted', DELETE: 'danger' }
+      },
       {
         field: 'actions',
         header: 'actions',
@@ -50,7 +62,14 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
         actions: [
           { label: 'aiAgent.aiModel.testPrompt.action', icon: 'pi pi-comments', severity: 'help', onClick: (row) => this.openTestPrompt(row) },
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-          { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+          {
+            label: 'delete',
+            icon: 'pi pi-trash',
+            severity: 'danger',
+            variant: 'danger',
+            confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
+            onClick: (row) => this.remove(row.id)
+          }
         ]
       }
     ],
@@ -84,7 +103,6 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
     ]
   };
 
-  loading = false;
   testPromptVisible = false;
   testPromptSubmitting = false;
   selectedModel: AiModelResponse | null = null;
@@ -109,7 +127,7 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
     private readonly router: Router,
     private readonly i18nService: I18nService
   ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
+    super(route, router, DEFAULT_TABLE_ROWS, ['modelName,asc']);
   }
 
   ngOnInit(): void {
@@ -118,6 +136,10 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
 
   onCreate(): void {
     void this.router.navigate([AI_MODEL_ROUTES.create]);
+  }
+
+  retryLoad(): void {
+    this.loadPage();
   }
 
   openTestPrompt(model: AiModelResponse): void {
@@ -189,8 +211,7 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
   }
 
   private remove(id: string): void {
-    this.loading = true;
-    this.loadingService.track(this.service.delete(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loadingService.track(this.service.delete(id)).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t('deleteSuccess'));
         this.loadPage();
@@ -200,14 +221,10 @@ export class AiModelListComponent extends BasePagedList<AiModelResponse> impleme
   }
 
   protected loadPage(): void {
-    this.loading = true;
-    this.loadingService
-      .track(this.service.getPage(this.page, this.pageSize, ['modelName,asc'], this.filters))
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: BasePageResponse<AiModelResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error('aiAgent.aiModel.toast.loadListFailed')
-      });
+    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.sorts, this.filters)), {
+      errorMessage: 'aiAgent.aiModel.loadFailed',
+      onError: () => this.toastService.error('aiAgent.aiModel.toast.loadListFailed')
+    });
   }
 
   private resetPromptState(): void {

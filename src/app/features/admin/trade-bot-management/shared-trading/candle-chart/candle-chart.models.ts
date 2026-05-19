@@ -147,9 +147,14 @@ export interface CandleChartConfig {
   showPriceAxisLabels?: boolean;
   showPreviewBar?: boolean;
   autoScrollToRealtime?: boolean;
+  lazyLoadOnPan?: boolean;
+  lazyLoadThresholdBars?: number;
+  preserveViewportOnDataUpdate?: boolean;
   evaluateOnBarChange?: boolean;
   evaluateOnClosedCandleOnly?: boolean;
   evaluateLivePreview?: boolean;
+  loading?: boolean;
+  errorMessage?: string;
   symbol?: string;
   exchange?: string;
   interval?: string;
@@ -179,6 +184,9 @@ export interface ResolvedCandleChartConfig extends CandleChartConfig {
   showPriceAxisLabels: boolean;
   showPreviewBar: boolean;
   autoScrollToRealtime: boolean;
+  lazyLoadOnPan: boolean;
+  lazyLoadThresholdBars: number;
+  preserveViewportOnDataUpdate: boolean;
   evaluateOnBarChange: boolean;
   evaluateOnClosedCandleOnly: boolean;
   evaluateLivePreview: boolean;
@@ -231,6 +239,12 @@ export interface CandleChartReplayStatusEvent {
 export interface CandleChartErrorEvent {
   message: string;
   detail?: unknown;
+}
+
+export interface CandleChartRangeBoundaryEvent {
+  direction: 'PAST' | 'FUTURE';
+  firstCandle: ChartCandle | null;
+  lastCandle: ChartCandle | null;
 }
 
 export interface CandleChartStrategySignal {

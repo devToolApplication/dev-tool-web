@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input } from '@angular/core';
 import { FieldState, RecordFieldConfig } from '../../models/form-config.model';
 
 type RecordEntry = { key: string; value: string };
@@ -9,9 +9,20 @@ type RecordEntry = { key: string; value: string };
   templateUrl: './field-record-renderer.html',
   styleUrl: './field-record-renderer.css'
 })
-export class FieldRecordRenderer {
+export class FieldRecordRenderer implements AfterViewChecked {
   @Input({ required: true })
   field!: FieldState;
+
+  constructor(private readonly host?: ElementRef<HTMLElement>) {}
+
+  ngAfterViewChecked(): void {
+    this.host?.nativeElement
+      .querySelectorAll<HTMLElement>('.p-fieldset-content-container[role="region"]')
+      .forEach((container) => {
+        container.removeAttribute('role');
+        container.removeAttribute('aria-labelledby');
+      });
+  }
 
   get recordConfig(): RecordFieldConfig | undefined {
     return this.field.type === 'record' ? (this.field.fieldConfig as RecordFieldConfig) : undefined;
@@ -30,7 +41,8 @@ export class FieldRecordRenderer {
   }
 
   onRecordAdd(): void {
-    const next = { ...this.toRecordObject(), '': '' };
+    const current = this.toRecordObject();
+    const next = { ...current, [this.nextKey(current)]: '' };
     this.field.setValue(next);
   }
 
@@ -69,10 +81,35 @@ export class FieldRecordRenderer {
     entries.forEach((entry, index) => {
       const normalizedKey = entry.key.trim();
       const fallbackKey = `key_${index + 1}`;
-      const key = normalizedKey || fallbackKey;
+      const baseKey = normalizedKey || fallbackKey;
+      const key = this.ensureUniqueKey(result, baseKey);
       result[key] = entry.value;
     });
 
     return result;
+  }
+
+  private nextKey(current: Record<string, string>): string {
+    let index = Object.keys(current).length + 1;
+    let key = `key_${index}`;
+    while (Object.prototype.hasOwnProperty.call(current, key)) {
+      index += 1;
+      key = `key_${index}`;
+    }
+    return key;
+  }
+
+  private ensureUniqueKey(result: Record<string, string>, key: string): string {
+    if (!Object.prototype.hasOwnProperty.call(result, key)) {
+      return key;
+    }
+
+    let index = 2;
+    let next = `${key}_${index}`;
+    while (Object.prototype.hasOwnProperty.call(result, next)) {
+      index += 1;
+      next = `${key}_${index}`;
+    }
+    return next;
   }
 }

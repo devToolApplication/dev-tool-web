@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.error-state {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.875rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--app-control-danger-border);
+  border-radius: 0.5rem;
+  background: var(--app-control-danger-bg);
+  color: var(--app-control-danger-text);
+}
+
+.error-state--compact {
+  padding: 0.75rem;
+}
+
+.error-state--warning {
+  border-color: var(--app-control-warn-border);
+  background: var(--app-control-warn-bg);
+  color: var(--app-control-warn-text);
+}
+
+.error-state--info {
+  border-color: var(--app-control-info-border);
+  background: var(--app-control-info-bg);
+  color: var(--app-control-info-text);
+}
+
+.error-state__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--app-surface-strong);
+}
+
+.error-state__body {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.error-state h3,
+.error-state p {
+  margin: 0;
+}
+
+.error-state h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.error-state p {
+  color: var(--app-text);
+  line-height: 1.5;
+}
+
+.error-state__code {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.125rem 0.375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid var(--app-control-danger-border);
+  border-radius: 0.375rem;
+  background: var(--app-surface-strong);
+  font-size: 0.75rem;
+}
+
+.error-state__actions {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .error-state {
+    grid-template-columns: 1fr;
+  }
+
+  .error-state__actions {
+    grid-column: 1;
+  }
+}

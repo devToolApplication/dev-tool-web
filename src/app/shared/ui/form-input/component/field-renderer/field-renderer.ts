@@ -18,6 +18,8 @@ import {
 export class FieldRenderer implements OnChanges {
   @Input({ required: true })
   field!: FieldState;
+  @Input() submitted = false;
+  @Input() readonlyMode = false;
 
   numberConfig?: NumberFieldConfig;
   inputMultiConfig?: InputMultiFieldConfig;
@@ -26,31 +28,31 @@ export class FieldRenderer implements OnChanges {
   textConfig?: TextFieldConfig;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.field?.type === 'number') {
+    if (this.isNumberLike(this.field?.type)) {
       this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
       this.selectConfig = undefined;
       this.textConfig = undefined;
-    } else if (this.field?.type === 'auto-complete') {
+    } else if (this.isAutoCompleteLike(this.field?.type)) {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = this.field.fieldConfig as AutoCompleteFieldConfig;
       this.selectConfig = undefined;
       this.textConfig = undefined;
-    } else if (this.field?.type === 'input-multi') {
+    } else if (this.field?.type === 'input-multi' || this.field?.type === 'tags') {
       this.numberConfig = undefined;
       this.inputMultiConfig = this.field.fieldConfig as InputMultiFieldConfig;
       this.autoCompleteConfig = undefined;
       this.selectConfig = undefined;
       this.textConfig = undefined;
-    } else if (this.field?.type === 'select' || this.field?.type === 'select-multi') {
+    } else if (this.field?.type === 'select' || this.field?.type === 'select-multi' || this.field?.type === 'multi-select') {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
       this.selectConfig = this.field.fieldConfig as SelectFieldConfig;
       this.textConfig = undefined;
-    } else if (this.field?.type === 'text' || this.field?.type === 'textarea') {
+    } else if (this.isTextLike(this.field?.type)) {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
@@ -66,7 +68,15 @@ export class FieldRenderer implements OnChanges {
   }
 
   get showInvalid() {
-    return !this.field.focusing() && this.field.touched() && !!this.field.errors();
+    return !this.field.focusing() && (this.field.touched() || this.submitted) && !!this.field.errors();
+  }
+
+  get firstErrorMessage(): string | undefined {
+    const errors = this.field.errors();
+    if (!errors) {
+      return undefined;
+    }
+    return Object.values(errors)[0];
   }
 
   get isArray() {
@@ -76,6 +86,41 @@ export class FieldRenderer implements OnChanges {
   get helpText(): string | undefined {
     const config = this.field?.fieldConfig as { helpText?: string; description?: string } | undefined;
     return config?.helpText || config?.description;
+  }
+
+  get resolvedNumberMode(): 'decimal' | 'currency' | undefined {
+    if (this.field?.type === 'currency') {
+      return 'currency';
+    }
+    return this.numberConfig?.mode;
+  }
+
+  get resolvedNumberSuffix(): string | undefined {
+    if (this.field?.type === 'percent') {
+      return this.numberConfig?.suffix ?? '%';
+    }
+    return this.numberConfig?.suffix;
+  }
+
+  get resolvedTextContentType(): 'text' | 'json' {
+    if (this.field?.type === 'json') {
+      return 'json';
+    }
+    return this.textConfig?.contentType ?? 'text';
+  }
+
+  get resolvedTextRows(): number {
+    if (this.field?.type === 'json' || this.field?.type === 'code') {
+      return this.textConfig?.rows ?? 8;
+    }
+    return this.textConfig?.rows ?? 5;
+  }
+
+  get resolvedTextMaxRows(): number {
+    if (this.field?.type === 'json' || this.field?.type === 'code') {
+      return this.textConfig?.maxRows ?? 18;
+    }
+    return this.textConfig?.maxRows ?? 5;
   }
 
   onChangeValue(value: any) {
@@ -98,5 +143,16 @@ export class FieldRenderer implements OnChanges {
     this.field.touched.set(true);
   }
 
+  private isNumberLike(type?: string): boolean {
+    return type === 'number' || type === 'decimal' || type === 'percent' || type === 'currency';
+  }
+
+  private isAutoCompleteLike(type?: string): boolean {
+    return type === 'auto-complete' || type === 'autocomplete';
+  }
+
+  private isTextLike(type?: string): boolean {
+    return type === 'text' || type === 'textarea' || type === 'json' || type === 'code';
+  }
 
 }

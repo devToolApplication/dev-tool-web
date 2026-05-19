@@ -7,7 +7,8 @@
         [label]="newButtonConfig.label ?? 'new'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
         styleClass="mr-2"
-        [disabled]="newButtonConfig.disabled ?? false"
+        [disabled]="isButtonDisabled(newButtonConfig)"
+        [tooltip]="buttonTooltip(newButtonConfig)"
         (buttonClick)="onCreate()"
       />
     }
@@ -17,22 +18,97 @@
         [severity]="deleteButtonConfig.severity ?? 'danger'"
         [label]="deleteButtonConfig.label ?? 'delete'"
         [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
-        [disabled]="deleteButtonConfig.disabled ?? false"
+        [disabled]="isButtonDisabled(deleteButtonConfig)"
+        [tooltip]="buttonTooltip(deleteButtonConfig)"
         (buttonClick)="onDelete()"
       />
+    }
+
+    @if (toolbarConfig.search?.visible) {
+      <div class="table-toolbar__search">
+        <app-input-text
+          [label]="toolbarConfig.search?.label ?? 'search'"
+          [placeholder]="toolbarConfig.search?.placeholder ?? 'search'"
+          [value]="quickSearchTerm()"
+          [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
+          (valueChange)="quickSearchTerm.set($event || '')"
+        ></app-input-text>
+        <app-button
+          icon="pi pi-search"
+          label="search"
+          [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
+          (buttonClick)="onQuickSearch()"
+        ></app-button>
+      </div>
+    }
+
+    @if (selectionEnabled && visibleBulkActions.length > 0) {
+      <div class="table-toolbar__bulk">
+        <span class="table-toolbar__bulk-count">
+          {{ ('shared.table.selectedRows' | translateContent).replace('{{count}}', selectedCount.toString()) }}
+        </span>
+        @for (action of visibleBulkActions; track action.id) {
+          <app-button
+            size="small"
+            [severity]="action.severity ?? (action.variant === 'danger' ? 'danger' : 'secondary')"
+            [label]="action.label"
+            [icon]="action.icon"
+            [disabled]="selectedCount === 0 || isBulkActionDisabled(action)"
+            [tooltip]="bulkActionTooltip(action)"
+            (buttonClick)="onBulkAction(action)"
+          ></app-button>
+        }
+      </div>
     }
   </ng-template>
 
   <ng-template pTemplate="right">
+    @if (isButtonVisible(refreshButtonConfig)) {
+      <app-button
+        [severity]="refreshButtonConfig.severity ?? 'secondary'"
+        [label]="refreshButtonConfig.label ?? 'refresh'"
+        [icon]="refreshButtonConfig.icon ?? 'pi pi-refresh'"
+        [disabled]="loading || isButtonDisabled(refreshButtonConfig)"
+        [tooltip]="buttonTooltip(refreshButtonConfig)"
+        (buttonClick)="onRefresh()"
+      />
+    }
+
+    @if (toolbarConfig.columnVisibility?.visible) {
+      <p-multiselect
+        class="table-toolbar__columns"
+        [options]="columnOptions"
+        [ngModel]="selectedColumnFields()"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        [placeholder]="(toolbarConfig.columnVisibility?.placeholder ?? 'fieldOptions') | translateContent"
+        [disabled]="loading"
+        (ngModelChange)="onColumnFieldsChange($event)"
+      ></p-multiselect>
+    }
+
+    @if (toolbarConfig.density?.visible) {
+      <app-select
+        [label]="toolbarConfig.density?.label ?? 'shared.table.density.label'"
+        [options]="densityOptions"
+        [value]="density()"
+        [disabled]="loading"
+        (valueChange)="onDensityChange($event)"
+      ></app-select>
+    }
+
     @if (isButtonVisible(importButtonConfig)) {
       <p-fileupload
         mode="basic"
         [accept]="importButtonConfig.accept ?? '*/*'"
         [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
-        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import'"
+        [chooseLabel]="(importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import') | translateContent"
         class="mr-2 inline-block"
         [customUpload]="true"
         [auto]="true"
+        [disabled]="isButtonDisabled(importButtonConfig)"
+        [attr.title]="buttonTooltip(importButtonConfig) | translateContent"
         (uploadHandler)="onImport($event.files[0])"
       />
     }
@@ -42,32 +118,47 @@
         [severity]="exportButtonConfig.severity ?? 'help'"
         [label]="exportButtonConfig.label ?? 'export'"
         [icon]="exportButtonConfig.icon ?? 'pi pi-upload'"
-        [disabled]="exportButtonConfig.disabled ?? false"
+        [disabled]="isButtonDisabled(exportButtonConfig)"
+        [tooltip]="buttonTooltip(exportButtonConfig)"
         (buttonClick)="onExport()"
       />
     }
   </ng-template>
 </p-toolbar>
 
+@if (error) {
+  <app-error-state
+    [title]="config.errorTitle ?? 'shared.table.errorTitle'"
+    [message]="error"
+    retryLabel="retry"
+    (retry)="retry.emit()"
+  ></app-error-state>
+} @else if (loading && resolvedData.length === 0) {
+  <app-loading-skeleton type="table" [rows]="resolvedRows" [columns]="visibleColumns.length"></app-loading-skeleton>
+} @else {
 <p-table
-  [styleClass]="(config.filters?.length ? 'app-table-scrollable app-table-scrollable--with-filters' : 'app-table-scrollable')"
-  [value]="resolvedData"
-  [rows]="resolvedRows"
-  [paginator]="config.pagination ?? true"
-  [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
-  [loading]="loading"
-  [lazy]="serverSidePagination"
-  [totalRecords]="resolvedTotalRecords"
-  [first]="first"
-  [tableStyle]="{ 'min-width': tableMinWidth }"
-  [rowHover]="true"
-  [currentPageReportTemplate]="'showingEntries' | translateContent"
-  [showCurrentPageReport]="true"
-  [scrollable]="scrollable"
-  [scrollHeight]="scrollHeight"
-  responsiveLayout="scroll"
-  (onPage)="onPage($event)"
->
+    [attr.aria-busy]="loading"
+    [styleClass]="tableStyleClass"
+    [value]="resolvedData"
+    [rows]="resolvedRows"
+    [paginator]="config.pagination ?? true"
+    [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
+    [loading]="loading"
+    [lazy]="serverSidePagination"
+    [totalRecords]="resolvedTotalRecords"
+    [first]="first"
+    [sortField]="sortField ?? undefined"
+    [sortOrder]="sortOrder"
+    [tableStyle]="{ 'min-width': tableMinWidth }"
+    [rowHover]="true"
+    [currentPageReportTemplate]="'showingEntries' | translateContent"
+    [showCurrentPageReport]="true"
+    [scrollable]="scrollable"
+    [scrollHeight]="scrollHeight"
+    responsiveLayout="scroll"
+    (onPage)="onPage($event)"
+    (onSort)="onSort($event)"
+  >
   <ng-template pTemplate="caption">
     <div class="table-caption">
       <h5 class="m-0">{{ (config.title ?? 'dataTable') | translateContent }}</h5>
@@ -86,13 +177,28 @@
 
   <ng-template pTemplate="header">
     <tr>
-      @for (col of config.columns; track col.field) {
+      @if (selectionEnabled) {
+        <th class="app-table-selection-column">
+          @if (multipleSelection && (config.selection?.showSelectAll ?? true)) {
+            <span (click)="$event.stopPropagation()">
+              <app-check-box
+                label=""
+                [value]="allCurrentRowsSelected"
+                [disabled]="loading"
+                (valueChange)="toggleAllCurrentRows($event)"
+              ></app-check-box>
+            </span>
+          }
+        </th>
+      }
+      @for (col of visibleColumns; track col.field) {
         <th
           pFrozenColumn
           [pSortableColumn]="col.sortable ? col.field : undefined"
           [style.width]="col.width ?? null"
           [style.minWidth]="col.minWidth ?? col.width ?? null"
           [style.maxWidth]="col.maxWidth ?? null"
+          [style.textAlign]="col.align ?? null"
           [frozen]="col.frozen ?? false"
           [alignFrozen]="col.alignFrozen ?? 'left'"
           [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
@@ -107,18 +213,42 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
-    <tr>
-      @for (col of config.columns; track col.field) {
+    <tr
+      [class.app-table-row-selected]="isRowSelected(row)"
+      [class.app-table-row-clickable]="config.rowClickable === true"
+      [attr.tabindex]="config.rowClickable ? 0 : -1"
+      (click)="onRowClick(row)"
+      (keydown.enter)="onRowClick(row)"
+    >
+      @if (selectionEnabled) {
+        <td class="app-table-selection-column">
+          <span (click)="$event.stopPropagation()">
+            <app-check-box
+              label=""
+              [value]="isRowSelected(row)"
+              [disabled]="loading"
+              (valueChange)="toggleRowSelection(row, $event)"
+            ></app-check-box>
+          </span>
+        </td>
+      }
+      @for (col of visibleColumns; track col.field) {
         <td
           pFrozenColumn
           [style.width]="col.width ?? null"
           [style.minWidth]="col.minWidth ?? col.width ?? null"
           [style.maxWidth]="col.maxWidth ?? null"
+          [style.textAlign]="col.align ?? null"
           [frozen]="col.frozen ?? false"
           [alignFrozen]="col.alignFrozen ?? 'left'"
           [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
         >
-          <app-table-cell [column]="col" [rowData]="row"></app-table-cell>
+          <app-table-cell
+            [column]="col"
+            [rowData]="row"
+            [customTemplates]="customTemplates"
+            (actionClick)="onActionClick($event)"
+          ></app-table-cell>
         </td>
       }
     </tr>
@@ -126,8 +256,17 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="config.columns.length" class="text-center">
-        {{ 'noDataFound' | translateContent }}
+      <td [attr.colspan]="visibleColumns.length + (selectionEnabled ? 1 : 0)" class="text-center">
+        @if (loading) {
+          <app-loading-skeleton type="table" [rows]="resolvedRows" [columns]="visibleColumns.length"></app-loading-skeleton>
+        } @else {
+          <app-empty-state
+            [title]="resolvedEmptyTitle"
+            [description]="resolvedEmptyDescription"
+            [secondaryActionLabel]="hasActiveFilters ? 'shared.table.clearFilters' : undefined"
+            (secondaryAction)="onResetFilter()"
+          ></app-empty-state>
+        }
       </td>
     </tr>
   </ng-template>
@@ -138,3 +277,4 @@
     </div>
   </ng-template>
 </p-table>
+}

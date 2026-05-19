@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { InputArea } from './input-area';
 
 const meta: Meta<InputArea> = {
-  title: 'Shared/Components/Input Area',
+  title: 'Shared/Components/Form Controls/Input Area',
   component: InputArea,
   args: {
     label: 'Notes',
@@ -25,7 +25,7 @@ export const Json: Story = {
   args: {
     label: 'JSON config',
     contentType: 'json',
-    value: '{\n  "symbol": "BTCUSDT",\n  "interval": "1h",\n  "enabled": true\n}',
+    value: '{\n  "code": "APPROVAL",\n  "interval": "daily",\n  "enabled": true\n}',
     rows: 8,
     maxRows: 10
   }

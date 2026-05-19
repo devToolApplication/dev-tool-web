@@ -81,6 +81,7 @@ export interface CandleChartEngineRenderInput {
   config: ResolvedCandleChartConfig;
   selectedRange: CandleChartRange;
   forceSetData?: boolean;
+  fitContent?: boolean;
 }
 
 @Injectable()
@@ -101,6 +102,10 @@ export class CandleChartEngineService {
   private hostElement: HTMLDivElement | null = null;
   private renderStateCallback: ((state: CandleChartEngineState) => void) | null = null;
   private candleClickCallback: ((candle: ChartCandle) => void) | null = null;
+  private visibleRangeCallback: ((range: { from: number; to: number } | null, candleCount: number) => void) | null = null;
+  private viewportUpdateFrame: number | null = null;
+  private lastRenderStateSignature = '';
+  private overlayGeometryEnabled = false;
 
   private readonly clickHandler: MouseEventHandler<Time> = (param): void => {
     if (param.time == null) {
@@ -120,17 +125,19 @@ export class CandleChartEngineService {
     input: CandleChartEngineRenderInput,
     renderStateCallback: (state: CandleChartEngineState) => void,
     candleClickCallback: (candle: ChartCandle) => void,
+    visibleRangeCallback?: (range: { from: number; to: number } | null, candleCount: number) => void,
   ): Promise<void> {
     this.lightweightChartsModule = await import('lightweight-charts');
     this.hostElement = hostElement;
     this.renderStateCallback = renderStateCallback;
     this.candleClickCallback = candleClickCallback;
+    this.visibleRangeCallback = visibleRangeCallback ?? null;
     const colors = this.resolveChartColors();
     this.chartInstance = this.lightweightChartsModule.createChart(
       hostElement,
       this.buildChartOptions(colors, input.config),
     );
-    this.chartInstance.timeScale().subscribeVisibleLogicalRangeChange(this.updateOverlayGeometry);
+    this.chartInstance.timeScale().subscribeVisibleLogicalRangeChange(this.scheduleViewportUpdate);
     this.chartInstance.subscribeClick(this.clickHandler);
     this.render(input);
   }
@@ -144,6 +151,7 @@ export class CandleChartEngineService {
     const normalizedCandles = this.timeUtil.normalizeCandles(input.candles);
     const nextStructureKey = this.buildStructureKey(input, normalizedCandles);
     const resetStructure = nextStructureKey !== this.structureKey;
+    const previousVisibleRange = input.fitContent === false ? this.chartInstance.timeScale().getVisibleRange() : null;
     this.structureKey = nextStructureKey;
     this.normalizedCandles = normalizedCandles;
 
@@ -161,17 +169,24 @@ export class CandleChartEngineService {
 
     const timeContext = this.timeUtil.buildTimeNormalizationContext(normalizedCandles);
     this.renderOverlays(input.overlays, timeContext, input.config, colors);
-    this.applySelectedRange(input.selectedRange);
-    this.updateOverlayGeometry();
+    this.applySelectedRange(input.selectedRange, input.fitContent !== false);
+    if (previousVisibleRange && input.fitContent === false) {
+      this.chartInstance.timeScale().setVisibleRange(previousVisibleRange);
+    }
+    this.updateViewportState();
   }
 
   resize(width: number, height: number): void {
     this.chartInstance?.resize(width, height, true);
-    this.updateOverlayGeometry();
+    this.updateViewportState();
   }
 
   destroy(): void {
-    this.chartInstance?.timeScale().unsubscribeVisibleLogicalRangeChange(this.updateOverlayGeometry);
+    if (this.viewportUpdateFrame != null) {
+      window.cancelAnimationFrame(this.viewportUpdateFrame);
+      this.viewportUpdateFrame = null;
+    }
+    this.chartInstance?.timeScale().unsubscribeVisibleLogicalRangeChange(this.scheduleViewportUpdate);
     this.chartInstance?.unsubscribeClick(this.clickHandler);
     this.clearAllSeries();
     this.chartInstance?.remove();
@@ -180,6 +195,9 @@ export class CandleChartEngineService {
     this.hostElement = null;
     this.renderStateCallback = null;
     this.candleClickCallback = null;
+    this.visibleRangeCallback = null;
+    this.lastRenderStateSignature = '';
+    this.overlayGeometryEnabled = false;
   }
 
   refreshTheme(input: CandleChartEngineRenderInput): void {
@@ -423,6 +441,7 @@ export class CandleChartEngineService {
 
     this.activeBoxAreas = boxes;
     this.activeLines = labelLines;
+    this.overlayGeometryEnabled = config.showOverlayLabels && (boxes.length > 0 || labelLines.some((line) => !!line.name));
     this.markersApi = this.lightweightChartsModule.createSeriesMarkers(this.candleSeries, markers);
   }
 
@@ -577,6 +596,7 @@ export class CandleChartEngineService {
     this.renderedTimes = [];
     this.activeBoxAreas = [];
     this.activeLines = [];
+    this.overlayGeometryEnabled = false;
   }
 
   private clearOverlayArtifacts(): void {
@@ -588,6 +608,7 @@ export class CandleChartEngineService {
     this.overlaySeries = [];
     this.activeBoxAreas = [];
     this.activeLines = [];
+    this.overlayGeometryEnabled = false;
   }
 
   private applyMainPriceScale(colors: CandleChartColors, config: ResolvedCandleChartConfig): void {
@@ -600,13 +621,16 @@ export class CandleChartEngineService {
     });
   }
 
-  private applySelectedRange(range: CandleChartRange): void {
+  private applySelectedRange(range: CandleChartRange, fitContent: boolean): void {
     if (!this.chartInstance) {
       return;
     }
 
     const timeScale = this.chartInstance.timeScale();
     if (range === 'ALL' || this.normalizedCandles.length === 0) {
+      if (!fitContent) {
+        return;
+      }
       timeScale.fitContent();
       return;
     }
@@ -660,9 +684,19 @@ export class CandleChartEngineService {
     }
   }
 
-  private readonly updateOverlayGeometry = (): void => {
+  private readonly scheduleViewportUpdate = (): void => {
+    if (this.viewportUpdateFrame != null) {
+      return;
+    }
+    this.viewportUpdateFrame = window.requestAnimationFrame(() => {
+      this.viewportUpdateFrame = null;
+      this.updateViewportState();
+    });
+  };
+
+  private updateViewportState(): void {
     if (!this.chartInstance || !this.candleSeries || !this.hostElement) {
-      this.renderStateCallback?.({
+      this.emitRenderState({
         latestCandle: null,
         renderedBoxAreas: [],
         renderedLineLabels: [],
@@ -671,6 +705,17 @@ export class CandleChartEngineService {
     }
 
     const timeScale = this.chartInstance.timeScale();
+    this.visibleRangeCallback?.(timeScale.getVisibleLogicalRange(), this.normalizedCandles.length);
+    const latestCandle = this.normalizedCandles.at(-1)?.source ?? null;
+    if (!this.overlayGeometryEnabled) {
+      this.emitRenderState({
+        latestCandle,
+        renderedBoxAreas: [],
+        renderedLineLabels: [],
+      });
+      return;
+    }
+
     const chartWidth = this.hostElement.clientWidth;
     const nextAreas = this.activeBoxAreas.flatMap((area) => {
       const startCoordinate = timeScale.timeToCoordinate(area.startTime);
@@ -744,12 +789,35 @@ export class CandleChartEngineService {
       ];
     });
 
-    this.renderStateCallback?.({
-      latestCandle: this.normalizedCandles.at(-1)?.source ?? null,
+    this.emitRenderState({
+      latestCandle,
       renderedBoxAreas: nextAreas,
       renderedLineLabels: nextLineLabels,
     });
-  };
+  }
+
+  private emitRenderState(state: CandleChartEngineState): void {
+    const signature = this.renderStateSignature(state);
+    if (signature === this.lastRenderStateSignature) {
+      return;
+    }
+    this.lastRenderStateSignature = signature;
+    this.renderStateCallback?.(state);
+  }
+
+  private renderStateSignature(state: CandleChartEngineState): string {
+    const latest = state.latestCandle;
+    const latestKey = latest
+      ? `${latest.openTime ?? latest.time}:${latest.open}:${latest.high}:${latest.low}:${latest.close}:${latest.volume ?? ''}`
+      : '';
+    const areasKey = state.renderedBoxAreas
+      .map((area) => `${area.key}:${area.style['left']}:${area.style['top']}:${area.style['width']}:${area.style['height']}:${area.style['background']}:${area.style['borderColor']}`)
+      .join('|');
+    const labelsKey = state.renderedLineLabels
+      .map((label) => `${label.key}:${label.style['left']}:${label.style['top']}:${label.style['color']}`)
+      .join('|');
+    return `${latestKey}::${areasKey}::${labelsKey}`;
+  }
 
   private buildChartOptions(
     colors: CandleChartColors,

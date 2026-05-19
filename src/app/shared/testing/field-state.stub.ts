@@ -8,6 +8,7 @@ export function createFieldState(config: FieldConfig, initialValue: unknown = ''
   const focusing = signal(false);
   const blurred = signal(false);
   const dirty = signal(false);
+  const externalErrors = signal<Record<string, string> | null>(null);
 
   return {
     fieldConfig: config,
@@ -25,8 +26,10 @@ export function createFieldState(config: FieldConfig, initialValue: unknown = ''
     focusing,
     blurred,
     dirty,
+    externalErrors,
     visible: signal(true),
     disabled: signal(false),
+    required: signal(config.required === true || config.validation?.some((rule) => rule.type === 'required') === true),
     options: signal<SelectOption[]>([]),
     errors: signal<Record<string, string> | null>(null),
     valid: signal(true),
@@ -44,7 +47,8 @@ export function createArrayFieldState(): ArrayFieldState {
     children: signal<FieldState[][]>([]),
     arrayState: {
       addItem: () => undefined,
-      removeItem: () => undefined
+      removeItem: () => undefined,
+      moveItem: () => undefined
     }
   };
 }

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { Paginator } from './paginator';
 
 const meta: Meta<Paginator> = {
-  title: 'Shared/Components/Paginator',
+  title: 'Shared/Components/Navigation/Paginator',
   component: Paginator,
   args: {
     first: 0,

@@ -1,188 +1,153 @@
-<section class="playwright-session-page">
-  <header class="page-hero">
-    <div>
-      <p class="eyebrow">{{ 'aiAgent.playwrightSessions.runtime' | translateContent }}</p>
-      <h2>{{ 'aiAgent.playwrightSessions.title' | translateContent }}</h2>
-      <p class="hero-description">
-        {{ 'aiAgent.playwrightSessions.description' | translateContent }}
-      </p>
-    </div>
-
-    <div class="hero-actions">
-      <app-button [text]="true" icon="pi pi-refresh" label="refresh" [loading]="loading" (buttonClick)="loadSessions()"></app-button>
-      <app-button icon="pi pi-sync" severity="secondary" label="aiAgent.playwrightSessions.syncDefault" [loading]="syncing" (buttonClick)="syncDefaultSession()"></app-button>
-      <app-button icon="pi pi-plus" severity="success" label="aiAgent.playwrightSessions.newSession" (buttonClick)="openCreate()"></app-button>
-    </div>
-  </header>
-
-  <section class="stat-grid">
-    <article class="stat-card">
-      <span>{{ 'aiAgent.playwrightSessions.total' | translateContent }}</span>
-      <strong>{{ totalCount }}</strong>
-    </article>
-    <article class="stat-card idle">
-      <span>{{ 'aiAgent.playwrightSessions.status.idle' | translateContent }}</span>
-      <strong>{{ idleCount }}</strong>
-    </article>
-    <article class="stat-card busy">
-      <span>{{ 'aiAgent.playwrightSessions.status.busy' | translateContent }}</span>
-      <strong>{{ busyCount }}</strong>
-    </article>
-    <article class="stat-card hung">
-      <span>{{ 'aiAgent.playwrightSessions.status.hung' | translateContent }}</span>
-      <strong>{{ hungCount }}</strong>
-    </article>
-  </section>
-
-  <section class="table-card">
-    <app-prime-table
-      [value]="sessions"
-      [loading]="loading"
-      [paginator]="sessions.length > 10"
-      [rows]="10"
-      [rowsPerPageOptions]="[10, 20, 50]"
-      [rowTrackBy]="trackBySessionId"
-      [scrollable]="true"
-      scrollHeight="flex"
-      responsiveLayout="scroll"
-      styleClass="playwright-session-table"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th>{{ 'aiAgent.playwrightSessions.session' | translateContent }}</th>
-          <th>{{ 'status' | translateContent }}</th>
-          <th>{{ 'aiAgent.playwrightSessions.cdpEndpoint' | translateContent }}</th>
-          <th>{{ 'timeout' | translateContent }}</th>
-          <th>{{ 'aiAgent.playwrightSessions.throttle' | translateContent }}</th>
-          <th>{{ 'aiAgent.playwrightSessions.currentThread' | translateContent }}</th>
-          <th>{{ 'aiAgent.playwrightSessions.timeline' | translateContent }}</th>
-          <th pFrozenColumn alignFrozen="right" class="action-col">{{ 'actions' | translateContent }}</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-session>
-        <tr>
-          <td>
-            <div class="session-title">{{ session.name || session.sessionId }}</div>
-            <code>{{ session.sessionId }}</code>
-          </td>
-          <td>
-            <div class="status-stack">
-              <app-tag [value]="statusLabel(session.status) | translateContent" [severity]="statusSeverity(session.status)"></app-tag>
-              <span class="enabled-state" [class.off]="session.enabled === false">
-                {{ (session.enabled === false ? 'aiAgent.playwrightSessions.disabled' : 'enabled') | translateContent }}
-              </span>
-              @if (session.lastErrorMessage) {
-                <span class="error-line">{{ session.lastErrorMessage }}</span>
-              }
-            </div>
-          </td>
-          <td>
-            <code class="endpoint">{{ session.cdpEndpoint || '-' }}</code>
-            <div class="temporary-url">{{ session.temporaryChatUrl || '-' }}</div>
-          </td>
-          <td>{{ formatTimeout(session.timeoutMs) }}</td>
-          <td>
-            <div class="timeline-stack">
-              <span><strong>{{ 'aiAgent.playwrightSessions.reuse' | translateContent }}:</strong> {{ formatTimeout(session.minIdleBeforeReuseMs) }}</span>
-              <span><strong>{{ 'aiAgent.playwrightSessions.global' | translateContent }}:</strong> {{ formatTimeout(session.globalMinStartIntervalMs) }}</span>
-            </div>
-          </td>
-          <td>
-            <div>{{ threadDisplay(session) }}</div>
-            @if (session.currentRequestId) {
-              <code class="request-id">{{ session.currentRequestId }}</code>
-            }
-          </td>
-          <td>
-            <div class="timeline-stack">
-              <span><strong>{{ 'aiAgent.playwrightSessions.leased' | translateContent }}:</strong> {{ formatDateTime(session.leasedAt) }}</span>
-              <span><strong>{{ 'aiAgent.playwrightSessions.expires' | translateContent }}:</strong> {{ formatDateTime(session.leaseExpiresAt) }}</span>
-              <span><strong>{{ 'aiAgent.playwrightSessions.reset' | translateContent }}:</strong> {{ formatDateTime(session.lastResetAt) }}</span>
-            </div>
-          </td>
-          <td pFrozenColumn alignFrozen="right" class="action-cell">
-            <app-button [text]="true" icon="pi pi-pencil" severity="info" label="edit" (buttonClick)="openEdit(session)"></app-button>
-            <app-button
-              [text]="true"
-              icon="pi pi-replay"
-              severity="help"
-              label="aiAgent.playwrightSessions.reset"
-              [loading]="isActionLoading(session, 'reset')"
-              [disabled]="session.status === 'BUSY'"
-              (buttonClick)="runSessionAction(session, 'reset')"
-            ></app-button>
-            @if (session.enabled === false || session.status === 'DISABLED') {
-              <app-button
-                [text]="true"
-                icon="pi pi-check"
-                severity="success"
-                label="aiAgent.playwrightSessions.enable"
-                [loading]="isActionLoading(session, 'enable')"
-                (buttonClick)="runSessionAction(session, 'enable')"
-              ></app-button>
-            } @else {
-              <app-button
-                [text]="true"
-                icon="pi pi-ban"
-                severity="danger"
-                label="aiAgent.playwrightSessions.disable"
-                [loading]="isActionLoading(session, 'disable')"
-                [disabled]="session.status === 'BUSY'"
-                (buttonClick)="runSessionAction(session, 'disable')"
-              ></app-button>
-            }
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="8">
-            <div class="empty-state">
-              {{ 'aiAgent.playwrightSessions.empty' | translateContent }}
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </app-prime-table>
-  </section>
-</section>
-
-<app-base-popup
-  [visible]="formVisible"
-  [header]="editMode ? 'aiAgent.playwrightSessions.editSession' : 'aiAgent.playwrightSessions.newSession'"
-  [subheader]="editMode ? (selectedSession?.sessionId || '') : 'aiAgent.playwrightSessions.formDescription'"
-  [size]="'lg'"
-  [loading]="saving"
-  [showDefaultCancel]="false"
-  [showDefaultConfirm]="false"
-  (visibleChange)="onFormVisibleChange($event)"
-  (cancel)="closeForm()"
+<app-page-shell
+  title="aiAgent.playwrightSessions.title"
+  subtitle="aiAgent.playwrightSessions.description"
+  layout="wide"
 >
-  <form class="session-form" #sessionForm="ngForm" (ngSubmit)="saveSession()">
-    <app-input-text label="aiAgent.playwrightSessions.sessionId" name="sessionId" [(ngModel)]="formModel.sessionId" [disabled]="editMode" placeholder="chrome-1" [required]="true"></app-input-text>
+  <app-action-toolbar
+    page-actions
+    [actions]="pageActions"
+    (actionClick)="onPageAction($event)"
+  ></app-action-toolbar>
 
-    <app-input-text label="name" name="name" [(ngModel)]="formModel.name" placeholder="Chrome CDP 1"></app-input-text>
-
-    <app-input-text class="full" label="aiAgent.playwrightSessions.cdpEndpoint" name="cdpEndpoint" [(ngModel)]="formModel.cdpEndpoint" placeholder="http://127.0.0.1:9222" [required]="true"></app-input-text>
-
-    <app-input-text class="full" label="aiAgent.playwrightSessions.temporaryChatUrl" name="temporaryChatUrl" [(ngModel)]="formModel.temporaryChatUrl" placeholder="https://chatgpt.com/?temporary-chat=true"></app-input-text>
-
-    <app-input-number label="aiAgent.playwrightSessions.leaseTimeoutMs" name="timeoutMs" [(ngModel)]="formModel.timeoutMs" [min]="1000" placeholder="180000"></app-input-number>
-
-    <app-input-number label="aiAgent.playwrightSessions.minIdleBeforeReuseMs" name="minIdleBeforeReuseMs" [(ngModel)]="formModel.minIdleBeforeReuseMs" [min]="0" placeholder="15000"></app-input-number>
-
-    <app-input-number label="aiAgent.playwrightSessions.globalStartIntervalMs" name="globalMinStartIntervalMs" [(ngModel)]="formModel.globalMinStartIntervalMs" [min]="0" placeholder="5000"></app-input-number>
-
-    <div class="switch-field">
-      <span>{{ 'enabled' | translateContent }}</span>
-      <app-toggle-switch name="enabled" [(ngModel)]="formModel.enabled"></app-toggle-switch>
-    </div>
-  </form>
-
-  <div popup-footer>
-    <app-button [text]="true" label="cancel" [disabled]="saving" (buttonClick)="closeForm()"></app-button>
-    <app-button icon="pi pi-save" label="save" [loading]="saving" (buttonClick)="saveSession()"></app-button>
+  <div page-summary class="session-summary-grid">
+    <app-summary-metric-card
+      label="aiAgent.playwrightSessions.total"
+      [value]="totalCount"
+      [loading]="loading() && sessions.length === 0"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      label="aiAgent.playwrightSessions.status.idle"
+      [value]="idleCount"
+      trendVariant="success"
+      [loading]="loading() && sessions.length === 0"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      label="aiAgent.playwrightSessions.status.busy"
+      [value]="busyCount"
+      trendVariant="info"
+      [loading]="loading() && sessions.length === 0"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      label="aiAgent.playwrightSessions.status.hung"
+      [value]="hungCount"
+      trendVariant="danger"
+      [loading]="loading() && sessions.length === 0"
+    ></app-summary-metric-card>
   </div>
-</app-base-popup>
+
+  <app-section-panel
+    title="aiAgent.playwrightSessions.listTitle"
+    subtitle="aiAgent.playwrightSessions.listDescription"
+  >
+    <app-table
+      [config]="tableConfig"
+      [data]="sessions"
+      [loading]="loading()"
+      [error]="loadError()"
+      [customTemplates]="{
+        session: sessionTemplate,
+        status: statusTemplate,
+        endpoint: endpointTemplate,
+        throttle: throttleTemplate,
+        thread: threadTemplate,
+        timeline: timelineTemplate
+      }"
+      (retry)="loadSessions()"
+    ></app-table>
+  </app-section-panel>
+</app-page-shell>
+
+<ng-template #sessionTemplate let-session>
+  <div class="session-cell">
+    <strong>{{ session.name || session.sessionId }}</strong>
+    <app-copyable-text [value]="session.sessionId" [shorten]="true"></app-copyable-text>
+  </div>
+</ng-template>
+
+<ng-template #statusTemplate let-session>
+  <div class="status-cell">
+    <app-badge
+      [label]="statusLabel(session.status)"
+      [variant]="statusSeverity(session.status)"
+    ></app-badge>
+    <app-badge
+      [label]="session.enabled === false ? 'aiAgent.playwrightSessions.disabled' : 'enabled'"
+      [variant]="session.enabled === false ? 'muted' : 'success'"
+      size="sm"
+    ></app-badge>
+    @if (session.lastErrorMessage) {
+      <app-alert
+        variant="danger"
+        [message]="session.lastErrorMessage"
+      ></app-alert>
+    }
+  </div>
+</ng-template>
+
+<ng-template #endpointTemplate let-session>
+  <div class="stacked-cell">
+    <app-copyable-text [value]="session.cdpEndpoint || '-'" [shorten]="true"></app-copyable-text>
+    <app-copyable-text [value]="session.temporaryChatUrl || '-'" [shorten]="true"></app-copyable-text>
+  </div>
+</ng-template>
+
+<ng-template #throttleTemplate let-session>
+  <div class="stacked-cell">
+    <span>{{ 'timeout' | translateContent }}: {{ formatTimeout(session.timeoutMs) }}</span>
+    <span>{{ 'aiAgent.playwrightSessions.reuse' | translateContent }}: {{ formatTimeout(session.minIdleBeforeReuseMs) }}</span>
+    <span>{{ 'aiAgent.playwrightSessions.global' | translateContent }}: {{ formatTimeout(session.globalMinStartIntervalMs) }}</span>
+  </div>
+</ng-template>
+
+<ng-template #threadTemplate let-session>
+  <div class="stacked-cell">
+    <span>{{ threadDisplay(session) }}</span>
+    @if (session.currentRequestId) {
+      <app-copyable-text [value]="session.currentRequestId" [shorten]="true"></app-copyable-text>
+    }
+  </div>
+</ng-template>
+
+<ng-template #timelineTemplate let-session>
+  <div class="stacked-cell">
+    <span>{{ 'aiAgent.playwrightSessions.leased' | translateContent }}: {{ formatDateTime(session.leasedAt) }}</span>
+    <span>{{ 'aiAgent.playwrightSessions.expires' | translateContent }}: {{ formatDateTime(session.leaseExpiresAt) }}</span>
+    <span>{{ 'aiAgent.playwrightSessions.reset' | translateContent }}: {{ formatDateTime(session.lastResetAt) }}</span>
+  </div>
+</ng-template>
+
+<app-drawer
+  [open]="formVisible"
+  [title]="formTitle"
+  [subtitle]="formSubtitle"
+  size="lg"
+  [closeOnBackdrop]="!saving()"
+  [closeOnEsc]="!saving()"
+  (openChange)="onFormVisibleChange($event)"
+  (closed)="closeForm()"
+>
+  <app-form-input
+    [config]="formConfig"
+    [context]="formContext"
+    [initialValue]="formModel"
+    [showSubmit]="false"
+    [submitting]="saving()"
+    [apiError]="formApiError"
+    (formSubmit)="saveSession($event)"
+  ></app-form-input>
+
+  <div drawer-footer class="drawer-actions">
+    <app-button
+      [text]="true"
+      label="cancel"
+      [disabled]="saving()"
+      (buttonClick)="closeForm()"
+    ></app-button>
+    <app-button
+      icon="pi pi-save"
+      label="save"
+      [loading]="saving()"
+      (buttonClick)="submitSessionForm()"
+    ></app-button>
+  </div>
+</app-drawer>

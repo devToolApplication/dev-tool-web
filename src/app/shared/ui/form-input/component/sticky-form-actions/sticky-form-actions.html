@@ -1,0 +1,52 @@
+<footer class="sticky-form-actions">
+  <div class="sticky-form-actions__state">
+    <span>{{ statusKey | translateContent }}</span>
+    @if (errorCount > 0) {
+      <small>{{ errorCount }} {{ 'shared.validation.errors' | translateContent }}</small>
+    } @else if (warningCount > 0) {
+      <small>{{ warningCount }} {{ 'shared.validation.warnings' | translateContent }}</small>
+    }
+  </div>
+
+  <div class="sticky-form-actions__buttons">
+    @if (errorCount > 0) {
+      <app-button
+        type="button"
+        severity="secondary"
+        icon="pi pi-list-check"
+        [label]="reviewErrorsLabel"
+        (buttonClick)="reviewErrors.emit()"
+      ></app-button>
+    }
+    @if (showReset) {
+      <app-button
+        type="button"
+        severity="secondary"
+        [text]="true"
+        icon="pi pi-refresh"
+        [label]="resetLabel"
+        [disabled]="!dirty || loading || submitting || readonly"
+        (buttonClick)="reset.emit()"
+      ></app-button>
+    }
+    @if (showCancel) {
+      <app-button
+        type="button"
+        severity="secondary"
+        [label]="cancelLabel"
+        [disabled]="loading || submitting"
+        (buttonClick)="cancel.emit()"
+      ></app-button>
+    }
+    @if (showSubmit && !readonly) {
+      <app-button
+        type="submit"
+        severity="success"
+        icon="pi pi-save"
+        [label]="submitLabel"
+        [disabled]="submitDisabled"
+        [loading]="submitting"
+      ></app-button>
+    }
+  </div>
+</footer>

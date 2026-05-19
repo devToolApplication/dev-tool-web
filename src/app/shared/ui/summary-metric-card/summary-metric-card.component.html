@@ -1,4 +1,31 @@
-<app-card class="summary-metric-card" [padding]="'md'" [fullHeight]="true">
-  <span class="summary-metric-label">{{ label | translateContent }}</span>
-  <strong class="summary-metric-value">{{ (value ?? 'notAvailable') | translateContent }}{{ suffix }}</strong>
-</app-card>
+@if (routerLink) {
+  <a class="summary-metric-link" [routerLink]="routerLink" [queryParams]="queryParams">
+    <app-card class="summary-metric-card" [padding]="'md'" [fullHeight]="true">
+      <span class="summary-metric-label">{{ label | translateContent }}</span>
+      @if (loading) {
+        <app-loading-skeleton type="card" [rows]="1"></app-loading-skeleton>
+      } @else if (error) {
+        <app-error-state [message]="error" [compact]="true"></app-error-state>
+      } @else {
+        <strong class="summary-metric-value">{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong>
+        @if (trendLabel) {
+          <app-badge class="summary-metric-trend" [label]="trendLabel" [variant]="trendVariant" size="sm"></app-badge>
+        }
+      }
+    </app-card>
+  </a>
+} @else {
+  <app-card class="summary-metric-card" [padding]="'md'" [fullHeight]="true">
+    <span class="summary-metric-label">{{ label | translateContent }}</span>
+    @if (loading) {
+      <app-loading-skeleton type="card" [rows]="1"></app-loading-skeleton>
+    } @else if (error) {
+      <app-error-state [message]="error" [compact]="true"></app-error-state>
+    } @else {
+      <strong class="summary-metric-value">{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong>
+      @if (trendLabel) {
+        <app-badge class="summary-metric-trend" [label]="trendLabel" [variant]="trendVariant" size="sm"></app-badge>
+      }
+    }
+  </app-card>
+}

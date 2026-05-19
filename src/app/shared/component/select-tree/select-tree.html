@@ -8,6 +8,7 @@
       <p-inputicon [class]="iconClass"></p-inputicon>
       <p-tree-select
         [inputId]="inputId"
+        appendTo="body"
         [options]="options | translateContent"
         [placeholder]="(placeholder || '') | translateContent"
         [selectionMode]="selectionMode"
@@ -24,6 +25,7 @@
   } @else {
     <p-tree-select
       [inputId]="inputId"
+      appendTo="body"
       [options]="options | translateContent"
       [placeholder]="(placeholder || '') | translateContent"
       [selectionMode]="selectionMode"
@@ -39,7 +41,7 @@
   }
 </div>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

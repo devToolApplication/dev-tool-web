@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.smart-form-shell {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding-bottom: 0.5rem;
+}
+
+.smart-form-shell--compact {
+  gap: 0.75rem;
+}
+
+.smart-form-shell--spacious {
+  gap: 1.25rem;
+}
+
+.smart-form-shell__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.smart-form-shell h2,
+.smart-form-shell p {
+  margin: 0;
+}
+
+.smart-form-shell h2 {
+  color: var(--app-text);
+  font-size: 1.125rem;
+  font-weight: 750;
+}
+
+.smart-form-shell p {
+  margin-top: 0.25rem;
+  color: var(--app-text-muted);
+}
+
+.smart-form-shell__loading {
+  display: grid;
+  gap: 1rem;
+}
+
+.smart-form-shell__workspace {
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.22fr) minmax(0, 1fr) minmax(13rem, 0.26fr);
+  align-items: start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.smart-form-shell__workspace--no-nav {
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.26fr);
+}
+
+.smart-form-shell__workspace--no-nav .smart-form-shell__nav {
+  display: none;
+}
+
+.smart-form-shell__workspace--no-status {
+  grid-template-columns: minmax(11rem, 0.22fr) minmax(0, 1fr);
+}
+
+.smart-form-shell__workspace--no-nav.smart-form-shell__workspace--no-status {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.smart-form-shell__main {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .smart-form-shell__workspace,
+  .smart-form-shell__workspace--no-nav,
+  .smart-form-shell__workspace--no-status,
+  .smart-form-shell__workspace--no-nav.smart-form-shell__workspace--no-status {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .smart-form-shell__workspace--no-nav .smart-form-shell__nav {
+    display: none;
+  }
+}

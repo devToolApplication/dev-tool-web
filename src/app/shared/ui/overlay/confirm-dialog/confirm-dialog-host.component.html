@@ -1,0 +1,63 @@
+@if (request(); as dialog) {
+  <div class="confirm-dialog" role="presentation">
+    <button
+      type="button"
+      class="confirm-dialog__backdrop"
+      [attr.aria-label]="'close' | translateContent"
+      (click)="onBackdropClick()"
+    ></button>
+
+    <section
+      #panel
+      class="confirm-dialog__panel"
+      role="alertdialog"
+      aria-modal="true"
+      tabindex="-1"
+      [attr.aria-label]="dialog.title"
+    >
+      <header class="confirm-dialog__header">
+        <span class="confirm-dialog__icon" [class]="'confirm-dialog__icon confirm-dialog__icon--' + dialog.variant">
+          <i [class]="dialog.icon" aria-hidden="true"></i>
+        </span>
+        <div>
+          <h2>{{ dialog.title }}</h2>
+          <p>{{ dialog.message }}</p>
+        </div>
+      </header>
+
+      @if (dialog.requireText) {
+        <div class="confirm-dialog__require">
+          <app-input-text
+            label="shared.confirm.confirmationText"
+            [value]="typedText()"
+            [placeholder]="dialog.requireText"
+            [autofocus]="true"
+            (valueChange)="typedText.set($event || '')"
+          ></app-input-text>
+          <small>{{ requireTextHint(dialog) }}</small>
+        </div>
+      }
+
+      @if (actionError()) {
+        <app-alert variant="danger" [message]="actionError() || ''"></app-alert>
+      }
+
+      <footer class="confirm-dialog__footer">
+        <app-button
+          [label]="dialog.cancelText"
+          severity="secondary"
+          [text]="true"
+          [disabled]="processing()"
+          (buttonClick)="reject()"
+        ></app-button>
+        <app-button
+          [label]="dialog.confirmText"
+          [severity]="severity(dialog)"
+          [disabled]="confirmDisabled"
+          [loading]="processing()"
+          (buttonClick)="accept()"
+        ></app-button>
+      </footer>
+    </section>
+  </div>
+}

@@ -8,6 +8,9 @@ type PanelSurface = 'default' | 'strong';
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.css'
 })
+/**
+ * @deprecated Use shared/ui/layout/section-panel or shared/ui/data-display/card style blocks for new composed panels.
+ */
 export class PanelComponent {
   @Input() title = '';
   @Input() description = '';

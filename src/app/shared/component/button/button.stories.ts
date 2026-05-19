@@ -4,7 +4,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { Button } from './button';
 
 const meta: Meta<Button> = {
-  title: 'Shared/Components/Button',
+  title: 'Shared/Components/Actions/Button',
   component: Button,
   args: {
     label: 'Submit',

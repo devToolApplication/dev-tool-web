@@ -4,7 +4,7 @@ import type { CrudPageConfig } from './base-crud-page.model';
 import type { FormConfig, FormContext } from '../form-input/models/form-config.model';
 
 const pageConfig: CrudPageConfig = {
-  title: 'Strategy Configuration',
+  title: 'Workflow Configuration',
   description: 'Shared CRUD shell with projected form actions.',
   infoSection: {
     title: 'Review before saving',
@@ -76,9 +76,9 @@ const formContext: FormContext = {
 };
 
 const formInitialValue = {
-  name: 'Breakout Alpha',
+  name: 'Approval Flow',
   status: 'active',
-  description: 'Entry strategy for momentum breakouts.'
+  description: 'Workflow for approval requests.'
 };
 
 const meta: Meta<BaseCrudPageComponent> = {

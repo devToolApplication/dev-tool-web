@@ -20,7 +20,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 220ms ease;
-  z-index: 2000;
+  z-index: var(--app-z-loading);
 }
 
 .loading-overlay.visible {

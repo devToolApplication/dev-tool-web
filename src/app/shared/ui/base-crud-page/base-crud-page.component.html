@@ -10,15 +10,19 @@
     @if (pageConfig.actions?.length) {
       <div class="header-actions flex flex-wrap items-center gap-2">
         @for (action of pageConfig.actions; track action.id) {
-          <app-button
-            [type]="action.type ?? 'button'"
-            [styleClass]="action.buttonClass ?? ''"
-            [icon]="action.icon ?? ''"
-            [label]="action.label"
-            [disabled]="action.disabled ?? false"
-            [loading]="action.loading ?? false"
-            (buttonClick)="onActionClick(action)"
-          ></app-button>
+          @if (action.visible ?? true) {
+            <app-button
+              [type]="action.type ?? 'button'"
+              [styleClass]="action.buttonClass ?? ''"
+              [icon]="action.icon ?? ''"
+              [label]="action.label"
+              [severity]="action.severity ?? null"
+              [text]="action.text ?? false"
+              [disabled]="action.disabled ?? false"
+              [loading]="action.loading ?? false"
+              (buttonClick)="onActionClick(action)"
+            ></app-button>
+          }
         }
       </div>
     }
@@ -43,6 +47,8 @@
         [initialValue]="formInitialValue"
         [showSubmit]="false"
         [submitting]="submitting"
+        [apiError]="apiError"
+        [apiFieldErrors]="apiFieldErrors"
         (formSubmit)="onFormSubmit($event)"
         (valueChange)="onValueChange($event)"
       ></app-form-input>

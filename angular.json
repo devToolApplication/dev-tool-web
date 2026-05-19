@@ -53,8 +53,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "10kB"
                 }
               ],
               "outputHashing": "all",
@@ -104,7 +104,7 @@
             "configDir": ".storybook",
             "browserTarget": "dev-tool-web:build:development",
             "tsConfig": ".storybook/tsconfig.json",
-            "outputDir": "storybook-static",
+            "outputDir": ".tmp/storybook-static",
             "compodoc": false
           }
         }

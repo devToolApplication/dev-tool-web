@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../../core/constants/system.constants';
-import { BasePageResponse } from '../../../../../../core/models/base-response.model';
 import { StorageConfigResponse } from '../../../../../../core/models/file-storage/storage-config.model';
 import { StorageConfigService } from '../../../../../../core/services/file-service/storage-config.service';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
@@ -19,30 +17,48 @@ import { STORAGE_CONFIG_ROUTES } from '../storage-config.constants';
 })
 export class StorageConfigListComponent extends BasePagedList<StorageConfigResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'Storage Configs',
+    title: 'systemManagement.storageConfig.list.title',
+    stateKey: 'system-management.storage-configs',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'loadError',
     toolbar: {
-      new: { visible: true, label: 'New Config', icon: 'pi pi-plus', severity: 'success' }
+      new: { visible: true, label: 'systemManagement.action.newConfig', icon: 'pi pi-plus', severity: 'success' },
+      columnVisibility: { visible: true },
+      density: { visible: true }
     },
     filters: [
-      { field: 'key', label: 'Key', placeholder: 'Search key' },
-      { field: 'category', label: 'Category', placeholder: 'Search category' }
+      { field: 'key', label: 'key', placeholder: 'systemManagement.filter.searchKey' },
+      { field: 'category', label: 'category', placeholder: 'systemManagement.filter.searchCategory' }
     ],
     filterOptions: { primaryField: 'key' },
     columns: [
-      { field: 'category', header: 'Category', sortable: true },
-      { field: 'key', header: 'Key', sortable: true },
-      { field: 'status', header: 'Status' },
-      { field: 'description', header: 'Description' },
+      { field: 'category', header: 'category', sortable: true },
+      { field: 'key', header: 'key', type: 'copyable', sortable: true },
+      {
+        field: 'status',
+        header: 'status',
+        type: 'badge',
+        badgeMap: { ACTIVE: 'success', INACTIVE: 'muted', DELETE: 'danger' }
+      },
+      { field: 'description', header: 'description' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         minWidth: '12rem',
         frozen: true,
         alignFrozen: 'right',
         actions: [
-          { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
-          { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.id) }
+          { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
+          {
+            label: 'delete',
+            icon: 'pi pi-trash',
+            severity: 'danger',
+            variant: 'danger',
+            confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
+            onClick: (row) => this.remove(row.id)
+          }
         ]
       }
     ],
@@ -50,8 +66,6 @@ export class StorageConfigListComponent extends BasePagedList<StorageConfigRespo
     rows: DEFAULT_TABLE_ROWS,
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
-
-  loading = false;
 
   constructor(
     private readonly service: StorageConfigService,
@@ -61,7 +75,7 @@ export class StorageConfigListComponent extends BasePagedList<StorageConfigRespo
     private readonly router: Router,
     private readonly i18nService: I18nService
   ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
+    super(route, router, DEFAULT_TABLE_ROWS, ['category,asc', 'key,asc']);
   }
 
   ngOnInit(): void {
@@ -77,8 +91,7 @@ export class StorageConfigListComponent extends BasePagedList<StorageConfigRespo
   }
 
   private remove(id: string): void {
-    this.loading = true;
-    this.loadingService.track(this.service.delete(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loadingService.track(this.service.delete(id)).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t('deleteSuccess'));
         this.loadPage();
@@ -88,13 +101,9 @@ export class StorageConfigListComponent extends BasePagedList<StorageConfigRespo
   }
 
   protected loadPage(): void {
-    this.loading = true;
-    this.loadingService
-      .track(this.service.getPage(this.page, this.pageSize, ['category,asc', 'key,asc'], this.filters))
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: BasePageResponse<StorageConfigResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error('Load storage configs failed')
-      });
+    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.sorts, this.filters)), {
+      errorMessage: 'systemManagement.storageConfig.toast.loadListFailed',
+      onError: () => this.toastService.error('systemManagement.storageConfig.toast.loadListFailed')
+    });
   }
 }

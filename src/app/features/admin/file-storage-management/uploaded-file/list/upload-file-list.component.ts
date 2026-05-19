@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { UploadFileResponse } from '../../../../../core/models/file-storage/upload-file.model';
 import { UploadStorageResponse } from '../../../../../core/models/file-storage/upload-storage.model';
 import { UploadFileService } from '../../../../../core/services/file-service/upload-file.service';
@@ -19,7 +17,11 @@ import { TableConfig } from '../../../../../shared/ui/table/models/table-config.
 })
 export class UploadFileListComponent extends BasePagedList<UploadFileResponse> implements OnInit {
   tableConfig: TableConfig = {
-    title: 'Uploaded Files',
+    title: 'layout.menu.uploadedFiles',
+    stateKey: 'file-storage.uploaded-files',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'loadError',
     minWidth: '112rem',
     filters: [
       { field: 'fileName', label: 'File name', placeholder: 'Search file name' },
@@ -30,18 +32,20 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
       primaryField: 'fileName'
     },
     toolbar: {
-      export: {
+      refresh: {
         visible: true,
-        label: 'Refresh',
+        label: 'refresh',
         icon: 'pi pi-refresh',
         severity: 'secondary'
-      }
+      },
+      columnVisibility: { visible: true },
+      density: { visible: true }
     },
     columns: [
       { field: 'fileName', header: 'File name', sortable: true, width: '20rem', frozen: true, alignFrozen: 'left' },
       { field: 'mimeType', header: 'MIME type', width: '12rem' },
-      { field: 'storageId', header: 'Storage ID', width: '18rem' },
-      { field: 'fileUrl', header: 'URL', width: '28rem' },
+      { field: 'storageId', header: 'Storage ID', type: 'copyable', width: '18rem' },
+      { field: 'fileUrl', header: 'URL', type: 'copyable', width: '28rem' },
       { field: 'createdAt', header: 'Created At', type: 'date', format: 'dd/MM/yyyy HH:mm', width: '12rem' },
       { field: 'updatedAt', header: 'Updated At', type: 'date', format: 'dd/MM/yyyy HH:mm', width: '12rem' },
       {
@@ -63,7 +67,8 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
             label: 'delete',
             icon: 'pi pi-trash',
             severity: 'danger',
-            disabled: () => this.loading,
+            variant: 'danger',
+            confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
             onClick: (row) => this.deleteFile(row.id)
           }
         ]
@@ -74,8 +79,6 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
     rowsPerPageOptions: [5, 10, 20, 50]
   };
 
-  loading = false;
-  tableLoading = false;
   storages: UploadStorageResponse[] = [];
 
   constructor(
@@ -86,7 +89,7 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
     private readonly router: Router,
     private readonly route: ActivatedRoute
   ) {
-    super(route, router, 10);
+    super(route, router, 10, ['createdAt,desc']);
   }
 
   ngOnInit(): void {
@@ -94,19 +97,25 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
     this.loadPage();
   }
 
-  onExport(): void {
+  onRefresh(): void {
     this.loadPage();
   }
 
   protected loadPage(): void {
-    this.tableLoading = true;
-    this.loadingService
-      .track(this.uploadFileService.getPage(this.page, this.pageSize, ['createdAt,desc'], this.filters as Record<string, string | number | boolean>))
-      .pipe(finalize(() => (this.tableLoading = false)))
-      .subscribe({
-        next: (res: BasePageResponse<UploadFileResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error('Load uploaded files failed')
-      });
+    this.runPageRequest(
+      this.loadingService.track(
+        this.uploadFileService.getPage(
+          this.page,
+          this.pageSize,
+          this.sorts,
+          this.filters as Record<string, string | number | boolean>
+        )
+      ),
+      {
+        errorMessage: 'Load uploaded files failed',
+        onError: () => this.toastService.error('Load uploaded files failed')
+      }
+    );
   }
 
   private loadStorages(): void {
@@ -138,10 +147,8 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
   }
 
   private deleteFile(id: string): void {
-    this.loading = true;
     this.loadingService
       .track(this.uploadFileService.delete(id))
-      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
           this.toastService.info('Uploaded file deleted');

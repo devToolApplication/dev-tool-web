@@ -18,6 +18,8 @@ export class FieldGroupRenderer {
 
   @Input({ required: true })
   field!: GroupFieldState;
+  @Input() submitted = false;
+  @Input() readonlyMode = false;
 
   getCol(width?: GridWidth): string {
     return getColClass(width);

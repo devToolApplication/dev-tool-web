@@ -1,12 +1,17 @@
-<section class="crud-page">
+<app-page-shell title="Storage Configs" layout="wide">
   <app-table
     [config]="tableConfig"
     [data]="rows"
     [pageResponse]="pageResponse"
-    [loading]="loading"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+    [loading]="pageLoading()"
+    [error]="pageError()"
     (pageChange)="onPageChange($event)"
+    (sortChange)="onSortChange($event)"
     (search)="onSearch($event)"
     (resetFilter)="onResetFilter()"
     (create)="onCreate()"
+    (retry)="refreshPage()"
   ></app-table>
-</section>
+</app-page-shell>

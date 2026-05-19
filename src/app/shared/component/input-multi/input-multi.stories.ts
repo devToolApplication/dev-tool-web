@@ -4,19 +4,19 @@ import { InputMulti } from './input-multi';
 import type { SelectOption } from '../select/select';
 
 const options: SelectOption[] = [
-  { label: 'BTCUSDT', value: 'BTCUSDT' },
-  { label: 'ETHUSDT', value: 'ETHUSDT' },
-  { label: 'SOLUSDT', value: 'SOLUSDT' }
+  { label: 'PRD', value: 'PRD' },
+  { label: 'OPS', value: 'OPS' },
+  { label: 'QA', value: 'QA' }
 ];
 
 const meta: Meta<InputMulti> = {
-  title: 'Shared/Components/Input Multi',
+  title: 'Shared/Components/Form Controls/Input Multi',
   component: InputMulti,
   args: {
-    label: 'Symbols',
+    label: 'Codes',
     placeholder: 'Type and press enter',
     options,
-    value: ['BTCUSDT', 'ETHUSDT'],
+    value: ['PRD', 'OPS'],
     helpText: 'Allows suggestions and custom values.'
   }
 };

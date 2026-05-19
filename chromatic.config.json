@@ -1,4 +1,5 @@
 {
   "buildScriptName": "build-storybook",
+  "outputDir": ".tmp/storybook-static",
   "zip": true
 }

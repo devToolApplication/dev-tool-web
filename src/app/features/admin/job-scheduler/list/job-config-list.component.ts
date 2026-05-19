@@ -3,7 +3,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../core/constants/system.constants';
-import { BasePageResponse } from '../../../../core/models/base-response.model';
 import { JobConfigResponse } from '../data-access/models/job-scheduler.model';
 import { TaskProgressState } from '../../../../core/models/realtime/realtime.model';
 import { JobSchedulerService } from '../data-access/api/job-scheduler.service';
@@ -24,7 +23,7 @@ import { JOB_SCHEDULER_ROUTES, JOB_STATUS_OPTIONS } from '../job-scheduler.const
 })
 export class JobConfigListComponent extends BasePagedList<JobConfigResponse> implements OnInit {
   tableConfig!: TableConfig;
-  readonly loading = signal(false);
+  readonly actionLoading = signal(false);
   readonly progress = signal<TaskProgressState | null>(null);
 
   constructor(
@@ -39,7 +38,7 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
     private readonly i18nService: I18nService,
     private readonly destroyRef: DestroyRef
   ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
+    super(route, router, DEFAULT_TABLE_ROWS, ['code,asc']);
     this.tableConfig = this.createTableConfig();
   }
 
@@ -68,8 +67,8 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
   }
 
   private runNow(code: string): void {
-    this.loading.set(true);
-    this.loadingService.track(this.service.runNow(code)).pipe(finalize(() => this.loading.set(false))).subscribe({
+    this.actionLoading.set(true);
+    this.loadingService.track(this.service.runNow(code)).pipe(finalize(() => this.actionLoading.set(false))).subscribe({
       next: (response) => {
         this.toastService.info(this.i18nService.t('jobScheduler.toast.runQueued'));
         if (response.jobRunId) {
@@ -82,16 +81,12 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
   }
 
   private remove(code: string): void {
-    if (!window.confirm(`${this.i18nService.t('jobScheduler.confirmDelete')} ${code}?`)) {
-      return;
-    }
-
     this.runAction(this.service.delete(code), 'deleteSuccess', 'jobScheduler.toast.deleteFailed');
   }
 
   private runAction(request$: any, successKey: string, errorKey: string): void {
-    this.loading.set(true);
-    this.loadingService.track(request$).pipe(finalize(() => this.loading.set(false))).subscribe({
+    this.actionLoading.set(true);
+    this.loadingService.track(request$).pipe(finalize(() => this.actionLoading.set(false))).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t(successKey));
         this.loadPage();
@@ -101,10 +96,9 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
   }
 
   protected loadPage(): void {
-    this.loading.set(true);
-    this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.filters)).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: (res: BasePageResponse<JobConfigResponse>) => this.setPageResponse(res),
-      error: () => this.toastService.error('jobScheduler.toast.loadListFailed')
+    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.filters, this.sorts)), {
+      errorMessage: 'jobScheduler.toast.loadListFailed',
+      onError: () => this.toastService.error('jobScheduler.toast.loadListFailed')
     });
   }
 
@@ -127,13 +121,19 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
   private createTableConfig(): TableConfig {
     return {
       title: 'jobScheduler.list.title',
+      stateKey: 'job-scheduler.job-configs',
+      emptyTitle: 'shared.table.emptyTitle',
+      emptyDescription: 'shared.table.emptyDescription',
+      errorTitle: 'jobScheduler.toast.loadListFailed',
       toolbar: {
         new: {
           visible: true,
           label: 'jobScheduler.list.new',
           icon: 'pi pi-plus',
           severity: 'success'
-        }
+        },
+        columnVisibility: { visible: true },
+        density: { visible: true }
       },
       filters: [
         { field: 'keyword', label: 'keyword', placeholder: 'jobScheduler.list.searchKeyword', quick: true },
@@ -166,13 +166,19 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
       ],
       filterOptions: { primaryField: 'keyword' },
       columns: [
-        { field: 'code', header: 'code', sortable: true, minWidth: '12rem' },
+        { field: 'code', header: 'code', type: 'copyable', sortable: true, minWidth: '12rem' },
         { field: 'name', header: 'name', sortable: true, minWidth: '14rem' },
         { field: 'cron', header: 'jobScheduler.field.cron', minWidth: '9rem' },
         { field: 'timezone', header: 'jobScheduler.field.timezone', minWidth: '11rem' },
         { field: 'auth.type', header: 'jobScheduler.field.authType', minWidth: '12rem' },
         { field: 'enabled', header: 'enabled', type: 'boolean', minWidth: '7rem' },
-        { field: 'lastStatus', header: 'status', minWidth: '8rem' },
+        {
+          field: 'lastStatus',
+          header: 'status',
+          type: 'badge',
+          minWidth: '8rem',
+          badgeMap: { SUCCESS: 'success', FAILED: 'danger', RUNNING: 'info', CANCELED: 'warning' }
+        },
         { field: 'lastRunAt', header: 'jobScheduler.field.lastRunAt', type: 'date', format: 'dd/MM/yyyy HH:mm:ss', minWidth: '11rem' },
         {
           field: 'actions',
@@ -187,7 +193,14 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
             { label: 'jobScheduler.action.runNow', icon: 'pi pi-play', severity: 'success', onClick: (row) => this.runNow(row.code) },
             { label: 'enable', icon: 'pi pi-check', severity: 'success', disabled: (row) => row.enabled === true, onClick: (row) => this.enable(row.code) },
             { label: 'disable', icon: 'pi pi-pause', severity: 'warn', disabled: (row) => row.enabled !== true, onClick: (row) => this.disable(row.code) },
-            { label: 'delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row) => this.remove(row.code) }
+            {
+              label: 'delete',
+              icon: 'pi pi-trash',
+              severity: 'danger',
+              variant: 'danger',
+              confirm: { message: 'jobScheduler.confirmDelete', variant: 'danger' },
+              onClick: (row) => this.remove(row.code)
+            }
           ]
         }
       ],

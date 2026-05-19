@@ -34,9 +34,9 @@
     --p-button-primary-hover-border-color: var(--app-control-accent-border);
     --p-button-primary-active-background: var(--app-control-accent-bg-active);
     --p-button-primary-active-border-color: var(--app-control-accent-border);
-    --p-button-primary-color: #ffffff;
-    --p-button-primary-hover-color: #ffffff;
-    --p-button-primary-active-color: #ffffff;
+    --p-button-primary-color: var(--app-control-on-primary);
+    --p-button-primary-hover-color: var(--app-control-on-primary);
+    --p-button-primary-active-color: var(--app-control-on-primary);
     box-shadow: var(--app-control-accent-shadow);
   }
 
@@ -129,6 +129,15 @@
     --p-button-contrast-hover-color: var(--app-control-contrast-text);
     --p-button-contrast-active-color: var(--app-control-contrast-text);
     box-shadow: var(--app-control-contrast-shadow);
+  }
+
+  :root .p-button.p-button-text {
+    color: var(--app-control-secondary-text) !important;
+  }
+
+  :root .p-button.p-button-text .p-button-label,
+  :root .p-button.p-button-text .p-button-icon {
+    color: inherit !important;
   }
 
   :root .p-tag.p-tag-secondary {
@@ -361,7 +370,7 @@
     border-color: var(--app-border);
     box-shadow: var(--app-shadow-overlay);
     backdrop-filter: blur(16px);
-    z-index: 1400 !important;
+    z-index: var(--app-z-popup) !important;
   }
 
   :root .p-select-option,
@@ -506,10 +515,39 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-border-soft) 50%, var(--app-transparent));
   }
 
+  :root p-togglebutton {
+    --p-togglebutton-disabled-color: var(--app-input-disabled-text);
+  }
+
+  :root p-togglebutton .p-togglebutton-label {
+    color: inherit !important;
+  }
+
   :root .p-selectbutton .p-togglebutton:not([data-p-disabled='true']):not(.p-disabled):not(.p-togglebutton-checked):not([data-p-checked='true']):hover,
   :root .p-togglebutton:not([data-p-disabled='true']):not(.p-disabled):not(.p-togglebutton-checked):not([data-p-checked='true']):hover {
     background: var(--p-togglebutton-hover-background);
     color: var(--p-togglebutton-hover-color);
+  }
+
+  :root .p-selectbutton .p-togglebutton[data-p-disabled='true'],
+  :root .p-selectbutton .p-togglebutton.p-disabled,
+  :root .p-togglebutton[data-p-disabled='true'],
+  :root .p-togglebutton.p-disabled,
+  :root p-togglebutton[data-p-disabled='true'],
+  :root p-togglebutton.p-disabled,
+  :root p-togglebutton[aria-disabled='true'] {
+    color: var(--app-input-disabled-text) !important;
+    opacity: 1;
+  }
+
+  :root .p-selectbutton .p-togglebutton[data-p-disabled='true'] .p-togglebutton-label,
+  :root .p-selectbutton .p-togglebutton.p-disabled .p-togglebutton-label,
+  :root .p-togglebutton[data-p-disabled='true'] .p-togglebutton-label,
+  :root .p-togglebutton.p-disabled .p-togglebutton-label,
+  :root p-togglebutton[data-p-disabled='true'] .p-togglebutton-label,
+  :root p-togglebutton.p-disabled .p-togglebutton-label,
+  :root p-togglebutton[aria-disabled='true'] .p-togglebutton-label {
+    color: inherit !important;
   }
 
   :root .p-selectbutton .p-togglebutton.p-togglebutton-checked,
@@ -671,7 +709,7 @@
 
   :root .p-paginator .p-paginator-page.p-highlight {
     background: var(--app-control-accent-bg);
-    color: #fff;
+    color: var(--app-control-on-primary);
     box-shadow: var(--app-control-accent-shadow);
   }
 
@@ -700,7 +738,7 @@
   }
 
   :root .p-message.p-message-error {
-    color: #ffb4cf;
+    color: var(--app-control-danger-text);
   }
 
   :root .p-message.p-message-success {

@@ -10,7 +10,7 @@ const model: MenuItem[] = [
 ];
 
 const meta: Meta<ButtonSpeedDial> = {
-  title: 'Shared/Components/Button Speed Dial',
+  title: 'Shared/Components/Actions/Button Speed Dial',
   component: ButtonSpeedDial,
   parameters: {
     layout: 'padded'

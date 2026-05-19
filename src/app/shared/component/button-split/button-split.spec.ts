@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedModule } from '../../shared.module';
 import { provideSharedTesting } from '../../testing/shared-test.providers';
 
-
 import { ButtonSplit } from './button-split';
 
 describe('ButtonSplit', () => {
@@ -23,5 +22,13 @@ describe('ButtonSplit', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('emits primary button clicks', () => {
+    const buttonClick = vi.spyOn(component.buttonClick, 'emit');
+
+    component.buttonClick.emit();
+
+    expect(buttonClick).toHaveBeenCalled();
   });
 });

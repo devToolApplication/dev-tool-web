@@ -1,12 +1,18 @@
-@if (state) {
-  <section class="realtime-progress app-border app-bg-card">
+@if (normalized(); as progress) {
+  <section class="realtime-progress app-border app-bg-card" role="status" [attr.aria-busy]="progress.status === 'running'">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="min-w-0">
-        <div class="text-sm font-semibold app-text">{{ state.taskType }}</div>
-        <div class="truncate text-xs app-text-muted">{{ state.taskId }}</div>
+        <div class="text-sm font-semibold app-text">{{ progress.title || progress.id }}</div>
+        <div class="truncate text-xs app-text-muted">{{ progress.id }}</div>
       </div>
       <div class="flex items-center gap-2">
-        <app-tag [value]="state.status"></app-tag>
+        <app-badge [label]="progress.status" [variant]="statusVariant(progress.status)"></app-badge>
+        @if (progress.status === 'failed' && progress.errorMessage) {
+          <app-button icon="pi pi-refresh" severity="danger" [label]="'retry'" (buttonClick)="retry.emit()"></app-button>
+        }
+        @if (showDetails) {
+          <app-button icon="pi pi-eye" severity="secondary" [label]="'preview'" (buttonClick)="viewDetail.emit()"></app-button>
+        }
         @if (canCancel()) {
           <app-button icon="pi pi-times" severity="danger" [label]="'cancel'" (buttonClick)="cancel.emit()"></app-button>
         }
@@ -14,15 +20,22 @@
     </div>
 
     <div class="mt-3 h-2 overflow-hidden rounded app-bg-soft">
-      <div class="h-full progress-fill" [style.width.%]="percent()"></div>
+      <div
+        class="h-full progress-fill"
+        [class.progress-fill--indeterminate]="indeterminate()"
+        [style.width.%]="indeterminate() ? 100 : percent()"
+      ></div>
     </div>
 
     @if (showDetails) {
       <div class="mt-2 grid gap-1 text-xs app-text-muted md:grid-cols-3">
-        <span>{{ state.step || '-' }}</span>
-        <span>{{ state.message || '-' }}</span>
-        <span>{{ state.current ?? 0 }} / {{ state.total ?? 0 }}</span>
+        <span>{{ progress.step || '-' }}</span>
+        <span>{{ progress.message || progress.errorMessage || '-' }}</span>
+        <span>{{ progress.current ?? 0 }} / {{ progress.total ?? 0 }}</span>
       </div>
+    }
+    @if (progress.status === 'failed' && progress.errorMessage) {
+      <app-alert variant="danger" [message]="progress.errorMessage"></app-alert>
     }
   </section>
 }

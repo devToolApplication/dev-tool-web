@@ -1,0 +1,39 @@
+<main class="page-shell" [class]="'page-shell--' + layout">
+  <app-page-header
+    [title]="title"
+    [subtitle]="subtitle"
+    [status]="status"
+    [breadcrumb]="breadcrumb"
+  >
+    <ng-container page-actions>
+      <ng-content select="[page-actions]"></ng-content>
+    </ng-container>
+  </app-page-header>
+
+  <section class="page-shell__summary">
+    <ng-content select="[page-summary]"></ng-content>
+  </section>
+
+  <section class="page-shell__toolbar">
+    <ng-content select="[page-toolbar]"></ng-content>
+  </section>
+
+  <section class="page-shell__content">
+    @if (loading) {
+      <app-loading-skeleton type="detail" [rows]="6"></app-loading-skeleton>
+    } @else if (error) {
+      <app-error-state
+        [message]="error"
+        retryLabel="retry"
+        (retry)="retry.emit()"
+      ></app-error-state>
+    } @else if (empty) {
+      <app-empty-state
+        [title]="emptyTitle"
+        [description]="emptyDescription"
+      ></app-empty-state>
+    } @else {
+      <ng-content></ng-content>
+    }
+  </section>
+</main>

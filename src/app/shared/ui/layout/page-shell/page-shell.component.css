@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.page-shell {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 96rem;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.page-shell--wide {
+  max-width: 120rem;
+}
+
+.page-shell--full {
+  max-width: none;
+}
+
+.page-shell__summary:empty,
+.page-shell__toolbar:empty {
+  display: none;
+}
+
+.page-shell__summary,
+.page-shell__toolbar,
+.page-shell__content {
+  min-width: 0;
+}

@@ -1,0 +1,29 @@
+<aside class="form-status-panel" [attr.aria-label]="'shared.form.status.title' | translateContent">
+  <header class="form-status-panel__header">
+    <span>{{ 'shared.form.status.title' | translateContent }}</span>
+    <app-badge [label]="statusKey" [variant]="statusVariant"></app-badge>
+  </header>
+
+  <dl class="form-status-panel__metrics">
+    <div>
+      <dt>{{ 'shared.form.status.mode' | translateContent }}</dt>
+      <dd>{{ (mode || 'edit') | translateContent }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'shared.form.status.sections' | translateContent }}</dt>
+      <dd>{{ completedCount }} / {{ sections.length }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'shared.form.status.fields' | translateContent }}</dt>
+      <dd>{{ totalFieldCount }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'shared.validation.errors' | translateContent }}</dt>
+      <dd [class.form-status-panel__danger]="errorCount > 0">{{ errorCount }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'shared.validation.warnings' | translateContent }}</dt>
+      <dd [class.form-status-panel__warning]="warningCount > 0">{{ warningCount }}</dd>
+    </div>
+  </dl>
+</aside>

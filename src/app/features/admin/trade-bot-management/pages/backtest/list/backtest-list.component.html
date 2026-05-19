@@ -1,4 +1,4 @@
-<section class="flex flex-col gap-4">
+<app-page-shell title="tradeBot.backtest.title" layout="wide">
   <app-card>
     <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.backtest.run' | translateContent }}</div>
     <app-form-input
@@ -13,5 +13,5 @@
     </div>
   </app-card>
 
-  <app-table [config]="tableConfig" [data]="runs()" [loading]="loading()"></app-table>
-</section>
+  <app-table [config]="tableConfig" [data]="runs()" [loading]="loading()" [error]="error()" (retry)="loadRuns()"></app-table>
+</app-page-shell>

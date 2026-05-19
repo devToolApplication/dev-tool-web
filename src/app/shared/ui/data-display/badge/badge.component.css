@@ -1,0 +1,65 @@
+:host {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: var(--app-badge-gap, 0.25rem);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-badge-radius, 999px);
+  background: var(--app-control-secondary-bg);
+  color: var(--app-control-secondary-text);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-badge span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-badge--sm {
+  padding: var(--app-badge-sm-padding, 0.1875rem 0.5rem);
+  font-size: var(--app-badge-sm-font-size, 0.6875rem);
+}
+
+.app-badge--md {
+  padding: var(--app-badge-md-padding, 0.3125rem 0.625rem);
+  font-size: var(--app-badge-md-font-size, 0.75rem);
+}
+
+.app-badge--info {
+  border-color: var(--app-control-info-border);
+  background: var(--app-control-info-bg);
+  color: var(--app-control-info-text);
+}
+
+.app-badge--success {
+  border-color: var(--app-control-success-border);
+  background: var(--app-control-success-bg);
+  color: var(--app-control-success-text);
+}
+
+.app-badge--warning {
+  border-color: var(--app-control-warn-border);
+  background: var(--app-control-warn-bg);
+  color: var(--app-control-warn-text);
+}
+
+.app-badge--danger {
+  border-color: var(--app-control-danger-border);
+  background: var(--app-control-danger-bg);
+  color: var(--app-control-danger-text);
+}
+
+.app-badge--muted {
+  background: var(--app-surface-soft);
+  color: var(--app-text-muted);
+}

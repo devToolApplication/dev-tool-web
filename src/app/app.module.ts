@@ -7,8 +7,9 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './core/http/auth.interceptor';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { APP_THEME_PRESETS } from './core/ui-services/theme-presets';
 import { KeycloakService } from './core/auth/keycloak.service';
@@ -28,6 +29,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
     AppRoutes,
     SharedModule,
     ToastModule,
+    ConfirmDialogModule,
     ProgressSpinnerModule
   ],
   providers: [
@@ -46,7 +48,9 @@ export function initializeKeycloak(keycloak: KeycloakService) {
       multi: true
     },
     MessageService,
+    ConfirmationService,
     providePrimeNG({
+      overlayAppendTo: 'body',
       theme: {
         preset: APP_THEME_PRESETS.aura,
         options: {

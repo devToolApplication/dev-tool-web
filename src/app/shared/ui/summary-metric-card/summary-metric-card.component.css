@@ -4,6 +4,17 @@
   height: 100%;
 }
 
+.summary-metric-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.summary-metric-link:hover .summary-metric-value {
+  color: var(--app-primary);
+}
+
 .summary-metric-label {
   display: block;
   font-size: 0.75rem;
@@ -21,4 +32,8 @@
   font-size: 1.5rem;
   line-height: 1.9rem;
   font-weight: 600;
+}
+
+.summary-metric-trend {
+  margin-top: 0.5rem;
 }

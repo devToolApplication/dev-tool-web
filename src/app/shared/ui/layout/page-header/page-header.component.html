@@ -1,0 +1,47 @@
+<header class="page-header">
+  <div class="page-header__main">
+    @if (breadcrumb?.length) {
+      <nav class="page-header__breadcrumb" aria-label="Breadcrumb">
+        @for (item of breadcrumb; track item.label; let last = $last) {
+          @if (item.routerLink && !last) {
+            <a [routerLink]="item.routerLink">{{ item.label | translateContent }}</a>
+          } @else {
+            <span>{{ item.label | translateContent }}</span>
+          }
+          @if (!last) {
+            <i class="pi pi-angle-right" aria-hidden="true"></i>
+          }
+        }
+      </nav>
+    }
+
+    <div class="page-header__title-row">
+      @if (showBack) {
+        <app-button
+          icon="pi pi-arrow-left"
+          [label]="backLabel"
+          severity="secondary"
+          [text]="true"
+          (buttonClick)="back.emit()"
+        ></app-button>
+      }
+      <div class="page-header__title-block">
+        <h1>{{ title | translateContent }}</h1>
+        @if (subtitle) {
+          <p>{{ subtitle | translateContent }}</p>
+        }
+      </div>
+      @if (status) {
+        <app-badge
+          [label]="status.label"
+          [variant]="status.variant ?? 'default'"
+          [icon]="status.icon"
+        ></app-badge>
+      }
+    </div>
+  </div>
+
+  <div class="page-header__actions">
+    <ng-content select="[page-actions]"></ng-content>
+  </div>
+</header>

@@ -4,7 +4,7 @@
     description: 'uploadStorage.form.description',
     actions: [
       { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
-      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading(), submitForm: true }
     ],
     infoSection: {
       title: 'uploadStorage.form.infoTitle',
@@ -15,6 +15,6 @@
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
-  [submitting]="loading"
+  [submitting]="loading()"
   (formSubmit)="onSubmitForm($event)"
 ></app-base-crud-page>

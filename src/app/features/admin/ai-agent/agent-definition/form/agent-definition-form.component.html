@@ -3,14 +3,22 @@
     title: pageTitle,
     description: pageDescription,
     actions: [
-      { id: 'back', label: 'Back', icon: 'pi pi-arrow-left', goBack: true },
-      { id: 'save', label: editId ? 'Update' : 'Create', icon: 'pi pi-save', submitForm: true, loading: loading }
+      { id: 'back', label: 'back', icon: 'pi pi-arrow-left', goBack: true, backLink: '/admin/ai-agent/agents', severity: 'secondary', text: true },
+      { id: 'save', label: editId ? 'update' : 'create', icon: 'pi pi-save', submitForm: true, loading: loading() }
     ]
   }"
   [formConfig]="formConfig"
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
-  [submitting]="loading"
+  [submitting]="loading()"
   (formSubmit)="onSubmitForm($event)"
-></app-base-crud-page>
+>
+  @if (dependenciesError) {
+    <app-alert
+      crud-page-before-form
+      variant="warning"
+      [message]="dependenciesError"
+    ></app-alert>
+  }
+</app-base-crud-page>

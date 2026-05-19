@@ -1,0 +1,119 @@
+:host {
+  display: contents;
+}
+
+.app-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--app-z-drawer);
+  display: grid;
+  justify-items: end;
+}
+
+.app-drawer--left {
+  justify-items: start;
+}
+
+.app-drawer--right {
+  justify-items: end;
+}
+
+.app-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: var(--app-overlay-scrim, color-mix(in srgb, var(--app-text) 28%, transparent));
+  cursor: default;
+}
+
+.app-drawer__panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(100vw, 42rem);
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-left: 1px solid var(--app-border);
+  background: var(--app-overlay-bg);
+  color: var(--app-overlay-text);
+  box-shadow: var(--app-shadow-overlay);
+}
+
+.app-drawer__panel--left {
+  border-right: 1px solid var(--app-border);
+  border-left: 0;
+}
+
+.app-drawer__panel--right {
+  border-left: 1px solid var(--app-border);
+}
+
+.app-drawer__panel--sm {
+  width: min(100vw, 28rem);
+}
+
+.app-drawer__panel--md {
+  width: min(100vw, 42rem);
+}
+
+.app-drawer__panel--lg {
+  width: min(100vw, 56rem);
+}
+
+.app-drawer__panel--xl {
+  width: min(100vw, 72rem);
+}
+
+.app-drawer__panel--full {
+  width: 100vw;
+}
+
+.app-drawer__header,
+.app-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.app-drawer__footer {
+  border-top: 1px solid var(--app-border);
+  border-bottom: 0;
+}
+
+.app-drawer__heading {
+  min-width: 0;
+}
+
+.app-drawer__heading h2,
+.app-drawer__heading p {
+  margin: 0;
+}
+
+.app-drawer__heading h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-drawer__heading p {
+  margin-top: 0.25rem;
+  color: var(--app-text-muted);
+}
+
+.app-drawer__body {
+  min-width: 0;
+  overflow: auto;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .app-drawer__panel {
+    width: 100vw;
+  }
+}

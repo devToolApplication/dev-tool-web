@@ -1,0 +1,56 @@
+<section class="json-viewer" [class.json-viewer--invalid]="invalid">
+  <header class="json-viewer__toolbar">
+    <div class="json-viewer__status">
+      @if (invalid) {
+        <app-badge label="shared.json.invalid" variant="danger" icon="pi pi-exclamation-triangle"></app-badge>
+      } @else {
+        <app-badge label="JSON" variant="muted" icon="pi pi-code"></app-badge>
+      }
+    </div>
+    <div class="json-viewer__actions">
+      @if (showRawToggle) {
+        <app-button
+          size="small"
+          severity="secondary"
+          [text]="true"
+          icon="pi pi-code"
+          [label]="rawMode() ? 'shared.json.pretty' : 'shared.json.raw'"
+          (buttonClick)="toggleRaw()"
+        ></app-button>
+      }
+      <app-button
+        size="small"
+        severity="secondary"
+        [text]="true"
+        icon="pi pi-copy"
+        [label]="copyLabel"
+        (buttonClick)="copy()"
+      ></app-button>
+      <app-button
+        size="small"
+        severity="secondary"
+        [text]="true"
+        [icon]="collapsedState() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+        [label]="collapsedState() ? 'open' : 'collapse'"
+        (buttonClick)="toggleCollapsed()"
+      ></app-button>
+    </div>
+  </header>
+
+  @if (!collapsedState()) {
+    @if (showSearch) {
+      <div class="json-viewer__search">
+        <app-input-text
+          label="search"
+          placeholder="search"
+          [value]="searchQuery()"
+          (valueChange)="searchQuery.set($event || '')"
+        ></app-input-text>
+        @if (copied()) {
+          <app-badge label="copied" variant="success" icon="pi pi-check"></app-badge>
+        }
+      </div>
+    }
+    <pre class="json-viewer__body">{{ filteredDisplayValue }}</pre>
+  }
+</section>

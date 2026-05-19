@@ -1,10 +1,25 @@
 .realtime-progress {
   border-width: 1px;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   padding: 0.75rem;
 }
 
 .progress-fill {
-  background: var(--p-primary-color);
+  background: var(--app-primary);
   transition: width 160ms ease;
+}
+
+.progress-fill--indeterminate {
+  background: linear-gradient(90deg, transparent 0%, var(--app-primary) 50%, transparent 100%);
+  animation: progress-indeterminate 1.2s linear infinite;
+}
+
+@keyframes progress-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
 }

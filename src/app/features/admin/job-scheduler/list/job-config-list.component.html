@@ -1,15 +1,19 @@
-<section class="crud-page">
-  <div class="mb-3">
-    <app-realtime-progress-bar [state]="progress()" [showCancel]="false"></app-realtime-progress-bar>
-  </div>
+<app-page-shell title="jobScheduler.list.title" layout="wide">
+  <app-realtime-progress-bar page-summary [state]="progress()" [showCancel]="false"></app-realtime-progress-bar>
+
   <app-table
     [config]="tableConfig"
     [data]="rows"
     [pageResponse]="pageResponse"
-    [loading]="loading()"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+    [loading]="pageLoading() || actionLoading()"
+    [error]="pageError()"
     (pageChange)="onPageChange($event)"
+    (sortChange)="onSortChange($event)"
     (search)="onSearch($event)"
     (resetFilter)="onResetFilter()"
     (create)="onCreate()"
+    (retry)="refreshPage()"
   ></app-table>
-</section>
+</app-page-shell>

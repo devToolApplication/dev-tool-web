@@ -1,63 +1,80 @@
 @if (field.visible()) {
+  @if (readonlyMode) {
+    <app-readonly-section [field]="field"></app-readonly-section>
+  } @else {
   <div class="col-span-12">
-    <p-fieldset
-      [legend]="(field.label || 'general') | translateContent"
-      class="w-full">
-      <div class="flex justify-between mb-4">
-        <app-button
-          type="button"
-          severity="secondary"
-          [label]="'addRow'"
-          [disabled]="field.disabled()"
-          (buttonClick)="addItem()">
-        </app-button>
+    <app-section-panel [title]="field.label || 'general'" density="compact">
+      <div class="array-field" [class.array-field--disabled]="field.disabled()">
+        <div class="array-field__toolbar">
+          <app-button
+            type="button"
+            severity="secondary"
+            icon="pi pi-plus"
+            [label]="'addRow'"
+            [disabled]="field.disabled()"
+            (buttonClick)="addItem()"
+          ></app-button>
+        </div>
+
+        @if (!field.value().length) {
+          <app-empty-state
+            title="shared.empty.title"
+            [description]="field.label || 'notAvailable'"
+            size="compact"
+          ></app-empty-state>
+        }
+
+        <div class="array-field__items">
+          @for (item of field.value(); track $index; let i = $index) {
+            <app-section-panel [title]="((field.label || 'general') | translateContent) + ' ' + (i + 1)" density="compact">
+              <div class="array-field__item-actions">
+                <app-button
+                  type="button"
+                  severity="secondary"
+                  [text]="true"
+                  icon="pi pi-arrow-up"
+                  [label]="'up'"
+                  [disabled]="field.disabled() || !canMove(i, -1)"
+                  (buttonClick)="moveItem(i, -1)"
+                ></app-button>
+                <app-button
+                  type="button"
+                  severity="secondary"
+                  [text]="true"
+                  icon="pi pi-arrow-down"
+                  [label]="'down'"
+                  [disabled]="field.disabled() || !canMove(i, 1)"
+                  (buttonClick)="moveItem(i, 1)"
+                ></app-button>
+                <app-button
+                  type="button"
+                  severity="danger"
+                  [text]="true"
+                  icon="pi pi-trash"
+                  [label]="'delete'"
+                  [disabled]="field.disabled()"
+                  (buttonClick)="removeItem(i)"
+                ></app-button>
+              </div>
+
+              <div class="grid grid-cols-12 gap-4">
+                @for (child of field.children()[i]; track child.path) {
+                  @if (isArrayField(child)) {
+                    <app-field-array-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-array-renderer>
+                  } @else if (isGroupField(child)) {
+                    <app-field-group-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-group-renderer>
+                  } @else if (isTreeField(child)) {
+                    <app-field-tree-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-tree-renderer>
+                  } @else {
+                    <app-field-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-renderer>
+                  }
+                }
+              </div>
+            </app-section-panel>
+          }
+        </div>
       </div>
-
-      @for (item of field.value(); track $index; let i = $index) {
-        <p-fieldset
-          [legend]="((field.label || 'general') | translateContent) + ' ' + (i + 1)"
-          class="w-full mb-4">
-          <div class="flex justify-end mb-2">
-            <app-button
-              type="button"
-              severity="danger"
-              [label]="'delete'"
-              [disabled]="field.disabled()"
-              (buttonClick)="removeItem(i)">
-            </app-button>
-          </div>
-
-          <div class="grid grid-cols-12 gap-4">
-            @for (child of field.children()[i]; track child.path) {
-              @if (isArrayField(child)) {
-                <app-field-array-renderer
-                  class="w-full h-full"
-                  [ngClass]="getCol(child.width)"
-                  [field]="child">
-                </app-field-array-renderer>
-              } @else if (isGroupField(child)) {
-                <app-field-group-renderer
-                  class="w-full h-full"
-                  [ngClass]="getCol(child.width)"
-                  [field]="child">
-                </app-field-group-renderer>
-              } @else if (isTreeField(child)) {
-                <app-field-tree-renderer
-                  class="w-full h-full"
-                  [ngClass]="getCol(child.width)"
-                  [field]="child">
-                </app-field-tree-renderer>
-              } @else {
-                <app-field-renderer
-                  class="w-full h-full"
-                  [ngClass]="getCol(child.width)"
-                  [field]="child">
-                </app-field-renderer>
-              }
-            }
-          </div>
-        </p-fieldset>
-      }
-    </p-fieldset>
+    </app-section-panel>
   </div>
+  }
 }

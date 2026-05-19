@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { PanelComponent } from './panel.component';
 
 const meta: Meta<PanelComponent> = {
-  title: 'Shared/Components/Panel',
+  title: 'Shared/Components/Data Display/Panel',
   component: PanelComponent,
   args: {
     title: 'fieldOptions',

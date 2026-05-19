@@ -1,0 +1,10 @@
+<span
+  class="app-badge"
+  [class]="'app-badge--' + resolvedVariant + ' app-badge--' + size"
+  [attr.title]="(tooltip || label || null) | translateContent"
+>
+  @if (icon) {
+    <i [class]="icon" aria-hidden="true"></i>
+  }
+  <span>{{ label | translateContent }}</span>
+</span>

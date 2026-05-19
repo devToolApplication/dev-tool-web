@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
 import { RadioButton } from './radio-button';
-import type { SelectOption } from '../../ui/form-input/models/form-config.model';
+import type { SelectOption } from '../select/select';
 
 const options: SelectOption[] = [
   { label: 'Draft', value: 'draft' },
@@ -10,7 +10,7 @@ const options: SelectOption[] = [
 ];
 
 const meta: Meta<RadioButton> = {
-  title: 'Shared/Components/Radio Button',
+  title: 'Shared/Components/Form Controls/Radio Button',
   component: RadioButton,
   args: {
     label: 'Status',

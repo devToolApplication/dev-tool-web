@@ -1,14 +1,15 @@
-<section class="flex flex-col gap-4">
-  <app-card>
-    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="text-lg font-semibold">{{ 'tradeBot.cache.title' | translateContent }}</div>
-      <div class="flex flex-wrap gap-2">
-        <app-button icon="pi pi-refresh" label="tradeBot.action.refresh" severity="secondary" [loading]="loading()" (buttonClick)="load()"></app-button>
-        <app-button icon="pi pi-trash" label="tradeBot.action.clearLocalCache" severity="danger" [loading]="loading()" (buttonClick)="clearLocal()"></app-button>
-      </div>
-    </div>
-    <app-json-preview>{{ statsJson() }}</app-json-preview>
-  </app-card>
+<app-page-shell title="tradeBot.cache.title" layout="wide">
+  <div page-actions class="flex flex-wrap gap-2">
+    <app-button icon="pi pi-refresh" label="tradeBot.action.refresh" severity="secondary" [loading]="loading()" (buttonClick)="load()"></app-button>
+    <app-button icon="pi pi-trash" label="tradeBot.action.clearLocalCache" severity="danger" [loading]="loading()" (buttonClick)="clearLocal()"></app-button>
+  </div>
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+    @for (card of summaryCards(); track card.label) {
+      <app-summary-metric-card [label]="card.label" [value]="card.value"></app-summary-metric-card>
+    }
+  </div>
+
+  <app-table [config]="tableConfig" [data]="cacheRows()" [loading]="loading()" [error]="error()" (retry)="load()"></app-table>
 
   <app-card>
     <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.cache.evict' | translateContent }}</div>
@@ -21,4 +22,8 @@
       (formSubmit)="evict($event)"
     ></app-form-input>
   </app-card>
-</section>
+
+<p-fieldset [legend]="'tradeBot.common.advancedJson' | translateContent" [toggleable]="true" [collapsed]="true">
+    <app-json-viewer [value]="statsJson()" [collapsed]="true"></app-json-viewer>
+</p-fieldset>
+</app-page-shell>

@@ -60,9 +60,7 @@
   </section>
 
   @if (uploadError) {
-    <section class="result-panel app-border app-bg-surface error">
-      {{ uploadError | translateContent }}
-    </section>
+    <app-alert class="result-alert" variant="danger" [message]="uploadError"></app-alert>
   }
 
   @if (uploadResult) {
@@ -77,16 +75,10 @@
         ></app-button>
       </div>
 
-      <div class="result-grid">
-        <div><strong>ID:</strong> {{ uploadResult.id || '-' }}</div>
-        <div><strong>{{ 'systemManagement.fileUploadDebug.storage' | translateContent }}:</strong> {{ uploadResult.storageId || '-' }}</div>
-        <div><strong>{{ 'systemManagement.fileUploadDebug.file' | translateContent }}:</strong> {{ uploadResult.fileName || '-' }}</div>
-        <div><strong>MIME:</strong> {{ uploadResult.mimeType || '-' }}</div>
-        <div class="full-width"><strong>URL:</strong> {{ uploadResult.fileUrl || '-' }}</div>
-        <div class="full-width">
-          <strong>{{ 'systemManagement.fileUploadDebug.raw' | translateContent }}:</strong>
-          <pre>{{ uploadResult | json }}</pre>
-        </div>
+      <app-key-value-list [items]="uploadResultItems" layout="two-column"></app-key-value-list>
+
+      <div class="result-raw">
+        <app-key-value-list [items]="uploadResultRawItems" layout="one-column"></app-key-value-list>
       </div>
     </section>
   }

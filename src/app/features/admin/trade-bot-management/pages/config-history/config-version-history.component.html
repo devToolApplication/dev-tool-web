@@ -1,6 +1,84 @@
-<section class="flex flex-col gap-4">
-  <app-card>
-    <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.configHistory.title' | translateContent }}</div>
-    <app-json-preview>{{ historyJson() }}</app-json-preview>
-  </app-card>
-</section>
+<app-page-shell title="tradeBot.configHistory.title" subtitle="tradeBot.configHistory.subtitle" layout="wide">
+  <app-section-panel title="tradeBot.configHistory.overview" subtitle="tradeBot.configHistory.overviewSubtitle">
+    <div section-actions class="flex flex-wrap items-center gap-2">
+      @if (latestVersion()?.status) {
+        <app-badge [label]="latestVersion()?.status || '-'" [variant]="statusVariant(latestVersion()?.status)"></app-badge>
+      }
+      <app-button icon="pi pi-arrow-left" label="tradeBot.action.back" severity="secondary" (buttonClick)="goBack()"></app-button>
+    </div>
+    <app-key-value-list [items]="overviewItems()" layout="two-column"></app-key-value-list>
+  </app-section-panel>
+
+  <app-table
+    [config]="timelineTableConfig"
+    [data]="rows()"
+    [loading]="loading()"
+    [error]="error()"
+    (retry)="loadHistory()"
+  ></app-table>
+
+  <app-section-panel title="tradeBot.configHistory.compare" subtitle="tradeBot.configHistory.compareSubtitle">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <app-select
+        label="tradeBot.configHistory.oldVersion"
+        [options]="versionOptions()"
+        [showClear]="false"
+        [value]="selectedBaseVersion()"
+        (valueChange)="selectBaseVersion($event)"
+      ></app-select>
+      <app-select
+        label="tradeBot.configHistory.newVersion"
+        [options]="versionOptions()"
+        [showClear]="false"
+        [value]="selectedTargetVersion()"
+        (valueChange)="selectTargetVersion($event)"
+      ></app-select>
+    </div>
+  </app-section-panel>
+
+  <app-section-panel
+    title="tradeBot.configHistory.diff"
+    [empty]="!baseVersion()?.raw || !targetVersion()?.raw"
+    emptyTitle="tradeBot.configHistory.emptyCompareTitle"
+    emptyDescription="tradeBot.configHistory.emptyCompareDescription"
+  >
+    @if (baseVersion()?.raw && targetVersion()?.raw) {
+      <app-diff-viewer [before]="baseVersion()?.raw" [after]="targetVersion()?.raw"></app-diff-viewer>
+    }
+  </app-section-panel>
+
+  <app-section-panel title="tradeBot.configHistory.diffTable" [collapsible]="true" [collapsed]="true">
+    <app-table
+      [config]="diffTableConfig"
+      [data]="diffRows()"
+      [loading]="loading()"
+      [error]="error()"
+      (retry)="loadHistory()"
+    ></app-table>
+  </app-section-panel>
+
+  <app-section-panel
+    title="tradeBot.common.advancedRawJson"
+    subtitle="tradeBot.configHistory.rawJsonSubtitle"
+    [collapsible]="true"
+    [collapsed]="true"
+    [empty]="!history()"
+    emptyTitle="tradeBot.configHistory.noHistoryTitle"
+    emptyDescription="tradeBot.configHistory.noHistoryDescription"
+  >
+    <app-json-viewer [value]="historyJson()" [collapsed]="true"></app-json-viewer>
+  </app-section-panel>
+
+  <app-drawer
+    [open]="rawDialogVisible()"
+    (openChange)="rawDialogVisible.set($event)"
+    (closed)="closeRaw()"
+    title="tradeBot.configHistory.rawVersion"
+    size="lg"
+  >
+    @if (selectedRawVersion(); as version) {
+      <app-key-value-list class="mb-3 block" [items]="selectedRawItems()" layout="two-column"></app-key-value-list>
+      <app-json-viewer [value]="selectedRawJson()" [collapsed]="true"></app-json-viewer>
+    }
+  </app-drawer>
+</app-page-shell>

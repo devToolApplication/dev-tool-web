@@ -4,12 +4,12 @@ import { expect, userEvent, within } from 'storybook/test';
 import { InputText } from './input-text';
 
 const meta: Meta<InputText> = {
-  title: 'Shared/Components/Input Text',
+  title: 'Shared/Components/Form Controls/Input Text',
   component: InputText,
   args: {
     label: 'Name',
     placeholder: 'Enter name',
-    value: 'Strategy Alpha',
+    value: 'Workflow Alpha',
     iconClass: 'pi pi-pencil',
     helpText: 'Single line text input.'
   }
@@ -24,10 +24,10 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     const input = canvas.getByLabelText(/name/i);
 
-    await expect(input).toHaveValue('Strategy Alpha');
+    await expect(input).toHaveValue('Workflow Alpha');
     await userEvent.clear(input);
-    await userEvent.type(input, 'Strategy Beta');
-    await expect(input).toHaveValue('Strategy Beta');
+    await userEvent.type(input, 'Workflow Beta');
+    await expect(input).toHaveValue('Workflow Beta');
   }
 };
 

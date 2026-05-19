@@ -6,6 +6,7 @@ import {
   FieldConfig,
   FieldState,
   FormContext,
+  FormCustomValidator,
   TreeFieldConfig
 } from '../models/form-config.model';
 import { ExpressionEngine } from './expression.engine';
@@ -23,14 +24,15 @@ export function createNestedFieldState<TFormModel extends object>(
   expr: ExpressionEngine,
   arrays: Record<string, ArrayState>,
   groupName?: string,
-  treeTemplate?: TreeFieldConfig
+  treeTemplate?: TreeFieldConfig,
+  validators: Record<string, FormCustomValidator> = {}
 ): FieldState | ArrayFieldState {
   if (config.type === 'group') {
-    return createFieldGroupState(path, config, modelSignal, contextSignal, expr, arrays);
+    return createFieldGroupState(path, config, modelSignal, contextSignal, expr, arrays, treeTemplate, validators);
   }
 
   if (config.type === 'tree') {
-    return createFieldTreeState(path, config, modelSignal, contextSignal, expr, arrays, treeTemplate);
+    return createFieldTreeState(path, config, modelSignal, contextSignal, expr, arrays, treeTemplate, validators);
   }
 
   if (config.type === 'array') {
@@ -44,9 +46,10 @@ export function createNestedFieldState<TFormModel extends object>(
       expr,
       arrayState,
       arrays,
-      treeTemplate
+      treeTemplate,
+      validators
     );
   }
 
-  return createFieldState(path, config, modelSignal, contextSignal, expr, groupName);
+  return createFieldState(path, config, modelSignal, contextSignal, expr, groupName, validators);
 }

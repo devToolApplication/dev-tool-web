@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../../core/constants/system.constants';
-import { BasePageResponse } from '../../../../../../core/models/base-response.model';
 import { TradeBotSecretResponse } from '../../../../../../core/models/trade-bot/trade-bot-secret.model';
 import { TradeBotSecretService } from '../../../../../../core/services/trade-bot-service/trade-bot-secret.service';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
@@ -19,29 +17,49 @@ import { TRADE_BOT_SECRET_ROUTES } from '../trade-bot-secret.constants';
 })
 export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
-    title: 'Trade Bot Secrets',
-    toolbar: { new: { visible: true, label: 'New Secret', icon: 'pi pi-plus', severity: 'success' } },
+    title: 'systemManagement.tradeBotSecret.list.title',
+    stateKey: 'system-management.trade-bot-secrets',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'loadError',
+    toolbar: {
+      new: { visible: true, label: 'systemManagement.action.newSecret', icon: 'pi pi-plus', severity: 'success' },
+      columnVisibility: { visible: true },
+      density: { visible: true }
+    },
     filters: [
-      { field: 'code', label: 'Code', placeholder: 'Search code' },
-      { field: 'category', label: 'Category', placeholder: 'Search category' }
+      { field: 'code', label: 'code', placeholder: 'systemManagement.filter.searchCode' },
+      { field: 'category', label: 'category', placeholder: 'systemManagement.filter.searchCategory' }
     ],
     filterOptions: { primaryField: 'code' },
     columns: [
-      { field: 'category', header: 'Category', sortable: true },
-      { field: 'name', header: 'Name', sortable: true },
-      { field: 'code', header: 'Code', sortable: true },
-      { field: 'status', header: 'Status' },
-      { field: 'description', header: 'Description' },
+      { field: 'category', header: 'category', sortable: true },
+      { field: 'name', header: 'name', sortable: true },
+      { field: 'code', header: 'code', type: 'copyable', sortable: true },
+      {
+        field: 'status',
+        header: 'status',
+        type: 'badge',
+        badgeMap: { ACTIVE: 'success', INACTIVE: 'muted', DELETE: 'danger' }
+      },
+      { field: 'description', header: 'description' },
       {
         field: 'actions',
-        header: 'Actions',
+        header: 'actions',
         type: 'actions',
         minWidth: '12rem',
         frozen: true,
         alignFrozen: 'right',
         actions: [
-          { label: 'Edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row: TradeBotSecretResponse) => this.goEdit(row.id) },
-          { label: 'Delete', icon: 'pi pi-trash', severity: 'danger', onClick: (row: TradeBotSecretResponse) => this.remove(row.id) }
+          { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row: TradeBotSecretResponse) => this.goEdit(row.id) },
+          {
+            label: 'delete',
+            icon: 'pi pi-trash',
+            severity: 'danger',
+            variant: 'danger',
+            confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
+            onClick: (row: TradeBotSecretResponse) => this.remove(row.id)
+          }
         ]
       }
     ],
@@ -49,8 +67,6 @@ export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretRes
     rows: DEFAULT_TABLE_ROWS,
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
-
-  loading = false;
 
   constructor(
     private readonly service: TradeBotSecretService,
@@ -60,7 +76,7 @@ export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretRes
     private readonly router: Router,
     private readonly i18nService: I18nService
   ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
+    super(route, router, DEFAULT_TABLE_ROWS, ['category,asc', 'code,asc']);
   }
 
   ngOnInit(): void {
@@ -76,8 +92,7 @@ export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretRes
   }
 
   private remove(id: string): void {
-    this.loading = true;
-    this.loadingService.track(this.service.delete(id)).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.loadingService.track(this.service.delete(id)).subscribe({
       next: () => {
         this.toastService.info(this.i18nService.t('deleteSuccess'));
         this.loadPage();
@@ -87,13 +102,9 @@ export class TradeBotSecretListComponent extends BasePagedList<TradeBotSecretRes
   }
 
   protected loadPage(): void {
-    this.loading = true;
-    this.loadingService
-      .track(this.service.getPage(this.page, this.pageSize, ['category,asc', 'code,asc'], this.filters))
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: BasePageResponse<TradeBotSecretResponse>) => this.setPageResponse(res),
-        error: () => this.toastService.error('Load Trade Bot secrets failed')
-      });
+    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.sorts, this.filters)), {
+      errorMessage: 'systemManagement.tradeBotSecret.toast.loadListFailed',
+      onError: () => this.toastService.error('systemManagement.tradeBotSecret.toast.loadListFailed')
+    });
   }
 }

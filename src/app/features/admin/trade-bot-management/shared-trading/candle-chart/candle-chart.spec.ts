@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 
 import { SharedModule } from '../../../../../shared/shared.module';
@@ -53,6 +56,39 @@ vi.mock('lightweight-charts', () => ({
   CrosshairMode: { Normal: 0 },
   LineStyle: { Solid: 0, Dotted: 1, Dashed: 2 },
 }));
+
+@Pipe({ name: 'translateContent', standalone: false })
+class TranslateContentPipeStub implements PipeTransform {
+  transform(value: unknown): unknown {
+    return value;
+  }
+}
+
+@Component({ selector: 'app-button', standalone: false, template: '' })
+class ButtonStubComponent {
+  @Input() label?: string;
+  @Input() icon?: string;
+  @Input() styleClass?: string;
+  @Input() tooltip?: string;
+  @Output() readonly buttonClick = new EventEmitter<void>();
+}
+
+@Component({ selector: 'p-select', standalone: false, template: '' })
+class SelectStubComponent {
+  @Input() options: unknown[] = [];
+  @Input() optionLabel?: string;
+  @Input() optionValue?: string;
+  @Input() ngModel: unknown;
+  @Output() readonly ngModelChange = new EventEmitter<unknown>();
+}
+
+@Component({ selector: 'p-slider', standalone: false, template: '' })
+class SliderStubComponent {
+  @Input() min = 0;
+  @Input() max = 0;
+  @Input() ngModel: unknown;
+  @Output() readonly ngModelChange = new EventEmitter<unknown>();
+}
 
 class MockCandleChartEngineService {
   initialize = vi.fn(
@@ -123,6 +159,51 @@ describe('CandleChart', () => {
     component.replayNext();
 
     expect(component.currentIndex).toBe(1);
+  });
+});
+
+describe('CandleChart template controls', () => {
+  let fixture: ComponentFixture<CandleChart>;
+
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      declarations: [CandleChart, ButtonStubComponent, SelectStubComponent, SliderStubComponent, TranslateContentPipeStub],
+      imports: [CommonModule],
+    });
+    TestBed.overrideComponent(CandleChart, {
+      set: {
+        providers: [
+          { provide: CandleChartEngineService, useClass: MockCandleChartEngineService },
+          CandleChartLegacyAdapter,
+          CandleChartRealtimeService,
+          CandleChartReplayService,
+          CandleChartStoreService,
+          CandleChartTimeUtil,
+        ],
+      },
+    });
+    await TestBed.compileComponents();
+
+    fixture = TestBed.createComponent(CandleChart);
+  });
+
+  it('renders replay controls through shared and Prime controls', async () => {
+    fixture.componentRef.setInput('mode', 'REPLAY');
+    fixture.componentRef.setInput('candles', [
+      { index: 0, time: '09:00', open: 1, high: 2, low: 0.5, close: 1.5 },
+      { index: 1, time: '10:00', open: 1.5, high: 3, low: 1, close: 2.5 },
+    ]);
+    fixture.componentRef.setInput('replayConfig', { initialIndex: 0, speedMs: 650 });
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.debugElement.queryAll(By.css('app-button')).length).toBeGreaterThan(0);
+    expect(fixture.debugElement.query(By.css('p-select'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('p-slider'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('select'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('input[type="range"]'))).toBeNull();
   });
 });
 

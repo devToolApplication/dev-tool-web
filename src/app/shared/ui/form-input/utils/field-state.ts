@@ -1,14 +1,24 @@
 import { signal, computed, WritableSignal } from '@angular/core';
-import { updateByPath, getByPath } from './form.utils';
+import {
+  getByPath,
+  isEmptyFormValue,
+  isRequiredByConfig,
+  requiredMessage,
+  resolveDisabledExpression,
+  resolveVisibleExpression,
+  updateByPath
+} from './form.utils';
 import { ExpressionEngine } from './expression.engine';
 import {
   FieldConfig,
   FieldState,
+  FormCustomValidator,
   FormContext,
   SelectOption,
   GroupFieldState,
   TextFieldConfig
 } from '../models/form-config.model';
+import { formValidationHelpers } from './expression.engine';
 
 export function createFieldState<TFormModel extends object>(
   path: string,
@@ -16,7 +26,8 @@ export function createFieldState<TFormModel extends object>(
   modelSignal: WritableSignal<TFormModel>,
   contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine,
-  groupName?: string
+  groupName?: string,
+  validators: Record<string, FormCustomValidator> = {}
 ): FieldState {
 
   const { type, name, label, width } = config;
@@ -25,6 +36,7 @@ export function createFieldState<TFormModel extends object>(
   const dirty = signal(false);
   const focusing = signal(false);
   const blurred = signal(false);
+  const externalErrors = signal<Record<string, string> | null>(null);
 
   const value = computed(() =>
     getByPath(modelSignal(), path)
@@ -35,6 +47,7 @@ export function createFieldState<TFormModel extends object>(
       updateByPath(m, path, val)
     );
     dirty.set(true);
+    externalErrors.set(null);
   }
 
   function markAsTouched() { touched.set(true); }
@@ -48,20 +61,29 @@ export function createFieldState<TFormModel extends object>(
   });
 
   const visible = computed(() => {
-    if (!config.rules?.visible) return true;
-    return !!expr.evaluate(config.rules.visible, buildCtx());
+    const expression = resolveVisibleExpression(config);
+    if (!expression) return true;
+    return !!expr.evaluate(expression, buildCtx());
   });
 
   const disabled = computed(() => {
-    if (!config.rules?.disabled) return false;
-    return !!expr.evaluate(config.rules.disabled, buildCtx());
+    if (contextSignal().mode === 'view') {
+      return true;
+    }
+    const expression = resolveDisabledExpression(config);
+    if (!expression) return false;
+    return !!expr.evaluate(expression, buildCtx());
   });
+
+  const required = computed(() => visible() && isRequiredByConfig(config, expr, buildCtx()));
 
   const options = computed<SelectOption[]>(() => {
     if (
       config.type !== 'select' &&
       config.type !== 'select-multi' &&
+      config.type !== 'multi-select' &&
       config.type !== 'auto-complete' &&
+      config.type !== 'autocomplete' &&
       config.type !== 'input-multi' &&
       config.type !== 'radio' &&
       config.type !== 'tags' &&
@@ -80,24 +102,48 @@ export function createFieldState<TFormModel extends object>(
       return null;
     }
 
-    const result: Record<string, string> = {};
+    const result: Record<string, string> = { ...(externalErrors() ?? {}) };
     const currentValue = value();
 
-    if ((config.type === 'text' || config.type === 'textarea') && isJsonContent(config)) {
+    if (isJsonContent(config)) {
       const rawValue = String(currentValue ?? '').trim();
       if (rawValue !== '') {
         try {
           JSON.parse(rawValue);
         } catch {
-          result['custom'] = config.jsonValidationMessage ?? 'Invalid JSON';
+          result['custom'] = config.jsonValidationMessage ?? 'shared.json.invalid';
         }
       }
     }
 
-    config.validation?.forEach(rule => {
-      const invalid = expr.evaluate(rule.expression, buildCtx());
+    if (required() && isEmptyFormValue(currentValue)) {
+      result['error-required'] = requiredMessage(config);
+    }
+
+    config.validation?.forEach((rule, index) => {
+      if (rule.type === 'required') {
+        return;
+      }
+
+      if (rule.type === 'custom' && rule.validator) {
+        const validator = validators[rule.validator];
+        const validationResult = validator?.(currentValue, {
+          formValue: modelSignal() as Record<string, unknown>,
+          fieldKey: path,
+          helpers: formValidationHelpers
+        });
+        if (validationResult && validationResult !== true) {
+          validationResult.forEach((error, errorIndex) => {
+            result[`custom-${index}-${errorIndex}`] = error.message;
+          });
+        }
+        return;
+      }
+
+      const invalid = evaluateRule(rule, currentValue, buildCtx(), expr);
       if (invalid) {
-        result["custom"] = expr.renderTemplate(rule.message, buildCtx());
+        const key = `${rule.severity === 'warning' ? 'warning' : 'error'}-${rule.type ?? 'expression'}-${index}`;
+        result[key] = expr.renderTemplate(rule.message, buildCtx());
       }
     });
 
@@ -119,8 +165,10 @@ export function createFieldState<TFormModel extends object>(
     focusing,
     blurred,
     dirty,
+    externalErrors,
     visible,
     disabled,
+    required,
     options,
     errors,
     valid,
@@ -139,7 +187,8 @@ export function createFieldState<TFormModel extends object>(
         modelSignal,
         contextSignal,
         expr,
-        config.name
+        config.name,
+        validators
       )
     );
 
@@ -154,5 +203,33 @@ export function createFieldState<TFormModel extends object>(
 }
 
 function isJsonContent(config: FieldConfig): config is TextFieldConfig {
-  return (config.type === 'text' || config.type === 'textarea') && config.contentType === 'json';
+  return config.type === 'json' || ((config.type === 'text' || config.type === 'textarea') && config.contentType === 'json');
+}
+
+function evaluateRule(
+  rule: NonNullable<FieldConfig['validation']>[number],
+  value: unknown,
+  ctx: { model: unknown; context: unknown; value?: unknown },
+  expr: ExpressionEngine
+): boolean {
+  if (rule.type === 'expression' || rule.expression) {
+    return !!expr.evaluate(rule.expression ?? 'false', ctx);
+  }
+
+  switch (rule.type) {
+    case 'required':
+      return isEmptyValue(value);
+    case 'min':
+      return value !== null && value !== undefined && value !== '' && Number(value) < Number(rule.value);
+    case 'max':
+      return value !== null && value !== undefined && value !== '' && Number(value) > Number(rule.value);
+    case 'regex':
+      return typeof rule.value === 'string' && !isEmptyValue(value) && !new RegExp(rule.value).test(String(value));
+    default:
+      return false;
+  }
+}
+
+function isEmptyValue(value: unknown): boolean {
+  return isEmptyFormValue(value);
 }

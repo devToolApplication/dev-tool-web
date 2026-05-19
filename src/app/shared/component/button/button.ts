@@ -13,6 +13,9 @@ export class Button extends BaseInput<void> {
   @Input() text = false;
   @Input() loading = false;
   @Input() severity: 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast' | null = null;
+  @Input() routerLink?: string | any[];
+  @Input() queryParams?: Record<string, unknown>;
+  @Input() ariaLabel?: string;
 
   @Output() buttonClick = new EventEmitter<void>();
 }

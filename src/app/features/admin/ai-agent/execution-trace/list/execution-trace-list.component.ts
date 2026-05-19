@@ -2,21 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { ExecutionSessionResponse, ExecutionStepResponse } from '../../../../../core/models/ai-agent/execution-trace.model';
 import { ExecutionTraceService } from '../../../../../core/services/ai-agent-service/execution-trace.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BadgeVariant } from '../../../../../shared/ui/data-display/badge/badge.component';
+import { KeyValueItem } from '../../../../../shared/ui/data-display/key-value-list/key-value-list.component';
+import { TimelineItem } from '../../../../../shared/ui/data-display/timeline/timeline.component';
 import { BasePagedList } from '../../../../../shared/ui/table/component/table/base-paged-list';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 
-interface ExecutionStepTimelineItem {
-  id: string;
-  stepNo: number;
-  stepType: ExecutionStepResponse['stepType'];
-  timestamp: string;
-  icon: string;
-  colorClass: string;
+interface ExecutionStepTimelineData {
+  step: ExecutionStepResponse;
   payload: string;
 }
 
@@ -29,6 +26,14 @@ interface ExecutionStepTimelineItem {
 export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
     title: 'aiAgent.executionTrace.title',
+    stateKey: 'ai-agent.execution-traces',
+    emptyTitle: 'shared.table.emptyTitle',
+    emptyDescription: 'shared.table.emptyDescription',
+    errorTitle: 'aiAgent.executionTrace.toast.loadTracesFailed',
+    toolbar: {
+      columnVisibility: { visible: true },
+      density: { visible: true }
+    },
     filters: [
       { field: 'agentId', label: 'aiAgent.agentId', placeholder: 'aiAgent.executionTrace.filterAgentId' },
       { field: 'userId', label: 'aiAgent.userId', placeholder: 'aiAgent.executionTrace.filterUserId' },
@@ -46,14 +51,20 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     ],
     filterOptions: { primaryField: 'agentId' },
     columns: [
-      { field: 'sessionId', header: 'aiAgent.sessionId', sortable: true },
-      { field: 'agentId', header: 'aiAgent.agentId' },
-      { field: 'userId', header: 'aiAgent.userId' },
-      { field: 'status', header: 'status', sortable: true },
+      { field: 'sessionId', header: 'aiAgent.sessionId', type: 'copyable', sortable: true },
+      { field: 'agentId', header: 'aiAgent.agentId', type: 'copyable' },
+      { field: 'userId', header: 'aiAgent.userId', type: 'copyable' },
+      {
+        field: 'status',
+        header: 'status',
+        type: 'badge',
+        sortable: true,
+        badgeMap: { RUNNING: 'info', COMPLETED: 'success', FAILED: 'danger', MAX_STEP_EXCEEDED: 'danger' }
+      },
       { field: 'iterationCount', header: 'aiAgent.iterations', sortable: true },
       { field: 'totalTokens', header: 'aiAgent.tokens', sortable: true },
-      { field: 'startedAt', header: 'aiAgent.startedAt' },
-      { field: 'finishedAt', header: 'aiAgent.finishedAt' },
+      { field: 'startedAt', header: 'aiAgent.startedAt', type: 'date', sortable: true, format: 'dd/MM/yyyy HH:mm:ss' },
+      { field: 'finishedAt', header: 'aiAgent.finishedAt', type: 'date', format: 'dd/MM/yyyy HH:mm:ss' },
       {
         field: 'actions',
         header: 'actions',
@@ -78,12 +89,13 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
 
-  loading = false;
   stepLoading = false;
+  stepError = '';
   stepPopupVisible = false;
   selectedSession: ExecutionSessionResponse | null = null;
   selectedSteps: ExecutionStepResponse[] = [];
-  selectedStepTimelineItems: ExecutionStepTimelineItem[] = [];
+  selectedStepTimelineItems: TimelineItem[] = [];
+  selectedStepPayload: ExecutionStepTimelineData | null = null;
 
   constructor(
     private readonly service: ExecutionTraceService,
@@ -92,11 +104,35 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     private readonly route: ActivatedRoute,
     private readonly router: Router
   ) {
-    super(route, router, DEFAULT_TABLE_ROWS);
+    super(route, router, DEFAULT_TABLE_ROWS, ['startedAt,desc']);
   }
 
   ngOnInit(): void {
     this.loadPage();
+  }
+
+  get selectedSessionItems(): KeyValueItem[] {
+    const session = this.selectedSession;
+    if (!session) {
+      return [];
+    }
+
+    return [
+      { label: 'aiAgent.sessionId', value: session.sessionId, type: 'copyable' },
+      { label: 'status', value: session.status, type: 'badge', variant: this.statusVariant(session.status) },
+      { label: 'aiAgent.agent', value: session.agentId, type: 'copyable' },
+      { label: 'aiAgent.user', value: session.userId || '-' },
+      { label: 'aiAgent.channel', value: session.channel || '-' },
+      { label: 'aiAgent.tokens', value: session.totalTokens ?? 0, type: 'number' },
+      { label: 'aiAgent.iterations', value: session.iterationCount ?? 0, type: 'number' },
+      { label: 'aiAgent.input', value: session.inputText || '-', emptyValue: '-' },
+      { label: 'aiAgent.error', value: session.errorMessage || '-', emptyValue: '-' }
+    ];
+  }
+
+  get selectedStepPayloadTitle(): string {
+    const step = this.selectedStepPayload?.step;
+    return step ? `#${step.stepNo} ${step.stepType}` : 'aiAgent.executionTrace.stepPayload';
   }
 
   onPopupVisibleChange(visible: boolean): void {
@@ -117,27 +153,37 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     }
 
     this.stepLoading = true;
+    this.stepError = '';
+    this.selectedStepPayload = null;
     this.loadingService.track(this.service.getSteps(this.selectedSession.sessionId)).pipe(finalize(() => (this.stepLoading = false))).subscribe({
       next: (steps) => {
         this.selectedSteps = [...steps].sort((left, right) => left.stepNo - right.stepNo);
         this.selectedStepTimelineItems = this.selectedSteps.map((step) => this.toTimelineItem(step));
       },
-      error: () => this.toastService.error('aiAgent.executionTrace.toast.loadStepsFailed')
+      error: () => {
+        this.stepError = 'aiAgent.executionTrace.toast.loadStepsFailed';
+        this.toastService.error('aiAgent.executionTrace.toast.loadStepsFailed');
+      }
     });
   }
 
   protected loadPage(): void {
-    this.loading = true;
-    this.loadingService.track(this.service.getSessionPage(this.page, this.pageSize, ['startedAt,desc'], this.filters)).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (res: BasePageResponse<ExecutionSessionResponse>) => this.setPageResponse(res),
-      error: () => this.toastService.error('aiAgent.executionTrace.toast.loadTracesFailed')
+    this.runPageRequest(this.loadingService.track(this.service.getSessionPage(this.page, this.pageSize, this.sorts, this.filters)), {
+      errorMessage: 'aiAgent.executionTrace.toast.loadTracesFailed',
+      onError: () => this.toastService.error('aiAgent.executionTrace.toast.loadTracesFailed')
     });
+  }
+
+  openStepPayload(item: TimelineItem): void {
+    this.selectedStepPayload = (item.data as ExecutionStepTimelineData | undefined) ?? null;
   }
 
   private openSteps(session: ExecutionSessionResponse): void {
     this.selectedSession = session;
     this.selectedSteps = [];
     this.selectedStepTimelineItems = [];
+    this.selectedStepPayload = null;
+    this.stepError = '';
     this.stepPopupVisible = true;
     this.refreshSelectedSteps();
   }
@@ -155,62 +201,58 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     this.selectedSession = null;
     this.selectedSteps = [];
     this.selectedStepTimelineItems = [];
+    this.selectedStepPayload = null;
     this.stepLoading = false;
+    this.stepError = '';
   }
 
-  private toTimelineItem(step: ExecutionStepResponse): ExecutionStepTimelineItem {
+  private toTimelineItem(step: ExecutionStepResponse): TimelineItem {
     const payload = this.formatPayload(step.payloadJson);
     const appearance = this.getStepAppearance(step.stepType);
     return {
       id: step.id,
-      stepNo: step.stepNo,
-      stepType: step.stepType,
-      timestamp: this.formatTimestamp(step.createdAt),
+      title: `#${step.stepNo} ${step.stepType}`,
+      time: step.createdAt,
       icon: appearance.icon,
-      colorClass: appearance.colorClass,
-      payload
+      variant: appearance.variant,
+      actionLabel: 'shared.json.view',
+      data: { step, payload } satisfies ExecutionStepTimelineData
     };
   }
 
-  private getStepAppearance(stepType: ExecutionStepResponse['stepType']): { icon: string; colorClass: string } {
+  private getStepAppearance(stepType: ExecutionStepResponse['stepType']): { icon: string; variant: BadgeVariant } {
     switch (stepType) {
       case 'USER_INPUT':
-        return { icon: 'pi pi-user', colorClass: 'timeline-marker-user' };
+        return { icon: 'pi pi-user', variant: 'success' };
       case 'MODEL_REQUEST':
-        return { icon: 'pi pi-send', colorClass: 'timeline-marker-request' };
+        return { icon: 'pi pi-send', variant: 'info' };
       case 'MODEL_RESPONSE':
-        return { icon: 'pi pi-sparkles', colorClass: 'timeline-marker-response' };
+        return { icon: 'pi pi-sparkles', variant: 'default' };
       case 'TOOL_CALL':
-        return { icon: 'pi pi-wrench', colorClass: 'timeline-marker-tool-call' };
+        return { icon: 'pi pi-wrench', variant: 'warning' };
       case 'TOOL_RESULT':
-        return { icon: 'pi pi-check-circle', colorClass: 'timeline-marker-tool-result' };
+        return { icon: 'pi pi-check-circle', variant: 'success' };
       case 'FINAL_ANSWER':
-        return { icon: 'pi pi-verified', colorClass: 'timeline-marker-final' };
+        return { icon: 'pi pi-verified', variant: 'info' };
       case 'ERROR':
-        return { icon: 'pi pi-exclamation-triangle', colorClass: 'timeline-marker-error' };
+        return { icon: 'pi pi-exclamation-triangle', variant: 'danger' };
       default:
-        return { icon: 'pi pi-circle', colorClass: 'timeline-marker-default' };
+        return { icon: 'pi pi-circle', variant: 'muted' };
     }
   }
 
-  private formatTimestamp(value?: string): string {
-    if (!value) {
-      return '-';
+  private statusVariant(status?: string): BadgeVariant {
+    switch (status) {
+      case 'COMPLETED':
+        return 'success';
+      case 'RUNNING':
+        return 'info';
+      case 'FAILED':
+      case 'MAX_STEP_EXCEEDED':
+        return 'danger';
+      default:
+        return 'muted';
     }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    return new Intl.DateTimeFormat('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(date);
   }
 
   private formatPayload(payloadJson?: string): string {

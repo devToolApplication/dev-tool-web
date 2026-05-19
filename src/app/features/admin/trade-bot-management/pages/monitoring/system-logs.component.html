@@ -1,4 +1,4 @@
-<section class="flex flex-col gap-4">
+<app-page-shell title="tradeBot.logs.title" layout="wide">
   <app-card>
     <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.logs.filters' | translateContent }}</div>
     <app-form-input
@@ -11,5 +11,38 @@
     ></app-form-input>
   </app-card>
 
-  <app-table [config]="tableConfig" [data]="logs()" [loading]="loading()"></app-table>
-</section>
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    @for (card of summaryCards(); track card.label) {
+      <app-summary-metric-card [label]="card.label" [value]="card.value"></app-summary-metric-card>
+    }
+  </div>
+
+  <app-table [config]="tableConfig" [data]="logs()" [loading]="loading()" [error]="error()" (retry)="retryLoad()"></app-table>
+
+  <app-drawer
+    [open]="!!selectedLog()"
+    (openChange)="handleLogDrawerOpenChange($event)"
+    (closed)="closeDrawer()"
+    title="tradeBot.logs.detail"
+    size="lg"
+  >
+    @if (selectedLog(); as log) {
+      <div class="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div class="rounded-lg border app-border app-bg-soft p-3">
+          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.level' | translateContent }}</div>
+          <div class="mt-1"><app-tag [value]="log.level" severity="danger"></app-tag></div>
+        </div>
+        <div class="rounded-lg border app-border app-bg-soft p-3">
+          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.module' | translateContent }}</div>
+          <div class="mt-1 app-text">{{ log.module ?? '-' }}</div>
+        </div>
+        <div class="rounded-lg border app-border app-bg-soft p-3">
+          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.runId' | translateContent }}</div>
+          <div class="mt-1 break-words app-text">{{ log.runId ?? '-' }}</div>
+        </div>
+      </div>
+      <div class="mb-3 app-text">{{ log.message }}</div>
+      <app-json-viewer [value]="logJson()" [collapsed]="true"></app-json-viewer>
+    }
+  </app-drawer>
+</app-page-shell>

@@ -114,6 +114,17 @@ export interface CandleSyncRunResponse {
   errorMessage?: string;
 }
 
+export interface CandleMarketOptionResponse {
+  symbol: string;
+  timeframe: string;
+  source: string;
+  marketType?: string;
+  feedCode?: string;
+  count: number;
+  fromTime?: string;
+  toTime?: string;
+}
+
 export interface CandleGapResponse {
   id: string;
   source: string;
@@ -137,6 +148,7 @@ export interface ExecutorVersionResponse {
   versions: string[];
   usesConfig?: boolean;
   childSlots?: IndicatorChildSlotResponse[];
+  formTemplate?: FormConfig;
 }
 
 export interface IndicatorChildSlotResponse {
@@ -186,9 +198,10 @@ export interface RuleConfigDto extends Omit<RuleConfigResponse, 'id'> {}
 export interface StrategyConfigResponse {
   id: string;
   code: string;
-  type: 'ENTRY_TP_SL';
+  type: string;
   strategyVersion: string;
   config: Record<string, unknown>;
+  formTemplate?: FormConfig;
   entryRule: string;
   slRule: string;
   tpRule: string;
@@ -453,6 +466,7 @@ export interface SystemLogResponse extends Record<string, unknown> {
   level?: string;
   status?: string;
   runId?: string;
+  traceId?: string;
   message?: string;
   symbol?: string;
   timeframe?: string;

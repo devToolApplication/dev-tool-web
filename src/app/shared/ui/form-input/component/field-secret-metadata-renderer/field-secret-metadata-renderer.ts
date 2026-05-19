@@ -1,8 +1,7 @@
-import { Component, DestroyRef, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
+import { AfterViewChecked, Component, DestroyRef, ElementRef, Inject, Input, OnChanges, Optional, SimpleChanges, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AiAgentSecretUserResponse, AiAgentSecretUserService } from '../../../../../core/services/ai-agent-service/ai-agent-secret-user.service';
-import { StorageSecretUserResponse, StorageSecretUserService } from '../../../../../core/services/file-service/storage-secret-user.service';
 import { FieldState, SecretMetadataFieldConfig, SelectOption } from '../../models/form-config.model';
+import { FORM_INPUT_OPTIONS_LOADERS, FormInputOptionsLoader } from '../../utils/form-input-options-loader';
 
 type MetadataType = 'RAW_TEXT' | 'KEYCLOAK_AUTH' | 'BASIC_AUTH';
 type LegacyMetadataType = 'CONFIG' | 'SECRET';
@@ -38,14 +37,14 @@ interface RawMetadataEntry {
   templateUrl: './field-secret-metadata-renderer.html',
   styleUrl: './field-secret-metadata-renderer.css'
 })
-export class FieldSecretMetadataRendererComponent implements OnChanges {
+export class FieldSecretMetadataRendererComponent implements AfterViewChecked, OnChanges {
   @Input({ required: true }) field!: FieldState;
   readonly serviceOptions = signal<SelectOption[]>([]);
 
   constructor(
-    private readonly storageSecretUserService: StorageSecretUserService,
-    private readonly aiAgentSecretUserService: AiAgentSecretUserService,
-    private readonly destroyRef: DestroyRef
+    @Optional() @Inject(FORM_INPUT_OPTIONS_LOADERS) private readonly optionLoaders: FormInputOptionsLoader[] | null,
+    private readonly destroyRef: DestroyRef,
+    private readonly host: ElementRef<HTMLElement>
   ) {}
 
   get config(): SecretMetadataFieldConfig {
@@ -67,8 +66,17 @@ export class FieldSecretMetadataRendererComponent implements OnChanges {
     }
   }
 
+  ngAfterViewChecked(): void {
+    this.host.nativeElement
+      .querySelectorAll<HTMLElement>('.p-fieldset-content-container[role="region"]')
+      .forEach((container) => {
+        container.removeAttribute('role');
+        container.removeAttribute('aria-labelledby');
+      });
+  }
+
   get secretOptions(): SelectOption[] {
-    return this.config.service ? this.serviceOptions() : this.field.options();
+    return this.config.optionsSource ? this.serviceOptions() : this.field.options();
   }
 
   get typeOptions(): SelectOption[] {
@@ -132,29 +140,25 @@ export class FieldSecretMetadataRendererComponent implements OnChanges {
   }
 
   private loadOptions(): void {
-    if (this.config.service === 'file-mcrs') {
-      this.storageSecretUserService
-        .getAll()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (items) => this.serviceOptions.set(this.mapStorageSecretOptions(items)),
-          error: () => this.serviceOptions.set([])
-        });
+    const source = this.config.optionsSource;
+    if (!source) {
+      this.serviceOptions.set([]);
       return;
     }
 
-    if (this.config.service === 'ai-agent-mcrs') {
-      this.aiAgentSecretUserService
-        .getAll()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (items) => this.serviceOptions.set(this.mapAiAgentSecretOptions(items)),
-          error: () => this.serviceOptions.set([])
-        });
+    const loader = this.optionLoaders?.find((item) => item.source === source);
+    if (!loader) {
+      this.serviceOptions.set([]);
       return;
     }
 
-    this.serviceOptions.set([]);
+    loader
+      .load()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (items) => this.serviceOptions.set(items),
+        error: () => this.serviceOptions.set([])
+      });
   }
 
   private patchEntry(index: number, patch: Partial<MetadataEntry>): void {
@@ -256,17 +260,5 @@ export class FieldSecretMetadataRendererComponent implements OnChanges {
         scope: config.scope ?? ''
       }
     };
-  }
-
-  private mapStorageSecretOptions(items: StorageSecretUserResponse[]): SelectOption[] {
-    return items
-      .filter((item) => item.status === 'ACTIVE')
-      .map((item) => ({ label: `${item.category} / ${item.name}`, value: item.id }));
-  }
-
-  private mapAiAgentSecretOptions(items: AiAgentSecretUserResponse[]): SelectOption[] {
-    return items
-      .filter((item) => item.status === 'ACTIVE')
-      .map((item) => ({ label: `${item.category} / ${item.name}`, value: item.id }));
   }
 }

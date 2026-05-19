@@ -5,42 +5,45 @@ import type { TableConfig } from './models/table-config.model';
 
 const rows = [
   {
-    id: 'STR-001',
-    name: 'Breakout Alpha',
+    id: 'CFG-001',
+    name: 'Approval Flow',
     owner: 'Nguyen An',
     status: 'active',
     enabled: true,
-    tags: ['momentum', 'btc'],
+    tags: ['approval', 'email'],
     budget: 125000,
     createdAt: new Date(2026, 3, 20),
-    risk: { maxDrawdown: '8%', leverage: '2x' }
+    details: { priority: 'high', retries: 2 }
   },
   {
-    id: 'STR-002',
-    name: 'Mean Reversion',
+    id: 'CFG-002',
+    name: 'Billing Sync',
     owner: 'Tran Binh',
     status: 'draft',
     enabled: false,
-    tags: ['range', 'eth'],
+    tags: ['billing', 'sync'],
     budget: 85000,
     createdAt: new Date(2026, 3, 22),
-    risk: { maxDrawdown: '5%', leverage: '1x' }
+    details: { priority: 'medium', retries: 1 }
   },
   {
-    id: 'STR-003',
-    name: 'Trend Rider',
+    id: 'CFG-003',
+    name: 'Archive Job',
     owner: 'Le Chi',
     status: 'paused',
     enabled: true,
-    tags: ['trend', 'sol'],
+    tags: ['archive', 'batch'],
     budget: 150000,
     createdAt: new Date(2026, 3, 25),
-    risk: { maxDrawdown: '10%', leverage: '3x' }
+    details: { priority: 'low', retries: 3 }
   }
 ];
 
 const tableConfig: TableConfig = {
-  title: 'Strategy Configurations',
+  title: 'Workflow Configurations',
+  stateKey: 'storybook-workflow-configurations',
+  emptyFilteredTitle: 'No workflows match the filters',
+  emptyFilteredDescription: 'Change the keyword or clear the active filters.',
   rows: 5,
   rowsPerPageOptions: [5, 10, 20],
   scrollHeight: '32rem',
@@ -115,7 +118,7 @@ const tableConfig: TableConfig = {
       minWidth: '11rem'
     },
     { field: 'createdAt', header: 'Created', type: 'date', minWidth: '10rem' },
-    { field: 'risk', header: 'Risk', type: 'group', minWidth: '16rem' },
+    { field: 'details', header: 'Details', type: 'group', minWidth: '16rem' },
     {
       field: 'actions',
       header: 'Actions',
@@ -128,14 +131,14 @@ const tableConfig: TableConfig = {
           label: 'Edit',
           icon: 'pi pi-pencil',
           severity: 'info',
-          onClick: (rowData: { id: string }) => console.log('edit', rowData.id)
+          onClick: (rowData: { id: string }) => void rowData.id
         },
         {
           label: 'Delete',
           icon: 'pi pi-trash',
           severity: 'danger',
           disabled: (rowData: { status: string }) => rowData.status === 'active',
-          onClick: (rowData: { id: string }) => console.log('delete', rowData.id)
+          onClick: (rowData: { id: string }) => void rowData.id
         }
       ]
     }
@@ -189,7 +192,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await expect(canvas.getByText('Breakout Alpha')).toBeInTheDocument();
+    await expect(canvas.getByText('Approval Flow')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: /new/i }));
     await expect(canvas.getByText('Create clicked')).toBeInTheDocument();
   }
@@ -209,6 +212,49 @@ export const Empty: Story = {
   args: {
     config: tableConfig,
     data: [],
+    rows: 5
+  },
+  render: Default.render
+};
+
+export const Error: Story = {
+  args: {
+    config: tableConfig,
+    data: [],
+    rows: 5,
+    error: 'loadError'
+  },
+  render: Default.render
+};
+
+export const SelectionAndControls: Story = {
+  args: {
+    config: {
+      ...tableConfig,
+      selection: { mode: 'multiple' },
+      toolbar: {
+        ...tableConfig.toolbar,
+        refresh: { visible: true, label: 'refresh', icon: 'pi pi-refresh' },
+        columnVisibility: { visible: true, placeholder: 'fieldOptions' },
+        density: { visible: true },
+        bulkActions: [
+          {
+            id: 'archive',
+            label: 'Archive',
+            icon: 'pi pi-folder',
+            onClick: (selectedRows: unknown[]) => void selectedRows.length
+          },
+          {
+            id: 'delete',
+            label: 'Delete',
+            icon: 'pi pi-trash',
+            variant: 'danger',
+            onClick: (selectedRows: unknown[]) => void selectedRows.length
+          }
+        ]
+      }
+    },
+    data: rows,
     rows: 5
   },
   render: Default.render

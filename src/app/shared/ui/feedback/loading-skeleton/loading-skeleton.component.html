@@ -1,0 +1,57 @@
+<div
+  class="loading-skeleton"
+  [class.loading-skeleton--animated]="animated"
+  [class]="'loading-skeleton--' + resolvedType"
+  [style.--skeleton-columns]="resolvedColumns"
+  role="status"
+  aria-live="polite"
+  aria-busy="true"
+  [attr.aria-label]="'loading' | translateContent"
+>
+  @switch (resolvedType) {
+    @case ('table') {
+      <div class="loading-skeleton__table">
+        @for (_ of sequence(resolvedColumns); track $index) {
+          <span class="loading-skeleton__line loading-skeleton__line--header"></span>
+        }
+        @for (_row of sequence(resolvedRows); track $index) {
+          @for (_col of sequence(resolvedColumns); track $index) {
+            <span class="loading-skeleton__line"></span>
+          }
+        }
+      </div>
+    }
+    @case ('form') {
+      <div class="loading-skeleton__form">
+        @for (_ of sequence(resolvedRows); track $index) {
+          <span class="loading-skeleton__label"></span>
+          <span class="loading-skeleton__field"></span>
+        }
+      </div>
+    }
+    @case ('detail') {
+      <div class="loading-skeleton__detail">
+        <span class="loading-skeleton__title"></span>
+        @for (_ of sequence(resolvedRows); track $index) {
+          <span class="loading-skeleton__line"></span>
+        }
+      </div>
+    }
+    @case ('list') {
+      <div class="loading-skeleton__list">
+        @for (_ of sequence(resolvedRows); track $index) {
+          <span class="loading-skeleton__avatar"></span>
+          <span class="loading-skeleton__line"></span>
+        }
+      </div>
+    }
+    @default {
+      <div class="loading-skeleton__card">
+        <span class="loading-skeleton__title"></span>
+        @for (_ of sequence(resolvedRows); track $index) {
+          <span class="loading-skeleton__line"></span>
+        }
+      </div>
+    }
+  }
+</div>

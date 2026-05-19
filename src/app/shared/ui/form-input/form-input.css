@@ -1,5 +1,18 @@
-.form-grid {
-  display: flex;
-  flex-direction: column;
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form-input__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
   gap: 1rem;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .form-input__grid {
+    gap: 0.875rem;
+  }
 }

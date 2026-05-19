@@ -10,7 +10,7 @@ const model: MenuItem[] = [
 ];
 
 const meta: Meta<ButtonSplit> = {
-  title: 'Shared/Components/Button Split',
+  title: 'Shared/Components/Actions/Button Split',
   component: ButtonSplit,
   args: {
     label: 'Actions',

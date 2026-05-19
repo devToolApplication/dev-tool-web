@@ -14,7 +14,8 @@
         icon="pi pi-sliders-h"
         severity="secondary"
         [text]="true"
-        [label]="''"
+        [label]="activeFilterCount() > 0 ? activeFilterCount().toString() : ''"
+        ariaLabel="showFilters"
         [disabled]="loading || !visibleAdvancedFields().length"
         (buttonClick)="openDrawer()"
       ></app-button>
@@ -23,11 +24,43 @@
         severity="secondary"
         [text]="true"
         [label]="''"
+        ariaLabel="reset"
         [disabled]="loading"
         (buttonClick)="onReset()"
       ></app-button>
     </div>
   </div>
+
+  @if (activeFilterChips().length) {
+    <div class="filter-chip-row" [attr.aria-label]="'shared.filter.active' | translateContent">
+      <span class="filter-chip-row__label">{{ 'shared.filter.active' | translateContent }}</span>
+
+      @for (chip of activeFilterChips(); track chip.field.field) {
+        <span class="filter-chip">
+          <span class="filter-chip__text">
+            {{ chip.label | translateContent }}:
+            <strong>{{ chip.valueLabel | translateContent }}</strong>
+          </span>
+          <app-button
+            icon="pi pi-times"
+            severity="secondary"
+            [text]="true"
+            [label]="''"
+            ariaLabel="shared.filter.remove"
+            (buttonClick)="removeFilter(chip.field)"
+          ></app-button>
+        </span>
+      }
+
+      <app-button
+        size="small"
+        severity="secondary"
+        [text]="true"
+        label="shared.filter.clearAll"
+        (buttonClick)="onReset()"
+      ></app-button>
+    </div>
+  }
 </section>
 
 <p-dialog
@@ -61,6 +94,7 @@
         severity="secondary"
         [text]="true"
         [label]="''"
+        ariaLabel="close"
         (buttonClick)="closeDrawer()"
       ></app-button>
     </header>
@@ -79,6 +113,7 @@
                 [value]="valueOf(field)"
                 [placeholder]="field.placeholder ?? field.label"
                 [showClear]="true"
+                [disabled]="loading || isFieldDisabled(field)"
                 (valueChange)="onFieldChange(field, $event)"
               ></app-select>
             }
@@ -88,6 +123,7 @@
                 [value]="valueOf(field)"
                 [placeholder]="field.placeholder ?? field.label"
                 [enableFilter]="true"
+                [disabled]="loading || isFieldDisabled(field)"
                 (valueChange)="onFieldChange(field, $event)"
               ></app-select-multi>
             }
@@ -97,6 +133,7 @@
                 [value]="valueOf(field)"
                 [placeholder]="field.placeholder ?? field.label"
                 [showClear]="true"
+                [disabled]="loading || isFieldDisabled(field)"
                 (valueChange)="onFieldChange(field, $event)"
               ></app-select>
             }
@@ -104,6 +141,7 @@
               <app-date-picker
                 [value]="valueOf(field)"
                 [placeholder]="field.placeholder ?? field.label"
+                [disabled]="loading || isFieldDisabled(field)"
                 (valueChange)="onFieldChange(field, $event)"
               ></app-date-picker>
             }
@@ -112,22 +150,62 @@
                 <app-date-picker
                   [value]="valueOf(field)?.start"
                   [placeholder]="'fromDate'"
+                  [disabled]="loading || isFieldDisabled(field)"
                   (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
                 ></app-date-picker>
                 <app-date-picker
                   [value]="valueOf(field)?.end"
                   [placeholder]="'toDate'"
+                  [disabled]="loading || isFieldDisabled(field)"
                   (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
                 ></app-date-picker>
               </div>
+            }
+            @case ('number-range') {
+              <div class="date-range-grid">
+                <app-input-number
+                  [label]="(field.label | translateContent) + ' ' + ('shared.filter.min' | translateContent)"
+                  [value]="valueOf(field)?.start"
+                  [placeholder]="'shared.filter.min'"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
+                ></app-input-number>
+                <app-input-number
+                  [label]="(field.label | translateContent) + ' ' + ('shared.filter.max' | translateContent)"
+                  [value]="valueOf(field)?.end"
+                  [placeholder]="'shared.filter.max'"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
+                ></app-input-number>
+              </div>
+            }
+            @case ('autocomplete') {
+              <app-auto-complete
+                [label]="field.label"
+                [options]="optionsOf(field)"
+                [value]="valueOf(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                [disabled]="loading || isFieldDisabled(field)"
+                (valueChange)="onFieldChange(field, $event)"
+              ></app-auto-complete>
             }
             @default {
               <app-input-text
                 [value]="valueOf(field)"
                 [placeholder]="field.placeholder ?? field.label"
+                [disabled]="loading || isFieldDisabled(field)"
                 (valueChange)="onFieldChange(field, $event)"
               ></app-input-text>
             }
+          }
+
+          @if (optionLoading(field)) {
+            <app-loading-skeleton type="list" [rows]="1"></app-loading-skeleton>
+          }
+          @if (optionError(field)) {
+            <app-error-state [message]="optionError(field)!" [compact]="true" (retry)="retryLoadOptions(field)"></app-error-state>
+          } @else if (optionsOf(field).length === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {
+            <small class="table-filter__empty">{{ (field.emptyMessage ?? 'noDataFound') | translateContent }}</small>
           }
         </div>
       }

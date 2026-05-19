@@ -9,11 +9,15 @@
     (onFocus)="onFocus()"
     [disabled]="disabled || readonly"
     [required]="required"
+    [indeterminate]="indeterminate"
+    [ariaLabel]="(ariaLabel || label || undefined) | translateContent"
   />
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
+  @if (!hideLabel && label) {
+    <label [attr.for]="inputId">{{ label | translateContent }}</label>
+  }
 </div>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

@@ -1,0 +1,85 @@
+<form class="smart-form-shell" [class]="'smart-form-shell--' + density" (ngSubmit)="submitRequested.emit()">
+  @if (title || description) {
+    <header class="smart-form-shell__header">
+      <div>
+        @if (title) {
+          <h2>{{ title | translateContent }}</h2>
+        }
+        @if (description) {
+          <p>{{ description | translateContent }}</p>
+        }
+      </div>
+    </header>
+  }
+
+  @if (apiError) {
+    <app-alert variant="danger" [message]="apiError"></app-alert>
+  }
+
+  @if (showValidationSummary && validationItems.length > 0) {
+    <app-validation-summary
+      [items]="validationItems"
+      (itemClick)="summaryItemClick.emit($event)"
+    ></app-validation-summary>
+  }
+
+  @if (loading) {
+    <div class="smart-form-shell__loading">
+      <app-loading-skeleton type="form" [rows]="5"></app-loading-skeleton>
+      <app-loading-skeleton type="form" [rows]="4"></app-loading-skeleton>
+    </div>
+  } @else {
+    <div
+      class="smart-form-shell__workspace"
+      [class.smart-form-shell__workspace--no-nav]="sectionNavigation === 'none' || sections.length <= 1"
+      [class.smart-form-shell__workspace--no-status]="!showStatusPanel"
+    >
+      <app-form-section-nav
+        class="smart-form-shell__nav"
+        [sections]="sections"
+        [mode]="sectionNavigation"
+        (sectionSelect)="sectionSelect.emit($event)"
+      ></app-form-section-nav>
+
+      <main class="smart-form-shell__main">
+        <ng-content></ng-content>
+      </main>
+
+      @if (showStatusPanel) {
+        <app-form-status-panel
+          class="smart-form-shell__status"
+          [sections]="sections"
+          [dirty]="dirty"
+          [submitting]="submitting"
+          [loading]="loading"
+          [readonly]="readonly"
+          [errorCount]="errorCount"
+          [warningCount]="warningCount"
+          [mode]="mode"
+        ></app-form-status-panel>
+      }
+    </div>
+  }
+
+  @if (showSubmit) {
+    <app-sticky-form-actions
+      [showSubmit]="showSubmit"
+      [showCancel]="showCancel"
+      [showReset]="showReset"
+      [dirty]="dirty"
+      [submitting]="submitting"
+      [loading]="loading"
+      [readonly]="readonly"
+      [submitDisabled]="submitDisabled"
+      [errorCount]="errorCount"
+      [warningCount]="warningCount"
+      [submitLabel]="submitLabel"
+      [cancelLabel]="cancelLabel"
+      [resetLabel]="resetLabel"
+      [reviewErrorsLabel]="reviewErrorsLabel"
+      (cancel)="cancel.emit()"
+      (reset)="reset.emit()"
+      (reviewErrors)="reviewErrors.emit()"
+    ></app-sticky-form-actions>
+  }
+</form>

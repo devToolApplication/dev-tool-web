@@ -1,0 +1,61 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.validation-summary {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--app-control-danger-border);
+  border-radius: 0.5rem;
+  background: var(--app-control-danger-bg);
+  color: var(--app-control-danger-text);
+}
+
+.validation-summary__header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.validation-summary h3,
+.validation-summary p {
+  margin: 0;
+}
+
+.validation-summary p {
+  color: var(--app-text);
+}
+
+.validation-summary__list {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.validation-summary__item {
+  display: inline-grid;
+  gap: 0.125rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.validation-summary__item span {
+  color: var(--app-text);
+}
+
+.validation-summary__item small {
+  color: var(--app-text-muted);
+}
+
+.validation-summary__item--warning {
+  color: var(--app-control-warn-text);
+}

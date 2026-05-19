@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { Fileupload } from './fileupload';
 
 const meta: Meta<Fileupload> = {
-  title: 'Shared/Components/File Upload',
+  title: 'Shared/Components/Form Controls/File Upload',
   component: Fileupload,
   args: {
     mode: 'basic',

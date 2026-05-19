@@ -1,0 +1,37 @@
+@if (items.length > 0) {
+  <section class="validation-summary" role="alert" tabindex="-1">
+    <header class="validation-summary__header">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <div>
+        <h3>{{ title | translateContent }}</h3>
+        <p>
+          {{ errorCount }} {{ 'shared.validation.errors' | translateContent }}
+          @if (warningCount > 0) {
+            <span> / {{ warningCount }} {{ 'shared.validation.warnings' | translateContent }}</span>
+          }
+        </p>
+      </div>
+    </header>
+
+    <ol class="validation-summary__list">
+      @for (item of items; track item.fieldPath ?? item.message) {
+        <li>
+          <button
+            type="button"
+            class="validation-summary__item"
+            [class.validation-summary__item--warning]="item.severity === 'warning'"
+            (click)="itemClick.emit(item)"
+          >
+            @if (item.section) {
+              <small>{{ item.section | translateContent }}</small>
+            }
+            @if (item.label) {
+              <strong>{{ item.label | translateContent }}</strong>
+            }
+            <span>{{ item.message | translateContent }}</span>
+          </button>
+        </li>
+      }
+    </ol>
+  </section>
+}

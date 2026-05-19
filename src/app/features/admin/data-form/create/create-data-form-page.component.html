@@ -1,0 +1,434 @@
+<app-page-shell
+  layout="full"
+  title="dataForm.create.title"
+  subtitle="dataForm.create.subtitle"
+  [breadcrumb]="[
+    { label: 'dataForm.breadcrumb.dataForms', routerLink: '/admin/data-forms' },
+    { label: 'dataForm.breadcrumb.create' }
+  ]"
+>
+  <ng-container page-actions>
+    <app-button label="cancel" icon="pi pi-times" severity="secondary" [text]="true" (buttonClick)="onCancel()"></app-button>
+    <app-button
+      label="dataForm.action.validate"
+      icon="pi pi-check-circle"
+      severity="secondary"
+      [loading]="validating()"
+      (buttonClick)="onValidate()"
+    ></app-button>
+    <app-button
+      label="dataForm.action.create"
+      icon="pi pi-plus"
+      severity="success"
+      [loading]="creating()"
+      [disabled]="!canSubmit()"
+      (buttonClick)="onCreate()"
+    ></app-button>
+  </ng-container>
+
+  <div class="create-data-form-page">
+    <aside class="create-data-form-page__left" [attr.aria-label]="'dataForm.sidebar.sections' | translateContent">
+      <app-section-panel title="dataForm.sidebar.sections" density="compact">
+        <nav class="section-nav" [attr.aria-label]="'dataForm.sidebar.sections' | translateContent">
+          @for (item of sectionItems; track item.id) {
+            <a
+              class="section-nav__item"
+              [class.section-nav__item--active]="activeSectionId() === item.id"
+              [attr.href]="'#' + item.id"
+              (click)="$event.preventDefault(); scrollToSection(item.id)"
+            >
+              <span class="section-nav__label">
+                <i [class]="item.icon" aria-hidden="true"></i>
+                <span>{{ item.label | translateContent }}</span>
+              </span>
+              @if (sectionErrorCount(item.id) > 0) {
+                <app-badge
+                  [label]="sectionErrorCount(item.id) + ' ' + ('dataForm.badge.errors' | translateContent)"
+                  variant="danger"
+                  size="sm"
+                ></app-badge>
+              }
+              @if (sectionWarningCount(item.id) > 0) {
+                <app-badge
+                  [label]="sectionWarningCount(item.id) + ' ' + ('dataForm.badge.warnings' | translateContent)"
+                  variant="warning"
+                  size="sm"
+                ></app-badge>
+              }
+            </a>
+          }
+        </nav>
+      </app-section-panel>
+
+      <app-section-panel title="dataForm.sidebar.status" density="compact">
+        <div class="status-stack">
+          <app-badge [label]="jsonStatusLabel()" [variant]="jsonStatusVariant()" icon="pi pi-code"></app-badge>
+          <app-badge [label]="schemaStatusLabel()" [variant]="schemaStatusVariant()" icon="pi pi-sitemap"></app-badge>
+          @if (unsavedChanges()) {
+            <app-badge label="dataForm.status.unsavedChanges" variant="warning" icon="pi pi-pencil"></app-badge>
+          }
+        </div>
+      </app-section-panel>
+    </aside>
+
+    <main class="create-data-form-page__main">
+      <app-section-panel
+        id="general-info"
+        title="dataForm.section.generalInformation"
+        subtitle="dataForm.section.generalInformationSubtitle"
+      >
+        <div class="general-grid">
+          <app-input-text
+            label="dataForm.field.formName"
+            [required]="true"
+            [value]="formName()"
+            [invalid]="!!generalErrorFor('formName')"
+            [errorMessage]="generalErrorFor('formName')"
+            (valueChange)="onFormNameChange($event)"
+          ></app-input-text>
+
+          <app-input-text
+            label="dataForm.field.formCode"
+            [required]="true"
+            [value]="formCode()"
+            [invalid]="!!generalErrorFor('formCode')"
+            [errorMessage]="generalErrorFor('formCode')"
+            [helpText]="checkingFormCode() ? 'dataForm.help.checkingFormCode' : 'dataForm.help.formCode'"
+            (valueChange)="onFormCodeChange($event)"
+            (blur)="onFormCodeBlur()"
+          ></app-input-text>
+
+          <div class="general-grid__full">
+            <app-input-area
+              label="description"
+              [rows]="3"
+              [maxRows]="6"
+              [value]="description()"
+              (valueChange)="onDescriptionChange($event)"
+            ></app-input-area>
+          </div>
+
+          <app-select-button
+            label="status"
+            [options]="statusOptions"
+            [allowEmpty]="false"
+            [value]="status()"
+            (valueChange)="onStatusChange($event)"
+          ></app-select-button>
+        </div>
+      </app-section-panel>
+
+      <app-section-panel
+        id="json-config"
+        title="dataForm.section.jsonConfiguration"
+        subtitle="dataForm.section.jsonConfigurationSubtitle"
+      >
+        <ng-container section-actions>
+          <app-button
+            size="small"
+            label="dataForm.action.formatJson"
+            icon="pi pi-align-left"
+            severity="secondary"
+            [disabled]="!canUpdateConfig()"
+            (buttonClick)="onFormatJson()"
+          ></app-button>
+          <app-button
+            size="small"
+            label="dataForm.action.checkJsonSyntax"
+            icon="pi pi-check"
+            severity="secondary"
+            (buttonClick)="onValidateJson()"
+          ></app-button>
+          @if (canImport()) {
+            <app-fileupload
+              mode="basic"
+              chooseLabel="dataForm.action.importJson"
+              accept=".json,application/json"
+              [disabled]="!canUpdateConfig()"
+              [maxFileSize]="1048576"
+              (fileSelect)="onImportJson($event)"
+            ></app-fileupload>
+          }
+          @if (canExport()) {
+            <app-button
+              size="small"
+              label="dataForm.action.exportJson"
+              icon="pi pi-download"
+              severity="secondary"
+              (buttonClick)="onExportJson()"
+            ></app-button>
+          }
+          <app-button
+            size="small"
+            label="dataForm.action.copyJson"
+            icon="pi pi-copy"
+            severity="secondary"
+            (buttonClick)="onCopyJson()"
+          ></app-button>
+        </ng-container>
+
+        <app-input-area
+          label="dataForm.field.jsonConfig"
+          contentType="json"
+          [rows]="18"
+          [maxRows]="28"
+          [showZoomButton]="true"
+          [value]="jsonText()"
+          [readonly]="!canUpdateConfig()"
+          [invalid]="!!jsonErrorText()"
+          [errorMessage]="jsonErrorText()"
+          (valueChange)="onJsonChange($event)"
+        ></app-input-area>
+
+        @if (validated() && parsedJson().error) {
+          <app-alert
+            variant="danger"
+            title="dataForm.json.errorTitle"
+            [message]="parsedJson().error?.message ?? 'dataForm.validation.invalidJson'"
+          ></app-alert>
+        }
+      </app-section-panel>
+
+      <app-section-panel
+        id="parsed-summary"
+        title="dataForm.section.parsedSummary"
+        subtitle="dataForm.section.parsedSummarySubtitle"
+      >
+        @if (!parsedJson().valid) {
+          @if (parsedJson().empty) {
+            <app-empty-state title="dataForm.empty.noJsonTitle" description="dataForm.empty.noJsonDescription" icon="pi pi-code"></app-empty-state>
+          } @else {
+            <app-error-state
+              title="dataForm.json.errorTitle"
+              [message]="parsedJson().error?.message ?? 'dataForm.validation.invalidJson'"
+              [compact]="true"
+            ></app-error-state>
+          }
+        } @else {
+          <div class="summary-stack">
+            <app-key-value-list [items]="parsedSummaryItems()" layout="two-column"></app-key-value-list>
+
+            <div class="field-type-list" [attr.aria-label]="'dataForm.summary.fields' | translateContent">
+              @if (parsedSummary().fieldTypes.length > 0) {
+                @for (fieldType of parsedSummary().fieldTypes; track fieldType.type) {
+                  <app-badge [label]="fieldType.type + ': ' + fieldType.count" variant="muted" size="sm"></app-badge>
+                }
+              } @else {
+                <span class="muted-text">{{ 'dataForm.empty.noFieldTypes' | translateContent }}</span>
+              }
+            </div>
+
+            <app-table [config]="fieldTableConfig" [data]="parsedSummary().fieldRows"></app-table>
+          </div>
+        }
+      </app-section-panel>
+
+      <app-section-panel
+        id="validation-result"
+        title="dataForm.section.validationResult"
+        subtitle="dataForm.section.validationResultSubtitle"
+      >
+        @if (!validated()) {
+          <app-empty-state
+            title="dataForm.empty.noValidationTitle"
+            description="dataForm.empty.noValidationDescription"
+            icon="pi pi-check-circle"
+          ></app-empty-state>
+        } @else {
+          <div class="validation-groups">
+            <section class="validation-group validation-group--critical">
+              <header>
+                <h3>{{ 'dataForm.validation.criticalErrors' | translateContent }}</h3>
+                <app-badge [label]="activeValidationGroups().critical.length + ''" variant="danger" size="sm"></app-badge>
+              </header>
+              @if (activeValidationGroups().critical.length > 0) {
+                <ul>
+                  @for (issue of activeValidationGroups().critical; track issue.path ?? issue.message) {
+                    <li>
+                      @if (issue.path) {
+                        <code>{{ issue.path }}</code>
+                      }
+                      <span>{{ issue.message | translateContent }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted-text">{{ 'dataForm.validation.noCriticalErrors' | translateContent }}</p>
+              }
+            </section>
+
+            <section class="validation-group validation-group--warning">
+              <header>
+                <h3>{{ 'dataForm.validation.warnings' | translateContent }}</h3>
+                <app-badge [label]="activeValidationGroups().warnings.length + ''" variant="warning" size="sm"></app-badge>
+              </header>
+              @if (activeValidationGroups().warnings.length > 0) {
+                <ul>
+                  @for (issue of activeValidationGroups().warnings; track issue.path ?? issue.message) {
+                    <li>
+                      @if (issue.path) {
+                        <code>{{ issue.path }}</code>
+                      }
+                      <span>{{ issue.message | translateContent }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted-text">{{ 'dataForm.validation.noWarnings' | translateContent }}</p>
+              }
+            </section>
+
+            <section class="validation-group validation-group--suggestion">
+              <header>
+                <h3>{{ 'dataForm.validation.suggestions' | translateContent }}</h3>
+                <app-badge [label]="activeValidationGroups().suggestions.length + ''" variant="info" size="sm"></app-badge>
+              </header>
+              @if (activeValidationGroups().suggestions.length > 0) {
+                <ul>
+                  @for (issue of activeValidationGroups().suggestions; track issue.path ?? issue.message) {
+                    <li>
+                      @if (issue.path) {
+                        <code>{{ issue.path }}</code>
+                      }
+                      <span>{{ issue.message | translateContent }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted-text">{{ 'dataForm.validation.noSuggestions' | translateContent }}</p>
+              }
+            </section>
+          </div>
+        }
+      </app-section-panel>
+
+      <app-section-panel id="permission" title="dataForm.section.permission" subtitle="dataForm.section.permissionSubtitle">
+        <div class="permission-grid">
+          <section>
+            <h3>{{ 'dataForm.permission.createQuestion' | translateContent }}</h3>
+            <app-check-box
+              label="dataForm.permission.admin"
+              [value]="permissionCreateAdmin()"
+              (valueChange)="onPermissionCreateAdminChange($event)"
+            ></app-check-box>
+            <app-check-box
+              label="dataForm.permission.manager"
+              [value]="permissionCreateManager()"
+              (valueChange)="onPermissionCreateManagerChange($event)"
+            ></app-check-box>
+          </section>
+
+          <section>
+            <h3>{{ 'dataForm.permission.updateQuestion' | translateContent }}</h3>
+            <app-check-box
+              label="dataForm.permission.admin"
+              [value]="permissionUpdateAdmin()"
+              (valueChange)="onPermissionUpdateAdminChange($event)"
+            ></app-check-box>
+          </section>
+
+          <section>
+            <h3>{{ 'dataForm.permission.importExportQuestion' | translateContent }}</h3>
+            <app-check-box
+              label="dataForm.permission.admin"
+              [value]="permissionImportExportAdmin()"
+              (valueChange)="onPermissionImportExportAdminChange($event)"
+            ></app-check-box>
+          </section>
+        </div>
+
+        <div class="permission-keys">
+          <app-badge label="FORM_CONFIG_CREATE" variant="muted" size="sm"></app-badge>
+          <app-badge label="FORM_CONFIG_UPDATE" variant="muted" size="sm"></app-badge>
+          <app-badge label="FORM_CONFIG_IMPORT" variant="muted" size="sm"></app-badge>
+          <app-badge label="FORM_CONFIG_EXPORT" variant="muted" size="sm"></app-badge>
+        </div>
+      </app-section-panel>
+
+      <app-section-panel id="audit-info" title="dataForm.section.auditInfo" subtitle="dataForm.section.auditInfoSubtitle">
+        <app-key-value-list [items]="auditItems()" layout="two-column"></app-key-value-list>
+      </app-section-panel>
+    </main>
+
+    <aside class="create-data-form-page__right" [attr.aria-label]="'dataForm.right.formSummary' | translateContent">
+      <app-section-panel title="dataForm.right.formSummary" density="compact">
+        <app-key-value-list [items]="formSummaryItems()" layout="one-column"></app-key-value-list>
+      </app-section-panel>
+
+      <app-section-panel title="dataForm.right.jsonStatus" density="compact">
+        <div class="right-status-card">
+          <app-badge [label]="jsonStatusLabel()" [variant]="jsonStatusVariant()" icon="pi pi-code"></app-badge>
+          @if (parsedJson().error?.line) {
+            <p>{{ parsedJson().error?.message }}</p>
+          }
+          <app-button
+            size="small"
+            label="dataForm.action.scrollToJson"
+            icon="pi pi-arrow-up-right"
+            severity="secondary"
+            [text]="true"
+            (buttonClick)="scrollToSection('json-config')"
+          ></app-button>
+        </div>
+      </app-section-panel>
+
+      <app-section-panel title="dataForm.right.validationSummary" density="compact">
+        <div class="validation-summary-card">
+          <app-badge [label]="schemaStatusLabel()" [variant]="schemaStatusVariant()" icon="pi pi-sitemap"></app-badge>
+
+          <div class="summary-counts">
+            <span>{{ 'dataForm.validation.criticalErrors' | translateContent }}: {{ totalValidationSummary().critical }}</span>
+            <span>{{ 'dataForm.validation.warnings' | translateContent }}: {{ totalValidationSummary().warnings }}</span>
+            <span>{{ 'dataForm.validation.suggestions' | translateContent }}: {{ totalValidationSummary().suggestions }}</span>
+          </div>
+
+          @if (topErrors().length > 0) {
+            <ol class="top-errors">
+              @for (issue of topErrors(); track issue.path ?? issue.message) {
+                <li>{{ issue.message | translateContent }}</li>
+              }
+            </ol>
+          }
+
+          <app-button
+            size="small"
+            label="dataForm.action.scrollToErrors"
+            icon="pi pi-arrow-up-right"
+            severity="secondary"
+            [text]="true"
+            (buttonClick)="scrollToSection('validation-result')"
+          ></app-button>
+        </div>
+      </app-section-panel>
+    </aside>
+  </div>
+
+  <footer class="create-data-form-footer">
+    <div class="create-data-form-footer__status">
+      @if (unsavedChanges()) {
+        <app-badge label="dataForm.status.unsavedChanges" variant="warning" icon="pi pi-pencil"></app-badge>
+      } @else {
+        <app-badge label="dataForm.status.ready" variant="muted" icon="pi pi-check"></app-badge>
+      }
+    </div>
+
+    <div class="create-data-form-footer__actions">
+      <app-button label="cancel" icon="pi pi-times" severity="secondary" [text]="true" (buttonClick)="onCancel()"></app-button>
+      <app-button
+        label="dataForm.action.validate"
+        icon="pi pi-check-circle"
+        severity="secondary"
+        [loading]="validating()"
+        (buttonClick)="onValidate()"
+      ></app-button>
+      <app-button
+        label="dataForm.action.create"
+        icon="pi pi-plus"
+        severity="success"
+        [loading]="creating()"
+        [disabled]="!canSubmit()"
+        (buttonClick)="onCreate()"
+      ></app-button>
+    </div>
+  </footer>
+</app-page-shell>

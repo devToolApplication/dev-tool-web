@@ -1,0 +1,30 @@
+<section class="diff-viewer">
+  @let diffRows = rows;
+  <div class="diff-viewer__header">
+    <span>{{ 'shared.diff.field' | translateContent }}</span>
+    <span>
+      {{ 'shared.diff.before' | translateContent }}
+      <app-button size="small" severity="secondary" [text]="true" icon="pi pi-copy" label="copy" (buttonClick)="copySide('before')"></app-button>
+    </span>
+    <span>
+      {{ 'shared.diff.after' | translateContent }}
+      <app-button size="small" severity="secondary" [text]="true" icon="pi pi-copy" label="copy" (buttonClick)="copySide('after')"></app-button>
+    </span>
+  </div>
+  @if (!diffRows.length) {
+    <div class="diff-viewer__empty">
+      <app-empty-state [title]="emptyTitle" size="compact"></app-empty-state>
+    </div>
+  }
+  @for (row of diffRows; track row.key) {
+    <div class="diff-viewer__row" [class]="'diff-viewer__row--' + row.state">
+      <strong>{{ row.key }}</strong>
+      <code>{{ stringify(row.before) }}</code>
+      <code>{{ stringify(row.after) }}</code>
+    </div>
+  }
+  <div class="diff-viewer__raw">
+    <app-json-viewer [value]="before" [collapsed]="true"></app-json-viewer>
+    <app-json-viewer [value]="after" [collapsed]="true"></app-json-viewer>
+  </div>
+</section>

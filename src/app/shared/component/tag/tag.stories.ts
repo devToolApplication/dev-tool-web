@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { Tag } from './tag';
 
 const meta: Meta<Tag> = {
-  title: 'Shared/Components/Tag',
+  title: 'Shared/Components/Data Display/Tag',
   component: Tag,
   args: {
     value: 'active',

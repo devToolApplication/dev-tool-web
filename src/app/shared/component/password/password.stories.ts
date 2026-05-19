@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { Password } from './password';
 
 const meta: Meta<Password> = {
-  title: 'Shared/Components/Password',
+  title: 'Shared/Components/Form Controls/Password',
   component: Password,
   args: {
     label: 'Password',

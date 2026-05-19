@@ -1,0 +1,49 @@
+<section
+  class="form-section-card"
+  [class]="'form-section-card--' + density"
+  [class.form-section-card--error]="section.errorCount > 0"
+  [id]="'form-section-' + section.id"
+  [attr.data-form-section-id]="section.id"
+>
+  <header class="form-section-card__header">
+    <div class="form-section-card__title">
+      @if (section.icon) {
+        <i [class]="section.icon" aria-hidden="true"></i>
+      }
+      <div>
+        <h3>{{ section.title | translateContent }}</h3>
+        @if (section.description) {
+          <p>{{ section.description | translateContent }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="form-section-card__meta">
+      @if (section.errorCount > 0) {
+        <app-badge [label]="section.errorCount + ' ' + ('shared.validation.errors' | translateContent)" variant="danger" icon="pi pi-exclamation-triangle"></app-badge>
+      } @else if (section.warningCount > 0) {
+        <app-badge [label]="section.warningCount + ' ' + ('shared.validation.warnings' | translateContent)" variant="warning" icon="pi pi-exclamation-circle"></app-badge>
+      } @else if (section.completed) {
+        <app-badge label="shared.form.section.complete" variant="success" icon="pi pi-check-circle"></app-badge>
+      } @else if (section.optional) {
+        <app-badge label="shared.form.optional" variant="muted"></app-badge>
+      }
+      @if (section.collapsible) {
+        <app-button
+          type="button"
+          severity="secondary"
+          [text]="true"
+          [icon]="collapsed() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+          [label]="collapsed() ? 'open' : 'collapse'"
+          (buttonClick)="toggleCollapsed()"
+        ></app-button>
+      }
+    </div>
+  </header>
+
+  @if (!collapsed()) {
+    <div class="form-section-card__body">
+      <ng-content></ng-content>
+    </div>
+  }
+</section>

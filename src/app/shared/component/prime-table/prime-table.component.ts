@@ -5,6 +5,9 @@ import { Component, Input } from '@angular/core';
   standalone: false,
   templateUrl: './prime-table.component.html'
 })
+/**
+ * @deprecated Use shared/ui/table for new business lists.
+ */
 export class PrimeTableComponent<T = unknown> {
   @Input() value: T[] = [];
   @Input() loading = false;

@@ -9,5 +9,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   providers: [provideValueAccessor(() => CheckBox)]
 })
 export class CheckBox extends BaseInput<boolean>{
-
+  @Input() indeterminate = false;
+  @Input() hideLabel = false;
+  @Input() ariaLabel?: string;
 }

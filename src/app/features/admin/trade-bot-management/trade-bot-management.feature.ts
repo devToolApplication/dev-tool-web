@@ -15,6 +15,7 @@ import { RuleConfigListComponent } from './pages/rule-config/list/rule-config-li
 import { SandboxComponent } from './pages/sandbox/sandbox.component';
 import { StrategyConfigFormComponent } from './pages/strategy-config/form/strategy-config-form.component';
 import { StrategyConfigListComponent } from './pages/strategy-config/list/strategy-config-list.component';
+import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 
 export const TRADE_BOT_FEATURE_COMPONENTS = [
   TradingSystemDashboardComponent,
@@ -40,14 +41,14 @@ export const tradeBotRoutes: Routes = [
   { path: 'admin/trade-bot/dashboard', component: TradingSystemDashboardComponent },
   { path: 'admin/trade-bot/market-data', component: MarketDataComponent },
   { path: 'admin/trade-bot/indicator-configs', component: IndicatorConfigListComponent },
-  { path: 'admin/trade-bot/indicator-configs/create', component: IndicatorConfigFormComponent },
-  { path: 'admin/trade-bot/indicator-configs/edit/:id', component: IndicatorConfigFormComponent },
+  { path: 'admin/trade-bot/indicator-configs/create', component: IndicatorConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+  { path: 'admin/trade-bot/indicator-configs/edit/:id', component: IndicatorConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
   { path: 'admin/trade-bot/rule-configs', component: RuleConfigListComponent },
-  { path: 'admin/trade-bot/rule-configs/create', component: RuleConfigFormComponent },
-  { path: 'admin/trade-bot/rule-configs/edit/:id', component: RuleConfigFormComponent },
+  { path: 'admin/trade-bot/rule-configs/create', component: RuleConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+  { path: 'admin/trade-bot/rule-configs/edit/:id', component: RuleConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
   { path: 'admin/trade-bot/strategy-configs', component: StrategyConfigListComponent },
-  { path: 'admin/trade-bot/strategy-configs/create', component: StrategyConfigFormComponent },
-  { path: 'admin/trade-bot/strategy-configs/edit/:id', component: StrategyConfigFormComponent },
+  { path: 'admin/trade-bot/strategy-configs/create', component: StrategyConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+  { path: 'admin/trade-bot/strategy-configs/edit/:id', component: StrategyConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
   { path: 'admin/trade-bot/config-history/:type/:id', component: ConfigVersionHistoryComponent },
   { path: 'admin/trade-bot/backtests', component: BacktestListComponent },
   { path: 'admin/trade-bot/backtests/:runId/:reviewTab', component: BacktestDetailComponent },

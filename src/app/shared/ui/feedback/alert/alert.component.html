@@ -1,0 +1,36 @@
+@if (!hidden()) {
+  <section class="app-alert" [class]="'app-alert--' + resolvedVariant" [attr.role]="role">
+    <i class="app-alert__icon" [class]="resolvedIcon" aria-hidden="true"></i>
+
+    <div class="app-alert__content">
+      @if (title) {
+        <strong>{{ title | translateContent }}</strong>
+      }
+      <span>{{ message | translateContent }}</span>
+    </div>
+
+    @if (actionLabel || dismissible) {
+      <div class="app-alert__actions">
+        @if (actionLabel) {
+          <app-button
+            size="small"
+            [text]="true"
+            severity="secondary"
+            [label]="actionLabel"
+            (buttonClick)="action.emit()"
+          ></app-button>
+        }
+        @if (dismissible) {
+          <app-button
+            size="small"
+            [text]="true"
+            severity="secondary"
+            icon="pi pi-times"
+            label="close"
+            (buttonClick)="dismiss()"
+          ></app-button>
+        }
+      </div>
+    }
+  </section>
+}

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { ToggleSwitch } from './toggle-switch';
 
 const meta: Meta<ToggleSwitch> = {
-  title: 'Shared/Components/Toggle Switch',
+  title: 'Shared/Components/Form Controls/Toggle Switch',
   component: ToggleSwitch,
   args: {
     label: 'Live mode',

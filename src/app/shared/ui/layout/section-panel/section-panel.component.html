@@ -1,0 +1,49 @@
+<section
+  class="section-panel"
+  [class]="'section-panel--' + variant + ' section-panel--' + density"
+  [class.section-panel--has-error]="!!error"
+>
+  @if (title || subtitle || collapsible) {
+    <header class="section-panel__header">
+      <div class="section-panel__heading">
+        @if (title) {
+          <h2>{{ title | translateContent }}</h2>
+        }
+        @if (subtitle) {
+          <p>{{ subtitle | translateContent }}</p>
+        }
+      </div>
+
+      <div class="section-panel__actions">
+        <ng-content select="[section-actions]"></ng-content>
+        @if (collapsible) {
+          <app-button
+            [icon]="collapsedState() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+            [label]="collapsedState() ? 'open' : 'collapse'"
+            severity="secondary"
+            [text]="true"
+            (buttonClick)="toggle()"
+          ></app-button>
+        }
+      </div>
+    </header>
+  }
+
+  @if (!collapsedState()) {
+    <div class="section-panel__body">
+      @if (loading) {
+        <app-loading-skeleton type="detail" [rows]="4"></app-loading-skeleton>
+      } @else if (error) {
+        <app-error-state [message]="error" retryLabel="retry" (retry)="retry.emit()"></app-error-state>
+      } @else if (empty) {
+        <app-empty-state [title]="emptyTitle" [description]="emptyDescription"></app-empty-state>
+      } @else {
+        <ng-content></ng-content>
+      }
+    </div>
+  }
+
+  <footer class="section-panel__footer">
+    <ng-content select="[section-footer]"></ng-content>
+  </footer>
+</section>

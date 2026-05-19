@@ -137,6 +137,10 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
           basicSetup,
           json(),
           EditorView.lineWrapping,
+          EditorView.contentAttributes.of({
+            'aria-label': this.label || this.placeholder || 'JSON editor',
+            title: this.label || this.placeholder || 'JSON editor'
+          }),
           EditorState.readOnly.of(!editable),
           EditorView.editable.of(editable),
           EditorView.updateListener.of((update) => {

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { UploadStorageFormComponent } from './storage-repository/form/upload-storage-form.component';
 import { UploadStorageListComponent } from './storage-repository/list/upload-storage-list.component';
 import { UploadFileListComponent } from './uploaded-file/list/upload-file-list.component';
@@ -11,8 +12,8 @@ export const fileStorageRoutes: Routes = [
     path: 'admin/upload-storage/storage',
     children: [
       { path: '', component: UploadStorageListComponent },
-      { path: 'create', component: UploadStorageFormComponent },
-      { path: 'edit/:id', component: UploadStorageFormComponent }
+      { path: 'create', component: UploadStorageFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: UploadStorageFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {

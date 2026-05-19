@@ -1,0 +1,60 @@
+@switch (type) {
+  @case ('number') {
+    @if (numberValue !== null) {
+      <span>{{ prefix }}{{ numberValue | number:(format ?? '1.0-3') }}{{ suffix }}</span>
+    } @else {
+      <span class="value-display__empty">{{ emptyValue }}</span>
+    }
+  }
+  @case ('currency') {
+    @if (numberValue !== null) {
+      <span>{{ numberValue | currency:currencyCode:'symbol':(format ?? '1.2-2') }}</span>
+    } @else {
+      <span class="value-display__empty">{{ emptyValue }}</span>
+    }
+  }
+  @case ('percent') {
+    @if (numberValue !== null) {
+      <span>{{ numberValue | percent:(format ?? '1.0-2') }}</span>
+    } @else {
+      <span class="value-display__empty">{{ emptyValue }}</span>
+    }
+  }
+  @case ('date') {
+    @if (dateValue) {
+      <span>{{ dateValue | date:(format ?? 'dd/MM/yyyy') }}</span>
+    } @else {
+      <span class="value-display__empty">{{ emptyValue }}</span>
+    }
+  }
+  @case ('datetime') {
+    @if (dateValue) {
+      <span>{{ dateValue | date:(format ?? 'dd/MM/yyyy HH:mm:ss') }}</span>
+    } @else {
+      <span class="value-display__empty">{{ emptyValue }}</span>
+    }
+  }
+  @case ('boolean') {
+    <span class="value-display__boolean">
+      @if (value) {
+        <i class="pi pi-check app-text-success" aria-hidden="true"></i>
+        <span>{{ 'yes' | translateContent }}</span>
+      } @else {
+        <i class="pi pi-times app-text-danger" aria-hidden="true"></i>
+        <span>{{ 'no' | translateContent }}</span>
+      }
+    </span>
+  }
+  @case ('badge') {
+    <app-badge [label]="textValue" [variant]="variant"></app-badge>
+  }
+  @case ('copyable') {
+    <app-copyable-text [value]="textValue" [shorten]="shorten"></app-copyable-text>
+  }
+  @case ('json') {
+    <app-json-viewer [value]="value" [collapsed]="true"></app-json-viewer>
+  }
+  @default {
+    <span class="value-display__text" [attr.title]="textValue">{{ textValue | translateContent }}</span>
+  }
+}

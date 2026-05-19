@@ -3,13 +3,13 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { TimelineComponent } from './timeline.component';
 
 const value = [
-  { time: '09:30', title: 'Signal created', detail: 'Entry condition matched.' },
-  { time: '10:15', title: 'Order filled', detail: 'Position opened at 42,100.' },
-  { time: '11:45', title: 'Risk updated', detail: 'Stop loss moved to break even.' }
+  { time: '09:30', title: 'Request created', detail: 'A new workflow request was submitted.' },
+  { time: '10:15', title: 'Review completed', detail: 'The request was approved by a reviewer.' },
+  { time: '11:45', title: 'Notification sent', detail: 'Subscribers were notified about the update.' }
 ];
 
 const meta: Meta<TimelineComponent> = {
-  title: 'Shared/Components/Timeline',
+  title: 'Shared/Components/Data Display/Timeline',
   component: TimelineComponent,
   parameters: {
     layout: 'padded'

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../select/select';
 
@@ -9,13 +9,45 @@ import { SelectOption } from '../select/select';
   styleUrl: './input-multi.css',
   providers: [provideValueAccessor(() => InputMulti)]
 })
-export class InputMulti extends BaseInput<string[]> implements OnChanges {
+export class InputMulti extends BaseInput<string[]> implements AfterViewChecked, OnChanges {
   @Input() options: SelectOption[] = [];
 
   currentQuery = '';
   model: string[] = [];
   selectedOptions: SelectOption[] = [];
   suggestions: SelectOption[] = [];
+
+  constructor(private readonly host: ElementRef<HTMLElement>) {
+    super();
+  }
+
+  ngAfterViewChecked(): void {
+    const accessibleName = this.label || this.placeholder || this.inputId;
+    this.host.nativeElement
+      .querySelectorAll<HTMLElement>('.p-autocomplete-input-multiple[role="listbox"]')
+      .forEach((listbox) => {
+        listbox.setAttribute('role', 'list');
+        listbox.removeAttribute('aria-orientation');
+        listbox.setAttribute('aria-label', accessibleName);
+        listbox.setAttribute('title', accessibleName);
+      });
+    this.host.nativeElement
+      .querySelectorAll<HTMLElement>('.p-autocomplete-chip-item[role="option"]')
+      .forEach((chip) => {
+        chip.setAttribute('role', 'listitem');
+        chip.removeAttribute('aria-selected');
+        chip.removeAttribute('aria-setsize');
+        chip.removeAttribute('aria-posinset');
+      });
+    this.host.nativeElement
+      .querySelectorAll<HTMLElement>('.p-autocomplete-input-multiple li[role="option"]')
+      .forEach((item) => {
+        item.setAttribute('role', 'listitem');
+        item.removeAttribute('aria-selected');
+        item.removeAttribute('aria-setsize');
+        item.removeAttribute('aria-posinset');
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
@@ -205,6 +237,7 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   }
 
   private debugLog(eventName: string, payload: Record<string, unknown>): void {
-    console.log('[InputMulti]', eventName, payload);
+    void eventName;
+    void payload;
   }
 }

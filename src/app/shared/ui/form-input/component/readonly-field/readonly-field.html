@@ -1,0 +1,26 @@
+@if (field.visible()) {
+  <app-field-block
+    [label]="field.label"
+    [helpText]="helpText"
+    [required]="field.required()"
+  >
+    @if (isJsonValue) {
+      <app-json-viewer
+        [value]="value"
+        [collapsed]="field.type !== 'json' && field.type !== 'code'"
+        [maskSecrets]="maskSecrets"
+      ></app-json-viewer>
+    } @else {
+      <div class="readonly-field__value">
+        <app-value-display
+          [value]="value"
+          [type]="displayType"
+          [prefix]="prefix"
+          [suffix]="suffix"
+          [currencyCode]="currencyCode"
+          [emptyValue]="'notAvailable' | translateContent"
+        ></app-value-display>
+      </div>
+    }
+  </app-field-block>
+}

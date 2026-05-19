@@ -5,12 +5,12 @@ import { Breadcrumb } from './breadcrumb';
 
 const items: MenuItem[] = [
   { label: 'Admin' },
-  { label: 'Trade Bot' },
-  { label: 'Strategy Config' }
+  { label: 'Workflows' },
+  { label: 'Configuration' }
 ];
 
 const meta: Meta<Breadcrumb> = {
-  title: 'Shared/Components/Breadcrumb',
+  title: 'Shared/Components/Navigation/Breadcrumb',
   component: Breadcrumb,
   args: {
     items

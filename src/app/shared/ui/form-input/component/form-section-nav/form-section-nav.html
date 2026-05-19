@@ -1,0 +1,42 @@
+@if (mode !== 'none' && sections.length > 1) {
+  <nav
+    class="form-section-nav"
+    [class.form-section-nav--tabs]="mode === 'tabs' || mode === 'dropdown'"
+    [attr.aria-label]="'shared.form.sections' | translateContent"
+  >
+    @for (section of sections; track trackBySection($index, section)) {
+      <button
+        type="button"
+        class="form-section-nav__item"
+        [class.form-section-nav__item--active]="section.active"
+        [class.form-section-nav__item--error]="section.errorCount > 0"
+        [class.form-section-nav__item--warning]="section.warningCount > 0 && section.errorCount === 0"
+        [class.form-section-nav__item--complete]="section.completed"
+        [disabled]="section.disabled"
+        [attr.aria-current]="section.active ? 'step' : null"
+        (click)="sectionSelect.emit(section.id)"
+      >
+        @if (section.icon) {
+          <i [class]="section.icon" aria-hidden="true"></i>
+        }
+        <span class="form-section-nav__text">
+          <strong>{{ section.title | translateContent }}</strong>
+          @if (section.description) {
+            <small>{{ section.description | translateContent }}</small>
+          }
+        </span>
+        <span class="form-section-nav__meta">
+          @if (section.errorCount > 0) {
+            <app-badge [label]="section.errorCount + ''" variant="danger" size="sm"></app-badge>
+          } @else if (section.warningCount > 0) {
+            <app-badge [label]="section.warningCount + ''" variant="warning" size="sm"></app-badge>
+          } @else if (section.completed) {
+            <i class="pi pi-check-circle" aria-hidden="true"></i>
+          } @else if (section.optional) {
+            <span>{{ 'shared.form.optional' | translateContent }}</span>
+          }
+        </span>
+      </button>
+    }
+  </nav>
+}

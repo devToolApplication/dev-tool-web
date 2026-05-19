@@ -7,6 +7,7 @@ import { UploadFileService } from '../../../../../core/services/file-service/upl
 import { UploadStorageService } from '../../../../../core/services/file-service/upload-storage.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { KeyValueItem } from '../../../../../shared/ui/data-display/key-value-list/key-value-list.component';
 
 @Component({
   selector: 'app-file-upload-debug',
@@ -36,6 +37,34 @@ export class FileUploadDebugComponent implements OnInit {
       label: `${item.name || item.id} (${item.storageType})`,
       value: item.id
     }));
+  }
+
+  get uploadResultItems(): KeyValueItem[] {
+    const result = this.uploadResult;
+    if (!result) {
+      return [];
+    }
+
+    return [
+      { label: 'id', value: result.id, type: 'copyable' },
+      { label: 'systemManagement.fileUploadDebug.storage', value: result.storageId },
+      { label: 'systemManagement.fileUploadDebug.file', value: result.fileName },
+      { label: 'systemManagement.fileUploadDebug.mimeType', value: result.mimeType },
+      { label: 'systemManagement.fileUploadDebug.url', value: result.fileUrl, type: 'copyable' },
+      { label: 'systemManagement.fileUploadDebug.createdAt', value: result.createdAt, type: result.createdAt ? 'datetime' : 'text' }
+    ];
+  }
+
+  get uploadResultRawItems(): KeyValueItem[] {
+    return this.uploadResult
+      ? [
+          {
+            label: 'systemManagement.fileUploadDebug.raw',
+            value: this.uploadResult,
+            type: 'json'
+          }
+        ]
+      : [];
   }
 
   ngOnInit(): void {

@@ -18,6 +18,7 @@
         optionLabel="label"
         optionValue="value"
         [placeholder]="(placeholder || '') | translateContent"
+        [ariaLabel]="(label || placeholder || inputId) | translateContent"
         [ngModel]="value"
         (ngModelChange)="onChange($event)"
         [disabled]="disabled"
@@ -45,6 +46,7 @@
       optionLabel="label"
       optionValue="value"
       [placeholder]="(placeholder || '') | translateContent"
+      [ariaLabel]="(label || placeholder || inputId) | translateContent"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
@@ -58,7 +60,7 @@
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
 
-@if (helpText && !invalid) {
+@if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 

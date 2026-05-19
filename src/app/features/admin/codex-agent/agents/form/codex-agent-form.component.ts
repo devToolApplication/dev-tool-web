@@ -1,6 +1,7 @@
-import { Component, DestroyRef, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../core/constants/system.constants';
 import {
@@ -18,10 +19,12 @@ import { CodexAgentService } from '../../../../../core/services/codex-agent-serv
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { BaseCrudPageComponent } from '../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { CrudPageConfig } from '../../../../../shared/ui/base-crud-page/base-crud-page.model';
 import { FieldGuideFieldItem, FieldGuideOptionItem } from '../../../../../shared/ui/field-guide-panel/field-guide-panel.component';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../shared/ui/form-input/utils/validation-rules';
+import { toUniqueTextOptions } from '../../../../form-option-utils';
 import { CODEX_AGENT_INITIAL_VALUE, CODEX_AGENT_ROUTES } from '../codex-agent.constants';
 
 @Component({
@@ -30,7 +33,9 @@ import { CODEX_AGENT_INITIAL_VALUE, CODEX_AGENT_ROUTES } from '../codex-agent.co
   templateUrl: './codex-agent-form.component.html'
 })
 export class CodexAgentFormComponent implements OnInit, OnDestroy {
-  readonly formContext: FormContext = { user: null, mode: 'create', extra: {} };
+  @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
+
+  formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formConfig: FormConfig = {
     fields: [
       {
@@ -73,7 +78,14 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       },
       { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
       { type: 'select', name: 'status', label: 'status', width: '1/3', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'text', name: 'installationId', label: 'codexAgent.form.installationId', width: '1/3', helpText: 'codexAgent.form.help.installationId' },
+      {
+        type: 'auto-complete',
+        name: 'installationId',
+        label: 'codexAgent.form.installationId',
+        width: '1/3',
+        optionsExpression: 'context.extra?.installationIdOptions || []',
+        helpText: 'codexAgent.form.help.installationId'
+      },
       { type: 'textarea', name: 'description', label: 'description', width: 'full', helpText: 'codexAgent.form.help.description' },
       { type: 'textarea', name: 'instruction', label: 'codexAgent.form.agentsInstruction', width: 'full', showZoomButton: true, helpText: 'codexAgent.form.help.instruction' },
       {
@@ -94,6 +106,7 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
   readonly authLoading = signal(false);
   readonly authDeviceLoading = signal(false);
   readonly syncLoading = signal(false);
+  readonly dependenciesError = signal('');
   formInitialValue: CodexAgentCreateDto = this.createInitialValue();
   readonly formVisible = signal(true);
   private authSessionPollTimer: number | null = null;
@@ -126,7 +139,7 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       title: this.editId ? 'codexAgent.form.editTitle' : 'codexAgent.form.createTitle',
       description: 'codexAgent.form.description',
       actions: [
-        { id: 'back', label: 'codexAgent.form.back', icon: 'pi pi-arrow-left', goBack: true },
+        { id: 'back', label: 'codexAgent.form.back', icon: 'pi pi-arrow-left', goBack: true, backLink: CODEX_AGENT_ROUTES.list, severity: 'secondary', text: true },
         ...(this.editId
           ? [{ id: 'sync-home', label: 'codexAgent.form.syncHome', icon: 'pi pi-refresh', loading: this.syncLoading() }]
           : []),
@@ -160,10 +173,19 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (saved) => {
           this.toastService.info(this.i18nService.t(this.editId ? 'updateSuccess' : 'createSuccess'));
+          this.crudPage?.markFormPristine();
           void this.router.navigate([`${CODEX_AGENT_ROUTES.list}/edit`, saved.id]);
         },
         error: () => this.toastService.error('codexAgent.form.toast.saveFailed')
       });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.crudPage?.hasUnsavedChanges() ?? false;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> | boolean {
+    return this.crudPage?.confirmDiscardChanges() ?? true;
   }
 
   onActionClick(actionId: string): void {
@@ -330,34 +352,48 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
 
   private loadOptions(): void {
     this.loading.set(true);
+    this.dependenciesError.set('');
+    const options$ = this.codexAgentService.getOptions().pipe(
+      catchError(() => of(null as CodexAgentOptionsResponse | null))
+    );
+    const agents$ = this.codexAgentService.getAll().pipe(
+      catchError(() => of([] as CodexAgentResponse[]))
+    );
+
     this.loadingService
-      .track(this.codexAgentService.getOptions())
+      .track(forkJoin({ options: options$, agents: agents$ }))
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (options) => {
+        next: ({ options, agents }) => {
+          if (!options) {
+            this.options = null;
+            this.optionDescriptions = {};
+            this.formContext.extra = {
+              modelOptions: [],
+              reasoningEffortOptions: [],
+              sandboxModeOptions: [],
+              approvalPolicyOptions: [],
+              installationIdOptions: this.toInstallationIdOptions(agents)
+            };
+            this.dependenciesError.set('codexAgent.form.dependenciesUnavailable');
+            this.toastService.error('codexAgent.form.toast.loadOptionsFailed');
+            this.bindRouteMode();
+            return;
+          }
+
+          this.dependenciesError.set('');
           this.options = options;
           this.optionDescriptions = Object.fromEntries((options.fields ?? []).map((field: CodexAgentFieldDescriptionResponse) => [field.key, field.description]));
           this.formContext.extra = {
             modelOptions: this.toSelectOptions(options.models),
             reasoningEffortOptions: this.toSelectOptions(options.reasoningEfforts),
             sandboxModeOptions: this.toSelectOptions(options.sandboxModes),
-            approvalPolicyOptions: this.toSelectOptions(options.approvalPolicies)
+            approvalPolicyOptions: this.toSelectOptions(options.approvalPolicies),
+            installationIdOptions: this.toInstallationIdOptions(agents)
           };
-          this.bindRouteMode();
-        },
-        error: () => {
-          this.options = null;
-          this.optionDescriptions = {};
-          this.formContext.extra = {
-            modelOptions: [],
-            reasoningEffortOptions: [],
-            sandboxModeOptions: [],
-            approvalPolicyOptions: []
-          };
-          this.toastService.error('codexAgent.form.toast.loadOptionsFailed');
           this.bindRouteMode();
         }
       });
@@ -506,12 +542,15 @@ export class CodexAgentFormComponent implements OnInit, OnDestroy {
   }
 
   private rerenderForm(): void {
-    this.formVisible.set(false);
-    window.setTimeout(() => this.formVisible.set(true));
+    this.formContext = { ...this.formContext, extra: { ...(this.formContext.extra ?? {}) } };
   }
 
   private toSelectOptions(items: CodexAgentOptionItemResponse[] | undefined): { label: string; value: string }[] {
     return (items ?? []).map((item) => ({ label: item.label, value: item.value }));
+  }
+
+  private toInstallationIdOptions(items: CodexAgentResponse[]) {
+    return toUniqueTextOptions(items, (item) => item.installationId);
   }
 
   private hasNumber(value: number | null | undefined): value is number {

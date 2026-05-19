@@ -1,63 +1,153 @@
 :host {
   display: block;
+  position: sticky;
+  top: 0;
+  z-index: var(--app-z-header);
+  padding: 0.75rem 1rem 0;
 }
 
 .header-toolbar {
-  height: 62px;
+  min-height: 64px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 8px;
   padding-inline: 1rem;
   box-shadow: var(--app-shadow-md);
   background: var(--app-card-surface-strong);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--app-border);
-  margin: 1rem 1rem 0;
 }
 
-.brand-wrap {
+.header-start {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
-.sidebar-toggle-button {
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 8px;
-  background: var(--app-transparent);
+.page-context {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.page-context h1 {
+  margin: 0;
   color: var(--app-text);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu-button {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-soft);
+  color: var(--app-text);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0.35rem 0.45rem 0.35rem 0.65rem;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: min(24rem, 42vw);
 }
 
-.sidebar-toggle-button:hover {
-  background: var(--app-surface-soft);
+.user-menu-button:hover {
+  border-color: var(--app-border-strong);
+  background: var(--app-card-surface);
 }
 
-.avatar-button {
-  border: 0;
-  background: var(--app-transparent);
-  border-radius: 9999px;
-  cursor: pointer;
-  padding: 0;
-  line-height: 0;
+.user-copy {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+  text-align: right;
+  line-height: 1.15;
 }
 
-:host ::ng-deep .avatar-button .p-avatar {
+.user-copy strong,
+.user-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-copy strong {
+  font-size: 0.86rem;
+}
+
+.user-copy small {
+  color: var(--app-text-muted);
+  font-size: 0.73rem;
+}
+
+.user-menu-chevron {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+}
+
+:host ::ng-deep .user-menu-button .p-avatar {
   background: color-mix(in srgb, var(--app-primary) 16%, var(--app-transparent));
   color: var(--app-primary);
+  font-weight: 700;
 }
 
 :host ::ng-deep .p-tieredmenu {
-  min-width: 12rem;
+  min-width: 13rem;
 }
 
 :host ::ng-deep .p-breadcrumb {
   background: var(--app-transparent);
   border: 0;
   padding: 0;
+}
+
+:host ::ng-deep .p-breadcrumb-list {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+:host ::ng-deep .p-breadcrumb-item,
+:host ::ng-deep .p-breadcrumb-item-link {
+  min-width: 0;
+}
+
+:host ::ng-deep .p-breadcrumb-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .sidebar-toggle-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+}
+
+@media (max-width: 700px) {
+  :host {
+    padding-inline: 0.75rem;
+  }
+
+  .header-toolbar {
+    padding-inline: 0.75rem;
+  }
+
+  :host ::ng-deep .p-breadcrumb {
+    display: none;
+  }
+
+  .user-copy,
+  .user-menu-chevron {
+    display: none;
+  }
+
+  .user-menu-button {
+    padding: 0.25rem;
+  }
 }

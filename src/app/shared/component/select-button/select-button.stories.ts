@@ -10,7 +10,7 @@ const options: SelectOption[] = [
 ];
 
 const meta: Meta<SelectButton> = {
-  title: 'Shared/Components/Select Button',
+  title: 'Shared/Components/Form Controls/Select Button',
   component: SelectButton,
   args: {
     label: 'status',

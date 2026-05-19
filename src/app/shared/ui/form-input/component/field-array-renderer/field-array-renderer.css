@@ -1,0 +1,21 @@
+.array-field {
+  display: grid;
+  gap: var(--app-space-4, 1rem);
+}
+
+.array-field--disabled {
+  opacity: 0.72;
+}
+
+.array-field__toolbar,
+.array-field__item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--app-space-2, 0.5rem);
+  flex-wrap: wrap;
+}
+
+.array-field__items {
+  display: grid;
+  gap: var(--app-space-4, 1rem);
+}

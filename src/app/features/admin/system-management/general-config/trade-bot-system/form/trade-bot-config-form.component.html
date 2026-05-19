@@ -3,8 +3,8 @@
     title: editId ? 'systemManagement.tradeBotConfig.form.editTitle' : 'systemManagement.tradeBotConfig.form.createTitle',
     description: 'systemManagement.tradeBotConfig.form.description',
     actions: [
-      { id: 'back', label: 'tradeBot.back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
-      { id: 'submit', label: 'submit', icon: 'pi pi-save', loading: loading, submitForm: true }
+      { id: 'back', label: 'back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'save', icon: 'pi pi-save', loading: loading(), submitForm: true }
     ],
     infoSection: {
       title: 'systemManagement.tradeBotConfig.form.infoTitle',
@@ -15,6 +15,6 @@
   [formContext]="formContext"
   [formInitialValue]="formInitialValue"
   [formVisible]="formVisible()"
-  [submitting]="loading"
+  [submitting]="loading()"
   (formSubmit)="onSubmitForm($event)"
 ></app-base-crud-page>

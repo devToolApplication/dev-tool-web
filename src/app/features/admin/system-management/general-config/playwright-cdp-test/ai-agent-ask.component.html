@@ -26,24 +26,26 @@
     <section class="sub-result-card app-border app-bg-surface">
       <div class="sub-result-header">
         <h4>{{ 'aiAgent.cdpTest.openAiCompatibleResult' | translateContent }}</h4>
-        <span class="status-pill success">{{ 'completed' | translateContent }}</span>
+        <app-badge label="completed" variant="success"></app-badge>
       </div>
 
-      <div class="detail-grid">
-        <div><strong>ID:</strong> {{ chatGptResult.id || '-' }}</div>
-        <div><strong>{{ 'aiAgent.model' | translateContent }}:</strong> {{ chatGptResult.model || '-' }}</div>
-        <div><strong>{{ 'aiAgent.created' | translateContent }}:</strong> {{ chatGptResult.created ?? '-' }}</div>
-        <div><strong>{{ 'aiAgent.object' | translateContent }}:</strong> {{ chatGptResult.object || '-' }}</div>
-        <div><strong>{{ 'aiAgent.finishReason' | translateContent }}:</strong> {{ chatGptResult.choices?.[0]?.finishReason || '-' }}</div>
-        <div><strong>{{ 'aiAgent.totalTokens' | translateContent }}:</strong> {{ chatGptResult.usage?.totalTokens ?? '-' }}</div>
-        <div class="full-width">
-          <strong>{{ 'content' | translateContent }}:</strong>
-          <pre class="result-body">{{ chatGptResult.choices?.[0]?.message?.content || '-' }}</pre>
-        </div>
-        <div class="full-width">
-          <strong>{{ 'aiAgent.toolCalls' | translateContent }}:</strong>
-          <pre class="result-body">{{ chatGptResult.choices?.[0]?.message?.toolCalls?.length ? (chatGptResult.choices?.[0]?.message?.toolCalls | json) : '[]' }}</pre>
-        </div>
+      <app-key-value-list class="result-section" [items]="chatGptSummaryItems" layout="two-column"></app-key-value-list>
+
+      <div class="result-section">
+        <div class="result-section-title">{{ 'content' | translateContent }}</div>
+        <app-input-area
+          label="content"
+          [value]="chatGptResult.choices?.[0]?.message?.content || '-'"
+          [readonly]="true"
+          [disabled]="true"
+          [rows]="8"
+          [maxRows]="14"
+          contentType="text"
+        ></app-input-area>
+      </div>
+
+      <div class="result-section">
+        <app-key-value-list [items]="chatGptToolCallItems" layout="one-column"></app-key-value-list>
       </div>
     </section>
   }
@@ -52,25 +54,25 @@
     <section class="sub-result-card app-border app-bg-surface">
       <div class="sub-result-header">
         <h4>{{ 'aiAgent.cdpTest.cdpResult' | translateContent }}</h4>
-        <span class="status-pill" [class.success]="connectionResult.connected" [class.error]="!connectionResult.connected">
-          {{ (connectionResult.connected ? 'aiAgent.cdpTest.connected' : 'aiAgent.cdpTest.failed') | translateContent }}
-        </span>
+        <app-badge
+          [label]="connectionResult.connected ? 'aiAgent.cdpTest.connected' : 'aiAgent.cdpTest.failed'"
+          [variant]="connectionVariant(connectionResult.connected)"
+        ></app-badge>
       </div>
 
-      <div class="detail-grid">
-        <div><strong>{{ 'aiAgent.cdpTest.browser' | translateContent }}:</strong> {{ connectionResult.browserVersion || '-' }}</div>
-        <div><strong>{{ 'aiAgent.cdpTest.contexts' | translateContent }}:</strong> {{ connectionResult.contextCount ?? 0 }}</div>
-        <div><strong>{{ 'aiAgent.cdpTest.pages' | translateContent }}:</strong> {{ connectionResult.pageCount ?? 0 }}</div>
-      </div>
+      <app-key-value-list class="result-section" [items]="connectionSummaryItems" layout="two-column"></app-key-value-list>
 
       @if (connectionResult.errorMessage) {
-        <div class="inline-error">{{ connectionResult.errorMessage }}</div>
+        <app-alert class="result-section" variant="danger" [message]="connectionResult.errorMessage"></app-alert>
       }
 
       @if ((connectionResult.pageUrls?.length || 0) > 0) {
         <div class="url-list">
+          <div class="result-section-title">{{ 'aiAgent.cdpTest.pageUrls' | translateContent }}</div>
           @for (url of connectionResult.pageUrls; track url) {
-            <div class="url-item">{{ url }}</div>
+            <div class="url-item">
+              <app-copyable-text [value]="url" [shorten]="true" [maxLength]="80"></app-copyable-text>
+            </div>
           }
         </div>
       }

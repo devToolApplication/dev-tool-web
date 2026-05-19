@@ -13,17 +13,17 @@ const options: TreeNode[] = [
     ]
   },
   {
-    key: 'trade-bot',
-    label: 'Trade Bot',
+    key: 'workflow',
+    label: 'Workflows',
     children: [
-      { key: 'trade-bot.config', label: 'Strategy Config' },
-      { key: 'trade-bot.backtest', label: 'Backtest' }
+      { key: 'workflow.config', label: 'Configuration' },
+      { key: 'workflow.history', label: 'History' }
     ]
   }
 ];
 
 const meta: Meta<SelectTree> = {
-  title: 'Shared/Components/Select Tree',
+  title: 'Shared/Components/Form Controls/Select Tree',
   component: SelectTree,
   args: {
     label: 'Feature',
@@ -43,6 +43,6 @@ export const Single: Story = {};
 export const Checkbox: Story = {
   args: {
     selectionMode: 'checkbox',
-    value: ['admin.users', 'trade-bot.config']
+    value: ['admin.users', 'workflow.config']
   }
 };

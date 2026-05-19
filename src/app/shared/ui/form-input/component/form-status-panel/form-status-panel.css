@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form-status-panel {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.875rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-card-surface);
+}
+
+.form-status-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.form-status-panel__header span {
+  color: var(--app-text);
+  font-weight: 700;
+}
+
+.form-status-panel__metrics {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+}
+
+.form-status-panel__metrics div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.form-status-panel dt {
+  color: var(--app-text-muted);
+  font-size: 0.8125rem;
+}
+
+.form-status-panel dd {
+  margin: 0;
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.form-status-panel__danger {
+  color: var(--app-control-danger-text) !important;
+}
+
+.form-status-panel__warning {
+  color: var(--app-control-warn-text) !important;
+}
+
+@media (max-width: 1024px) {
+  .form-status-panel {
+    position: static;
+  }
+}

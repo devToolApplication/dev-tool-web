@@ -9,7 +9,7 @@ const options: SelectOption[] = [
 ];
 
 const meta: Meta<Select> = {
-  title: 'Shared/Components/Select',
+  title: 'Shared/Components/Form Controls/Select',
   component: Select,
   args: {
     label: 'Status',
@@ -29,6 +29,19 @@ export const Default: Story = {};
 export const Loading: Story = {
   args: {
     loading: true
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true
+  }
+};
+
+export const Empty: Story = {
+  args: {
+    value: null,
+    options: []
   }
 };
 

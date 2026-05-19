@@ -1,0 +1,36 @@
+<section class="empty-state" [class]="'empty-state--' + variant + ' empty-state--' + size + ' empty-state--' + align" role="status" aria-live="polite">
+  <div class="empty-state__icon" aria-hidden="true">
+    <i [class]="resolvedIcon"></i>
+  </div>
+
+  <div class="empty-state__content">
+    <h3>{{ title | translateContent }}</h3>
+    @if (description) {
+      <p>{{ description | translateContent }}</p>
+    }
+    <ng-content></ng-content>
+  </div>
+
+  @if (primaryActionLabel || secondaryActionLabel) {
+    <div class="empty-state__actions">
+      @if (primaryActionLabel) {
+        <app-button
+          size="small"
+          severity="info"
+          [label]="primaryActionLabel"
+          icon="pi pi-arrow-right"
+          (buttonClick)="primaryAction.emit()"
+        ></app-button>
+      }
+      @if (secondaryActionLabel) {
+        <app-button
+          size="small"
+          severity="secondary"
+          [text]="true"
+          [label]="secondaryActionLabel"
+          (buttonClick)="secondaryAction.emit()"
+        ></app-button>
+      }
+    </div>
+  }
+</section>

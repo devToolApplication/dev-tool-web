@@ -4,7 +4,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CheckBox } from './check-box';
 
 const meta: Meta<CheckBox> = {
-  title: 'Shared/Components/Check Box',
+  title: 'Shared/Components/Form Controls/Check Box',
   component: CheckBox,
   args: {
     label: 'Enable notifications',

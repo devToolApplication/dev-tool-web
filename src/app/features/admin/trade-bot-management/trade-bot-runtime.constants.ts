@@ -25,6 +25,45 @@ export const STATUS_OPTIONS = [
   { label: 'tradeBot.status.inactive', value: 'INACTIVE' }
 ];
 
+export const MARKET_SOURCE_OPTIONS = [
+  { label: 'BINANCE_USDM', value: 'BINANCE_USDM' },
+  { label: 'YAHOO_CHART', value: 'YAHOO_CHART' },
+  { label: 'INTERNAL', value: 'INTERNAL' }
+];
+
+export const MARKET_TYPE_OPTIONS = [
+  { label: 'USD_M_FUTURES', value: 'USD_M_FUTURES' },
+  { label: 'SPOT', value: 'SPOT' },
+  { label: 'CFD', value: 'CFD' },
+  { label: 'FOREX', value: 'FOREX' },
+  { label: 'COMMODITY', value: 'COMMODITY' }
+];
+
+export const TIMEFRAME_OPTIONS = [
+  { label: '1m', value: '1m' },
+  { label: '3m', value: '3m' },
+  { label: '5m', value: '5m' },
+  { label: '15m', value: '15m' },
+  { label: 'M15', value: 'M15' },
+  { label: '30m', value: '30m' },
+  { label: '1h', value: '1h' },
+  { label: '4h', value: '4h' },
+  { label: '1d', value: '1d' }
+];
+
+export const SYMBOL_OPTIONS = [
+  { label: 'BTCUSDT', value: 'BTCUSDT' },
+  { label: 'ETHUSDT', value: 'ETHUSDT' },
+  { label: 'XAUUSD', value: 'XAUUSD' }
+];
+
+export const FEED_CODE_OPTIONS = [
+  { label: 'BINANCE_USDM_BTCUSDT_5M', value: 'BINANCE_USDM_BTCUSDT_5M' },
+  { label: 'BINANCE_USDM_BTCUSDT_1H', value: 'BINANCE_USDM_BTCUSDT_1H' },
+  { label: 'BINANCE_USDM_ETHUSDT_1H', value: 'BINANCE_USDM_ETHUSDT_1H' },
+  { label: 'YAHOO_CHART_XAUUSD_1H', value: 'YAHOO_CHART_XAUUSD_1H' }
+];
+
 export const AUDIT_LEVEL_OPTIONS = [
   { label: 'tradeBot.audit.summary', value: 'SUMMARY' },
   { label: 'tradeBot.audit.tradeTrace', value: 'TRADE_TRACE' },
@@ -40,13 +79,13 @@ export const SAME_BAR_OPTIONS = [
 
 export const MARKET_DATA_QUERY_FORM: FormConfig = {
   fields: [
-    { name: 'symbol', type: 'text', label: 'tradeBot.field.symbol', width: '1/4', validation: [requiredRule()] },
-    { name: 'timeframe', type: 'text', label: 'tradeBot.field.timeframe', width: '1/4', validation: [requiredRule()] },
-    { name: 'source', type: 'text', label: 'tradeBot.field.source', width: '1/4' },
-    { name: 'marketType', type: 'text', label: 'tradeBot.field.marketType', width: '1/4' },
-    { name: 'feedCode', type: 'text', label: 'tradeBot.field.feedCode', width: '1/4' },
-    { name: 'from', type: 'text', label: 'tradeBot.field.fromTime', width: '1/4' },
-    { name: 'to', type: 'text', label: 'tradeBot.field.toTime', width: '1/4' },
+    { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', options: SYMBOL_OPTIONS, width: '1/4', validation: [requiredRule()] },
+    { name: 'timeframe', type: 'select', label: 'tradeBot.field.timeframe', options: TIMEFRAME_OPTIONS, width: '1/4', validation: [requiredRule()] },
+    { name: 'source', type: 'select', label: 'tradeBot.field.source', options: MARKET_SOURCE_OPTIONS, showClear: true, width: '1/4' },
+    { name: 'marketType', type: 'select', label: 'tradeBot.field.marketType', options: MARKET_TYPE_OPTIONS, showClear: true, width: '1/4' },
+    { name: 'feedCode', type: 'auto-complete', label: 'tradeBot.field.feedCode', options: FEED_CODE_OPTIONS, width: '1/4' },
+    { name: 'from', type: 'date', label: 'tradeBot.field.fromTime', width: '1/4' },
+    { name: 'to', type: 'date', label: 'tradeBot.field.toTime', width: '1/4' },
     { name: 'limit', type: 'number', label: 'tradeBot.field.limit', suffix: 'bars', width: '1/4' }
   ]
 };
@@ -68,16 +107,16 @@ export const CANDLE_IMPORT_FORM: FormConfig = {
 
 export const BINANCE_USDM_SYNC_FORM: FormConfig = {
   fields: [
-    { name: 'symbolsText', type: 'text', label: 'tradeBot.field.symbols', width: '1/3', validation: [requiredRule()] },
-    { name: 'timeframesText', type: 'text', label: 'tradeBot.field.timeframes', width: '1/3', validation: [requiredRule()] },
+    { name: 'symbolsText', type: 'input-multi', label: 'tradeBot.field.symbols', options: SYMBOL_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'timeframesText', type: 'select-multi', label: 'tradeBot.field.timeframes', options: TIMEFRAME_OPTIONS, width: '1/3', validation: [requiredRule()] },
     { name: 'mode', type: 'select', label: 'tradeBot.field.mode', width: '1/3', options: [
       { label: 'tradeBot.sync.mode.latest', value: 'latest' },
       { label: 'tradeBot.sync.mode.range', value: 'range' },
       { label: 'tradeBot.sync.mode.backfill', value: 'backfill' },
       { label: 'tradeBot.sync.mode.repairGap', value: 'repair-gap' }
     ] },
-    { name: 'fromTime', type: 'text', label: 'tradeBot.field.fromTime', width: '1/3' },
-    { name: 'toTime', type: 'text', label: 'tradeBot.field.toTime', width: '1/3' },
+    { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/3' },
+    { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/3' },
     { name: 'initialLookbackHours', type: 'number', label: 'tradeBot.field.initialLookbackHours', suffix: 'hours', width: '1/3' },
     { name: 'limit', type: 'number', label: 'tradeBot.field.limit', suffix: 'bars', width: '1/3' },
     { name: 'maxPages', type: 'number', label: 'tradeBot.field.maxPages', suffix: 'pages', width: '1/3' },
@@ -86,6 +125,7 @@ export const BINANCE_USDM_SYNC_FORM: FormConfig = {
   ]
 };
 
+/** @deprecated Feature forms now build FormConfig from executor metadata/template. Keep only as a legacy reference; do not import for new UI. */
 export const INDICATOR_FORM: FormConfig = {
   fields: [
     { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [requiredRule()] },
@@ -99,6 +139,7 @@ export const INDICATOR_FORM: FormConfig = {
   ]
 };
 
+/** @deprecated Feature forms now build FormConfig from executor metadata/template. Keep only as a legacy reference; do not import for new UI. */
 export const RULE_FORM: FormConfig = {
   fields: [
     { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [requiredRule()] },
@@ -112,6 +153,7 @@ export const RULE_FORM: FormConfig = {
   ]
 };
 
+/** @deprecated Strategy form now uses explicit UI config fields plus collapsed Advanced JSON. Keep only as a legacy reference; do not import for new UI. */
 export const STRATEGY_FORM: FormConfig = {
   fields: [
     { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [requiredRule()] },
@@ -127,14 +169,14 @@ export const STRATEGY_FORM: FormConfig = {
 
 export const BACKTEST_RUN_FORM: FormConfig = {
   fields: [
-    { name: 'strategyCode', type: 'text', label: 'tradeBot.field.strategyCode', width: '1/3', validation: [requiredRule()] },
-    { name: 'symbol', type: 'text', label: 'tradeBot.field.symbol', width: '1/3', validation: [requiredRule()] },
-    { name: 'timeframe', type: 'text', label: 'tradeBot.field.timeframe', width: '1/3', validation: [requiredRule()] },
-    { name: 'source', type: 'text', label: 'tradeBot.field.source', width: '1/3' },
-    { name: 'marketType', type: 'text', label: 'tradeBot.field.marketType', width: '1/3' },
-    { name: 'feedCode', type: 'text', label: 'tradeBot.field.feedCode', width: '1/3' },
-    { name: 'fromTime', type: 'text', label: 'tradeBot.field.fromTime', width: '1/2', validation: [requiredRule()] },
-    { name: 'toTime', type: 'text', label: 'tradeBot.field.toTime', width: '1/2', validation: [requiredRule()] },
+    { name: 'strategyCode', type: 'select', label: 'tradeBot.field.strategyCode', optionsExpression: 'context.extra?.strategyOptions ?? []', width: '1/3', validation: [requiredRule()] },
+    { name: 'symbol', type: 'select', label: 'tradeBot.field.symbol', optionsExpression: "context.extra?.getBacktestMarketOptions?.('symbol', model) ?? []", width: '1/3', validation: [requiredRule()] },
+    { name: 'timeframe', type: 'select', label: 'tradeBot.field.timeframe', optionsExpression: "context.extra?.getBacktestMarketOptions?.('timeframe', model) ?? []", width: '1/3', validation: [requiredRule()] },
+    { name: 'source', type: 'select', label: 'tradeBot.field.source', optionsExpression: "context.extra?.getBacktestMarketOptions?.('source', model) ?? []", showClear: true, width: '1/3' },
+    { name: 'marketType', type: 'select', label: 'tradeBot.field.marketType', optionsExpression: "context.extra?.getBacktestMarketOptions?.('marketType', model) ?? []", showClear: true, width: '1/3' },
+    { name: 'feedCode', type: 'select', label: 'tradeBot.field.feedCode', optionsExpression: "context.extra?.getBacktestMarketOptions?.('feedCode', model) ?? []", showClear: true, width: '1/3' },
+    { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/2', validation: [requiredRule()] },
+    { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/2', validation: [requiredRule()] },
     { name: 'initialBalance', type: 'number', label: 'tradeBot.field.initialBalance', prefix: '$', width: '1/4' },
     { name: 'riskPerTradePct', type: 'number', label: 'tradeBot.field.riskPerTradePct', suffix: '%', width: '1/4' },
     { name: 'feeRate', type: 'number', label: 'tradeBot.field.feeRate', suffix: '%', width: '1/4' },
@@ -147,35 +189,35 @@ export const BACKTEST_RUN_FORM: FormConfig = {
 
 export const REPLAY_INIT_FORM: FormConfig = {
   fields: [
-    { name: 'strategyCode', type: 'text', label: 'tradeBot.field.strategyCode', width: '1/3', validation: [requiredRule()] },
-    { name: 'symbol', type: 'text', label: 'tradeBot.field.symbol', width: '1/3', validation: [requiredRule()] },
-    { name: 'timeframe', type: 'text', label: 'tradeBot.field.timeframe', width: '1/3', validation: [requiredRule()] },
-    { name: 'source', type: 'text', label: 'tradeBot.field.source', width: '1/3' },
-    { name: 'marketType', type: 'text', label: 'tradeBot.field.marketType', width: '1/3' },
-    { name: 'feedCode', type: 'text', label: 'tradeBot.field.feedCode', width: '1/3' },
-    { name: 'fromTime', type: 'text', label: 'tradeBot.field.fromTime', width: '1/2', validation: [requiredRule()] },
-    { name: 'toTime', type: 'text', label: 'tradeBot.field.toTime', width: '1/2', validation: [requiredRule()] },
+    { name: 'strategyCode', type: 'auto-complete', label: 'tradeBot.field.strategyCode', optionsExpression: 'context.extra?.strategyOptions ?? []', width: '1/3', validation: [requiredRule()] },
+    { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', options: SYMBOL_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'timeframe', type: 'select', label: 'tradeBot.field.timeframe', options: TIMEFRAME_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'source', type: 'select', label: 'tradeBot.field.source', options: MARKET_SOURCE_OPTIONS, width: '1/3' },
+    { name: 'marketType', type: 'select', label: 'tradeBot.field.marketType', options: MARKET_TYPE_OPTIONS, width: '1/3' },
+    { name: 'feedCode', type: 'auto-complete', label: 'tradeBot.field.feedCode', options: FEED_CODE_OPTIONS, width: '1/3' },
+    { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/2', validation: [requiredRule()] },
+    { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/2', validation: [requiredRule()] },
     { name: 'overlayCodesText', type: 'textarea', label: 'tradeBot.field.overlayCodesJson', contentType: 'json', rows: 4, maxRows: 10, showZoomButton: true }
   ]
 };
 
 export const EVALUATE_FORM: FormConfig = {
   fields: [
-    { name: 'runId', type: 'text', label: 'tradeBot.field.runId', width: '1/2', validation: [requiredRule()] },
+    { name: 'runId', type: 'auto-complete', label: 'tradeBot.field.runId', optionsExpression: 'context.extra?.runOptions ?? []', width: '1/2', validation: [requiredRule()] },
     { name: 'index', type: 'number', label: 'tradeBot.field.index', suffix: 'bar', width: '1/2', validation: [requiredRule()] }
   ]
 };
 
 export const SANDBOX_FORM: FormConfig = {
   fields: [
-    { name: 'strategyCode', type: 'text', label: 'tradeBot.field.strategyCode', width: '1/3', validation: [requiredRule()] },
-    { name: 'symbol', type: 'text', label: 'tradeBot.field.symbol', width: '1/3', validation: [requiredRule()] },
-    { name: 'timeframe', type: 'text', label: 'tradeBot.field.timeframe', width: '1/3', validation: [requiredRule()] },
-    { name: 'source', type: 'text', label: 'tradeBot.field.source', width: '1/3' },
-    { name: 'marketType', type: 'text', label: 'tradeBot.field.marketType', width: '1/3' },
-    { name: 'feedCode', type: 'text', label: 'tradeBot.field.feedCode', width: '1/3' },
-    { name: 'fromTime', type: 'text', label: 'tradeBot.field.fromTime', width: '1/3', validation: [requiredRule()] },
-    { name: 'toTime', type: 'text', label: 'tradeBot.field.toTime', width: '1/3', validation: [requiredRule()] },
+    { name: 'strategyCode', type: 'auto-complete', label: 'tradeBot.field.strategyCode', optionsExpression: 'context.extra?.strategyOptions ?? []', width: '1/3', validation: [requiredRule()] },
+    { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', options: SYMBOL_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'timeframe', type: 'select', label: 'tradeBot.field.timeframe', options: TIMEFRAME_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'source', type: 'select', label: 'tradeBot.field.source', options: MARKET_SOURCE_OPTIONS, width: '1/3' },
+    { name: 'marketType', type: 'select', label: 'tradeBot.field.marketType', options: MARKET_TYPE_OPTIONS, width: '1/3' },
+    { name: 'feedCode', type: 'auto-complete', label: 'tradeBot.field.feedCode', options: FEED_CODE_OPTIONS, width: '1/3' },
+    { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/3', validation: [requiredRule()] },
+    { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/3', validation: [requiredRule()] },
     { name: 'startIndex', type: 'number', label: 'tradeBot.field.startIndex', suffix: 'bar', width: '1/4' },
     { name: 'endIndex', type: 'number', label: 'tradeBot.field.endIndex', suffix: 'bar', width: '1/4' },
     { name: 'warmupBars', type: 'number', label: 'tradeBot.field.warmupBars', suffix: 'bars', width: '1/4' },
@@ -189,14 +231,14 @@ export const SANDBOX_FORM: FormConfig = {
 
 export const EVALUATE_BAR_FORM: FormConfig = {
   fields: [
-    { name: 'strategyCode', type: 'text', label: 'tradeBot.field.strategyCode', width: '1/3', validation: [requiredRule()] },
-    { name: 'symbol', type: 'text', label: 'tradeBot.field.symbol', width: '1/3', validation: [requiredRule()] },
-    { name: 'timeframe', type: 'text', label: 'tradeBot.field.timeframe', width: '1/3', validation: [requiredRule()] },
-    { name: 'source', type: 'text', label: 'tradeBot.field.source', width: '1/3' },
-    { name: 'marketType', type: 'text', label: 'tradeBot.field.marketType', width: '1/3' },
-    { name: 'feedCode', type: 'text', label: 'tradeBot.field.feedCode', width: '1/3' },
-    { name: 'fromTime', type: 'text', label: 'tradeBot.field.fromTime', width: '1/3', validation: [requiredRule()] },
-    { name: 'toTime', type: 'text', label: 'tradeBot.field.toTime', width: '1/3', validation: [requiredRule()] },
+    { name: 'strategyCode', type: 'auto-complete', label: 'tradeBot.field.strategyCode', optionsExpression: 'context.extra?.strategyOptions ?? []', width: '1/3', validation: [requiredRule()] },
+    { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', options: SYMBOL_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'timeframe', type: 'select', label: 'tradeBot.field.timeframe', options: TIMEFRAME_OPTIONS, width: '1/3', validation: [requiredRule()] },
+    { name: 'source', type: 'select', label: 'tradeBot.field.source', options: MARKET_SOURCE_OPTIONS, width: '1/3' },
+    { name: 'marketType', type: 'select', label: 'tradeBot.field.marketType', options: MARKET_TYPE_OPTIONS, width: '1/3' },
+    { name: 'feedCode', type: 'auto-complete', label: 'tradeBot.field.feedCode', options: FEED_CODE_OPTIONS, width: '1/3' },
+    { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/3', validation: [requiredRule()] },
+    { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/3', validation: [requiredRule()] },
     { name: 'index', type: 'number', label: 'tradeBot.field.index', suffix: 'bar', width: '1/3', validation: [requiredRule()] },
     { name: 'paramsText', type: 'textarea', label: 'tradeBot.field.paramsJson', contentType: 'json', rows: 5, maxRows: 12, showZoomButton: true }
   ]

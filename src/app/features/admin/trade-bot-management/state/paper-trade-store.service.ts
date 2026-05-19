@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { TaskProgressState } from '../../../../core/models/realtime/realtime.model';
-import { CandleBarResponse } from '../../../../core/models/trade-bot/market-data.model';
+import { CandleBarResponse } from '../data-access/models/trading-system.model';
 import {
   PaperTradeAccount,
   PaperTradeEquityPoint,

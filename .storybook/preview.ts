@@ -24,6 +24,7 @@ const preview: Preview = {
         provideRouter([], withHashLocation()),
         MessageService,
         providePrimeNG({
+          overlayAppendTo: 'body',
           theme: {
             preset: APP_THEME_PRESETS.aura,
             options: {
@@ -43,7 +44,7 @@ const preview: Preview = {
       options: MINIMAL_VIEWPORTS
     },
     a11y: {
-      test: 'todo'
+      test: 'error'
     },
     controls: {
       matchers: {

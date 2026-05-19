@@ -23,6 +23,7 @@ import {
   CandleBarResponse,
   CandleBulkImportDto,
   CandleGapResponse,
+  CandleMarketOptionResponse,
   CandleSyncRunResponse,
   CacheEvictRequest,
   CacheMonitorResponse,
@@ -83,6 +84,12 @@ export class TradingSystemService {
       .pipe(map((res) => res.data ?? []));
   }
 
+  getCandleMarketOptions(limit = 200): Observable<CandleMarketOptionResponse[]> {
+    return this.http
+      .get<BaseResponse<CandleMarketOptionResponse[]>>(`${this.apiUrl}/candles/markets`, { params: this.params({ limit }) })
+      .pipe(map((res) => res.data ?? []));
+  }
+
   getCandleGaps(filters: Record<string, any> = {}): Observable<CandleGapResponse[]> {
     return this.http
       .get<BaseResponse<CandleGapResponse[]>>(`${this.apiUrl}/candles/gaps`, { params: this.params(filters) })
@@ -115,14 +122,23 @@ export class TradingSystemService {
     return this.http.get<BaseResponse<ExecutorVersionResponse[]>>(`${this.apiUrl}/rule-executors`).pipe(map((res) => res.data ?? []));
   }
 
+  getStrategyExecutors(): Observable<ExecutorVersionResponse[]> {
+    return this.http.get<BaseResponse<ExecutorVersionResponse[]>>(`${this.apiUrl}/strategy-executors`).pipe(map((res) => res.data ?? []));
+  }
+
   getIndicatorConfigs(filters: Record<string, any> = {}): Observable<IndicatorConfigResponse[]> {
     return this.http.get<BaseResponse<IndicatorConfigResponse[]>>(`${this.apiUrl}/indicator-configs`, { params: this.params(filters) }).pipe(map((res) => res.data ?? []));
   }
 
-  getIndicatorConfigPage(page = 0, size = 10, filters: Record<string, any> = {}): Observable<BasePageResponse<IndicatorConfigResponse>> {
+  getIndicatorConfigPage(
+    page = 0,
+    size = 10,
+    filters: Record<string, any> = {},
+    sort: string[] = []
+  ): Observable<BasePageResponse<IndicatorConfigResponse>> {
     return this.http
       .get<BaseResponse<BasePageResponse<IndicatorConfigResponse>>>(`${this.apiUrl}/indicator-configs/page`, {
-        params: this.pageParams(page, size, filters)
+        params: this.pageParams(page, size, filters, sort)
       })
       .pipe(map((res) => ({ data: res.data?.data ?? [], metadata: normalizePageMetadata(res.data?.metadata, page, size) })));
   }
@@ -141,10 +157,19 @@ export class TradingSystemService {
     return this.http.delete<BaseResponse<IndicatorConfigResponse>>(`${this.apiUrl}/indicator-configs/${id}`).pipe(map((res) => res.data));
   }
 
-  getRuleConfigPage(page = 0, size = 10, filters: Record<string, any> = {}): Observable<BasePageResponse<RuleConfigResponse>> {
+  getRuleConfigPage(
+    page = 0,
+    size = 10,
+    filters: Record<string, any> = {},
+    sort: string[] = []
+  ): Observable<BasePageResponse<RuleConfigResponse>> {
     return this.http
-      .get<BaseResponse<BasePageResponse<RuleConfigResponse>>>(`${this.apiUrl}/rule-configs/page`, { params: this.pageParams(page, size, filters) })
+      .get<BaseResponse<BasePageResponse<RuleConfigResponse>>>(`${this.apiUrl}/rule-configs/page`, { params: this.pageParams(page, size, filters, sort) })
       .pipe(map((res) => ({ data: res.data?.data ?? [], metadata: normalizePageMetadata(res.data?.metadata, page, size) })));
+  }
+
+  getRuleConfigs(filters: Record<string, any> = {}): Observable<RuleConfigResponse[]> {
+    return this.http.get<BaseResponse<RuleConfigResponse[]>>(`${this.apiUrl}/rule-configs`, { params: this.params(filters) }).pipe(map((res) => res.data ?? []));
   }
 
   getRuleConfig(id: string): Observable<RuleConfigResponse> {
@@ -161,10 +186,19 @@ export class TradingSystemService {
     return this.http.delete<BaseResponse<RuleConfigResponse>>(`${this.apiUrl}/rule-configs/${id}`).pipe(map((res) => res.data));
   }
 
-  getStrategyConfigPage(page = 0, size = 10, filters: Record<string, any> = {}): Observable<BasePageResponse<StrategyConfigResponse>> {
+  getStrategyConfigPage(
+    page = 0,
+    size = 10,
+    filters: Record<string, any> = {},
+    sort: string[] = []
+  ): Observable<BasePageResponse<StrategyConfigResponse>> {
     return this.http
-      .get<BaseResponse<BasePageResponse<StrategyConfigResponse>>>(`${this.apiUrl}/strategy-configs/page`, { params: this.pageParams(page, size, filters) })
+      .get<BaseResponse<BasePageResponse<StrategyConfigResponse>>>(`${this.apiUrl}/strategy-configs/page`, { params: this.pageParams(page, size, filters, sort) })
       .pipe(map((res) => ({ data: res.data?.data ?? [], metadata: normalizePageMetadata(res.data?.metadata, page, size) })));
+  }
+
+  getStrategyConfigs(filters: Record<string, any> = {}): Observable<StrategyConfigResponse[]> {
+    return this.http.get<BaseResponse<StrategyConfigResponse[]>>(`${this.apiUrl}/strategy-configs`, { params: this.params(filters) }).pipe(map((res) => res.data ?? []));
   }
 
   getStrategyConfig(id: string): Observable<StrategyConfigResponse> {
@@ -235,8 +269,10 @@ export class TradingSystemService {
     return this.http.get<BaseResponse<BacktestReviewResponse>>(`${this.apiUrl}/backtest-review/${runId}`).pipe(map((res) => res.data));
   }
 
-  getBacktestReviewChart(runId: string): Observable<BacktestChartReviewResponse> {
-    return this.http.get<BaseResponse<BacktestChartReviewResponse>>(`${this.apiUrl}/backtest-review/${runId}/chart`).pipe(map((res) => res.data));
+  getBacktestReviewChart(runId: string, includeCandles = true): Observable<BacktestChartReviewResponse> {
+    return this.http
+      .get<BaseResponse<BacktestChartReviewResponse>>(`${this.apiUrl}/backtest-review/${runId}/chart`, { params: this.params({ includeCandles }) })
+      .pipe(map((res) => res.data));
   }
 
   getBacktestReviewTrades(runId: string): Observable<BacktestTradeResponse[]> {
@@ -321,8 +357,12 @@ export class TradingSystemService {
     return this.http.get<BaseResponse<SystemLogResponse[]>>(`${this.apiUrl}/system-logs`, { params: this.params(filters) }).pipe(map((res) => res.data ?? []));
   }
 
-  private pageParams(page: number, size: number, filters: Record<string, any>): HttpParams {
-    return this.params(filters).set('page', page).set('size', size);
+  private pageParams(page: number, size: number, filters: Record<string, any>, sort: string[] = []): HttpParams {
+    let params = this.params(filters).set('page', page).set('size', size);
+    sort.forEach((item) => {
+      params = params.append('sort', item);
+    });
+    return params;
   }
 
   private params(filters: Record<string, any>): HttpParams {

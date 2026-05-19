@@ -1,0 +1,141 @@
+<section class="filter-panel" [class.filter-panel--dirty]="dirty">
+  <div class="filter-panel__fields">
+    @for (field of simpleFilters; track field.key) {
+      <ng-container
+        [ngTemplateOutlet]="fieldTemplate"
+        [ngTemplateOutletContext]="{ field: field }"
+      ></ng-container>
+    }
+  </div>
+
+  @if (advancedFilters.length > 0) {
+    <div class="filter-panel__advanced-toggle">
+      <app-button
+        size="small"
+        severity="secondary"
+        [text]="true"
+        [icon]="showAdvanced() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        label="advancedFilters"
+        (buttonClick)="toggleAdvanced()"
+      ></app-button>
+    </div>
+  }
+
+  @if (showAdvanced()) {
+    <div class="filter-panel__fields filter-panel__fields--advanced">
+      @for (field of advancedFilters; track field.key) {
+        <ng-container
+          [ngTemplateOutlet]="fieldTemplate"
+          [ngTemplateOutletContext]="{ field: field }"
+        ></ng-container>
+      }
+    </div>
+  }
+
+  <div class="filter-panel__actions">
+    @if (activeCount > 0) {
+      <span class="filter-panel__count">{{ activeCount }}</span>
+    }
+    @if (dirty) {
+      <span class="filter-panel__dirty">{{ 'shared.filter.dirty' | translateContent }}</span>
+    }
+    <app-button size="small" severity="info" icon="pi pi-check" label="apply" (buttonClick)="onApply()"></app-button>
+    <app-button size="small" severity="secondary" [text]="true" icon="pi pi-refresh" label="reset" (buttonClick)="onReset()"></app-button>
+    <app-button size="small" severity="secondary" [text]="true" icon="pi pi-filter-slash" label="clear" (buttonClick)="clear()"></app-button>
+  </div>
+</section>
+
+<ng-template #fieldTemplate let-field="field">
+  @switch (field.type) {
+    @case ('select') {
+      <app-select
+        size="small"
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [options]="field.options ?? []"
+        [value]="selectValue(field.key)"
+        [showClear]="true"
+        (valueChange)="setValue(field.key, $event)"
+      ></app-select>
+    }
+    @case ('multi-select') {
+      <app-select-multi
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [options]="field.options ?? []"
+        [value]="multiValue(field.key)"
+        [loading]="field.loading ?? false"
+        [enableFilter]="true"
+        (valueChange)="setValue(field.key, $event)"
+      ></app-select-multi>
+    }
+    @case ('boolean') {
+      <app-select
+        size="small"
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [options]="[{ label: 'yes', value: true }, { label: 'no', value: false }]"
+        [value]="selectValue(field.key)"
+        [showClear]="true"
+        (valueChange)="setValue(field.key, $event)"
+      ></app-select>
+    }
+    @case ('date-range') {
+      <app-date-picker
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        selectionMode="range"
+        [value]="dateRangeValue(field.key)"
+        (valueChange)="setDateRangeValue(field.key, $event)"
+      ></app-date-picker>
+    }
+    @case ('number-range') {
+      <div class="filter-panel__range">
+        <app-input-number
+          [label]="(field.label | translateContent) + ' - ' + ('shared.filter.min' | translateContent)"
+          [value]="numberRangeValue(field.key, 'from')"
+          (valueChange)="setRangeValue(field.key, 'from', $event)"
+        ></app-input-number>
+        <app-input-number
+          [label]="(field.label | translateContent) + ' - ' + ('shared.filter.max' | translateContent)"
+          [value]="numberRangeValue(field.key, 'to')"
+          (valueChange)="setRangeValue(field.key, 'to', $event)"
+        ></app-input-number>
+      </div>
+    }
+    @case ('autocomplete') {
+      <app-auto-complete
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [options]="field.options ?? []"
+        [value]="textValue(field.key)"
+        (valueChange)="setDebouncedValue(field.key, $event)"
+      ></app-auto-complete>
+    }
+    @default {
+      <app-input-text
+        size="small"
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [value]="textValue(field.key)"
+        (valueChange)="setDebouncedValue(field.key, $event)"
+      ></app-input-text>
+    }
+  }
+
+  @if (field.loading) {
+    <app-loading-skeleton type="list" [rows]="1"></app-loading-skeleton>
+  }
+
+  @if (field.error) {
+    <app-error-state
+      [title]="field.label"
+      [message]="field.error"
+      [compact]="true"
+      retryLabel="retry"
+      (retry)="retryOptions.emit(field)"
+    ></app-error-state>
+  } @else if ((field.options?.length ?? 0) === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {
+    <small class="filter-panel__empty">{{ (field.emptyMessage ?? 'noDataFound') | translateContent }}</small>
+  }
+</ng-template>

@@ -1,6 +1,6 @@
 .record-field {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--app-space-2, 0.5rem);
 }
 
 .record-field__header,
@@ -9,6 +9,16 @@
   grid-template-columns: 1fr 1fr auto;
   gap: 0.5rem;
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .record-field__header {
+    display: none;
+  }
+
+  .record-field__row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .record-field__header {

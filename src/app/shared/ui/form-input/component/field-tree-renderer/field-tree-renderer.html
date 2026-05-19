@@ -1,4 +1,329 @@
 @if (field.visible()) {
+  @if (readonlyMode) {
+    <app-readonly-section [field]="field"></app-readonly-section>
+  } @else {
+  @if (!isTemplateTree) {
+    <section class="field-tree">
+      @let visibleNodes = visibleTree;
+      @let selected = selectedItems;
+      <header class="field-tree__header">
+        <div>
+          <h3>
+            {{ (field.label || 'general') | translateContent }}
+            @if (field.required()) {
+              <span class="field-tree__required" aria-hidden="true">*</span>
+            }
+          </h3>
+          @if (field.fieldConfig.description || field.fieldConfig.helpText) {
+            <p>{{ (field.fieldConfig.description || field.fieldConfig.helpText) | translateContent }}</p>
+          }
+        </div>
+        @if (canEdit()) {
+          <div class="field-tree__header-actions">
+            @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
+              <app-button
+                size="small"
+                severity="success"
+                icon="pi pi-plus"
+                [label]="labels.addNode ?? 'add'"
+                (buttonClick)="openAddPicker()"
+              ></app-button>
+            }
+            @if (field.fieldConfig.treeConfig?.allowGroupNode === true) {
+              <app-button
+                size="small"
+                severity="secondary"
+                icon="pi pi-folder-plus"
+                [label]="labels.addGroup ?? 'shared.tree.addGroup'"
+                (buttonClick)="addGroup()"
+              ></app-button>
+            }
+            @if (nodes.length > 0) {
+              <app-button
+                size="small"
+                severity="secondary"
+                [text]="true"
+                icon="pi pi-check-circle"
+                [label]="labels.validate ?? 'shared.tree.validate'"
+                (buttonClick)="validateTree()"
+              ></app-button>
+            }
+            @if (nodes.length > 0) {
+              <app-button
+                size="small"
+                severity="danger"
+                [text]="true"
+                icon="pi pi-trash"
+                [label]="labels.clear ?? 'clear'"
+                (buttonClick)="clear()"
+              ></app-button>
+            }
+          </div>
+        }
+      </header>
+
+      @if (showToolbar && nodes.length > 0) {
+        <div class="field-tree__toolbar" role="region" [attr.aria-label]="'shared.tree.tools' | translateContent">
+          @if (searchable) {
+            <app-input-text
+              class="field-tree__search"
+              iconClass="pi pi-search"
+              [label]="labels.searchPlaceholder ?? 'shared.tree.searchPlaceholder'"
+              [placeholder]="labels.searchPlaceholder ?? 'shared.tree.searchPlaceholder'"
+              [value]="treeQuery()"
+              (valueChange)="setTreeQuery($event)"
+            ></app-input-text>
+          }
+
+          @if (showFilterTabs) {
+            <div class="field-tree__filters" role="tablist" [attr.aria-label]="'filters' | translateContent">
+              <app-button
+                size="small"
+                [severity]="treeFilterMode() === 'all' ? 'info' : 'secondary'"
+                [text]="treeFilterMode() !== 'all'"
+                icon="pi pi-list"
+                label="all"
+                (buttonClick)="setTreeFilterMode('all')"
+              ></app-button>
+              <app-button
+                size="small"
+                [severity]="treeFilterMode() === 'selected' ? 'info' : 'secondary'"
+                [text]="treeFilterMode() !== 'selected'"
+                icon="pi pi-check-square"
+                [label]="labels.selectedOnly ?? 'shared.tree.selectedOnly'"
+                (buttonClick)="setTreeFilterMode('selected')"
+              ></app-button>
+              <app-button
+                size="small"
+                [severity]="treeFilterMode() === 'leaf' ? 'info' : 'secondary'"
+                [text]="treeFilterMode() !== 'leaf'"
+                icon="pi pi-sitemap"
+                [label]="labels.leafOnly ?? 'shared.tree.leafOnly'"
+                (buttonClick)="setTreeFilterMode('leaf')"
+              ></app-button>
+            </div>
+          }
+
+          <div class="field-tree__toolbar-actions">
+            <app-button
+              size="small"
+              severity="secondary"
+              [text]="true"
+              icon="pi pi-angle-double-down"
+              [label]="labels.expandAll ?? 'shared.tree.expandAll'"
+              (buttonClick)="expandAll()"
+            ></app-button>
+            <app-button
+              size="small"
+              severity="secondary"
+              [text]="true"
+              icon="pi pi-angle-double-up"
+              [label]="labels.collapseAll ?? 'shared.tree.collapseAll'"
+              (buttonClick)="collapseAll()"
+            ></app-button>
+            @if (hasCheckboxSelection) {
+              <app-button
+                size="small"
+                severity="secondary"
+                [text]="true"
+                icon="pi pi-directions"
+                [label]="labels.expandSelected ?? 'shared.tree.expandSelected'"
+                [disabled]="selected.length === 0"
+                (buttonClick)="expandSelected()"
+              ></app-button>
+              <app-button
+                size="small"
+                severity="secondary"
+                [text]="true"
+                icon="pi pi-check"
+                [label]="labels.selectVisible ?? 'shared.tree.selectVisible'"
+                [disabled]="visibleNodes.length === 0"
+                (buttonClick)="selectVisibleNodes()"
+              ></app-button>
+            }
+          </div>
+
+          @if (hasCheckboxSelection && selectionPresetItems.length > 0) {
+            <div class="field-tree__presets" role="group" [attr.aria-label]="(labels.presetTitle ?? 'shared.tree.presets') | translateContent">
+              @for (preset of selectionPresetItems; track preset.id) {
+                <app-button
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  [icon]="preset.icon ?? 'pi pi-bolt'"
+                  [label]="preset.label"
+                  [tooltip]="preset.description"
+                  (buttonClick)="applySelectionPreset(preset.id)"
+                ></app-button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (treeLoading) {
+        <app-loading-skeleton type="list" [rows]="5"></app-loading-skeleton>
+      } @else if (treeError; as error) {
+        <app-error-state
+          title="shared.tree.errorTitle"
+          [message]="error"
+          retryLabel="retry"
+          [compact]="true"
+          (retry)="retryTree()"
+        ></app-error-state>
+      } @else if (nodes.length === 0) {
+        <app-empty-state
+          [title]="labels.emptyTitle ?? 'shared.tree.emptyTitle'"
+          [description]="labels.emptyDescription ?? 'shared.tree.emptyDescription'"
+          [primaryActionLabel]="canEdit() && field.fieldConfig.pickerOptions?.length ? (labels.addNode ?? 'add') : undefined"
+          (primaryAction)="openAddPicker()"
+        ></app-empty-state>
+      } @else {
+        <div class="field-tree__workspace">
+          <div class="field-tree__body">
+            @if (visibleNodes.length === 0) {
+              <app-empty-state
+                variant="search"
+                [title]="treeFilterMode() === 'selected' ? (labels.selectedEmptyTitle ?? 'shared.tree.selectedEmptyTitle') : (labels.searchEmptyTitle ?? 'shared.tree.searchEmptyTitle')"
+                [description]="treeFilterMode() === 'selected' ? (labels.selectedEmptyDescription ?? 'shared.tree.selectedEmptyDescription') : (labels.searchEmptyDescription ?? 'shared.tree.searchEmptyDescription')"
+                [primaryActionLabel]="treeQuery() ? (labels.clearSearch ?? 'shared.tree.clearSearch') : undefined"
+                (primaryAction)="clearTreeSearch()"
+              ></app-empty-state>
+            } @else {
+              <ul class="field-tree__nodes" role="tree" [attr.aria-label]="(field.label || 'general') | translateContent">
+                @for (view of visibleNodes; track view.node.id) {
+                  <ng-container
+                    [ngTemplateOutlet]="nodeTemplate"
+                    [ngTemplateOutletContext]="{ view: view, level: 0 }"
+                  ></ng-container>
+                }
+              </ul>
+            }
+          </div>
+
+          @if (showSelectedPanel) {
+            <aside class="field-tree__selected-panel" aria-live="polite">
+              <header class="field-tree__selected-header">
+                <div>
+                  <h4>{{ (labels.selectedPanelTitle ?? 'shared.tree.selectedItems') | translateContent }}</h4>
+                  <span>{{ selected.length }} {{ 'shared.tree.itemsSelected' | translateContent }}</span>
+                </div>
+                <app-button
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  icon="pi pi-times"
+                  [label]="labels.clearSelection ?? 'shared.tree.clearSelection'"
+                  [disabled]="selected.length === 0"
+                  (buttonClick)="clearSelection()"
+                ></app-button>
+              </header>
+
+              @if (selected.length === 0) {
+                <app-empty-state
+                  size="compact"
+                  align="start"
+                  title="shared.tree.selectedEmptyTitle"
+                  description="shared.tree.selectedEmptyDescription"
+                ></app-empty-state>
+              } @else {
+                <ul class="field-tree__selected-list">
+                  @for (item of selected; track item.node.id) {
+                    <li class="field-tree__selected-row">
+                      <button
+                        type="button"
+                        class="field-tree__selected-item"
+                        (click)="focusSelectedNode(item.node.id)"
+                      >
+                        <span>{{ item.path | translateContent }}</span>
+                        @if (item.code) {
+                          <small>{{ item.code }}</small>
+                        }
+                      </button>
+                      <app-button
+                        size="small"
+                        severity="secondary"
+                        [text]="true"
+                        icon="pi pi-times"
+                        [label]="labels.removeSelected ?? 'shared.tree.removeSelected'"
+                        (buttonClick)="removeSelectedItem(item.node.id)"
+                      ></app-button>
+                    </li>
+                  }
+                </ul>
+              }
+            </aside>
+          }
+        </div>
+
+        @if (hasCheckboxSelection) {
+          <footer class="field-tree__footer">
+            <span>{{ selected.length }} {{ 'shared.tree.itemsSelected' | translateContent }}</span>
+            <app-button
+              size="small"
+              severity="secondary"
+              [text]="true"
+              icon="pi pi-trash"
+              [label]="labels.clearSelection ?? 'shared.tree.clearSelection'"
+              [disabled]="selected.length === 0"
+              (buttonClick)="clearSelection()"
+            ></app-button>
+          </footer>
+        }
+      }
+
+      @if (field.errors(); as errors) {
+        <div class="field-tree__errors" role="alert">
+          @for (message of (errors | keyvalue); track message.key) {
+            <p>{{ message.value | translateContent }}</p>
+          }
+        </div>
+      }
+
+      @if (field.fieldConfig.treeConfig?.advancedJson?.enabled) {
+        <app-section-panel
+          title="shared.form.advancedJson"
+          [collapsible]="true"
+          [collapsed]="field.fieldConfig.treeConfig?.advancedJson?.collapsedByDefault ?? true"
+          density="compact"
+        >
+          @if (field.fieldConfig.treeConfig?.advancedJson?.editable) {
+            <div class="field-tree__advanced-json">
+              <app-input-area
+                label="shared.form.advancedJson"
+                contentType="json"
+                [rows]="8"
+                [maxRows]="18"
+                [value]="advancedJsonText()"
+                [invalid]="!!advancedJsonError()"
+                [errorMessage]="advancedJsonError() || undefined"
+                (valueChange)="onAdvancedJsonChange($event)"
+              ></app-input-area>
+              <div class="field-tree__advanced-actions">
+                <app-button
+                  size="small"
+                  severity="success"
+                  icon="pi pi-check"
+                  [label]="labels.applyJson ?? 'shared.tree.applyJson'"
+                  (buttonClick)="applyAdvancedJson()"
+                ></app-button>
+                <app-button
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  icon="pi pi-refresh"
+                  [label]="labels.resetJson ?? 'shared.tree.resetJson'"
+                  (buttonClick)="resetAdvancedJson()"
+                ></app-button>
+              </div>
+            </div>
+          } @else {
+            <app-json-viewer [value]="nodes" [collapsed]="true"></app-json-viewer>
+          }
+        </app-section-panel>
+      }
+    </section>
+  } @else {
   <p-fieldset
     [legend]="(field.label || 'general') | translateContent"
     class="w-full">
@@ -9,23 +334,320 @@
           <app-field-array-renderer
             class="w-full h-full"
             [ngClass]="getCol(f.width)"
-            [field]="f">
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode">
           </app-field-array-renderer>
         } @else if (isTreeField(f)) {
           <app-field-tree-renderer
             class="w-full h-full"
             [ngClass]="getCol(f.width)"
-            [field]="f">
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode">
           </app-field-tree-renderer>
         } @else {
           <app-field-renderer
             class="w-full h-full"
             [ngClass]="getCol(f.width)"
-            [field]="f">
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode">
           </app-field-renderer>
         }
       }
     </div>
 
   </p-fieldset>
+  }
+  }
 }
+
+<ng-template #nodeTemplate let-view="view" let-level="level">
+  @let node = view.node;
+  @let badges = nodeBadges(node);
+  <li class="field-tree__node" [style.--tree-level]="level" role="none">
+    <div
+      class="field-tree__node-row"
+      [class.field-tree__node-row--disabled]="node.disabled"
+      [class.field-tree__node-row--error]="nodeHasError(node.id)"
+      [class.field-tree__node-row--match]="view.matched"
+      [class.field-tree__node-row--focused]="focusedNodeId() === node.id"
+      [attr.data-tree-node-id]="node.id"
+      role="treeitem"
+      tabindex="0"
+      [attr.aria-expanded]="hasNodeChildren(node) ? isViewExpanded(view) : null"
+      [attr.aria-selected]="view.checked"
+      (keydown)="onNodeKeydown($event, view)"
+    >
+      @if (hasNodeChildren(node)) {
+        <app-button
+          size="small"
+          severity="secondary"
+          [text]="true"
+          [icon]="isViewExpanded(view) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          [label]="isViewExpanded(view) ? 'collapse' : 'open'"
+          (buttonClick)="toggleNode(node.id)"
+        ></app-button>
+      } @else {
+        <span class="field-tree__node-spacer" aria-hidden="true"></span>
+      }
+      @if (hasCheckboxSelection) {
+        <app-check-box
+          [hideLabel]="true"
+          [ariaLabel]="node.label"
+          [value]="view.checked"
+          [indeterminate]="view.indeterminate"
+          [disabled]="!canSelectNode(node)"
+          (valueChange)="toggleNodeSelection(node, $event)"
+        ></app-check-box>
+      }
+      @if (node.icon) {
+        <i [class]="node.icon" aria-hidden="true"></i>
+      }
+      <div class="field-tree__node-text">
+        <div class="field-tree__node-title">
+          <strong>{{ node.label | translateContent }}</strong>
+          @if (view.code) {
+            <code>{{ view.code }}</code>
+          }
+        </div>
+        @if (showPath) {
+          <span>{{ view.path | translateContent }}</span>
+        } @else if (node.subtitle) {
+          <span>{{ node.subtitle | translateContent }}</span>
+        }
+        @if (node.disabledReason) {
+          <small>{{ node.disabledReason | translateContent }}</small>
+        }
+      </div>
+      @if (badges.length) {
+        <div class="field-tree__badges">
+          @for (badge of badges; track badge.label) {
+            <app-badge [label]="badge.label" [variant]="badge.variant" size="sm"></app-badge>
+          }
+        </div>
+      }
+      @if (node.loading) {
+        <span class="field-tree__node-loading" role="status">{{ 'loading' | translateContent }}</span>
+      }
+      @if (canEdit()) {
+        <app-button
+          size="small"
+          severity="secondary"
+          [text]="true"
+          icon="pi pi-eye"
+          [label]="labels.view ?? 'shared.tree.view'"
+          (buttonClick)="viewNode(node)"
+        ></app-button>
+        @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
+          <app-button
+            size="small"
+            severity="success"
+            [text]="true"
+            icon="pi pi-plus"
+            [label]="labels.addNode ?? 'add'"
+            (buttonClick)="openAddPicker(node.id)"
+          ></app-button>
+        }
+        @if (showNodeActions) {
+          <app-button
+            size="small"
+            severity="secondary"
+            [text]="true"
+            icon="pi pi-ellipsis-v"
+            [label]="labels.actionMenu ?? 'shared.tree.actionMenu'"
+            (buttonClick)="openNodeActions(node)"
+          ></app-button>
+        }
+      }
+    </div>
+
+    @if (nodeHasError(node.id)) {
+      <div class="field-tree__node-errors" role="alert">
+        @for (message of nodeErrors(node.id); track message) {
+          <small>{{ message | translateContent }}</small>
+        }
+      </div>
+    }
+
+    @if (view.children.length && isViewExpanded(view)) {
+      <ul class="field-tree__nodes">
+        @for (child of view.children; track child.node.id) {
+          <ng-container
+            [ngTemplateOutlet]="nodeTemplate"
+            [ngTemplateOutletContext]="{ view: child, level: level + 1 }"
+          ></ng-container>
+        }
+      </ul>
+    }
+  </li>
+</ng-template>
+
+<app-drawer
+  [open]="pickerOpen"
+  (openChange)="pickerOpen = $event"
+  [title]="labels.addNode ?? 'shared.tree.pickerTitle'"
+  size="sm"
+>
+  <div class="field-tree-picker">
+    @if (field.fieldConfig.treeConfig?.picker?.searchable !== false) {
+      <app-input-text
+        label="search"
+        placeholder="search"
+        [value]="pickerQuery"
+        (valueChange)="setPickerQueryDebounced($event)"
+      ></app-input-text>
+    }
+
+    @if (pickerLoading) {
+      <app-loading-skeleton type="list" [rows]="4"></app-loading-skeleton>
+    } @else if (pickerError) {
+      <app-error-state [message]="pickerError" [compact]="true" (retry)="pickerRetry.emit()"></app-error-state>
+    } @else if (pickerOptions.length === 0) {
+      <app-empty-state title="shared.tree.noPickerOptions"></app-empty-state>
+    } @else {
+      <div class="field-tree-picker__options">
+        @for (option of pickerOptions; track option.id) {
+          @if (pickerMultiSelect && pickerMode === 'add') {
+            <div class="field-tree-picker__option field-tree-picker__option--check">
+              <app-check-box
+                [label]="option.label"
+                [value]="selectedPickerOptionIds().has(option.id)"
+                [disabled]="!!option.disabled"
+                [helpText]="option.disabledReason"
+                (valueChange)="togglePickerOption(option, $event)"
+              ></app-check-box>
+              @if (option.subtitle || option.description) {
+                <small>{{ (option.subtitle || option.description) | translateContent }}</small>
+              }
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="field-tree-picker__option"
+              [disabled]="option.disabled"
+              [title]="option.disabledReason ? (option.disabledReason | translateContent) : null"
+              (click)="selectOption(option)"
+            >
+              @if (option.icon) {
+                <i [class]="option.icon" aria-hidden="true"></i>
+              }
+              <span>
+                <strong>{{ option.label | translateContent }}</strong>
+                @if (option.subtitle) {
+                  <small>{{ option.subtitle | translateContent }}</small>
+                }
+                @if (option.description) {
+                  <small>{{ option.description | translateContent }}</small>
+                }
+                @if (option.disabledReason) {
+                  <small>{{ option.disabledReason | translateContent }}</small>
+                }
+              </span>
+            </button>
+          }
+        }
+      </div>
+
+      @if (pickerMultiSelect && pickerMode === 'add') {
+        <div class="field-tree-picker__footer">
+          <app-button
+            label="add"
+            icon="pi pi-plus"
+            severity="success"
+            [disabled]="selectedPickerOptionIds().size === 0"
+            (buttonClick)="addSelectedOptions()"
+          ></app-button>
+        </div>
+      }
+    }
+  </div>
+</app-drawer>
+
+<app-drawer
+  [open]="!!actionNode()"
+  (closed)="actionNode.set(null)"
+  [title]="actionNode()?.label ?? 'shared.tree.actionMenu'"
+  size="sm"
+>
+  @if (actionNode(); as node) {
+    <div class="field-tree-actions">
+      <app-button
+        severity="secondary"
+        icon="pi pi-eye"
+        [label]="labels.view ?? 'shared.tree.view'"
+        (buttonClick)="viewNode(node); actionNode.set(null)"
+      ></app-button>
+      @if (hasCheckboxSelection && node.children?.length) {
+        <app-button
+          severity="secondary"
+          icon="pi pi-check-square"
+          [label]="labels.selectDescendants ?? 'shared.tree.selectDescendants'"
+          (buttonClick)="selectDescendants(node.id); actionNode.set(null)"
+        ></app-button>
+        <app-button
+          severity="secondary"
+          icon="pi pi-stop"
+          [label]="labels.unselectDescendants ?? 'shared.tree.unselectDescendants'"
+          (buttonClick)="unselectDescendants(node.id); actionNode.set(null)"
+        ></app-button>
+      }
+      @if (field.fieldConfig.treeConfig?.allowGroupNode === true) {
+        <app-button
+          severity="secondary"
+          icon="pi pi-folder-plus"
+          [label]="labels.addGroup ?? 'shared.tree.addGroup'"
+          (buttonClick)="addGroup(node.id); actionNode.set(null)"
+        ></app-button>
+      }
+      @if (field.fieldConfig.treeConfig?.allowReplaceNode === true && field.fieldConfig.pickerOptions?.length) {
+        <app-button
+          severity="info"
+          icon="pi pi-sync"
+          [label]="labels.replace ?? 'replace'"
+          (buttonClick)="openReplacePicker(node.id); actionNode.set(null)"
+        ></app-button>
+      }
+      @if (field.fieldConfig.treeConfig?.allowMoveNode !== false) {
+        <app-button
+          severity="secondary"
+          icon="pi pi-arrow-up"
+          [label]="labels.moveUp ?? 'up'"
+          [disabled]="!canMove(node.id, -1)"
+          (buttonClick)="moveNode(node.id, -1); actionNode.set(null)"
+        ></app-button>
+        <app-button
+          severity="secondary"
+          icon="pi pi-arrow-down"
+          [label]="labels.moveDown ?? 'down'"
+          [disabled]="!canMove(node.id, 1)"
+          (buttonClick)="moveNode(node.id, 1); actionNode.set(null)"
+        ></app-button>
+      }
+      <app-button
+        severity="secondary"
+        icon="pi pi-copy"
+        [label]="labels.duplicate ?? 'shared.tree.duplicate'"
+        (buttonClick)="duplicateNode(node.id); actionNode.set(null)"
+      ></app-button>
+      @if (field.fieldConfig.treeConfig?.allowRemoveNode !== false) {
+        <app-button
+          severity="danger"
+          icon="pi pi-trash"
+          [label]="labels.remove ?? 'delete'"
+          (buttonClick)="removeNode(node.id); actionNode.set(null)"
+        ></app-button>
+      }
+    </div>
+  }
+</app-drawer>
+
+<app-drawer
+  [open]="!!detailNode()"
+  (closed)="detailNode.set(null)"
+  [title]="detailNode()?.label ?? 'shared.drawer.title'"
+  size="md"
+>
+  <app-json-viewer [value]="detailNode()"></app-json-viewer>
+</app-drawer>
