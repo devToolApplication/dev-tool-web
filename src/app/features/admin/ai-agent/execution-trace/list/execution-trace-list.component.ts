@@ -14,7 +14,7 @@ import { TableConfig } from '../../../../../shared/ui/table/models/table-config.
 
 interface ExecutionStepTimelineData {
   step: ExecutionStepResponse;
-  payload: string;
+  payload: unknown;
 }
 
 @Component({
@@ -96,6 +96,8 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   selectedSteps: ExecutionStepResponse[] = [];
   selectedStepTimelineItems: TimelineItem[] = [];
   selectedStepPayload: ExecutionStepTimelineData | null = null;
+  deepLinkError = '';
+  private resolvingDeepLinkSessionId = '';
 
   constructor(
     private readonly service: ExecutionTraceService,
@@ -144,6 +146,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
 
   closePopup(): void {
     this.stepPopupVisible = false;
+    this.clearSessionQueryParam();
     this.resetPopupState();
   }
 
@@ -170,6 +173,7 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
   protected loadPage(): void {
     this.runPageRequest(this.loadingService.track(this.service.getSessionPage(this.page, this.pageSize, this.sorts, this.filters)), {
       errorMessage: 'aiAgent.executionTrace.toast.loadTracesFailed',
+      onSuccess: (response) => this.openSessionFromQuery(response.data ?? []),
       onError: () => this.toastService.error('aiAgent.executionTrace.toast.loadTracesFailed')
     });
   }
@@ -178,13 +182,26 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     this.selectedStepPayload = (item.data as ExecutionStepTimelineData | undefined) ?? null;
   }
 
-  private openSteps(session: ExecutionSessionResponse): void {
+  clearDeepLinkError(): void {
+    this.deepLinkError = '';
+    this.clearSessionQueryParam();
+  }
+
+  private openSteps(session: ExecutionSessionResponse, syncUrl = true): void {
     this.selectedSession = session;
     this.selectedSteps = [];
     this.selectedStepTimelineItems = [];
     this.selectedStepPayload = null;
     this.stepError = '';
+    this.deepLinkError = '';
     this.stepPopupVisible = true;
+    if (syncUrl) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { sessionId: session.sessionId },
+        queryParamsHandling: 'merge'
+      });
+    }
     this.refreshSelectedSteps();
   }
 
@@ -206,8 +223,57 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     this.stepError = '';
   }
 
+  private openSessionFromQuery(rows: ExecutionSessionResponse[]): void {
+    const sessionId = this.route.snapshot.queryParamMap.get('sessionId')?.trim();
+    if (!sessionId || this.selectedSession?.sessionId === sessionId || this.resolvingDeepLinkSessionId === sessionId) {
+      return;
+    }
+
+    const currentPageMatch = rows.find((row) => row.sessionId === sessionId);
+    if (currentPageMatch) {
+      this.openSteps(currentPageMatch, false);
+      return;
+    }
+
+    this.resolveDeepLinkedSession(sessionId);
+  }
+
+  private resolveDeepLinkedSession(sessionId: string): void {
+    this.resolvingDeepLinkSessionId = sessionId;
+    this.loadingService.track(this.service.getSessions({ sessionId })).pipe(finalize(() => {
+      if (this.resolvingDeepLinkSessionId === sessionId) {
+        this.resolvingDeepLinkSessionId = '';
+      }
+    })).subscribe({
+      next: (sessions) => {
+        const match = sessions.find((session) => session.sessionId === sessionId) ?? null;
+        if (match) {
+          this.openSteps(match, false);
+          return;
+        }
+        this.deepLinkError = 'aiAgent.executionTrace.deepLinkNotFound';
+      },
+      error: () => {
+        this.deepLinkError = 'aiAgent.executionTrace.deepLinkLoadFailed';
+        this.toastService.error('aiAgent.executionTrace.deepLinkLoadFailed');
+      }
+    });
+  }
+
+  private clearSessionQueryParam(): void {
+    if (!this.route.snapshot.queryParamMap.has('sessionId')) {
+      return;
+    }
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { sessionId: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
   private toTimelineItem(step: ExecutionStepResponse): TimelineItem {
-    const payload = this.formatPayload(step.payloadJson);
+    const payload = this.parsePayload(step.payloadJson);
     const appearance = this.getStepAppearance(step.stepType);
     return {
       id: step.id,
@@ -255,13 +321,13 @@ export class ExecutionTraceListComponent extends BasePagedList<ExecutionSessionR
     }
   }
 
-  private formatPayload(payloadJson?: string): string {
+  private parsePayload(payloadJson?: string): unknown {
     if (!payloadJson?.trim()) {
-      return '{}';
+      return {};
     }
 
     try {
-      return JSON.stringify(JSON.parse(payloadJson), null, 2);
+      return JSON.parse(payloadJson);
     } catch {
       return payloadJson;
     }

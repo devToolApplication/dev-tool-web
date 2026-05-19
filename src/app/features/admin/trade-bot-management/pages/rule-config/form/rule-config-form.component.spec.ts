@@ -13,6 +13,7 @@ import { TradingSystemService } from '../../../../../../core/services/trade-bot-
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
+import { ConfirmDialogService } from '../../../../../../shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { FormConfig } from '../../../../../../shared/ui/form-input/models/form-config.model';
 
 import { RuleConfigFormComponent } from './rule-config-form.component';
@@ -123,6 +124,7 @@ describe('RuleConfigFormComponent', () => {
         { provide: Router, useValue: { navigate: vi.fn(() => Promise.resolve(true)) } },
         { provide: LoadingService, useValue: { track: <T>(source$: Observable<T>) => source$ } },
         { provide: ToastService, useValue: { error: vi.fn(), info: vi.fn() } },
+        { provide: ConfirmDialogService, useValue: { confirm: vi.fn(() => Promise.resolve(true)) } },
         { provide: I18nService, useValue: { t: (key: unknown) => String(key ?? '') } }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -132,7 +134,7 @@ describe('RuleConfigFormComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('loads edit data from mocked APIs and builds dynamic template fields', async () => {
+  it('loads edit data and converts legacy childRules into rule expression', async () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -148,19 +150,14 @@ describe('RuleConfigFormComponent', () => {
     expect(fieldNames).not.toContain('overlayText');
     expect(fieldNames).toContain('config');
     expect(fieldNames).toContain('indicators');
-    expect(fieldNames).toContain('childRules');
-
-    const childRulesField = component.formConfig.fields.find((field) => field.name === 'childRules');
-    expect(childRulesField?.type).toBe('tree');
-    if (childRulesField?.type === 'tree') {
-      expect(childRulesField.treeConfig?.advancedJson?.collapsedByDefault).toBe(true);
-      expect(component.formInitialValue['childRules']).toEqual([
-        expect.objectContaining({
-          label: 'TEST_CHILD',
-          subtitle: 'confirm'
-        })
-      ]);
-    }
+    expect(fieldNames).not.toContain('childRules');
+    expect(component.ruleExpressionValue().root).toEqual(
+      expect.objectContaining({
+        type: 'ruleRef',
+        ruleCode: 'TEST_CHILD',
+        slotCode: 'confirm'
+      })
+    );
   });
 
   it('shows a warning and keeps configText in advanced JSON when executor template is missing', async () => {
@@ -185,6 +182,7 @@ describe('RuleConfigFormComponent', () => {
     expect(component.pageConfig.infoSection?.title).toBe('tradeBot.message.missingFormTemplateTitle');
     const fieldNames = component.formConfig.fields.map((field) => field.name);
     expect(fieldNames).not.toContain('configText');
+    expect(fieldNames).not.toContain('childRules');
     expect(fieldNames).toContain('advancedJson');
 
     const advancedJson = component.formConfig.fields.find((field) => field.name === 'advancedJson');
@@ -195,47 +193,15 @@ describe('RuleConfigFormComponent', () => {
     }
   });
 
-  it('registers child rule tree validation through FormConfig validators', async () => {
+  it('validates self rule references through the expression builder state', async () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const childRulesField = component.formConfig.fields.find((field) => field.name === 'childRules');
-    expect(childRulesField?.type).toBe('tree');
-    if (childRulesField?.type === 'tree') {
-      expect(childRulesField.validation?.some((rule) => rule.validator === 'ruleChildRules')).toBe(true);
-    }
-    const validator = component.formConfig.validators?.['ruleChildRules'];
-    expect(validator).toBeTruthy();
-    if (!validator) {
-      throw new Error('ruleChildRules validator missing');
-    }
+    component.onRuleExpressionValueChange({
+      root: { id: 'self', type: 'ruleRef', ruleCode: 'TEST_ENTRY_TREND_BUY' }
+    });
 
-    const result = validator(
-      [
-        {
-          id: 'self',
-          label: 'TEST_ENTRY_TREND_BUY',
-          value: { ruleCode: 'TEST_ENTRY_TREND_BUY' }
-        }
-      ],
-      {
-        formValue: { code: 'TEST_ENTRY_TREND_BUY' },
-        fieldKey: 'childRules',
-        helpers: {
-          flattenTree: (value) => value as any[],
-          countTreeNodes: () => 1,
-          treeDepth: () => 1,
-          hasDuplicate: () => false,
-          hasDisabledNode: () => false,
-          findTreeNode: () => null
-        }
-      }
-    );
-
-    expect(result).not.toBe(true);
-    if (result !== true) {
-      expect(result[0].message).toBe('tradeBot.validation.selfChildRule');
-    }
+    expect(component.ruleExpressionValidation().errors[0].message).toBe('tradeBot.validation.selfChildRule');
   });
 
   it('adds common editable rule sections when rule template only defines config fields', async () => {
@@ -267,52 +233,25 @@ describe('RuleConfigFormComponent', () => {
     );
 
     const fieldNames = component.formConfig.fields.map((field) => field.name);
-    expect(fieldNames).toEqual(expect.arrayContaining(['config', 'indicators', 'childRules', 'overlay']));
+    expect(fieldNames).toEqual(expect.arrayContaining(['config', 'indicators', 'overlay']));
+    expect(fieldNames).not.toContain('childRules');
     expect(component.pageConfig.infoSection).toBeNull();
   });
 
-  it('detects circular child rule dependencies from existing rule configs', async () => {
+  it('detects circular ruleRef dependencies from existing rule configs', async () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const validator = component.formConfig.validators?.['ruleChildRules'];
-    expect(validator).toBeTruthy();
-    if (!validator) {
-      throw new Error('ruleChildRules validator missing');
-    }
+    component.onRuleExpressionValueChange({
+      root: { id: 'child', type: 'ruleRef', ruleCode: 'TEST_CHILD' }
+    });
 
-    const result = validator(
-      [
-        {
-          id: 'child',
-          label: 'TEST_CHILD',
-          value: { ruleCode: 'TEST_CHILD' },
-          data: { ruleCode: 'TEST_CHILD', sourceId: 'rule-child' }
-        }
-      ],
-      {
-        formValue: { code: 'TEST_ENTRY_TREND_BUY' },
-        fieldKey: 'childRules',
-        helpers: {
-          flattenTree: (value) => value as any[],
-          countTreeNodes: () => 1,
-          treeDepth: () => 1,
-          hasDuplicate: () => false,
-          hasDisabledNode: () => false,
-          findTreeNode: () => null
-        }
-      }
-    );
-
-    expect(result).not.toBe(true);
-    if (result !== true) {
-      expect(result.some((error) =>
-        error.message.includes('TEST_ENTRY_TREND_BUY -> TEST_CHILD -> TEST_ENTRY_TREND_BUY')
-      )).toBe(true);
-    }
+    expect(component.ruleExpressionValidation().errors.some((error) =>
+      error.message.includes('TEST_ENTRY_TREND_BUY -> TEST_CHILD -> TEST_ENTRY_TREND_BUY')
+    )).toBe(true);
   });
 
-  it('detects circular child rule dependencies from nested inline child rules', async () => {
+  it('detects circular ruleRef dependencies from nested inline child rules', async () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -340,40 +279,51 @@ describe('RuleConfigFormComponent', () => {
       }
     ];
 
-    const validator = component.formConfig.validators?.['ruleChildRules'];
-    expect(validator).toBeTruthy();
-    if (!validator) {
-      throw new Error('ruleChildRules validator missing');
-    }
+    component.onRuleExpressionValueChange({
+      root: { id: 'child', type: 'ruleRef', ruleCode: 'TEST_CHILD' }
+    });
 
-    const result = validator(
-      [
-        {
-          id: 'child',
-          label: 'TEST_CHILD',
-          value: { ruleCode: 'TEST_CHILD' },
-          data: { ruleCode: 'TEST_CHILD', sourceId: 'rule-child' }
-        }
-      ],
+    expect(component.ruleExpressionValidation().errors.some((error) =>
+      error.message.includes('TEST_ENTRY_TREND_BUY -> TEST_CHILD -> GROUP -> INLINE_CONFIRM -> TEST_ENTRY_TREND_BUY')
+    )).toBe(true);
+  });
+
+  it('saves ruleExpression in config and derives childRules from active ruleRef nodes', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.ruleConfigs = [
       {
-        formValue: { code: 'TEST_ENTRY_TREND_BUY' },
-        fieldKey: 'childRules',
-        helpers: {
-          flattenTree: (value) => value as any[],
-          countTreeNodes: () => 1,
-          treeDepth: () => 1,
-          hasDuplicate: () => false,
-          hasDisabledNode: () => false,
-          findTreeNode: () => null
-        }
+        id: 'rule-safe',
+        code: 'SAFE_CHILD',
+        executor: 'TREND',
+        executorVersion: 'v1',
+        status: 'ACTIVE',
+        indicators: [],
+        config: {},
+        childRules: [],
+        overlay: {}
       }
-    );
+    ];
+    component.onRuleExpressionValueChange({
+      root: { id: 'safe-child', type: 'ruleRef', ruleCode: 'SAFE_CHILD', slotCode: 'confirm' }
+    });
 
-    expect(result).not.toBe(true);
-    if (result !== true) {
-      expect(result.some((error) =>
-        error.message.includes('TEST_ENTRY_TREND_BUY -> TEST_CHILD -> GROUP -> INLINE_CONFIRM -> TEST_ENTRY_TREND_BUY')
-      )).toBe(true);
-    }
+    component.submit({
+      code: 'TEST_ENTRY_TREND_BUY',
+      executor: 'TREND',
+      executorVersion: 'v1',
+      status: 'ACTIVE',
+      indicators: ['TEST_CLOSE_PRICE'],
+      config: { side: 'BUY', lookback: 5 },
+      overlay: { label: 'Trend entry' }
+    });
+
+    expect(serviceMock.saveRuleConfig).toHaveBeenCalled();
+    const payload = (serviceMock.saveRuleConfig as any).mock.calls[0][1];
+    expect(payload.config.ruleExpression.root).toEqual(expect.objectContaining({ type: 'ruleRef', ruleCode: 'SAFE_CHILD' }));
+    expect(payload.childRules).toEqual([{ ruleCode: 'SAFE_CHILD', slotCode: 'confirm' }]);
+    expect(payload.indicators).toEqual(['TEST_CLOSE_PRICE']);
+    expect(payload.overlay).toEqual({ label: 'Trend entry' });
   });
 });

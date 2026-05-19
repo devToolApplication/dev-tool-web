@@ -50,6 +50,40 @@
           <app-badge label="copied" variant="success" icon="pi pi-check"></app-badge>
         }
       </div>
+      @if (searchQuery().trim()) {
+        <div class="json-viewer__matches">
+          @if (searchResults().length) {
+            @for (result of searchResults(); track result.path) {
+              <div class="json-viewer__match">
+                <div class="json-viewer__match-text">
+                  <code>{{ result.path }}</code>
+                  <span>{{ result.displayValue }}</span>
+                </div>
+                <div class="json-viewer__match-actions">
+                  <app-button
+                    size="small"
+                    severity="secondary"
+                    [text]="true"
+                    icon="pi pi-link"
+                    label="shared.json.copyPath"
+                    (buttonClick)="copyPath(result)"
+                  ></app-button>
+                  <app-button
+                    size="small"
+                    severity="secondary"
+                    [text]="true"
+                    icon="pi pi-copy"
+                    label="shared.json.copyValue"
+                    (buttonClick)="copyValue(result)"
+                  ></app-button>
+                </div>
+              </div>
+            }
+          } @else {
+            <small class="json-viewer__no-match">{{ 'shared.json.searchNoMatches' | translateContent }}</small>
+          }
+        </div>
+      }
     }
     <pre class="json-viewer__body">{{ filteredDisplayValue }}</pre>
   }

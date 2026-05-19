@@ -12,5 +12,6 @@ rồi thêm route array vào `FEATURE_ROUTES` nếu đó là feature group mới
 - Đọc tài liệu này trước khi sửa khu vực liên quan.
 - Cập nhật docs nếu folder, route, API contract hoặc shared boundary thay đổi.
 - Không move/xóa path public khi chưa có compatibility wrapper hoặc alias.
+- Route màn hình nghiệp vụ nên khai báo `data.title`; route con như `create`/`edit/:id` nên khai báo thêm `data.breadcrumb`. Global header ưu tiên `data.title` cho page title và dùng `data.breadcrumb` cho segment con trước khi fallback từ URL. Feature route registry quan trọng nên có spec kiểm tra metadata này.
 
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { PageHeaderStatus } from '../page-header/page-header.component';
 
 export type PageShellLayout = 'default' | 'wide' | 'full';
@@ -13,6 +13,7 @@ export interface PageShellConfig {
 @Component({
   selector: 'app-page-shell',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-shell.component.html',
   styleUrl: './page-shell.component.css'
 })

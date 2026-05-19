@@ -118,10 +118,10 @@ export class PlaywrightSessionManagementComponent implements OnInit {
       density: { visible: true },
       export: {
         visible: true,
-        label: 'export',
+        label: 'shared.table.exportCurrentPage',
         icon: 'pi pi-download',
         severity: 'help',
-        currentData: true,
+        scope: 'current-page',
         fileName: 'playwright-sessions'
       }
     },

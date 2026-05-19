@@ -61,8 +61,8 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
       },
       export: {
         visible: true,
-        label: 'export',
-        icon: 'pi pi-upload',
+        label: 'shared.table.exportFiltered',
+        icon: 'pi pi-download',
         severity: 'help'
       },
       columnVisibility: { visible: true },

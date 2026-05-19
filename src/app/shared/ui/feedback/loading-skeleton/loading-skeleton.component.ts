@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 export type LoadingSkeletonType = 'card' | 'table' | 'form' | 'detail' | 'list';
 
@@ -12,6 +12,7 @@ export interface LoadingSkeletonConfig {
 @Component({
   selector: 'app-loading-skeleton',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './loading-skeleton.component.html',
   styleUrl: './loading-skeleton.component.css'
 })

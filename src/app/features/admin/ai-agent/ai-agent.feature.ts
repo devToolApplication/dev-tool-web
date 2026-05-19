@@ -30,42 +30,44 @@ export const aiAgentAdminRoutes: Routes = [
   {
     path: 'admin/ai-agent/models',
     children: [
-      { path: '', component: AiModelListComponent },
-      { path: 'create', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard] }
+      { path: '', component: AiModelListComponent, data: { title: 'aiAgent.aiModel.title', breadcrumb: 'aiAgent.aiModel.title' } },
+      { path: 'create', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.aiModel.createTitle', breadcrumb: 'layout.route.create' } },
+      { path: 'edit/:id', component: AiModelFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.aiModel.editTitle', breadcrumb: 'layout.route.edit' } }
     ]
   },
   {
     path: 'admin/ai-agent/agents',
     children: [
-      { path: '', component: AgentDefinitionListComponent },
-      { path: 'create', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard] }
+      { path: '', component: AgentDefinitionListComponent, data: { title: 'aiAgent.agentDefinition.title', breadcrumb: 'aiAgent.agentDefinition.title' } },
+      { path: 'create', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.agentDefinition.createTitle', breadcrumb: 'layout.route.create' } },
+      { path: 'edit/:id', component: AgentDefinitionFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.agentDefinition.editTitle', breadcrumb: 'layout.route.edit' } }
     ]
   },
   {
     path: 'admin/ai-agent/prompt-templates',
     children: [
-      { path: '', component: PromptTemplateListComponent },
-      { path: 'create', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard] }
+      { path: '', component: PromptTemplateListComponent, data: { title: 'aiAgent.promptTemplate.title', breadcrumb: 'aiAgent.promptTemplate.title' } },
+      { path: 'create', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.promptTemplate.createTitle', breadcrumb: 'layout.route.create' } },
+      { path: 'edit/:id', component: PromptTemplateFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.promptTemplate.editTitle', breadcrumb: 'layout.route.edit' } }
     ]
   },
   {
     path: 'admin/ai-agent/execution-policies',
     children: [
-      { path: '', component: ExecutionPolicyListComponent },
-      { path: 'create', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard] }
+      { path: '', component: ExecutionPolicyListComponent, data: { title: 'aiAgent.executionPolicy.title', breadcrumb: 'aiAgent.executionPolicy.title' } },
+      { path: 'create', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.executionPolicy.createTitle', breadcrumb: 'layout.route.create' } },
+      { path: 'edit/:id', component: ExecutionPolicyFormComponent, canDeactivate: [unsavedChangesGuard], data: { title: 'aiAgent.executionPolicy.editTitle', breadcrumb: 'layout.route.edit' } }
     ]
   },
   {
     path: 'admin/ai-agent/execution-traces',
-    component: ExecutionTraceListComponent
+    component: ExecutionTraceListComponent,
+    data: { title: 'aiAgent.executionTrace.title', breadcrumb: 'aiAgent.executionTrace.title' }
   },
   {
     path: 'admin/ai-agent/runtime/playground',
-    component: AiAgentPlaygroundComponent
+    component: AiAgentPlaygroundComponent,
+    data: { title: 'aiAgent.playground.title', breadcrumb: 'aiAgent.playground.title' }
   },
   {
     path: 'admin/ai-agent/playground',
@@ -74,7 +76,8 @@ export const aiAgentAdminRoutes: Routes = [
   },
   {
     path: 'admin/ai-agent/playwright-sessions',
-    component: PlaywrightSessionManagementComponent
+    component: PlaywrightSessionManagementComponent,
+    data: { title: 'aiAgent.playwrightSessions.title', breadcrumb: 'aiAgent.playwrightSessions.title' }
   },
   {
     path: 'admin/ai-agent/system-ask',

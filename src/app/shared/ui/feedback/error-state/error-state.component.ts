@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type ErrorStateVariant = 'danger' | 'warning' | 'info';
 
@@ -17,6 +17,7 @@ const DEFAULT_ERROR_MESSAGE = 'shared.error.message';
 @Component({
   selector: 'app-error-state',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './error-state.component.html',
   styleUrl: './error-state.component.css'
 })

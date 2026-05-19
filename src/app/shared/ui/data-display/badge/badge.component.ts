@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 export type BadgeVariant = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
 export type BadgeSize = 'sm' | 'md';
@@ -6,6 +6,7 @@ export type BadgeSize = 'sm' | 'md';
 @Component({
   selector: 'app-badge',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './badge.component.html',
   styleUrl: './badge.component.css'
 })

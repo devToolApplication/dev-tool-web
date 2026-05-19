@@ -110,6 +110,7 @@ export class HeaderComponent implements OnInit {
     const cleanUrl = this.normalizeUrl(this.router.url);
     const segments = cleanUrl.split('/').filter(Boolean);
     const menuTrail = this.resolveMenuTrail(cleanUrl);
+    const routeBreadcrumbMap = this.resolveRouteBreadcrumbMap();
     const lastLinkedMenuItem = [...menuTrail].reverse().find((item) => !!item.routerLink);
     const matchedSegments = this.normalizeUrl(String(lastLinkedMenuItem?.routerLink ?? ''))
       .split('/')
@@ -124,7 +125,7 @@ export class HeaderComponent implements OnInit {
       const targetUrl = '/' + segments.slice(0, matchedSegments + index + 1).join('/');
 
       return {
-        label: this.formatSegmentLabel(segment),
+        label: routeBreadcrumbMap.get(targetUrl) ?? this.formatSegmentLabel(segment),
         routerLink: this.canNavigateTo(targetUrl) ? targetUrl : undefined
       };
     });
@@ -238,6 +239,25 @@ export class HeaderComponent implements OnInit {
 
     const title = currentRoute.data?.['title'];
     return typeof title === 'string' && title.trim() ? title : undefined;
+  }
+
+  private resolveRouteBreadcrumbMap(): Map<string, string> {
+    const labels = new Map<string, string>();
+    const segments: string[] = [];
+    let currentRoute = this.router.routerState.snapshot.root;
+
+    while (currentRoute.firstChild) {
+      currentRoute = currentRoute.firstChild;
+      const routeSegments = currentRoute.url.map((segment) => segment.path).filter(Boolean);
+      segments.push(...routeSegments);
+
+      const breadcrumb = currentRoute.data?.['breadcrumb'];
+      if (routeSegments.length > 0 && typeof breadcrumb === 'string' && breadcrumb.trim()) {
+        labels.set('/' + segments.join('/'), breadcrumb);
+      }
+    }
+
+    return labels;
   }
 
   private updateUserSummary(): void {

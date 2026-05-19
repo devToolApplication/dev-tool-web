@@ -205,7 +205,7 @@ describe('TableCellComponent', () => {
     expect(fixture.nativeElement.querySelector('.custom-cell')?.textContent).toContain('Alpha / Alpha');
   });
 
-  it('moves overflowing primary row actions into the more menu once', () => {
+  it('keeps one primary row action and moves the rest into the more menu', () => {
     const actions: TableAction[] = [
       { id: 'view', label: 'View', onClick: vi.fn() },
       { id: 'edit', label: 'Edit', onClick: vi.fn() },
@@ -215,8 +215,22 @@ describe('TableCellComponent', () => {
 
     renderCell({ field: 'actions', header: 'Actions', type: 'actions', actions }, { id: 1 });
 
-    expect(component.primaryActions.map((action) => action.id)).toEqual(['view', 'edit']);
-    expect(component.moreActions.map((action) => action.id)).toEqual(['copy', 'delete']);
+    expect(component.primaryActions.map((action) => action.id)).toEqual(['view']);
+    expect(component.moreActions.map((action) => action.id)).toEqual(['edit', 'copy', 'delete']);
+  });
+
+  it('closes the row action menu on Escape without a document listener', () => {
+    const actions: TableAction[] = [
+      { id: 'view', label: 'View', onClick: vi.fn() },
+      { id: 'edit', label: 'Edit', onClick: vi.fn() }
+    ];
+    renderCell({ field: 'actions', header: 'Actions', type: 'actions', actions }, { id: 1 });
+    component.actionsOpen.set(true);
+    fixture.detectChanges();
+
+    fixture.debugElement.query(By.css('.table-actions')).triggerEventHandler('keydown.escape', new KeyboardEvent('keydown'));
+
+    expect(component.actionsOpen()).toBe(false);
   });
 
   it('requires confirmation for danger row actions even when confirm config is omitted', async () => {

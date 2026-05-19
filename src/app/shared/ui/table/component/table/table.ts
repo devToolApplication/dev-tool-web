@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TemplateRef, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TemplateRef, signal } from '@angular/core';
 import { PermissionService } from '../../../../../core/auth/permission.service';
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
@@ -7,6 +7,7 @@ import {
   TableBulkAction,
   TableConfig,
   TableDensity,
+  TableExportScope,
   TableToolbarButtonConfig,
   TableToolbarConfig,
   TableToolbarExportConfig,
@@ -27,6 +28,15 @@ export interface TableSortChangeEvent {
   order?: 1 | -1 | 0;
 }
 
+export interface TableExportEvent {
+  scope: TableExportScope;
+  filters: Record<string, any>;
+  sortField: string | null;
+  sortOrder: 1 | -1 | 0;
+  visibleColumns: string[];
+  rows: any[];
+}
+
 export interface TableCellTemplateContext {
   $implicit: any;
   row: any;
@@ -37,6 +47,7 @@ export interface TableCellTemplateContext {
 @Component({
   selector: 'app-table',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table.html',
   styleUrls: ['./table.css']
 })
@@ -57,7 +68,7 @@ export class TableComponent implements OnChanges {
   @Output() resetFilter = new EventEmitter<void>();
   @Output() create = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
-  @Output() export = new EventEmitter<void>();
+  @Output() export = new EventEmitter<TableExportEvent>();
   @Output() import = new EventEmitter<File>();
   @Output() pageChange = new EventEmitter<TablePageChangeEvent>();
   @Output() retry = new EventEmitter<void>();
@@ -76,6 +87,7 @@ export class TableComponent implements OnChanges {
   readonly selectedRows = signal<any[]>([]);
   readonly selectedRowKeys = signal<string[]>([]);
   readonly activeFilterCount = signal(0);
+  readonly activeFilters = signal<Record<string, any>>({});
   private readonly selectedRowCache = new Map<string, any>();
 
   readonly densityOptions: SelectOption[] = [
@@ -120,6 +132,18 @@ export class TableComponent implements OnChanges {
 
   get exportButtonConfig(): TableToolbarExportConfig {
     return this.toolbarConfig.export ?? {};
+  }
+
+  get exportScope(): TableExportScope {
+    return this.exportButtonConfig.scope ?? (this.exportButtonConfig.currentData ? 'current-page' : 'external');
+  }
+
+  get exportButtonLabel(): string {
+    return this.exportButtonConfig.label ?? (this.exportScope === 'current-page' ? 'shared.table.exportCurrentPage' : 'shared.table.exportFiltered');
+  }
+
+  get exportButtonIcon(): string {
+    return this.exportButtonConfig.icon ?? 'pi pi-download';
   }
 
   get refreshButtonConfig(): TableToolbarButtonConfig {
@@ -282,10 +306,19 @@ export class TableComponent implements OnChanges {
   }
 
   onExport(): void {
-    if (this.exportButtonConfig.currentData) {
+    if (this.exportScope === 'current-page') {
       this.downloadCsv();
+      return;
     }
-    this.export.emit();
+
+    this.export.emit({
+      scope: this.exportScope,
+      filters: this.activeFilters(),
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
+      visibleColumns: this.visibleColumns.filter((column) => column.type !== 'actions').map((column) => column.field),
+      rows: this.resolvedData
+    });
   }
 
   onRefresh(): void {
@@ -323,6 +356,7 @@ export class TableComponent implements OnChanges {
     if (this.loading) {
       return;
     }
+    this.activeFilters.set({ ...filters });
     this.activeFilterCount.set(this.countActiveFilters(filters));
     this.search.emit(filters);
   }
@@ -334,6 +368,7 @@ export class TableComponent implements OnChanges {
   }
 
   onResetFilter(): void {
+    this.activeFilters.set({});
     this.activeFilterCount.set(0);
     this.resetFilter.emit();
   }

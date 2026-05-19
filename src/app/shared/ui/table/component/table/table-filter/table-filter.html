@@ -202,6 +202,13 @@
           @if (optionLoading(field)) {
             <app-loading-skeleton type="list" [rows]="1"></app-loading-skeleton>
           }
+          @if (fieldErrors(field).length) {
+            <div class="table-filter__errors" role="alert">
+              @for (error of fieldErrors(field); track error.message) {
+                <small>{{ error.message | translateContent }}</small>
+              }
+            </div>
+          }
           @if (optionError(field)) {
             <app-error-state [message]="optionError(field)!" [compact]="true" (retry)="retryLoadOptions(field)"></app-error-state>
           } @else if (optionsOf(field).length === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {

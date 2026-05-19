@@ -167,6 +167,12 @@ app-input-text {
   color: color-mix(in srgb, var(--app-text) 80%, var(--app-transparent));
 }
 
+.table-filter__errors {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--app-control-danger-text);
+}
+
 .drawer-field.full-span {
   grid-column: 1 / -1;
 }

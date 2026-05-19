@@ -105,6 +105,80 @@ describe('TableComponent', () => {
     expect(rowClick).toHaveBeenCalledWith({ id: 'row-1' });
   });
 
+  it('downloads current page CSV without emitting external export', () => {
+    const exportSpy = vi.fn();
+    const anchor = document.createElement('a');
+    const clickSpy = vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:table-export');
+    const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const originalCreateElement = document.createElement.bind(document);
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation(((tagName: string, options?: ElementCreationOptions) => {
+      if (tagName.toLowerCase() === 'a') {
+        return anchor;
+      }
+      return originalCreateElement(tagName, options);
+    }) as typeof document.createElement);
+    component.config = {
+      ...baseConfig,
+      toolbar: {
+        export: {
+          visible: true,
+          scope: 'current-page',
+          fileName: 'items'
+        }
+      }
+    };
+    component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
+    component.export.subscribe(exportSpy);
+
+    component.onExport();
+
+    expect(clickSpy).toHaveBeenCalled();
+    expect(anchor.download).toBe('items.csv');
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    createElementSpy.mockRestore();
+    createObjectUrlSpy.mockRestore();
+    revokeObjectUrlSpy.mockRestore();
+  });
+
+  it('emits export context for page-owned filtered exports', () => {
+    const exportSpy = vi.fn();
+    component.config = {
+      ...baseConfig,
+      toolbar: {
+        export: {
+          visible: true,
+          scope: 'external'
+        }
+      }
+    };
+    component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
+    component.sortField = 'name';
+    component.sortOrder = 1;
+    component.ngOnChanges({
+      config: {
+        currentValue: component.config,
+        previousValue: baseConfig,
+        firstChange: false,
+        isFirstChange: () => false
+      }
+    });
+    component.export.subscribe(exportSpy);
+
+    component.onSearch({ status: 'ACTIVE' });
+    component.onExport();
+
+    expect(exportSpy).toHaveBeenCalledWith({
+      scope: 'external',
+      filters: { status: 'ACTIVE' },
+      sortField: 'name',
+      sortOrder: 1,
+      visibleColumns: ['name', 'status'],
+      rows: component.data
+    });
+  });
+
   it('handles column visibility, density and selection outputs', () => {
     const columns = vi.fn();
     const density = vi.fn();

@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { BadgeVariant } from '../data-display/badge/badge.component';
 
 @Component({
   selector: 'app-summary-metric-card',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summary-metric-card.component.html',
   styleUrl: './summary-metric-card.component.css'
 })

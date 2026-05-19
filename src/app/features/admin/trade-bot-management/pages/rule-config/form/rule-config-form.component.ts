@@ -14,6 +14,7 @@ import { LoadingService } from '../../../../../../core/ui-services/loading.servi
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { BaseCrudPageComponent } from '../../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { CrudPageConfig } from '../../../../../../shared/ui/base-crud-page/base-crud-page.model';
+import { ConfirmDialogService } from '../../../../../../shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import {
   FieldConfig,
   FormConfig,
@@ -34,6 +35,14 @@ import {
 } from '../../../config-template-form.utils';
 import { parseJson, stringifyJson } from '../../../trade-bot-form-utils';
 import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.constants';
+import { deriveChildRulesFromExpression } from '../../../shared-trading/rule-expression-builder/rule-expression-dependencies';
+import { cloneRuleLogicValue } from '../../../shared-trading/rule-expression-builder/rule-expression-factory';
+import { ruleExpressionFromConfigAndChildRules } from '../../../shared-trading/rule-expression-builder/rule-expression-legacy';
+import {
+  RuleExpressionValidationResult,
+  RuleLogicFormValue
+} from '../../../shared-trading/rule-expression-builder/rule-expression.models';
+import { validateRuleExpression } from '../../../shared-trading/rule-expression-builder/rule-expression-validator';
 
 @Component({
   selector: 'app-rule-config-form',
@@ -46,6 +55,12 @@ export class RuleConfigFormComponent implements OnInit {
   formConfig: FormConfig = { fields: [] };
   formContext: FormContext = { user: null, mode: 'create' };
   readonly submitting = signal(false);
+  readonly ruleExpressionValue = signal<RuleLogicFormValue>({ root: null });
+  readonly ruleExpressionValidation = signal<RuleExpressionValidationResult>(
+    validateRuleExpression({ root: null })
+  );
+  readonly ruleExpressionDirty = signal(false);
+  readonly currentRuleCode = signal('');
   readonly pageConfig: CrudPageConfig = {
     title: 'tradeBot.rule.formTitle',
     actions: [
@@ -54,10 +69,10 @@ export class RuleConfigFormComponent implements OnInit {
     ]
   };
   formInitialValue: Record<string, unknown> = this.toFormValue();
-  private id: string | null = null;
+  id: string | null = null;
   private executors: ExecutorVersionResponse[] = [];
-  private indicatorConfigs: IndicatorConfigResponse[] = [];
-  private ruleConfigs: RuleConfigResponse[] = [];
+  indicatorConfigs: IndicatorConfigResponse[] = [];
+  ruleConfigs: RuleConfigResponse[] = [];
   private currentFormTemplate?: FormConfig;
   private currentTemplateSignature = '';
   private currentExecutor = '';
@@ -69,6 +84,7 @@ export class RuleConfigFormComponent implements OnInit {
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly i18nService: I18nService,
+    private readonly confirmDialogService: ConfirmDialogService,
     private readonly destroyRef: DestroyRef
   ) {}
 
@@ -79,6 +95,13 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   submit(model: Record<string, unknown>): void {
+    this.currentRuleCode.set(stringValue(model['code']));
+    const expressionValidation = this.validateCurrentRuleExpression();
+    if (!expressionValidation.valid) {
+      this.toastService.error(this.i18nService.t('tradeBot.ruleExpression.validation.invalidExpression'));
+      return;
+    }
+
     let payload: RuleConfigDto;
     try {
       payload = this.toPayload(model);
@@ -105,6 +128,7 @@ export class RuleConfigFormComponent implements OnInit {
 
   onValueChange(model: Record<string, unknown>): void {
     const executor = stringValue(model['executor']);
+    this.currentRuleCode.set(stringValue(model['code']));
     const normalizedModel: Record<string, unknown> = {
       ...model,
       executorVersion: this.resolveVersion(executor, model['executorVersion'])
@@ -120,11 +144,33 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.crudPage?.hasUnsavedChanges() ?? false;
+    return (this.crudPage?.hasUnsavedChanges() ?? false) || this.ruleExpressionDirty();
   }
 
   confirmDiscardChanges(): Promise<boolean> | boolean {
-    return this.crudPage?.confirmDiscardChanges() ?? true;
+    if (this.crudPage?.hasUnsavedChanges()) {
+      return this.crudPage.confirmDiscardChanges();
+    }
+    if (!this.ruleExpressionDirty()) {
+      return true;
+    }
+    return this.confirmDialogService.confirm({
+      title: 'confirm',
+      message: 'shared.form.confirmLeave',
+      confirmText: 'yes',
+      cancelText: 'cancel',
+      variant: 'warning'
+    });
+  }
+
+  onRuleExpressionValueChange(value: RuleLogicFormValue): void {
+    this.ruleExpressionValue.set(cloneRuleLogicValue(value));
+    this.ruleExpressionDirty.set(true);
+    this.validateCurrentRuleExpression();
+  }
+
+  onRuleExpressionValidationChange(result: RuleExpressionValidationResult): void {
+    this.ruleExpressionValidation.set(result);
   }
 
   private loadInitialData(): void {
@@ -164,21 +210,32 @@ export class RuleConfigFormComponent implements OnInit {
       status: String(model['status'] ?? 'ACTIVE')
     };
 
+    const childRules = deriveChildRulesFromExpression(this.ruleExpressionValue());
+
     if (!template) {
+      const config = {
+        ...parseJson(model['configText'], {}),
+        ruleExpression: cloneRuleLogicValue(this.ruleExpressionValue())
+      };
       return {
         ...basePayload,
         indicators: this.indicatorsFromModel(model),
-        config: parseJson(model['configText'], {}),
-        childRules: this.ruleTreeToPayload(asArray<TreeFormNode>(model['childRules'])),
+        config,
+        childRules,
         overlay: asRecord(model['overlay'])
       };
     }
 
+    const config = {
+      ...asRecord(model['config']),
+      ruleExpression: cloneRuleLogicValue(this.ruleExpressionValue())
+    };
+
     return {
       ...basePayload,
       indicators: this.indicatorsFromModel(model),
-      config: asRecord(model['config']),
-      childRules: this.ruleTreeToPayload(asArray<TreeFormNode>(model['childRules'])),
+      config,
+      childRules,
       overlay: asRecord(model['overlay']),
       formTemplate: template
     };
@@ -193,6 +250,7 @@ export class RuleConfigFormComponent implements OnInit {
       indicators: value?.indicators ?? [],
       config: value?.config ?? {},
       childRules: this.ruleConfigsToTree(value?.childRules),
+      ruleExpression: ruleExpressionFromConfigAndChildRules(value?.config, value?.childRules),
       overlay: value?.overlay ?? {},
       configText: stringifyJson(value?.config, {})
     };
@@ -218,6 +276,12 @@ export class RuleConfigFormComponent implements OnInit {
     this.currentFormTemplate = cloneFormConfig(template);
     this.currentTemplateSignature = formTemplateSignature(template);
     this.currentExecutor = currentExecutor;
+    this.currentRuleCode.set(stringValue(model['code']));
+    this.ruleExpressionValue.set(ruleExpressionFromModel(model, this.ruleExpressionValue()));
+    if ('ruleExpression' in model) {
+      this.ruleExpressionDirty.set(false);
+    }
+    this.validateCurrentRuleExpression();
     this.formInitialValue = this.withLegacyTexts(model);
     this.formConfig = this.buildFormConfig(this.currentFormTemplate, currentExecutor);
     this.updateTemplateFallbackInfo(currentExecutor, this.currentFormTemplate);
@@ -302,7 +366,6 @@ export class RuleConfigFormComponent implements OnInit {
   private legacyFields(): FieldConfig[] {
     return [
       this.indicatorsField(),
-      this.childRulesTreeField(),
       this.overlayRecordField(),
       this.advancedJsonGroup([
         this.jsonTextField('configText', 'tradeBot.field.configJson', 8, 16)
@@ -315,14 +378,11 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   private templateFieldsWithCommonRuleFields(fields: FieldConfig[]): FieldConfig[] {
-    const normalizedFields = this.normalizeTemplateFields(fields);
+    const normalizedFields = this.removeFieldByName(this.normalizeTemplateFields(fields), 'childRules');
     const commonFields: FieldConfig[] = [];
 
     if (!this.hasField(normalizedFields, 'indicators')) {
       commonFields.push(this.indicatorsField());
-    }
-    if (!this.hasField(normalizedFields, 'childRules')) {
-      commonFields.push(this.childRulesTreeField());
     }
     if (!this.hasField(normalizedFields, 'overlay')) {
       commonFields.push(this.overlayRecordField());
@@ -347,6 +407,31 @@ export class RuleConfigFormComponent implements OnInit {
       }
       return false;
     });
+  }
+
+  private removeFieldByName(fields: FieldConfig[], name: string): FieldConfig[] {
+    const result: FieldConfig[] = [];
+
+    fields.forEach((field) => {
+      if (field.name === name) {
+        return;
+      }
+      if (field.type === 'group') {
+        result.push({ ...field, children: this.removeFieldByName(field.children, name) });
+        return;
+      }
+      if (field.type === 'array') {
+        result.push({ ...field, itemConfig: this.removeFieldByName(field.itemConfig, name) });
+        return;
+      }
+      if (field.type === 'tree') {
+        result.push({ ...field, children: field.children ? this.removeFieldByName(field.children, name) : field.children });
+        return;
+      }
+      result.push(field);
+    });
+
+    return result;
   }
 
   private normalizeTemplateField(field: FieldConfig): FieldConfig {
@@ -722,4 +807,24 @@ export class RuleConfigFormComponent implements OnInit {
   private requiredRule(): { expression: string; message: string } {
     return { expression: "value == null || String(value).trim() === ''", message: 'required' };
   }
+
+  private validateCurrentRuleExpression(): RuleExpressionValidationResult {
+    const result = validateRuleExpression(this.ruleExpressionValue(), {
+      indicatorConfigs: this.indicatorConfigs,
+      ruleConfigs: this.ruleConfigs,
+      currentRuleCode: this.currentRuleCode(),
+      currentRuleId: this.id
+    });
+    this.ruleExpressionValidation.set(result);
+    return result;
+  }
+}
+
+function ruleExpressionFromModel(
+  model: Record<string, unknown>,
+  fallback: RuleLogicFormValue
+): RuleLogicFormValue {
+  return 'ruleExpression' in model
+    ? ruleExpressionFromConfigAndChildRules({ ruleExpression: model['ruleExpression'] }, asArray<Record<string, unknown>>(model['childRules']))
+    : cloneRuleLogicValue(fallback);
 }

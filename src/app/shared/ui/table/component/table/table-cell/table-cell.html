@@ -115,7 +115,7 @@
   }
 
   @case ('actions') {
-    <div class="table-actions" (click)="$event.stopPropagation()">
+    <div class="table-actions" (click)="$event.stopPropagation()" (keydown.escape)="closeActions()">
       @for (action of primaryActions; track action.id ?? action.label ?? action.icon) {
         <app-button
           [label]="action.showLabel === false ? '' : action.label"
@@ -133,8 +133,9 @@
         <div class="table-actions__more-wrap">
           <app-button
             icon="pi pi-ellipsis-h"
-            label="showMore"
+            label=""
             tooltip="showMore"
+            ariaLabel="showMore"
             severity="secondary"
             [text]="true"
             (buttonClick)="toggleActions()"

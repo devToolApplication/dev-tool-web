@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { BadgeVariant } from '../badge/badge.component';
 
 export type KeyValueType =
@@ -30,6 +30,7 @@ export interface KeyValueItem {
 @Component({
   selector: 'app-key-value-list',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './key-value-list.component.html',
   styleUrl: './key-value-list.component.css'
 })

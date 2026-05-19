@@ -1,4 +1,14 @@
 <app-page-shell title="aiAgent.executionTrace.title" layout="wide">
+  @if (deepLinkError) {
+    <app-alert
+      class="execution-trace-alert"
+      variant="danger"
+      [message]="deepLinkError"
+      [dismissible]="true"
+      (dismissed)="clearDeepLinkError()"
+    ></app-alert>
+  }
+
   <app-table
     [config]="tableConfig"
     [data]="rows"

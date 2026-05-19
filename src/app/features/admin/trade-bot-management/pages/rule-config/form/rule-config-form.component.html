@@ -6,4 +6,16 @@
   [submitting]="submitting()"
   (valueChange)="onValueChange($event)"
   (formSubmit)="submit($event)"
-></app-base-crud-page>
+>
+  <app-rule-expression-builder
+    crud-page-before-form
+    [value]="ruleExpressionValue()"
+    [indicatorConfigs]="indicatorConfigs"
+    [ruleConfigs]="ruleConfigs"
+    [currentRuleCode]="currentRuleCode()"
+    [currentRuleId]="id"
+    [disabled]="submitting()"
+    (valueChange)="onRuleExpressionValueChange($event)"
+    (validationChange)="onRuleExpressionValidationChange($event)"
+  ></app-rule-expression-builder>
+</app-base-crud-page>

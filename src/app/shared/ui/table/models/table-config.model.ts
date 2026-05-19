@@ -35,6 +35,8 @@ export type TableActionSeverity =
   | 'contrast'
   | null;
 
+export type TableExportScope = 'current-page' | 'external';
+
 export interface TableAction {
   label: string;
   id?: string;
@@ -211,6 +213,7 @@ export interface TableToolbarButtonConfig {
   icon?: string;
   severity?: TableActionSeverity;
   disabled?: boolean;
+  loading?: boolean;
   permissions?: readonly string[];
   permissionMode?: 'hide' | 'disable';
   permissionDeniedTooltip?: string;
@@ -243,6 +246,7 @@ export interface TableToolbarImportConfig extends TableToolbarButtonConfig {
 
 export interface TableToolbarExportConfig extends TableToolbarButtonConfig {
   fileName?: string;
+  scope?: TableExportScope;
   currentData?: boolean;
 }
 

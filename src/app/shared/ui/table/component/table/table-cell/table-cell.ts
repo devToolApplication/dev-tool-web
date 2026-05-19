@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, Output, TemplateRef, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, signal } from '@angular/core';
 import { PermissionService } from '../../../../../../core/auth/permission.service';
 import { ConfirmDialogService } from '../../../../overlay/confirm-dialog/confirm-dialog.service';
 import { TableAction, TableBadgeVariant, TableColumn } from '../../../models/table-config.model';
@@ -7,6 +7,7 @@ import { getValueByPath } from '../../../utils/object.util';
 @Component({
   selector: 'app-table-cell',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table-cell.html',
   styleUrls: ['./table-cell.css']
 })
@@ -33,14 +34,15 @@ export class TableCellComponent {
   }
 
   get primaryActions(): TableAction[] {
-    const explicit = this.actions.filter((action) => action.placement !== 'more');
-    return this.actions.length > 3 ? explicit.slice(0, 2) : explicit;
+    const explicitPrimary = this.actions.find((action) => action.placement === 'primary');
+    const fallbackPrimary = this.actions.find((action) => action.placement !== 'more');
+    const primary = explicitPrimary ?? fallbackPrimary;
+    return primary ? [primary] : [];
   }
 
   get moreActions(): TableAction[] {
-    const explicitMore = this.actions.filter((action) => action.placement === 'more');
-    const overflow = this.actions.filter((action) => action.placement !== 'more').slice(2);
-    return this.actions.length > 3 ? [...overflow, ...explicitMore] : explicitMore;
+    const primary = this.primaryActions[0];
+    return this.actions.filter((action) => action !== primary);
   }
 
   get hasMoreActions(): boolean {
@@ -134,7 +136,6 @@ export class TableCellComponent {
     this.actionsOpen.update((value) => !value);
   }
 
-  @HostListener('document:keydown.escape')
   closeActions(): void {
     this.actionsOpen.set(false);
   }

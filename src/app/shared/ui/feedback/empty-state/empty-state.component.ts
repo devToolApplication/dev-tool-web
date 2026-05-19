@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type EmptyStateVariant = 'default' | 'search' | 'create' | 'warning';
 
@@ -14,6 +14,7 @@ export interface EmptyStateConfig {
 @Component({
   selector: 'app-empty-state',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './empty-state.component.html',
   styleUrl: './empty-state.component.css'
 })

@@ -1,10 +1,11 @@
-<section class="playground-page">
+<section class="playground-page" [class.playground-page--workspace]="!!result || !!steps.length || running">
   <app-base-crud-page
     [pageConfig]="{
       title: 'aiAgent.playground.title',
       description: 'aiAgent.playground.description',
       actions: [
         { id: 'clear-result', label: 'aiAgent.playground.clearResult', icon: 'pi pi-times', buttonClass: 'p-button-text', visible: !!result || !!steps.length },
+        { id: 'cancel-run', label: 'aiAgent.playground.cancelRun', icon: 'pi pi-stop', severity: 'danger', text: true, visible: running },
         { id: 'run', label: 'aiAgent.playground.runRequest', icon: 'pi pi-send', loading: running, disabled: loading || running || !!dependenciesError, submitForm: true }
       ],
       infoSection: {
@@ -85,7 +86,7 @@
                 <div class="step-title">#{{ step.stepNo }} {{ step.stepType }}</div>
                 <div class="step-time">{{ step.createdAt || '-' }}</div>
               </div>
-              <app-json-viewer [value]="formatPayload(step.payloadJson)" [collapsed]="true"></app-json-viewer>
+              <app-json-viewer [value]="parsePayload(step.payloadJson)" [collapsed]="true"></app-json-viewer>
             </article>
           }
         </div>

@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AgentDefinitionResponse } from '../../../../core/models/ai-agent/agent-definition.model';
 import { AiAgentAskRequest, AiAgentAskResponse } from '../../../../core/models/ai-agent/ai-agent-ask.model';
@@ -33,7 +33,7 @@ const PLAYGROUND_INITIAL_VALUE: PlaygroundFormValue = {
   templateUrl: './ai-agent-playground.component.html',
   styleUrl: './ai-agent-playground.component.css'
 })
-export class AiAgentPlaygroundComponent implements OnInit {
+export class AiAgentPlaygroundComponent implements OnInit, OnDestroy {
   formContext: FormContext = { user: null, mode: 'create', extra: {} };
   readonly formConfig: FormConfig = {
     fields: [
@@ -93,6 +93,7 @@ export class AiAgentPlaygroundComponent implements OnInit {
   steps: ExecutionStepResponse[] = [];
   private queryAgentId = '';
   private queryUserId = '';
+  private activeRun?: Subscription;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -113,6 +114,10 @@ export class AiAgentPlaygroundComponent implements OnInit {
     this.loadDependencies();
   }
 
+  ngOnDestroy(): void {
+    this.activeRun?.unsubscribe();
+  }
+
   onValueChange(model: PlaygroundFormValue): void {
     this.formValue = {
       agentId: model?.agentId || '',
@@ -124,6 +129,10 @@ export class AiAgentPlaygroundComponent implements OnInit {
   }
 
   onSubmitForm(model: PlaygroundFormValue): void {
+    if (this.running) {
+      return;
+    }
+
     const payload: PlaygroundFormValue = {
       agentId: model.agentId?.trim() || '',
       modelId: model.modelId?.trim() || '',
@@ -141,7 +150,10 @@ export class AiAgentPlaygroundComponent implements OnInit {
     this.result = null;
     this.steps = [];
     this.traceError = '';
-    this.loadingService.track(this.aiAgentAdminService.ask(payload)).pipe(finalize(() => (this.running = false))).subscribe({
+    this.activeRun = this.loadingService.track(this.aiAgentAdminService.ask(payload)).pipe(finalize(() => {
+      this.running = false;
+      this.activeRun = undefined;
+    })).subscribe({
       next: (response) => {
         this.result = response;
         if (response.sessionId) {
@@ -161,6 +173,9 @@ export class AiAgentPlaygroundComponent implements OnInit {
     if (actionId === 'clear-result') {
       this.clearResult();
     }
+    if (actionId === 'cancel-run') {
+      this.cancelRunningRequest();
+    }
   }
 
   refreshTrace(): void {
@@ -176,6 +191,17 @@ export class AiAgentPlaygroundComponent implements OnInit {
 
   get selectedModelLabel(): string {
     return this.getOptionLabel('modelOptions', this.formValue.modelId || this.formInitialValue.modelId || '');
+  }
+
+  cancelRunningRequest(): void {
+    if (!this.activeRun) {
+      return;
+    }
+
+    this.activeRun.unsubscribe();
+    this.activeRun = undefined;
+    this.running = false;
+    this.toastService.info('aiAgent.playground.toast.runCanceled');
   }
 
   get resultSummaryItems(): KeyValueItem[] {
@@ -210,13 +236,13 @@ export class AiAgentPlaygroundComponent implements OnInit {
     return this.result.success ? 'success' : 'danger';
   }
 
-  formatPayload(payloadJson?: string): string {
+  parsePayload(payloadJson?: string): unknown {
     if (!payloadJson?.trim()) {
-      return '{}';
+      return {};
     }
 
     try {
-      return JSON.stringify(JSON.parse(payloadJson), null, 2);
+      return JSON.parse(payloadJson);
     } catch {
       return payloadJson;
     }

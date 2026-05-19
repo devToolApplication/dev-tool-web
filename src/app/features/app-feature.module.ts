@@ -58,6 +58,11 @@ import {
 import { DATA_FORM_FEATURE_COMPONENTS, dataFormRoutes } from './admin/data-form/data-form.feature';
 import { CandleChart } from './admin/trade-bot-management/shared-trading/candle-chart/candle-chart';
 import { DataQualityWarningComponent } from './admin/trade-bot-management/shared-trading/data-quality-warning/data-quality-warning.component';
+import { RuleExpressionBuilderComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-builder.component';
+import { RuleExpressionJsonPreviewComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-json-preview.component';
+import { RuleExpressionNodeComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-node.component';
+import { RuleExpressionOperandPickerComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-operand-picker.component';
+import { RuleExpressionPanelComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-panel.component';
 import { RuleTreeViewerComponent } from './admin/trade-bot-management/shared-trading/rule-tree-viewer/rule-tree-viewer.component';
 import { TradeDetailDrawerComponent } from './admin/trade-bot-management/shared-trading/trade-detail-drawer/trade-detail-drawer.component';
 import { FEATURE_FORM_INPUT_OPTIONS_LOADERS } from './form-input-options-loaders';
@@ -101,6 +106,11 @@ const FEATURE_COMPONENTS = [
   ...DATA_FORM_FEATURE_COMPONENTS,
   CandleChart,
   DataQualityWarningComponent,
+  RuleExpressionBuilderComponent,
+  RuleExpressionJsonPreviewComponent,
+  RuleExpressionNodeComponent,
+  RuleExpressionOperandPickerComponent,
+  RuleExpressionPanelComponent,
   RuleTreeViewerComponent,
   TradeDetailDrawerComponent
 ];

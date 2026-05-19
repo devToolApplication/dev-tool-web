@@ -2,6 +2,11 @@
   display: block;
 }
 
+.execution-trace-alert {
+  display: block;
+  margin-bottom: 1rem;
+}
+
 .drawer-actions {
   display: flex;
   flex-wrap: wrap;

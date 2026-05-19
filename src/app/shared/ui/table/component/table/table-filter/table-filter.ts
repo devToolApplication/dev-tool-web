@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { from, isObservable, of, Subject, takeUntil } from 'rxjs';
 import { TableFilterField, TableFilterOption, TableFilterOptions } from '../../../models/table-config.model';
@@ -10,9 +10,15 @@ interface TableFilterChip {
   valueLabel: string;
 }
 
+interface TableFilterValidationError {
+  field: string;
+  message: string;
+}
+
 @Component({
   selector: 'app-table-filter',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table-filter.html',
   styleUrls: ['./table-filter.css']
 })
@@ -30,6 +36,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
   readonly appliedValues = signal<Record<string, any>>({});
   readonly drawerOpen = signal(false);
   readonly optionState = signal<Record<string, { options: TableFilterOption[]; loading: boolean; error: string | null }>>({});
+  readonly validationErrors = signal<TableFilterValidationError[]>([]);
 
   private readonly destroy$ = new Subject<void>();
   private readonly expressionEngine = new ExpressionEngine();
@@ -110,6 +117,10 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
       nextApplied[primaryField.field] = this.normalizedSearchValue;
     }
 
+    if (!this.validateValues(nextApplied)) {
+      return;
+    }
+
     this.appliedValues.set(nextApplied);
     this.draftValues.update((current) => ({
       ...current,
@@ -141,6 +152,10 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
   onApplyAdvanced(): void {
     const nextApplied = this.cloneValue(this.draftValues());
+    if (!this.validateValues(nextApplied)) {
+      return;
+    }
+
     this.appliedValues.set(nextApplied);
     this.searchValue.set(this.getPrimaryFieldValue(nextApplied));
     this.syncQueryParams(nextApplied);
@@ -150,6 +165,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
   onReset(): void {
     this.clearScheduledSearch();
+    this.validationErrors.set([]);
     const defaults = this.buildDefaultValues();
     this.draftValues.set(defaults);
     this.appliedValues.set(this.cloneValue(defaults));
@@ -172,6 +188,9 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
       });
 
     this.draftValues.set(nextValues);
+    if (this.validationErrors().length > 0) {
+      this.validateValues(nextValues);
+    }
     if (this.primaryFieldConfig?.field === field.field) {
       this.searchValue.set(String(normalizedValue ?? ''));
     }
@@ -241,6 +260,10 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     this.loadDynamicOptions(this.draftValues(), field);
   }
 
+  fieldErrors(field: TableFilterField): TableFilterValidationError[] {
+    return this.validationErrors().filter((error) => error.field === field.field);
+  }
+
   activeFilterCount(): number {
     return Object.values(this.appliedValues()).filter((value) => this.hasValue(value)).length;
   }
@@ -273,6 +296,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
     this.appliedValues.set(nextValues);
     this.draftValues.set(this.cloneValue(nextValues));
+    this.validationErrors.set(this.validationErrors().filter((error) => error.field !== field.field));
     this.searchValue.set(this.getPrimaryFieldValue(nextValues));
     this.syncQueryParams(nextValues);
     this.emitSearch(nextValues);
@@ -421,6 +445,81 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
   private emitSearch(values: Record<string, any>): void {
     this.search.emit(this.normalizePayload(values));
+  }
+
+  private validateValues(values: Record<string, any>): boolean {
+    const errors = this.fields
+      .filter((field) => this.isFieldVisible(field))
+      .flatMap((field) => this.validateField(field, values));
+    this.validationErrors.set(errors);
+    return errors.length === 0;
+  }
+
+  private validateField(field: TableFilterField, values: Record<string, any>): TableFilterValidationError[] {
+    const value = values[field.field];
+    const errors: TableFilterValidationError[] = [];
+
+    if (field.type === 'date-range' && this.hasValue(value?.start) && this.hasValue(value?.end)) {
+      const start = new Date(value.start).getTime();
+      const end = new Date(value.end).getTime();
+      if (Number.isFinite(start) && Number.isFinite(end) && start > end) {
+        errors.push({ field: field.field, message: 'shared.filter.dateRangeInvalid' });
+      }
+    }
+
+    if (field.type === 'number-range' && this.hasValue(value?.start) && this.hasValue(value?.end) && Number(value.start) > Number(value.end)) {
+      errors.push({ field: field.field, message: 'shared.filter.numberRangeInvalid' });
+    }
+
+    (field.validation ?? []).forEach((rule) => {
+      if (this.isValidationRuleFailed(rule, field, value, values)) {
+        errors.push({ field: field.field, message: rule.message });
+      }
+    });
+
+    return errors;
+  }
+
+  private isValidationRuleFailed(
+    rule: NonNullable<TableFilterField['validation']>[number],
+    field: TableFilterField,
+    value: any,
+    values: Record<string, any>
+  ): boolean {
+    if (rule.type === 'required') {
+      return !this.hasValue(value);
+    }
+
+    if (rule.type === 'min' && rule.value != null && this.hasValue(value)) {
+      return Number(value) < Number(rule.value);
+    }
+
+    if (rule.type === 'max' && rule.value != null && this.hasValue(value)) {
+      return Number(value) > Number(rule.value);
+    }
+
+    if (rule.type === 'regex' && rule.value != null && typeof value === 'string') {
+      try {
+        return !new RegExp(String(rule.value)).test(value);
+      } catch {
+        return false;
+      }
+    }
+
+    if (!rule.expression) {
+      return false;
+    }
+
+    try {
+      const result = this.expressionEngine.evaluate(rule.expression, {
+        model: values,
+        context: { values, field },
+        value
+      });
+      return result === true;
+    } catch {
+      return false;
+    }
   }
 
   private normalizePayload(values: Record<string, any>): Record<string, any> {

@@ -1,8 +1,15 @@
-import { Component, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, computed, signal } from '@angular/core';
+
+interface JsonSearchResult {
+  path: string;
+  value: unknown;
+  displayValue: string;
+}
 
 @Component({
   selector: 'app-json-viewer',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './json-viewer.component.html',
   styleUrl: './json-viewer.component.css'
 })
@@ -20,6 +27,7 @@ export class JsonViewerComponent implements OnChanges {
   readonly collapsedState = signal(false);
   readonly searchQuery = signal('');
   readonly copied = signal(false);
+  readonly searchResults = computed(() => this.findSearchResults(this.searchQuery()));
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['collapsed']) {
@@ -81,6 +89,95 @@ export class JsonViewerComponent implements OnChanges {
     if (!text) {
       return;
     }
+    await this.copyText(text);
+  }
+
+  async copyPath(result: JsonSearchResult): Promise<void> {
+    await this.copyText(result.path);
+  }
+
+  async copyValue(result: JsonSearchResult): Promise<void> {
+    await this.copyText(this.valueToClipboardText(result.value));
+  }
+
+  toggleRaw(): void {
+    this.rawMode.update((value) => !value);
+  }
+
+  toggleCollapsed(): void {
+    this.collapsedState.update((value) => !value);
+  }
+
+  private get displaySource(): unknown {
+    return this.maskSecrets ? this.maskSecretValues(this.parsedValue) : this.parsedValue;
+  }
+
+  private findSearchResults(query: string): JsonSearchResult[] {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    return this.flattenJson(this.displaySource)
+      .filter((result) => `${result.path} ${result.displayValue}`.toLowerCase().includes(normalizedQuery))
+      .slice(0, 50);
+  }
+
+  private flattenJson(value: unknown, path = '$'): JsonSearchResult[] {
+    const current: JsonSearchResult = {
+      path,
+      value,
+      displayValue: this.previewValue(value)
+    };
+
+    if (Array.isArray(value)) {
+      return [
+        current,
+        ...value.flatMap((item, index) => this.flattenJson(item, `${path}[${index}]`))
+      ];
+    }
+
+    if (value && typeof value === 'object') {
+      return [
+        current,
+        ...Object.entries(value as Record<string, unknown>).flatMap(([key, item]) =>
+          this.flattenJson(item, this.childPath(path, key))
+        )
+      ];
+    }
+
+    return [current];
+  }
+
+  private childPath(path: string, key: string): string {
+    return /^[A-Za-z_$][\w$]*$/.test(key) ? `${path}.${key}` : `${path}[${JSON.stringify(key)}]`;
+  }
+
+  private previewValue(value: unknown): string {
+    if (Array.isArray(value)) {
+      return `Array(${value.length})`;
+    }
+
+    if (value && typeof value === 'object') {
+      return `Object(${Object.keys(value as Record<string, unknown>).length})`;
+    }
+
+    return String(value ?? '');
+  }
+
+  private valueToClipboardText(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value ?? '');
+    }
+  }
+
+  private async copyText(text: string): Promise<void> {
     try {
       await navigator.clipboard?.writeText(text);
     } catch {
@@ -95,18 +192,6 @@ export class JsonViewerComponent implements OnChanges {
     }
     this.copied.set(true);
     window.setTimeout(() => this.copied.set(false), 1200);
-  }
-
-  toggleRaw(): void {
-    this.rawMode.update((value) => !value);
-  }
-
-  toggleCollapsed(): void {
-    this.collapsedState.update((value) => !value);
-  }
-
-  private get displaySource(): unknown {
-    return this.maskSecrets ? this.maskSecretValues(this.parsedValue) : this.parsedValue;
   }
 
   private maskSecretValues(value: unknown): unknown {

@@ -116,9 +116,10 @@
     @if (isButtonVisible(exportButtonConfig)) {
       <app-button
         [severity]="exportButtonConfig.severity ?? 'help'"
-        [label]="exportButtonConfig.label ?? 'export'"
-        [icon]="exportButtonConfig.icon ?? 'pi pi-upload'"
-        [disabled]="isButtonDisabled(exportButtonConfig)"
+        [label]="exportButtonLabel"
+        [icon]="exportButtonIcon"
+        [disabled]="isButtonDisabled(exportButtonConfig) || (exportButtonConfig.loading ?? false)"
+        [loading]="exportButtonConfig.loading ?? false"
         [tooltip]="buttonTooltip(exportButtonConfig)"
         (buttonClick)="onExport()"
       />

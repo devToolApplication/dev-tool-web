@@ -6,7 +6,9 @@ Rule config dùng dynamic form từ metadata `rule-executors` để người dù
 
 - Form lấy `formTemplate` từ executor metadata hoặc detail response.
 - `formTemplate` chỉ cần mô tả phần `config` nghiệp vụ của executor.
-- Màn rule tự thêm các phần chung nếu template chưa khai báo: `indicators`, `childRules` dạng tree builder và `overlay` dạng key-value record.
+- Màn rule tự thêm các phần chung nếu template chưa khai báo: `indicators` và `overlay` dạng key-value record.
+- Logic rule được cấu hình bằng `Rule Expression Builder` riêng ở `features/admin/trade-bot-management/shared-trading/rule-expression-builder`, lưu vào `config.ruleExpression`.
+- `childRules` không còn render bằng tree builder generic trên màn form; khi save FE derive `childRules` từ các `ruleRef` đang bật trong expression để giữ tương thích endpoint hiện tại.
 - Raw `configText` chỉ còn trong nhóm Advanced JSON đã collapse khi executor chưa có `formTemplate`.
 - Không còn render các field legacy `formTemplateText`, `indicatorsText`, `childRulesText`, `overlayText` trên màn form chính.
 
@@ -23,4 +25,5 @@ Rule config dùng dynamic form từ metadata `rule-executors` để người dù
 - UI uses shared layer and translate.
 - API contract typed.
 - Loading/error/empty states covered.
+- Rule expression có preview, dependency summary, validation inline và Advanced JSON collapsed.
 

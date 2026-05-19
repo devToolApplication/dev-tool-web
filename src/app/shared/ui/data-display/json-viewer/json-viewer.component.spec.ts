@@ -86,6 +86,37 @@ describe('JsonViewerComponent', () => {
     expect(component.copied()).toBe(true);
   });
 
+  it('searches JSON by path/value and copies node path or value', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText }
+    });
+    component.value = {
+      toolCalls: [
+        {
+          arguments: {
+            symbol: 'BTCUSDT'
+          }
+        }
+      ]
+    };
+    component.searchQuery.set('symbol');
+    fixture.detectChanges();
+
+    const result = component.searchResults().find((item) => item.path.endsWith('.symbol'));
+    expect(result).toEqual(expect.objectContaining({
+      path: '$.toolCalls[0].arguments.symbol',
+      displayValue: 'BTCUSDT'
+    }));
+
+    await component.copyPath(result!);
+    await component.copyValue(result!);
+
+    expect(writeText).toHaveBeenNthCalledWith(1, '$.toolCalls[0].arguments.symbol');
+    expect(writeText).toHaveBeenNthCalledWith(2, 'BTCUSDT');
+  });
+
   it('masks secret-like keys when enabled', () => {
     component.value = {
       visible: 'shown',

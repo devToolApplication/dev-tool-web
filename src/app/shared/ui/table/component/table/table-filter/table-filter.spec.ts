@@ -94,6 +94,29 @@ describe('TableFilterComponent', () => {
     }));
   });
 
+  it('blocks invalid range filters and renders inline validation errors', () => {
+    const search = vi.spyOn(component.search, 'emit');
+    component.drawerOpen.set(true);
+
+    component.onFieldChange(component.fields[1], { start: '20', end: '10' });
+    component.onApplyAdvanced();
+    fixture.detectChanges();
+
+    expect(search).not.toHaveBeenCalled();
+    expect(component.validationErrors()).toEqual([
+      { field: 'amount', message: 'shared.filter.numberRangeInvalid' }
+    ]);
+    expect(component.fieldErrors(component.fields[1]).map((error) => error.message)).toEqual([
+      'shared.filter.numberRangeInvalid'
+    ]);
+
+    component.onFieldChange(component.fields[1], { start: '10', end: '20' });
+    component.onApplyAdvanced();
+
+    expect(component.validationErrors()).toEqual([]);
+    expect(search).toHaveBeenCalledWith({ amountFrom: 10, amountTo: 20 });
+  });
+
   it('renders active filter chips and removes an individual filter', () => {
     const search = vi.spyOn(component.search, 'emit');
 
