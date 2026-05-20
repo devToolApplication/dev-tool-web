@@ -29,11 +29,16 @@ describe('rule expression utilities', () => {
       ], { id: 'root' })
     };
 
-    expect(printRuleExpression(expression)).toBe('price.CLOSE GT 100 OR RULE(CONFIRM_VOLUME)');
+    expect(printRuleExpression(expression)).toBe('CLOSEPRICE GT 100 OR CONFIRM_VOLUME');
   });
 
-  it('validates group, not, xor and range constraints', () => {
+  it('validates group, not, xor, default condition and range constraints', () => {
     expect(validateRuleExpression({ root: null }).errors[0].message).toBe('tradeBot.ruleExpression.validation.rootRequired');
+
+    const defaultCondition = createRuleExpressionCondition({ id: 'default-condition' });
+    expect(defaultCondition.operator).toBe('CROSSOVER');
+    expect(defaultCondition.params).toEqual({ lookback: 1, tolerance: 0 });
+    expect(validateRuleExpression({ root: defaultCondition }).errors[0].message).toBe('tradeBot.ruleExpression.validation.operandRequired');
 
     const xor = createRuleExpressionGroup('XOR', [createRuleExpressionRuleRef('A')], { id: 'xor' });
     expect(validateRuleExpression({ root: xor }).errors[0].message).toBe('tradeBot.ruleExpression.validation.xorChildCount');
@@ -51,6 +56,21 @@ describe('rule expression utilities', () => {
       ]
     });
     expect(validateRuleExpression({ root: range }).errors[0].message).toBe('tradeBot.ruleExpression.validation.rangeOrder');
+  });
+
+  it('rejects boolean rule references for crossover operands', () => {
+    const expression = createRuleExpressionCondition({
+      id: 'invalid-operand',
+      operator: 'CROSSOVER',
+      operands: [
+        { type: 'ruleRef', ruleCode: 'TREND_FILTER' },
+        { type: 'priceSeries', series: 'CLOSEPRICE' }
+      ]
+    });
+
+    expect(validateRuleExpression({ root: expression }).errors.some((error) =>
+      error.message === 'tradeBot.ruleExpression.validation.incompatibleOperand'
+    )).toBe(true);
   });
 
   it('extracts dependencies and derives active childRules from rule refs', () => {
@@ -141,4 +161,3 @@ describe('rule expression utilities', () => {
     expect(self.errors[0].message).toBe('tradeBot.validation.selfChildRule');
   });
 });
-

@@ -24,6 +24,13 @@ export type RuleExpressionOperandType =
   | 'constant';
 export type RuleExpressionPriceSeries = 'OPEN' | 'HIGH' | 'LOW' | 'CLOSE' | 'VOLUME' | 'CLOSEPRICE';
 export type RuleExpressionConstantType = 'number' | 'string' | 'boolean';
+export type RuleExpressionOperandValueType =
+  | 'numericSeries'
+  | 'priceSeries'
+  | 'number'
+  | 'boolean'
+  | 'string';
+export type RuleExpressionOperatorSlotName = 'left' | 'right' | 'min' | 'max';
 export type RuleExpressionValidationSeverity = 'error' | 'warning';
 
 export interface RuleExpressionOperand {
@@ -109,4 +116,3 @@ export interface RuleExpressionOption {
   value: string;
   disabled?: boolean;
 }
-

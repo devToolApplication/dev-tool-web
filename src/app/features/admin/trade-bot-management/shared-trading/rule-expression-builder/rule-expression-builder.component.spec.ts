@@ -55,8 +55,15 @@ describe('RuleExpressionBuilderComponent', () => {
 
     component.addCondition();
 
-    expect(component.expression().root).toEqual(expect.objectContaining({ type: 'condition', operator: 'GT' }));
-    expect(component.preview()).toBe('price.CLOSE GT 0');
+    expect(component.expression().root).toEqual(
+      expect.objectContaining({
+        type: 'condition',
+        operator: 'CROSSOVER',
+        operands: [],
+        params: { lookback: 1, tolerance: 0 }
+      })
+    );
+    expect(component.preview()).toBe('? CROSSOVER ?');
     expect(emitted.length).toBe(1);
   });
 
@@ -65,20 +72,22 @@ describe('RuleExpressionBuilderComponent', () => {
     component.addCondition();
 
     expect(component.expression().root).toEqual(expect.objectContaining({ type: 'group', operator: 'AND' }));
-    expect(component.preview()).toBe('price.CLOSE GT 0 AND price.CLOSE GT 0');
+    expect(component.preview()).toBe('? CROSSOVER ? AND ? CROSSOVER ?');
   });
 
-  it('wraps selected nodes with OR and NOT groups', () => {
+  it('adds groups without wrapping the selected node', () => {
     component.addCondition();
     const conditionId = component.selectedNodeId();
     expect(conditionId).toBeTruthy();
 
     component.addGroup('OR');
-    expect(component.expression().root).toEqual(expect.objectContaining({ type: 'group', operator: 'OR' }));
+    const root = component.expression().root;
 
-    component.selectNode(conditionId ?? '');
-    component.addNot();
-    expect(component.preview()).toContain('NOT');
+    expect(root).toEqual(expect.objectContaining({ type: 'group', operator: 'AND' }));
+    expect(root?.type === 'group' ? root.children[0]?.id : null).toBe(conditionId);
+    expect(root?.type === 'group' ? root.children[1] : null).toEqual(
+      expect.objectContaining({ type: 'group', operator: 'OR' })
+    );
   });
 
   it('adds rule references and emits validation state', () => {

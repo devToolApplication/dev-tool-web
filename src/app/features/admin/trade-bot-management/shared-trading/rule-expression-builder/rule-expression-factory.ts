@@ -10,6 +10,7 @@ import {
   RuleExpressionRuleRefNode,
   RuleLogicFormValue
 } from './rule-expression.models';
+import { defaultParamsForOperator } from './rule-expression-operators';
 
 let nodeCounter = 0;
 
@@ -18,7 +19,7 @@ export function nextRuleExpressionNodeId(prefix = 'expr'): string {
   return `${prefix}-${Date.now().toString(36)}-${nodeCounter.toString(36)}`;
 }
 
-export function createPriceOperand(series = 'CLOSE' as const): RuleExpressionOperand {
+export function createPriceOperand(series = 'CLOSEPRICE' as const): RuleExpressionOperand {
   return { type: 'priceSeries', series };
 }
 
@@ -30,7 +31,7 @@ export function createConstantOperand(value: string | number | boolean | null = 
 export function createRuleExpressionCondition(
   overrides: Partial<RuleExpressionConditionNode> = {}
 ): RuleExpressionConditionNode {
-  const operator = overrides.operator ?? 'GT';
+  const operator = overrides.operator ?? 'CROSSOVER';
   return {
     id: overrides.id ?? nextRuleExpressionNodeId('condition'),
     type: 'condition',
@@ -38,7 +39,7 @@ export function createRuleExpressionCondition(
     operands: overrides.operands ?? defaultOperands(operator),
     disabled: overrides.disabled,
     label: overrides.label,
-    params: cloneParams(overrides.params)
+    params: cloneParams(overrides.params ?? defaultParamsForOperator(operator))
   };
 }
 
@@ -330,6 +331,9 @@ function normalizeOperand(value: unknown): RuleExpressionOperand | null {
 function defaultOperands(operator: RuleExpressionConditionOperator | null): RuleExpressionOperand[] {
   if (operator === 'BETWEEN' || operator === 'OUTSIDE') {
     return [createPriceOperand(), createConstantOperand(0), createConstantOperand(1)];
+  }
+  if (operator === 'CROSSOVER' || operator === 'CROSSUNDER') {
+    return [];
   }
   return [createPriceOperand(), createConstantOperand(0)];
 }

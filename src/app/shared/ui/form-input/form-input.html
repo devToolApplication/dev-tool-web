@@ -30,7 +30,62 @@
     (reviewErrors)="reviewErrors()"
     (reset)="resetToInitialValue()"
   >
-    @for (section of renderSections(); track section.id) {
+    @if (firstRenderSection(); as section) {
+      <app-form-section-card
+        [section]="section"
+        [density]="layout().density ?? 'comfortable'"
+      >
+        <div class="form-input__grid">
+          @for (f of section.fields; track f.path) {
+            @if (f.type === 'array') {
+              <app-field-array-renderer
+                [attr.data-field-path]="f.path"
+                tabindex="-1"
+                class="w-full h-full"
+                [ngClass]="getCol(f.width)"
+                [field]="asArrayField(f)"
+                [submitted]="submitted()"
+                [readonlyMode]="readonlyMode()">
+              </app-field-array-renderer>
+            } @else if (f.type === 'group') {
+              <app-field-group-renderer
+                [attr.data-field-path]="f.path"
+                tabindex="-1"
+                class="w-full h-full"
+                [ngClass]="getCol(f.width)"
+                [field]="asGroupField(f)"
+                [submitted]="submitted()"
+                [readonlyMode]="readonlyMode()">
+              </app-field-group-renderer>
+            } @else if (f.type === 'tree') {
+              <app-field-tree-renderer
+                [attr.data-field-path]="f.path"
+                tabindex="-1"
+                class="w-full h-full"
+                [ngClass]="getCol(f.width)"
+                [field]="asTreeField(f)"
+                [submitted]="submitted()"
+                [readonlyMode]="readonlyMode()">
+              </app-field-tree-renderer>
+            } @else {
+              <app-field-renderer
+                [attr.data-field-path]="f.path"
+                tabindex="-1"
+                class="w-full h-full"
+                [ngClass]="getCol(f.width)"
+                [field]="f"
+                [submitted]="submitted()"
+                [readonlyMode]="readonlyMode()">
+              </app-field-renderer>
+            }
+          }
+        </div>
+      </app-form-section-card>
+
+      <ng-content select="[crud-page-after-first-section]"></ng-content>
+    }
+
+    @for (section of remainingRenderSections(); track section.id) {
       <app-form-section-card
         [section]="section"
         [density]="layout().density ?? 'comfortable'"

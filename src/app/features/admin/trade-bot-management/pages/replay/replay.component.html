@@ -1,15 +1,21 @@
 <app-page-shell title="tradeBot.replay.title" layout="wide">
   <app-card>
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <div class="text-xl font-semibold">{{ 'tradeBot.replay.title' | translateContent }}</div>
-        <div class="app-text-muted">
+    <div class="replay-page-header">
+      <div class="replay-page-heading">
+        <div class="replay-page-title">{{ 'tradeBot.replay.title' | translateContent }}</div>
+        <div class="replay-page-subtitle">
           {{ replay()?.strategyCode || '-' }} / {{ replay()?.symbol || '-' }} {{ replay()?.timeframe || '' }}
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="replay-page-actions">
         <app-tag [value]="replayStatus()" severity="info"></app-tag>
-        <app-button icon="pi pi-refresh" label="tradeBot.action.reset" severity="secondary" [disabled]="!replay()" (buttonClick)="resetReplay()"></app-button>
+        <app-button
+          icon="pi pi-refresh"
+          label="tradeBot.action.reset"
+          severity="secondary"
+          [disabled]="!replay()"
+          (buttonClick)="resetReplay()"
+        ></app-button>
       </div>
     </div>
   </app-card>
@@ -25,116 +31,129 @@
   </p-fieldset>
 
   @if (replay()) {
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+    <div class="replay-summary-grid">
       @for (fact of replayFacts(); track fact.label) {
         <app-summary-metric-card [label]="fact.label" [value]="fact.value"></app-summary-metric-card>
       }
     </div>
 
-    <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <div class="replay-chart-stack">
       <app-candle-chart
         [mode]="'REPLAY'"
         [config]="chartConfig()"
         [candles]="chartCandles()"
         [indicators]="chartIndicators()"
         [replayConfig]="replayConfig()"
+        [controlledReplay]="true"
+        [replayState]="chartReplayState()"
         [evaluationConfig]="chartEvaluationConfig()"
         [evaluateHandler]="evaluateCurrentBar"
+        (replayCommand)="onChartReplayCommand($event)"
         (candleSelected)="onChartCandleSelected($event)"
         (strategySignal)="onChartStrategySignal($event)"
         (ruleEvaluated)="onChartRuleEvaluated($event)"
         (error)="onChartError()"
       ></app-candle-chart>
 
-      <app-card>
-        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.debugPanel' | translateContent }}</div>
-        <div class="mb-3 grid grid-cols-2 gap-2">
-          @for (fact of selectedCandleFacts(); track fact.label) {
-            <div class="rounded-lg border app-border app-bg-soft p-2">
-              <div class="text-xs font-semibold uppercase app-text-muted">{{ fact.label | translateContent }}</div>
-              <div class="mt-1 break-words app-text">{{ fact.value }}</div>
-            </div>
-          }
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <app-button icon="pi pi-step-backward" severity="secondary" [label]="'tradeBot.chart.replay.previous'" (buttonClick)="sendReplayCommand('PREVIOUS_CANDLE')"></app-button>
-          <app-button icon="pi pi-play" severity="success" [label]="'tradeBot.chart.replay.play'" (buttonClick)="playReplay()"></app-button>
-          <app-button icon="pi pi-pause" severity="warn" [label]="'tradeBot.chart.replay.pause'" (buttonClick)="sendReplayCommand('PAUSE_REPLAY')"></app-button>
-          <app-button icon="pi pi-step-forward" severity="secondary" [label]="'tradeBot.chart.replay.next'" (buttonClick)="sendReplayCommand('NEXT_CANDLE')"></app-button>
-          <app-button icon="pi pi-stop" severity="danger" [label]="'tradeBot.chart.replay.stop'" (buttonClick)="sendReplayCommand('STOP_REPLAY')"></app-button>
-          <app-button icon="pi pi-fast-forward" severity="secondary" [label]="'tradeBot.chart.replay.last'" (buttonClick)="jumpReplay((replay()?.candles?.length ?? 1) - 1)"></app-button>
-        </div>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <app-button icon="pi pi-angle-double-right" label="250ms" severity="secondary" (buttonClick)="changeReplaySpeed(250)"></app-button>
-          <app-button icon="pi pi-forward" label="650ms" severity="secondary" (buttonClick)="changeReplaySpeed(650)"></app-button>
-          <app-button icon="pi pi-angle-right" label="1500ms" severity="secondary" (buttonClick)="changeReplaySpeed(1500)"></app-button>
-        </div>
-      </app-card>
+      <div class="replay-session-strip">
+        <span class="replay-session-strip__item">
+          <span class="replay-session-strip__dot" aria-hidden="true"></span>
+          {{ 'tradeBot.replay.backendSession' | translateContent }}: {{ backendSessionStatus() }}
+        </span>
+        <span class="replay-session-strip__item">
+          {{ 'tradeBot.replay.currentIndex' | translateContent }}: {{ chartReplayState().index + 1 }} /
+          {{ replay()?.candles?.length ?? 0 }}
+        </span>
+        <span class="replay-session-strip__item">
+          {{ 'tradeBot.replay.lastEval' | translateContent }}: {{ lastEvalLatency() }}
+        </span>
+      </div>
     </div>
 
     <app-card>
-      <div class="mb-3">
+      <div class="replay-debug-header">
+        <div class="replay-debug-title">{{ 'tradeBot.replay.debugPanel' | translateContent }}</div>
         <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="activeTab.set($event)"></app-tabs>
       </div>
 
-      @switch (activeTab()) {
-        @case ('ruleTrace') {
-          <div class="flex flex-col gap-4">
-            <div>
-              <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.replay.evaluate' | translateContent }}</div>
-              <app-form-input
-                [config]="evaluateForm"
-                [context]="formContext"
-                [initialValue]="evaluateModel()"
-                [showSubmit]="false"
-                [submitting]="loading()"
-                (valueChange)="evaluateModel.set($event)"
-                (formSubmit)="evaluateTrace($event)"
-              ></app-form-input>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <app-button icon="pi pi-sitemap" label="tradeBot.action.evaluateTrace" [loading]="loading()" (buttonClick)="evaluateTrace(evaluateModel())"></app-button>
-                <app-button icon="pi pi-bolt" label="tradeBot.action.evaluateStrategy" severity="info" [loading]="loading()" (buttonClick)="evaluateStrategy(evaluateModel())"></app-button>
+      <div class="replay-debug-content">
+        @switch (activeTab()) {
+          @case ('signal') {
+            @if (signalSummary()) {
+              <div class="replay-debug-grid">
+                <section class="replay-debug-panel">
+                  <div class="replay-debug-panel__header">
+                    <span>{{ 'tradeBot.replay.signalSummary' | translateContent }}</span>
+                    <app-tag [value]="signalSide()" severity="success"></app-tag>
+                  </div>
+                  <div class="replay-fact-list">
+                    @for (fact of signalSummaryFacts(); track fact.label) {
+                      <div class="replay-fact-row">
+                        <span>{{ fact.label | translateContent }}</span>
+                        <strong>{{ fact.value }}</strong>
+                      </div>
+                    }
+                  </div>
+                </section>
+
+                <section class="replay-debug-panel">
+                  <div class="replay-debug-panel__header">
+                    <span>{{ 'tradeBot.replay.candleDetails' | translateContent }}</span>
+                  </div>
+                  <div class="replay-fact-list">
+                    @for (fact of selectedCandleFacts(); track fact.label) {
+                      <div class="replay-fact-row">
+                        <span>{{ fact.label | translateContent }}</span>
+                        <strong>{{ fact.value }}</strong>
+                      </div>
+                    }
+                  </div>
+                </section>
               </div>
-            </div>
-            @if (evaluation()) {
+            } @else {
+              <div class="replay-empty-state">{{ 'tradeBot.replay.noSignal' | translateContent }}</div>
+            }
+          }
+
+          @case ('ruleTrace') {
+            @if (ruleTrace() || evaluation()) {
               <app-rule-tree-viewer [trace]="evaluationTrace()"></app-rule-tree-viewer>
             } @else {
-              <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">{{ 'tradeBot.replay.noEvaluation' | translateContent }}</div>
+              <div class="replay-empty-state">{{ 'tradeBot.replay.noEvaluation' | translateContent }}</div>
             }
-          </div>
+          }
+
+          @case ('candle') {
+            <section class="replay-debug-panel replay-debug-panel--compact">
+              <div class="replay-debug-panel__header">
+                <span>{{ 'tradeBot.replay.candleDetails' | translateContent }}</span>
+              </div>
+              <div class="replay-fact-list">
+                @for (fact of selectedCandleFacts(); track fact.label) {
+                  <div class="replay-fact-row">
+                    <span>{{ fact.label | translateContent }}</span>
+                    <strong>{{ fact.value }}</strong>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          @case ('raw') {
+            <div class="replay-raw-grid">
+              <p-fieldset [legend]="'tradeBot.replay.event' | translateContent" [toggleable]="true" [collapsed]="true">
+                <app-json-viewer [value]="replayEventJson()" [collapsed]="true"></app-json-viewer>
+              </p-fieldset>
+              <p-fieldset [legend]="'tradeBot.replay.evaluation' | translateContent" [toggleable]="true" [collapsed]="true">
+                <app-json-viewer [value]="evaluationJson()" [collapsed]="true"></app-json-viewer>
+              </p-fieldset>
+              <p-fieldset [legend]="'tradeBot.replay.overlays' | translateContent" [toggleable]="true" [collapsed]="true">
+                <app-json-viewer [value]="replayJson()" [collapsed]="true"></app-json-viewer>
+              </p-fieldset>
+            </div>
+          }
         }
-        @case ('candles') {
-          <app-table
-            [config]="candleTableConfig"
-            [data]="replay()?.candles ?? []"
-            [loading]="loading()"
-            [error]="error()"
-            (retry)="initReplay(replayModel())"
-          ></app-table>
-        }
-        @case ('overlays') {
-          <app-table
-            [config]="overlayTableConfig"
-            [data]="overlayRows()"
-            [loading]="loading()"
-            [error]="error()"
-            (retry)="initReplay(replayModel())"
-          ></app-table>
-        }
-        @case ('rawEvents') {
-          <div class="flex flex-col gap-3">
-            <p-fieldset [legend]="'tradeBot.replay.event' | translateContent" [toggleable]="true" [collapsed]="true">
-              <app-json-viewer [value]="replayEventJson()" [collapsed]="true"></app-json-viewer>
-            </p-fieldset>
-            <p-fieldset [legend]="'tradeBot.replay.evaluation' | translateContent" [toggleable]="true" [collapsed]="true">
-              <app-json-viewer [value]="evaluationJson()" [collapsed]="true"></app-json-viewer>
-            </p-fieldset>
-            <p-fieldset [legend]="'tradeBot.replay.overlays' | translateContent" [toggleable]="true" [collapsed]="true">
-              <app-json-viewer [value]="replayJson()" [collapsed]="true"></app-json-viewer>
-            </p-fieldset>
-          </div>
-        }
-      }
+      </div>
     </app-card>
   }
 </app-page-shell>

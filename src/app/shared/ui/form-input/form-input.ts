@@ -77,6 +77,9 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     });
   });
 
+  readonly firstRenderSection = computed(() => this.renderSections()[0] ?? null);
+  readonly remainingRenderSections = computed(() => this.renderSections().slice(1));
+
   private readonly flatFields = computed<FieldState[]>(() => {
     this.engineRevision();
     if (!this.engine) {

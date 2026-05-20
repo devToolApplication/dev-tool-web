@@ -180,6 +180,10 @@ export const WithBeforeFormContent: Story = {
             <div class="text-sm font-semibold">Projected preview</div>
             <div class="mt-1 text-sm app-text-muted">Content in this slot renders above the form.</div>
           </div>
+          <div crud-page-after-first-section class="rounded-lg border app-border app-bg-card p-4 app-shadow-sm">
+            <div class="text-sm font-semibold">Projected inline section</div>
+            <div class="mt-1 text-sm app-text-muted">Content in this slot renders after the first form section.</div>
+          </div>
         </app-base-crud-page>
 
         <div class="mx-auto mt-4 max-w-6xl rounded-lg border app-border app-bg-card p-4">

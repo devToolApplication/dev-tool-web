@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { RuleExpressionBuilderComponent } from './rule-expression-builder.component';
+import { RuleConditionRowComponent } from './rule-condition-row.component';
 import { RuleExpressionJsonPreviewComponent } from './rule-expression-json-preview.component';
 import { RuleExpressionNodeComponent } from './rule-expression-node.component';
 import { RuleExpressionOperandPickerComponent } from './rule-expression-operand-picker.component';
@@ -14,18 +15,61 @@ const value = {
     operator: 'AND' as const,
     children: [
       {
-        id: 'story-condition',
+        id: 'story-condition-macd',
         type: 'condition' as const,
-        operator: 'GT' as const,
+        operator: 'CROSSOVER' as const,
         operands: [
-          { type: 'indicatorOutput' as const, indicatorCode: 'EMA_FAST', outputName: 'VALUE' },
-          { type: 'indicatorOutput' as const, indicatorCode: 'EMA_SLOW', outputName: 'VALUE' }
-        ]
+          { type: 'indicator' as const, indicatorCode: 'MACD' },
+          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const }
+        ],
+        params: { lookback: 1, tolerance: 0 }
       },
       {
-        id: 'story-rule-ref',
+        id: 'story-condition-bb',
+        type: 'condition' as const,
+        operator: 'CROSSUNDER' as const,
+        operands: [
+          { type: 'indicator' as const, indicatorCode: 'BOLLINGER_BAND_LOW' },
+          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const }
+        ],
+        params: { lookback: 1, tolerance: 0 }
+      }
+    ]
+  }
+};
+
+const nestedValue = {
+  root: {
+    id: 'story-nested-root',
+    type: 'group' as const,
+    operator: 'OR' as const,
+    children: [
+      {
+        id: 'story-rule-a',
         type: 'ruleRef' as const,
-        ruleCode: 'VOLUME_CONFIRMATION'
+        ruleCode: 'RULE_A'
+      },
+      {
+        id: 'story-nested-and',
+        type: 'group' as const,
+        operator: 'AND' as const,
+        children: [
+          {
+            id: 'story-rule-c',
+            type: 'ruleRef' as const,
+            ruleCode: 'RULE_C'
+          },
+          {
+            id: 'story-condition-de',
+            type: 'condition' as const,
+            operator: 'CROSSOVER' as const,
+            operands: [
+              { type: 'indicator' as const, indicatorCode: 'D' },
+              { type: 'indicator' as const, indicatorCode: 'E' }
+            ],
+            params: { lookback: 1, tolerance: 0 }
+          }
+        ]
       }
     ]
   }
@@ -37,6 +81,7 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
   decorators: [
     moduleMetadata({
       declarations: [
+        RuleConditionRowComponent,
         RuleExpressionJsonPreviewComponent,
         RuleExpressionNodeComponent,
         RuleExpressionOperandPickerComponent,
@@ -52,8 +97,8 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
     indicatorConfigs: [
       {
         id: 'indicator-fast',
-        code: 'EMA_FAST',
-        executor: 'EMA',
+        code: 'MACD',
+        executor: 'MACD',
         executorVersion: 'v1',
         config: {},
         children: [],
@@ -62,8 +107,28 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
       },
       {
         id: 'indicator-slow',
-        code: 'EMA_SLOW',
-        executor: 'EMA',
+        code: 'BOLLINGER_BAND_LOW',
+        executor: 'BOLLINGER_BAND',
+        executorVersion: 'v1',
+        config: {},
+        children: [],
+        overlay: {},
+        status: 'ACTIVE'
+      },
+      {
+        id: 'indicator-d',
+        code: 'D',
+        executor: 'CUSTOM',
+        executorVersion: 'v1',
+        config: {},
+        children: [],
+        overlay: {},
+        status: 'ACTIVE'
+      },
+      {
+        id: 'indicator-e',
+        code: 'E',
+        executor: 'CUSTOM',
         executorVersion: 'v1',
         config: {},
         children: [],
@@ -74,8 +139,19 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
     ruleConfigs: [
       {
         id: 'rule-volume',
-        code: 'VOLUME_CONFIRMATION',
+        code: 'RULE_A',
         executor: 'VOLUME_RULE',
+        executorVersion: 'v1',
+        config: {},
+        indicators: [],
+        childRules: [],
+        overlay: {},
+        status: 'ACTIVE'
+      },
+      {
+        id: 'rule-c',
+        code: 'RULE_C',
+        executor: 'CONFIRM_RULE',
         executorVersion: 'v1',
         config: {},
         indicators: [],
@@ -99,3 +175,45 @@ export const Empty: Story = {
   }
 };
 
+export const NestedOrAnd: Story = {
+  args: {
+    value: nestedValue
+  }
+};
+
+export const InvalidMissingOperand: Story = {
+  args: {
+    value: {
+      root: {
+        id: 'story-invalid',
+        type: 'condition',
+        operator: 'CROSSOVER',
+        operands: [{ type: 'indicator', indicatorCode: 'MACD' }],
+        params: { lookback: 1, tolerance: 0 }
+      }
+    }
+  }
+};
+
+export const DisabledNode: Story = {
+  args: {
+    value: {
+      root: {
+        ...value.root,
+        children: [
+          value.root.children[0],
+          {
+            ...value.root.children[1],
+            disabled: true
+          }
+        ]
+      }
+    }
+  }
+};
+
+export const Readonly: Story = {
+  args: {
+    readonly: true
+  }
+};

@@ -57,8 +57,13 @@ import {
 } from './admin/trade-bot-management/trade-bot-management.feature';
 import { DATA_FORM_FEATURE_COMPONENTS, dataFormRoutes } from './admin/data-form/data-form.feature';
 import { CandleChart } from './admin/trade-bot-management/shared-trading/candle-chart/candle-chart';
+import { CandleChartHeaderComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-header/candle-chart-header.component';
+import { CandleChartReplayControlsComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-replay-controls/candle-chart-replay-controls.component';
+import { CandleChartStateOverlayComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-state-overlay/candle-chart-state-overlay.component';
+import { CandleChartToolbarComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-toolbar/candle-chart-toolbar.component';
 import { DataQualityWarningComponent } from './admin/trade-bot-management/shared-trading/data-quality-warning/data-quality-warning.component';
 import { RuleExpressionBuilderComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-builder.component';
+import { RuleConditionRowComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-condition-row.component';
 import { RuleExpressionJsonPreviewComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-json-preview.component';
 import { RuleExpressionNodeComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-node.component';
 import { RuleExpressionOperandPickerComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-operand-picker.component';
@@ -105,8 +110,13 @@ const FEATURE_COMPONENTS = [
   ...CODEX_AGENT_FEATURE_COMPONENTS,
   ...DATA_FORM_FEATURE_COMPONENTS,
   CandleChart,
+  CandleChartHeaderComponent,
+  CandleChartReplayControlsComponent,
+  CandleChartStateOverlayComponent,
+  CandleChartToolbarComponent,
   DataQualityWarningComponent,
   RuleExpressionBuilderComponent,
+  RuleConditionRowComponent,
   RuleExpressionJsonPreviewComponent,
   RuleExpressionNodeComponent,
   RuleExpressionOperandPickerComponent,

@@ -58,6 +58,11 @@ export class RuleExpressionBuilderComponent implements OnChanges {
 
   readonly preview = computed(() => printRuleExpression(this.expression()));
   readonly dependencies = computed<RuleExpressionDependencySummary>(() => extractRuleExpressionDependencies(this.expression()));
+  readonly dependencyTotal = computed(() =>
+    this.dependencies().indicatorCodes.length +
+    this.dependencies().ruleCodes.length +
+    this.dependencies().priceSeries.length
+  );
   readonly selectedNode = computed(() => findRuleExpressionNode(this.expression().root, this.selectedNodeId()));
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -88,27 +93,11 @@ export class RuleExpressionBuilderComponent implements OnChanges {
       return;
     }
 
-    const root = this.expression().root;
-    const selectedId = this.selectedNodeId();
-    if (root && selectedId) {
-      const next = wrapRuleExpressionNode(root, selectedId, 'group', operator);
-      this.commit(next, next ? findRuleExpressionNode(next, selectedId)?.id ?? selectedId : selectedId);
-      return;
-    }
-
     this.insertNode(createRuleExpressionGroup(operator));
   }
 
   addNot(): void {
     if (this.readonlyOrDisabled) {
-      return;
-    }
-
-    const root = this.expression().root;
-    const selectedId = this.selectedNodeId();
-    if (root && selectedId) {
-      const next = wrapRuleExpressionNode(root, selectedId, 'not');
-      this.commit(next, selectedId);
       return;
     }
 
@@ -127,10 +116,12 @@ export class RuleExpressionBuilderComponent implements OnChanges {
     this.commit(next, node.id);
   }
 
-  onAddChild(event: { parentId: string; type: RuleExpressionNodeType }): void {
+  onAddChild(event: { parentId: string; type: RuleExpressionNodeType; operator?: RuleExpressionGroupOperator }): void {
     const child = event.type === 'ruleRef'
       ? createRuleExpressionRuleRef(this.defaultRuleCode())
-      : createRuleExpressionNode(event.type);
+      : event.type === 'group'
+        ? createRuleExpressionGroup(event.operator ?? 'AND')
+        : createRuleExpressionNode(event.type);
     const next = addRuleExpressionChild(this.expression().root, event.parentId, child);
     this.commit(next, child.id);
   }
@@ -164,6 +155,12 @@ export class RuleExpressionBuilderComponent implements OnChanges {
 
   selectNode(nodeId: string): void {
     this.selectedNodeId.set(nodeId);
+  }
+
+  selectIssue(nodeId: string | undefined): void {
+    if (nodeId) {
+      this.selectedNodeId.set(nodeId);
+    }
   }
 
   private insertNode(node: RuleExpressionNode): void {

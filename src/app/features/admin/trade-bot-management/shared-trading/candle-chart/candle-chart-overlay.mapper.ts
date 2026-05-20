@@ -4,6 +4,8 @@ import type {
   CandleChartBarChangedEvent,
   CandleChartEvaluationResult,
   CandleChartStrategySignal,
+  CandleChartIndicatorPane,
+  CandleChartIndicatorType,
   ChartCandle,
   ChartIndicator,
   ChartOverlay,
@@ -29,13 +31,14 @@ export class CandleChartOverlayMapper {
         }
       });
 
+      const meta = this.resolveIndicatorMeta(code);
       return [
         {
           code,
           name: code,
-          pane: 'MAIN' as const,
-          type: 'LINE' as const,
-          color: 'var(--app-chart-info)',
+          pane: meta.pane,
+          type: meta.type,
+          color: meta.color,
           values,
           visible: true,
         },
@@ -71,6 +74,7 @@ export class CandleChartOverlayMapper {
       generated.push({
         id: `evaluation-entry-${index}`,
         type: 'MARKER',
+        category: 'ENTRY',
         source: 'STRATEGY',
         sourceCode: 'ENTRY',
         index,
@@ -83,6 +87,7 @@ export class CandleChartOverlayMapper {
       generated.push({
         id: `evaluation-entry-line-${index}`,
         type: 'PRICE_LINE',
+        category: 'ENTRY',
         source: 'STRATEGY',
         sourceCode: 'ENTRY',
         price: entryPrice,
@@ -94,6 +99,7 @@ export class CandleChartOverlayMapper {
       generated.push({
         id: `evaluation-sl-${index}`,
         type: 'PRICE_LINE',
+        category: 'STOP_LOSS',
         source: 'STRATEGY',
         sourceCode: 'SL',
         price: stopLoss,
@@ -105,6 +111,7 @@ export class CandleChartOverlayMapper {
       generated.push({
         id: `evaluation-tp-${index}`,
         type: 'PRICE_LINE',
+        category: 'TAKE_PROFIT',
         source: 'STRATEGY',
         sourceCode: 'TP',
         price: takeProfit,
@@ -149,6 +156,31 @@ export class CandleChartOverlayMapper {
   private numberValue(value: unknown): number | null {
     const numericValue = Number(value);
     return Number.isNaN(numericValue) ? null : numericValue;
+  }
+
+  private resolveIndicatorMeta(code: string): {
+    pane: CandleChartIndicatorPane;
+    type: CandleChartIndicatorType;
+    color: string;
+  } {
+    const normalized = code.toLowerCase();
+    if (normalized.includes('macd') && (normalized.includes('hist') || normalized.includes('bar'))) {
+      return { pane: 'SUB', type: 'HISTOGRAM', color: 'var(--app-chart-warning)' };
+    }
+    if (normalized.includes('macd')) {
+      return {
+        pane: 'SUB',
+        type: 'LINE',
+        color: normalized.includes('signal') ? 'var(--app-chart-danger)' : 'var(--app-chart-info)',
+      };
+    }
+    if (normalized.includes('rsi')) {
+      return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-violet)' };
+    }
+    if (normalized.includes('bb') || normalized.includes('bollinger')) {
+      return { pane: 'MAIN', type: 'LINE', color: 'var(--app-chart-primary)' };
+    }
+    return { pane: 'MAIN', type: 'LINE', color: 'var(--app-chart-info)' };
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

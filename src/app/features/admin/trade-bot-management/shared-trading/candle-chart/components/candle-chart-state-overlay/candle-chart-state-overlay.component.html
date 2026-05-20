@@ -1,0 +1,10 @@
+<div class="candle-chart-state" [ngClass]="'candle-chart-state--' + severity">
+  @if (severity === 'loading') {
+    <span class="pi pi-spin pi-spinner" aria-hidden="true"></span>
+  } @else if (severity === 'error') {
+    <span class="pi pi-exclamation-triangle" aria-hidden="true"></span>
+  } @else {
+    <span class="pi pi-chart-line" aria-hidden="true"></span>
+  }
+  <span>{{ message | translateContent }}</span>
+</div>

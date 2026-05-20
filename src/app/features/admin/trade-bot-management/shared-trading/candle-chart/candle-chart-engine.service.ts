@@ -91,7 +91,7 @@ export class CandleChartEngineService {
   private candleSeries: ISeriesApi<'Candlestick'> | null = null;
   private volumeSeries: ISeriesApi<'Histogram'> | null = null;
   private markersApi: ISeriesMarkersPluginApi<Time> | null = null;
-  private indicatorSeries = new Map<string, ISeriesApi<'Line'>>();
+  private indicatorSeries = new Map<string, SeriesApi>();
   private overlaySeries: SeriesApi[] = [];
   private priceLines: IPriceLine[] = [];
   private normalizedCandles: NormalizedCandle[] = [];
@@ -99,6 +99,7 @@ export class CandleChartEngineService {
   private activeBoxAreas: NormalizedBoxArea[] = [];
   private activeLines: NormalizedLine[] = [];
   private structureKey = '';
+  private overlaySignature = '';
   private hostElement: HTMLDivElement | null = null;
   private renderStateCallback: ((state: CandleChartEngineState) => void) | null = null;
   private candleClickCallback: ((candle: ChartCandle) => void) | null = null;
@@ -148,10 +149,12 @@ export class CandleChartEngineService {
     }
 
     const colors = this.resolveChartColors();
+    const wasNearRealtimeEdge = this.isNearRealtimeEdge();
     const normalizedCandles = this.timeUtil.normalizeCandles(input.candles);
     const nextStructureKey = this.buildStructureKey(input, normalizedCandles);
     const resetStructure = nextStructureKey !== this.structureKey;
-    const previousVisibleRange = input.fitContent === false ? this.chartInstance.timeScale().getVisibleRange() : null;
+    const previousVisibleLogicalRange =
+      input.fitContent === false ? this.chartInstance.timeScale().getVisibleLogicalRange() : null;
     this.structureKey = nextStructureKey;
     this.normalizedCandles = normalizedCandles;
 
@@ -170,8 +173,10 @@ export class CandleChartEngineService {
     const timeContext = this.timeUtil.buildTimeNormalizationContext(normalizedCandles);
     this.renderOverlays(input.overlays, timeContext, input.config, colors);
     this.applySelectedRange(input.selectedRange, input.fitContent !== false);
-    if (previousVisibleRange && input.fitContent === false) {
-      this.chartInstance.timeScale().setVisibleRange(previousVisibleRange);
+    if (input.config.autoScrollToRealtime && input.config.mode === 'REALTIME' && wasNearRealtimeEdge) {
+      this.chartInstance.timeScale().scrollToRealTime();
+    } else if (previousVisibleLogicalRange && input.fitContent === false) {
+      this.chartInstance.timeScale().setVisibleLogicalRange(previousVisibleLogicalRange);
     }
     this.updateViewportState();
   }
@@ -255,25 +260,8 @@ export class CandleChartEngineService {
         if (indicator.visible === false) {
           return;
         }
+        const series = this.createIndicatorSeries(indicator, input);
         const isSubchart = indicator.pane === 'SUB' || indicator.pane === 'subchart';
-        const series = this.chartInstance!.addSeries(
-          this.lightweightChartsModule!.LineSeries,
-          {
-            color: resolveCssColor(indicator.color, '--app-chart-violet'),
-            lineWidth: this.resolveIndicatorLineWidth(indicator.name),
-            lineStyle: this.resolveIndicatorLineStyle(indicator.name),
-            lastValueVisible: input.config.showOverlayLabels && input.config.showPriceAxisLabels,
-            priceLineVisible: false,
-            crosshairMarkerVisible: false,
-            priceFormat: {
-              type: 'price',
-              precision: 2,
-              minMove: 0.01,
-            },
-            title: input.config.showOverlayLabels ? indicator.name : '',
-          },
-          isSubchart ? 1 : 0,
-        );
         series.priceScale().applyOptions({
           borderColor: colors.border,
           scaleMargins: {
@@ -284,6 +272,59 @@ export class CandleChartEngineService {
         this.indicatorSeries.set(this.indicatorKey(indicator, index), series);
       });
     }
+  }
+
+  private createIndicatorSeries(indicator: ChartIndicator, input: CandleChartEngineRenderInput): SeriesApi {
+    const isSubchart = indicator.pane === 'SUB' || indicator.pane === 'subchart';
+    const color = resolveCssColor(indicator.color, '--app-chart-violet');
+    const paneIndex = isSubchart ? 1 : 0;
+    const commonOptions = {
+      priceLineVisible: false,
+      lastValueVisible: input.config.showOverlayLabels && input.config.showPriceAxisLabels,
+      priceFormat: {
+        type: 'price' as const,
+        precision: 2,
+        minMove: 0.01,
+      },
+      title: input.config.showOverlayLabels ? indicator.name : '',
+    };
+
+    if (indicator.type === 'HISTOGRAM') {
+      return this.chartInstance!.addSeries(
+        this.lightweightChartsModule!.HistogramSeries,
+        {
+          ...commonOptions,
+          color,
+        },
+        paneIndex,
+      );
+    }
+
+    if (indicator.type === 'AREA') {
+      return this.chartInstance!.addSeries(
+        this.lightweightChartsModule!.AreaSeries,
+        {
+          ...commonOptions,
+          lineColor: color,
+          topColor: color,
+          bottomColor: 'transparent',
+          lineWidth: this.resolveIndicatorLineWidth(indicator.name),
+        },
+        paneIndex,
+      );
+    }
+
+    return this.chartInstance!.addSeries(
+      this.lightweightChartsModule!.LineSeries,
+      {
+        ...commonOptions,
+        color,
+        lineWidth: this.resolveIndicatorLineWidth(indicator.name),
+        lineStyle: this.resolveIndicatorLineStyle(indicator.name),
+        crosshairMarkerVisible: false,
+      },
+      paneIndex,
+    );
   }
 
   private setSeriesData(
@@ -359,8 +400,14 @@ export class CandleChartEngineService {
       return;
     }
 
-    this.clearOverlayArtifacts();
     const visibleOverlays = overlays.filter((overlay) => overlay.visible !== false);
+    const nextSignature = this.buildOverlaySignature(visibleOverlays, config);
+    if (nextSignature === this.overlaySignature) {
+      return;
+    }
+
+    this.clearOverlayArtifacts();
+    this.overlaySignature = nextSignature;
     const markers: Array<SeriesMarker<Time>> = [];
     const boxes: NormalizedBoxArea[] = [];
     const labelLines: NormalizedLine[] = [];
@@ -609,6 +656,7 @@ export class CandleChartEngineService {
     this.activeBoxAreas = [];
     this.activeLines = [];
     this.overlayGeometryEnabled = false;
+    this.overlaySignature = '';
   }
 
   private applyMainPriceScale(colors: CandleChartColors, config: ResolvedCandleChartConfig): void {
@@ -625,12 +673,12 @@ export class CandleChartEngineService {
     if (!this.chartInstance) {
       return;
     }
+    if (!fitContent) {
+      return;
+    }
 
     const timeScale = this.chartInstance.timeScale();
     if (range === 'ALL' || this.normalizedCandles.length === 0) {
-      if (!fitContent) {
-        return;
-      }
       timeScale.fitContent();
       return;
     }
@@ -906,14 +954,14 @@ export class CandleChartEngineService {
   private toIndicatorData(
     normalizedCandles: NormalizedCandle[],
     values: Array<number | null>,
-  ): Array<LineData<Time> | WhitespaceData<Time>> {
+  ): Array<LineData<Time> | HistogramData<Time> | WhitespaceData<Time>> {
     return normalizedCandles.map((item, index) => this.toIndicatorItem(item, values[index]));
   }
 
   private toIndicatorItem(
     item: NormalizedCandle,
     value: number | null | undefined,
-  ): LineData<Time> | WhitespaceData<Time> {
+  ): LineData<Time> | HistogramData<Time> | WhitespaceData<Time> {
     return value == null || Number.isNaN(Number(value))
       ? { time: item.time }
       : { time: item.time, value: Number(value) };
@@ -931,10 +979,57 @@ export class CandleChartEngineService {
         code: indicator.code,
         name: indicator.name,
         pane: indicator.pane,
+        type: indicator.type ?? 'LINE',
+        color: indicator.color,
         visible: indicator.visible !== false,
       })),
       empty: normalizedCandles.length === 0,
     });
+  }
+
+  private buildOverlaySignature(overlays: ChartOverlay[], config: ResolvedCandleChartConfig): string {
+    return JSON.stringify({
+      labels: config.showOverlayLabels,
+      priceLabels: config.showPriceAxisLabels,
+      overlays: overlays.map((overlay, index) => ({
+        id: overlay.id ?? `${overlay.type}-${index}`,
+        type: overlay.type,
+        category: overlay.category,
+        source: overlay.source,
+        sourceCode: overlay.sourceCode,
+        index: overlay.index,
+        time: overlay.time,
+        price: overlay.price,
+        start: overlay.start,
+        end: overlay.end,
+        startPrice: overlay.startPrice,
+        endPrice: overlay.endPrice,
+        startIndex: overlay.startIndex,
+        endIndex: overlay.endIndex,
+        startTime: overlay.startTime,
+        endTime: overlay.endTime,
+        low: overlay.low,
+        high: overlay.high,
+        points: overlay.points,
+        text: config.showOverlayLabels ? overlay.text : '',
+        color: overlay.color,
+        shape: overlay.shape,
+        size: overlay.size,
+        visible: overlay.visible,
+      })),
+    });
+  }
+
+  private isNearRealtimeEdge(thresholdBars = 3): boolean {
+    if (!this.chartInstance || this.normalizedCandles.length === 0) {
+      return true;
+    }
+    const range = this.chartInstance.timeScale().getVisibleLogicalRange();
+    if (!range) {
+      return true;
+    }
+    const lastIndex = this.normalizedCandles.length - 1;
+    return range.to >= lastIndex - thresholdBars;
   }
 
   private indicatorKey(indicator: ChartIndicator, index: number): string {

@@ -18,6 +18,7 @@ Feature create/edit form dùng `app-base-crud-page` phải expose dirty contract
 - Loading/submitting state dùng `signal`, template/action config đọc bằng `loading()` hoặc `submitting()`.
 - Subscription dài hạn như `route.paramMap` phải cleanup bằng `takeUntilDestroyed(this.destroyRef)`.
 - Label/title/description/action text trong `FormConfig` và page config phải là translate key, không hard-code chuỗi hiển thị.
+- Content phụ trợ trước toàn bộ form dùng slot `[crud-page-before-form]`; content cần nằm ngay sau section đầu tiên của `app-form-input` dùng slot `[crud-page-after-first-section]`.
 
 ## Smart Form Layout
 

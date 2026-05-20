@@ -83,9 +83,14 @@
   @if (validation().issues.length) {
     <div class="rule-expression-summary">
       @for (issue of validation().issues; track issue.message + issue.path) {
-        <div class="rule-expression-issue" [class.rule-expression-issue--warning]="issue.severity === 'warning'">
-          {{ issue.message | translateContent }}
-        </div>
+        <app-button
+          icon="pi pi-exclamation-circle"
+          [label]="issue.message"
+          [severity]="issue.severity === 'warning' ? 'warn' : 'danger'"
+          [text]="true"
+          styleClass="rule-expression-issue-button"
+          (buttonClick)="selectIssue(issue.nodeId)"
+        ></app-button>
       }
     </div>
   }
@@ -98,9 +103,13 @@
           [node]="rootNode"
           [selectedNodeId]="selectedNodeId()"
           [issues]="validation().issues"
+          [indicatorConfigs]="indicatorConfigs"
+          [ruleConfigs]="ruleConfigs"
+          [currentRuleId]="currentRuleId"
           [readonly]="readonly"
           [disabled]="disabled"
           (selectNode)="selectNode($event)"
+          (nodeChange)="onNodeChange($event)"
           (addChild)="onAddChild($event)"
           (removeNode)="onRemoveNode($event)"
           (duplicateNode)="onDuplicateNode($event)"
@@ -129,7 +138,10 @@
   <section class="rule-expression-dependencies">
     <div>
       <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.dependencies' | translateContent }}</div>
-      <div class="rule-expression-section-subtitle">{{ 'tradeBot.ruleExpression.dependenciesSubtitle' | translateContent }}</div>
+      <div class="rule-expression-section-subtitle">
+        {{ 'tradeBot.ruleExpression.dependenciesSubtitle' | translateContent }}
+        {{ 'tradeBot.ruleExpression.dependenciesTotal' | translateContent }}: {{ dependencyTotal() }}
+      </div>
     </div>
     <div class="rule-expression-dependencies__groups">
       <div class="rule-expression-dependencies__group">
@@ -167,4 +179,3 @@
 
   <app-rule-expression-json-preview [value]="expression()"></app-rule-expression-json-preview>
 </section>
-

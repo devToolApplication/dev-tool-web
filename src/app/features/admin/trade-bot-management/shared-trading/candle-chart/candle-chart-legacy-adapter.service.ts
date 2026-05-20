@@ -33,6 +33,7 @@ export class CandleChartLegacyAdapter {
       ...payload.lines.map((line, index) => ({
         id: `legacy-line-${index}`,
         type: 'TREND_LINE' as const,
+        category: 'USER_DRAWING' as const,
         source: 'USER_DRAWING' as const,
         sourceCode: line.name,
         text: line.name,
@@ -45,6 +46,7 @@ export class CandleChartLegacyAdapter {
       ...payload.boxAreas.map((box, index) => ({
         id: `legacy-box-${index}`,
         type: 'BOX' as const,
+        category: 'USER_DRAWING' as const,
         source: 'USER_DRAWING' as const,
         text: box.name,
         color: box.color,
@@ -56,6 +58,7 @@ export class CandleChartLegacyAdapter {
       ...payload.points.map((point, index) => ({
         id: `legacy-point-${index}`,
         type: 'MARKER' as const,
+        category: 'USER_DRAWING' as const,
         source: 'USER_DRAWING' as const,
         sourceCode: point.name,
         text: point.name,

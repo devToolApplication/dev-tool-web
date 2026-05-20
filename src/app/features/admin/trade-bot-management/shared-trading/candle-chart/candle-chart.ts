@@ -27,10 +27,14 @@ import type {
   CandleChartPayload,
   CandleChartRange,
   CandleChartRangeBoundaryEvent,
+  CandleChartReplayCommand,
+  CandleChartReplayCommandType,
+  CandleChartReplayState,
   CandleChartReplayStatusEvent,
   CandleChartRuleEvaluation,
   CandleChartStatus,
   CandleChartStrategySignal,
+  ChartOverlayCategory,
   ChartCandle,
   ChartIndicator,
   ChartOverlay,
@@ -76,6 +80,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   @Input() indicators: ChartIndicator[] | null = null;
   @Input() overlays: ChartOverlay[] | null = null;
   @Input() replayConfig: ReplayConfig | null = null;
+  @Input() controlledReplay = false;
+  @Input() replayState: CandleChartReplayState | null = null;
   @Input() realtimeConfig: RealtimeConfig | null = null;
   @Input() evaluationConfig: EvaluationConfig | null = null;
   @Input() evaluateHandler: CandleChartEvaluateHandler | null = null;
@@ -85,6 +91,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   @Output() readonly ruleEvaluated = new EventEmitter<CandleChartRuleEvaluation | Record<string, unknown>>();
   @Output() readonly strategySignal = new EventEmitter<CandleChartStrategySignal | Record<string, unknown>>();
   @Output() readonly replayStatusChanged = new EventEmitter<CandleChartReplayStatusEvent>();
+  @Output() readonly replayCommand = new EventEmitter<CandleChartReplayCommand>();
   @Output() readonly error = new EventEmitter<CandleChartErrorEvent>();
   @Output() readonly rangeBoundaryReached = new EventEmitter<CandleChartRangeBoundaryEvent>();
 
@@ -134,6 +141,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   private destroyed = false;
   private themeObserver: MutationObserver | null = null;
   private clockIntervalId: number | null = null;
+  private evaluationTimerId: number | null = null;
   private evaluationSubscription: Subscription | null = null;
   private lastRenderInput: CandleChartEngineRenderInput | null = null;
   private evaluationOverlays: ChartOverlay[] = [];
@@ -264,8 +272,24 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       return;
     }
 
-    const resetIndex = Boolean(changes['candles'] || changes['data'] || changes['replayConfig']);
-    this.syncInputsAndRender(resetIndex);
+    const inputChanged = Boolean(
+      changes['candles'] ||
+        changes['data'] ||
+        changes['replayConfig'] ||
+        changes['config'] ||
+        changes['mode'] ||
+        changes['symbol'] ||
+        changes['timeframe'] ||
+        changes['indicators'] ||
+        changes['overlays'],
+    );
+    if (inputChanged) {
+      const resetIndex = Boolean(changes['candles'] || changes['data'] || changes['replayConfig']);
+      this.syncInputsAndRender(resetIndex);
+    }
+    if (this.controlledReplay && changes['replayState']) {
+      this.applyControlledReplayState();
+    }
   }
 
   ngOnDestroy(): void {
@@ -276,6 +300,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       this.clockIntervalId = null;
     }
     this.themeObserver?.disconnect();
+    if (this.evaluationTimerId != null) {
+      window.clearTimeout(this.evaluationTimerId);
+      this.evaluationTimerId = null;
+    }
     this.evaluationSubscription?.unsubscribe();
     this.replayService.pause();
     this.realtimeService.disconnect();
@@ -358,15 +386,19 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     const overlays = this.store.overlays();
     return [
       { label: 'tradeBot.chart.overlay.indicators', value: this.store.indicators().length, color: 'var(--app-finance-chart-crosshair)' },
-      { label: 'tradeBot.chart.overlay.entries', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['ENTRY', 'BUY', 'LONG'])).length, color: 'var(--app-chart-candle-up)' },
-      { label: 'tradeBot.chart.overlay.exits', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['EXIT', 'SELL', 'CLOSE'])).length, color: 'var(--app-chart-candle-down)' },
-      { label: 'tradeBot.chart.overlay.stopLoss', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['SL', 'STOP'])).length, color: 'var(--app-chart-candle-down)' },
-      { label: 'tradeBot.chart.overlay.takeProfit', value: overlays.filter((overlay) => this.overlayMatches(overlay, ['TP', 'TAKE'])).length, color: 'var(--app-chart-candle-up)' },
+      { label: 'tradeBot.chart.overlay.entries', value: this.countOverlaysByCategory(overlays, 'ENTRY'), color: 'var(--app-chart-candle-up)' },
+      { label: 'tradeBot.chart.overlay.exits', value: this.countOverlaysByCategory(overlays, 'EXIT'), color: 'var(--app-chart-candle-down)' },
+      { label: 'tradeBot.chart.overlay.stopLoss', value: this.countOverlaysByCategory(overlays, 'STOP_LOSS'), color: 'var(--app-chart-candle-down)' },
+      { label: 'tradeBot.chart.overlay.takeProfit', value: this.countOverlaysByCategory(overlays, 'TAKE_PROFIT'), color: 'var(--app-chart-candle-up)' },
     ].filter((item) => item.value > 0);
   }
 
   playReplay(): void {
     if (this.store.mode() !== 'REPLAY') {
+      return;
+    }
+    if (this.controlledReplay) {
+      this.emitReplayCommand('PLAY', { index: this.currentIndex, speedMs: this.store.speedMs() });
       return;
     }
     this.replayService.play(this.currentIndex, this.totalCandles, this.currentReplayConfig(), (step) =>
@@ -375,32 +407,56 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   pauseReplay(): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('PAUSE');
+      return;
+    }
     this.replayService.pause();
     this.store.setStatus(this.totalCandles ? 'PAUSED' : 'IDLE');
     this.emitReplayStatus();
   }
 
   replayFirst(): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('FIRST', { index: 0 });
+      return;
+    }
     this.replayService.pause();
     this.applyReplayStep(this.replayService.first(this.totalCandles), true);
   }
 
   replayPrevious(): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('PREVIOUS', { index: Math.max(0, this.currentIndex - 1) });
+      return;
+    }
     this.replayService.pause();
     this.applyReplayStep(this.replayService.previous(this.currentIndex, this.totalCandles), true);
   }
 
   replayNext(): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('NEXT', { index: Math.min(Math.max(this.totalCandles - 1, 0), this.currentIndex + 1) });
+      return;
+    }
     this.replayService.pause();
     this.applyReplayStep(this.replayService.next(this.currentIndex, this.totalCandles, this.currentReplayConfig()), true);
   }
 
   replayLast(): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('LAST', { index: Math.max(this.totalCandles - 1, 0) });
+      return;
+    }
     this.replayService.pause();
     this.applyReplayStep(this.replayService.last(this.totalCandles), true);
   }
 
   seekReplay(value: string | number | null | undefined): void {
+    if (this.controlledReplay) {
+      this.emitReplayCommand('JUMP', { index: Number(value) });
+      return;
+    }
     this.replayService.pause();
     this.applyReplayStep(this.replayService.seek(Number(value), this.totalCandles), true);
   }
@@ -408,6 +464,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   changeReplaySpeed(value: string | number | boolean | null | undefined): void {
     const speedMs = Number(value);
     this.store.speedMs.set(Number.isNaN(speedMs) ? 650 : speedMs);
+    if (this.controlledReplay) {
+      this.emitReplayCommand('SPEED', { speedMs: this.store.speedMs() });
+      return;
+    }
     if (this.isPlaying) {
       this.playReplay();
     }
@@ -432,6 +492,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     }
     this.initialized = true;
     this.connectRealtimeIfNeeded();
+    if (this.controlledReplay) {
+      this.applyControlledReplayState(false);
+      return;
+    }
     if (this.store.mode() === 'REPLAY' && this.currentReplayConfig().autoPlay) {
       this.playReplay();
     }
@@ -442,6 +506,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.forceSetDataOnNextRender = resetIndex;
     this.connectRealtimeIfNeeded();
     this.renderStore();
+    if (this.controlledReplay) {
+      this.applyControlledReplayState(false);
+      return;
+    }
     if (resetIndex && this.store.mode() === 'REPLAY' && this.currentReplayConfig().autoPlay) {
       this.playReplay();
     }
@@ -499,6 +567,26 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     });
   }
 
+  private applyControlledReplayState(emitBarChange = true): void {
+    if (!this.replayState || this.store.mode() !== 'REPLAY') {
+      return;
+    }
+
+    const previousIndex = this.currentIndex;
+    const candle = this.store.setCurrentIndex(this.replayState.index);
+    this.store.setStatus(this.replayState.status);
+    this.store.speedMs.set(Math.max(50, Number(this.replayState.speedMs || this.store.speedMs())));
+    this.renderStore();
+    if (emitBarChange && candle && previousIndex !== this.currentIndex) {
+      this.emitBarChanged(candle);
+    }
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private emitReplayCommand(type: CandleChartReplayCommandType, payload: Omit<CandleChartReplayCommand, 'type'> = {}): void {
+    this.replayCommand.emit({ type, ...payload });
+  }
+
   private emitBarChanged(candle: ChartCandle): void {
     const event: CandleChartBarChangedEvent = {
       index: this.currentIndex,
@@ -520,6 +608,27 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       return;
     }
 
+    if (this.evaluationTimerId != null) {
+      window.clearTimeout(this.evaluationTimerId);
+      this.evaluationTimerId = null;
+    }
+
+    const debounceMs = Math.max(0, Number(config?.debounceMs ?? 0));
+    if (debounceMs > 0) {
+      this.evaluationTimerId = window.setTimeout(() => {
+        this.evaluationTimerId = null;
+        this.runEvaluation(event);
+      }, debounceMs);
+      return;
+    }
+
+    this.runEvaluation(event);
+  }
+
+  private runEvaluation(event: CandleChartBarChangedEvent): void {
+    if (!this.evaluateHandler) {
+      return;
+    }
     this.evaluationSubscription?.unsubscribe();
     try {
       const result = this.evaluateHandler(event);
@@ -644,7 +753,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       autoScrollToRealtime: true,
       lazyLoadOnPan: false,
       lazyLoadThresholdBars: 24,
-      preserveViewportOnDataUpdate: false,
+      preserveViewportOnDataUpdate: true,
       evaluateOnBarChange: false,
       evaluateOnClosedCandleOnly: true,
       evaluateLivePreview: false,
@@ -682,22 +791,67 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   private overlayAllowed(overlay: ChartOverlay): boolean {
     const filters = this.overlayFilters();
-    if (!filters['failedEntries'] && this.overlayMatches(overlay, ['FAIL', 'FAILED', 'REJECT'])) {
+    const category = this.resolveOverlayCategory(overlay);
+    if (!filters['failedEntries'] && category === 'FAILED_ENTRY') {
       return false;
     }
-    if (!filters['stopLoss'] && this.overlayMatches(overlay, ['SL', 'STOP'])) {
+    if (!filters['stopLoss'] && category === 'STOP_LOSS') {
       return false;
     }
-    if (!filters['takeProfit'] && this.overlayMatches(overlay, ['TP', 'TAKE'])) {
+    if (!filters['takeProfit'] && category === 'TAKE_PROFIT') {
       return false;
     }
-    if (!filters['entries'] && this.overlayMatches(overlay, ['ENTRY', 'BUY', 'LONG'])) {
+    if (!filters['entries'] && category === 'ENTRY') {
       return false;
     }
-    if (!filters['exits'] && this.overlayMatches(overlay, ['EXIT', 'SELL', 'CLOSE'])) {
+    if (!filters['exits'] && category === 'EXIT') {
+      return false;
+    }
+    if (!filters['indicators'] && category === 'INDICATOR') {
       return false;
     }
     return true;
+  }
+
+  private countOverlaysByCategory(overlays: ChartOverlay[], category: ChartOverlayCategory): number {
+    return overlays.filter((overlay) => this.resolveOverlayCategory(overlay) === category).length;
+  }
+
+  private resolveOverlayCategory(overlay: ChartOverlay): ChartOverlayCategory {
+    if (overlay.category) {
+      return overlay.category;
+    }
+    if (this.overlayMatches(overlay, ['FAIL', 'FAILED', 'REJECT'])) {
+      return 'FAILED_ENTRY';
+    }
+    if (this.overlayMatches(overlay, ['SL', 'STOP'])) {
+      return 'STOP_LOSS';
+    }
+    if (this.overlayMatches(overlay, ['TP', 'TAKE'])) {
+      return 'TAKE_PROFIT';
+    }
+    if (this.overlayMatches(overlay, ['ENTRY', 'BUY', 'LONG'])) {
+      return 'ENTRY';
+    }
+    if (this.overlayMatches(overlay, ['EXIT', 'SELL', 'CLOSE'])) {
+      return 'EXIT';
+    }
+    if (overlay.source === 'INDICATOR') {
+      return 'INDICATOR';
+    }
+    if (overlay.source === 'RULE') {
+      return 'RULE';
+    }
+    if (overlay.source === 'STRATEGY') {
+      return 'STRATEGY';
+    }
+    if (overlay.source === 'PAPER_TRADE') {
+      return 'PAPER_TRADE';
+    }
+    if (overlay.source === 'USER_DRAWING') {
+      return 'USER_DRAWING';
+    }
+    return 'OTHER';
   }
 
   private overlayMatches(overlay: ChartOverlay, tokens: string[]): boolean {

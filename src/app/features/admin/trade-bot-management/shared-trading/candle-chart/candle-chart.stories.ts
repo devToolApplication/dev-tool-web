@@ -1,12 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/angular';
+import { moduleMetadata } from '@storybook/angular';
 
+import { SharedModule } from '../../../../../shared/shared.module';
 import {
   CandleChart,
   type CandleChartConfig,
   type CandleChartPayload,
   type ChartCandle,
+  type ChartIndicator,
   type ChartOverlay,
 } from './candle-chart';
+import { CandleChartHeaderComponent } from './components/candle-chart-header/candle-chart-header.component';
+import { CandleChartReplayControlsComponent } from './components/candle-chart-replay-controls/candle-chart-replay-controls.component';
+import { CandleChartStateOverlayComponent } from './components/candle-chart-state-overlay/candle-chart-state-overlay.component';
+import { CandleChartToolbarComponent } from './components/candle-chart-toolbar/candle-chart-toolbar.component';
 
 const config: CandleChartConfig = {
   showCandles: true,
@@ -89,6 +96,7 @@ const strategyOverlays: ChartOverlay[] = [
   {
     id: 'entry',
     type: 'MARKER',
+    category: 'ENTRY',
     source: 'STRATEGY',
     index: 3,
     price: 111,
@@ -99,6 +107,7 @@ const strategyOverlays: ChartOverlay[] = [
   {
     id: 'sl',
     type: 'PRICE_LINE',
+    category: 'STOP_LOSS',
     source: 'STRATEGY',
     price: 106,
     text: 'SL',
@@ -107,6 +116,7 @@ const strategyOverlays: ChartOverlay[] = [
   {
     id: 'tp',
     type: 'PRICE_LINE',
+    category: 'TAKE_PROFIT',
     source: 'STRATEGY',
     price: 121,
     text: 'TP',
@@ -114,9 +124,55 @@ const strategyOverlays: ChartOverlay[] = [
   },
 ];
 
+const typedIndicators: ChartIndicator[] = [
+  {
+    code: 'MACD',
+    name: 'MACD',
+    pane: 'SUB',
+    type: 'LINE',
+    color: 'var(--app-chart-info)',
+    values: [0.1, 0.2, 0.35, 0.3, 0.24, 0.31, 0.42, 0.28],
+  },
+  {
+    code: 'MACD_SIGNAL',
+    name: 'MACD Signal',
+    pane: 'SUB',
+    type: 'LINE',
+    color: 'var(--app-chart-danger)',
+    values: [0.08, 0.14, 0.22, 0.27, 0.25, 0.27, 0.34, 0.31],
+  },
+  {
+    code: 'MACD_HISTOGRAM',
+    name: 'MACD Histogram',
+    pane: 'SUB',
+    type: 'HISTOGRAM',
+    color: 'var(--app-chart-warning)',
+    values: [0.02, 0.06, 0.13, 0.03, -0.01, 0.04, 0.08, -0.03],
+  },
+  {
+    code: 'RSI',
+    name: 'RSI',
+    pane: 'SUB',
+    type: 'AREA',
+    color: 'var(--app-chart-violet)',
+    values: [44, 48, 57, 62, 55, 66, 71, 63],
+  },
+];
+
 const meta: Meta<CandleChart> = {
   title: 'Shared/Components/Candle Chart',
   component: CandleChart,
+  decorators: [
+    moduleMetadata({
+      declarations: [
+        CandleChartHeaderComponent,
+        CandleChartReplayControlsComponent,
+        CandleChartStateOverlayComponent,
+        CandleChartToolbarComponent,
+      ],
+      imports: [SharedModule],
+    }),
+  ],
   parameters: {
     layout: 'padded',
   },
@@ -233,5 +289,19 @@ export const EvaluationOverlays: Story = {
     },
     candles,
     overlays: strategyOverlays,
+  },
+};
+
+export const IndicatorTypes: Story = {
+  args: {
+    mode: 'HISTORICAL',
+    config: {
+      ...config,
+      showIndicators: true,
+      showToolbar: true,
+      showOverlayLabels: true,
+    },
+    candles,
+    indicators: typedIndicators,
   },
 };

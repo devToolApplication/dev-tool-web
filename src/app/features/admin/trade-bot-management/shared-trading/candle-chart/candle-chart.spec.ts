@@ -8,6 +8,10 @@ import { SharedModule } from '../../../../../shared/shared.module';
 import { provideSharedTesting } from '../../../../../shared/testing/shared-test.providers';
 
 import { CandleChart } from './candle-chart';
+import { CandleChartHeaderComponent } from './components/candle-chart-header/candle-chart-header.component';
+import { CandleChartReplayControlsComponent } from './components/candle-chart-replay-controls/candle-chart-replay-controls.component';
+import { CandleChartStateOverlayComponent } from './components/candle-chart-state-overlay/candle-chart-state-overlay.component';
+import { CandleChartToolbarComponent } from './components/candle-chart-toolbar/candle-chart-toolbar.component';
 import { CandleChartEngineService, type CandleChartEngineRenderInput } from './candle-chart-engine.service';
 import { CandleChartLegacyAdapter } from './candle-chart-legacy-adapter.service';
 import { CandleChartRealtimeService } from './candle-chart-realtime.service';
@@ -28,6 +32,8 @@ const addSeries = vi.fn(() => ({
 const timeScale = {
   fitContent: vi.fn(),
   setVisibleLogicalRange: vi.fn(),
+  getVisibleLogicalRange: vi.fn(() => ({ from: 0, to: 10 })),
+  scrollToRealTime: vi.fn(),
   timeToCoordinate: vi.fn(() => 40),
   subscribeVisibleLogicalRangeChange: vi.fn(),
   unsubscribeVisibleLogicalRangeChange: vi.fn(),
@@ -51,6 +57,7 @@ vi.mock('lightweight-charts', () => ({
   })),
   CandlestickSeries: { type: 'Candlestick' },
   HistogramSeries: { type: 'Histogram' },
+  AreaSeries: { type: 'Area' },
   LineSeries: { type: 'Line' },
   ColorType: { Solid: 'solid' },
   CrosshairMode: { Normal: 0 },
@@ -160,6 +167,32 @@ describe('CandleChart', () => {
 
     expect(component.currentIndex).toBe(1);
   });
+
+  it('should emit commands instead of moving index in controlled replay mode', async () => {
+    const replayCommand = vi.fn();
+    component.replayCommand.subscribe(replayCommand);
+    fixture.componentRef.setInput('mode', 'REPLAY');
+    fixture.componentRef.setInput('controlledReplay', true);
+    fixture.componentRef.setInput('candles', [
+      { index: 0, time: '09:00', open: 1, high: 2, low: 0.5, close: 1.5 },
+      { index: 1, time: '10:00', open: 1.5, high: 3, low: 1, close: 2.5 },
+    ]);
+    fixture.componentRef.setInput('replayConfig', { initialIndex: 0, speedMs: 650 });
+    fixture.componentRef.setInput('replayState', { index: 0, status: 'READY', speedMs: 650 });
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    component.replayNext();
+
+    expect(component.currentIndex).toBe(0);
+    expect(replayCommand).toHaveBeenCalledWith({ type: 'NEXT', index: 1 });
+
+    fixture.componentRef.setInput('replayState', { index: 1, status: 'PLAYING', speedMs: 650 });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.currentIndex).toBe(1);
+  });
 });
 
 describe('CandleChart template controls', () => {
@@ -168,7 +201,17 @@ describe('CandleChart template controls', () => {
   beforeEach(async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      declarations: [CandleChart, ButtonStubComponent, SelectStubComponent, SliderStubComponent, TranslateContentPipeStub],
+      declarations: [
+        CandleChart,
+        CandleChartHeaderComponent,
+        CandleChartReplayControlsComponent,
+        CandleChartStateOverlayComponent,
+        CandleChartToolbarComponent,
+        ButtonStubComponent,
+        SelectStubComponent,
+        SliderStubComponent,
+        TranslateContentPipeStub,
+      ],
       imports: [CommonModule],
     });
     TestBed.overrideComponent(CandleChart, {

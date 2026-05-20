@@ -1,9 +1,6 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
-import {
-  createConstantOperand,
-  createPriceOperand
-} from './rule-expression-factory';
+import { createConstantOperand } from './rule-expression-factory';
 import {
   RuleExpressionConditionNode,
   RuleExpressionConditionOperator,
@@ -11,17 +8,20 @@ import {
   RuleExpressionGroupOperator,
   RuleExpressionNode,
   RuleExpressionOperand,
+  RuleExpressionOperandValueType,
   RuleExpressionRuleRefNode,
   RuleExpressionValidationIssue
 } from './rule-expression.models';
 import {
   RULE_EXPRESSION_OPERATOR_CATALOG,
+  operandValueTypes,
   operatorDefinition
 } from './rule-expression-operators';
 
 interface OperandSlot {
   index: number;
   label: string;
+  allowedValueTypes: RuleExpressionOperandValueType[];
 }
 
 @Component({
@@ -89,21 +89,15 @@ export class RuleExpressionPanelComponent {
 
   operandSlots(node: RuleExpressionConditionNode): OperandSlot[] {
     const definition = operatorDefinition(node.operator);
-    if (definition?.arity === 'range') {
-      return [
-        { index: 0, label: 'tradeBot.ruleExpression.field.leftOperand' },
-        { index: 1, label: 'tradeBot.ruleExpression.field.minOperand' },
-        { index: 2, label: 'tradeBot.ruleExpression.field.maxOperand' }
-      ];
-    }
-    return [
-      { index: 0, label: 'tradeBot.ruleExpression.field.leftOperand' },
-      { index: 1, label: 'tradeBot.ruleExpression.field.rightOperand' }
-    ];
+    return (definition?.slots ?? []).map((slot, index) => ({
+      index,
+      label: slot.label,
+      allowedValueTypes: slot.allowedValueTypes
+    }));
   }
 
-  operandAt(node: RuleExpressionConditionNode, index: number): RuleExpressionOperand {
-    return node.operands[index] ?? (index === 0 ? createPriceOperand() : createConstantOperand());
+  operandAt(node: RuleExpressionConditionNode, index: number): RuleExpressionOperand | null {
+    return node.operands[index] ?? null;
   }
 
   updateGroupOperator(node: RuleExpressionGroupNode, value: unknown): void {
@@ -117,12 +111,21 @@ export class RuleExpressionPanelComponent {
     if (!this.isConditionOperator(value)) {
       return;
     }
-    const required = operatorDefinition(value)?.arity === 'range' ? 3 : 2;
-    const operands = [...node.operands];
-    while (operands.length < required) {
-      operands.push(operands.length === 0 ? createPriceOperand() : createConstantOperand(operands.length === 1 ? 0 : 1));
-    }
-    this.emitChange({ ...node, operator: value, operands: operands.slice(0, required) });
+    const slots = operatorDefinition(value)?.slots ?? [];
+    const operands = slots.flatMap((slot, index) => {
+      const current = node.operands[index];
+      if (current && operandValueTypes(current).some((type) => slot.allowedValueTypes.includes(type))) {
+        return [current];
+      }
+      if (slot.name === 'min') {
+        return [createConstantOperand(0)];
+      }
+      if (slot.name === 'max') {
+        return [createConstantOperand(1)];
+      }
+      return [];
+    });
+    this.emitChange({ ...node, operator: value, operands });
   }
 
   updateOperand(node: RuleExpressionConditionNode, index: number, operand: RuleExpressionOperand): void {
@@ -191,4 +194,3 @@ export class RuleExpressionPanelComponent {
     return typeof value === 'string' ? value : '';
   }
 }
-

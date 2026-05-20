@@ -25,13 +25,13 @@ export function printRuleExpressionOperand(operand: RuleExpressionOperand | null
   }
   if (operand.type === 'indicatorOutput') {
     const code = operand.indicatorCode || '?';
-    return operand.outputName ? `${code}.${operand.outputName}` : `${code}.?`;
+    return !operand.outputName || operand.outputName === 'VALUE' ? code : `${code}.${operand.outputName}`;
   }
   if (operand.type === 'priceSeries') {
-    return operand.series ? `price.${operand.series}` : 'price.?';
+    return operand.series ? printPriceSeries(operand.series) : '?';
   }
   if (operand.type === 'ruleRef') {
-    return operand.ruleCode ? `rule.${operand.ruleCode}` : 'rule.?';
+    return operand.ruleCode || '?';
   }
   return printConstant(operand);
 }
@@ -45,7 +45,7 @@ function printNode(node: RuleExpressionNode, nested: boolean): string {
     return printCondition(node);
   }
   if (node.type === 'ruleRef') {
-    return node.ruleCode ? `RULE(${node.ruleCode})` : 'RULE(?)';
+    return node.ruleCode || '?';
   }
   if (node.type === 'not') {
     const child = node.children.map((item) => printNode(item, true)).find(Boolean);
@@ -75,7 +75,7 @@ function printCondition(node: RuleExpressionConditionNode): string {
 
 function printConstant(operand: RuleExpressionOperand): string {
   if (operand.value === null || operand.value === undefined || operand.value === '') {
-    return 'const.?';
+    return '?';
   }
   if (operand.valueType === 'string') {
     return `"${String(operand.value)}"`;
@@ -83,7 +83,16 @@ function printConstant(operand: RuleExpressionOperand): string {
   return String(operand.value);
 }
 
+function printPriceSeries(series: string): string {
+  if (series === 'CLOSE' || series === 'CLOSEPRICE') {
+    return 'CLOSEPRICE';
+  }
+  if (['OPEN', 'HIGH', 'LOW'].includes(series)) {
+    return `${series}PRICE`;
+  }
+  return series;
+}
+
 function isNode(value: RuleLogicFormValue | RuleExpressionNode | null | undefined): value is RuleExpressionNode {
   return Boolean(value && typeof value === 'object' && 'type' in value);
 }
-

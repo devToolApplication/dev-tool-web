@@ -9,7 +9,7 @@ import {
   RuleExpressionValidationResult,
   RuleLogicFormValue
 } from './rule-expression.models';
-import { operatorDefinition } from './rule-expression-operators';
+import { operandValueTypes, operatorDefinition } from './rule-expression-operators';
 
 export function validateRuleExpression(
   value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
@@ -102,25 +102,34 @@ function validateCondition(
     return;
   }
 
-  const requiredOperands = definition.arity === 'range' ? 3 : 2;
-  if (node.operands.length < requiredOperands || node.operands.slice(0, requiredOperands).some((operand) => !operandComplete(operand))) {
-    issues.push({
-      nodeId: node.id,
-      path,
-      message: 'tradeBot.ruleExpression.validation.operandRequired',
-      severity: 'error'
-    });
-  }
-
-  node.operands.slice(0, requiredOperands).forEach((operand, index) => {
+  definition.slots.forEach((slot, index) => {
+    const operand = node.operands[index];
     if (!operand) {
-      return;
-    }
-    validateOperand(operand, node.id, context, issues, `${path}.operand.${index}`);
-    if (!operandCompatible(operand, definition.numericOnly, definition.allowBoolean, definition.allowRuleRef)) {
       issues.push({
         nodeId: node.id,
-        path: `${path}.operand.${index}`,
+        path: `${path}.operand.${slot.name}`,
+        message: 'tradeBot.ruleExpression.validation.operandRequired',
+        severity: 'error'
+      });
+      return;
+    }
+
+    const operandPath = `${path}.operand.${slot.name}`;
+    if (!operandComplete(operand)) {
+      issues.push({
+        nodeId: node.id,
+        path: operandPath,
+        message: 'tradeBot.ruleExpression.validation.operandRequired',
+        severity: 'error'
+      });
+      return;
+    }
+
+    validateOperand(operand, node.id, context, issues, operandPath);
+    if (!operandCompatible(operand, slot.allowedValueTypes)) {
+      issues.push({
+        nodeId: node.id,
+        path: operandPath,
         message: 'tradeBot.ruleExpression.validation.incompatibleOperand',
         severity: 'error'
       });
@@ -334,25 +343,9 @@ function operandComplete(operand: RuleExpressionOperand | undefined): boolean {
   return operand.value !== undefined && operand.value !== null && operand.value !== '';
 }
 
-function operandCompatible(
-  operand: RuleExpressionOperand,
-  numericOnly: boolean,
-  allowBoolean: boolean,
-  allowRuleRef: boolean
-): boolean {
-  if (operand.type === 'ruleRef') {
-    return allowRuleRef;
-  }
-  if (operand.type !== 'constant') {
-    return true;
-  }
-  if (operand.valueType === 'boolean') {
-    return allowBoolean;
-  }
-  if (numericOnly) {
-    return operand.valueType === 'number' && typeof operand.value === 'number';
-  }
-  return true;
+function operandCompatible(operand: RuleExpressionOperand, allowedValueTypes: string[]): boolean {
+  const types = operandValueTypes(operand);
+  return types.some((type) => allowedValueTypes.includes(type));
 }
 
 function constantNumber(operand: RuleExpressionOperand): number | null {

@@ -1,8 +1,8 @@
 import { Component, DestroyRef, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { BacktestRunResponse, ReplayInitDto, ReplayInitResponse } from '../../../../../core/models/trade-bot/trading-system.model';
-import { RealtimeProgressEvent } from '../../../../../core/models/realtime/realtime.model';
+import { RealtimeProgressEvent, RealtimeTaskStatus } from '../../../../../core/models/realtime/realtime.model';
 import { RealtimeWebSocketService, ReplayCommandType } from '../../../../../core/services/realtime/realtime-websocket.service';
 import { ReplayService } from '../../../../../core/services/trade-bot-service/replay.service';
 import { StrategyDebugService } from '../../../../../core/services/trade-bot-service/strategy-debug.service';
@@ -15,6 +15,9 @@ import {
   CandleChartBarChangedEvent,
   CandleChartConfig,
   CandleChartEvaluationResult,
+  CandleChartReplayCommand,
+  CandleChartReplayState,
+  CandleChartStatus,
   ChartCandle,
   ChartIndicator,
   EvaluationConfig,
@@ -29,7 +32,8 @@ import { parseJson } from '../../trade-bot-form-utils';
 @Component({
   selector: 'app-trade-bot-replay',
   standalone: false,
-  templateUrl: './replay.component.html'
+  templateUrl: './replay.component.html',
+  styleUrl: './replay.component.css'
 })
 export class ReplayComponent {
   readonly replayForm = REPLAY_INIT_FORM;
@@ -40,14 +44,16 @@ export class ReplayComponent {
   readonly replay = signal<ReplayInitResponse | null>(null);
   readonly replayEvent = signal<RealtimeProgressEvent | null>(null);
   readonly evaluation = signal<Record<string, unknown> | null>(null);
+  readonly strategySignal = signal<Record<string, unknown> | null>(null);
+  readonly ruleTrace = signal<Record<string, unknown> | null>(null);
   readonly selectedCandle = signal<ChartCandle | null>(null);
   readonly replaySpeed = signal(650);
-  readonly activeTab = signal('ruleTrace');
+  readonly activeTab = signal('signal');
   readonly tabs: AppTabItem[] = [
+    { label: 'tradeBot.replay.signal', value: 'signal' },
     { label: 'tradeBot.replay.ruleTrace', value: 'ruleTrace' },
-    { label: 'tradeBot.replay.candles', value: 'candles' },
-    { label: 'tradeBot.replay.overlays', value: 'overlays' },
-    { label: 'tradeBot.replay.rawEvents', value: 'rawEvents' }
+    { label: 'tradeBot.replay.candle', value: 'candle' },
+    { label: 'tradeBot.replay.raw', value: 'raw' }
   ];
   readonly chartConfig = computed<CandleChartConfig>(() => ({
     showCandles: true,
@@ -63,7 +69,8 @@ export class ReplayComponent {
     showReplayControls: true,
     showToolbar: true,
     showDebugPanel: true,
-    evaluateOnBarChange: true
+    evaluateOnBarChange: true,
+    preserveViewportOnDataUpdate: true
   }));
   readonly chartCandles = computed<ChartCandle[]>(() =>
     (this.replay()?.candles ?? []).map((candle, index) => ({
@@ -130,8 +137,30 @@ export class ReplayComponent {
     }))
   );
   readonly evaluationTrace = computed<Record<string, unknown>>(() => {
+    const trace = this.ruleTrace();
+    if (trace) {
+      return trace;
+    }
     const evaluation = this.evaluation();
     return ((evaluation?.['ruleTrace'] ?? evaluation?.['trace'] ?? evaluation) as Record<string, unknown>) ?? {};
+  });
+  readonly signalSummary = computed(() => this.resolveSignalRecord());
+  readonly signalSide = computed(() => String(this.signalSummary()?.['side'] ?? this.signalSummary()?.['signal'] ?? '-').toUpperCase());
+  readonly signalSummaryFacts = computed(() => {
+    const signal = this.signalSummary();
+    return [
+      { label: 'tradeBot.field.entryPrice', value: this.formatDisplayValue(this.pickValue(signal, ['entryPrice', 'entry'])) },
+      { label: 'tradeBot.replay.stopLoss', value: this.formatDisplayValue(this.pickValue(signal, ['stopLoss', 'sl'])) },
+      { label: 'tradeBot.replay.takeProfit', value: this.formatDisplayValue(this.pickValue(signal, ['takeProfit', 'tp'])) },
+      { label: 'tradeBot.replay.riskReward', value: this.formatDisplayValue(this.pickValue(signal, ['riskReward', 'rr'])) },
+      { label: 'tradeBot.replay.confidence', value: this.formatDisplayValue(this.pickValue(signal, ['confidence', 'score'])) },
+      { label: 'tradeBot.replay.signalTime', value: this.formatDisplayValue(this.pickValue(signal, ['signalTime', 'time', 'openTime'])) }
+    ];
+  });
+  readonly backendSessionStatus = computed(() => this.replayEvent()?.status ?? (this.replay() ? 'IDLE' : '-'));
+  readonly lastEvalLatency = computed(() => {
+    const payload = this.replayEvent()?.payload;
+    return this.formatDisplayValue(this.pickValue(payload, ['lastEvalMs', 'evaluationMs', 'latencyMs', 'elapsedMs']));
   });
   readonly chartEvaluationConfig = computed<EvaluationConfig>(() => {
     const runId = String(this.evaluateModel()['runId'] ?? '');
@@ -139,15 +168,42 @@ export class ReplayComponent {
       enabled: runId.length > 0,
       runId,
       includeStrategy: true,
-      includeTrace: false
+      includeTrace: false,
+      debounceMs: 180,
+      cacheEnabled: true
     };
   });
+  readonly chartReplayState = computed<CandleChartReplayState>(() => ({
+    index: this.resolveReplayIndex(),
+    status: this.mapReplayStatus(this.replayEvent()?.status),
+    speedMs: this.replaySpeed()
+  }));
   readonly evaluateCurrentBar = (event: CandleChartBarChangedEvent): Observable<CandleChartEvaluationResult | null> | null => {
     const runId = String(this.evaluateModel()['runId'] ?? '');
     if (!runId) {
       return null;
     }
-    return this.strategyDebugService.evaluateStrategy(runId, event.index).pipe(map((response) => response as CandleChartEvaluationResult));
+    const key = `${runId}:${event.index}`;
+    const cached = this.evaluationCache.get(key);
+    if (cached) {
+      return of(cached);
+    }
+    const pending = this.pendingEvaluation.get(key);
+    if (pending) {
+      return pending;
+    }
+    const request$ = this.strategyDebugService.evaluateStrategy(runId, event.index).pipe(
+      map((response) => response as CandleChartEvaluationResult),
+      tap((result) => {
+        if (result) {
+          this.evaluationCache.set(key, result);
+        }
+      }),
+      finalize(() => this.pendingEvaluation.delete(key)),
+      shareReplay(1)
+    );
+    this.pendingEvaluation.set(key, request$);
+    return request$;
   };
   readonly candleTableConfig: TableConfig = {
     title: 'tradeBot.replay.candles',
@@ -174,6 +230,8 @@ export class ReplayComponent {
     scrollable: true,
     minWidth: '56rem'
   };
+  private readonly evaluationCache = new Map<string, CandleChartEvaluationResult>();
+  private readonly pendingEvaluation = new Map<string, Observable<CandleChartEvaluationResult | null>>();
 
   constructor(
     private readonly service: ReplayService,
@@ -216,6 +274,10 @@ export class ReplayComponent {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => {
+          this.clearEvaluationCache();
+          this.evaluation.set(null);
+          this.strategySignal.set(null);
+          this.ruleTrace.set(null);
           this.replay.set(response);
           this.selectedCandle.set(this.chartCandles()[response.currentIndex] ?? this.chartCandles()[0] ?? null);
           this.error.set(null);
@@ -253,11 +315,49 @@ export class ReplayComponent {
     this.sendReplayCommand('JUMP_TO_INDEX', { index });
   }
 
+  onChartReplayCommand(command: CandleChartReplayCommand): void {
+    switch (command.type) {
+      case 'FIRST':
+        this.jumpReplay(0);
+        return;
+      case 'PREVIOUS':
+        this.sendReplayCommand('PREVIOUS_CANDLE');
+        return;
+      case 'PLAY':
+        if (command.speedMs != null) {
+          this.replaySpeed.set(command.speedMs);
+        }
+        this.sendReplayCommand('PLAY_REPLAY', {
+          currentIndex: command.index ?? this.resolveReplayIndex(),
+          speedMs: command.speedMs ?? this.replaySpeed()
+        });
+        return;
+      case 'PAUSE':
+        this.sendReplayCommand('PAUSE_REPLAY');
+        return;
+      case 'NEXT':
+        this.sendReplayCommand('NEXT_CANDLE');
+        return;
+      case 'LAST':
+        this.jumpReplay(Math.max((this.replay()?.candles?.length ?? 1) - 1, 0));
+        return;
+      case 'JUMP':
+        this.jumpReplay(Number(command.index ?? this.resolveReplayIndex()));
+        return;
+      case 'SPEED':
+        this.changeReplaySpeed(Number(command.speedMs ?? this.replaySpeed()));
+        return;
+    }
+  }
+
   resetReplay(): void {
     this.replay.set(null);
     this.replayEvent.set(null);
     this.evaluation.set(null);
+    this.strategySignal.set(null);
+    this.ruleTrace.set(null);
     this.selectedCandle.set(null);
+    this.clearEvaluationCache();
   }
 
   replayStatus(): string {
@@ -273,11 +373,13 @@ export class ReplayComponent {
   }
 
   onChartStrategySignal(signal: Record<string, unknown>): void {
-    this.evaluation.set(signal);
+    this.strategySignal.set(signal);
+    this.evaluation.set({ ...(this.evaluation() ?? {}), strategy: signal });
   }
 
   onChartRuleEvaluated(trace: Record<string, unknown>): void {
-    this.evaluation.set(trace);
+    this.ruleTrace.set(trace);
+    this.evaluation.set({ ...(this.evaluation() ?? {}), trace });
   }
 
   onChartCandleSelected(candle: ChartCandle): void {
@@ -318,8 +420,94 @@ export class ReplayComponent {
         }
         if (event.payload) {
           this.evaluation.set(event.payload);
+          this.syncEvaluationPanels(event.payload);
         }
       });
+  }
+
+  private resolveReplayIndex(): number {
+    const payloadIndex = Number(this.replayEvent()?.payload?.['index']);
+    if (Number.isFinite(payloadIndex)) {
+      return payloadIndex;
+    }
+    return Number(this.replay()?.currentIndex ?? 0);
+  }
+
+  private mapReplayStatus(status: RealtimeTaskStatus | undefined): CandleChartStatus {
+    switch (status) {
+      case 'STARTED':
+      case 'RUNNING':
+      case 'PROGRESS':
+      case 'RESUMED':
+        return 'PLAYING';
+      case 'PAUSED':
+        return 'PAUSED';
+      case 'COMPLETED':
+      case 'SKIPPED':
+        return 'ENDED';
+      case 'FAILED':
+      case 'CANCELLED':
+      case 'WARNING':
+        return 'ERROR';
+      case 'IDLE':
+      default:
+        return this.replay() ? 'READY' : 'IDLE';
+    }
+  }
+
+  private clearEvaluationCache(): void {
+    this.evaluationCache.clear();
+    this.pendingEvaluation.clear();
+  }
+
+  private syncEvaluationPanels(value: Record<string, unknown>): void {
+    const strategy = this.overlayMapper.resolveStrategySignal(value);
+    if (strategy) {
+      this.strategySignal.set(strategy as Record<string, unknown>);
+    }
+    const trace = this.overlayMapper.resolveRuleTrace(value);
+    if (trace) {
+      this.ruleTrace.set(trace);
+    }
+  }
+
+  private resolveSignalRecord(): Record<string, unknown> | null {
+    const signal = this.strategySignal();
+    if (signal) {
+      return signal;
+    }
+    const evaluation = this.evaluation();
+    const nested = evaluation?.['strategy'];
+    if (nested && typeof nested === 'object') {
+      return nested as Record<string, unknown>;
+    }
+    if (evaluation && ('entryPrice' in evaluation || 'stopLoss' in evaluation || 'takeProfit' in evaluation)) {
+      return evaluation;
+    }
+    return null;
+  }
+
+  private pickValue(record: Record<string, unknown> | null | undefined, keys: string[]): unknown {
+    if (!record) {
+      return null;
+    }
+    for (const key of keys) {
+      const value = record[key];
+      if (value != null && value !== '') {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  private formatDisplayValue(value: unknown): string {
+    if (value == null || value === '') {
+      return '-';
+    }
+    if (typeof value === 'number') {
+      return Number.isInteger(value) ? String(value) : value.toFixed(4);
+    }
+    return String(value);
   }
 
   private evaluate(model: Record<string, unknown>, trace: boolean): void {
@@ -334,6 +522,7 @@ export class ReplayComponent {
       .subscribe({
         next: (response) => {
           this.evaluation.set(response);
+          this.syncEvaluationPanels(response as Record<string, unknown>);
           this.error.set(null);
         },
         error: () => {

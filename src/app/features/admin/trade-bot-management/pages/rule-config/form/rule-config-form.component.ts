@@ -301,7 +301,18 @@ export class RuleConfigFormComponent implements OnInit {
       ? this.templateFieldsWithCommonRuleFields(template.fields)
       : this.legacyFields();
     return {
-      fields: [...this.staticFieldGroups(currentExecutor), ...templateFields],
+      layout: {
+        sectionNavigation: 'none',
+        showStatusPanel: false
+      },
+      sections: [
+        { id: 'basicInfo', title: 'tradeBot.ruleExpression.basicInfo', icon: 'pi pi-info-circle', order: 0 },
+        { id: 'configuration', title: 'shared.form.section.configuration', icon: 'pi pi-sliders-h', order: 1 }
+      ],
+      fields: [
+        ...this.staticFieldGroups(currentExecutor),
+        ...this.withDefaultSection(templateFields, 'configuration')
+      ],
       validators: {
         ruleChildRules: (value, context) => this.validateRuleChildRules(value, context.formValue, context.helpers)
       }
@@ -324,21 +335,13 @@ export class RuleConfigFormComponent implements OnInit {
       {
         name: 'basicInfo',
         type: 'group',
-        label: 'general',
+        label: 'tradeBot.ruleExpression.basicInfo',
+        sectionId: 'basicInfo',
         width: 'full',
         flat: true,
         children: [
           { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/2', validation: [this.requiredRule()] },
-          { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/2' }
-        ]
-      },
-      {
-        name: 'executorInfo',
-        type: 'group',
-        label: 'tradeBot.field.executor',
-        width: 'full',
-        flat: true,
-        children: [
+          { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/2' },
           !useExecutorSelect
             ? { name: 'executor', type: 'text', label: 'tradeBot.field.executor', width: '1/2', validation: [this.requiredRule()] }
             : {
@@ -361,6 +364,13 @@ export class RuleConfigFormComponent implements OnInit {
         ]
       }
     ];
+  }
+
+  private withDefaultSection(fields: FieldConfig[], sectionId: string): FieldConfig[] {
+    return fields.map((field) => ({
+      ...field,
+      sectionId: field.sectionId ?? sectionId
+    }));
   }
 
   private legacyFields(): FieldConfig[] {

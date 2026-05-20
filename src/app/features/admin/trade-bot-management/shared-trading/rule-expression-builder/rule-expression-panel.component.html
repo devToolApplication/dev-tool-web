@@ -43,6 +43,7 @@
           <app-rule-expression-operand-picker
             [label]="slot.label"
             [operand]="operandAt(conditionNode(selectedNode), slot.index)"
+            [allowedValueTypes]="slot.allowedValueTypes"
             [indicatorConfigs]="indicatorConfigs"
             [ruleConfigs]="ruleConfigs"
             [currentRuleId]="currentRuleId"
@@ -67,22 +68,22 @@
           [disabled]="readonlyOrDisabled"
           (valueChange)="updateSlotCode(ruleRefNode(selectedNode), $event)"
         ></app-input-text>
-
-        <app-input-area
-          label="tradeBot.ruleExpression.field.paramsJson"
-          contentType="json"
-          [rows]="5"
-          [maxRows]="10"
-          [showZoomButton]="true"
-          [value]="paramsText(selectedNode)"
-          [disabled]="readonlyOrDisabled"
-          [invalid]="paramsJsonError() !== null"
-          [errorMessage]="paramsJsonError() || undefined"
-          (valueChange)="updateParams(selectedNode, $event)"
-        ></app-input-area>
       } @else {
         <div class="rule-expression-panel__empty">{{ 'tradeBot.ruleExpression.notConfig' | translateContent }}</div>
       }
+
+      <app-input-area
+        label="tradeBot.ruleExpression.field.paramsJson"
+        contentType="json"
+        [rows]="5"
+        [maxRows]="10"
+        [showZoomButton]="true"
+        [value]="paramsText(selectedNode)"
+        [disabled]="readonlyOrDisabled"
+        [invalid]="paramsJsonError() !== null"
+        [errorMessage]="paramsJsonError() || undefined"
+        (valueChange)="updateParams(selectedNode, $event)"
+      ></app-input-area>
 
       @if (nodeIssues(selectedNode).length) {
         <div class="rule-expression-panel__issues">
@@ -118,4 +119,3 @@
     <div class="rule-expression-panel__empty">{{ 'tradeBot.ruleExpression.selectNode' | translateContent }}</div>
   }
 </aside>
-

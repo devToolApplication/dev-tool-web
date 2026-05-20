@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
 import {
+  RuleExpressionGroupNode,
   RuleExpressionGroupOperator,
   RuleExpressionNode,
   RuleExpressionNodeType,
+  RuleExpressionRuleRefNode,
   RuleExpressionValidationIssue
 } from './rule-expression.models';
-import { printRuleExpressionNode } from './rule-expression-printer';
 
 @Component({
   selector: 'app-rule-expression-node',
@@ -17,15 +19,35 @@ export class RuleExpressionNodeComponent {
   @Input({ required: true }) node!: RuleExpressionNode;
   @Input() selectedNodeId: string | null = null;
   @Input() issues: RuleExpressionValidationIssue[] = [];
+  @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
+  @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
   @Input() disabled = false;
 
   @Output() readonly selectNode = new EventEmitter<string>();
-  @Output() readonly addChild = new EventEmitter<{ parentId: string; type: RuleExpressionNodeType }>();
+  @Output() readonly nodeChange = new EventEmitter<RuleExpressionNode>();
+  @Output() readonly addChild = new EventEmitter<{
+    parentId: string;
+    type: RuleExpressionNodeType;
+    operator?: RuleExpressionGroupOperator;
+  }>();
   @Output() readonly removeNode = new EventEmitter<string>();
   @Output() readonly duplicateNode = new EventEmitter<string>();
   @Output() readonly toggleDisabled = new EventEmitter<string>();
-  @Output() readonly wrapNode = new EventEmitter<{ nodeId: string; wrapperType: 'group' | 'not'; operator?: RuleExpressionGroupOperator }>();
+  @Output() readonly wrapNode = new EventEmitter<{
+    nodeId: string;
+    wrapperType: 'group' | 'not';
+    operator?: RuleExpressionGroupOperator;
+  }>();
+
+  readonly moreOpen = signal(false);
+
+  readonly groupOperatorOptions: Array<{ label: string; value: RuleExpressionGroupOperator }> = [
+    { label: 'tradeBot.ruleExpression.group.AND', value: 'AND' },
+    { label: 'tradeBot.ruleExpression.group.OR', value: 'OR' },
+    { label: 'tradeBot.ruleExpression.group.XOR', value: 'XOR' }
+  ];
 
   get selected(): boolean {
     return this.node.id === this.selectedNodeId;
@@ -39,69 +61,102 @@ export class RuleExpressionNodeComponent {
     return node.type === 'group' || node.type === 'not' ? node.children : [];
   }
 
-  canHaveChildren(node: RuleExpressionNode): boolean {
-    return node.type === 'group' || node.type === 'not';
+  groupNode(node: RuleExpressionNode): RuleExpressionGroupNode {
+    return node as RuleExpressionGroupNode;
   }
 
-  title(node: RuleExpressionNode): string {
-    if (node.type === 'group') {
-      return node.operator;
-    }
-    if (node.type === 'not') {
-      return 'NOT';
-    }
-    if (node.type === 'ruleRef') {
-      return node.ruleCode || 'RULE(?)';
-    }
-    return node.operator ?? 'CONDITION';
-  }
-
-  subtitle(node: RuleExpressionNode): string {
-    return printRuleExpressionNode(node) || 'tradeBot.ruleExpression.disabledPreview';
+  ruleRefNode(node: RuleExpressionNode): RuleExpressionRuleRefNode {
+    return node as RuleExpressionRuleRefNode;
   }
 
   nodeIssues(node: RuleExpressionNode): RuleExpressionValidationIssue[] {
     return this.issues.filter((issue) => issue.nodeId === node.id);
   }
 
+  groupDescription(operator: RuleExpressionGroupOperator): string {
+    return `tradeBot.ruleExpression.groupDescription.${operator}`;
+  }
+
+  canAddChild(node: RuleExpressionNode): boolean {
+    if (node.type === 'group') {
+      return true;
+    }
+    return node.type === 'not' && node.children.filter((child) => !child.disabled).length === 0;
+  }
+
+  ruleOptions(): Array<{ label: string; value: string; disabled?: boolean }> {
+    return this.ruleConfigs
+      .filter((item) => item.id !== this.currentRuleId)
+      .map((item) => ({
+        label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
+        value: item.code,
+        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
   select(): void {
     this.selectNode.emit(this.node.id);
   }
 
-  add(type: RuleExpressionNodeType): void {
+  add(type: RuleExpressionNodeType, operator?: RuleExpressionGroupOperator): void {
     if (!this.readonlyOrDisabled) {
-      this.addChild.emit({ parentId: this.node.id, type });
+      this.addChild.emit({ parentId: this.node.id, type, operator });
     }
   }
 
-  remove(): void {
-    if (!this.readonlyOrDisabled) {
-      this.removeNode.emit(this.node.id);
+  updateGroupOperator(node: RuleExpressionGroupNode, value: unknown): void {
+    if (this.isGroupOperator(value)) {
+      this.nodeChange.emit({ ...node, operator: value });
     }
   }
 
-  duplicate(): void {
+  updateRuleCode(node: RuleExpressionRuleRefNode, value: unknown): void {
+    this.nodeChange.emit({ ...node, ruleCode: typeof value === 'string' ? value : '' });
+  }
+
+  toggleMore(): void {
     if (!this.readonlyOrDisabled) {
-      this.duplicateNode.emit(this.node.id);
+      this.moreOpen.update((value) => !value);
     }
   }
 
-  toggle(): void {
+  wrap(operator: RuleExpressionGroupOperator): void {
     if (!this.readonlyOrDisabled) {
-      this.toggleDisabled.emit(this.node.id);
+      this.wrapNode.emit({ nodeId: this.node.id, wrapperType: 'group', operator });
+      this.moreOpen.set(false);
     }
   }
 
   wrapNot(): void {
     if (!this.readonlyOrDisabled) {
       this.wrapNode.emit({ nodeId: this.node.id, wrapperType: 'not' });
+      this.moreOpen.set(false);
     }
   }
 
-  wrapAnd(): void {
+  remove(): void {
     if (!this.readonlyOrDisabled) {
-      this.wrapNode.emit({ nodeId: this.node.id, wrapperType: 'group', operator: 'AND' });
+      this.removeNode.emit(this.node.id);
+      this.moreOpen.set(false);
     }
+  }
+
+  duplicate(): void {
+    if (!this.readonlyOrDisabled) {
+      this.duplicateNode.emit(this.node.id);
+      this.moreOpen.set(false);
+    }
+  }
+
+  toggle(): void {
+    if (!this.readonlyOrDisabled) {
+      this.toggleDisabled.emit(this.node.id);
+      this.moreOpen.set(false);
+    }
+  }
+
+  private isGroupOperator(value: unknown): value is RuleExpressionGroupOperator {
+    return value === 'AND' || value === 'OR' || value === 'XOR';
   }
 }
-

@@ -1,157 +1,50 @@
 <div class="candle-chart-wrapper" [class.candle-chart-wrapper--fullscreen]="fullscreen()">
   @if (showToolbar) {
-    <div class="candle-chart-toolbar">
-      <div class="candle-chart-toolbar__group">
-        <span class="candle-chart-status" [class.candle-chart-status--active]="isPlaying">
-          {{ ('tradeBot.chart.status.' + store.status().toLowerCase()) | translateContent }}
-        </span>
-        @if (store.mode() === 'REALTIME') {
-          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.realtime' | translateContent }}</span>
-        } @else if (store.mode() === 'REPLAY') {
-          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.replay' | translateContent }}</span>
-        } @else {
-          <span class="candle-chart-mode">{{ 'tradeBot.chart.mode.historical' | translateContent }}</span>
-        }
-      </div>
-
-      <div class="candle-chart-toolbar__group candle-chart-toolbar__group--toggles">
-        @for (option of overlayToggleOptions; track option.key) {
-          <app-button
-            [label]="option.label"
-            [styleClass]="overlayToggleButtonClass(option.key)"
-            (buttonClick)="toggleOverlayFilter(option.key)"
-          />
-        }
-      </div>
-
-      <div class="candle-chart-toolbar__group">
-        <app-button
-          label=""
-          icon="pi pi-arrows-h"
-          styleClass="candle-chart-icon-button"
-          tooltip="tradeBot.chart.action.fitContent"
-          (buttonClick)="fitContent()"
-        />
-        <app-button
-          label=""
-          icon="pi pi-image"
-          styleClass="candle-chart-icon-button"
-          tooltip="tradeBot.chart.action.exportImage"
-          (buttonClick)="exportChartImage()"
-        />
-        <app-button
-          label=""
-          [icon]="fullscreen() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"
-          styleClass="candle-chart-icon-button"
-          [tooltip]="fullscreen() ? 'tradeBot.chart.action.exitFullscreen' : 'tradeBot.chart.action.fullscreen'"
-          (buttonClick)="toggleFullscreen()"
-        />
-      </div>
-
+    <app-candle-chart-toolbar
+      [status]="store.status()"
+      [mode]="store.mode()"
+      [isPlaying]="isPlaying"
+      [fullscreen]="fullscreen()"
+      [overlayToggleOptions]="overlayToggleOptions"
+      [activeOverlayFilters]="overlayFilters()"
+      (overlayToggle)="toggleOverlayFilter($event)"
+      (fitContent)="fitContent()"
+      (exportImage)="exportChartImage()"
+      (fullscreenToggle)="toggleFullscreen()"
+    >
       @if (showReplayControls) {
-        <div class="candle-chart-toolbar__group candle-chart-toolbar__group--replay">
-          <app-button
-            label=""
-            icon="pi pi-step-backward"
-            styleClass="candle-chart-icon-button"
-            tooltip="tradeBot.chart.replay.first"
-            (buttonClick)="replayFirst()"
-          />
-          <app-button
-            label=""
-            icon="pi pi-chevron-left"
-            styleClass="candle-chart-icon-button"
-            tooltip="tradeBot.chart.replay.previous"
-            (buttonClick)="replayPrevious()"
-          />
-          @if (isPlaying) {
-            <app-button
-              label=""
-              icon="pi pi-pause"
-              styleClass="candle-chart-icon-button candle-chart-icon-button--primary"
-              tooltip="tradeBot.chart.replay.pause"
-              (buttonClick)="pauseReplay()"
-            />
-          } @else {
-            <app-button
-              label=""
-              icon="pi pi-play"
-              styleClass="candle-chart-icon-button candle-chart-icon-button--primary"
-              tooltip="tradeBot.chart.replay.play"
-              (buttonClick)="playReplay()"
-            />
-          }
-          <app-button
-            label=""
-            icon="pi pi-chevron-right"
-            styleClass="candle-chart-icon-button"
-            tooltip="tradeBot.chart.replay.next"
-            (buttonClick)="replayNext()"
-          />
-          <app-button
-            label=""
-            icon="pi pi-step-forward"
-            styleClass="candle-chart-icon-button"
-            tooltip="tradeBot.chart.replay.last"
-            (buttonClick)="replayLast()"
-          />
-
-          <p-select
-            class="candle-chart-speed-select"
-            [options]="replaySpeedOptions"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            [ngModel]="store.speedMs()"
-            (ngModelChange)="changeReplaySpeed($event)"
-            [attr.aria-label]="'tradeBot.chart.replay.speed' | translateContent"
-          />
-        </div>
+        <app-candle-chart-replay-controls
+          candleChartReplayControls
+          [isPlaying]="isPlaying"
+          [speedMs]="store.speedMs()"
+          [speedOptions]="replaySpeedOptions"
+          (first)="replayFirst()"
+          (previous)="replayPrevious()"
+          (play)="playReplay()"
+          (pause)="pauseReplay()"
+          (next)="replayNext()"
+          (last)="replayLast()"
+          (speedChange)="changeReplaySpeed($event)"
+        />
       }
-    </div>
+    </app-candle-chart-toolbar>
   }
 
   <div class="candle-chart-stage" [style.height.px]="chartHeight">
     <div #chartRef class="candle-chart-canvas"></div>
 
     @if (showStateOverlay) {
-      <div class="candle-chart-state" [ngClass]="'candle-chart-state--' + stateOverlaySeverity">
-        @if (stateOverlaySeverity === 'loading') {
-          <span class="pi pi-spin pi-spinner" aria-hidden="true"></span>
-        } @else if (stateOverlaySeverity === 'error') {
-          <span class="pi pi-exclamation-triangle" aria-hidden="true"></span>
-        } @else {
-          <span class="pi pi-chart-line" aria-hidden="true"></span>
-        }
-        <span>{{ stateOverlayMessage | translateContent }}</span>
-      </div>
+      <app-candle-chart-state-overlay [severity]="stateOverlaySeverity" [message]="stateOverlayMessage" />
     }
 
     @if (showHeader) {
-      <div class="candle-chart-header">
-        <div class="candle-chart-header__main">
-          @if (chartTitle) {
-            <span class="candle-chart-header__title">{{ chartTitle }}</span>
-          }
-          @if (latestCandle) {
-            <span class="candle-chart-header__metric">O {{ formatPrice(latestCandle.open) }}</span>
-            <span class="candle-chart-header__metric">H {{ formatPrice(latestCandle.high) }}</span>
-            <span class="candle-chart-header__metric">L {{ formatPrice(latestCandle.low) }}</span>
-            <span class="candle-chart-header__metric">C {{ formatPrice(latestCandle.close) }}</span>
-            <span
-              class="candle-chart-header__change"
-              [ngClass]="'candle-chart-header__change--' + latestTone"
-            >
-              {{ formatPrice(latestChange) }} ({{ latestChangePercent | number: '1.2-2' }}%)
-            </span>
-          }
-        </div>
-        @if (latestCandle?.volume != null) {
-          <div class="candle-chart-header__volume">
-            Vol <span>{{ formatVolume(latestCandle?.volume) }}</span>
-          </div>
-        }
-      </div>
+      <app-candle-chart-header
+        [chartTitle]="chartTitle"
+        [candle]="latestCandle"
+        [change]="latestChange"
+        [changePercent]="latestChangePercent"
+        [tone]="latestTone"
+      />
     }
 
     <div class="candle-chart-box-layer" aria-hidden="true">

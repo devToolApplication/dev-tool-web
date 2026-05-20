@@ -51,7 +51,11 @@
         [apiFieldErrors]="apiFieldErrors"
         (formSubmit)="onFormSubmit($event)"
         (valueChange)="onValueChange($event)"
-      ></app-form-input>
+      >
+        <div class="crud-page__after-first-section-slot" crud-page-after-first-section>
+          <ng-content select="[crud-page-after-first-section]"></ng-content>
+        </div>
+      </app-form-input>
     }
   </div>
 </section>

@@ -21,6 +21,18 @@ export type CandleChartOverlayType =
   | 'POLYLINE'
   | 'LABEL';
 export type CandleChartOverlaySource = 'INDICATOR' | 'RULE' | 'STRATEGY' | 'PAPER_TRADE' | 'USER_DRAWING';
+export type ChartOverlayCategory =
+  | 'ENTRY'
+  | 'EXIT'
+  | 'STOP_LOSS'
+  | 'TAKE_PROFIT'
+  | 'FAILED_ENTRY'
+  | 'INDICATOR'
+  | 'RULE'
+  | 'STRATEGY'
+  | 'PAPER_TRADE'
+  | 'USER_DRAWING'
+  | 'OTHER';
 export type CandleChartIndicatorPane = 'MAIN' | 'SUB' | 'overlay' | 'subchart';
 export type CandleChartIndicatorType = 'LINE' | 'HISTOGRAM' | 'AREA';
 
@@ -96,6 +108,7 @@ export interface ChartOverlayPoint {
 export interface ChartOverlay {
   id?: string;
   type: CandleChartOverlayType;
+  category?: ChartOverlayCategory;
   source?: CandleChartOverlaySource;
   sourceCode?: string;
   index?: number;
@@ -234,6 +247,28 @@ export interface CandleChartReplayStatusEvent {
   index: number;
   status: CandleChartStatus;
   speedMs: number;
+}
+
+export interface CandleChartReplayState {
+  index: number;
+  status: CandleChartStatus;
+  speedMs: number;
+}
+
+export type CandleChartReplayCommandType =
+  | 'FIRST'
+  | 'PREVIOUS'
+  | 'PLAY'
+  | 'PAUSE'
+  | 'NEXT'
+  | 'LAST'
+  | 'JUMP'
+  | 'SPEED';
+
+export interface CandleChartReplayCommand {
+  type: CandleChartReplayCommandType;
+  index?: number;
+  speedMs?: number;
 }
 
 export interface CandleChartErrorEvent {
