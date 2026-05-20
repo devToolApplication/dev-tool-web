@@ -9,19 +9,25 @@ const config: StorybookConfig = {
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-a11y',
-    '@chromatic-com/storybook'
+    '@chromatic-com/storybook',
+    '@storybook/addon-controls',
+    '@storybook/addon-viewport'
   ],
   framework: {
     name: '@storybook/angular',
     options: {}
   },
   docs: {
-    defaultName: 'Docs'
+    defaultName: 'Docs',
+    autodocs: true
   },
   staticDirs: ['../public'],
   webpackFinal: async (config) => {
     // Handle CSS imports from PrimeNG and other dependencies
     return config;
+  },
+  typescript: {
+    reactDocgen: 'react'
   }
 };
 

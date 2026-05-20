@@ -12,7 +12,6 @@ import { SharedModule } from '../src/app/shared/shared.module';
 
 if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('data-theme', 'light');
-  // Enable Tailwind dark mode support
   document.documentElement.classList.add('light');
 }
 
@@ -34,7 +33,14 @@ const preview: Preview = {
               cssLayer: false
             }
           },
-          ripple: true
+          ripple: true,
+          zIndex: {
+            modal: 1100,
+            overlay: 1000,
+            fixed: 1000,
+            dropdown: 1000,
+            tooltip: 1100
+          }
         })
       ]
     }),
@@ -45,20 +51,34 @@ const preview: Preview = {
   parameters: {
     layout: 'padded',
     viewport: {
-      options: MINIMAL_VIEWPORTS
+      defaultViewport: 'iphone12',
+      viewports: MINIMAL_VIEWPORTS
     },
     a11y: {
-      test: 'error'
+      test: 'error',
+      config: {
+        rules: [
+          {
+            id: 'color-contrast',
+            enabled: true
+          }
+        ]
+      }
     },
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i
-      }
+      },
+      expanded: true
     },
     docs: {
       source: {
-        type: 'dynamic'
+        type: 'dynamic',
+        excludeDecorators: true
+      },
+      toc: {
+        title: 'On this page'
       }
     }
   }
