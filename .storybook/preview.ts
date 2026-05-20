@@ -12,6 +12,8 @@ import { SharedModule } from '../src/app/shared/shared.module';
 
 if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('data-theme', 'light');
+  // Enable Tailwind dark mode support
+  document.documentElement.classList.add('light');
 }
 
 const preview: Preview = {
@@ -28,9 +30,11 @@ const preview: Preview = {
           theme: {
             preset: APP_THEME_PRESETS.aura,
             options: {
-              darkModeSelector: '[data-theme="dark"]'
+              darkModeSelector: '[data-theme="dark"]',
+              cssLayer: false
             }
-          }
+          },
+          ripple: true
         })
       ]
     }),
