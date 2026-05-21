@@ -38,7 +38,7 @@
     (onBlur)="onBlur()"
     (onFocus)="onFocus()"
   >
-    <ng-template #group let-groupOption>
+    <ng-template pTemplate="group" let-groupOption>
       <span class="app-select-group-label">
         {{ groupOption?.[optionGroupLabel] | translateContent }}
       </span>
