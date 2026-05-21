@@ -2,57 +2,49 @@
   @if (iconClass) {
     <p-iconfield class="w-full">
       <p-inputicon [class]="iconClass"></p-inputicon>
-      <p-select
-        [size]="size"
-        [inputId]="inputId"
-        class="w-full"
-        appendTo="body"
-        [options]="options | translateContent"
-        optionLabel="label"
-        optionValue="value"
-        [loading]="loading"
-        [showClear]="showClear"
-        [emptyMessage]="'noDataFound' | translateContent"
-        [emptyFilterMessage]="'shared.table.noResultsTitle' | translateContent"
-        [placeholder]="(placeholder || '') | translateContent"
-        [ariaLabel]="(label || placeholder || inputId) | translateContent"
-        [ngModel]="value"
-        (ngModelChange)="onChange($event)"
-        [disabled]="disabled"
-        [required]="required"
-        [invalid]="invalid"
-        [styleClass]="styleClass"
-        (onBlur)="onBlur()"
-        (onFocus)="onFocus()"
-      />
+      <ng-container *ngTemplateOutlet="selectControl"></ng-container>
     </p-iconfield>
   } @else {
-    <p-select
-      [size]="size"
-      [inputId]="inputId"
-      class="w-full"
-      appendTo="body"
-      [options]="options | translateContent"
-      optionLabel="label"
-      optionValue="value"
-      [loading]="loading"
-      [showClear]="showClear"
-      [emptyMessage]="'noDataFound' | translateContent"
-      [emptyFilterMessage]="'shared.table.noResultsTitle' | translateContent"
-      [placeholder]="(placeholder || '') | translateContent"
-      [ariaLabel]="(label || placeholder || inputId) | translateContent"
-      [ngModel]="value"
-      (ngModelChange)="onChange($event)"
-      [disabled]="disabled"
-      [required]="required"
-      [invalid]="invalid"
-      [styleClass]="styleClass"
-      (onBlur)="onBlur()"
-      (onFocus)="onFocus()"
-    />
+    <ng-container *ngTemplateOutlet="selectControl"></ng-container>
   }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
+
+<ng-template #selectControl>
+  <p-select
+    [size]="size"
+    [inputId]="inputId"
+    class="w-full"
+    appendTo="body"
+    [options]="options | translateContent"
+    [optionLabel]="optionLabel"
+    [optionValue]="optionValue"
+    [optionDisabled]="optionDisabled"
+    [group]="group"
+    [optionGroupLabel]="optionGroupLabel"
+    [optionGroupChildren]="optionGroupChildren"
+    [loading]="loading"
+    [showClear]="showClear"
+    [emptyMessage]="'noDataFound' | translateContent"
+    [emptyFilterMessage]="'shared.table.noResultsTitle' | translateContent"
+    [placeholder]="(placeholder || '') | translateContent"
+    [ariaLabel]="(label || placeholder || inputId) | translateContent"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  >
+    <ng-template pTemplate="group" let-groupOption>
+      <span class="app-select-group-label">
+        {{ groupOption?.[optionGroupLabel] | translateContent }}
+      </span>
+    </ng-template>
+  </p-select>
+</ng-template>
 
 @if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
