@@ -4,14 +4,12 @@ import { BaseInput, provideValueAccessor } from '../base-input';
 export type SelectValue = string | number | boolean | null;
 
 export interface SelectOption {
-  [key: string]: unknown;
   label: string;
   value: SelectValue;
   disabled?: boolean;
 }
 
 export interface SelectOptionGroup {
-  [key: string]: unknown;
   label: string;
   value?: SelectValue;
   disabled?: boolean;
