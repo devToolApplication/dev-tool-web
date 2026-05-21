@@ -7,3 +7,11 @@
   margin-top: 0.45rem;
   color: var(--app-text-muted);
 }
+
+.app-select-group-label {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
