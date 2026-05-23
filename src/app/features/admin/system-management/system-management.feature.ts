@@ -3,7 +3,7 @@ import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-chang
 import { FileUploadDebugComponent } from './debug-tools/file-upload-debug/file-upload-debug.component';
 import { AiAgentConfigFormComponent } from './general-config/ai-agent-system/form/ai-agent-config-form.component';
 import { AiAgentConfigListComponent } from './general-config/ai-agent-system/list/ai-agent-config-list.component';
-import { AiAgentAskComponent } from './general-config/playwright-cdp-test/ai-agent-ask.component';
+
 import { StorageConfigFormComponent } from './general-config/storage-system/form/storage-config-form.component';
 import { StorageConfigListComponent } from './general-config/storage-system/list/storage-config-list.component';
 import { TradeBotConfigFormComponent } from './general-config/trade-bot-system/form/trade-bot-config-form.component';
@@ -28,7 +28,6 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentConfigFormComponent,
   TradeBotConfigListComponent,
   TradeBotConfigFormComponent,
-  AiAgentAskComponent,
   FileUploadDebugComponent
 ];
 
@@ -73,10 +72,7 @@ export const systemManagementRoutes: Routes = [
       { path: 'edit/:id', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
-  {
-    path: 'admin/system-management/system-ask',
-    component: AiAgentAskComponent
-  },
+
   {
     path: 'admin/system-management/file-upload',
     component: FileUploadDebugComponent

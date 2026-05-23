@@ -8,20 +8,7 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
       { label: 'layout.menu.dashboard', icon: 'pi pi-gauge', routerLink: '/admin/dashboard' }
     ]
   },
-  {
-    label: 'layout.menu.aiAgentManagement',
-    icon: 'pi pi-sparkles',
-    items: [
-      { label: 'layout.menu.playground', icon: 'pi pi-play-circle', routerLink: '/admin/ai-agent/runtime/playground' },
-      { label: 'layout.menu.agents', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/agents' },
-      { label: 'layout.menu.codexAgent', icon: 'pi pi-code', routerLink: '/admin/codex-agent/agents' },
-      { label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
-      { label: 'layout.menu.promptTemplates', icon: 'pi pi-file-edit', routerLink: '/admin/ai-agent/prompt-templates' },
-      { label: 'layout.menu.executionPolicies', icon: 'pi pi-sliders-h', routerLink: '/admin/ai-agent/execution-policies' },
-      { label: 'layout.menu.executionTraces', icon: 'pi pi-history', routerLink: '/admin/ai-agent/execution-traces' },
-      { label: 'layout.menu.playwrightSessions', icon: 'pi pi-window-maximize', routerLink: '/admin/ai-agent/playwright-sessions' }
-    ]
-  },
+
   {
     label: 'layout.menu.tradeBotManagement',
     icon: 'pi pi-chart-line',
@@ -81,7 +68,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.debugTools',
         icon: 'pi pi-bug',
         items: [
-          { label: 'layout.menu.checkChatGpt', icon: 'pi pi-comments', routerLink: '/admin/system-management/system-ask' },
           { label: 'layout.menu.fileUpload', icon: 'pi pi-upload', routerLink: '/admin/system-management/file-upload' }
         ]
       }

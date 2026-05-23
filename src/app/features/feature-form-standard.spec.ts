@@ -1,12 +1,8 @@
 /// <reference types="vite/client" />
 
 import { FieldConfig, FormConfig } from '../shared/ui/form-input/models/form-config.model';
-import { AiModelFormComponent } from './admin/ai-agent/ai-model/form/ai-model-form.component';
-import { PlaywrightSessionManagementComponent } from './admin/ai-agent/playwright-session/playwright-session-management.component';
-import { CodexAgentFormComponent } from './admin/codex-agent/agents/form/codex-agent-form.component';
 import { UploadStorageFormComponent } from './admin/file-storage-management/storage-repository/form/upload-storage-form.component';
 import { JobConfigFormComponent } from './admin/job-scheduler/form/job-config-form.component';
-import { AiAgentAskComponent } from './admin/system-management/general-config/playwright-cdp-test/ai-agent-ask.component';
 import { AiAgentConfigFormComponent } from './admin/system-management/general-config/ai-agent-system/form/ai-agent-config-form.component';
 import { StorageConfigFormComponent } from './admin/system-management/general-config/storage-system/form/storage-config-form.component';
 import { TradeBotConfigFormComponent } from './admin/system-management/general-config/trade-bot-system/form/trade-bot-config-form.component';
@@ -107,10 +103,6 @@ describe('feature form standard', () => {
 
   it('uses option-backed autocomplete for fields that can be derived from existing data', () => {
     const requiredFieldsByPath: Record<string, { formConfig: FormConfig; fields: string[] }> = {
-      './admin/ai-agent/ai-model/form/ai-model-form.component.ts': {
-        formConfig: formConfigOf(AiModelFormComponent, 7),
-        fields: ['modelName', 'modelType', 'url']
-      },
       './admin/job-scheduler/form/job-config-form.component.ts': {
         formConfig: formConfigOf(JobConfigFormComponent, 7),
         fields: [
@@ -131,18 +123,6 @@ describe('feature form standard', () => {
       './admin/file-storage-management/storage-repository/form/upload-storage-form.component.ts': {
         formConfig: formConfigOf(UploadStorageFormComponent, 7),
         fields: ['apiDomain', 'apiPath']
-      },
-      './admin/ai-agent/playwright-session/playwright-session-management.component.ts': {
-        formConfig: formConfigOf(PlaywrightSessionManagementComponent, 3),
-        fields: ['cdpEndpoint', 'temporaryChatUrl']
-      },
-      './admin/codex-agent/agents/form/codex-agent-form.component.ts': {
-        formConfig: formConfigOf(CodexAgentFormComponent, 7),
-        fields: ['installationId']
-      },
-      './admin/system-management/general-config/playwright-cdp-test/ai-agent-ask.component.ts': {
-        formConfig: formConfigPropertyOf(AiAgentAskComponent, 3, 'chatGptFormConfig'),
-        fields: ['model']
       },
       './admin/trade-bot-management/pages/monitoring/cache-monitor.component.ts': {
         formConfig: formConfigPropertyOf(CacheMonitorComponent, 5, 'evictForm'),

@@ -34,11 +34,7 @@ import { ForbiddenComponent } from './error/forbidden/forbidden.component';
 import { NotFoundComponent } from './error/not-found/not-found.component';
 import { FeaturePlaceholderComponent } from './feature-placeholder/feature-placeholder.component';
 import { SettingsComponent } from './settings/settings.component';
-import { AI_AGENT_FEATURE_COMPONENTS, aiAgentAdminRoutes } from './admin/ai-agent/ai-agent.feature';
-import {
-  CODEX_AGENT_FEATURE_COMPONENTS,
-  codexAgentAdminRoutes
-} from './admin/codex-agent/codex-agent.feature';
+
 import {
   FILE_STORAGE_FEATURE_COMPONENTS,
   fileStorageRoutes
@@ -80,12 +76,10 @@ const FEATURE_ROUTES: Routes = [
   ...settingsRoutes,
   ...demoRouter,
   ...dashboardRoutes,
-  ...aiAgentAdminRoutes,
   ...fileStorageRoutes,
   ...jobSchedulerRoutes,
   ...systemManagementRoutes,
   ...tradeBotRoutes,
-  ...codexAgentAdminRoutes,
   ...dataFormRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
@@ -102,12 +96,10 @@ const FEATURE_COMPONENTS = [
   ForbiddenComponent,
   NotFoundComponent,
   FeaturePlaceholderComponent,
-  ...AI_AGENT_FEATURE_COMPONENTS,
   ...FILE_STORAGE_FEATURE_COMPONENTS,
   ...JOB_SCHEDULER_FEATURE_COMPONENTS,
   ...SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,
   ...TRADE_BOT_FEATURE_COMPONENTS,
-  ...CODEX_AGENT_FEATURE_COMPONENTS,
   ...DATA_FORM_FEATURE_COMPONENTS,
   CandleChart,
   CandleChartHeaderComponent,

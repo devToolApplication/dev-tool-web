@@ -14,21 +14,16 @@ export const environment = {
     }
   },
   apiUrl:{
-    // adminAiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1/admin',
-    adminAiGenerator: 'http://127.0.0.1:31001/ai-agent-mcrs/v1/admin',
-    // aiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1',
-    aiGenerator: 'http://127.0.0.1:31001/ai-agent-mcrs/v1',
-    // adminFileServiceUrl: 'https://api.103.77.243.66.nip.io/file-mcrs/v1/admin',
-    adminFileServiceUrl: 'http://127.0.0.1:31000/file-mcrs/v1/admin',
-    tradeBotAdminUrl: 'http://127.0.0.1:31002/trade-bot-mcrs/v1/admin',
-    tradeBotUrl: 'http://127.0.0.1:31002/trade-bot-mcrs/v1',
-    jobSchedulerAdminUrl: 'http://127.0.0.1:3001/v1/admin',
-    // bpmEngineAdminUrl: 'http://127.0.0.1:31005/bpm-engine/v1/admin',
+    adminAiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1/admin',
+    aiGenerator: 'https://api.103.77.243.66.nip.io/ai-agent-mcrs/v1',
+    adminFileServiceUrl: 'https://api.103.77.243.66.nip.io/file-mcrs/v1/admin',
+    tradeBotAdminUrl: 'https://api.103.77.243.66.nip.io/trade-bot-mcrs/v1/admin',
+    tradeBotUrl: 'https://api.103.77.243.66.nip.io/trade-bot-mcrs/v1',
+    jobSchedulerAdminUrl: 'https://api.103.77.243.66.nip.io/job-service/v1/admin',
     bpmEngineAdminUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1/admin',
-    // bpmEngineUrl: 'http://127.0.0.1:31005/bpm-engine/v1',
     bpmEngineUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1'
   },
   ws: {
-    tradeBotWs: 'ws://127.0.0.1:31002/trade-bot-mcrs/ws'
+    tradeBotWs: 'wss://api.103.77.243.66.nip.io/trade-bot-mcrs/ws'
   }
 };

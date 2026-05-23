@@ -1,21 +1,17 @@
 import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 import { SYSTEM_STATUS_OPTIONS } from '../../../../../../core/constants/system.constants';
 import { AiAgentConfigCreateDto, AiAgentConfigResponse, AiAgentConfigUpdateDto } from '../../../../../../core/models/ai-agent/ai-agent-config.model';
-import { AgentDefinitionResponse } from '../../../../../../core/models/ai-agent/agent-definition.model';
-import { AiModelResponse } from '../../../../../../core/models/ai-agent/ai-model.model';
 import { AiAgentConfigService } from '../../../../../../core/services/ai-agent-service/ai-agent-config.service';
-import { AgentDefinitionService } from '../../../../../../core/services/ai-agent-service/agent-definition.service';
-import { AiModelService } from '../../../../../../core/services/ai-agent-service/ai-model.service';
 import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { BaseCrudPageComponent } from '../../../../../../shared/ui/base-crud-page/base-crud-page.component';
 import { FormConfig, FormContext } from '../../../../../../shared/ui/form-input/models/form-config.model';
 import { Rules } from '../../../../../../shared/ui/form-input/utils/validation-rules';
-import { toEntityRefOptions, toUniqueTextOptions } from '../../../../../form-option-utils';
+import { toUniqueTextOptions } from '../../../../../form-option-utils';
 import { AI_AGENT_CONFIG_INITIAL_VALUE, AI_AGENT_CONFIG_ROUTES } from '../ai-agent-config.constants';
 
 @Component({
@@ -100,8 +96,6 @@ export class AiAgentConfigFormComponent implements OnInit {
 
   constructor(
     private readonly service: AiAgentConfigService,
-    private readonly agentDefinitionService: AgentDefinitionService,
-    private readonly aiModelService: AiModelService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly destroyRef: DestroyRef,
@@ -117,12 +111,8 @@ export class AiAgentConfigFormComponent implements OnInit {
   private loadOptions(): void {
     this.loading.set(true);
     this.loadingService.track(
-      forkJoin({
-        configs: this.service.getAll().pipe(catchError(() => of([] as AiAgentConfigResponse[]))),
-        agents: this.agentDefinitionService.getAll().pipe(catchError(() => of([] as AgentDefinitionResponse[]))),
-        models: this.aiModelService.getAll().pipe(catchError(() => of([] as AiModelResponse[])))
-      })
-    ).pipe(finalize(() => this.loading.set(false))).subscribe(({ configs, agents, models }) => {
+      this.service.getAll().pipe(catchError(() => of([] as AiAgentConfigResponse[])))
+    ).pipe(finalize(() => this.loading.set(false))).subscribe((configs) => {
       this.formContext.extra = {
         categoryOptions: toUniqueTextOptions(configs, (item) => item.category),
         keyOptions: toUniqueTextOptions(configs, (item) => item.key),
@@ -130,16 +120,8 @@ export class AiAgentConfigFormComponent implements OnInit {
         scopeRefOptions: {
           GLOBAL: [],
           CHANNEL: toUniqueTextOptions(configs.filter((item) => item.scopeType === 'CHANNEL'), (item) => item.scopeRef),
-          AGENT: toEntityRefOptions(
-            agents,
-            (item) => item.id,
-            (item) => `${item.name}${item.code ? ` (${item.code})` : ''}`
-          ),
-          MODEL: toEntityRefOptions(
-            models,
-            (item) => item.id,
-            (item) => `${item.modelName}${item.code ? ` (${item.code})` : ''}`
-          ),
+          AGENT: [],
+          MODEL: [],
           TOOL: toUniqueTextOptions(configs.filter((item) => item.scopeType === 'TOOL'), (item) => item.scopeRef),
           USER: toUniqueTextOptions(configs.filter((item) => item.scopeType === 'USER'), (item) => item.scopeRef)
         }
