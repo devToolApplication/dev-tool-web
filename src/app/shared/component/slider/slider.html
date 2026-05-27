@@ -1,0 +1,8 @@
+<p-slider
+  [min]="min"
+  [max]="max"
+  [ngModel]="value"
+  (ngModelChange)="onValueChange($event)"
+  [styleClass]="styleClass"
+  [attr.aria-label]="(ariaLabel || null) | translateContent"
+/>

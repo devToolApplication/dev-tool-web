@@ -1,0 +1,54 @@
+:host {
+  display: grid;
+  min-width: 0;
+}
+
+:host(.responsive-grid--sm) {
+  gap: 0.5rem;
+}
+
+:host(.responsive-grid--md) {
+  gap: 1rem;
+}
+
+:host(.responsive-grid--lg) {
+  gap: 1.5rem;
+}
+
+:host(.responsive-grid--stretch) {
+  align-items: stretch;
+}
+
+:host(.responsive-grid--start) {
+  align-items: start;
+}
+
+:host(.responsive-grid--1) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  :host(.responsive-grid--2),
+  :host(.responsive-grid--3),
+  :host(.responsive-grid--4),
+  :host(.responsive-grid--6) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  :host(.responsive-grid--3) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :host(.responsive-grid--4),
+  :host(.responsive-grid--6) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  :host(.responsive-grid--6) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

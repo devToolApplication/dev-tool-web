@@ -1,0 +1,13 @@
+<section class="data-quality" [class.data-quality--ok]="!hasWarnings()">
+  <div class="flex flex-wrap items-center gap-2">
+    @if (hasWarnings()) {
+      <span class="text-sm font-semibold app-text">{{ 'tradeBot.dataQuality.title' | translateContent }}</span>
+      @for (item of items(); track item.label) {
+        <app-tag [value]="item.label" [severity]="item.severity"></app-tag>
+        <span class="data-quality-value app-text">{{ item.value }}</span>
+      }
+    } @else {
+      <app-tag value="tradeBot.dataQuality.ok" severity="success" icon="pi pi-check"></app-tag>
+    }
+  </div>
+</section>

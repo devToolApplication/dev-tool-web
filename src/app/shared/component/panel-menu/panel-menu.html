@@ -1,0 +1,6 @@
+<p-panelmenu
+  [model]="model"
+  [multiple]="multiple"
+  [styleClass]="styleClass || ''"
+  (onNodeSelect)="itemClick.emit($any($event).item)"
+/>

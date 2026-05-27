@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-3">
+  <app-data-quality-warning [candles]="chartCandlesRaw" [snapshot]="marketDataSnapshot"></app-data-quality-warning>
+  @if (chartCandles().length) {
+    <app-candle-chart
+      [mode]="'HISTORICAL'"
+      [config]="chartConfig()"
+      [candles]="chartCandles()"
+      [overlays]="chartReviewOverlays"
+      (rangeBoundaryReached)="rangeBoundaryReached.emit($event)"
+    ></app-candle-chart>
+  } @else {
+    <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">
+      {{ 'tradeBot.dataQuality.noCandles' | translateContent }}
+    </div>
+  }
+</div>

@@ -1,0 +1,20 @@
+<app-base-crud-page
+  [pageConfig]="{
+    title: editId ? 'systemManagement.aiAgentCatalog.form.editTitle' : 'systemManagement.aiAgentCatalog.form.createTitle',
+    description: 'systemManagement.aiAgentCatalog.form.description',
+    actions: [
+      { id: 'back', label: 'back', icon: 'pi pi-arrow-left', buttonClass: 'p-button-text', goBack: true },
+      { id: 'submit', label: 'save', icon: 'pi pi-save', loading: loading(), submitForm: true }
+    ],
+    infoSection: {
+      title: 'systemManagement.aiAgentCatalog.form.infoTitle',
+      description: 'systemManagement.aiAgentCatalog.form.infoDescription'
+    }
+  }"
+  [formConfig]="formConfig"
+  [formContext]="formContext"
+  [formInitialValue]="formInitialValue"
+  [formVisible]="formVisible()"
+  [submitting]="loading()"
+  (formSubmit)="onSubmitForm($event)"
+></app-base-crud-page>

@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": [
+        "serve",
+        "--mcp"
+      ]
+    },
+    "basic-memory": {
+      "type": "stdio",
+      "command": "C:\\Users\\Hello\\AppData\\Roaming\\Python\\Python314\\Scripts\\basic-memory.exe",
+      "args": [
+        "mcp",
+        "--transport",
+        "stdio",
+        "--project",
+        "dev-tool-web"
+      ]
+    }
+  }
+}

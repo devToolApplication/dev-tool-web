@@ -1,0 +1,9 @@
+:host {
+  display: inline-block;
+}
+
+span {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}

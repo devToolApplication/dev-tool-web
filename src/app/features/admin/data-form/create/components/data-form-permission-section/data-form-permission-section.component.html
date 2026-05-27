@@ -1,0 +1,40 @@
+<div class="permission-grid">
+  <section>
+    <h3>{{ 'dataForm.permission.createQuestion' | translateContent }}</h3>
+    <app-check-box
+      label="dataForm.permission.admin"
+      [value]="permissionCreateAdmin"
+      (valueChange)="permissionCreateAdminChange.emit(!!$event)"
+    ></app-check-box>
+    <app-check-box
+      label="dataForm.permission.manager"
+      [value]="permissionCreateManager"
+      (valueChange)="permissionCreateManagerChange.emit(!!$event)"
+    ></app-check-box>
+  </section>
+
+  <section>
+    <h3>{{ 'dataForm.permission.updateQuestion' | translateContent }}</h3>
+    <app-check-box
+      label="dataForm.permission.admin"
+      [value]="permissionUpdateAdmin"
+      (valueChange)="permissionUpdateAdminChange.emit(!!$event)"
+    ></app-check-box>
+  </section>
+
+  <section>
+    <h3>{{ 'dataForm.permission.importExportQuestion' | translateContent }}</h3>
+    <app-check-box
+      label="dataForm.permission.admin"
+      [value]="permissionImportExportAdmin"
+      (valueChange)="permissionImportExportAdminChange.emit(!!$event)"
+    ></app-check-box>
+  </section>
+</div>
+
+<div class="permission-keys">
+  <app-badge label="FORM_CONFIG_CREATE" variant="muted" size="sm"></app-badge>
+  <app-badge label="FORM_CONFIG_UPDATE" variant="muted" size="sm"></app-badge>
+  <app-badge label="FORM_CONFIG_IMPORT" variant="muted" size="sm"></app-badge>
+  <app-badge label="FORM_CONFIG_EXPORT" variant="muted" size="sm"></app-badge>
+</div>

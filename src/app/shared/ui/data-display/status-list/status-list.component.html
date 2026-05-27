@@ -1,0 +1,28 @@
+<div class="status-list" [class.status-list--comfortable]="density === 'comfortable'">
+  @for (item of items; track item.title + item.status + item.timestamp) {
+    <article class="status-list__item">
+      <div class="status-list__content">
+        <strong>{{ item.title | translateContent }}</strong>
+        @if (item.description) {
+          <span>{{ item.description | translateContent }}</span>
+        }
+      </div>
+
+      @if (item.value) {
+        <span class="status-list__value">{{ item.value | translateContent }}</span>
+      }
+
+      @if (item.status) {
+        <app-badge
+          [label]="item.status"
+          [variant]="item.statusVariant ?? 'default'"
+          size="sm"
+        ></app-badge>
+      }
+
+      @if (item.timestamp) {
+        <time>{{ formattedTimestamp(item.timestamp) }}</time>
+      }
+    </article>
+  }
+</div>

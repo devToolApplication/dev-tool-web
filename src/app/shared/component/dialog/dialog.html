@@ -1,0 +1,32 @@
+<p-dialog
+  [visible]="visible"
+  [header]="header | translateContent"
+  [modal]="modal"
+  [appendTo]="appendTo"
+  [baseZIndex]="baseZIndex"
+  [dismissableMask]="dismissableMask"
+  [closeOnEscape]="closeOnEscape"
+  [closable]="closable"
+  [draggable]="draggable"
+  [resizable]="resizable"
+  [maximizable]="maximizable"
+  [position]="position"
+  [styleClass]="styleClass"
+  [maskStyleClass]="maskStyleClass"
+  [style]="width ? { width } : undefined"
+  [blockScroll]="blockScroll"
+  [contentStyle]="contentStyle"
+  [attr.aria-label]="(ariaLabel || header || 'dialog') | translateContent"
+  (visibleChange)="visibleChange.emit($event)"
+  (onHide)="hide.emit()"
+>
+  <ng-template pTemplate="header">
+    <ng-content select="[dialog-header]"></ng-content>
+  </ng-template>
+
+  <ng-content></ng-content>
+
+  <ng-template pTemplate="footer">
+    <ng-content select="[dialog-footer]"></ng-content>
+  </ng-template>
+</p-dialog>

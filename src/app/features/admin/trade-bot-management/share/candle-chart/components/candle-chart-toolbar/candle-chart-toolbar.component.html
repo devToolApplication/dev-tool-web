@@ -1,0 +1,44 @@
+<div class="candle-chart-toolbar">
+  <div class="candle-chart-toolbar__group">
+    <span class="candle-chart-status" [class.candle-chart-status--active]="isPlaying">
+      {{ statusKey() | translateContent }}
+    </span>
+    <span class="candle-chart-mode">{{ modeKey() | translateContent }}</span>
+  </div>
+
+  <div class="candle-chart-toolbar__group candle-chart-toolbar__group--toggles">
+    @for (option of overlayToggleOptions; track option.key) {
+      <app-button
+        [label]="option.label"
+        [styleClass]="overlayToggleButtonClass(option.key)"
+        (buttonClick)="overlayToggle.emit(option.key)"
+      />
+    }
+  </div>
+
+  <div class="candle-chart-toolbar__group">
+    <app-button
+      label=""
+      icon="pi pi-arrows-h"
+      styleClass="candle-chart-icon-button"
+      tooltip="tradeBot.chart.action.fitContent"
+      (buttonClick)="fitContent.emit()"
+    />
+    <app-button
+      label=""
+      icon="pi pi-image"
+      styleClass="candle-chart-icon-button"
+      tooltip="tradeBot.chart.action.exportImage"
+      (buttonClick)="exportImage.emit()"
+    />
+    <app-button
+      label=""
+      [icon]="fullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"
+      styleClass="candle-chart-icon-button"
+      [tooltip]="fullscreen ? 'tradeBot.chart.action.exitFullscreen' : 'tradeBot.chart.action.fullscreen'"
+      (buttonClick)="fullscreenToggle.emit()"
+    />
+  </div>
+
+  <ng-content select="[candleChartReplayControls]"></ng-content>
+</div>

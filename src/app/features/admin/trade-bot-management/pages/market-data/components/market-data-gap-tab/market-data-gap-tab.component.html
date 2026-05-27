@@ -1,0 +1,15 @@
+<div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+  @for (card of gapSummaryCards(); track card.label) {
+    <app-summary-metric-card [label]="card.label" [value]="card.value"></app-summary-metric-card>
+  }
+</div>
+
+<app-table
+  [config]="gapTableConfig"
+  [data]="gaps"
+  [loading]="loading"
+  [error]="error"
+  (search)="search.emit($event)"
+  (resetFilter)="resetFilter.emit()"
+  (retry)="retryGaps.emit()"
+></app-table>

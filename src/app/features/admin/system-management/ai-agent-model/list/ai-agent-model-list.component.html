@@ -1,0 +1,17 @@
+<app-page-shell title="AI Agent Model Catalog" layout="wide">
+  <app-table
+    [config]="tableConfig"
+    [data]="rows"
+    [pageResponse]="pageResponse"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+    [loading]="pageLoading()"
+    [error]="pageError()"
+    (pageChange)="onPageChange($event)"
+    (sortChange)="onSortChange($event)"
+    (search)="onSearch($event)"
+    (resetFilter)="onResetFilter()"
+    (create)="onCreate()"
+    (retry)="refreshPage()"
+  ></app-table>
+</app-page-shell>

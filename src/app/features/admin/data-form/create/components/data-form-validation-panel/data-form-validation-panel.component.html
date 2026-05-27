@@ -1,0 +1,72 @@
+@if (!validated) {
+  <app-empty-state
+    title="dataForm.empty.noValidationTitle"
+    description="dataForm.empty.noValidationDescription"
+    icon="pi pi-check-circle"
+  ></app-empty-state>
+} @else {
+  <div class="validation-groups">
+    <section class="validation-group validation-group--critical">
+      <header>
+        <h3>{{ 'dataForm.validation.criticalErrors' | translateContent }}</h3>
+        <app-badge [label]="validationGroups.critical.length + ''" variant="danger" size="sm"></app-badge>
+      </header>
+      @if (validationGroups.critical.length > 0) {
+        <ul>
+          @for (issue of validationGroups.critical; track issue.path ?? issue.message) {
+            <li>
+              @if (issue.path) {
+                <code>{{ issue.path }}</code>
+              }
+              <span>{{ issue.message | translateContent }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="muted-text">{{ 'dataForm.validation.noCriticalErrors' | translateContent }}</p>
+      }
+    </section>
+
+    <section class="validation-group validation-group--warning">
+      <header>
+        <h3>{{ 'dataForm.validation.warnings' | translateContent }}</h3>
+        <app-badge [label]="validationGroups.warnings.length + ''" variant="warning" size="sm"></app-badge>
+      </header>
+      @if (validationGroups.warnings.length > 0) {
+        <ul>
+          @for (issue of validationGroups.warnings; track issue.path ?? issue.message) {
+            <li>
+              @if (issue.path) {
+                <code>{{ issue.path }}</code>
+              }
+              <span>{{ issue.message | translateContent }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="muted-text">{{ 'dataForm.validation.noWarnings' | translateContent }}</p>
+      }
+    </section>
+
+    <section class="validation-group validation-group--suggestion">
+      <header>
+        <h3>{{ 'dataForm.validation.suggestions' | translateContent }}</h3>
+        <app-badge [label]="validationGroups.suggestions.length + ''" variant="info" size="sm"></app-badge>
+      </header>
+      @if (validationGroups.suggestions.length > 0) {
+        <ul>
+          @for (issue of validationGroups.suggestions; track issue.path ?? issue.message) {
+            <li>
+              @if (issue.path) {
+                <code>{{ issue.path }}</code>
+              }
+              <span>{{ issue.message | translateContent }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="muted-text">{{ 'dataForm.validation.noSuggestions' | translateContent }}</p>
+      }
+    </section>
+  </div>
+}

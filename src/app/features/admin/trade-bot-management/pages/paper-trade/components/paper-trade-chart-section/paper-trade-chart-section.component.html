@@ -1,0 +1,50 @@
+<div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+  @if (candles.length) {
+    <app-candle-chart
+      [mode]="'HISTORICAL'"
+      [config]="chartConfig()"
+      [candles]="chartCandles()"
+      [overlays]="overlays"
+      (rangeBoundaryReached)="rangeBoundaryReached.emit($event)"
+    ></app-candle-chart>
+  } @else {
+    <app-card>
+      <div class="app-text-muted">{{ 'tradeBot.paper.noCandles' | translateContent }}</div>
+    </app-card>
+  }
+
+  <app-section-panel title="tradeBot.paper.activePositions" density="compact">
+    @if (activePositions.length) {
+      <div class="flex flex-col gap-3">
+        @for (position of activePositions; track position.positionId) {
+          <div class="rounded-lg border app-border app-bg-soft p-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="font-semibold app-text">{{ position.symbol }}</div>
+              <app-tag [value]="position.side" severity="info"></app-tag>
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <div class="app-text-muted">{{ 'tradeBot.field.entryPrice' | translateContent }}</div>
+                <div class="app-text">{{ position.entryPrice }}</div>
+              </div>
+              <div>
+                <div class="app-text-muted">{{ 'tradeBot.paper.markPrice' | translateContent }}</div>
+                <div class="app-text">{{ position.markPrice }}</div>
+              </div>
+              <div>
+                <div class="app-text-muted">{{ 'tradeBot.paper.stopLoss' | translateContent }}</div>
+                <div class="app-text">{{ position.stopLoss ?? '-' }}</div>
+              </div>
+              <div>
+                <div class="app-text-muted">{{ 'tradeBot.paper.takeProfit' | translateContent }}</div>
+                <div class="app-text">{{ position.takeProfit ?? '-' }}</div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">{{ 'tradeBot.paper.noActivePositions' | translateContent }}</div>
+    }
+  </app-section-panel>
+</div>

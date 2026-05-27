@@ -1,0 +1,5 @@
+<div class="flex flex-col gap-4">
+  <app-table [config]="orderTableConfig" [data]="orders" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  <app-table [config]="orderTableConfig" [data]="fills" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  <app-table [config]="positionTableConfig" [data]="positions" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+</div>

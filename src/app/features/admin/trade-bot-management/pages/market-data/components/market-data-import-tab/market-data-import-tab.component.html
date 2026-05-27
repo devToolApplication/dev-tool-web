@@ -1,0 +1,9 @@
+<app-section-panel title="tradeBot.market.import" density="compact">
+  <app-form-input
+    [config]="importForm"
+    [context]="formContext"
+    [initialValue]="importInitialValue"
+    [submitting]="loading"
+    (formSubmit)="importSubmit.emit($event)"
+  ></app-form-input>
+</app-section-panel>

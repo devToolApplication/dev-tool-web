@@ -1,0 +1,20 @@
+<app-card padding="lg">
+  <app-empty-state
+    [title]="title"
+    [description]="description"
+    icon="pi pi-exclamation-triangle"
+    variant="warning"
+  >
+    @if (code) {
+      <span class="error-page__code">{{ code }}</span>
+    }
+    <app-button
+      [label]="actionLabel"
+      icon="pi pi-arrow-left"
+      severity="secondary"
+      [routerLink]="actionRouterLink"
+      [text]="true"
+      (buttonClick)="actionClick.emit()"
+    ></app-button>
+  </app-empty-state>
+</app-card>

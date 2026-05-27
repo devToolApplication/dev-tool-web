@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-4">
+  <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+    <div class="rounded-lg border app-border p-4">
+      <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.equity' | translateContent }}</div>
+      <div class="backtest-trend">
+        @for (point of equityTrend(); track $index) {
+          <span class="backtest-trend-bar backtest-trend-bar--equity" [style.height.%]="point.height" [attr.title]="point.value"></span>
+        }
+      </div>
+    </div>
+    <div class="rounded-lg border app-border p-4">
+      <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.drawdown' | translateContent }}</div>
+      <div class="backtest-trend">
+        @for (point of drawdownTrend(); track $index) {
+          <span class="backtest-trend-bar backtest-trend-bar--drawdown" [style.height.%]="point.height" [attr.title]="point.value"></span>
+        }
+      </div>
+    </div>
+  </div>
+  <app-table [config]="curveTableConfig" [data]="equityRows().concat(drawdownRows())" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+</div>

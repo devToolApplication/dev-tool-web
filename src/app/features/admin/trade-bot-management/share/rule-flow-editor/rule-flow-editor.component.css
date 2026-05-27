@@ -1,0 +1,34 @@
+.rule-flow-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--p-surface-0);
+}
+
+.rule-flow-editor__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--p-surface-200);
+  background: transparent;
+  flex-wrap: wrap;
+}
+
+.rule-flow-editor__separator {
+  width: 1px;
+  height: 24px;
+  background: var(--p-surface-200);
+  margin: 0 4px;
+}
+
+.rule-flow-editor__canvas {
+  width: 100%;
+  min-height: 500px;
+  overflow: auto;
+  position: relative;
+  background: var(--p-surface-50);
+}

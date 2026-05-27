@@ -1,0 +1,48 @@
+<div class="mb-3">
+  <app-tabs [tabs]="tabs" [value]="currentTab" (valueChange)="currentTab = $event"></app-tabs>
+</div>
+
+@switch (currentTab) {
+  @case ('sessions') {
+    <app-table [config]="sessionTableConfig" [data]="sessions" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('positions') {
+    <app-table [config]="positionTableConfig" [data]="positions" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('orders') {
+    <app-table [config]="orderTableConfig" [data]="orders" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('fills') {
+    <app-table [config]="fillTableConfig" [data]="fills" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('equity') {
+    <app-table [config]="equityTableConfig" [data]="equityCurve" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('events') {
+    <app-table [config]="eventTableConfig" [data]="events" [loading]="loading" [error]="error" (retry)="retry.emit()"></app-table>
+  }
+  @case ('snapshot') {
+    @if (detail?.snapshot) {
+      <div class="flex flex-col gap-4">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          @for (fact of snapshotFacts(); track fact.label) {
+            <div class="rounded-lg border app-border app-bg-soft p-3">
+              <div class="text-xs font-semibold uppercase app-text-muted">{{ fact.label | translateContent }}</div>
+              <div class="mt-1 break-words app-text">{{ fact.value }}</div>
+            </div>
+          }
+        </div>
+        @if (detail?.snapshot?.configChangedAfterStart) {
+          <app-tag severity="warn" value="tradeBot.paper.configChanged"></app-tag>
+        } @else {
+          <app-tag severity="success" value="tradeBot.paper.snapshotLocked"></app-tag>
+        }
+        <app-fieldset legend="tradeBot.common.advancedRawJson" [toggleable]="true" [collapsed]="true">
+          <app-json-viewer [value]="snapshotJson()" [collapsed]="true"></app-json-viewer>
+        </app-fieldset>
+      </div>
+    } @else {
+      <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">{{ 'tradeBot.paper.noSnapshot' | translateContent }}</div>
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<app-base-popup
+  [visible]="createAccountVisible"
+  header="tradeBot.paper.createAccount"
+  size="lg"
+  width="min(58rem, 94vw)"
+  [loading]="actionLoading"
+  [dismissableMask]="true"
+  [showFooter]="false"
+  (visibleChange)="createAccountVisibleChange.emit($event)"
+>
+  <app-form-input [config]="accountForm" [context]="formContext" [initialValue]="accountInitialValue" [submitting]="actionLoading" (formSubmit)="createAccount.emit($event)"></app-form-input>
+</app-base-popup>
+
+<app-base-popup
+  [visible]="startSessionVisible"
+  header="tradeBot.paper.startSession"
+  size="lg"
+  width="min(64rem, 94vw)"
+  [loading]="actionLoading"
+  [dismissableMask]="true"
+  [showFooter]="false"
+  (visibleChange)="startSessionVisibleChange.emit($event)"
+>
+  <app-form-input [config]="startForm()" [context]="formContext" [initialValue]="startInitialValue()" [submitting]="actionLoading" (formSubmit)="startSession.emit($event)"></app-form-input>
+</app-base-popup>

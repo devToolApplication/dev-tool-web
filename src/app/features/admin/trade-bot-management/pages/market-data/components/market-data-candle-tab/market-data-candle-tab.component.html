@@ -1,0 +1,54 @@
+<app-section-panel title="tradeBot.market.query" density="compact">
+  <app-form-input
+    [config]="queryForm"
+    [context]="formContext"
+    [initialValue]="queryInitialValue"
+    [submitting]="loading"
+    (formSubmit)="querySubmit.emit($event)"
+  ></app-form-input>
+</app-section-panel>
+
+<app-data-quality-warning [candles]="candles" [gaps]="gaps"></app-data-quality-warning>
+
+@if (candles.length) {
+  <app-candle-chart
+    [mode]="'HISTORICAL'"
+    [config]="chartConfig()"
+    [candles]="chartCandles()"
+    (rangeBoundaryReached)="rangeBoundaryReached.emit($event)"
+  ></app-candle-chart>
+}
+
+<app-table
+  [config]="tableConfig"
+  [data]="candles"
+  [loading]="loading"
+  [error]="error"
+  (retry)="retryQuery.emit()"
+></app-table>
+
+<app-drawer
+  [open]="!!selectedRawCandle()"
+  (openChange)="handleRawCandleOpenChange($event)"
+  (closed)="closeRawCandle()"
+  title="tradeBot.market.rawCandle"
+  size="lg"
+>
+  @if (selectedRawCandle(); as candle) {
+    <div class="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div class="rounded-lg border app-border app-bg-soft p-3">
+        <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.symbol' | translateContent }}</div>
+        <div class="mt-1 app-text">{{ candle.symbol }}</div>
+      </div>
+      <div class="rounded-lg border app-border app-bg-soft p-3">
+        <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.timeframe' | translateContent }}</div>
+        <div class="mt-1 app-text">{{ candle.timeframe }}</div>
+      </div>
+      <div class="rounded-lg border app-border app-bg-soft p-3">
+        <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.openTime' | translateContent }}</div>
+        <div class="mt-1 app-text">{{ candle.openTime }}</div>
+      </div>
+    </div>
+    <app-json-viewer [value]="rawCandleJson()" [collapsed]="true"></app-json-viewer>
+  }
+</app-drawer>

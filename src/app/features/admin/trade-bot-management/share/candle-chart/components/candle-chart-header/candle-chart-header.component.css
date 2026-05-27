@@ -1,0 +1,66 @@
+.candle-chart-header {
+  position: absolute;
+  z-index: 4;
+  top: 0.5rem;
+  left: 0.75rem;
+  display: flex;
+  max-width: calc(100% - 1.5rem);
+  flex-direction: column;
+  gap: 0.2rem;
+  color: var(--app-chart-axis);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.candle-chart-header__main {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.candle-chart-header__title {
+  max-width: min(24rem, 100%);
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candle-chart-header__metric,
+.candle-chart-header__volume {
+  color: var(--app-chart-axis);
+  white-space: nowrap;
+}
+
+.candle-chart-header__change,
+.candle-chart-header__volume span {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.candle-chart-header__change--up {
+  color: var(--app-chart-candle-up);
+}
+
+.candle-chart-header__change--down {
+  color: var(--app-chart-candle-down);
+}
+
+.candle-chart-header__change--flat {
+  color: var(--app-chart-axis);
+}
+
+@media (max-width: 640px) {
+  .candle-chart-header {
+    right: 0.75rem;
+    font-size: 0.68rem;
+  }
+
+  .candle-chart-header__title {
+    max-width: 100%;
+  }
+}

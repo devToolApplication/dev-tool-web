@@ -1,0 +1,17 @@
+<p-confirmDialog
+  [key]="key"
+  [header]="(header || undefined) | translateContent"
+  [message]="(message || undefined) | translateContent"
+  [icon]="icon"
+  [acceptLabel]="(acceptLabel || undefined) | translateContent"
+  [rejectLabel]="(rejectLabel || undefined) | translateContent"
+  [acceptButtonStyleClass]="acceptButtonStyleClass"
+  [rejectButtonStyleClass]="rejectButtonStyleClass"
+  [appendTo]="appendTo"
+  [closable]="closable"
+  [closeOnEscape]="closeOnEscape"
+  [dismissableMask]="dismissableMask"
+  [styleClass]="styleClass"
+  (accept)="accept.emit()"
+  (reject)="reject.emit()"
+/>

@@ -1,0 +1,20 @@
+.backtest-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 4rem;
+}
+
+.backtest-trend-bar {
+  flex: 1;
+  min-width: 2px;
+  border-radius: 2px 2px 0 0;
+}
+
+.backtest-trend-bar--equity {
+  background-color: var(--app-chart-candle-up, #22c55e);
+}
+
+.backtest-trend-bar--drawdown {
+  background-color: var(--app-chart-candle-down, #ef4444);
+}

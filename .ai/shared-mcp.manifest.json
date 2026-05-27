@@ -1,0 +1,31 @@
+{
+  "workspace": {
+    "name": "d-code-workspace",
+    "root": "D:\\Code",
+    "primaryProject": "D:\\Code\\dev-tool-web"
+  },
+  "sharedMcpServers": {
+    "codegraph": {
+      "transport": "stdio",
+      "command": "codegraph",
+      "args": ["serve", "--mcp"],
+      "scope": "workspace",
+      "indexRoot": "D:\\Code",
+      "purpose": "Shared code intelligence and code graph for all projects under D:\\Code"
+    },
+    "basic-memory": {
+      "transport": "stdio",
+      "command": "C:\\Users\\Hello\\AppData\\Roaming\\Python\\Python314\\Scripts\\basic-memory.exe",
+      "args": ["mcp", "--transport", "stdio", "--project", "dev-tool-web"],
+      "scope": "project-memory",
+      "purpose": "Shared project memory for Claude, Codex, Gemini, and Gravity"
+    }
+  },
+  "maintenance": {
+    "codegraphInit": "codegraph init D:\\Code",
+    "codegraphIndex": "codegraph index D:\\Code",
+    "codegraphSync": "codegraph sync D:\\Code",
+    "codegraphStatus": "codegraph status D:\\Code",
+    "basicMemoryProject": "basic-memory project info dev-tool-web"
+  }
+}

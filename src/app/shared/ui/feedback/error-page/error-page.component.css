@@ -1,0 +1,20 @@
+:host {
+  display: grid;
+  min-height: min(30rem, 70vh);
+  place-items: center;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.error-page__code {
+  display: inline-grid;
+  place-items: center;
+  min-width: 4rem;
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--app-control-warn-bg);
+  color: var(--app-control-warn-text);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
