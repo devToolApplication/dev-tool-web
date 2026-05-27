@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
+@import "./styles/tokens/generated/_variables.css";
 @import "./theme/tokens.css";
 @import "./theme/dark.css";
 @import "./theme/layout.css";
