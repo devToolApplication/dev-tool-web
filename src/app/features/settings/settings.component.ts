@@ -1,6 +1,5 @@
 import { Component, WritableSignal, computed, signal } from '@angular/core';
 import { ThemeMode, ThemeService } from '../../core/ui-services/theme.service';
-import { ThemePresetId } from '../../core/ui-services/theme-presets';
 import { AppLanguage, I18nService } from '../../core/ui-services/i18n.service';
 import {
   ThemeCustomOption,
@@ -44,7 +43,6 @@ export class SettingsComponent {
   readonly activeTab = signal<SettingsTab>('general');
   readonly customThemeMode = signal<ThemeMode>('light');
   readonly themeMode: WritableSignal<ThemeMode>;
-  readonly themePreset: WritableSignal<ThemePresetId>;
   readonly language: I18nService['language'];
 
   private readonly themeConfigRevision = signal(0);
@@ -66,8 +64,6 @@ export class SettingsComponent {
     { label: 'english', value: 'en' }
   ];
 
-  readonly themePresetOptions: SettingsOption<ThemePresetId>[];
-
   readonly generalPanels: SettingsPanel[] = [
     {
       icon: 'pi pi-moon',
@@ -78,11 +74,6 @@ export class SettingsComponent {
       icon: 'pi pi-desktop',
       title: 'settings.themeModeTitle',
       description: 'settings.themeModeDescription'
-    },
-    {
-      icon: 'pi pi-palette',
-      title: 'settings.themePresetTitle',
-      description: 'settings.themePresetDescription'
     },
     {
       icon: 'pi pi-language',
@@ -119,11 +110,6 @@ export class SettingsComponent {
       value: this.themeMode()
     },
     {
-      icon: 'pi pi-palette',
-      label: 'settings.summary.preset',
-      value: `settings.${this.themePreset()}`
-    },
-    {
       icon: 'pi pi-language',
       label: 'settings.summary.language',
       value: this.language() === 'vi' ? 'vietnamese' : 'english'
@@ -157,12 +143,7 @@ export class SettingsComponent {
     private readonly themeCustomizerService: ThemeCustomizerService
   ) {
     this.themeMode = signal<ThemeMode>(this.themeService.themeMode);
-    this.themePreset = signal<ThemePresetId>(this.themeService.themePreset);
     this.language = this.i18nService.language;
-    this.themePresetOptions = this.themeService.availablePresets.map((preset) => ({
-      label: `settings.${preset}`,
-      value: preset
-    }));
   }
 
   onTabChange(value: string | number | undefined): void {
@@ -179,13 +160,6 @@ export class SettingsComponent {
     if (isThemeMode(mode)) {
       this.themeService.setThemeMode(mode);
       this.themeMode.set(mode);
-    }
-  }
-
-  onThemePresetChange(preset: string | number | boolean | null): void {
-    if (isThemePreset(preset)) {
-      this.themeService.setThemePreset(preset);
-      this.themePreset.set(preset);
     }
   }
 
@@ -239,10 +213,6 @@ function isSettingsTab(value: unknown): value is SettingsTab {
 
 function isThemeMode(value: unknown): value is ThemeMode {
   return value === 'light' || value === 'dark';
-}
-
-function isThemePreset(value: unknown): value is ThemePresetId {
-  return value === 'aura' || value === 'lara' || value === 'nora' || value === 'material';
 }
 
 function isLanguage(value: unknown): value is AppLanguage {

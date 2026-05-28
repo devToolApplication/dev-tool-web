@@ -75,8 +75,6 @@ class ButtonStubComponent {
 
 class MockThemeService {
   themeMode: 'light' | 'dark' = 'light';
-  themePreset: 'aura' | 'lara' | 'nora' | 'material' = 'aura';
-  availablePresets: Array<'aura' | 'lara' | 'nora' | 'material'> = ['aura', 'lara', 'nora', 'material'];
 
   get isDarkMode(): boolean {
     return this.themeMode === 'dark';
@@ -88,10 +86,6 @@ class MockThemeService {
 
   setThemeMode = vi.fn((mode: 'light' | 'dark') => {
     this.themeMode = mode;
-  });
-
-  setThemePreset = vi.fn((preset: 'aura' | 'lara' | 'nora' | 'material') => {
-    this.themePreset = preset;
   });
 }
 
@@ -195,16 +189,13 @@ describe('SettingsComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.settings-token').length).toBe(10);
   });
 
-  it('syncs theme mode, preset and language changes to services', () => {
+  it('syncs theme mode and language changes to services', () => {
     component.onThemeModeChange('dark');
-    component.onThemePresetChange('lara');
     component.onLanguageChange('en');
 
     expect(themeService.setThemeMode).toHaveBeenCalledWith('dark');
-    expect(themeService.setThemePreset).toHaveBeenCalledWith('lara');
     expect(i18nService.setLanguage).toHaveBeenCalledWith('en');
     expect(component.settingsSummary()[0].value).toBe('dark');
-    expect(component.settingsSummary()[1].value).toBe('settings.lara');
   });
 
   it('updates and resets custom token values for the selected mode', () => {

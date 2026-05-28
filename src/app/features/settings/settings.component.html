@@ -49,19 +49,6 @@
 
           <app-section-panel
             [title]="generalPanels[2].title"
-            [subtitle]="generalPanels[2].description"
-            density="compact"
-          >
-            <app-select
-              label="settings.themePresetTitle"
-              [options]="themePresetOptions"
-              [value]="themePreset()"
-              (valueChange)="onThemePresetChange($event)"
-            ></app-select>
-          </app-section-panel>
-
-          <app-section-panel
-            [title]="generalPanels[3].title"
             [subtitle]="generalPanels[3].description"
             density="compact"
           >
