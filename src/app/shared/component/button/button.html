@@ -1,17 +1,21 @@
-<p-button
-  [label]="label | translateContent"
-  [icon]="icon"
-  [severity]="severity"
-  [disabled]="disabled"
-  [loading]="loading"
+<button
   [type]="type"
-  [text]="text"
-  [styleClass]="styleClass"
+  [disabled]="disabled || loading"
+  [attr.aria-label]="(ariaLabel || tooltip || label || null) | translateContent"
+  [attr.title]="(tooltip || null) | translateContent"
   [routerLink]="routerLink"
   [queryParams]="queryParams"
-  [pTooltip]="(tooltip || '') | translateContent"
-  tooltipPosition="top"
-  [ariaLabel]="(ariaLabel || tooltip || label || undefined) | translateContent"
-  [attr.aria-label]="(ariaLabel || tooltip || label || null) | translateContent"
-  (onClick)="buttonClick.emit()"
-/>
+  class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+  [ngClass]="buttonClasses"
+  [class]="styleClass || ''"
+  (click)="buttonClick.emit()"
+>
+  @if (loading) {
+    <i class="pi pi-spinner pi-spin"></i>
+  } @else if (icon) {
+    <i [class]="icon"></i>
+  }
+  @if (label) {
+    <span>{{ label | translateContent }}</span>
+  }
+</button>

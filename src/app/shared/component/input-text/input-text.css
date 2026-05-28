@@ -2,8 +2,10 @@
   display: block;
 }
 
-:host small {
-  display: block;
-  margin-top: 0.45rem;
-  color: var(--app-text-muted);
+.app-field--invalid input {
+  border-color: var(--app-control-danger-text);
+}
+
+.app-field--invalid label {
+  color: var(--app-control-danger-text) !important;
 }

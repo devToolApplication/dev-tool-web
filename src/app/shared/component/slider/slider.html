@@ -1,8 +1,12 @@
-<p-slider
-  [min]="min"
-  [max]="max"
-  [ngModel]="value"
-  (ngModelChange)="onValueChange($event)"
-  [styleClass]="styleClass"
-  [attr.aria-label]="(ariaLabel || null) | translateContent"
-/>
+<div class="app-field">
+  <input
+    type="range"
+    [min]="min"
+    [max]="max"
+    [ngModel]="value"
+    (ngModelChange)="onValueChange($event)"
+    [attr.aria-label]="(ariaLabel || null) | translateContent"
+    class="w-full h-2 rounded-full appearance-none cursor-pointer bg-[var(--app-input-border)] accent-[var(--app-primary)]"
+    [class]="styleClass || ''"
+  />
+</div>

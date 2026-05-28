@@ -1,7 +1,17 @@
-<p-badge
-  [value]="value"
-  [severity]="severity"
-  [size]="size"
-  [badgeDisabled]="badgeDisabled"
-  [styleClass]="styleClass"
-/>
+<span
+  class="inline-flex items-center justify-center rounded-full font-bold text-white"
+  [class]="styleClass || ''"
+  [ngClass]="{
+    'h-5 w-5 text-[0.65rem]': !size,
+    'h-6 w-6 text-xs': size === 'large',
+    'h-8 w-8 text-sm': size === 'xlarge',
+    'bg-[var(--app-primary)]': !severity,
+    'bg-[var(--app-control-success-text)]': severity === 'success',
+    'bg-[var(--app-control-info-text)]': severity === 'info',
+    'bg-[var(--app-control-warn-text)]': severity === 'warn',
+    'bg-[var(--app-control-danger-text)]': severity === 'danger',
+    'bg-[var(--app-control-secondary-text)]': severity === 'secondary',
+    'bg-[var(--app-control-contrast-text)]': severity === 'contrast',
+    'hidden': badgeDisabled
+  }"
+>{{ value }}</span>

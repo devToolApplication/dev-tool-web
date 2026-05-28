@@ -1,6 +1,5 @@
-import { Component, Input, ViewChild } from '@angular/core';
-import { MenuItem } from 'primeng/api';
-import { TieredMenu } from 'primeng/tieredmenu';
+import { Component, Input } from '@angular/core';
+import { AppMenuItem } from '../button-split/button-split';
 
 @Component({
   selector: 'app-tiered-menu',
@@ -9,19 +8,25 @@ import { TieredMenu } from 'primeng/tieredmenu';
   styleUrl: './tiered-menu.css'
 })
 export class TieredMenuComponent {
-  @Input() items: MenuItem[] = [];
+  @Input() items: AppMenuItem[] = [];
   @Input() popup = false;
   @Input() appendTo: HTMLElement | 'body' | null = null;
   @Input() styleClass?: string;
   @Input() ariaLabel = 'Options menu';
 
-  @ViewChild(TieredMenu) private menu?: TieredMenu;
+  visible = false;
 
   toggle(event: Event): void {
-    this.menu?.toggle(event);
+    event.stopPropagation();
+    this.visible = !this.visible;
   }
 
   hide(): void {
-    this.menu?.hide();
+    this.visible = false;
+  }
+
+  onItemClick(item: AppMenuItem): void {
+    if (item.command) item.command();
+    this.hide();
   }
 }

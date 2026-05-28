@@ -1,19 +1,28 @@
-<p-timeline [value]="value" [align]="align" [layout]="layout" [styleClass]="styleClass">
-  <ng-template pTemplate="opposite" let-item>
-    @if (oppositeTemplate) {
-      <ng-container [ngTemplateOutlet]="oppositeTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
-    }
-  </ng-template>
+<div class="flex" [class]="styleClass" [ngClass]="{'flex-col': layout === 'vertical', 'flex-row': layout === 'horizontal'}">
+  @for (item of value; track $index) {
+    <div class="flex" [ngClass]="{'flex-row gap-4': layout === 'vertical', 'flex-col items-center gap-2': layout === 'horizontal'}">
+      @if (oppositeTemplate && (align === 'left' || align === 'top')) {
+        <div class="flex-1 text-right">
+          <ng-container [ngTemplateOutlet]="oppositeTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        </div>
+      }
 
-  <ng-template pTemplate="marker" let-item>
-    @if (markerTemplate) {
-      <ng-container [ngTemplateOutlet]="markerTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
-    }
-  </ng-template>
+      <div class="flex flex-col items-center">
+        @if (markerTemplate) {
+          <ng-container [ngTemplateOutlet]="markerTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        } @else {
+          <div class="h-3 w-3 rounded-full bg-[var(--app-primary)]"></div>
+        }
+        @if ($index < value.length - 1) {
+          <div class="w-0.5 flex-1 min-h-[2rem] bg-[var(--app-border)]"></div>
+        }
+      </div>
 
-  <ng-template pTemplate="content" let-item>
-    @if (contentTemplate) {
-      <ng-container [ngTemplateOutlet]="contentTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
-    }
-  </ng-template>
-</p-timeline>
+      <div class="flex-1 pb-4">
+        @if (contentTemplate) {
+          <ng-container [ngTemplateOutlet]="contentTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        }
+      </div>
+    </div>
+  }
+</div>

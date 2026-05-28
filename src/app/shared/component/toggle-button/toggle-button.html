@@ -1,27 +1,30 @@
-<div [class]="styleClass">
+<div class="app-field" [class.app-field--disabled]="disabled">
   @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block">{{ label | translateContent }}</label>
+    <label class="mb-2 block text-sm font-semibold text-[var(--app-text)]">{{ label | translateContent }}</label>
   }
 
-  <p-togglebutton
-    [inputId]="inputId"
-    [onLabel]="onLabel | translateContent"
-    [offLabel]="offLabel | translateContent"
-    [onIcon]="onIcon"
-    [offIcon]="offIcon"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
+  <button
+    type="button"
+    [id]="inputId"
     [disabled]="disabled"
-    [invalid]="invalid"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+    [attr.aria-pressed]="!!value"
+    class="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+    [class]="value
+      ? 'bg-[var(--app-primary)] border-[var(--app-primary)] text-white shadow-[0_0_14px_rgba(122,119,255,0.2)]'
+      : 'bg-[var(--app-custom-input-bg)] border-[var(--app-input-border)] text-[var(--app-custom-input-text)] hover:border-[var(--app-primary)]'"
+    (click)="onChange(!value)"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
+  >
+    <i [class]="value ? onIcon : offIcon"></i>
+    <span>{{ (value ? onLabel : offLabel) | translateContent }}</span>
+  </button>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
 </div>
-
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}

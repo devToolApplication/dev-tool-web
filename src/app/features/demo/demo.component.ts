@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MenuItem, TreeNode } from 'primeng/api';
+import { TreeNode } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { SelectOption } from '../../shared/component/select/select';
+import { AppMenuItem } from '../../shared/component/button-split/button-split';
 import { ActionToolbarAction } from '../../shared/ui/layout/action-toolbar/action-toolbar.component';
 import { CandleChartConfig } from '../admin/trade-bot-management/share/candle-chart/candle-chart';
 
@@ -110,20 +111,20 @@ export class DemoComponent {
     | null = null;
   buttonText = false;
 
-  splitItems: MenuItem[] = [
+  splitItems: AppMenuItem[] = [
     { label: 'Save Draft', icon: 'pi pi-save' },
     { label: 'Publish', icon: 'pi pi-send' },
   ];
 
   speedDialDirection: 'up' | 'down' | 'left' | 'right' = 'up';
   speedDialType: 'linear' | 'circle' | 'semi-circle' | 'quarter-circle' = 'linear';
-  speedDialItems: MenuItem[] = [
+  speedDialItems: AppMenuItem[] = [
     { label: 'Copy', icon: 'pi pi-copy' },
     { label: 'Delete', icon: 'pi pi-trash' },
     { label: 'Share', icon: 'pi pi-share-alt' },
   ];
 
-  breadcrumbItems: MenuItem[] = [
+  breadcrumbItems: AppMenuItem[] = [
     { label: 'Admin' },
     { label: 'Component Demo' },
     { label: 'Breadcrumb' },

@@ -1,13 +1,13 @@
-<p-toolbar [styleClass]="styleClass">
-  <ng-template pTemplate="start">
+<div class="flex items-center gap-2 rounded-lg border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-2" [class]="styleClass || ''">
+  <div class="flex items-center gap-2">
     <ng-content select="[toolbar-start], [toolbar-left]"></ng-content>
-  </ng-template>
+  </div>
 
-  <ng-template pTemplate="center">
+  <div class="flex flex-1 items-center justify-center gap-2">
     <ng-content select="[toolbar-center]"></ng-content>
-  </ng-template>
+  </div>
 
-  <ng-template pTemplate="end">
+  <div class="flex items-center gap-2">
     <ng-content select="[toolbar-end], [toolbar-right]"></ng-content>
-  </ng-template>
-</p-toolbar>
+  </div>
+</div>

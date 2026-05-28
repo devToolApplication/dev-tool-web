@@ -2,10 +2,10 @@ import { Component, DestroyRef, EventEmitter, Input, NgZone, OnInit, Output, Vie
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Route, Router, Routes } from '@angular/router';
 import { filter } from 'rxjs';
-import { MenuItem } from 'primeng/api';
 import { KeycloakService } from '../../../core/auth/keycloak.service';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
 import { AppMenuItem } from '../side-menu/side-menu.component';
+import { AppMenuItem as MenuItemType } from '../../component/button-split/button-split';
 import { TieredMenuComponent } from '../../component/tiered-menu/tiered-menu';
 
 interface AppShellUserInfo {
@@ -31,7 +31,7 @@ export class HeaderComponent implements OnInit {
   @Output() toggleSidebar = new EventEmitter<void>();
   @ViewChild('userMenu') userMenu!: TieredMenuComponent;
 
-  readonly homeItem: MenuItem = {
+  readonly homeItem: MenuItemType = {
     icon: 'pi pi-home',
     routerLink: '/admin/dashboard'
   };
@@ -40,8 +40,8 @@ export class HeaderComponent implements OnInit {
   readonly userRoleLabel = signal('layout.roleFallback');
   readonly userInitials = signal('DT');
 
-  accountMenuItems: MenuItem[] = [];
-  breadcrumbItems: MenuItem[] = [];
+  accountMenuItems: MenuItemType[] = [];
+  breadcrumbItems: MenuItemType[] = [];
 
   constructor(
     private readonly router: Router,

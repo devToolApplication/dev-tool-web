@@ -1,75 +1,51 @@
-<p-floatlabel [variant]="variant">
-  @if (iconClass) {
-    <p-iconfield [style.width.%]="fluid ? 100 : null">
-      <p-inputicon [class]="iconClass"></p-inputicon>
-      <p-inputNumber
-        [inputId]="inputId"
-        [size]="size"
-        [ngModel]="value"
-        (ngModelChange)="onChange($event)"
-        [disabled]="disabled"
-        [readonly]="readonly"
-        [required]="required"
-        [autofocus]="autofocus"
-        [placeholder]="(placeholder || '') | translateContent"
-        [mode]="mode"
-        [currency]="currency"
-        [suffix]="suffix"
-        [prefix]="prefix"
-        [showClear]="showClear"
-        [min]="min"
-        [max]="max"
-        [step]="step"
-        [minFractionDigits]="minFractionDigits"
-        [maxFractionDigits]="maxFractionDigits"
-        currencyDisplay="code"
-        locale="en-IN"
-        [invalid]="invalid"
-        autocomplete="off"
-        [style]="{ width: fluid ? '100%' : 'auto' }"
-        [styleClass]="styleClass"
-        (onBlur)="onBlur()"
-        (onFocus)="onFocus()"
-      />
-    </p-iconfield>
-  } @else {
-    <p-inputNumber
-      [inputId]="inputId"
-      [size]="size"
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+  <div class="relative">
+    @if (iconClass) {
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]" aria-hidden="true">
+        <i [class]="iconClass"></i>
+      </span>
+    }
+    <input
+      [id]="inputId"
+      type="number"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
-      [readonly]="readonly"
+      [readOnly]="readonly"
       [required]="required"
-      [autofocus]="autofocus"
-      [placeholder]="(placeholder || '') | translateContent"
-      [mode]="mode"
-      [currency]="currency"
-      [suffix]="suffix"
-      [prefix]="prefix"
-      [showClear]="showClear"
-      [min]="min"
-      [max]="max"
-      [step]="step"
-      [minFractionDigits]="minFractionDigits"
-      [maxFractionDigits]="maxFractionDigits"
-      currencyDisplay="code"
-      locale="en-IN"
-      [invalid]="invalid"
+      [attr.autofocus]="autofocus ? true : null"
+      [attr.placeholder]="(placeholder || ' ') | translateContent"
+      [attr.min]="min"
+      [attr.max]="max"
+      [attr.step]="step"
+      [attr.aria-invalid]="invalid || null"
       autocomplete="off"
-      [style]="{ width: fluid ? '100%' : 'auto' }"
-      [styleClass]="styleClass"
-      (onBlur)="onBlur()"
-      (onFocus)="onFocus()"
+      class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] placeholder-transparent outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      [class.pl-9]="iconClass"
+      [class]="styleClass || ''"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
     />
+    @if (label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
+        [class.left-9]="iconClass"
+      >{{ label | translateContent }}</label>
+    }
+    @if (suffix) {
+      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ suffix }}</span>
+    }
+    @if (prefix) {
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ prefix }}</span>
+    }
+  </div>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
   }
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
 
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
+</div>

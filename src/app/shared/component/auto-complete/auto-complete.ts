@@ -14,13 +14,14 @@ export class AutoComplete extends BaseInput<string> {
   @Output() enterPress = new EventEmitter<void>();
 
   suggestions: string[] = [];
+  dropdownOpen = false;
 
   get enableTypeahead(): boolean {
     return this.options.length > 0;
   }
 
   onSearch(query: string): void {
-    const normalizedQuery = query.trim();
+    const normalizedQuery = (query || '').trim();
     const keyword = normalizedQuery.toLowerCase();
     const optionSuggestions = this.options
       .map((option) => String(option.value ?? option.label ?? '').trim())
@@ -31,6 +32,7 @@ export class AutoComplete extends BaseInput<string> {
     this.suggestions = normalizedQuery
       ? [normalizedQuery, ...optionSuggestions.filter((item) => item !== normalizedQuery)]
       : optionSuggestions;
+    this.dropdownOpen = this.suggestions.length > 0;
   }
 
   onInput(value: string): void {
@@ -40,6 +42,12 @@ export class AutoComplete extends BaseInput<string> {
 
   onEnter(event: Event): void {
     event.preventDefault();
+    this.dropdownOpen = false;
     this.enterPress.emit();
+  }
+
+  override onBlur(): void {
+    setTimeout(() => { this.dropdownOpen = false; }, 150);
+    super.onBlur();
   }
 }

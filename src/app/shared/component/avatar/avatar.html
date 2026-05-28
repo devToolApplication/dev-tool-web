@@ -1,8 +1,21 @@
-<p-avatar
-  [label]="(label || undefined) | translateContent"
-  [icon]="icon"
-  [image]="image"
-  [size]="size"
-  [shape]="shape"
-  [styleClass]="styleClass"
-/>
+<span
+  class="inline-flex items-center justify-center overflow-hidden font-medium"
+  [class]="styleClass || ''"
+  [ngClass]="{
+    'h-8 w-8 text-sm': size === 'normal',
+    'h-10 w-10 text-base': size === 'large',
+    'h-14 w-14 text-lg': size === 'xlarge',
+    'rounded-full': shape === 'circle',
+    'rounded-lg': shape === 'square'
+  }"
+  [class.bg-[var(--app-chart-primary-fill)]]="!image"
+  [class.text-[var(--app-primary)]]="!image"
+>
+  @if (image) {
+    <img [src]="image" [alt]="(label || '') | translateContent" class="h-full w-full object-cover" />
+  } @else if (icon) {
+    <i [class]="icon"></i>
+  } @else if (label) {
+    <span>{{ label | translateContent }}</span>
+  }
+</span>

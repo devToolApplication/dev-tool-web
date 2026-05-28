@@ -1,55 +1,72 @@
-<p-floatlabel [variant]="variant">
-  @if (iconClass) {
-    <p-iconfield class="w-full">
-      <p-inputicon [class]="iconClass"></p-inputicon>
-      <ng-container *ngTemplateOutlet="selectControl"></ng-container>
-    </p-iconfield>
-  } @else {
-    <ng-container *ngTemplateOutlet="selectControl"></ng-container>
-  }
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
-
-<ng-template #selectControl>
-  <p-select
-    [size]="size"
-    [inputId]="inputId"
-    class="w-full"
-    appendTo="body"
-    [options]="options | translateContent"
-    [optionLabel]="optionLabel"
-    [optionValue]="optionValue"
-    [optionDisabled]="optionDisabled"
-    [group]="group"
-    [optionGroupLabel]="optionGroupLabel"
-    [optionGroupChildren]="optionGroupChildren"
-    [loading]="loading"
-    [showClear]="showClear"
-    [emptyMessage]="'noDataFound' | translateContent"
-    [emptyFilterMessage]="'shared.table.noResultsTitle' | translateContent"
-    [placeholder]="(placeholder || '') | translateContent"
-    [ariaLabel]="(label || placeholder || inputId) | translateContent"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [required]="required"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  >
-    <ng-template pTemplate="group" let-groupOption>
-      <span class="app-select-group-label">
-        {{ groupOption?.[optionGroupLabel] | translateContent }}
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+  <div class="relative">
+    @if (iconClass) {
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)] z-1" aria-hidden="true">
+        <i [class]="iconClass"></i>
       </span>
-    </ng-template>
-  </p-select>
-</ng-template>
+    }
+    <select
+      [id]="inputId"
+      [ngModel]="value"
+      (ngModelChange)="onChange($event)"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.aria-invalid]="invalid || null"
+      class="peer w-full appearance-none rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 pr-9 text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      [class.pl-9]="iconClass"
+      [class.text-[var(--app-text-muted)]]="value == null || value === ''"
+      [class]="styleClass || ''"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+    >
+      @if (placeholder) {
+        <option [value]="''" disabled hidden>{{ placeholder | translateContent }}</option>
+      }
+      @if (!group) {
+        @for (opt of $any(options); track opt.value) {
+          <option [value]="opt.value" [disabled]="opt.disabled || false">{{ opt.label | translateContent }}</option>
+        }
+      } @else {
+        @for (grp of $any(options); track grp.label) {
+          <optgroup [label]="grp.label | translateContent">
+            @for (opt of grp.items; track opt.value) {
+              <option [value]="opt.value" [disabled]="opt.disabled || false">{{ opt.label | translateContent }}</option>
+            }
+          </optgroup>
+        }
+      }
+    </select>
+    <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]">
+      <i class="pi pi-chevron-down text-xs"></i>
+    </span>
+    @if (label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1"
+        [class.top-0]="value != null && value !== ''"
+        [class.text-xs]="value != null && value !== ''"
+        [class.bg-[var(--app-custom-input-bg)]]="value != null && value !== ''"
+        [class.px-1]="value != null && value !== ''"
+        [class.left-9]="iconClass"
+      >{{ label | translateContent }}</label>
+    }
+    @if (showClear && value != null && value !== '') {
+      <button
+        type="button"
+        class="absolute right-8 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors"
+        aria-label="Clear"
+        (click)="onChange(null)"
+      >
+        <i class="pi pi-times text-xs"></i>
+      </button>
+    }
+  </div>
 
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
 
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
+</div>

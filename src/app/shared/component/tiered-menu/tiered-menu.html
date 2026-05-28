@@ -1,7 +1,21 @@
-<p-tieredmenu
-  [model]="items"
-  [popup]="popup"
-  [appendTo]="appendTo"
-  [styleClass]="styleClass || ''"
-  [attr.aria-label]="ariaLabel | translateContent"
-/>
+<div class="relative inline-block" [class]="styleClass || ''">
+  @if (!popup) {
+    <nav class="rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md min-w-[13rem] p-1 overflow-hidden" [attr.aria-label]="ariaLabel | translateContent">
+      @for (item of items; track item.label) {
+        @if (item.separator) {
+          <hr class="my-1 border-[var(--app-border-soft)]" />
+        } @else if (item.visible !== false) {
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)] hover:text-[var(--app-primary)] transition-colors disabled:opacity-50"
+            [disabled]="item.disabled || false"
+            (click)="onItemClick(item)"
+          >
+            @if (item.icon) { <i [class]="item.icon" class="text-[var(--app-text-muted)]"></i> }
+            <span>{{ item.label | translateContent }}</span>
+          </button>
+        }
+      }
+    </nav>
+  }
+</div>

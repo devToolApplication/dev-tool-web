@@ -1,46 +1,50 @@
-<div
-  class="flex h-full w-full items-center"
-  [ngClass]="{
-    'flex-col gap-2': labelPosition === 'top',
-    'flex-row items-start gap-4': labelPosition === 'left'
-  }"
->
-  @if (label) {
-    <label class="font-bold whitespace-nowrap">{{ label | translateContent }}</label>
-  }
-
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
   <div
-    class="flex"
+    class="flex h-full w-full items-center"
     [ngClass]="{
-      'flex-wrap gap-4': optionLayout === 'horizontal',
-      'flex-col gap-2': optionLayout === 'vertical'
+      'flex-col gap-2 items-start': labelPosition === 'top',
+      'flex-row items-start gap-4': labelPosition === 'left'
     }"
   >
-    @for (option of options; track $index) {
-      <div class="flex items-center">
-        <p-radioButton
-          [inputId]="inputId + '-' + $index"
-          [name]="groupName"
-          [value]="option.value"
-          [ngModel]="value"
-          (ngModelChange)="onChange($event)"
-          [disabled]="disabled || option.disabled || false"
-          [required]="required"
-          [invalid]="invalid"
-          (onBlur)="onBlur()"
-          (onFocus)="onFocus()"
-        ></p-radioButton>
-
-        <label [for]="inputId + '-' + $index" class="ml-2">{{ option.label | translateContent }}</label>
-      </div>
+    @if (label) {
+      <label class="text-sm font-semibold text-[var(--app-text)] whitespace-nowrap">{{ label | translateContent }}</label>
     }
+
+    <div
+      class="flex"
+      [ngClass]="{
+        'flex-wrap gap-4': optionLayout === 'horizontal',
+        'flex-col gap-2': optionLayout === 'vertical'
+      }"
+      role="radiogroup"
+    >
+      @for (option of options; track $index) {
+        <label [for]="inputId + '-' + $index" class="inline-flex items-center gap-2 cursor-pointer" [class.cursor-not-allowed]="disabled || option.disabled">
+          <input
+            [id]="inputId + '-' + $index"
+            type="radio"
+            [name]="groupName"
+            [value]="option.value"
+            [checked]="value === option.value"
+            (change)="onChange($any(option.value))"
+            [disabled]="disabled || option.disabled || false"
+            [required]="required"
+            [attr.aria-invalid]="invalid || null"
+            class="h-4.5 w-4.5 border border-[var(--app-input-border)] bg-[var(--app-custom-input-bg)] text-[var(--app-primary)] transition-all duration-150 focus:ring-2 focus:ring-[var(--app-primary)]/25 checked:border-[var(--app-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+            (blur)="onBlur()"
+            (focus)="onFocus()"
+          />
+          <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{ option.label | translateContent }}</span>
+        </label>
+      }
+    </div>
   </div>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
 </div>
-
-@if (helpText) {
-  <small class="mt-1 block">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple" class="mt-1 block">{{ errorMessage | translateContent }}</p-message>
-}

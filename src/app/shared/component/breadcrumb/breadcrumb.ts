@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { AppMenuItem } from '../button-split/button-split';
 
 @Component({
   selector: 'app-breadcrumb',
@@ -7,10 +7,7 @@ import { MenuItem } from 'primeng/api';
   templateUrl: './breadcrumb.html',
   styleUrl: './breadcrumb.css'
 })
-/**
- * @deprecated Prefer shared/ui/layout/page-header breadcrumb support for new pages.
- */
 export class Breadcrumb {
-  @Input() home: MenuItem = { icon: 'pi pi-home', label: 'Home' };
-  @Input() items: MenuItem[] = [];
+  @Input() home: AppMenuItem = { icon: 'pi pi-home', label: 'Home' };
+  @Input() items: AppMenuItem[] = [];
 }

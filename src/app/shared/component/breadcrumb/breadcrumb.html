@@ -1,1 +1,16 @@
-<p-breadcrumb [home]="home | translateContent" [model]="items | translateContent" />
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-sm">
+  @if (home) {
+    <a class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors" [routerLink]="home.routerLink || '/'">
+      <i [class]="home.icon || 'pi pi-home'"></i>
+      @if (home.label) { <span class="ml-1">{{ home.label | translateContent }}</span> }
+    </a>
+  }
+  @for (item of items; track item.label) {
+    <i class="pi pi-chevron-right text-[0.6rem] text-[var(--app-text-muted)]"></i>
+    @if (item.routerLink) {
+      <a class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors" [routerLink]="item.routerLink">{{ item.label | translateContent }}</a>
+    } @else {
+      <span class="text-[var(--app-text)]">{{ item.label | translateContent }}</span>
+    }
+  }
+</nav>

@@ -25,4 +25,25 @@ export class DatePicker extends BaseInput<Date | Date[] | null> {
   constructor() {
     super();
   }
+
+  get dateStringValue(): string {
+    if (!this.value || Array.isArray(this.value)) return '';
+    const d = this.value instanceof Date ? this.value : new Date(this.value);
+    if (isNaN(d.getTime())) return '';
+    if (this.showTime) {
+      return d.toISOString().slice(0, 16);
+    }
+    return d.toISOString().slice(0, 10);
+  }
+
+  onDateInput(value: string): void {
+    if (!value) {
+      this.onChange(null);
+      return;
+    }
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      this.onChange(date);
+    }
+  }
 }

@@ -1,23 +1,33 @@
-<div [class]="styleClass">
-  @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block">{{ label | translateContent }}</label>
+<div class="app-field" [class.app-field--disabled]="disabled">
+  <label class="inline-flex items-center gap-3 cursor-pointer" [class.cursor-not-allowed]="disabled">
+    @if (label) {
+      <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{ label | translateContent }}</span>
+    }
+    <button
+      type="button"
+      role="switch"
+      [id]="inputId"
+      [attr.aria-checked]="!!value"
+      [attr.aria-label]="(label || '') | translateContent"
+      [disabled]="disabled"
+      class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      [class]="value ? 'bg-[var(--app-primary)]' : 'bg-[var(--app-input-border)]'"
+      (click)="onChange(!value)"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+    >
+      <span
+        class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200"
+        [class]="value ? 'translate-x-5' : 'translate-x-0'"
+      ></span>
+    </button>
+  </label>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
   }
 
-  <p-toggleswitch
-    [inputId]="inputId"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [invalid]="invalid"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  />
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
 </div>
-
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}

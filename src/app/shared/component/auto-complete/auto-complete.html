@@ -1,34 +1,49 @@
-<p-floatlabel [variant]="variant">
-  <p-autocomplete
-    [inputId]="inputId"
-    appendTo="body"
-    [suggestions]="suggestions"
-    [ngModel]="value"
-    (ngModelChange)="onInput($any($event) || '')"
-    [disabled]="disabled"
-    [required]="required"
-    [forceSelection]="false"
-    [typeahead]="enableTypeahead"
-    [fluid]="fluid"
-    [placeholder]="(placeholder || '') | translateContent"
-    [ariaLabel]="(label || placeholder || inputId) | translateContent"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (completeMethod)="onSearch($any($event.query || ''))"
-    (onInputKeydown)="onEnter($event)"
-    (onFocus)="onFocus()"
-    (onBlur)="onBlur()">
-    <ng-template pTemplate="item" let-item>
-      <span [class.app-suggestion-exact]="item === value">{{ item }}</span>
-    </ng-template>
-  </p-autocomplete>
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+  <div class="relative">
+    <input
+      [id]="inputId"
+      type="text"
+      [ngModel]="value"
+      (ngModelChange)="onInput($event || '')"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.autofocus]="autofocus ? true : null"
+      [attr.placeholder]="(placeholder || ' ') | translateContent"
+      [attr.aria-label]="(label || placeholder || inputId) | translateContent"
+      [attr.aria-invalid]="invalid || null"
+      autocomplete="off"
+      class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] placeholder-transparent outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      [class]="styleClass || ''"
+      (keydown.enter)="onEnter($event)"
+      (blur)="onBlur()"
+      (focus)="onFocus(); onSearch(value || '')"
+    />
+    @if (label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
+      >{{ label | translateContent }}</label>
+    }
 
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
+    @if (suggestions.length > 0 && dropdownOpen) {
+      <div class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-48 overflow-y-auto">
+        @for (item of suggestions; track item) {
+          <button
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
+            [class.font-semibold]="item === value"
+            (mousedown)="onInput(item); dropdownOpen = false"
+          >{{ item }}</button>
+        }
+      </div>
+    }
+  </div>
 
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
+</div>

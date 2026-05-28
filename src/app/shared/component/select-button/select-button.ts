@@ -1,6 +1,6 @@
-import { AfterViewChecked, Component, ElementRef, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
-import { SelectOption } from '../select/select';
+import { SelectOption, SelectValue } from '../select/select';
 
 @Component({
   selector: 'app-select-button',
@@ -9,29 +9,38 @@ import { SelectOption } from '../select/select';
   styleUrl: './select-button.css',
   providers: [provideValueAccessor(() => SelectButton)]
 })
-export class SelectButton extends BaseInput<string | number | boolean> implements AfterViewChecked {
+export class SelectButton extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] = [];
   @Input() multiple = false;
   @Input() allowEmpty = true;
   @Input() optionLabel = 'label';
   @Input() optionValue = 'value';
 
-  constructor(private readonly host: ElementRef<HTMLElement>) {
-    super();
+  isOptionSelected(val: SelectValue): boolean {
+    if (this.multiple && Array.isArray(this.value)) {
+      return (this.value as unknown as SelectValue[]).includes(val);
+    }
+    return this.value === val;
   }
 
-  ngAfterViewChecked(): void {
-    this.host.nativeElement
-      .querySelectorAll<HTMLElement>('p-togglebutton, .p-togglebutton, .p-togglebutton-content, .p-togglebutton-label')
-      .forEach((element) => {
-        if (this.disabled) {
-          element.style.setProperty('color', 'var(--app-text-soft)', 'important');
-          element.style.setProperty('opacity', '1', 'important');
-          return;
-        }
-
-        element.style.removeProperty('color');
-        element.style.removeProperty('opacity');
-      });
+  selectOption(val: SelectValue): void {
+    if (this.disabled) return;
+    if (this.multiple) {
+      const current = Array.isArray(this.value) ? [...(this.value as unknown as SelectValue[])] : [];
+      const idx = current.indexOf(val);
+      if (idx >= 0) {
+        if (this.allowEmpty || current.length > 1) current.splice(idx, 1);
+      } else {
+        current.push(val);
+      }
+      this.onChange(current as unknown as string | number | boolean);
+    } else {
+      if (this.value === val && this.allowEmpty) {
+        this.onChange(null as unknown as string | number | boolean);
+      } else {
+        this.onChange(val as string | number | boolean);
+      }
+    }
+    this.onSelect();
   }
 }

@@ -1,7 +1,18 @@
-<p-tag
-  [value]="(value | translateContent) || ''"
-  [severity]="severity"
-  [icon]="icon"
-  [rounded]="rounded"
-  [styleClass]="styleClass"
-/>
+<span
+  class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium"
+  [class]="styleClass || ''"
+  [ngClass]="{
+    'rounded-full': rounded,
+    'rounded-md': !rounded,
+    'bg-[var(--app-control-success-bg)] text-[var(--app-control-success-text)] border border-[var(--app-control-success-border)]': severity === 'success',
+    'bg-[var(--app-control-secondary-bg)] text-[var(--app-control-secondary-text)] border border-[var(--app-control-secondary-border)]': severity === 'secondary',
+    'bg-[var(--app-control-info-bg)] text-[var(--app-control-info-text)] border border-[var(--app-control-info-border)]': severity === 'info',
+    'bg-[var(--app-control-warn-bg)] text-[var(--app-control-warn-text)] border border-[var(--app-control-warn-border)]': severity === 'warn',
+    'bg-[var(--app-control-danger-bg)] text-[var(--app-control-danger-text)] border border-[var(--app-control-danger-border)]': severity === 'danger',
+    'bg-[var(--app-control-contrast-bg)] text-[var(--app-control-contrast-text)] border border-[var(--app-control-contrast-border)]': severity === 'contrast',
+    'bg-[var(--app-chart-primary-fill)] text-[var(--app-primary)] border border-[var(--app-primary)]/20': !severity
+  }"
+>
+  @if (icon) { <i [class]="icon" class="text-[0.65rem]"></i> }
+  @if (value) { <span>{{ value | translateContent }}</span> }
+</span>

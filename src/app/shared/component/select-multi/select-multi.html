@@ -1,56 +1,56 @@
-@if (inline) {
-  <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
-} @else {
-<p-floatlabel [variant]="variant">
-  @if (iconClass) {
-    <p-iconfield class="w-full">
-      <p-inputicon [class]="iconClass"></p-inputicon>
-      <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
-    </p-iconfield>
-  } @else {
-    <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+  <div class="relative">
+    @if (!inline && label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-text-muted)] bg-[var(--app-custom-input-bg)] px-1 pointer-events-none z-1"
+      >{{ label | translateContent }}</label>
+    }
+    <div
+      class="w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2 text-sm text-[var(--app-custom-input-text)] transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus-within:border-[var(--app-primary)] focus-within:ring-2 focus-within:ring-[var(--app-primary)]/25 min-h-[2.625rem] flex flex-wrap items-center gap-1.5 cursor-pointer"
+      [class.opacity-60]="disabled"
+      [class.cursor-not-allowed]="disabled"
+      (click)="dropdownOpen = !dropdownOpen && !disabled"
+    >
+      @if (selectedLabels.length === 0) {
+        <span class="text-[var(--app-text-muted)]">{{ (placeholder || '') | translateContent }}</span>
+      }
+      @for (lbl of selectedLabels; track lbl) {
+        <span class="inline-flex items-center gap-1 rounded-md bg-[var(--app-chart-primary-fill)] px-2 py-0.5 text-xs text-[var(--app-text)]">
+          <span class="max-w-[120px] truncate">{{ lbl }}</span>
+          <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)]" (click)="removeItem(lbl); $event.stopPropagation()">
+            <i class="pi pi-times text-[0.6rem]"></i>
+          </button>
+        </span>
+      }
+      <span class="ml-auto text-[var(--app-text-muted)]">
+        <i class="pi pi-chevron-down text-xs"></i>
+      </span>
+    </div>
+
+    @if (dropdownOpen) {
+      <div class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-60 overflow-y-auto">
+        @for (opt of options; track opt.value) {
+          <label class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)] cursor-pointer transition-colors">
+            <input
+              type="checkbox"
+              [checked]="isSelected(opt.value)"
+              (change)="toggleOption(opt.value)"
+              [disabled]="opt.disabled || false"
+              class="h-4 w-4 rounded border border-[var(--app-input-border)] bg-[var(--app-custom-input-bg)] text-[var(--app-primary)] checked:bg-[var(--app-primary)] checked:border-[var(--app-primary)]"
+            />
+            <span>{{ opt.label | translateContent }}</span>
+          </label>
+        }
+      </div>
+    }
+  </div>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
   }
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
-}
 
-<ng-template #multiSelectControl>
-  <p-multiselect
-    [size]="size"
-    [inputId]="inputId"
-    appendTo="body"
-    [display]="display"
-    [showClear]="true"
-    [filter]="enableFilter"
-    [selectedItemsLabel]="'selectedItems' | translateContent"
-    [maxSelectedLabels]="maxSelectedLabels"
-    [selectionLimit]="selectionLimit"
-    [loading]="loading"
-    class="w-full"
-    [options]="options | translateContent"
-    optionLabel="label"
-    optionValue="value"
-    [placeholder]="(placeholder || '') | translateContent"
-    [ariaLabel]="(label || placeholder || inputId) | translateContent"
-    [ngModel]="value"
-    (ngModelChange)="onChange($event)"
-    [disabled]="disabled"
-    [required]="required"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (onBlur)="onBlur()"
-    (onFocus)="onFocus()"
-  >
-    <ng-template pTemplate="chip" let-item>
-      <span class="app-chip-label" [title]="item.label">{{ item.label }}</span>
-    </ng-template>
-  </p-multiselect>
-</ng-template>
-
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <app-message severity="error" size="small" variant="simple" [text]="errorMessage"></app-message>
-}
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
+</div>

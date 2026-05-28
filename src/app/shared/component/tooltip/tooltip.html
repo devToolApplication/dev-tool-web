@@ -1,10 +1,21 @@
 <span
-  [pTooltip]="text | translateContent"
-  [tooltipPosition]="position"
-  [autoHide]="autoHide"
-  [showDelay]="showDelay"
-  [hideDelay]="hideDelay"
-  [tooltipStyleClass]="styleClass"
+  class="relative inline-block"
+  [class]="styleClass || ''"
+  (mouseenter)="show()"
+  (mouseleave)="hide()"
+  (focus)="show()"
+  (blur)="hide()"
 >
   <ng-content></ng-content>
+  @if (visible && text) {
+    <div
+      class="absolute z-50 rounded-md bg-[var(--app-overlay-bg)] border border-[var(--app-border-soft)] px-2 py-1 text-xs font-medium text-[var(--app-text)] shadow-md backdrop-blur-sm whitespace-nowrap pointer-events-none"
+      [ngClass]="{
+        'bottom-full left-1/2 -translate-x-1/2 mb-2': position === 'top',
+        'top-full left-1/2 -translate-x-1/2 mt-2': position === 'bottom',
+        'right-full top-1/2 -translate-y-1/2 mr-2': position === 'left',
+        'left-full top-1/2 -translate-y-1/2 ml-2': position === 'right'
+      }"
+    >{{ text | translateContent }}</div>
+  }
 </span>

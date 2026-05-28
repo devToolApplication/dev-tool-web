@@ -1,50 +1,36 @@
-<div [class]="styleClass">
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
   @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block">{{ label | translateContent }}</label>
+    <label [attr.for]="inputId" class="mb-2 block text-sm font-semibold text-[var(--app-text-soft)]">{{ label | translateContent }}</label>
   }
 
-  @if (iconClass) {
-    <p-iconfield [style.width.%]="fluid ? 100 : null">
-      <p-inputicon [class]="iconClass"></p-inputicon>
-      <p-tree-select
-        [inputId]="inputId"
-        appendTo="body"
-        [options]="options | translateContent"
-        [placeholder]="(placeholder || '') | translateContent"
-        [selectionMode]="selectionMode"
-        [filter]="filter"
-        [ngModel]="value"
-        (ngModelChange)="onChange($event)"
-        [disabled]="disabled"
-        [invalid]="invalid"
-        [fluid]="fluid"
-        (onShow)="onFocus()"
-        (onHide)="onBlur()"
-      />
-    </p-iconfield>
-  } @else {
-    <p-tree-select
-      [inputId]="inputId"
-      appendTo="body"
-      [options]="options | translateContent"
-      [placeholder]="(placeholder || '') | translateContent"
-      [selectionMode]="selectionMode"
-      [filter]="filter"
+  <div class="relative">
+    <select
+      [id]="inputId"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
-      [invalid]="invalid"
-      [fluid]="fluid"
-      (onShow)="onFocus()"
-      (onHide)="onBlur()"
-    />
+      [attr.aria-invalid]="invalid || null"
+      class="w-full appearance-none rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 pr-9 text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+    >
+      @if (placeholder) {
+        <option [value]="''" disabled hidden>{{ placeholder | translateContent }}</option>
+      }
+      @for (node of flatOptions; track node.key) {
+        <option [value]="node.key" [disabled]="!node.selectable">{{ node.label }}</option>
+      }
+    </select>
+    <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]">
+      <i class="pi pi-chevron-down text-xs"></i>
+    </span>
+  </div>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
   }
 </div>
-
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
-
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}

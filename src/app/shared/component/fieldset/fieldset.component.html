@@ -1,7 +1,17 @@
-<p-fieldset
-  [legend]="legend | translateContent"
-  [toggleable]="toggleable"
-  [collapsed]="collapsed"
->
-  <ng-content></ng-content>
-</p-fieldset>
+<fieldset class="rounded-lg border border-[var(--app-border)] p-4" [class.pb-0]="collapsed">
+  @if (legend) {
+    <legend class="flex items-center gap-2 px-2 text-sm font-semibold text-[var(--app-text)]">
+      @if (toggleable) {
+        <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors" (click)="collapsed = !collapsed">
+          <i class="pi text-xs" [class]="collapsed ? 'pi-chevron-right' : 'pi-chevron-down'"></i>
+        </button>
+      }
+      <span>{{ legend | translateContent }}</span>
+    </legend>
+  }
+  @if (!collapsed) {
+    <div class="pt-2">
+      <ng-content></ng-content>
+    </div>
+  }
+</fieldset>

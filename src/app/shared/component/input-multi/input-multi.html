@@ -1,39 +1,60 @@
-<p-floatlabel [variant]="variant">
-  <p-auto-complete
-    [inputId]="inputId"
-    [multiple]="true"
-    [suggestions]="suggestions"
-    optionLabel="label"
-    optionValue="value"
-    [ngModel]="selectedOptions"
-    (ngModelChange)="onModelChange($event)"
-    [disabled]="disabled"
-    [required]="required"
-    [forceSelection]="false"
-    [typeahead]="enableTypeahead"
-    [addOnBlur]="false"
-    [addOnTab]="false"
-    [separator]="','"
-    [fluid]="fluid"
-    [ariaLabel]="(label || placeholder || inputId) | translateContent"
-    [placeholder]="(placeholder || '') | translateContent"
-    [invalid]="invalid"
-    [styleClass]="styleClass"
-    (completeMethod)="onSearch($any($event.query || ''))"
-    (onInputKeydown)="onInputKeydown($event)"
-    (onFocus)="onFocus()"
-    (onBlur)="onBlur()">
-    <ng-template pTemplate="selectedItem" let-item>
-      <span class="app-chip-label" [title]="item.label">{{ item.label }}</span>
-    </ng-template>
-  </p-auto-complete>
-  <label [attr.for]="inputId">{{ label | translateContent }}</label>
-</p-floatlabel>
+<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+  <div class="relative">
+    <div
+      class="w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2 text-sm text-[var(--app-custom-input-text)] transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus-within:border-[var(--app-primary)] focus-within:ring-2 focus-within:ring-[var(--app-primary)]/25 min-h-[2.625rem] flex flex-wrap items-center gap-1.5"
+      [class.opacity-60]="disabled"
+    >
+      @for (item of selectedOptions; track item.value) {
+        <span class="inline-flex items-center gap-1 rounded-md bg-[var(--app-chart-primary-fill)] px-2 py-0.5 text-xs text-[var(--app-text)]">
+          <span class="app-chip-label">{{ item.label }}</span>
+          @if (!disabled) {
+            <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)]" (click)="removeTag(item.value)">
+              <i class="pi pi-times text-[0.6rem]"></i>
+            </button>
+          }
+        </span>
+      }
+      <input
+        [id]="inputId"
+        type="text"
+        [disabled]="disabled"
+        [attr.placeholder]="selectedOptions.length === 0 ? ((placeholder || ' ') | translateContent) : ''"
+        [attr.aria-label]="(label || placeholder || inputId) | translateContent"
+        [attr.aria-invalid]="invalid || null"
+        class="flex-1 min-w-[80px] bg-transparent outline-none text-sm placeholder-[var(--app-text-muted)]"
+        [(ngModel)]="currentQuery"
+        (keydown.enter)="onInputKeydown($any($event))"
+        (input)="onSearch(currentQuery)"
+        (blur)="onBlur()"
+        (focus)="onFocus(); onSearch(currentQuery)"
+      />
+    </div>
+    @if (label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-0 -translate-y-1/2 text-xs bg-[var(--app-custom-input-bg)] px-1 text-[var(--app-text-muted)] pointer-events-none"
+      >{{ label | translateContent }}</label>
+    }
 
-@if (helpText) {
-  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
-}
+    @if (suggestions.length > 0 && suggestionsOpen) {
+      <div class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-48 overflow-y-auto">
+        @for (item of suggestions; track item.value) {
+          <button
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
+            [class.font-semibold]="isInModel(item.value)"
+            (mousedown)="addTag(item.value)"
+          >{{ item.label }}</button>
+        }
+      </div>
+    }
+  </div>
 
-@if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
-}
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+  }
+</div>

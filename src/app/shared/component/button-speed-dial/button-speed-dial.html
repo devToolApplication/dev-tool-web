@@ -1,8 +1,35 @@
-<p-speeddial
-  [model]="model | translateContent"
-  [direction]="direction"
-  [type]="type"
-  [showIcon]="showIcon"
-  [hideIcon]="hideIcon"
-  [ariaLabel]="ariaLabel | translateContent"
-/>
+<div class="relative inline-block">
+  <button
+    type="button"
+    class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--app-primary)] text-white shadow-lg transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25"
+    [attr.aria-label]="ariaLabel | translateContent"
+    [attr.aria-expanded]="menuOpen"
+    (click)="menuOpen = !menuOpen"
+  >
+    <i [class]="menuOpen ? hideIcon : showIcon"></i>
+  </button>
+
+  @if (menuOpen) {
+    <div
+      class="absolute z-50 flex gap-2"
+      [ngClass]="{
+        'bottom-full left-1/2 -translate-x-1/2 mb-3 flex-col-reverse': direction === 'up',
+        'top-full left-1/2 -translate-x-1/2 mt-3 flex-col': direction === 'down',
+        'right-full top-1/2 -translate-y-1/2 mr-3 flex-row-reverse': direction === 'left',
+        'left-full top-1/2 -translate-y-1/2 ml-3 flex-row': direction === 'right'
+      }"
+    >
+      @for (item of model; track item.label) {
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-control-secondary-bg)] border border-[var(--app-control-secondary-border)] text-[var(--app-text)] shadow-md transition-all duration-150 hover:bg-[var(--app-chart-primary-fill)] hover:text-[var(--app-primary)]"
+          [attr.aria-label]="item.label | translateContent"
+          [attr.title]="item.label | translateContent"
+          (click)="onItemClick(item)"
+        >
+          <i [class]="item.icon || 'pi pi-circle'"></i>
+        </button>
+      }
+    </div>
+  }
+</div>

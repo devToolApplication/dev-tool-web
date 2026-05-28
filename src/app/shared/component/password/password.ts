@@ -16,6 +16,8 @@ export class Password extends BaseInput<string> {
   @Input() mediumLabel = 'medium';
   @Input() strongLabel = 'strong';
 
+  showPassword = false;
+
   constructor() {
     super();
     this.value = '';
