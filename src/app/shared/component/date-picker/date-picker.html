@@ -23,12 +23,11 @@
     @if (label) {
       <label
         [attr.for]="inputId"
-        class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
+        class="absolute transition-all duration-150 pointer-events-none"
+        [ngClass]="value != null
+          ? 'left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1'
+          : 'left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)]'"
         [class.left-9]="iconClass"
-        [class.top-0]="value != null"
-        [class.text-xs]="value != null"
-        [class.bg-[var(--app-custom-input-bg)]]="value != null"
-        [class.px-1]="value != null"
       >{{ label | translateContent }}</label>
     }
   </div>

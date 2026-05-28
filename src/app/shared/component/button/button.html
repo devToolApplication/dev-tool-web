@@ -5,9 +5,8 @@
   [attr.title]="(tooltip || null) | translateContent"
   [routerLink]="routerLink"
   [queryParams]="queryParams"
-  class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
-  [ngClass]="buttonClasses"
-  [class]="styleClass || ''"
+  class="app-btn"
+  [ngClass]="[computedClass, styleClass || '']"
   (click)="buttonClick.emit()"
 >
   @if (loading) {

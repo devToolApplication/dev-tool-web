@@ -1,0 +1,127 @@
+:host {
+  display: inline-block;
+}
+
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 150ms ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.app-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--app-primary) 25%, transparent);
+}
+
+.app-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.app-btn--primary {
+  background: var(--app-primary);
+  color: #fff;
+  border-color: var(--app-primary);
+  box-shadow: 0 0 14px rgba(122, 119, 255, 0.2);
+}
+
+.app-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.app-btn--secondary {
+  background: var(--app-control-secondary-bg);
+  color: var(--app-control-secondary-text);
+  border-color: var(--app-control-secondary-border);
+  box-shadow: var(--app-control-secondary-shadow);
+}
+
+.app-btn--secondary:hover:not(:disabled) {
+  background: var(--app-control-secondary-bg-hover);
+}
+
+.app-btn--success {
+  background: var(--app-control-success-bg);
+  color: var(--app-control-success-text);
+  border-color: var(--app-control-success-border);
+  box-shadow: var(--app-control-success-shadow);
+}
+
+.app-btn--success:hover:not(:disabled) {
+  background: var(--app-control-success-bg-hover);
+}
+
+.app-btn--info {
+  background: var(--app-control-info-bg);
+  color: var(--app-control-info-text);
+  border-color: var(--app-control-info-border);
+  box-shadow: var(--app-control-info-shadow);
+}
+
+.app-btn--info:hover:not(:disabled) {
+  background: var(--app-control-info-bg-hover);
+}
+
+.app-btn--warn {
+  background: var(--app-control-warn-bg);
+  color: var(--app-control-warn-text);
+  border-color: var(--app-control-warn-border);
+  box-shadow: var(--app-control-warn-shadow);
+}
+
+.app-btn--warn:hover:not(:disabled) {
+  background: var(--app-control-warn-bg-hover);
+}
+
+.app-btn--help {
+  background: var(--app-control-help-bg);
+  color: var(--app-control-help-text);
+  border-color: var(--app-control-help-border);
+  box-shadow: var(--app-control-help-shadow);
+}
+
+.app-btn--help:hover:not(:disabled) {
+  background: var(--app-control-help-bg-hover);
+}
+
+.app-btn--danger {
+  background: var(--app-control-danger-bg);
+  color: var(--app-control-danger-text);
+  border-color: var(--app-control-danger-border);
+  box-shadow: var(--app-control-danger-shadow);
+}
+
+.app-btn--danger:hover:not(:disabled) {
+  background: var(--app-control-danger-bg-hover);
+}
+
+.app-btn--contrast {
+  background: var(--app-control-contrast-bg);
+  color: var(--app-control-contrast-text);
+  border-color: var(--app-control-contrast-border);
+  box-shadow: var(--app-control-contrast-shadow);
+}
+
+.app-btn--contrast:hover:not(:disabled) {
+  background: var(--app-control-contrast-bg-hover);
+}
+
+.app-btn--text {
+  background: transparent;
+  color: var(--app-text-soft);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.app-btn--text:hover:not(:disabled) {
+  color: var(--app-primary);
+  background: var(--app-chart-primary-fill);
+}
