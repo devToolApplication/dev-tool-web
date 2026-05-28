@@ -11,24 +11,14 @@ import { MarketDataService } from '../../../../../core/services/trade-bot-servic
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle } from '../../shared-trading/candle-chart/candle-chart';
+import { CandleChartRangeBoundaryEvent } from '../../share/candle-chart/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../shared-trading/candle-chart/candle-window-loader';
+} from '../../share/candle-chart/candle-window-loader';
 import { AppTabItem } from '../../../../../shared/component/tabs/tabs.component';
-import { FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
-import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { ConfirmDialogService } from '../../../../../shared/ui/overlay/confirm-dialog/confirm-dialog.service';
-import {
-  BINANCE_USDM_SYNC_FORM,
-  CANDLE_IMPORT_FORM,
-  MARKET_DATA_QUERY_FORM,
-  MARKET_SOURCE_OPTIONS,
-  SYMBOL_OPTIONS,
-  TIMEFRAME_OPTIONS
-} from '../../trade-bot-runtime.constants';
 import { parseJson } from '../../trade-bot-form-utils';
 
 @Component({
@@ -37,33 +27,14 @@ import { parseJson } from '../../trade-bot-form-utils';
   templateUrl: './market-data.component.html'
 })
 export class MarketDataComponent {
-  readonly queryForm = MARKET_DATA_QUERY_FORM;
-  readonly importForm = CANDLE_IMPORT_FORM;
-  readonly syncForm = BINANCE_USDM_SYNC_FORM;
-  readonly formContext: FormContext = { user: null, mode: 'create' };
-  readonly queryInitialValue = { symbol: 'XAUUSD', timeframe: 'M15', source: 'INTERNAL', marketType: '', feedCode: '', from: '', to: '', limit: 500 };
-  readonly importInitialValue = { payload: JSON.stringify({ candles: [] }, null, 2) };
-  readonly syncInitialValue = {
-    symbolsText: 'BTCUSDT',
-    timeframesText: ['1m'],
-    mode: 'latest',
-    fromTime: '',
-    toTime: '',
-    initialLookbackHours: 24,
-    limit: 1000,
-    maxPages: null,
-    lookbackBars: 3,
-    onlyClosedCandle: true
-  };
   readonly loading = signal(false);
   readonly syncLoading = signal(false);
   readonly candleError = signal<string | null>(null);
   readonly syncRunError = signal<string | null>(null);
   readonly gapError = signal<string | null>(null);
-  readonly candleQueryModel = signal<Record<string, unknown>>(this.queryInitialValue);
+  readonly candleQueryModel = signal<Record<string, unknown>>({ symbol: 'XAUUSD', timeframe: 'M15', source: 'INTERNAL', marketType: '', feedCode: '', from: '', to: '', limit: 500 });
   readonly gapFilterModel = signal<Record<string, unknown>>({ status: 'OPEN' });
   readonly candles = signal<CandleBarResponse[]>([]);
-  readonly selectedRawCandle = signal<CandleBarResponse | null>(null);
   readonly syncRuns = signal<CandleSyncRunResponse[]>([]);
   readonly gaps = signal<CandleGapResponse[]>([]);
   readonly syncProgress = signal<TaskProgressState | null>(null);
@@ -84,12 +55,6 @@ export class MarketDataComponent {
     { label: 'tradeBot.market.summary.openGaps', value: this.openGaps().length },
     { label: 'tradeBot.market.summary.lastSyncStatus', value: this.lastSyncRun()?.status ?? null }
   ]);
-  readonly gapSummaryCards = computed(() => [
-    { label: 'tradeBot.market.summary.openGaps', value: this.openGaps().length },
-    { label: 'tradeBot.market.summary.missingBars', value: this.openGaps().reduce((sum, gap) => sum + Number(gap.missingBars ?? 0), 0) },
-    { label: 'tradeBot.market.summary.repairedToday', value: this.gaps().filter((gap) => String(gap.status ?? '').toUpperCase() === 'REPAIRED' && isToday(gap.repairedAt)).length },
-    { label: 'tradeBot.market.summary.ignoredGaps', value: this.gaps().filter((gap) => String(gap.status ?? '').toUpperCase() === 'IGNORED').length }
-  ]);
   readonly overviewFacts = computed(() => {
     const candle = this.latestCandle();
     const syncRun = this.lastSyncRun();
@@ -99,159 +64,6 @@ export class MarketDataComponent {
       { label: 'tradeBot.field.timeframe', value: candle?.timeframe ?? syncRun?.timeframe ?? '-' }
     ];
   });
-  readonly chartConfig = computed<CandleChartConfig>(() => ({
-    showCandles: true,
-    showVolume: true,
-    showLines: false,
-    showBoxAreas: false,
-    showPoints: false,
-    showIndicators: false,
-    symbol: this.candles()[0]?.symbol,
-    interval: this.candles()[0]?.timeframe,
-    height: 440,
-    showOverlayLabels: false,
-    loading: this.loading() && this.candles().length === 0,
-    lazyLoadOnPan: true,
-    lazyLoadThresholdBars: 32,
-    preserveViewportOnDataUpdate: true
-  }));
-  readonly chartCandles = computed<ChartCandle[]>(() =>
-    this.candles().map((candle, index) => ({
-      index,
-      time: candle.openTime,
-      openTime: candle.openTime,
-      closeTime: candle.closeTime,
-      open: Number(candle.open),
-      high: Number(candle.high),
-      low: Number(candle.low),
-      close: Number(candle.close),
-      volume: Number(candle.volume ?? 0),
-      closed: candle.closed
-    }))
-  );
-
-  readonly tableConfig: TableConfig = {
-    title: 'tradeBot.market.title',
-    columns: [
-      { field: 'openTime', header: 'tradeBot.field.openTime', type: 'date', minWidth: '13rem' },
-      { field: 'open', header: 'tradeBot.field.open', type: 'number' },
-      { field: 'high', header: 'tradeBot.field.high', type: 'number' },
-      { field: 'low', header: 'tradeBot.field.low', type: 'number' },
-      { field: 'close', header: 'tradeBot.field.close', type: 'number' },
-      { field: 'volume', header: 'tradeBot.field.volume', type: 'number' },
-      { field: 'quoteVolume', header: 'tradeBot.field.quoteVolume', type: 'number' },
-      { field: 'tradeCount', header: 'tradeBot.field.tradeCount', type: 'number' },
-      { field: 'closed', header: 'tradeBot.field.closed', type: 'boolean' },
-      { field: 'source', header: 'tradeBot.field.source' },
-      { field: 'marketType', header: 'tradeBot.field.marketType' },
-      { field: 'feedCode', header: 'tradeBot.field.feedCode', minWidth: '14rem' },
-      { field: 'candleHash', header: 'tradeBot.field.candleHash', type: 'copyable', minWidth: '18rem' },
-      { field: 'updatedAt', header: 'tradeBot.field.updatedAt', type: 'date', minWidth: '13rem' },
-      {
-        field: 'actions',
-        header: 'tradeBot.field.actions',
-        type: 'actions',
-        actions: [
-          { label: 'tradeBot.action.viewRaw', icon: 'pi pi-code', severity: 'info', showLabel: false, onClick: (row) => this.selectedRawCandle.set(row) },
-          { label: 'tradeBot.action.viewGapsAround', icon: 'pi pi-search', severity: 'secondary', showLabel: false, onClick: (row) => this.viewGapsAround(row) }
-        ]
-      }
-    ],
-    pagination: true,
-    rows: 25,
-    scrollable: true,
-    minWidth: '72rem'
-  };
-
-  rawCandleJson(): CandleBarResponse | null {
-    return this.selectedRawCandle();
-  }
-
-  readonly syncRunTableConfig: TableConfig = {
-    title: 'tradeBot.sync.runs',
-    columns: [
-      { field: 'startedAt', header: 'tradeBot.field.startedAt', type: 'date', minWidth: '13rem' },
-      { field: 'source', header: 'tradeBot.field.source' },
-      { field: 'symbol', header: 'tradeBot.field.symbol' },
-      { field: 'timeframe', header: 'tradeBot.field.timeframe' },
-      { field: 'mode', header: 'tradeBot.field.mode' },
-      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
-      { field: 'fetched', header: 'tradeBot.field.fetched', type: 'number' },
-      { field: 'inserted', header: 'tradeBot.field.inserted', type: 'number' },
-      { field: 'updated', header: 'tradeBot.field.updated', type: 'number' },
-      { field: 'gapsDetected', header: 'tradeBot.field.gapsDetected', type: 'number' },
-      { field: 'durationMs', header: 'tradeBot.field.duration', type: 'duration' },
-      { field: 'errorMessage', header: 'tradeBot.field.errorMessage', minWidth: '16rem' }
-    ],
-    pagination: true,
-    rows: 10,
-    scrollable: true,
-    minWidth: '100rem'
-  };
-
-  readonly gapTableConfig: TableConfig = {
-    title: 'tradeBot.sync.gaps',
-    filters: [
-      { field: 'status', label: 'tradeBot.field.status', type: 'select', options: [
-        { label: 'OPEN', value: 'OPEN' },
-        { label: 'REPAIRED', value: 'REPAIRED' },
-        { label: 'IGNORED', value: 'IGNORED' }
-      ], defaultValue: 'OPEN' },
-      { field: 'source', label: 'tradeBot.field.source', type: 'select', options: MARKET_SOURCE_OPTIONS },
-      { field: 'symbol', label: 'tradeBot.field.symbol', type: 'autocomplete', options: SYMBOL_OPTIONS },
-      { field: 'timeframe', label: 'tradeBot.field.timeframe', type: 'select', options: TIMEFRAME_OPTIONS }
-    ],
-    filterOptions: { primaryField: 'symbol', enableUrlSync: true },
-    columns: [
-      { field: 'createdAt', header: 'tradeBot.field.createdAt', type: 'date', minWidth: '13rem' },
-      { field: 'source', header: 'tradeBot.field.source' },
-      { field: 'marketType', header: 'tradeBot.field.marketType' },
-      { field: 'feedCode', header: 'tradeBot.field.feedCode', minWidth: '14rem' },
-      { field: 'symbol', header: 'tradeBot.field.symbol' },
-      { field: 'timeframe', header: 'tradeBot.field.timeframe' },
-      { field: 'expectedOpenTime', header: 'tradeBot.field.expectedOpenTime', type: 'date', minWidth: '13rem' },
-      { field: 'nextAvailableOpenTime', header: 'tradeBot.field.nextAvailableOpenTime', type: 'date', minWidth: '13rem' },
-      { field: 'missingBars', header: 'tradeBot.field.missingBars', type: 'number' },
-      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
-      { field: 'detectedRunId', header: 'tradeBot.field.detectedRunId', type: 'copyable', minWidth: '18rem' },
-      { field: 'repairedRunId', header: 'tradeBot.field.repairedRunId', type: 'copyable', minWidth: '18rem' },
-      {
-        field: 'actions',
-        header: 'tradeBot.field.actions',
-        type: 'actions',
-        minWidth: '13rem',
-        actions: [
-          {
-            label: 'tradeBot.action.repairGap',
-            icon: 'pi pi-wrench',
-            severity: 'warn',
-            showLabel: false,
-            disabled: (row) => this.isClosedGap(row),
-            onClick: (row) => this.repairGap(row)
-          },
-          {
-            label: 'tradeBot.action.ignoreGap',
-            icon: 'pi pi-ban',
-            severity: 'secondary',
-            showLabel: false,
-            disabled: (row) => this.isClosedGap(row),
-            onClick: (row) => this.ignoreGap(row)
-          },
-          {
-            label: 'tradeBot.action.viewSyncRun',
-            icon: 'pi pi-history',
-            severity: 'info',
-            showLabel: false,
-            onClick: () => this.onTabChange('sync')
-          }
-        ]
-      }
-    ],
-    pagination: true,
-    rows: 10,
-    scrollable: true,
-    minWidth: '92rem'
-  };
 
   constructor(
     private readonly service: MarketDataService,
@@ -324,10 +136,10 @@ export class MarketDataComponent {
       });
   }
 
-  importCandles(model: { payload: string }): void {
+  importCandles(model: Record<string, unknown>): void {
     let payload;
     try {
-      payload = parseJson(model.payload, { candles: [] });
+      payload = parseJson(model['payload'], { candles: [] });
     } catch {
       this.toastService.error(this.i18nService.t('tradeBot.message.invalidJson'));
       return;
@@ -417,10 +229,6 @@ export class MarketDataComponent {
       });
   }
 
-  isClosedGap(gap: CandleGapResponse): boolean {
-    return ['REPAIRED', 'IGNORED'].includes(String(gap.status ?? '').toUpperCase());
-  }
-
   onTabChange(tab: string): void {
     this.activeTab.set(tab);
     void this.router.navigate([], {
@@ -428,16 +236,6 @@ export class MarketDataComponent {
       queryParams: { tab },
       queryParamsHandling: 'merge'
     });
-  }
-
-  closeRawCandle(): void {
-    this.selectedRawCandle.set(null);
-  }
-
-  handleRawCandleOpenChange(open: boolean): void {
-    if (!open) {
-      this.closeRawCandle();
-    }
   }
 
   loadGaps(filters?: Record<string, unknown>): void {
@@ -455,13 +253,16 @@ export class MarketDataComponent {
     });
   }
 
-  private viewGapsAround(candle: CandleBarResponse): void {
-    this.activeTab.set('gaps');
-    this.loadGaps({
-      status: 'OPEN',
-      source: candle.source,
-      symbol: candle.symbol,
-      timeframe: candle.timeframe
+  loadSyncRuns(): void {
+    this.syncRunError.set(null);
+    this.service.getCandleSyncRuns({ limit: 50 }).subscribe({
+      next: (runs) => {
+        this.syncRuns.set(runs);
+        this.syncRunError.set(null);
+      },
+      error: () => {
+        this.syncRunError.set(this.i18nService.t('tradeBot.message.loadFailed'));
+      }
     });
   }
 
@@ -480,20 +281,6 @@ export class MarketDataComponent {
       }
     });
   }
-
-  loadSyncRuns(): void {
-    this.syncRunError.set(null);
-    this.service.getCandleSyncRuns({ limit: 50 }).subscribe({
-      next: (runs) => {
-        this.syncRuns.set(runs);
-        this.syncRunError.set(null);
-      },
-      error: () => {
-        this.syncRunError.set(this.i18nService.t('tradeBot.message.loadFailed'));
-      }
-    });
-  }
-
 }
 
 function splitCsv(value: unknown): string[] {
@@ -545,16 +332,4 @@ function taskTypeForMode(mode: 'latest' | 'range' | 'backfill' | 'repair-gap'): 
 
 function resolveTab(tab: string | null): string {
   return ['overview', 'candles', 'sync', 'gaps', 'import'].includes(String(tab)) ? String(tab) : 'overview';
-}
-
-function isToday(value?: string): boolean {
-  if (!value) {
-    return false;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return false;
-  }
-  const now = new Date();
-  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
 }

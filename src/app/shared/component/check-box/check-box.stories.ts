@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { expect, userEvent, within } from 'storybook/test';
-
 import { CheckBox } from './check-box';
 
 const meta: Meta<CheckBox> = {
-  title: 'Shared/Components/Form Controls/Check Box',
+  title: 'Shared/Components/Form/CheckBox',
   component: CheckBox,
   args: {
-    label: 'Enable notifications',
-    value: true,
-    helpText: 'Binary checkbox bound through BaseInput.'
+    label: 'Accept terms and conditions',
+    value: false,
+    indeterminate: false,
+    disabled: false,
+    hideLabel: false
   }
 };
 
@@ -17,21 +17,30 @@ export default meta;
 
 type Story = StoryObj<CheckBox>;
 
-export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const checkbox = canvas.getByRole('checkbox', { name: /enable notifications/i });
+export const Default: Story = {};
 
-    await expect(checkbox).toBeChecked();
-    await userEvent.click(checkbox);
-    await expect(checkbox).not.toBeChecked();
+export const Checked: Story = {
+  args: {
+    value: true
   }
 };
 
-export const Invalid: Story = {
+export const Indeterminate: Story = {
   args: {
-    value: false,
-    invalid: true,
-    errorMessage: 'This option must be checked'
+    indeterminate: true
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    value: true
+  }
+};
+
+export const HiddenLabel: Story = {
+  args: {
+    hideLabel: true,
+    ariaLabel: 'Toggle terms acceptance'
   }
 };

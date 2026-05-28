@@ -13,12 +13,12 @@ import { LoadingService } from '../../../../../core/ui-services/loading.service'
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { AppTabItem } from '../../../../../shared/component/tabs/tabs.component';
 import { SelectOption } from '../../../../../shared/component/select/select';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../shared-trading/candle-chart/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../share/candle-chart/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../shared-trading/candle-chart/candle-window-loader';
+} from '../../share/candle-chart/candle-window-loader';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { PaperTradeApiService } from '../../data-access/api/paper-trade-api.service';
@@ -177,7 +177,7 @@ export class PaperTradeComponent {
     pagination: true,
     rows: 10,
     scrollable: true,
-    minWidth: '78rem'
+    minWidth: '68rem'
   };
 
   readonly orderTableConfig: TableConfig = {
@@ -212,7 +212,7 @@ export class PaperTradeComponent {
     pagination: true,
     rows: 8,
     scrollable: true,
-    minWidth: '90rem'
+    minWidth: '76rem'
   };
 
   readonly fillTableConfig: TableConfig = {
@@ -242,7 +242,7 @@ export class PaperTradeComponent {
     pagination: true,
     rows: 8,
     scrollable: true,
-    minWidth: '80rem'
+    minWidth: '72rem'
   };
   readonly equityTableConfig: TableConfig = {
     title: 'tradeBot.paper.equityCurve',
@@ -259,7 +259,7 @@ export class PaperTradeComponent {
     pagination: true,
     rows: 10,
     scrollable: true,
-    minWidth: '92rem'
+    minWidth: '78rem'
   };
 
   readonly chartConfig = computed<CandleChartConfig>(() => ({

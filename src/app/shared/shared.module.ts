@@ -16,6 +16,7 @@ import { FluidModule } from 'primeng/fluid';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ColorPickerModule } from 'primeng/colorpicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
@@ -39,12 +40,15 @@ import { TextareaModule } from 'primeng/textarea';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { TimelineModule } from 'primeng/timeline';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { AvatarComponent } from './component/avatar/avatar';
+import { DialogComponent } from './component/dialog/dialog';
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
 import { BaseCrudPageComponent } from './ui/base-crud-page/base-crud-page.component';
 import { BasePopupComponent } from './component/base-popup/base-popup.component';
@@ -56,23 +60,37 @@ import { JsonPreviewComponent } from './component/json-preview/json-preview.comp
 import { CheckBox } from './component/check-box/check-box';
 import { DatePicker } from './component/date-picker/date-picker';
 import { Fileupload } from './component/fileupload/fileupload';
+import { FieldsetComponent } from './component/fieldset/fieldset.component';
 import { InputArea } from './component/input-area/input-area';
 import { InputMulti } from './component/input-multi/input-multi';
 import { InputNumber } from './component/input-number/input-number';
 import { InputText } from './component/input-text/input-text';
+import { ColorPicker } from './component/color-picker/color-picker';
+import { MessageComponent } from './component/message/message';
 import { Paginator } from './component/paginator/paginator';
 import { PanelComponent } from './component/panel/panel.component';
 import { Password } from './component/password/password';
+import { PrimeBadgeComponent } from './component/prime-badge/prime-badge';
+import { PrimeConfirmDialogComponent } from './component/confirm-dialog/confirm-dialog';
+import { FluidComponent } from './component/fluid/fluid';
+import { IconFieldComponent } from './component/icon-field/icon-field';
+import { PanelMenuComponent } from './component/panel-menu/panel-menu';
+import { RippleComponent } from './component/ripple/ripple';
+import { TooltipComponent } from './component/tooltip/tooltip';
 import { PrimeTableComponent } from './component/prime-table/prime-table.component';
 import { ProgressSpinnerComponent } from './component/progress-spinner/progress-spinner.component';
 import { RadioButton } from './component/radio-button/radio-button';
 import { SelectButton } from './component/select-button/select-button';
 import { SelectMulti } from './component/select-multi/select-multi';
 import { SelectTree } from './component/select-tree/select-tree';
+import { SliderComponent } from './component/slider/slider';
 import { Select } from './component/select/select';
+import { TieredMenuComponent } from './component/tiered-menu/tiered-menu';
+import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
+import { ToastComponent } from './component/toast/toast';
+import { ToolbarComponent } from './component/toolbar/toolbar';
 import { ToggleButton } from './component/toggle-button/toggle-button';
 import { ToggleSwitch } from './component/toggle-switch/toggle-switch';
-import { TimelineComponent } from './component/timeline-wrapper/timeline.component';
 import { TabsComponent } from './component/tabs/tabs.component';
 import { Tag } from './component/tag/tag';
 import { BaseLayoutComponent } from './layout/base/base.layout';
@@ -126,16 +144,22 @@ import { TimelineComponent as SharedTimelineComponent } from './ui/data-display/
 import { ValueDisplayComponent } from './ui/data-display/value-display/value-display.component';
 import { ValidationSummaryComponent } from './ui/forms/validation-summary/validation-summary.component';
 import { ConfigTemplateFormComponent } from './ui/forms/config-template-form/config-template-form.component';
+import { ResponsiveGridComponent } from './ui/layout/responsive-grid/responsive-grid.component';
+import { StatusListComponent } from './ui/data-display/status-list/status-list.component';
+import { ErrorPageComponent } from './ui/feedback/error-page/error-page.component';
 
 const PIPE = [TranslateContentPipe];
 
 const ACTION_COMPONENTS = [
   ButtonSpeedDial,
   ButtonSplit,
-  Button
+  Button,
+  RippleComponent,
+  ToolbarComponent,
+  TooltipComponent
 ];
 
-const FORM_CONTROL_COMPONENTS = [
+const INPUT_COMPONENTS = [
   AutoComplete,
   CheckBox,
   DatePicker,
@@ -144,25 +168,47 @@ const FORM_CONTROL_COMPONENTS = [
   InputMulti,
   InputNumber,
   InputText,
+  ColorPicker,
+  MessageComponent,
   Password,
   RadioButton,
-  SelectButton,
-  SelectMulti,
-  SelectTree,
-  Select,
+  SliderComponent,
   ToggleButton,
   ToggleSwitch
+];
+
+const SELECT_COMPONENTS = [
+  Select,
+  SelectButton,
+  SelectMulti,
+  SelectTree
+];
+
+const FORM_LAYOUT_COMPONENTS = [
+  FieldsetComponent,
+  FluidComponent,
+  IconFieldComponent
+];
+
+const FORM_CONTROL_COMPONENTS = [
+  ...INPUT_COMPONENTS,
+  ...SELECT_COMPONENTS,
+  ...FORM_LAYOUT_COMPONENTS
 ];
 
 const NAVIGATION_COMPONENTS = [
   Breadcrumb,
   Paginator,
-  TabsComponent
+  TabsComponent,
+  TieredMenuComponent,
+  PanelMenuComponent
 ];
 
 const DATA_DISPLAY_COMPONENTS = [
+  AvatarComponent,
   JsonPreviewComponent,
   PanelComponent,
+  PrimeBadgeComponent,
   PrimeTableComponent,
   Tag,
   TimelineComponent
@@ -170,10 +216,13 @@ const DATA_DISPLAY_COMPONENTS = [
 
 const FEEDBACK_OVERLAY_COMPONENTS = [
   BasePopupComponent,
-  ProgressSpinnerComponent
+  DialogComponent,
+  PrimeConfirmDialogComponent,
+  ProgressSpinnerComponent,
+  ToastComponent
 ];
 
-const COMPONENTS = [
+const LEGACY_PRIMITIVE_COMPONENTS = [
   ...ACTION_COMPONENTS,
   ...FORM_CONTROL_COMPONENTS,
   ...NAVIGATION_COMPONENTS,
@@ -181,14 +230,17 @@ const COMPONENTS = [
   ...FEEDBACK_OVERLAY_COMPONENTS
 ];
 
-const UI = [
-  BaseCrudPageComponent,
-  FormInput,
-  TableComponent,
-  FieldGuidePanelComponent,
+const PAGE_COMPONENTS = [
   CardComponent,
-  SummaryMetricCardComponent,
-  RealtimeProgressBarComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  SectionPanelComponent,
+  FilterPanelComponent,
+  ActionToolbarComponent,
+  ResponsiveGridComponent
+];
+
+const FEEDBACK_COMPONENTS = [
   EmptyStateComponent,
   ErrorStateComponent,
   LoadingSkeletonComponent,
@@ -196,13 +248,10 @@ const UI = [
   SkeletonFormComponent,
   SkeletonCardComponent,
   AlertComponent,
-  ConfirmDialogHostComponent,
-  DrawerComponent,
-  PageHeaderComponent,
-  PageShellComponent,
-  SectionPanelComponent,
-  FilterPanelComponent,
-  ActionToolbarComponent,
+  ErrorPageComponent
+];
+
+const DATA_VIEW_COMPONENTS = [
   BadgeComponent,
   CopyableTextComponent,
   JsonViewerComponent,
@@ -210,8 +259,31 @@ const UI = [
   DiffViewerComponent,
   SharedTimelineComponent,
   ValueDisplayComponent,
+  StatusListComponent,
+  SummaryMetricCardComponent,
+  RealtimeProgressBarComponent
+];
+
+const OVERLAY_COMPONENTS = [
+  ConfirmDialogHostComponent,
+  DrawerComponent
+];
+
+const FORM_EXPERIENCE_COMPONENTS = [
+  BaseCrudPageComponent,
+  FormInput,
   ValidationSummaryComponent,
-  ConfigTemplateFormComponent
+  ConfigTemplateFormComponent,
+  FieldGuidePanelComponent
+];
+
+const UI = [
+  ...FORM_EXPERIENCE_COMPONENTS,
+  ...PAGE_COMPONENTS,
+  ...FEEDBACK_COMPONENTS,
+  ...DATA_VIEW_COMPONENTS,
+  ...OVERLAY_COMPONENTS,
+  TableComponent
 ];
 const UI_COMPONENT = [
   SmartFormShellComponent,
@@ -234,8 +306,18 @@ const UI_COMPONENT = [
 ];
 const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageComponent];
 
+export const SHARED_PRIMITIVE_COMPONENTS = [
+  ...LEGACY_PRIMITIVE_COMPONENTS
+];
+
+export const SHARED_UI_COMPONENTS = [
+  ...UI,
+  ...UI_COMPONENT,
+  ...LAYOUT
+];
+
 @NgModule({
-  declarations: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...PIPE],
+  declarations: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE],
   imports: [
     CommonModule,
     RouterModule,
@@ -250,6 +332,7 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     DatePickerModule,
     FileUploadModule,
     InputNumberModule,
+    ColorPickerModule,
     InputTextModule,
     DialogModule,
     PaginatorModule,
@@ -274,6 +357,7 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     BadgeModule,
     RippleModule,
     ToastModule,
+    TooltipModule,
     ProgressSpinnerModule,
     TagModule,
     ToolbarModule,
@@ -284,6 +368,6 @@ const LAYOUT = [BaseLayoutComponent, SideMenuComponent, HeaderComponent, PageCom
     IconFieldModule,
     InputIconModule
   ],
-  exports: [...COMPONENTS, ...UI, ...UI_COMPONENT, ...LAYOUT, ...PIPE]
+  exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })
 export class SharedModule {}

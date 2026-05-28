@@ -4,21 +4,16 @@
   layout="wide"
 >
   <div page-actions class="flex flex-wrap items-center gap-2">
-        @if (detail()?.session?.status) {
-          <app-tag [value]="detail()?.session?.status ?? ''" severity="info"></app-tag>
-        }
-        <app-button label="tradeBot.paper.createAccount" icon="pi pi-wallet" severity="secondary" (buttonClick)="createAccountVisible.set(true)"></app-button>
-        <app-button label="tradeBot.paper.startSession" icon="pi pi-play-circle" severity="success" (buttonClick)="startSessionVisible.set(true)"></app-button>
-        <app-button label="tradeBot.action.refresh" icon="pi pi-refresh" [loading]="loading()" (buttonClick)="reload()"></app-button>
-        <app-button label="tradeBot.paper.evaluateLatest" icon="pi pi-bolt" severity="info" [disabled]="!detail()" [loading]="actionLoading()" (buttonClick)="evaluateLatest()"></app-button>
-        <app-button label="tradeBot.paper.pause" icon="pi pi-pause" severity="warn" [disabled]="detail()?.session?.status !== 'RUNNING'" [loading]="actionLoading()" (buttonClick)="pause()"></app-button>
-        <app-button label="tradeBot.paper.resume" icon="pi pi-play" severity="success" [disabled]="detail()?.session?.status !== 'PAUSED'" [loading]="actionLoading()" (buttonClick)="resume()"></app-button>
-        <app-button label="tradeBot.paper.stop" icon="pi pi-stop-circle" severity="danger" [disabled]="!detail() || detail()?.session?.status === 'STOPPED'" [loading]="actionLoading()" (buttonClick)="stop()"></app-button>
-        <app-button label="tradeBot.paper.resetAccount" icon="pi pi-refresh" severity="danger" [loading]="actionLoading()" (buttonClick)="resetAccount()"></app-button>
-      </div>
+    @if (detail()?.session?.status) {
+      <app-tag [value]="detail()?.session?.status ?? ''" severity="info"></app-tag>
+    }
+    <app-button label="tradeBot.paper.createAccount" icon="pi pi-wallet" severity="secondary" (buttonClick)="createAccountVisible.set(true)"></app-button>
+    <app-button label="tradeBot.paper.startSession" icon="pi pi-play-circle" severity="success" (buttonClick)="startSessionVisible.set(true)"></app-button>
+    <app-button label="tradeBot.action.refresh" icon="pi pi-refresh" [loading]="loading()" (buttonClick)="reload()"></app-button>
+  </div>
 
-  <app-card>
-    <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+  <app-section-panel title="tradeBot.paper.sessionContext" density="compact">
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
       <app-select
         label="tradeBot.paper.account"
         [options]="accountOptions()"
@@ -34,7 +29,7 @@
         (valueChange)="selectSession($event)"
       ></app-select>
     </div>
-  </app-card>
+  </app-section-panel>
 
   <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
     @for (metric of kpiCards(); track metric.label) {
@@ -42,134 +37,53 @@
     }
   </div>
 
+  <app-section-panel title="tradeBot.paper.actions" density="compact">
+    <div class="flex flex-wrap items-center gap-2">
+      <app-button label="tradeBot.paper.evaluateLatest" icon="pi pi-bolt" severity="info" [disabled]="!detail()" [loading]="actionLoading()" (buttonClick)="evaluateLatest()"></app-button>
+      <app-button label="tradeBot.paper.pause" icon="pi pi-pause" severity="warn" [disabled]="detail()?.session?.status !== 'RUNNING'" [loading]="actionLoading()" (buttonClick)="pause()"></app-button>
+      <app-button label="tradeBot.paper.resume" icon="pi pi-play" severity="success" [disabled]="detail()?.session?.status !== 'PAUSED'" [loading]="actionLoading()" (buttonClick)="resume()"></app-button>
+      <app-button label="tradeBot.paper.stop" icon="pi pi-stop-circle" severity="danger" [disabled]="!detail() || detail()?.session?.status === 'STOPPED'" [loading]="actionLoading()" (buttonClick)="stop()"></app-button>
+      <app-button label="tradeBot.paper.resetAccount" icon="pi pi-refresh" severity="danger" [loading]="actionLoading()" (buttonClick)="resetAccount()"></app-button>
+    </div>
+  </app-section-panel>
+
   <app-realtime-progress-bar [state]="progress()" [showCancel]="false"></app-realtime-progress-bar>
 
-  <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-    @if (candles().length) {
-      <app-candle-chart
-        [mode]="'HISTORICAL'"
-        [config]="chartConfig()"
-        [candles]="chartCandles()"
-        [overlays]="chartOverlays()"
-        (rangeBoundaryReached)="loadMoreCandles($event)"
-      ></app-candle-chart>
-    } @else {
-      <app-card>
-        <div class="app-text-muted">{{ 'tradeBot.paper.noCandles' | translateContent }}</div>
-      </app-card>
-    }
-
-    <app-card>
-      <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.paper.activePositions' | translateContent }}</div>
-      @if (activePositions().length) {
-        <div class="flex flex-col gap-3">
-          @for (position of activePositions(); track position.positionId) {
-            <div class="rounded-lg border app-border app-bg-soft p-3">
-              <div class="flex items-center justify-between gap-3">
-                <div class="font-semibold app-text">{{ position.symbol }}</div>
-                <app-tag [value]="position.side" severity="info"></app-tag>
-              </div>
-              <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div class="app-text-muted">{{ 'tradeBot.field.entryPrice' | translateContent }}</div>
-                  <div class="app-text">{{ position.entryPrice }}</div>
-                </div>
-                <div>
-                  <div class="app-text-muted">{{ 'tradeBot.paper.markPrice' | translateContent }}</div>
-                  <div class="app-text">{{ position.markPrice }}</div>
-                </div>
-                <div>
-                  <div class="app-text-muted">{{ 'tradeBot.paper.stopLoss' | translateContent }}</div>
-                  <div class="app-text">{{ position.stopLoss ?? '-' }}</div>
-                </div>
-                <div>
-                  <div class="app-text-muted">{{ 'tradeBot.paper.takeProfit' | translateContent }}</div>
-                  <div class="app-text">{{ position.takeProfit ?? '-' }}</div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      } @else {
-        <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">{{ 'tradeBot.paper.noActivePositions' | translateContent }}</div>
-      }
-    </app-card>
-  </div>
+  <app-paper-trade-chart-section
+    [candles]="candles()"
+    [overlays]="chartOverlays()"
+    [activePositions]="activePositions()"
+    [symbol]="detail()?.session?.symbol ?? 'BTCUSDT'"
+    [interval]="detail()?.session?.interval ?? '1m'"
+    [loading]="candleLoading()"
+    (rangeBoundaryReached)="loadMoreCandles($event)"
+  ></app-paper-trade-chart-section>
 
   <app-card>
-    <div class="mb-3">
-      <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="activeTab.set($event)"></app-tabs>
-    </div>
-
-    @switch (activeTab()) {
-      @case ('sessions') {
-        <app-table [config]="sessionTableConfig" [data]="sessions()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('positions') {
-        <app-table [config]="positionTableConfig" [data]="positions()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('orders') {
-        <app-table [config]="orderTableConfig" [data]="orders()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('fills') {
-        <app-table [config]="fillTableConfig" [data]="fills()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('equity') {
-        <app-table [config]="equityTableConfig" [data]="equityCurve()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('events') {
-        <app-table [config]="eventTableConfig" [data]="events()" [loading]="loading()" [error]="error()" (retry)="retryCurrentView()"></app-table>
-      }
-      @case ('snapshot') {
-        @if (detail()?.snapshot) {
-          <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-              @for (fact of snapshotFacts(); track fact.label) {
-                <div class="rounded-lg border app-border app-bg-soft p-3">
-                  <div class="text-xs font-semibold uppercase app-text-muted">{{ fact.label | translateContent }}</div>
-                  <div class="mt-1 break-words app-text">{{ fact.value }}</div>
-                </div>
-              }
-            </div>
-            @if (detail()?.snapshot?.configChangedAfterStart) {
-              <app-tag severity="warn" value="tradeBot.paper.configChanged"></app-tag>
-            } @else {
-              <app-tag severity="success" value="tradeBot.paper.snapshotLocked"></app-tag>
-            }
-            <p-fieldset [legend]="'tradeBot.common.advancedRawJson' | translateContent" [toggleable]="true" [collapsed]="true">
-              <app-json-viewer [value]="snapshotJson()" [collapsed]="true"></app-json-viewer>
-            </p-fieldset>
-          </div>
-        } @else {
-          <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">{{ 'tradeBot.paper.noSnapshot' | translateContent }}</div>
-        }
-      }
-    }
+    <app-paper-trade-data-tabs
+      [sessions]="sessions()"
+      [orders]="orders()"
+      [fills]="fills()"
+      [positions]="positions()"
+      [equityCurve]="equityCurve()"
+      [events]="events()"
+      [detail]="detail()"
+      [loading]="loading()"
+      [error]="error()"
+      (retry)="retryCurrentView()"
+      (loadDetail)="loadDetail($event)"
+    ></app-paper-trade-data-tabs>
   </app-card>
 
-  <app-base-popup
-    [visible]="createAccountVisible()"
-    header="tradeBot.paper.createAccount"
-    size="lg"
-    width="min(58rem, 94vw)"
-    [loading]="actionLoading()"
-    [dismissableMask]="true"
-    [showFooter]="false"
-    (visibleChange)="createAccountVisible.set($event)"
-  >
-    <app-form-input [config]="accountForm" [context]="formContext" [initialValue]="accountInitialValue" [submitting]="actionLoading()" (formSubmit)="createAccount($event)"></app-form-input>
-  </app-base-popup>
-
-  <app-base-popup
-    [visible]="startSessionVisible()"
-    header="tradeBot.paper.startSession"
-    size="lg"
-    width="min(64rem, 94vw)"
-    [loading]="actionLoading()"
-    [dismissableMask]="true"
-    [showFooter]="false"
-    (visibleChange)="startSessionVisible.set($event)"
-  >
-    <app-form-input [config]="startForm()" [context]="formContext" [initialValue]="startInitialValue()" [submitting]="actionLoading()" (formSubmit)="startSession($event)"></app-form-input>
-  </app-base-popup>
+  <app-paper-trade-create-dialogs
+    [accounts]="accounts()"
+    [strategyOptions]="strategyOptions()"
+    [actionLoading]="actionLoading()"
+    [createAccountVisible]="createAccountVisible()"
+    [startSessionVisible]="startSessionVisible()"
+    (createAccountVisibleChange)="createAccountVisible.set($event)"
+    (startSessionVisibleChange)="startSessionVisible.set($event)"
+    (createAccount)="createAccount($event)"
+    (startSession)="startSession($event)"
+  ></app-paper-trade-create-dialogs>
 </app-page-shell>

@@ -1,24 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { AutoComplete } from './auto-complete';
-import type { SelectOption } from '../select/select';
 
-const options: SelectOption[] = [
-  { label: 'Angular', value: 'angular' },
-  { label: 'PrimeNG', value: 'primeng' },
-  { label: 'Storybook', value: 'storybook' },
-  { label: 'Design System', value: 'design-system' }
+const sampleOptions = [
+  { label: 'Nguyen An', value: 'Nguyen An' },
+  { label: 'Tran Binh', value: 'Tran Binh' },
+  { label: 'Le Chi', value: 'Le Chi' },
+  { label: 'Pham Duc', value: 'Pham Duc' }
 ];
 
 const meta: Meta<AutoComplete> = {
-  title: 'Shared/Components/Form Controls/Auto Complete',
+  title: 'Shared/Components/Form/AutoComplete',
   component: AutoComplete,
   args: {
-    label: 'Technology',
-    placeholder: 'Type to search',
-    options,
-    value: 'angular',
-    helpText: 'Supports free text and suggestions.'
+    label: 'Owner',
+    placeholder: 'Search and select owner...',
+    options: sampleOptions,
+    value: '',
+    disabled: false
   }
 };
 
@@ -28,10 +26,15 @@ type Story = StoryObj<AutoComplete>;
 
 export const Default: Story = {};
 
-export const Invalid: Story = {
+export const WithInitialValue: Story = {
   args: {
-    value: '',
-    invalid: true,
-    errorMessage: 'Technology is required'
+    value: 'Tran Binh'
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    value: 'Nguyen An'
   }
 };

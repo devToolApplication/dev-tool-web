@@ -1,7 +1,10 @@
-<section class="placeholder-page">
-  <div class="placeholder-card">
-    <p class="placeholder-eyebrow">{{ 'layout.menu.admin' | translateContent }}</p>
-    <h2>{{ (title$ | async) | translateContent }}</h2>
-    <p>{{ (description$ | async) | translateContent }}</p>
-  </div>
-</section>
+<app-page-shell
+  [title]="(title$ | async) ?? 'feature.placeholder.title'"
+  [subtitle]="(description$ | async) ?? 'feature.placeholder.description'"
+>
+  <app-empty-state
+    title="feature.placeholder.title"
+    [description]="(description$ | async) ?? 'feature.placeholder.description'"
+    icon="pi pi-box"
+  ></app-empty-state>
+</app-page-shell>

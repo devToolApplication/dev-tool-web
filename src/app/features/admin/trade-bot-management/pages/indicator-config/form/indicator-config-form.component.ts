@@ -321,7 +321,7 @@ export class IndicatorConfigFormComponent implements OnInit {
         flat: true,
         children: [
           { name: 'code', type: 'text', label: 'tradeBot.field.code', width: '1/3', validation: [this.requiredRule()] },
-          { name: 'displayType', type: 'auto-complete', label: 'tradeBot.field.displayType', options: this.displayTypeOptions(), width: '1/3' },
+          { name: 'displayType', type: 'select', label: 'tradeBot.field.displayType', options: this.displayTypeOptions(), width: '1/3' },
           { name: 'status', type: 'select', label: 'tradeBot.field.status', options: STATUS_OPTIONS, width: '1/3' }
         ]
       },
@@ -400,12 +400,43 @@ export class IndicatorConfigFormComponent implements OnInit {
   private overlayRecordField(label = 'tradeBot.template.overlay'): FieldConfig {
     return {
       name: 'overlay',
-      type: 'record',
+      type: 'group',
       label,
-      keyLabel: 'tradeBot.template.overlayKey',
-      valueLabel: 'tradeBot.template.overlayValue',
-      addButtonLabel: 'addRow',
-      width: 'full'
+      width: 'full',
+      collapsible: true,
+      collapsed: true,
+      children: [
+        {
+          name: 'color',
+          type: 'color-picker',
+          label: 'tradeBot.field.overlayColor',
+          placeholder: '#2196F3',
+          width: '1/3'
+        },
+        {
+          name: 'lineWidth',
+          type: 'select',
+          label: 'tradeBot.field.overlayLineWidth',
+          options: [
+            { label: '1', value: 1 },
+            { label: '2', value: 2 },
+            { label: '3', value: 3 },
+            { label: '4', value: 4 }
+          ],
+          width: '1/3'
+        },
+        {
+          name: 'lineStyle',
+          type: 'select',
+          label: 'tradeBot.field.overlayLineStyle',
+          options: [
+            { label: 'Solid', value: 'SOLID' },
+            { label: 'Dashed', value: 'DASHED' },
+            { label: 'Dotted', value: 'DOTTED' }
+          ],
+          width: '1/3'
+        }
+      ]
     };
   }
 

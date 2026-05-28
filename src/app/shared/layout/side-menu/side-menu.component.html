@@ -10,7 +10,7 @@
   </div>
 
   @if (!collapsed) {
-    <div class="menu-search">
+    <div class="menu-search" #menuSearchInput>
       <app-input-text
         inputId="app-shell-menu-search"
         label="layout.menuSearch"
@@ -20,15 +20,20 @@
         [value]="searchQuery()"
         (valueChange)="onSearchChange($event)"
       ></app-input-text>
+      <span class="menu-search-hint" aria-hidden="true">⌘K</span>
     </div>
   }
 
-  <nav class="menu-list" [attr.aria-label]="'layout.sidebar' | translateContent" (keydown)="onMenuKeydown($event)">
+  <nav class="menu-list app-scrollbar" [attr.aria-label]="'layout.sidebar' | translateContent" (keydown)="onMenuKeydown($event)">
     @let groups = visibleGroups();
 
     @if (groups.length) {
       @for (group of groups; track trackMenuItem($index, group)) {
-        <section class="menu-group" [class.menu-group--active]="isItemActive(group)">
+        <section
+          class="menu-group"
+          [class.menu-group--active]="isItemActive(group)"
+          [style.--group-color]="group.groupColor || null"
+        >
           <p class="menu-group-title">{{ group.label | translateContent }}</p>
 
           @if (group.items?.length) {

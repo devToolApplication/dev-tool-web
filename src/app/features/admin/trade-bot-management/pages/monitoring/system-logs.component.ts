@@ -58,13 +58,24 @@ export class SystemLogsComponent implements OnInit {
         { label: 'COMPLETED', value: 'COMPLETED' },
         { label: 'RUNNING', value: 'RUNNING' }
       ] },
-      { name: 'runId', type: 'auto-complete', label: 'tradeBot.field.runId', optionsExpression: 'context.extra?.runIdOptions ?? []', width: '1/4' },
-      { name: 'traceId', type: 'auto-complete', label: 'tradeBot.field.traceId', optionsExpression: 'context.extra?.traceIdOptions ?? []', width: '1/4' },
-      { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', optionsExpression: 'context.extra?.symbolOptions ?? []', width: '1/4' },
-      { name: 'timeframe', type: 'auto-complete', label: 'tradeBot.field.timeframe', optionsExpression: 'context.extra?.timeframeOptions ?? []', width: '1/4' },
-      { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/4' },
-      { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/4' },
-      { name: 'limit', type: 'number', label: 'tradeBot.field.limit', suffix: 'logs', width: '1/4' }
+      { name: 'limit', type: 'number', label: 'tradeBot.field.limit', suffix: 'logs', width: '1/4' },
+      {
+        name: 'advancedFilters',
+        type: 'group',
+        label: 'shared.form.advancedFilters',
+        width: 'full',
+        flat: true,
+        collapsible: true,
+        collapsed: true,
+        children: [
+          { name: 'runId', type: 'auto-complete', label: 'tradeBot.field.runId', optionsExpression: 'context.extra?.runIdOptions ?? []', width: '1/4' },
+          { name: 'traceId', type: 'auto-complete', label: 'tradeBot.field.traceId', optionsExpression: 'context.extra?.traceIdOptions ?? []', width: '1/4' },
+          { name: 'symbol', type: 'auto-complete', label: 'tradeBot.field.symbol', optionsExpression: 'context.extra?.symbolOptions ?? []', width: '1/4' },
+          { name: 'timeframe', type: 'auto-complete', label: 'tradeBot.field.timeframe', optionsExpression: 'context.extra?.timeframeOptions ?? []', width: '1/4' },
+          { name: 'fromTime', type: 'date', label: 'tradeBot.field.fromTime', width: '1/4' },
+          { name: 'toTime', type: 'date', label: 'tradeBot.field.toTime', width: '1/4' }
+        ]
+      }
     ]
   };
   readonly tableConfig: TableConfig = {

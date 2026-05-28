@@ -1,6 +1,6 @@
 <p-toolbar [styleClass]="styleClass">
   <ng-template pTemplate="start">
-    <ng-content select="[toolbar-start]"></ng-content>
+    <ng-content select="[toolbar-start], [toolbar-left]"></ng-content>
   </ng-template>
 
   <ng-template pTemplate="center">
@@ -8,6 +8,6 @@
   </ng-template>
 
   <ng-template pTemplate="end">
-    <ng-content select="[toolbar-end]"></ng-content>
+    <ng-content select="[toolbar-end], [toolbar-right]"></ng-content>
   </ng-template>
 </p-toolbar>

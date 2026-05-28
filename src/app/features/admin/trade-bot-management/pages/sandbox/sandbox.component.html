@@ -1,22 +1,14 @@
-<app-page-shell title="tradeBot.sandbox.title" layout="wide">
-  <app-card>
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <div class="text-xl font-semibold">{{ 'tradeBot.sandbox.title' | translateContent }}</div>
-        <div class="app-text-muted">{{ 'tradeBot.sandbox.subtitle' | translateContent }}</div>
-      </div>
-      <app-button icon="pi pi-code" label="tradeBot.action.viewJson" severity="secondary" (buttonClick)="openRaw()"></app-button>
-    </div>
-  </app-card>
+<app-page-shell title="tradeBot.sandbox.title" subtitle="tradeBot.sandbox.subtitle" layout="wide">
+  <app-button page-actions icon="pi pi-code" label="tradeBot.action.viewJson" severity="secondary" (buttonClick)="openRaw()"></app-button>
 
-  <app-card>
-    <div class="mb-3">
+  <app-panel>
+    <div panel-actions>
       <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="activeTab.set($event)"></app-tabs>
     </div>
 
     @switch (activeTab()) {
       @case ('fastBacktest') {
-        <div class="flex flex-col gap-4">
+        <app-panel>
           <app-form-input
             [config]="sandboxForm"
             [context]="formContext"
@@ -26,16 +18,16 @@
           ></app-form-input>
 
           @if (fastBacktest()) {
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+            <app-responsive-grid [columns]="6" gap="md">
               @for (metric of fastBacktestSummary(); track metric.label) {
                 <app-summary-metric-card [label]="metric.label" [value]="metric.value" [suffix]="metric.suffix ?? ''"></app-summary-metric-card>
               }
-            </div>
+            </app-responsive-grid>
           }
-        </div>
+        </app-panel>
       }
       @case ('evaluateBar') {
-        <div class="flex flex-col gap-4">
+        <app-panel>
           <app-form-input
             [config]="evaluateBarForm"
             [context]="formContext"
@@ -45,14 +37,14 @@
           ></app-form-input>
 
           @if (evaluateBar()) {
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <app-responsive-grid [columns]="4" gap="md">
               @for (metric of evaluateSummary(); track metric.label) {
                 <app-summary-metric-card [label]="metric.label" [value]="metric.value"></app-summary-metric-card>
               }
-            </div>
+            </app-responsive-grid>
             <app-rule-tree-viewer [trace]="evaluateBar()?.ruleTrace ?? evaluateBar()?.trace ?? {}"></app-rule-tree-viewer>
           }
-        </div>
+        </app-panel>
       }
       @case ('history') {
         <app-table
@@ -63,17 +55,17 @@
         ></app-table>
       }
       @case ('raw') {
-        <div class="flex flex-col gap-3">
-          <p-fieldset [legend]="'tradeBot.sandbox.result' | translateContent" [toggleable]="true" [collapsed]="true">
+        <app-panel>
+          <app-fieldset legend="tradeBot.sandbox.result" [toggleable]="true" [collapsed]="true">
             <app-json-viewer [value]="fastBacktestJson()" [collapsed]="true"></app-json-viewer>
-          </p-fieldset>
-          <p-fieldset [legend]="'tradeBot.sandbox.evaluateResult' | translateContent" [toggleable]="true" [collapsed]="true">
+          </app-fieldset>
+          <app-fieldset legend="tradeBot.sandbox.evaluateResult" [toggleable]="true" [collapsed]="true">
             <app-json-viewer [value]="evaluateBarJson()" [collapsed]="true"></app-json-viewer>
-          </p-fieldset>
-        </div>
+          </app-fieldset>
+        </app-panel>
       }
     }
-  </app-card>
+  </app-panel>
 
   <app-drawer
     [open]="rawDialogVisible()"

@@ -11,7 +11,8 @@
     [loading]="loading()"
     (buttonClick)="load()"
   ></app-button>
-  <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+
+  <app-responsive-grid [columns]="6" gap="sm">
     @for (card of cards(); track card.label) {
       <app-summary-metric-card
         [label]="card.label"
@@ -20,29 +21,23 @@
         [queryParams]="card.queryParams"
       ></app-summary-metric-card>
     }
-  </div>
+  </app-responsive-grid>
 
-  <app-card>
-    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="text-lg font-semibold">{{ 'tradeBot.dashboard.quickActions' | translateContent }}</div>
-      <div class="flex flex-wrap gap-2">
-        <app-button label="tradeBot.dashboard.action.syncMarketData" icon="pi pi-database" severity="info" [routerLink]="'/admin/trade-bot/market-data'" [queryParams]="{ tab: 'sync' }"></app-button>
-        <app-button label="tradeBot.dashboard.action.newBacktest" icon="pi pi-play" severity="success" [routerLink]="'/admin/trade-bot/backtests'"></app-button>
-        <app-button label="tradeBot.dashboard.action.openPaperTrade" icon="pi pi-wallet" severity="secondary" [routerLink]="'/admin/trade-bot/paper-trade'"></app-button>
-        <app-button label="tradeBot.dashboard.action.viewGaps" icon="pi pi-exclamation-triangle" severity="warn" [routerLink]="'/admin/trade-bot/market-data'" [queryParams]="{ tab: 'gaps', status: 'OPEN' }"></app-button>
-        <app-button label="tradeBot.dashboard.action.viewLogs" icon="pi pi-list-check" severity="danger" [routerLink]="'/admin/trade-bot/system-logs'" [queryParams]="{ level: 'ERROR' }"></app-button>
-      </div>
-    </div>
-  </app-card>
+  <app-section-panel title="tradeBot.dashboard.quickActions" density="compact">
+    <app-action-toolbar
+      [actions]="quickActions"
+      (actionClick)="onQuickAction($event)"
+    ></app-action-toolbar>
+  </app-section-panel>
 
-  <app-card>
-    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <app-table [config]="syncRunTableConfig" [data]="syncRuns()" [loading]="loading()" [error]="syncRunError()" (retry)="load()"></app-table>
-      <app-table [config]="backtestTableConfig" [data]="backtests()" [loading]="loading()" [error]="backtestError()" (retry)="load()"></app-table>
-      <app-table [config]="gapTableConfig" [data]="openGaps()" [loading]="loading()" [error]="gapError()" (retry)="load()"></app-table>
-      <app-table [config]="errorTableConfig" [data]="errorLogs()" [loading]="loading()" [error]="logError()" (retry)="load()"></app-table>
-    </div>
-  </app-card>
+  <app-responsive-grid [columns]="2">
+    <app-table [config]="syncRunTableConfig" [data]="syncRuns()" [loading]="loading()" [error]="syncRunError()" (retry)="load()"></app-table>
+    <app-table [config]="backtestTableConfig" [data]="backtests()" [loading]="loading()" [error]="backtestError()" (retry)="load()"></app-table>
+    <app-table [config]="gapTableConfig" [data]="openGaps()" [loading]="loading()" [error]="gapError()" (retry)="load()"></app-table>
+    <app-table [config]="errorTableConfig" [data]="errorLogs()" [loading]="loading()" [error]="logError()" (retry)="load()"></app-table>
+  </app-responsive-grid>
 
-  <app-table [config]="activePaperTableConfig" [data]="activePaperSessions()" [loading]="loading()" [error]="paperError()" (retry)="load()"></app-table>
+  <app-section-panel title="tradeBot.dashboard.activePaperSessions" density="compact">
+    <app-table [config]="activePaperTableConfig" [data]="activePaperSessions()" [loading]="loading()" [error]="paperError()" (retry)="load()"></app-table>
+  </app-section-panel>
 </app-page-shell>

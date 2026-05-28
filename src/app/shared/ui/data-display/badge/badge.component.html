@@ -3,6 +3,9 @@
   [class]="'app-badge--' + resolvedVariant + ' app-badge--' + size"
   [attr.title]="(tooltip || label || null) | translateContent"
 >
+  @if (pulse) {
+    <span class="status-dot status-dot--active" aria-hidden="true"></span>
+  }
   @if (icon) {
     <i [class]="icon" aria-hidden="true"></i>
   }

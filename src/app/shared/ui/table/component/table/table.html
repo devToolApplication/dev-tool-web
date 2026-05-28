@@ -1,12 +1,11 @@
-<p-toolbar class="mb-4 gap-2 table-toolbar">
-  <ng-template pTemplate="left">
+<app-toolbar class="table-toolbar">
+  <ng-container toolbar-left>
     @if (isButtonVisible(newButtonConfig)) {
       <app-button
         [size]="'small'"
         [severity]="newButtonConfig.severity ?? 'success'"
         [label]="newButtonConfig.label ?? 'new'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
-        styleClass="mr-2"
         [disabled]="isButtonDisabled(newButtonConfig)"
         [tooltip]="buttonTooltip(newButtonConfig)"
         (buttonClick)="onCreate()"
@@ -35,6 +34,7 @@
         ></app-input-text>
         <app-button
           icon="pi pi-search"
+          [text]="true"
           label="search"
           [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
           (buttonClick)="onQuickSearch()"
@@ -60,9 +60,9 @@
         }
       </div>
     }
-  </ng-template>
+  </ng-container>
 
-  <ng-template pTemplate="right">
+  <ng-container toolbar-right>
     @if (isButtonVisible(refreshButtonConfig)) {
       <app-button
         [severity]="refreshButtonConfig.severity ?? 'secondary'"
@@ -75,17 +75,15 @@
     }
 
     @if (toolbarConfig.columnVisibility?.visible) {
-      <p-multiselect
+      <app-select-multi
         class="table-toolbar__columns"
+        [inline]="true"
         [options]="columnOptions"
-        [ngModel]="selectedColumnFields()"
-        optionLabel="label"
-        optionValue="value"
-        appendTo="body"
-        [placeholder]="(toolbarConfig.columnVisibility?.placeholder ?? 'fieldOptions') | translateContent"
+        [value]="selectedColumnFields()"
+        [placeholder]="toolbarConfig.columnVisibility?.placeholder ?? 'fieldOptions'"
         [disabled]="loading"
-        (ngModelChange)="onColumnFieldsChange($event)"
-      ></p-multiselect>
+        (valueChange)="onColumnFieldsChange($any($event))"
+      ></app-select-multi>
     }
 
     @if (toolbarConfig.density?.visible) {
@@ -99,18 +97,17 @@
     }
 
     @if (isButtonVisible(importButtonConfig)) {
-      <p-fileupload
+      <app-fileupload
         mode="basic"
         [accept]="importButtonConfig.accept ?? '*/*'"
         [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
-        [chooseLabel]="(importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import') | translateContent"
+        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import'"
         class="mr-2 inline-block"
         [customUpload]="true"
         [auto]="true"
         [disabled]="isButtonDisabled(importButtonConfig)"
-        [attr.title]="buttonTooltip(importButtonConfig) | translateContent"
         (uploadHandler)="onImport($event.files[0])"
-      />
+      ></app-fileupload>
     }
 
     @if (isButtonVisible(exportButtonConfig)) {
@@ -124,8 +121,8 @@
         (buttonClick)="onExport()"
       />
     }
-  </ng-template>
-</p-toolbar>
+  </ng-container>
+</app-toolbar>
 
 @if (error) {
   <app-error-state

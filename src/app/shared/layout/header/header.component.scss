@@ -3,38 +3,40 @@
   position: sticky;
   top: 0;
   z-index: var(--app-z-header);
-  padding: 0.75rem 1rem 0;
+  padding: 0.5rem 0.75rem 0;
+  --p-avatar-background: color-mix(in srgb, var(--app-primary) 14%, var(--app-transparent));
+  --p-avatar-color: var(--app-primary);
+  --p-tieredmenu-min-width: 13rem;
+  --p-breadcrumb-background: var(--app-transparent);
+  --p-breadcrumb-padding: 0;
 }
 
 .header-toolbar {
-  min-height: 64px;
-  border: 0;
+  min-height: 56px;
+  border: 1px solid color-mix(in srgb, var(--app-border) 78%, var(--app-transparent));
   border-radius: 8px;
-  padding-inline: 1rem;
-  box-shadow: var(--app-shadow-md);
-  background: var(--app-card-surface-strong);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--app-border);
+  padding-inline: 0.75rem;
+  box-shadow: var(--app-shadow-sm);
+  background: var(--app-surface);
 }
 
 .header-start {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   min-width: 0;
 }
 
 .page-context {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.05rem;
   min-width: 0;
 }
 
 .page-context h1 {
   margin: 0;
   color: var(--app-text);
-  font-size: 1.15rem;
+  font-size: 1rem;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0;
@@ -44,30 +46,30 @@
 }
 
 .user-menu-button {
-  border: 1px solid var(--app-border);
-  background: var(--app-surface-soft);
+  border: 1px solid color-mix(in srgb, var(--app-border) 82%, var(--app-transparent));
+  background: var(--app-transparent);
   color: var(--app-text);
   border-radius: 8px;
   cursor: pointer;
-  padding: 0.35rem 0.45rem 0.35rem 0.65rem;
+  padding: 0.28rem 0.38rem 0.28rem 0.55rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
   min-width: 0;
-  max-width: min(24rem, 42vw);
+  max-width: min(22rem, 40vw);
 }
 
 .user-menu-button:hover {
   border-color: var(--app-border-strong);
-  background: var(--app-card-surface);
+  background: var(--app-surface-soft);
 }
 
 .user-copy {
   display: grid;
-  gap: 0.05rem;
+  gap: 0;
   min-width: 0;
   text-align: right;
-  line-height: 1.15;
+  line-height: 1.12;
 }
 
 .user-copy strong,
@@ -78,33 +80,17 @@
 }
 
 .user-copy strong {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .user-copy small {
   color: var(--app-text-muted);
-  font-size: 0.73rem;
+  font-size: 0.7rem;
 }
 
 .user-menu-chevron {
   color: var(--app-text-muted);
-  font-size: 0.72rem;
-}
-
-:host ::ng-deep .user-menu-button .p-avatar {
-  background: color-mix(in srgb, var(--app-primary) 16%, var(--app-transparent));
-  color: var(--app-primary);
-  font-weight: 700;
-}
-
-:host ::ng-deep .p-tieredmenu {
-  min-width: 13rem;
-}
-
-:host ::ng-deep .p-breadcrumb {
-  background: var(--app-transparent);
-  border: 0;
-  padding: 0;
+  font-size: 0.68rem;
 }
 
 :host ::ng-deep .p-breadcrumb-list {
@@ -124,18 +110,19 @@
 }
 
 :host ::ng-deep .sidebar-toggle-button {
-  width: 2rem;
-  height: 2rem;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: 8px;
 }
 
 @media (max-width: 700px) {
   :host {
-    padding-inline: 0.75rem;
+    padding-inline: 0.55rem;
   }
 
   .header-toolbar {
-    padding-inline: 0.75rem;
+    min-height: 52px;
+    padding-inline: 0.6rem;
   }
 
   :host ::ng-deep .p-breadcrumb {

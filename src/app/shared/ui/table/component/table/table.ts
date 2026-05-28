@@ -266,7 +266,7 @@ export class TableComponent implements OnChanges {
   }
 
   get tableMinWidth(): string {
-    return this.config.minWidth ?? '75rem';
+    return this.config.minWidth ?? '64rem';
   }
 
   isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean {

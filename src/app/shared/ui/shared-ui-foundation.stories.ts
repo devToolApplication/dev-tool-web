@@ -6,6 +6,8 @@ import type { KeyValueItem } from './data-display/key-value-list/key-value-list.
 import type { TimelineItem } from './data-display/timeline/timeline.component';
 import type { TableConfig } from './table/models/table-config.model';
 import type { FormConfig, FormContext } from './form-input/models/form-config.model';
+import type { FieldGuideFieldItem, FieldGuideOptionItem } from './field-guide-panel/field-guide-panel.component';
+import type { ProgressState } from './realtime-progress-bar/realtime-progress-bar.component';
 
 const sampleJson = {
   id: 'cfg-001',
@@ -228,6 +230,58 @@ export const TableAndForm: Story = {
           [context]="context"
           [initialValue]="initialValue"
         ></app-config-template-form>
+      </div>
+    `
+  })
+};
+
+export const AdvancedControlsAndMetrics: Story = {
+  render: () => ({
+    props: {
+      progressState: {
+        id: 'task-102',
+        title: 'Model Sync Job',
+        status: 'running',
+        percent: 68,
+        step: 'Syncing weights...',
+        message: 'Loaded layer 18 of 24'
+      } as ProgressState,
+      fields: [
+        { key: 'temperature', label: 'Temperature', description: 'Controls randomness: lower values are more deterministic.' },
+        { key: 'top_p', label: 'Top P', description: 'Nucleus sampling threshold for diverse output selection.' }
+      ] as FieldGuideFieldItem[],
+      warnings: [
+        { title: 'API Limit', description: 'Exceeding 50 requests per min will trigger IP throttling.' }
+      ] as FieldGuideOptionItem[]
+    },
+    template: `
+      <div class="app-stack">
+        <app-summary-metric-card
+          label="Active Agents"
+          [value]="18"
+          trend="+12%"
+          trendVariant="success"
+        ></app-summary-metric-card>
+
+        <app-summary-metric-card
+          label="API Cost"
+          [value]="4.24"
+          prefix="$"
+          trend="Budget safe"
+          trendVariant="info"
+        ></app-summary-metric-card>
+
+        <app-realtime-progress-bar
+          [state]="progressState"
+          [showCancel]="true"
+        ></app-realtime-progress-bar>
+
+        <app-field-guide-panel
+          title="Model settings help"
+          description="A guide to configuring hyperparameters."
+          [fields]="fields"
+          [warnings]="warnings"
+        ></app-field-guide-panel>
       </div>
     `
   })

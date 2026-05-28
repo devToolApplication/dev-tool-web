@@ -15,6 +15,13 @@ import { StorageSecretListComponent } from './secret-management/storage-system/l
 import { TradeBotSecretFormComponent } from './secret-management/trade-bot-system/form/trade-bot-secret-form.component';
 import { TradeBotSecretListComponent } from './secret-management/trade-bot-system/list/trade-bot-secret-list.component';
 
+import { AiAgentModelListComponent } from './ai-agent-model/list/ai-agent-model-list.component';
+import { AiAgentModelFormComponent } from './ai-agent-model/form/ai-agent-model-form.component';
+import { AiAgentCrawlerListComponent } from './ai-agent-crawler/list/ai-agent-crawler-list.component';
+import { AiAgentCrawlerFormComponent } from './ai-agent-crawler/form/ai-agent-crawler-form.component';
+import { AiAgentCatalogListComponent } from './ai-agent-catalog/list/ai-agent-catalog-list.component';
+import { AiAgentCatalogFormComponent } from './ai-agent-catalog/form/ai-agent-catalog-form.component';
+
 export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   StorageSecretListComponent,
   StorageSecretFormComponent,
@@ -28,7 +35,13 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentConfigFormComponent,
   TradeBotConfigListComponent,
   TradeBotConfigFormComponent,
-  FileUploadDebugComponent
+  FileUploadDebugComponent,
+  AiAgentModelListComponent,
+  AiAgentModelFormComponent,
+  AiAgentCrawlerListComponent,
+  AiAgentCrawlerFormComponent,
+  AiAgentCatalogListComponent,
+  AiAgentCatalogFormComponent
 ];
 
 export const systemManagementRoutes: Routes = [
@@ -72,7 +85,30 @@ export const systemManagementRoutes: Routes = [
       { path: 'edit/:id', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
-
+  {
+    path: 'admin/system-management/ai-agent-models',
+    children: [
+      { path: '', component: AiAgentModelListComponent },
+      { path: 'create', component: AiAgentModelFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentModelFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-crawlers',
+    children: [
+      { path: '', component: AiAgentCrawlerListComponent },
+      { path: 'create', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agents',
+    children: [
+      { path: '', component: AiAgentCatalogListComponent },
+      { path: 'create', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ]
+  },
   {
     path: 'admin/system-management/file-upload',
     component: FileUploadDebugComponent

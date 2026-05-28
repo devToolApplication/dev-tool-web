@@ -26,72 +26,74 @@
 
     @switch (activeTab()) {
       @case ('overview') {
-        <div class="flex flex-col gap-4">
-          <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            @for (fact of runFacts(); track fact.label) {
-              <div class="rounded-lg border app-border app-bg-soft p-3">
-                <div class="text-xs font-semibold uppercase app-text-muted">{{ fact.label | translateContent }}</div>
-                <div class="mt-1 break-words font-medium app-text">{{ fact.value ?? '-' }}</div>
-              </div>
-            }
-          </div>
-          <app-table [config]="metricTableConfig" [data]="metricRows()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
-        </div>
+        <app-backtest-overview-tab
+          [run]="run()"
+          [metrics]="metrics()"
+          [chartCandlesRaw]="chartCandlesRaw()"
+          [marketDataSnapshot]="marketDataSnapshot()"
+          [loading]="loading()"
+          [error]="error()"
+          [runId]="runId"
+          (retry)="retryActiveTab()"
+        ></app-backtest-overview-tab>
       }
       @case ('chart') {
-        <div class="flex flex-col gap-3">
-          <app-data-quality-warning [candles]="chartCandlesRaw()" [snapshot]="marketDataSnapshot()"></app-data-quality-warning>
-          @if (chartCandles().length) {
-            <app-candle-chart
-              [mode]="'HISTORICAL'"
-              [config]="chartConfig()"
-              [candles]="chartCandles()"
-              [overlays]="chartOverlays()"
-              (rangeBoundaryReached)="loadMoreChartCandles($event)"
-            ></app-candle-chart>
-          } @else {
-            <div class="rounded-lg border app-border app-bg-soft p-4 app-text-muted">
-              {{ 'tradeBot.dataQuality.noCandles' | translateContent }}
-            </div>
-          }
-        </div>
+        <app-backtest-chart-tab
+          [chartCandlesRaw]="chartCandlesRaw()"
+          [chartReviewOverlays]="chartOverlays()"
+          [marketDataSnapshot]="marketDataSnapshot()"
+          [symbol]="run()?.symbol ?? ''"
+          [timeframe]="run()?.timeframe ?? ''"
+          [chartLoading]="chartLoading()"
+          (rangeBoundaryReached)="loadMoreChartCandles($event)"
+        ></app-backtest-chart-tab>
       }
       @case ('trades') {
         <app-table [config]="tradeTableConfig" [data]="trades()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
       }
       @case ('orders') {
-        <div class="flex flex-col gap-4">
-          <app-table [config]="orderTableConfig" [data]="orders()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
-          <app-table [config]="orderTableConfig" [data]="fills()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
-          <app-table [config]="positionTableConfig" [data]="positions()" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
-        </div>
+        <app-backtest-orders-tab
+          [orders]="reviewOrders()"
+          [fills]="reviewFills()"
+          [positions]="reviewPositions()"
+          [loading]="loading()"
+          [error]="error()"
+          (retry)="retryActiveTab()"
+        ></app-backtest-orders-tab>
       }
       @case ('equity') {
-        <div class="flex flex-col gap-4">
-          <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div class="rounded-lg border app-border p-4">
-              <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.equity' | translateContent }}</div>
-              <div class="backtest-trend">
-                @for (point of equityTrend(); track $index) {
-                  <span class="backtest-trend-bar backtest-trend-bar--equity" [style.height.%]="point.height" [attr.title]="point.value"></span>
-                }
-              </div>
-            </div>
-            <div class="rounded-lg border app-border p-4">
-              <div class="mb-3 text-sm font-semibold app-text">{{ 'tradeBot.field.drawdown' | translateContent }}</div>
-              <div class="backtest-trend">
-                @for (point of drawdownTrend(); track $index) {
-                  <span class="backtest-trend-bar backtest-trend-bar--drawdown" [style.height.%]="point.height" [attr.title]="point.value"></span>
-                }
-              </div>
-            </div>
-          </div>
-          <app-table [config]="curveTableConfig" [data]="equityRows().concat(drawdownRows())" [loading]="loading()" [error]="error()" (retry)="retryActiveTab()"></app-table>
-        </div>
+        <app-backtest-equity-tab
+          [equity]="equity()"
+          [drawdown]="drawdown()"
+          [loading]="loading()"
+          [error]="error()"
+          (retry)="retryActiveTab()"
+        ></app-backtest-equity-tab>
       }
       @case ('ruleTrace') {
-        <app-rule-tree-viewer [trace]="trace()"></app-rule-tree-viewer>
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <app-button
+              icon="pi pi-list"
+              label="tradeBot.ruleExpression.viewTree"
+              [severity]="ruleTraceViewMode() === 'tree' ? 'info' : 'secondary'"
+              [text]="ruleTraceViewMode() !== 'tree'"
+              (buttonClick)="ruleTraceViewMode.set('tree')"
+            ></app-button>
+            <app-button
+              icon="pi pi-sitemap"
+              label="tradeBot.ruleExpression.viewFlow"
+              [severity]="ruleTraceViewMode() === 'flow' ? 'info' : 'secondary'"
+              [text]="ruleTraceViewMode() !== 'flow'"
+              (buttonClick)="ruleTraceViewMode.set('flow')"
+            ></app-button>
+          </div>
+          @if (ruleTraceViewMode() === 'tree') {
+            <app-rule-tree-viewer [trace]="trace()"></app-rule-tree-viewer>
+          } @else {
+            <app-rule-flow-viewer [trace]="trace()"></app-rule-flow-viewer>
+          }
+        </div>
       }
       @case ('snapshots') {
         <div class="flex flex-col gap-4">

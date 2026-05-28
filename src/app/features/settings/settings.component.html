@@ -1,53 +1,43 @@
 <app-page-shell title="settings.title" subtitle="settings.description" layout="wide">
-  <section page-summary class="settings-summary-grid">
+  <app-responsive-grid page-summary [columns]="4">
     @for (item of settingsSummary(); track item.label) {
-      <article class="settings-summary-card app-border app-bg-card">
-        <i [attr.class]="'settings-summary-icon ' + item.icon" aria-hidden="true"></i>
-        <div>
-          <div class="settings-summary-label app-text-muted">{{ item.label | translateContent }}</div>
-          <div class="settings-summary-value app-text">{{ item.value | translateContent }}</div>
-        </div>
-      </article>
+      <app-summary-metric-card
+        [label]="item.label"
+        [value]="item.value"
+      ></app-summary-metric-card>
     }
-  </section>
+  </app-responsive-grid>
 
-  <div page-toolbar class="settings-toolbar app-border app-bg-card">
+  <app-card page-toolbar padding="sm">
     <app-tabs [tabs]="tabItems" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
-  </div>
+  </app-card>
 
   @switch (activeTab()) {
     @case ('general') {
-      <section class="settings-grid" [attr.aria-label]="'settings.tab.general' | translateContent">
-        <article class="settings-panel app-border app-bg-card">
-          <div class="settings-panel-main">
-            <span class="settings-panel-icon" aria-hidden="true">
-              <i [attr.class]="generalPanels[0].icon"></i>
-            </span>
-            <div class="settings-panel-copy">
-              <h3>{{ generalPanels[0].title | translateContent }}</h3>
-              <p class="app-text-muted">{{ generalPanels[0].description | translateContent }}</p>
-            </div>
-          </div>
-          <div class="settings-control">
+      <app-section-panel
+        title="settings.generalQuickSettings"
+        subtitle="settings.generalQuickSettingsDescription"
+        density="compact"
+        variant="muted"
+      >
+        <app-responsive-grid [columns]="2">
+          <app-section-panel
+            [title]="generalPanels[0].title"
+            [subtitle]="generalPanels[0].description"
+            density="compact"
+          >
             <app-toggle-switch
               label="settings.enabled"
               [value]="themeMode() === 'dark'"
               (valueChange)="onDarkModeToggle($event === true)"
             ></app-toggle-switch>
-          </div>
-        </article>
+          </app-section-panel>
 
-        <article class="settings-panel app-border app-bg-card">
-          <div class="settings-panel-main">
-            <span class="settings-panel-icon" aria-hidden="true">
-              <i [attr.class]="generalPanels[1].icon"></i>
-            </span>
-            <div class="settings-panel-copy">
-              <h3>{{ generalPanels[1].title | translateContent }}</h3>
-              <p class="app-text-muted">{{ generalPanels[1].description | translateContent }}</p>
-            </div>
-          </div>
-          <div class="settings-control">
+          <app-section-panel
+            [title]="generalPanels[1].title"
+            [subtitle]="generalPanels[1].description"
+            density="compact"
+          >
             <app-select-button
               label="settings.themeModeTitle"
               [options]="themeModeOptions"
@@ -55,40 +45,26 @@
               [allowEmpty]="false"
               (valueChange)="onThemeModeChange($event)"
             ></app-select-button>
-          </div>
-        </article>
+          </app-section-panel>
 
-        <article class="settings-panel app-border app-bg-card">
-          <div class="settings-panel-main">
-            <span class="settings-panel-icon" aria-hidden="true">
-              <i [attr.class]="generalPanels[2].icon"></i>
-            </span>
-            <div class="settings-panel-copy">
-              <h3>{{ generalPanels[2].title | translateContent }}</h3>
-              <p class="app-text-muted">{{ generalPanels[2].description | translateContent }}</p>
-            </div>
-          </div>
-          <div class="settings-control">
+          <app-section-panel
+            [title]="generalPanels[2].title"
+            [subtitle]="generalPanels[2].description"
+            density="compact"
+          >
             <app-select
               label="settings.themePresetTitle"
               [options]="themePresetOptions"
               [value]="themePreset()"
               (valueChange)="onThemePresetChange($event)"
             ></app-select>
-          </div>
-        </article>
+          </app-section-panel>
 
-        <article class="settings-panel app-border app-bg-card">
-          <div class="settings-panel-main">
-            <span class="settings-panel-icon" aria-hidden="true">
-              <i [attr.class]="generalPanels[3].icon"></i>
-            </span>
-            <div class="settings-panel-copy">
-              <h3>{{ generalPanels[3].title | translateContent }}</h3>
-              <p class="app-text-muted">{{ generalPanels[3].description | translateContent }}</p>
-            </div>
-          </div>
-          <div class="settings-control">
+          <app-section-panel
+            [title]="generalPanels[3].title"
+            [subtitle]="generalPanels[3].description"
+            density="compact"
+          >
             <app-select-button
               label="settings.languageTitle"
               [options]="languageOptions"
@@ -96,75 +72,61 @@
               [allowEmpty]="false"
               (valueChange)="onLanguageChange($event)"
             ></app-select-button>
-          </div>
-        </article>
-      </section>
+          </app-section-panel>
+        </app-responsive-grid>
+      </app-section-panel>
     }
 
     @case ('theme') {
-      <section class="settings-theme-workspace">
-        <div class="settings-theme-header app-border app-bg-card">
-          <div>
-            <h3>{{ 'settings.customThemeTitle' | translateContent }}</h3>
-            <p class="app-text-muted">{{ 'settings.customThemeDescription' | translateContent }}</p>
-          </div>
+      <app-section-panel
+        title="settings.customThemeTitle"
+        subtitle="settings.customThemeDescription"
+        density="compact"
+      >
+        <app-select-button
+          section-actions
+          label="settings.customThemeMode"
+          [options]="customModeOptions"
+          [value]="customThemeMode()"
+          [allowEmpty]="false"
+          (valueChange)="onCustomModeChange($event)"
+        ></app-select-button>
+        <app-button
+          section-actions
+          icon="pi pi-refresh"
+          severity="secondary"
+          label="reset"
+          (buttonClick)="onResetThemeConfig()"
+        ></app-button>
 
-          <div class="settings-theme-actions">
-            <app-select-button
-              label="settings.customThemeMode"
-              [options]="customModeOptions"
-              [value]="customThemeMode()"
-              [allowEmpty]="false"
-              (valueChange)="onCustomModeChange($event)"
-            ></app-select-button>
-            <app-button
-              icon="pi pi-refresh"
-              severity="secondary"
-              label="reset"
-              (buttonClick)="onResetThemeConfig()"
-            ></app-button>
-          </div>
-        </div>
+        <app-alert variant="info" [message]="'settings.customThemeDescription'"></app-alert>
+      </app-section-panel>
 
-        <div class="settings-token-grid">
-          @for (field of themeTokenFields; track field.token) {
-            <article class="settings-token app-border app-bg-card">
-              <div class="settings-token-header">
-                <div>
-                  <h3>{{ field.label | translateContent }}</h3>
-                  <p class="app-text-muted">{{ field.description | translateContent }}</p>
-                </div>
-                <span
-                  class="settings-token-swatch app-border"
-                  [style.background]="themeTokenValue()[field.token]"
-                  [attr.title]="themeTokenValue()[field.token]"
-                  aria-hidden="true"
-                ></span>
-              </div>
-
-              <div class="settings-token-value app-text-soft">
-                <span>{{ 'settings.activeValue' | translateContent }}</span>
-                <code>{{ themeTokenValue()[field.token] }}</code>
-              </div>
-
-              <div class="settings-token-controls">
-                <app-select
-                  label="settings.presetValue"
-                  [options]="themeTokenOptions()[field.token]"
-                  [value]="themeTokenValue()[field.token]"
-                  (valueChange)="onThemeTokenChange(field.token, $event)"
-                ></app-select>
-                <app-input-text
-                  label="settings.manualValue"
-                  [value]="themeTokenValue()[field.token]"
-                  placeholder="customCssValue"
-                  (valueChange)="onThemeTokenManualInput(field.token, $event || '')"
-                ></app-input-text>
-              </div>
-            </article>
-          }
-        </div>
-      </section>
+      <app-responsive-grid [columns]="2">
+        @for (field of themeTokenFields; track field.token) {
+          <app-section-panel
+            [title]="field.label"
+            [subtitle]="field.description"
+            density="compact"
+          >
+            <app-status-list
+              [items]="[{ title: 'settings.activeValue', value: themeTokenValue()[field.token] }]"
+            ></app-status-list>
+            <app-select
+              label="settings.presetValue"
+              [options]="themeTokenOptions()[field.token]"
+              [value]="themeTokenValue()[field.token]"
+              (valueChange)="onThemeTokenChange(field.token, $event)"
+            ></app-select>
+            <app-input-text
+              label="settings.manualValue"
+              [value]="themeTokenValue()[field.token]"
+              placeholder="customCssValue"
+              (valueChange)="onThemeTokenManualInput(field.token, $event || '')"
+            ></app-input-text>
+          </app-section-panel>
+        }
+      </app-responsive-grid>
     }
   }
 </app-page-shell>

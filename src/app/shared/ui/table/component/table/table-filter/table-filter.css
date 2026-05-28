@@ -45,10 +45,16 @@
   max-width: min(100%, 22rem);
   min-height: 2rem;
   padding: 0.15rem 0.2rem 0.15rem 0.6rem;
-  border: 1px solid var(--app-border);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 32%, var(--app-border));
   border-radius: 999px;
-  background: var(--app-surface-soft);
+  background: color-mix(in srgb, var(--app-primary) 8%, var(--app-surface-soft));
   color: var(--app-text);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.filter-chip:hover {
+  border-color: color-mix(in srgb, var(--app-primary) 52%, var(--app-border));
+  background: color-mix(in srgb, var(--app-primary) 12%, var(--app-surface-soft));
 }
 
 .filter-chip__text {
@@ -61,6 +67,7 @@
 
 .filter-chip__text strong {
   font-weight: 700;
+  color: var(--app-primary);
 }
 
 app-input-text {

@@ -1,1 +1,18 @@
+:host {
+  display: block;
+}
 
+:host small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--app-text-muted);
+}
+
+.app-chip-label {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}

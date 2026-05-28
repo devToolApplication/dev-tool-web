@@ -1,0 +1,36 @@
+<p-floatlabel [variant]="variant">
+  <div class="color-picker-wrapper">
+    <p-colorPicker
+      [ngModel]="value"
+      (ngModelChange)="onColorSelect({ value: $event })"
+      [disabled]="disabled"
+      [format]="format"
+      appendTo="body">
+    </p-colorPicker>
+    <input
+      pInputText
+      [pSize]="size"
+      [id]="inputId"
+      type="text"
+      [ngModel]="value"
+      (ngModelChange)="onTextChange($event)"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [attr.placeholder]="(placeholder || '#000000') | translateContent"
+      [invalid]="invalid"
+      autocomplete="off"
+      class="color-text-input"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+    />
+  </div>
+  <label [attr.for]="inputId">{{ label | translateContent }}</label>
+</p-floatlabel>
+
+@if (helpText) {
+  <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
+}
+
+@if (invalid && errorMessage) {
+  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+}

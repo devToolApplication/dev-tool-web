@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
 import { SelectOption } from '../select/select';
 
@@ -9,7 +9,7 @@ import { SelectOption } from '../select/select';
   styleUrl: './input-multi.css',
   providers: [provideValueAccessor(() => InputMulti)]
 })
-export class InputMulti extends BaseInput<string[]> implements AfterViewChecked, OnChanges {
+export class InputMulti extends BaseInput<string[]> implements AfterViewInit, OnChanges {
   @Input() options: SelectOption[] = [];
 
   currentQuery = '';
@@ -17,36 +17,14 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
   selectedOptions: SelectOption[] = [];
   suggestions: SelectOption[] = [];
 
-  constructor(private readonly host: ElementRef<HTMLElement>) {
-    super();
-  }
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
 
-  ngAfterViewChecked(): void {
-    const accessibleName = this.label || this.placeholder || this.inputId;
-    this.host.nativeElement
-      .querySelectorAll<HTMLElement>('.p-autocomplete-input-multiple[role="listbox"]')
-      .forEach((listbox) => {
-        listbox.setAttribute('role', 'list');
-        listbox.removeAttribute('aria-orientation');
-        listbox.setAttribute('aria-label', accessibleName);
-        listbox.setAttribute('title', accessibleName);
-      });
-    this.host.nativeElement
-      .querySelectorAll<HTMLElement>('.p-autocomplete-chip-item[role="option"]')
-      .forEach((chip) => {
-        chip.setAttribute('role', 'listitem');
-        chip.removeAttribute('aria-selected');
-        chip.removeAttribute('aria-setsize');
-        chip.removeAttribute('aria-posinset');
-      });
-    this.host.nativeElement
-      .querySelectorAll<HTMLElement>('.p-autocomplete-input-multiple li[role="option"]')
-      .forEach((item) => {
-        item.setAttribute('role', 'listitem');
-        item.removeAttribute('aria-selected');
-        item.removeAttribute('aria-setsize');
-        item.removeAttribute('aria-posinset');
-      });
+  ngAfterViewInit(): void {
+    const observer = new MutationObserver(() => this.fixAccessibility());
+    observer.observe(this.host.nativeElement, { childList: true, subtree: true });
+    this.destroyRef.onDestroy(() => observer.disconnect());
+    this.fixAccessibility();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -54,12 +32,6 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
       this.model = this.normalizeItems(Array.isArray(this.value) ? this.value : []);
       this.selectedOptions = this.model.map((item) => this.toOption(item));
       this.syncSuggestions();
-      this.debugLog('ngOnChanges:value', {
-        value: this.value,
-        model: this.model,
-        selectedOptions: this.selectedOptions,
-        suggestions: this.suggestions
-      });
     }
   }
 
@@ -68,103 +40,33 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
   }
 
   onModelChange(value: unknown): void {
-    this.debugLog('ngModelChange:before', { value, model: this.model, currentQuery: this.currentQuery });
-    if (!Array.isArray(value)) {
-      this.debugLog('ngModelChange:ignored-non-array', { value });
-      return;
-    }
+    if (!Array.isArray(value)) return;
 
     this.selectedOptions = this.normalizeOptions(value);
     this.model = this.selectedOptions.map((option) => String(option.value));
     this.syncSuggestions();
-    this.debugLog('ngModelChange:after', {
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
     this.onChange(this.model);
   }
 
   onSearch(query: string): void {
     this.currentQuery = query;
     this.syncSuggestions(query);
-    this.debugLog('completeMethod', {
-      query,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
   }
 
   onInputKeydown(event: KeyboardEvent): void {
-    this.debugLog('onInputKeydown', {
-      key: event.key,
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions
-    });
-    if (event.key !== 'Enter') {
-      return;
-    }
-
+    if (event.key !== 'Enter') return;
     event.preventDefault();
     this.commitCurrentQuery();
   }
 
   override onBlur(): void {
-    this.debugLog('onBlur:before', {
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
     this.commitCurrentQuery();
-    this.debugLog('onBlur:after-commit', {
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
     super.onBlur();
-  }
-
-  override onFocus(): void {
-    this.debugLog('onFocus', {
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
-    super.onFocus();
-  }
-
-  onSelectItem(event: unknown): void {
-    this.debugLog('onSelect', {
-      event,
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
-  }
-
-  onUnselectItem(event: unknown): void {
-    this.debugLog('onUnselect', {
-      event,
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
   }
 
   private commitCurrentQuery(): void {
     const value = this.currentQuery.trim();
     if (!value || this.model.includes(value)) {
-      this.debugLog('commitCurrentQuery:skip', {
-        currentQuery: this.currentQuery,
-        model: this.model
-      });
       this.currentQuery = '';
       this.syncSuggestions();
       return;
@@ -172,20 +74,9 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
 
     this.model = [...this.model, value];
     this.selectedOptions = [...this.selectedOptions, this.toOption(value)];
-    this.debugLog('commitCurrentQuery:add', {
-      addedValue: value,
-      model: this.model,
-      selectedOptions: this.selectedOptions
-    });
     this.onChange(this.model);
     this.currentQuery = '';
     this.syncSuggestions();
-    this.debugLog('commitCurrentQuery:after', {
-      currentQuery: this.currentQuery,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
   }
 
   private normalizeItems(values: unknown[]): string[] {
@@ -196,27 +87,23 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
   }
 
   private syncSuggestions(query = this.currentQuery): void {
-    const normalizedQuery = query.trim();
-    const keyword = normalizedQuery.toLowerCase();
-    const optionSuggestions = this.options
+    const keyword = query.trim().toLowerCase();
+
+    const available = this.options
       .map((option) => this.toOption(String(option.value ?? option.label ?? '').trim()))
       .filter((option) => option.value)
       .filter((option, index, items) => items.findIndex((item) => item.value === option.value) === index)
       .filter((option) => !this.model.includes(String(option.value)))
       .filter((option) => !keyword || option.label.toLowerCase().includes(keyword));
 
-    const suggestions = [...this.selectedOptions, ...optionSuggestions];
-    if (normalizedQuery && !suggestions.some((option) => option.value === normalizedQuery)) {
-      suggestions.unshift(this.toOption(normalizedQuery));
+    const suggestions = [...this.selectedOptions, ...available];
+    if (keyword && !suggestions.some((option) => option.value === keyword)) {
+      suggestions.unshift(this.toOption(keyword));
     }
 
-    this.suggestions = suggestions.filter((option, index, items) => items.findIndex((item) => item.value === option.value) === index);
-    this.debugLog('syncSuggestions', {
-      query,
-      model: this.model,
-      selectedOptions: this.selectedOptions,
-      suggestions: this.suggestions
-    });
+    this.suggestions = suggestions.filter(
+      (option, index, items) => items.findIndex((item) => item.value === option.value) === index
+    );
   }
 
   private normalizeOptions(values: unknown[]): SelectOption[] {
@@ -228,7 +115,6 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
       const record = item as Record<string, unknown>;
       return String(record['value'] ?? record['label'] ?? '').trim();
     }
-
     return String(item ?? '').trim();
   }
 
@@ -236,8 +122,21 @@ export class InputMulti extends BaseInput<string[]> implements AfterViewChecked,
     return { label: value, value };
   }
 
-  private debugLog(eventName: string, payload: Record<string, unknown>): void {
-    void eventName;
-    void payload;
+  private fixAccessibility(): void {
+    const accessibleName = this.label || this.placeholder || this.inputId;
+    const root = this.host.nativeElement as HTMLElement;
+    root.querySelectorAll('.p-autocomplete-input-multiple[role="listbox"]')
+      .forEach((el) => {
+        el.setAttribute('role', 'list');
+        el.removeAttribute('aria-orientation');
+        el.setAttribute('aria-label', accessibleName);
+      });
+    root.querySelectorAll('.p-autocomplete-chip-item[role="option"], .p-autocomplete-input-multiple li[role="option"]')
+      .forEach((el) => {
+        el.setAttribute('role', 'listitem');
+        el.removeAttribute('aria-selected');
+        el.removeAttribute('aria-setsize');
+        el.removeAttribute('aria-posinset');
+      });
   }
 }

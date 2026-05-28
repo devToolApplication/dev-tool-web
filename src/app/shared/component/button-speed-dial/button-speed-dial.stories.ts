@@ -1,44 +1,54 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import type { MenuItem } from 'primeng/api';
-
 import { ButtonSpeedDial } from './button-speed-dial';
 
-const model: MenuItem[] = [
-  { label: 'Add', icon: 'pi pi-plus' },
-  { label: 'Edit', icon: 'pi pi-pencil' },
-  { label: 'Delete', icon: 'pi pi-trash' }
+const sampleMenuItems = [
+  { icon: 'pi pi-pencil', tooltip: 'Edit' },
+  { icon: 'pi pi-trash', tooltip: 'Delete' },
+  { icon: 'pi pi-share-alt', tooltip: 'Share' }
 ];
 
 const meta: Meta<ButtonSpeedDial> = {
-  title: 'Shared/Components/Actions/Button Speed Dial',
+  title: 'Shared/Components/Form/ButtonSpeedDial',
   component: ButtonSpeedDial,
-  parameters: {
-    layout: 'padded'
-  },
   args: {
-    model,
-    direction: 'right',
-    type: 'linear'
-  }
-};
-
-export default meta;
-
-type Story = StoryObj<ButtonSpeedDial>;
-
-export const Default: Story = {
+    model: sampleMenuItems,
+    direction: 'up',
+    type: 'linear',
+    showIcon: 'pi pi-bars',
+    hideIcon: 'pi pi-times',
+    ariaLabel: 'Open actions menu'
+  },
   render: (args) => ({
-    props: { ...args },
+    props: args,
     template: `
-      <div class="relative h-32 min-w-80 p-8">
+      <div class="flex justify-center items-center h-48">
         <app-button-speed-dial
           [model]="model"
           [direction]="direction"
           [type]="type"
           [showIcon]="showIcon"
           [hideIcon]="hideIcon"
+          [ariaLabel]="ariaLabel"
         ></app-button-speed-dial>
       </div>
     `
   })
+};
+
+export default meta;
+
+type Story = StoryObj<ButtonSpeedDial>;
+
+export const Default: Story = {};
+
+export const Circle: Story = {
+  args: {
+    type: 'circle'
+  }
+};
+
+export const Down: Story = {
+  args: {
+    direction: 'down'
+  }
 };

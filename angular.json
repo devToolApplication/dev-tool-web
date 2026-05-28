@@ -40,7 +40,8 @@
               "node_modules/primeicons/primeicons.css"
             ],
             "allowedCommonJsDependencies": [
-              "@stomp/stompjs"
+              "@stomp/stompjs",
+              "@joint/core"
             ]
           },
           "configurations": {

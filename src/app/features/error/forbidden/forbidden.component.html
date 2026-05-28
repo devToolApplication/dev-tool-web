@@ -1,8 +1,5 @@
-<section class="error-page">
-  <div class="error-card">
-    <div class="error-code">403</div>
-    <h1>{{ 'errors.forbiddenTitle' | translateContent }}</h1>
-    <p>{{ 'errors.forbiddenDescription' | translateContent }}</p>
-    <a routerLink="/admin/dashboard">{{ 'errors.backToDashboard' | translateContent }}</a>
-  </div>
-</section>
+<app-error-page
+  code="403"
+  title="errors.forbiddenTitle"
+  description="errors.forbiddenDescription"
+></app-error-page>

@@ -1,25 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { SelectMulti } from './select-multi';
-import type { SelectOption } from '../select/select';
 
-const options: SelectOption[] = [
-  { label: 'Angular', value: 'angular' },
-  { label: 'PrimeNG', value: 'primeng' },
-  { label: 'Storybook', value: 'storybook' },
-  { label: 'Design System', value: 'design-system' }
+const sampleOptions = [
+  { label: 'QA Environment', value: 'qa' },
+  { label: 'Production Environment', value: 'prod' },
+  { label: 'Staging Environment', value: 'staging' },
+  { label: 'Development Environment', value: 'dev' }
 ];
 
 const meta: Meta<SelectMulti> = {
-  title: 'Shared/Components/Form Controls/Select Multi',
+  title: 'Shared/Components/Form/SelectMulti',
   component: SelectMulti,
   args: {
-    label: 'Tags',
-    placeholder: 'Choose tags',
-    options,
-    value: ['angular', 'storybook'],
-    enableFilter: true,
-    display: 'chip'
+    label: 'Deployment Targets',
+    placeholder: 'Choose targets',
+    options: sampleOptions,
+    display: 'chip',
+    enableFilter: false,
+    loading: false,
+    disabled: false
   }
 };
 
@@ -29,9 +28,22 @@ type Story = StoryObj<SelectMulti>;
 
 export const Default: Story = {};
 
-export const Limited: Story = {
+export const WithFilter: Story = {
+  args: {
+    enableFilter: true,
+    placeholder: 'Search and select target'
+  }
+};
+
+export const WithLimit: Story = {
   args: {
     selectionLimit: 2,
-    maxSelectedLabels: 2
+    placeholder: 'Max 2 targets'
+  }
+};
+
+export const LoadingState: Story = {
+  args: {
+    loading: true
   }
 };

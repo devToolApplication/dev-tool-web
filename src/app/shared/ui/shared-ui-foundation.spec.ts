@@ -2,6 +2,19 @@ import { SimpleChange, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SharedModule } from '../shared.module';
+import { AvatarComponent } from '../component/avatar/avatar';
+import { PrimeConfirmDialogComponent } from '../component/confirm-dialog/confirm-dialog';
+import { DialogComponent } from '../component/dialog/dialog';
+import { FluidComponent } from '../component/fluid/fluid';
+import { IconFieldComponent } from '../component/icon-field/icon-field';
+import { MessageComponent } from '../component/message/message';
+import { PanelMenuComponent } from '../component/panel-menu/panel-menu';
+import { PrimeBadgeComponent } from '../component/prime-badge/prime-badge';
+import { RippleComponent } from '../component/ripple/ripple';
+import { TieredMenuComponent } from '../component/tiered-menu/tiered-menu';
+import { ToastComponent } from '../component/toast/toast';
+import { ToolbarComponent } from '../component/toolbar/toolbar';
+import { TooltipComponent } from '../component/tooltip/tooltip';
 import { provideSharedTesting } from '../testing/shared-test.providers';
 import { BadgeComponent } from './data-display/badge/badge.component';
 import { CopyableTextComponent } from './data-display/copyable-text/copyable-text.component';
@@ -52,7 +65,20 @@ describe('Shared UI foundation', () => {
       KeyValueListComponent,
       DiffViewerComponent,
       DataTimelineComponent,
-      ValidationSummaryComponent
+      ValidationSummaryComponent,
+      AvatarComponent,
+      DialogComponent,
+      MessageComponent,
+      TieredMenuComponent,
+      ToastComponent,
+      ToolbarComponent,
+      PrimeBadgeComponent,
+      PanelMenuComponent,
+      PrimeConfirmDialogComponent,
+      FluidComponent,
+      IconFieldComponent,
+      RippleComponent,
+      TooltipComponent
     ];
 
     components.forEach((componentType) => {

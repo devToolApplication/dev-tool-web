@@ -15,6 +15,7 @@ export class Fileupload {
   @Input() accept?: string;
   @Input() multiple = false;
   @Input() customUpload = true;
+  @Input() auto = false;
   @Input() disabled = false;
   @Input() maxFileSize?: number;
   @Output() fileSelect = new EventEmitter<FileSelectEvent>();

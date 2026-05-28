@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 import { BadgeVariant } from '../../shared/ui/data-display/badge/badge.component';
-import { KeyValueItem } from '../../shared/ui/data-display/key-value-list/key-value-list.component';
+import { StatusListItem } from '../../shared/ui/data-display/status-list/status-list.component';
 import { ActionToolbarAction } from '../../shared/ui/layout/action-toolbar/action-toolbar.component';
 import { DashboardActivity, DashboardMetric, DashboardOverview, DashboardResource, DashboardTabType } from './dashboard.models';
 import { DashboardService } from './dashboard.service';
@@ -15,7 +15,7 @@ import { DashboardService } from './dashboard.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
-  activeTab: DashboardTabType = 'ai-agent';
+  readonly activeTab = signal<DashboardTabType>('ai-agent');
 
   readonly tabs: DashboardTabType[] = ['ai-agent', 'file-storage'];
   readonly tabItems = [
@@ -23,64 +23,36 @@ export class DashboardComponent implements OnInit {
     { value: 'file-storage', label: 'dashboard.tab.fileStorage' }
   ];
 
-  readonly overviews: Partial<Record<DashboardTabType, DashboardOverview>> = {};
-  readonly loadingState: Record<DashboardTabType, boolean> = {
+  readonly overviews = signal<Partial<Record<DashboardTabType, DashboardOverview>>>({});
+  readonly loadingState = signal<Record<DashboardTabType, boolean>>({
     'ai-agent': false,
     'file-storage': false
-  };
-  readonly errorState: Record<DashboardTabType, string> = {
+  });
+  readonly errorState = signal<Record<DashboardTabType, string>>({
     'ai-agent': '',
     'file-storage': ''
-  };
+  });
 
-  constructor(
-    private readonly dashboardService: DashboardService,
-    private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
+  readonly activeOverview = computed(() => this.overviews()[this.activeTab()] ?? null);
+  readonly activeActivities = computed<DashboardActivity[]>(() => this.activeOverview()?.activities ?? []);
+  readonly activeResources = computed<DashboardResource[]>(() => this.activeOverview()?.resources ?? []);
+  readonly loading = computed(() => this.loadingState()[this.activeTab()]);
+  readonly activeError = computed(() => this.errorState()[this.activeTab()]);
 
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.tabs.forEach((tab) => this.loadOverview(tab));
-    });
-  }
+  readonly dashboardActions = computed<ActionToolbarAction[]>(() => [
+    {
+      id: 'refresh',
+      label: 'dashboard.refresh',
+      icon: 'pi pi-refresh',
+      variant: 'primary',
+      placement: 'primary',
+      loading: this.loading(),
+      disabled: this.loading()
+    }
+  ]);
 
-  get activeOverview(): DashboardOverview | null {
-    return this.overviews[this.activeTab] ?? null;
-  }
-
-  get activeActivities(): DashboardActivity[] {
-    return this.activeOverview?.activities ?? [];
-  }
-
-  get activeResources(): DashboardResource[] {
-    return this.activeOverview?.resources ?? [];
-  }
-
-  get loading(): boolean {
-    return this.loadingState[this.activeTab];
-  }
-
-  get activeError(): string {
-    return this.errorState[this.activeTab];
-  }
-
-  get dashboardActions(): ActionToolbarAction[] {
-    return [
-      {
-        id: 'refresh',
-        label: 'dashboard.refresh',
-        icon: 'pi pi-refresh',
-        variant: 'primary',
-        placement: 'primary',
-        loading: this.loading,
-        disabled: this.loading
-      }
-    ];
-  }
-
-  get quickActions(): ActionToolbarAction[] {
-    if (this.activeTab === 'file-storage') {
+  readonly quickActions = computed<ActionToolbarAction[]>(() => {
+    if (this.activeTab() === 'file-storage') {
       return [
         { id: 'storage-repository', label: 'layout.menu.storageRepository', icon: 'pi pi-database', variant: 'primary', placement: 'primary' },
         { id: 'uploaded-files', label: 'layout.menu.uploadedFiles', icon: 'pi pi-file', placement: 'secondary' }
@@ -92,10 +64,10 @@ export class DashboardComponent implements OnInit {
       { id: 'execution-traces', label: 'layout.menu.executionTraces', icon: 'pi pi-history', placement: 'secondary' },
       { id: 'ai-models', label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', placement: 'secondary' }
     ];
-  }
+  });
 
-  get needsAttentionItems(): Array<{ title: string; description?: string; status?: string }> {
-    const overview = this.activeOverview;
+  readonly needsAttentionItems = computed<StatusListItem[]>(() => {
+    const overview = this.activeOverview();
     if (!overview) {
       return [];
     }
@@ -103,24 +75,63 @@ export class DashboardComponent implements OnInit {
     const importantStatuses = new Set(['warning', 'danger', 'failed', 'error', 'degraded', 'pending']);
     const fromMetrics = overview.metrics
       .filter((metric) => importantStatuses.has(String(metric.severity ?? '').toLowerCase()))
-      .map((metric) => ({ title: metric.label, description: String(metric.value ?? ''), status: metric.severity }));
+      .map((metric) => ({
+        title: metric.label,
+        description: String(metric.value ?? ''),
+        status: metric.severity,
+        statusVariant: this.metricVariant(metric.severity)
+      }));
     const fromResources = overview.resources
       .filter((resource) => importantStatuses.has(String(resource.status ?? '').toLowerCase()))
-      .map((resource) => ({ title: resource.name, description: resource.description ?? resource.value, status: resource.status }));
+      .map((resource) => ({
+        title: resource.name,
+        description: resource.description ?? resource.value,
+        status: resource.status,
+        statusVariant: this.metricVariant(resource.status)
+      }));
 
     return [...fromMetrics, ...fromResources].slice(0, 6);
-  }
+  });
 
-  get serviceStatusItems(): KeyValueItem[] {
-    const overview = this.activeOverview;
+  readonly serviceStatusItems = computed<StatusListItem[]>(() => {
+    const overview = this.activeOverview();
     if (!overview) {
       return [];
     }
 
     return [
-      { label: 'dashboard.service', value: overview.service || '-', type: 'copyable' },
-      { label: 'dashboard.generatedAt', value: overview.generatedAt || '-', type: overview.generatedAt ? 'datetime' : 'text' }
+      { title: 'dashboard.service', value: overview.service || '-' },
+      { title: 'dashboard.generatedAt', value: overview.generatedAt || '-' }
     ];
+  });
+
+  readonly activityItems = computed<StatusListItem[]>(() =>
+    this.activeActivities().map((activity) => ({
+      title: activity.title,
+      description: activity.description,
+      status: activity.status,
+      statusVariant: this.metricVariant(activity.status),
+      timestamp: activity.timestamp
+    }))
+  );
+
+  readonly resourceItems = computed<StatusListItem[]>(() =>
+    this.activeResources().map((resource) => ({
+      title: resource.name,
+      description: resource.description,
+      status: resource.status,
+      statusVariant: this.metricVariant(resource.status),
+      value: resource.value
+    }))
+  );
+
+  constructor(
+    private readonly dashboardService: DashboardService,
+    private readonly router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.tabs.forEach((tab) => this.loadOverview(tab));
   }
 
   onTabChange(value: string | number | undefined): void {
@@ -129,14 +140,14 @@ export class DashboardComponent implements OnInit {
     }
 
     const nextTab = value as DashboardTabType;
-    this.activeTab = nextTab;
-    if (!this.overviews[nextTab] && !this.loadingState[nextTab]) {
+    this.activeTab.set(nextTab);
+    if (!this.overviews()[nextTab] && !this.loadingState()[nextTab]) {
       this.loadOverview(nextTab);
     }
   }
 
   refreshActive(): void {
-    this.loadOverview(this.activeTab);
+    this.loadOverview(this.activeTab());
   }
 
   onDashboardAction(action: ActionToolbarAction): void {
@@ -190,38 +201,24 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadOverview(tab: DashboardTabType): void {
-    this.deferStateUpdate(() => {
-      this.loadingState[tab] = true;
-      this.errorState[tab] = '';
-    });
+    this.loadingState.update((state) => ({ ...state, [tab]: true }));
+    this.errorState.update((state) => ({ ...state, [tab]: '' }));
+
     this.dashboardService
       .getOverview(tab)
       .pipe(
         catchError(() => {
-          this.deferStateUpdate(() => {
-            this.errorState[tab] = 'dashboard.loadError';
-          });
+          this.errorState.update((state) => ({ ...state, [tab]: 'dashboard.loadError' }));
           return of(null);
         }),
         finalize(() => {
-          this.deferStateUpdate(() => {
-            this.loadingState[tab] = false;
-          });
+          this.loadingState.update((state) => ({ ...state, [tab]: false }));
         })
       )
       .subscribe((overview) => {
         if (overview) {
-          this.deferStateUpdate(() => {
-            this.overviews[tab] = overview;
-          });
+          this.overviews.update((state) => ({ ...state, [tab]: overview }));
         }
       });
-  }
-
-  private deferStateUpdate(update: () => void): void {
-    setTimeout(() => {
-      update();
-      this.cdr.markForCheck();
-    });
   }
 }

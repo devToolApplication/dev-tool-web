@@ -22,8 +22,8 @@ import {
   ChartIndicator,
   EvaluationConfig,
   ReplayConfig
-} from '../../shared-trading/candle-chart/candle-chart';
-import { CandleChartOverlayMapper } from '../../shared-trading/candle-chart/candle-chart-overlay.mapper';
+} from '../../share/candle-chart/candle-chart';
+import { CandleChartOverlayMapper } from '../../share/candle-chart/candle-chart-overlay.mapper';
 import { FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { EVALUATE_FORM, REPLAY_INIT_FORM } from '../../trade-bot-runtime.constants';
@@ -49,14 +49,7 @@ export class ReplayComponent {
   readonly selectedCandle = signal<ChartCandle | null>(null);
   readonly replaySpeed = signal(650);
   readonly activeTab = signal('signal');
-  readonly tabs: AppTabItem[] = [
-    { label: 'tradeBot.replay.signal', value: 'signal' },
-    { label: 'tradeBot.replay.ruleTrace', value: 'ruleTrace' },
-    { label: 'tradeBot.replay.candle', value: 'candle' },
-    { label: 'tradeBot.replay.raw', value: 'raw' }
-  ];
   readonly chartConfig = computed<CandleChartConfig>(() => ({
-    showCandles: true,
     showVolume: true,
     showLines: false,
     showBoxAreas: false,
@@ -118,45 +111,6 @@ export class ReplayComponent {
     { label: 'tradeBot.replay.candleCount', value: this.replay()?.candles?.length ?? 0 },
     { label: 'tradeBot.field.status', value: this.replayStatus() }
   ]);
-  readonly selectedCandleFacts = computed(() => {
-    const candle = this.selectedCandle();
-    return [
-      { label: 'tradeBot.field.openTime', value: candle?.openTime ?? '-' },
-      { label: 'tradeBot.field.open', value: candle?.open ?? '-' },
-      { label: 'tradeBot.field.high', value: candle?.high ?? '-' },
-      { label: 'tradeBot.field.low', value: candle?.low ?? '-' },
-      { label: 'tradeBot.field.close', value: candle?.close ?? '-' },
-      { label: 'tradeBot.field.volume', value: candle?.volume ?? '-' }
-    ];
-  });
-  readonly overlayRows = computed(() =>
-    Object.entries(this.replay()?.overlay?.overlays ?? {}).map(([name, value]) => ({
-      name,
-      count: Array.isArray(value) ? value.length : value && typeof value === 'object' ? Object.keys(value).length : value ? 1 : 0,
-      raw: value
-    }))
-  );
-  readonly evaluationTrace = computed<Record<string, unknown>>(() => {
-    const trace = this.ruleTrace();
-    if (trace) {
-      return trace;
-    }
-    const evaluation = this.evaluation();
-    return ((evaluation?.['ruleTrace'] ?? evaluation?.['trace'] ?? evaluation) as Record<string, unknown>) ?? {};
-  });
-  readonly signalSummary = computed(() => this.resolveSignalRecord());
-  readonly signalSide = computed(() => String(this.signalSummary()?.['side'] ?? this.signalSummary()?.['signal'] ?? '-').toUpperCase());
-  readonly signalSummaryFacts = computed(() => {
-    const signal = this.signalSummary();
-    return [
-      { label: 'tradeBot.field.entryPrice', value: this.formatDisplayValue(this.pickValue(signal, ['entryPrice', 'entry'])) },
-      { label: 'tradeBot.replay.stopLoss', value: this.formatDisplayValue(this.pickValue(signal, ['stopLoss', 'sl'])) },
-      { label: 'tradeBot.replay.takeProfit', value: this.formatDisplayValue(this.pickValue(signal, ['takeProfit', 'tp'])) },
-      { label: 'tradeBot.replay.riskReward', value: this.formatDisplayValue(this.pickValue(signal, ['riskReward', 'rr'])) },
-      { label: 'tradeBot.replay.confidence', value: this.formatDisplayValue(this.pickValue(signal, ['confidence', 'score'])) },
-      { label: 'tradeBot.replay.signalTime', value: this.formatDisplayValue(this.pickValue(signal, ['signalTime', 'time', 'openTime'])) }
-    ];
-  });
   readonly backendSessionStatus = computed(() => this.replayEvent()?.status ?? (this.replay() ? 'IDLE' : '-'));
   readonly lastEvalLatency = computed(() => {
     const payload = this.replayEvent()?.payload;
@@ -391,18 +345,6 @@ export class ReplayComponent {
     this.toastService.error(this.i18nService.t('tradeBot.message.evaluateFailed'));
   }
 
-  replayJson(): unknown {
-    return this.replay()?.overlay?.overlays ?? {};
-  }
-
-  evaluationJson(): unknown {
-    return this.evaluation() ?? {};
-  }
-
-  replayEventJson(): RealtimeProgressEvent | null {
-    return this.replayEvent();
-  }
-
   private watchReplay(response: ReplayInitResponse): void {
     if (!response.sessionId) {
       return;
@@ -469,22 +411,6 @@ export class ReplayComponent {
     if (trace) {
       this.ruleTrace.set(trace);
     }
-  }
-
-  private resolveSignalRecord(): Record<string, unknown> | null {
-    const signal = this.strategySignal();
-    if (signal) {
-      return signal;
-    }
-    const evaluation = this.evaluation();
-    const nested = evaluation?.['strategy'];
-    if (nested && typeof nested === 'object') {
-      return nested as Record<string, unknown>;
-    }
-    if (evaluation && ('entryPrice' in evaluation || 'stopLoss' in evaluation || 'takeProfit' in evaluation)) {
-      return evaluation;
-    }
-    return null;
   }
 
   private pickValue(record: Record<string, unknown> | null | undefined, keys: string[]): unknown {

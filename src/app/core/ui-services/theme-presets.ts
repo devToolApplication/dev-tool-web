@@ -91,14 +91,14 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
             mutedColor: '{surface.700}'
           },
           content: {
-            background: '{surface.100}',
-            hoverBackground: '{surface.200}',
-            borderColor: '{surface.300}',
-            color: '{surface.900}'
+            background: '{surface.0}',
+            hoverBackground: '{surface.50}',
+            borderColor: '{surface.200}',
+            color: '{surface.950}'
           },
           formField: {
-            background: '{surface.50}',
-            borderColor: '{surface.300}',
+            background: '{surface.0}',
+            borderColor: '{surface.200}',
             hoverBorderColor: '{primary.color}',
             focusBorderColor: '{primary.color}',
             color: '{surface.950}',
@@ -106,19 +106,19 @@ const withPrimaryIndigo = (basePreset: Preset, darkSurface: DarkSurfaceScale) =>
           },
           overlay: {
             select: {
-              background: '{surface.100}',
-              borderColor: '{surface.300}',
-              color: '{surface.900}'
+              background: '{surface.0}',
+              borderColor: '{surface.200}',
+              color: '{surface.950}'
             },
             popover: {
-              background: '{surface.100}',
-              borderColor: '{surface.300}',
-              color: '{surface.900}'
+              background: '{surface.0}',
+              borderColor: '{surface.200}',
+              color: '{surface.950}'
             },
             modal: {
-              background: '{surface.100}',
-              borderColor: '{surface.300}',
-              color: '{surface.900}'
+              background: '{surface.0}',
+              borderColor: '{surface.200}',
+              color: '{surface.950}'
             }
           }
         }

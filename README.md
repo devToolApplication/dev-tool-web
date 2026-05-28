@@ -1,3 +1,9 @@
+---
+title: README
+type: note
+permalink: dev-tool-web/readme
+---
+
 # Dev Tool Web
 
 Tai lieu nay dung de thong nhat cach to chuc feature, form, list va service trong FE. Khi them man hinh moi, can bam theo README nay thay vi tu dat structure rieng.

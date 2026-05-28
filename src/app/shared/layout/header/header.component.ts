@@ -3,10 +3,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Route, Router, Routes } from '@angular/router';
 import { filter } from 'rxjs';
 import { MenuItem } from 'primeng/api';
-import { TieredMenu } from 'primeng/tieredmenu';
 import { KeycloakService } from '../../../core/auth/keycloak.service';
 import { APP_LAYOUT_MENU } from '../config/menu.config';
 import { AppMenuItem } from '../side-menu/side-menu.component';
+import { TieredMenuComponent } from '../../component/tiered-menu/tiered-menu';
 
 interface AppShellUserInfo {
   family_name?: string;
@@ -29,7 +29,7 @@ export class HeaderComponent implements OnInit {
   @Input() sidebarOpen = false;
   @Input() mobileLayout = false;
   @Output() toggleSidebar = new EventEmitter<void>();
-  @ViewChild('userMenu') userMenu!: TieredMenu;
+  @ViewChild('userMenu') userMenu!: TieredMenuComponent;
 
   readonly homeItem: MenuItem = {
     icon: 'pi pi-home',

@@ -3,8 +3,14 @@ import { FeaturePlaceholderComponent } from '../../feature-placeholder/feature-p
 import { permissionGuard } from '../../../core/auth/permission.guard';
 import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { CreateDataFormPageComponent } from './create/create-data-form-page.component';
+import { DataFormValidationPanelComponent } from './create/components/data-form-validation-panel/data-form-validation-panel.component';
+import { DataFormPermissionSectionComponent } from './create/components/data-form-permission-section/data-form-permission-section.component';
 
-export const DATA_FORM_FEATURE_COMPONENTS = [CreateDataFormPageComponent];
+export const DATA_FORM_FEATURE_COMPONENTS = [
+  CreateDataFormPageComponent,
+  DataFormValidationPanelComponent,
+  DataFormPermissionSectionComponent
+];
 
 export const dataFormRoutes: Routes = [
   {

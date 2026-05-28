@@ -1,8 +1,5 @@
-<section class="error-page">
-  <div class="error-card">
-    <div class="error-code">404</div>
-    <h1>{{ 'errors.notFoundTitle' | translateContent }}</h1>
-    <p>{{ 'errors.notFoundDescription' | translateContent }}</p>
-    <a routerLink="/admin/dashboard">{{ 'errors.backToDashboard' | translateContent }}</a>
-  </div>
-</section>
+<app-error-page
+  code="404"
+  title="errors.notFoundTitle"
+  description="errors.notFoundDescription"
+></app-error-page>

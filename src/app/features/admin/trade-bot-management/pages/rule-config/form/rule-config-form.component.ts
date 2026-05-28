@@ -35,14 +35,14 @@ import {
 } from '../../../config-template-form.utils';
 import { parseJson, stringifyJson } from '../../../trade-bot-form-utils';
 import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.constants';
-import { deriveChildRulesFromExpression } from '../../../shared-trading/rule-expression-builder/rule-expression-dependencies';
-import { cloneRuleLogicValue } from '../../../shared-trading/rule-expression-builder/rule-expression-factory';
-import { ruleExpressionFromConfigAndChildRules } from '../../../shared-trading/rule-expression-builder/rule-expression-legacy';
+import { deriveChildRulesFromExpression } from '../../../share/rule-expression-builder/rule-expression-dependencies';
+import { cloneRuleLogicValue } from '../../../share/rule-expression-builder/rule-expression-factory';
+import { ruleExpressionFromConfigAndChildRules } from '../../../share/rule-expression-builder/rule-expression-legacy';
 import {
   RuleExpressionValidationResult,
   RuleLogicFormValue
-} from '../../../shared-trading/rule-expression-builder/rule-expression.models';
-import { validateRuleExpression } from '../../../shared-trading/rule-expression-builder/rule-expression-validator';
+} from '../../../share/rule-expression-builder/rule-expression.models';
+import { validateRuleExpression } from '../../../share/rule-expression-builder/rule-expression-validator';
 
 @Component({
   selector: 'app-rule-config-form',
@@ -60,6 +60,7 @@ export class RuleConfigFormComponent implements OnInit {
     validateRuleExpression({ root: null })
   );
   readonly ruleExpressionDirty = signal(false);
+  readonly ruleEditorMode = signal<'tree' | 'flow'>('tree');
   readonly currentRuleCode = signal('');
   readonly pageConfig: CrudPageConfig = {
     title: 'tradeBot.rule.formTitle',

@@ -1,22 +1,10 @@
-<section class="demo-page app-bg-surface app-text app-border">
-  <h2>{{ title }} Demo</h2>
-  <p class="description">{{ 'demo.description' | translateContent }}</p>
-
+<app-page-shell [title]="title + ' Demo'" subtitle="demo.description" layout="wide">
   @switch (section) {
     @case ('input-text') {
-      <div class="preset-actions">
-        <app-button
-          label="Normal"
-          severity="secondary"
-          (buttonClick)="setTextPreset('normal')"
-        ></app-button>
-        <app-button
-          label="Error"
-          severity="danger"
-          (buttonClick)="setTextPreset('error')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="inputTextActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-input-text
           label="Input text"
           [placeholder]="textPlaceholder"
@@ -25,15 +13,14 @@
           [invalid]="textInvalid"
           [errorMessage]="textInvalid ? 'Invalid value' : undefined"
         ></app-input-text>
-      </div>
+      </app-card>
     }
 
     @case ('input-area') {
-      <div class="preset-actions">
-        <app-button label="Rows 3" severity="secondary" (buttonClick)="areaRows = 3"></app-button>
-        <app-button label="Rows 6" severity="info" (buttonClick)="areaRows = 6"></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="inputAreaActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-input-area
           label="Input area"
           placeholder="Write your note"
@@ -41,23 +28,14 @@
           [value]="areaValue"
           (valueChange)="areaValue = $event || ''"
         ></app-input-area>
-      </div>
+      </app-card>
     }
 
     @case ('input-number') {
-      <div class="preset-actions">
-        <app-button
-          label="Decimal"
-          severity="secondary"
-          (buttonClick)="setNumberPreset('decimal')"
-        ></app-button>
-        <app-button
-          label="Currency"
-          severity="success"
-          (buttonClick)="setNumberPreset('currency')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="inputNumberActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-input-number
           label="Amount"
           placeholder="Enter amount"
@@ -67,23 +45,14 @@
           [value]="numberValue"
           (valueChange)="numberValue = $event"
         ></app-input-number>
-      </div>
+      </app-card>
     }
 
     @case ('password') {
-      <div class="preset-actions">
-        <app-button
-          label="Feedback On"
-          severity="secondary"
-          (buttonClick)="passwordFeedback = true"
-        ></app-button>
-        <app-button
-          label="Feedback Off"
-          severity="warn"
-          (buttonClick)="passwordFeedback = false"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="passwordActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-password
           label="Password"
           placeholder="Enter password"
@@ -91,33 +60,24 @@
           [value]="passwordValue"
           (valueChange)="passwordValue = $event || ''"
         ></app-password>
-      </div>
+      </app-card>
     }
 
     @case ('check-box') {
-      <div class="preset-actions">
-        <app-button
-          label="Checked"
-          severity="success"
-          (buttonClick)="checkboxValue = true"
-        ></app-button>
-        <app-button
-          label="Unchecked"
-          severity="secondary"
-          (buttonClick)="checkboxValue = false"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="checkboxActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-check-box
           label="Enable notifications"
           [value]="checkboxValue"
           (valueChange)="checkboxValue = $event || false"
         ></app-check-box>
-      </div>
+      </app-card>
     }
 
     @case ('radio-button') {
-      <div class="preview-card app-border">
+      <app-card>
         <app-radio-button
           label="Role"
           [value]="radioValue"
@@ -125,49 +85,31 @@
           [options]="[
             { label: 'Admin', value: 'admin' },
             { label: 'Editor', value: 'editor' },
-            { label: 'Viewer', value: 'viewer' },
+            { label: 'Viewer', value: 'viewer' }
           ]"
         ></app-radio-button>
-      </div>
+      </app-card>
     }
 
     @case ('date-picker') {
-      <div class="preset-actions">
-        <app-button
-          label="dd/mm/yy"
-          severity="secondary"
-          (buttonClick)="dateFormat = 'dd/mm/yy'"
-        ></app-button>
-        <app-button
-          label="mm-dd-yy"
-          severity="info"
-          (buttonClick)="dateFormat = 'mm-dd-yy'"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="datePickerActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-date-picker
           label="Start date"
           [dateFormat]="dateFormat"
           [value]="dateValue"
           (valueChange)="onDateValueChange($event)"
         ></app-date-picker>
-      </div>
+      </app-card>
     }
 
     @case ('select') {
-      <div class="preset-actions">
-        <app-button
-          label="Normal"
-          severity="secondary"
-          (buttonClick)="setSelectPreset('normal')"
-        ></app-button>
-        <app-button
-          label="Show Clear"
-          severity="info"
-          (buttonClick)="setSelectPreset('clear')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="selectActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-select
           label="Status"
           placeholder="Select status"
@@ -176,23 +118,14 @@
           [value]="selectValue"
           (valueChange)="selectValue = $any($event)"
         ></app-select>
-      </div>
+      </app-card>
     }
 
     @case ('select-multi') {
-      <div class="preset-actions">
-        <app-button
-          label="Filter On"
-          severity="secondary"
-          (buttonClick)="multiEnableFilter = true"
-        ></app-button>
-        <app-button
-          label="Filter Off"
-          severity="warn"
-          (buttonClick)="multiEnableFilter = false"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="selectMultiActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-select-multi
           label="Framework"
           placeholder="Select frameworks"
@@ -200,33 +133,19 @@
           [options]="[
             { label: 'Angular', value: 'angular' },
             { label: 'React', value: 'react' },
-            { label: 'Vue', value: 'vue' },
+            { label: 'Vue', value: 'vue' }
           ]"
           [value]="multiValue"
           (valueChange)="multiValue = $any($event) || []"
         ></app-select-multi>
-      </div>
+      </app-card>
     }
 
     @case ('select-tree') {
-      <div class="preset-actions">
-        <app-button
-          label="Single"
-          severity="secondary"
-          (buttonClick)="setTreeMode('single')"
-        ></app-button>
-        <app-button
-          label="Multiple"
-          severity="info"
-          (buttonClick)="setTreeMode('multiple')"
-        ></app-button>
-        <app-button
-          label="Checkbox"
-          severity="help"
-          (buttonClick)="setTreeMode('checkbox')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="selectTreeActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-select-tree
           label="Department"
           [options]="treeOptions"
@@ -234,23 +153,14 @@
           [value]="treeValue"
           (valueChange)="treeValue = $any($event)"
         ></app-select-tree>
-      </div>
+      </app-card>
     }
 
     @case ('select-button') {
-      <div class="preset-actions">
-        <app-button
-          label="Single"
-          severity="secondary"
-          (buttonClick)="selectButtonMultiple = false"
-        ></app-button>
-        <app-button
-          label="Multiple"
-          severity="info"
-          (buttonClick)="selectButtonMultiple = true"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="selectButtonActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-select-button
           label="Range"
           [multiple]="selectButtonMultiple"
@@ -258,11 +168,11 @@
           [value]="selectButtonValue"
           (valueChange)="selectButtonValue = $any($event)"
         ></app-select-button>
-      </div>
+      </app-card>
     }
 
     @case ('toggle-button') {
-      <div class="preview-card app-border">
+      <app-card>
         <app-toggle-button
           label="Status"
           onLabel="On"
@@ -270,86 +180,58 @@
           [value]="toggleButtonValue"
           (valueChange)="toggleButtonValue = $event || false"
         ></app-toggle-button>
-      </div>
+      </app-card>
     }
 
     @case ('toggle-switch') {
-      <div class="preview-card app-border">
+      <app-card>
         <app-toggle-switch
           label="Notifications"
           [value]="toggleSwitchValue"
           (valueChange)="toggleSwitchValue = $event || false"
         ></app-toggle-switch>
-      </div>
+      </app-card>
     }
 
     @case ('button') {
-      <div class="preset-actions">
-        <app-button
-          label="Normal"
-          severity="secondary"
-          (buttonClick)="setButtonPreset('normal')"
-        ></app-button>
-        <app-button
-          label="Success"
-          severity="success"
-          (buttonClick)="setButtonPreset('success')"
-        ></app-button>
-        <app-button
-          label="Danger"
-          severity="danger"
-          (buttonClick)="setButtonPreset('danger')"
-        ></app-button>
-        <app-button
-          label="Text"
-          severity="help"
-          (buttonClick)="setButtonPreset('text')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border button-preview">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="buttonActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-button label="Action" [severity]="buttonSeverity" [text]="buttonText"></app-button>
-      </div>
+      </app-card>
     }
 
     @case ('button-split') {
-      <div class="preview-card app-border button-preview">
+      <app-card>
         <app-button-split label="Actions" [model]="splitItems"></app-button-split>
-      </div>
+      </app-card>
     }
 
     @case ('button-speed-dial') {
-      <div class="preset-actions">
-        <app-button
-          label="Linear"
-          severity="secondary"
-          (buttonClick)="setSpeedDialPreset('linear')"
-        ></app-button>
-        <app-button
-          label="Circle"
-          severity="info"
-          (buttonClick)="setSpeedDialPreset('circle')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border speed-dial-preview">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="speedDialActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card [fullHeight]="true">
         <app-button-speed-dial
           [model]="speedDialItems"
           [direction]="speedDialDirection"
           [type]="speedDialType"
         ></app-button-speed-dial>
-      </div>
+      </app-card>
     }
 
     @case ('breadcrumb') {
-      <div class="preview-card app-border">
+      <app-card>
         <app-page-header
           title="Breadcrumb"
           [breadcrumb]="pageBreadcrumbItems"
         ></app-page-header>
-      </div>
+      </app-card>
     }
 
     @case ('paginator') {
-      <div class="preview-card app-border">
+      <app-card>
         <app-paginator
           [first]="paginatorFirst"
           [rows]="paginatorRows"
@@ -357,84 +239,32 @@
           [rowsPerPageOptions]="[5, 10, 20]"
           (pageChange)="onPageChange($event)"
         ></app-paginator>
-      </div>
+      </app-card>
     }
 
     @case ('candle-chart') {
-      <div class="preset-actions">
-        <app-button
-          label="Fetch once"
-          severity="secondary"
-          (buttonClick)="setCandleMode('once')"
-        ></app-button>
-        <app-button
-          label="Polling"
-          severity="info"
-          (buttonClick)="setCandleMode('polling')"
-        ></app-button>
-        <app-button
-          label="WebSocket"
-          severity="success"
-          (buttonClick)="setCandleMode('ws')"
-        ></app-button>
-      </div>
-      <div class="preset-actions">
-        <app-button
-          [label]="candleConfig.showCandles ? 'Hide candles' : 'Show candles'"
-          severity="secondary"
-          (buttonClick)="toggleCandleLayer('showCandles')"
-        ></app-button>
-        <app-button
-          [label]="candleConfig.showLines ? 'Hide lines' : 'Show lines'"
-          severity="secondary"
-          (buttonClick)="toggleCandleLayer('showLines')"
-        ></app-button>
-        <app-button
-          [label]="candleConfig.showBoxAreas ? 'Hide box areas' : 'Show box areas'"
-          severity="secondary"
-          (buttonClick)="toggleCandleLayer('showBoxAreas')"
-        ></app-button>
-        <app-button
-          [label]="candleConfig.showPoints ? 'Hide points' : 'Show points'"
-          severity="secondary"
-          (buttonClick)="toggleCandleLayer('showPoints')"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="candleModeActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-section-panel title="Demo layers" density="compact">
+        <app-action-toolbar [actions]="candleLayerActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-candle-chart [config]="candleConfig"></app-candle-chart>
-      </div>
+      </app-card>
     }
 
     @case ('fileupload') {
-      <div class="preset-actions">
-        <app-button
-          label="Basic"
-          severity="secondary"
-          (buttonClick)="fileUploadMode = 'basic'"
-        ></app-button>
-        <app-button
-          label="Advanced"
-          severity="info"
-          (buttonClick)="fileUploadMode = 'advanced'"
-        ></app-button>
-        <app-button
-          label="Single"
-          severity="help"
-          (buttonClick)="fileUploadMultiple = false"
-        ></app-button>
-        <app-button
-          label="Multiple"
-          severity="warn"
-          (buttonClick)="fileUploadMultiple = true"
-        ></app-button>
-      </div>
-      <div class="preview-card app-border">
+      <app-section-panel title="Demo presets" density="compact">
+        <app-action-toolbar [actions]="fileUploadActions" (actionClick)="onDemoAction($event)"></app-action-toolbar>
+      </app-section-panel>
+      <app-card>
         <app-fileupload
           [mode]="fileUploadMode"
           [multiple]="fileUploadMultiple"
           accept=".png,.jpg,.pdf"
         ></app-fileupload>
-      </div>
+      </app-card>
     }
   }
-</section>
+</app-page-shell>

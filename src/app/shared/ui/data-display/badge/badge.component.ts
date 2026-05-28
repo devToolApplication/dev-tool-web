@@ -16,6 +16,8 @@ export class BadgeComponent {
   @Input() size: BadgeSize = 'md';
   @Input() icon?: string;
   @Input() tooltip?: string;
+  /** Show a pulsing status dot before the label (best used with variant='success') */
+  @Input() pulse = false;
 
   get resolvedVariant(): BadgeVariant {
     return ['default', 'info', 'success', 'warning', 'danger', 'muted'].includes(this.variant)

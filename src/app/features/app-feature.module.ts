@@ -1,28 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
-import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DatePickerModule } from 'primeng/datepicker';
-import { DialogModule } from 'primeng/dialog';
-import { FieldsetModule } from 'primeng/fieldset';
-import { FileUploadModule } from 'primeng/fileupload';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { PanelModule } from 'primeng/panel';
-import { SelectModule } from 'primeng/select';
-import { SliderModule } from 'primeng/slider';
-import { TableModule } from 'primeng/table';
-import { TabsModule } from 'primeng/tabs';
-import { TextareaModule } from 'primeng/textarea';
-import { TimelineModule } from 'primeng/timeline';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ToolbarModule } from 'primeng/toolbar';
 
 import { SharedModule } from '../shared/shared.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -52,20 +30,22 @@ import {
   tradeBotRoutes
 } from './admin/trade-bot-management/trade-bot-management.feature';
 import { DATA_FORM_FEATURE_COMPONENTS, dataFormRoutes } from './admin/data-form/data-form.feature';
-import { CandleChart } from './admin/trade-bot-management/shared-trading/candle-chart/candle-chart';
-import { CandleChartHeaderComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-header/candle-chart-header.component';
-import { CandleChartReplayControlsComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-replay-controls/candle-chart-replay-controls.component';
-import { CandleChartStateOverlayComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-state-overlay/candle-chart-state-overlay.component';
-import { CandleChartToolbarComponent } from './admin/trade-bot-management/shared-trading/candle-chart/components/candle-chart-toolbar/candle-chart-toolbar.component';
-import { DataQualityWarningComponent } from './admin/trade-bot-management/shared-trading/data-quality-warning/data-quality-warning.component';
-import { RuleExpressionBuilderComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-builder.component';
-import { RuleConditionRowComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-condition-row.component';
-import { RuleExpressionJsonPreviewComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-json-preview.component';
-import { RuleExpressionNodeComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-node.component';
-import { RuleExpressionOperandPickerComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-operand-picker.component';
-import { RuleExpressionPanelComponent } from './admin/trade-bot-management/shared-trading/rule-expression-builder/rule-expression-panel.component';
-import { RuleTreeViewerComponent } from './admin/trade-bot-management/shared-trading/rule-tree-viewer/rule-tree-viewer.component';
-import { TradeDetailDrawerComponent } from './admin/trade-bot-management/shared-trading/trade-detail-drawer/trade-detail-drawer.component';
+import { CandleChart } from './admin/trade-bot-management/share/candle-chart/candle-chart';
+import { CandleChartHeaderComponent } from './admin/trade-bot-management/share/candle-chart/components/candle-chart-header/candle-chart-header.component';
+import { CandleChartReplayControlsComponent } from './admin/trade-bot-management/share/candle-chart/components/candle-chart-replay-controls/candle-chart-replay-controls.component';
+import { CandleChartStateOverlayComponent } from './admin/trade-bot-management/share/candle-chart/components/candle-chart-state-overlay/candle-chart-state-overlay.component';
+import { CandleChartToolbarComponent } from './admin/trade-bot-management/share/candle-chart/components/candle-chart-toolbar/candle-chart-toolbar.component';
+import { DataQualityWarningComponent } from './admin/trade-bot-management/share/data-quality-warning/data-quality-warning.component';
+import { RuleExpressionBuilderComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-builder.component';
+import { RuleConditionRowComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-condition-row.component';
+import { RuleExpressionJsonPreviewComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-json-preview.component';
+import { RuleExpressionNodeComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-node.component';
+import { RuleExpressionOperandPickerComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-operand-picker.component';
+import { RuleExpressionPanelComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-panel.component';
+import { RuleTreeViewerComponent } from './admin/trade-bot-management/share/rule-tree-viewer/rule-tree-viewer.component';
+import { RuleFlowEditorComponent } from './admin/trade-bot-management/share/rule-flow-editor/rule-flow-editor.component';
+import { RuleFlowViewerComponent } from './admin/trade-bot-management/share/rule-flow-viewer/rule-flow-viewer.component';
+import { TradeDetailDrawerComponent } from './admin/trade-bot-management/share/trade-detail-drawer/trade-detail-drawer.component';
 import { FEATURE_FORM_INPUT_OPTIONS_LOADERS } from './form-input-options-loaders';
 import { dashboardRoutes } from './dashboard/dashboard-routing.module';
 import { demoRouter } from './demo/demo-routing.module';
@@ -114,6 +94,8 @@ const FEATURE_COMPONENTS = [
   RuleExpressionOperandPickerComponent,
   RuleExpressionPanelComponent,
   RuleTreeViewerComponent,
+  RuleFlowEditorComponent,
+  RuleFlowViewerComponent,
   TradeDetailDrawerComponent
 ];
 
@@ -122,30 +104,7 @@ const FEATURE_COMPONENTS = [
   imports: [
     CommonModule,
     RouterModule.forChild(FEATURE_ROUTES),
-    FormsModule,
-    ReactiveFormsModule,
-    SharedModule,
-    AvatarModule,
-    BadgeModule,
-    ButtonModule,
-    CheckboxModule,
-    DatePickerModule,
-    DialogModule,
-    FieldsetModule,
-    FileUploadModule,
-    InputNumberModule,
-    InputTextModule,
-    MessageModule,
-    MultiSelectModule,
-    PanelModule,
-    SelectModule,
-    SliderModule,
-    TableModule,
-    TabsModule,
-    TextareaModule,
-    TimelineModule,
-    ToggleSwitchModule,
-    ToolbarModule
+    SharedModule
   ],
   providers: [...FEATURE_FORM_INPUT_OPTIONS_LOADERS]
 })

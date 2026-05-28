@@ -21,10 +21,11 @@
     [styleClass]="styleClass"
     (completeMethod)="onSearch($any($event.query || ''))"
     (onInputKeydown)="onInputKeydown($event)"
-    (onSelect)="onSelectItem($event)"
-    (onUnselect)="onUnselectItem($event)"
     (onFocus)="onFocus()"
     (onBlur)="onBlur()">
+    <ng-template pTemplate="selectedItem" let-item>
+      <span class="app-chip-label" [title]="item.label">{{ item.label }}</span>
+    </ng-template>
   </p-auto-complete>
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>

@@ -289,6 +289,21 @@
         <app-field-secret-metadata-renderer [field]="field"></app-field-secret-metadata-renderer>
       }
 
+      @case ('color-picker') {
+        <app-color-picker
+          [label]="field.label"
+          [required]="field.required()"
+          [value]="field.value()"
+          [disabled]="field.disabled()"
+          [invalid]="showInvalid"
+          [errorMessage]="firstErrorMessage"
+          [helpText]="helpText"
+          (valueChange)="field.setValue($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+        </app-color-picker>
+      }
+
       @case ('textarea') {
         <app-input-area
           [invalid]="showInvalid"

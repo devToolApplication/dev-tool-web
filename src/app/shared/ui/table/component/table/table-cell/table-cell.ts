@@ -128,7 +128,7 @@ export class TableCellComponent {
       }
     }
 
-    this.actionsOpen.set(false);
+    this.closeActions();
     this.actionClick.emit({ action, row: this.rowData });
   }
 

@@ -1,0 +1,17 @@
+.color-picker-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.color-picker-wrapper :host ::ng-deep .p-colorpicker-preview {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--p-border-radius-sm);
+}
+
+.color-text-input {
+  flex: 1;
+  width: 100%;
+}

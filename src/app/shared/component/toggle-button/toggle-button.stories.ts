@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { ToggleButton } from './toggle-button';
 
 const meta: Meta<ToggleButton> = {
-  title: 'Shared/Components/Form Controls/Toggle Button',
+  title: 'Shared/Components/Form/ToggleButton',
   component: ToggleButton,
   args: {
-    label: 'Mode',
-    value: true,
-    onLabel: 'Enabled',
-    offLabel: 'Disabled',
-    onIcon: 'pi pi-check',
-    offIcon: 'pi pi-times'
+    label: 'Dark Mode',
+    onLabel: 'Active',
+    offLabel: 'Inactive',
+    onIcon: 'pi pi-sun',
+    offIcon: 'pi pi-moon',
+    value: false,
+    disabled: false
   }
 };
 
@@ -21,9 +21,19 @@ type Story = StoryObj<ToggleButton>;
 
 export const Default: Story = {};
 
-export const Invalid: Story = {
+export const CustomLabels: Story = {
   args: {
-    invalid: true,
-    errorMessage: 'Toggle must be enabled'
+    onLabel: 'Locked',
+    offLabel: 'Unlocked',
+    onIcon: 'pi pi-lock',
+    offIcon: 'pi pi-lock-open',
+    value: true
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    value: true
   }
 };

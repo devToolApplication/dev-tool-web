@@ -7,15 +7,41 @@
   (valueChange)="onValueChange($event)"
   (formSubmit)="submit($event)"
 >
-  <app-rule-expression-builder
-    crud-page-after-first-section
-    [value]="ruleExpressionValue()"
-    [indicatorConfigs]="indicatorConfigs"
-    [ruleConfigs]="ruleConfigs"
-    [currentRuleCode]="currentRuleCode()"
-    [currentRuleId]="id"
-    [disabled]="submitting()"
-    (valueChange)="onRuleExpressionValueChange($event)"
-    (validationChange)="onRuleExpressionValidationChange($event)"
-  ></app-rule-expression-builder>
+  <div crud-page-after-first-section class="rule-editor-section">
+    <div class="rule-editor-section__toggle">
+      <app-button
+        icon="pi pi-list"
+        label="tradeBot.ruleExpression.viewTree"
+        [severity]="ruleEditorMode() === 'tree' ? 'info' : 'secondary'"
+        [text]="ruleEditorMode() !== 'tree'"
+        (buttonClick)="ruleEditorMode.set('tree')"
+      ></app-button>
+      <app-button
+        icon="pi pi-sitemap"
+        label="tradeBot.ruleExpression.viewFlow"
+        [severity]="ruleEditorMode() === 'flow' ? 'info' : 'secondary'"
+        [text]="ruleEditorMode() !== 'flow'"
+        (buttonClick)="ruleEditorMode.set('flow')"
+      ></app-button>
+    </div>
+
+    @if (ruleEditorMode() === 'tree') {
+      <app-rule-expression-builder
+        [value]="ruleExpressionValue()"
+        [indicatorConfigs]="indicatorConfigs"
+        [ruleConfigs]="ruleConfigs"
+        [currentRuleCode]="currentRuleCode()"
+        [currentRuleId]="id"
+        [disabled]="submitting()"
+        (valueChange)="onRuleExpressionValueChange($event)"
+        (validationChange)="onRuleExpressionValidationChange($event)"
+      ></app-rule-expression-builder>
+    } @else {
+      <app-rule-flow-editor
+        [value]="ruleExpressionValue()"
+        [readonly]="submitting()"
+        (valueChange)="onRuleExpressionValueChange($event)"
+      ></app-rule-flow-editor>
+    }
+  </div>
 </app-base-crud-page>

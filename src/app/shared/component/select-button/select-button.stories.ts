@@ -1,22 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { SelectButton } from './select-button';
-import type { SelectOption } from '../select/select';
 
-const options: SelectOption[] = [
-  { label: 'active', value: 'active' },
-  { label: 'inactive', value: 'inactive' },
-  { label: 'custom', value: 'custom' }
+const sampleOptions = [
+  { label: 'Day', value: 'day' },
+  { label: 'Week', value: 'week' },
+  { label: 'Month', value: 'month' }
 ];
 
 const meta: Meta<SelectButton> = {
-  title: 'Shared/Components/Form Controls/Select Button',
+  title: 'Shared/Components/Form/SelectButton',
   component: SelectButton,
   args: {
-    label: 'status',
-    options,
-    value: 'active',
-    allowEmpty: true
+    options: sampleOptions,
+    value: 'week',
+    multiple: false,
+    allowEmpty: true,
+    disabled: false
   }
 };
 
@@ -27,29 +26,20 @@ type Story = StoryObj<SelectButton>;
 export const Default: Story = {};
 
 export const Multiple: Story = {
-  args: {
-    multiple: true,
-    value: ['active', 'custom'] as never
-  }
+  render: (args) => ({
+    props: {
+      ...args,
+      multiple: true,
+      value: ['day', 'week']
+    },
+    template: `
+      <app-select-button [options]="options" [multiple]="true" [allowEmpty]="allowEmpty" [value]="value"></app-select-button>
+    `
+  })
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true
-  }
-};
-
-export const Invalid: Story = {
-  args: {
-    invalid: true,
-    errorMessage: 'selectValue'
-  }
-};
-
-export const Empty: Story = {
-  args: {
-    value: null,
-    options: [],
-    helpText: 'noDataFound'
   }
 };

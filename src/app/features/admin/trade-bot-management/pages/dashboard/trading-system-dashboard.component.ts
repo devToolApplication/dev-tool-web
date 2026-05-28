@@ -1,10 +1,12 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { BacktestRunResponse, CandleGapResponse, CandleSyncRunResponse, SystemLogResponse } from '../../../../../core/models/trade-bot/trading-system.model';
 import { TradingSystemService } from '../../../../../core/services/trade-bot-service/trading-system.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
+import { ActionToolbarAction } from '../../../../../shared/ui/layout/action-toolbar/action-toolbar.component';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { PaperTradeApiService } from '../../data-access/api/paper-trade-api.service';
 import { PaperTradeSession } from '../../data-access/models/paper-trade.model';
@@ -43,6 +45,43 @@ export class TradingSystemDashboardComponent implements OnInit {
     { label: 'tradeBot.dashboard.errorLogs', value: this.errorLogs().length, routerLink: TRADE_BOT_ROUTES.systemLogs, queryParams: { level: 'ERROR' } }
   ]);
 
+  readonly quickActions = [
+    {
+      id: 'sync-market-data',
+      label: 'tradeBot.dashboard.action.syncMarketData',
+      icon: 'pi pi-database',
+      variant: 'primary' as const,
+      placement: 'secondary' as const
+    },
+    {
+      id: 'new-backtest',
+      label: 'tradeBot.dashboard.action.newBacktest',
+      icon: 'pi pi-play',
+      variant: 'primary' as const,
+      placement: 'secondary' as const
+    },
+    {
+      id: 'open-paper-trade',
+      label: 'tradeBot.dashboard.action.openPaperTrade',
+      icon: 'pi pi-wallet',
+      placement: 'secondary' as const
+    },
+    {
+      id: 'view-gaps',
+      label: 'tradeBot.dashboard.action.viewGaps',
+      icon: 'pi pi-exclamation-triangle',
+      variant: 'warning' as const,
+      placement: 'secondary' as const
+    },
+    {
+      id: 'view-logs',
+      label: 'tradeBot.dashboard.action.viewLogs',
+      icon: 'pi pi-list-check',
+      variant: 'danger' as const,
+      placement: 'secondary' as const
+    }
+  ];
+
   readonly syncRunTableConfig: TableConfig = {
     title: 'tradeBot.sync.runs',
     columns: [
@@ -70,7 +109,7 @@ export class TradingSystemDashboardComponent implements OnInit {
     ],
     pagination: true,
     rows: 10,
-    minWidth: '76rem'
+    minWidth: '68rem'
   };
 
   readonly gapTableConfig: TableConfig = {
@@ -85,7 +124,7 @@ export class TradingSystemDashboardComponent implements OnInit {
     ],
     pagination: true,
     rows: 10,
-    minWidth: '70rem'
+    minWidth: '64rem'
   };
 
   readonly errorTableConfig: TableConfig = {
@@ -100,7 +139,7 @@ export class TradingSystemDashboardComponent implements OnInit {
     ],
     pagination: true,
     rows: 10,
-    minWidth: '88rem'
+    minWidth: '72rem'
   };
 
   readonly activePaperTableConfig: TableConfig = {
@@ -117,10 +156,11 @@ export class TradingSystemDashboardComponent implements OnInit {
     ],
     pagination: true,
     rows: 10,
-    minWidth: '104rem'
+    minWidth: '78rem'
   };
 
   constructor(
+    private readonly router: Router,
     private readonly service: TradingSystemService,
     private readonly paperTradeApi: PaperTradeApiService,
     private readonly loadingService: LoadingService,
@@ -130,6 +170,28 @@ export class TradingSystemDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  onQuickAction(action: ActionToolbarAction): void {
+    switch (action.id) {
+      case 'sync-market-data':
+        void this.router.navigate([TRADE_BOT_ROUTES.marketData], { queryParams: { tab: 'sync' } });
+        return;
+      case 'new-backtest':
+        void this.router.navigate([TRADE_BOT_ROUTES.backtests]);
+        return;
+      case 'open-paper-trade':
+        void this.router.navigate([TRADE_BOT_ROUTES.paperTrade]);
+        return;
+      case 'view-gaps':
+        void this.router.navigate([TRADE_BOT_ROUTES.marketData], { queryParams: { tab: 'gaps', status: 'OPEN' } });
+        return;
+      case 'view-logs':
+        void this.router.navigate([TRADE_BOT_ROUTES.systemLogs], { queryParams: { level: 'ERROR' } });
+        return;
+      default:
+        return;
+    }
   }
 
   load(): void {

@@ -14,6 +14,7 @@ export class SelectMulti extends BaseInput<Array<string | number>> {
 
   @Input() display = 'chip';
   @Input() enableFilter = false;
+  @Input() inline = false;
   @Input() maxSelectedLabels: number | null | undefined;
   @Input() selectionLimit: number | null | undefined;
   @Input() loading = false;

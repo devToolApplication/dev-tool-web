@@ -18,12 +18,12 @@ import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { AppTabItem } from '../../../../../../shared/component/tabs/tabs.component';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../shared-trading/candle-chart/candle-chart';
+import { CandleChartRangeBoundaryEvent, ChartOverlay } from '../../../share/candle-chart/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../../shared-trading/candle-chart/candle-window-loader';
+} from '../../../share/candle-chart/candle-window-loader';
 import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
 
 @Component({
@@ -55,6 +55,7 @@ export class BacktestDetailComponent implements OnInit {
   readonly selectedTrade = signal<BacktestTradeResponse | null>(null);
   readonly selectedTradeTrace = signal<Record<string, unknown> | null>(null);
   readonly activeTab = signal('overview');
+  readonly ruleTraceViewMode = signal<'tree' | 'flow'>('tree');
 
   readonly tabs: AppTabItem[] = [
     { label: 'tradeBot.backtest.tab.overview', value: 'overview' },
@@ -78,66 +79,7 @@ export class BacktestDetailComponent implements OnInit {
     ];
   });
 
-  readonly runFacts = computed(() => {
-    const run = this.run();
-    return [
-      { label: 'tradeBot.field.runId', value: run?.runId ?? this.runId },
-      { label: 'tradeBot.field.strategyCode', value: run?.strategyCode },
-      { label: 'tradeBot.field.symbol', value: run?.symbol },
-      { label: 'tradeBot.field.timeframe', value: run?.timeframe },
-      { label: 'tradeBot.field.fromTime', value: run?.fromTime },
-      { label: 'tradeBot.field.toTime', value: run?.toTime },
-      { label: 'tradeBot.field.candleRangeHash', value: run?.candleRangeHash }
-    ];
-  });
-
-  readonly metricRows = computed(() =>
-    Object.entries(this.metrics()?.metrics ?? {}).map(([metric, value]) => ({
-      metric,
-      value: valueOrNull(value)
-    }))
-  );
-
-  readonly chartConfig = computed<CandleChartConfig>(() => ({
-    showCandles: true,
-    showVolume: true,
-    showLines: false,
-    showBoxAreas: false,
-    showPoints: false,
-    showIndicators: false,
-    symbol: this.run()?.symbol,
-    interval: this.run()?.timeframe,
-    height: 460,
-    showOverlayLabels: true,
-    showToolbar: true,
-    showDebugPanel: false,
-    loading: this.chartLoading() && this.chartCandlesRaw().length === 0,
-    lazyLoadOnPan: true,
-    lazyLoadThresholdBars: 32,
-    preserveViewportOnDataUpdate: true
-  }));
-
-  readonly chartCandles = computed<ChartCandle[]>(() =>
-    this.chartCandlesRaw().map((candle, index) => ({
-      index,
-      time: candle.openTime,
-      openTime: candle.openTime,
-      closeTime: candle.closeTime,
-      open: Number(candle.open),
-      high: Number(candle.high),
-      low: Number(candle.low),
-      close: Number(candle.close),
-      volume: Number(candle.volume ?? 0),
-      closed: candle.closed
-    }))
-  );
-
   readonly chartOverlays = computed<ChartOverlay[]>(() => (this.chartReview()?.overlays ?? []) as unknown as ChartOverlay[]);
-
-  readonly equityRows = computed(() => this.equity().map((point) => ({ ...point, curve: 'Equity' })));
-  readonly drawdownRows = computed(() => this.drawdown().map((point) => ({ ...point, curve: 'Drawdown' })));
-  readonly equityTrend = computed(() => trendPoints(this.equity(), 'equity', 'balance'));
-  readonly drawdownTrend = computed(() => trendPoints(this.drawdown(), 'drawdownPct', 'drawdown'));
 
   readonly tradeTableConfig: TableConfig = {
     title: 'tradeBot.backtest.trades',
@@ -177,70 +119,7 @@ export class BacktestDetailComponent implements OnInit {
     rows: 20
   };
 
-  readonly orderTableConfig: TableConfig = {
-    title: 'tradeBot.backtest.orders',
-    columns: [
-      { field: 'orderId', header: 'tradeBot.field.orderId', type: 'copyable', minWidth: '18rem' },
-      { field: 'tradeId', header: 'tradeBot.field.tradeId', type: 'copyable', minWidth: '18rem' },
-      { field: 'side', header: 'tradeBot.field.side', type: 'badge' },
-      { field: 'type', header: 'tradeBot.field.type' },
-      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
-      { field: 'price', header: 'tradeBot.field.price', type: 'number' },
-      { field: 'quantity', header: 'tradeBot.field.quantity', type: 'number' },
-      { field: 'fee', header: 'tradeBot.field.fee', type: 'number' },
-      { field: 'barIndex', header: 'tradeBot.field.index', type: 'number' },
-      { field: 'orderTime', header: 'tradeBot.field.time', type: 'date', minWidth: '13rem' }
-    ],
-    pagination: true,
-    rows: 20,
-    minWidth: '100rem'
-  };
-
-  readonly positionTableConfig: TableConfig = {
-    title: 'tradeBot.backtest.positions',
-    columns: [
-      { field: 'positionId', header: 'tradeBot.field.positionId', type: 'copyable', minWidth: '18rem' },
-      { field: 'tradeId', header: 'tradeBot.field.tradeId', type: 'copyable', minWidth: '18rem' },
-      { field: 'side', header: 'tradeBot.field.side', type: 'badge' },
-      { field: 'status', header: 'tradeBot.field.status', type: 'badge' },
-      { field: 'entryPrice', header: 'tradeBot.field.entryPrice', type: 'number' },
-      { field: 'exitPrice', header: 'tradeBot.field.exitPrice', type: 'number' },
-      { field: 'quantity', header: 'tradeBot.field.quantity', type: 'number' },
-      { field: 'pnl', header: 'tradeBot.field.pnl', type: 'semantic-number' }
-    ],
-    pagination: true,
-    rows: 20,
-    minWidth: '82rem'
-  };
-
-  readonly metricTableConfig: TableConfig = {
-    title: 'tradeBot.backtest.metrics',
-    columns: [
-      { field: 'metric', header: 'tradeBot.field.metric', minWidth: '14rem' },
-      { field: 'value', header: 'tradeBot.field.value', minWidth: '14rem' }
-    ],
-    pagination: true,
-    rows: 12,
-    minWidth: '32rem'
-  };
-
-  readonly curveTableConfig: TableConfig = {
-    title: 'tradeBot.backtest.curves',
-    columns: [
-      { field: 'curve', header: 'tradeBot.field.type' },
-      { field: 'barIndex', header: 'tradeBot.field.index', type: 'number' },
-      { field: 'time', header: 'tradeBot.field.time', type: 'date', minWidth: '13rem' },
-      { field: 'balance', header: 'tradeBot.field.currentBalance', type: 'number' },
-      { field: 'equity', header: 'tradeBot.field.equity', type: 'number' },
-      { field: 'drawdown', header: 'tradeBot.field.drawdown', type: 'number' },
-      { field: 'drawdownPct', header: 'tradeBot.field.drawdownPct', type: 'number', suffix: '%' }
-    ],
-    pagination: true,
-    rows: 20,
-    minWidth: '74rem'
-  };
-
-  private runId = '';
+  runId = '';
   private readonly loadedTabs = new Set<string>();
 
   constructor(
@@ -258,44 +137,12 @@ export class BacktestDetailComponent implements OnInit {
     this.loadInitial();
   }
 
-  traceJson(): string {
-    return JSON.stringify(this.trace(), null, 2);
-  }
-
-  metricsJson(): string {
-    return JSON.stringify(this.metrics()?.metrics ?? {}, null, 2);
-  }
-
-  curveJson(): string {
-    return JSON.stringify({ equity: this.equity(), drawdown: this.drawdown() }, null, 2);
-  }
-
-  overviewJson(): string {
-    return JSON.stringify({ run: this.run(), metrics: this.metrics()?.metrics ?? {} }, null, 2);
-  }
-
-  chartReviewJson(): string {
-    return JSON.stringify({ chart: this.chartReview(), overlays: this.review()?.overlays ?? [] }, null, 2);
-  }
-
   snapshotJson(): string {
     return JSON.stringify({ config: this.configSnapshot(), marketData: this.marketDataSnapshot() }, null, 2);
   }
 
   reportJson(): string {
     return JSON.stringify(this.reportExport(), null, 2);
-  }
-
-  orders(): BacktestOrderResponse[] {
-    return this.reviewOrders();
-  }
-
-  fills(): BacktestOrderResponse[] {
-    return this.reviewFills();
-  }
-
-  positions(): BacktestPositionResponse[] {
-    return this.reviewPositions();
   }
 
   allOrdersAndFills(): BacktestOrderResponse[] {
@@ -333,6 +180,40 @@ export class BacktestDetailComponent implements OnInit {
       .subscribe({
         next: (report) => this.reportExport.set(report as unknown as Record<string, unknown>),
         error: () => this.toastService.error(this.i18nService.t('tradeBot.message.exportFailed'))
+      });
+  }
+
+  loadMoreChartCandles(event: CandleChartRangeBoundaryEvent): void {
+    const run = this.run();
+    if (!run || this.chartLoading()) {
+      return;
+    }
+    const window = buildAdjacentCandleWindow({
+      direction: event.direction,
+      timeframe: run.timeframe,
+      firstOpenTime: event.firstCandle?.openTime ?? event.firstCandle?.time,
+      lastOpenTime: event.lastCandle?.openTime ?? event.lastCandle?.time,
+      minTime: run.fromTime,
+      maxTime: run.toTime,
+      limit: CANDLE_CHART_WINDOW_LIMIT
+    });
+    if (!window) {
+      return;
+    }
+    this.chartLoading.set(true);
+    this.service
+      .getCandles({
+        symbol: run.symbol,
+        timeframe: run.timeframe,
+        source: run.source,
+        marketType: run.marketType,
+        feedCode: run.feedCode,
+        ...window
+      })
+      .pipe(finalize(() => this.chartLoading.set(false)))
+      .subscribe({
+        next: (candles) => this.chartCandlesRaw.set(mergeCandlesByOpenTime(this.chartCandlesRaw(), candles)),
+        error: () => undefined
       });
   }
 
@@ -519,40 +400,6 @@ export class BacktestDetailComponent implements OnInit {
       });
   }
 
-  loadMoreChartCandles(event: CandleChartRangeBoundaryEvent): void {
-    const run = this.run();
-    if (!run || this.chartLoading()) {
-      return;
-    }
-    const window = buildAdjacentCandleWindow({
-      direction: event.direction,
-      timeframe: run.timeframe,
-      firstOpenTime: event.firstCandle?.openTime ?? event.firstCandle?.time,
-      lastOpenTime: event.lastCandle?.openTime ?? event.lastCandle?.time,
-      minTime: run.fromTime,
-      maxTime: run.toTime,
-      limit: CANDLE_CHART_WINDOW_LIMIT
-    });
-    if (!window) {
-      return;
-    }
-    this.chartLoading.set(true);
-    this.service
-      .getCandles({
-        symbol: run.symbol,
-        timeframe: run.timeframe,
-        source: run.source,
-        marketType: run.marketType,
-        feedCode: run.feedCode,
-        ...window
-      })
-      .pipe(finalize(() => this.chartLoading.set(false)))
-      .subscribe({
-        next: (candles) => this.chartCandlesRaw.set(mergeCandlesByOpenTime(this.chartCandlesRaw(), candles)),
-        error: () => undefined
-      });
-  }
-
   private loadTrace(tradeId: string): void {
     this.loading.set(true);
     this.error.set(null);
@@ -614,21 +461,4 @@ function tabRoute(tab: string): string {
     ruleTrace: 'rule-trace'
   };
   return map[tab] ?? tab;
-}
-
-function trendPoints(points: BacktestCurvePointResponse[], primaryField: 'equity' | 'drawdownPct', fallbackField: 'balance' | 'drawdown'): Array<{ height: number; label: string; value: number }> {
-  const values = points
-    .map((point) => Number(point[primaryField] ?? point[fallbackField] ?? 0))
-    .filter((value) => Number.isFinite(value));
-  if (!values.length) {
-    return [];
-  }
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  return values.slice(-80).map((value, index) => ({
-    value,
-    label: String(points[index]?.barIndex ?? index),
-    height: Math.max(8, ((value - min) / range) * 100)
-  }));
 }

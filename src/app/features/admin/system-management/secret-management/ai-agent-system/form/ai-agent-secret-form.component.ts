@@ -78,7 +78,14 @@ export class AiAgentSecretFormComponent implements OnInit {
 
   private loadOptions(): void {
     this.loading.set(true);
-    this.loadingService.track(this.service.getAll().pipe(catchError(() => of([] as AiAgentSecretResponse[])))).pipe(finalize(() => this.loading.set(false))).subscribe((secrets) => {
+    this.loadingService.track(
+      this.service.getAll().pipe(
+        catchError((err) => {
+          this.toastService.error(this.i18nService.t('systemManagement.aiAgentSecret.toast.loadCategoriesError') || 'Failed to load category options');
+          return of([] as AiAgentSecretResponse[]);
+        })
+      )
+    ).pipe(finalize(() => this.loading.set(false))).subscribe((secrets) => {
       this.formContext.extra = {
         categoryOptions: toUniqueTextOptions(secrets, (item) => item.category)
       };
@@ -106,7 +113,10 @@ export class AiAgentSecretFormComponent implements OnInit {
         this.crudPage?.markFormPristine();
         void this.router.navigate([AI_AGENT_SECRET_ROUTES.list]);
       },
-      error: () => this.toastService.error(this.i18nService.t('systemManagement.aiAgentSecret.toast.saveError'))
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || this.i18nService.t('systemManagement.aiAgentSecret.toast.saveError');
+        this.toastService.error(errorMsg);
+      }
     });
   }
 
@@ -138,8 +148,9 @@ export class AiAgentSecretFormComponent implements OnInit {
         this.formInitialValue = { ...detail };
         this.rerenderForm();
       },
-      error: () => {
-        this.toastService.error(this.i18nService.t('systemManagement.aiAgentSecret.toast.loadDetailError'));
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || this.i18nService.t('systemManagement.aiAgentSecret.toast.loadDetailError');
+        this.toastService.error(errorMsg);
         void this.router.navigate([AI_AGENT_SECRET_ROUTES.list]);
       }
     });

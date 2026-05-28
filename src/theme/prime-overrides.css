@@ -133,6 +133,16 @@
 
   :root .p-button.p-button-text {
     color: var(--app-control-secondary-text) !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    transition: background-color 140ms ease, color 140ms ease !important;
+  }
+
+  :root .p-button.p-button-text:not(:disabled):hover {
+    background: var(--app-chart-primary-fill) !important;
+    color: var(--app-primary) !important;
+    border-color: transparent !important;
   }
 
   :root .p-button.p-button-text .p-button-label,
@@ -341,7 +351,7 @@
   :root .p-floatlabel:has(.p-inputwrapper-focus) label,
   :root .p-floatlabel:has(input:focus) label,
   :root .p-floatlabel:has(textarea:focus) label {
-    color: var(--app-accent-cyan);
+    color: var(--app-accent-violet);
   }
 
   :root .p-inputicon {
@@ -365,10 +375,10 @@
   :root .p-dialog,
   :root .p-popover,
   :root .p-tooltip {
-    background: var(--app-custom-select-bg);
-    color: var(--app-custom-select-text);
-    border-color: var(--app-border);
-    box-shadow: var(--app-shadow-overlay);
+    background: var(--app-custom-select-bg) !important;
+    color: var(--app-custom-select-text) !important;
+    border-color: var(--app-border) !important;
+    box-shadow: var(--app-shadow-overlay) !important;
     backdrop-filter: blur(16px);
     z-index: var(--app-z-popup) !important;
   }
@@ -384,13 +394,15 @@
   }
 
   :root .p-select-option:hover,
+  :root .p-select-option.p-focus,
   :root .p-multiselect-option:hover,
+  :root .p-multiselect-option.p-focus,
   :root .p-autocomplete-option:hover,
+  :root .p-autocomplete-option.p-focus,
   :root .p-datepicker-day:hover,
   :root .p-datepicker-month:hover,
-  :root .p-datepicker-year:hover,
-  :root .p-tieredmenu-item-content:hover {
-    background: color-mix(in srgb, var(--app-custom-select-bg) 82%, var(--app-primary) 18%);
+  :root .p-datepicker-year:hover {
+    background: var(--app-chart-primary-fill) !important;
   }
 
   :root .p-tieredmenu {
@@ -407,7 +419,13 @@
 
   :root .p-tieredmenu-item-content {
     border-radius: 12px;
-    transition: background-color 160ms ease;
+    transition: background-color 160ms ease, color 140ms ease;
+  }
+
+  :root .p-tieredmenu-item-content:hover,
+  :root .p-tieredmenu-item-content.p-focus {
+    background: var(--app-chart-primary-fill) !important;
+    color: var(--app-primary) !important;
   }
 
   :root .p-tieredmenu-item-link {
@@ -427,6 +445,27 @@
   :root .p-autocomplete-dropdown,
   :root .p-treeselect-dropdown {
     color: var(--app-text-muted);
+  }
+
+  :root .p-multiselect-overlay .p-multiselect-header,
+  :root .p-multiselect-overlay .p-multiselect-list-container,
+  :root .p-multiselect-overlay .p-multiselect-list,
+  :root .p-multiselect-panel .p-multiselect-header,
+  :root .p-multiselect-panel .p-multiselect-list-container,
+  :root .p-multiselect-panel .p-multiselect-list,
+  :root .p-select-overlay .p-select-list-container,
+  :root .p-select-overlay .p-select-list,
+  :root .p-select-panel .p-select-list-container,
+  :root .p-select-panel .p-select-list {
+    background: transparent !important;
+    color: var(--app-custom-select-text) !important;
+  }
+
+  :root .p-multiselect-overlay .p-multiselect-filter-container .p-inputtext,
+  :root .p-multiselect-panel .p-multiselect-filter-container .p-inputtext {
+    background: color-mix(in srgb, var(--app-custom-select-bg) 80%, var(--app-primary) 5%) !important;
+    color: var(--app-custom-select-text) !important;
+    border-color: var(--app-border) !important;
   }
 
   :root .p-multiselect-chip {
@@ -556,18 +595,18 @@
   :root .p-togglebutton.p-togglebutton-checked,
   :root .p-togglebutton[data-p-checked='true'],
   :root .p-togglebutton.p-highlight {
-    border-color: var(--p-togglebutton-checked-border-color);
-    background: var(--p-togglebutton-checked-background);
-    color: var(--p-togglebutton-checked-color);
-    box-shadow: var(--app-control-accent-shadow);
+    border-color: var(--p-togglebutton-checked-border-color) !important;
+    background: var(--p-togglebutton-checked-background) !important;
+    color: var(--p-togglebutton-checked-color) !important;
+    box-shadow: var(--app-control-accent-shadow) !important;
   }
 
   :root .p-selectbutton .p-togglebutton.p-togglebutton-checked .p-togglebutton-content,
   :root .p-selectbutton .p-togglebutton[data-p-checked='true'] .p-togglebutton-content,
   :root .p-togglebutton.p-togglebutton-checked .p-togglebutton-content,
   :root .p-togglebutton[data-p-checked='true'] .p-togglebutton-content {
-    background: var(--p-togglebutton-content-checked-background);
-    color: inherit;
+    background: transparent !important;
+    color: inherit !important;
   }
 
   :root .p-toggleswitch {
@@ -763,5 +802,28 @@
     background: color-mix(in srgb, var(--app-control-danger-bg) 88%, transparent);
     border-color: var(--app-control-danger-border);
     color: var(--app-control-danger-text);
+  }
+
+  :root .p-tooltip {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: var(--app-shadow-md) !important;
+  }
+
+  :root .p-tooltip-text {
+    background: var(--app-overlay-bg) !important;
+    color: var(--app-text) !important;
+    border: 1px solid var(--app-border-soft) !important;
+    border-radius: 8px !important;
+    padding: 0.35rem 0.55rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+  }
+
+  :root .p-tooltip-arrow {
+    border-top-color: var(--app-overlay-bg) !important;
+    border-bottom-color: var(--app-overlay-bg) !important;
+    border-left-color: var(--app-overlay-bg) !important;
+    border-right-color: var(--app-overlay-bg) !important;
   }
 }

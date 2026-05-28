@@ -1,14 +1,14 @@
 <section class="crud-page">
-  <div class="header-row flex flex-col gap-3 rounded-lg border app-border app-bg-card p-5 app-shadow-sm lg:flex-row lg:items-start lg:justify-between">
-    <div>
-      <h2 class="m-0 text-2xl font-semibold">{{ pageConfig.title | translateContent }}</h2>
+  <div class="header-row">
+    <div class="header-row__content">
+      <h2 class="header-row__title">{{ pageConfig.title | translateContent }}</h2>
       @if (pageConfig.description) {
-        <p class="mt-2 text-sm app-text-muted">{{ pageConfig.description | translateContent }}</p>
+        <p class="header-row__description">{{ pageConfig.description | translateContent }}</p>
       }
     </div>
 
     @if (pageConfig.actions?.length) {
-      <div class="header-actions flex flex-wrap items-center gap-2">
+      <div class="header-actions">
         @for (action of pageConfig.actions; track action.id) {
           @if (action.visible ?? true) {
             <app-button
@@ -30,12 +30,12 @@
 
   <ng-content select="[crud-page-before-form]"></ng-content>
 
-  <div class="form-wrap shadow-1">
+  <div class="form-wrap">
     @if (pageConfig.infoSection) {
-      <div class="mb-4 rounded-lg border app-border app-bg-soft p-4">
-        <div class="text-sm font-semibold">{{ pageConfig.infoSection.title | translateContent }}</div>
+      <div class="form-wrap__info">
+        <div class="form-wrap__info-title">{{ pageConfig.infoSection.title | translateContent }}</div>
         @if (pageConfig.infoSection.description) {
-          <div class="mt-1 text-sm app-text-soft">{{ pageConfig.infoSection.description | translateContent }}</div>
+          <div class="form-wrap__info-description">{{ pageConfig.infoSection.description | translateContent }}</div>
         }
       </div>
     }

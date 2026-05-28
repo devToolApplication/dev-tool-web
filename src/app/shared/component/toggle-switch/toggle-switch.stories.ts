@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { ToggleSwitch } from './toggle-switch';
 
 const meta: Meta<ToggleSwitch> = {
-  title: 'Shared/Components/Form Controls/Toggle Switch',
+  title: 'Shared/Components/Form/ToggleSwitch',
   component: ToggleSwitch,
   args: {
-    label: 'Live mode',
-    value: true,
-    helpText: 'Simple boolean switch.'
+    label: 'Enable notifications',
+    value: false,
+    disabled: false
   }
 };
 
@@ -18,8 +17,15 @@ type Story = StoryObj<ToggleSwitch>;
 
 export const Default: Story = {};
 
+export const On: Story = {
+  args: {
+    value: true
+  }
+};
+
 export const Disabled: Story = {
   args: {
-    disabled: true
+    disabled: true,
+    value: true
   }
 };

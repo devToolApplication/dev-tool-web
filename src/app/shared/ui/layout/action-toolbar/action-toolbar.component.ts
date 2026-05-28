@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnChanges, Output, signal } from '@angular/core';
 import { PermissionService } from '../../../../core/auth/permission.service';
 import { ConfirmDialogConfig, ConfirmDialogService } from '../../overlay/confirm-dialog/confirm-dialog.service';
 
@@ -23,28 +23,28 @@ export interface ActionToolbarAction {
 @Component({
   selector: 'app-action-toolbar',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './action-toolbar.component.html',
   styleUrl: './action-toolbar.component.css'
 })
-export class ActionToolbarComponent {
+export class ActionToolbarComponent implements OnChanges {
   @Input() actions: ActionToolbarAction[] = [];
   @Output() actionClick = new EventEmitter<ActionToolbarAction>();
 
   readonly moreOpen = signal(false);
+  primaryActions: ActionToolbarAction[] = [];
+  secondaryActions: ActionToolbarAction[] = [];
+  moreActions: ActionToolbarAction[] = [];
 
   constructor(
     private readonly confirmDialogService: ConfirmDialogService,
     private readonly permissionService: PermissionService
   ) {}
 
-  visibleActions(placement: ActionToolbarAction['placement']): ActionToolbarAction[] {
-    return this.actions.filter(
-      (action) => (action.visible ?? true) && (action.placement ?? 'secondary') === placement && this.canRenderAction(action)
-    );
-  }
-
-  get moreActions(): ActionToolbarAction[] {
-    return this.visibleActions('more');
+  ngOnChanges(): void {
+    this.primaryActions = this.filterActions('primary');
+    this.secondaryActions = this.filterActions('secondary');
+    this.moreActions = this.filterActions('more');
   }
 
   get hasMoreActions(): boolean {
@@ -107,6 +107,12 @@ export class ActionToolbarComponent {
   @HostListener('document:keydown.escape')
   closeByEsc(): void {
     this.moreOpen.set(false);
+  }
+
+  private filterActions(placement: ActionToolbarAction['placement']): ActionToolbarAction[] {
+    return this.actions.filter(
+      (action) => (action.visible ?? true) && (action.placement ?? 'secondary') === placement && this.canRenderAction(action)
+    );
   }
 
   private canRenderAction(action: ActionToolbarAction): boolean {

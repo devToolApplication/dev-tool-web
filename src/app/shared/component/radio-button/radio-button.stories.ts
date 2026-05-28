@@ -1,23 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { RadioButton } from './radio-button';
-import type { SelectOption } from '../select/select';
 
-const options: SelectOption[] = [
-  { label: 'Draft', value: 'draft' },
-  { label: 'Active', value: 'active' },
-  { label: 'Paused', value: 'paused' }
+const sampleOptions = [
+  { label: 'Email', value: 'email' },
+  { label: 'Slack Chat', value: 'slack' },
+  { label: 'Webhook API', value: 'webhook' }
 ];
 
 const meta: Meta<RadioButton> = {
-  title: 'Shared/Components/Form Controls/Radio Button',
+  title: 'Shared/Components/Form/RadioButton',
   component: RadioButton,
   args: {
-    label: 'Status',
-    options,
-    value: 'draft',
+    label: 'Notification Channel',
+    options: sampleOptions,
+    value: 'email',
     labelPosition: 'left',
-    optionLayout: 'horizontal'
+    optionLayout: 'horizontal',
+    disabled: false
   }
 };
 
@@ -25,19 +24,17 @@ export default meta;
 
 type Story = StoryObj<RadioButton>;
 
-export const Horizontal: Story = {};
+export const Default: Story = {};
 
 export const Vertical: Story = {
   args: {
-    optionLayout: 'vertical',
-    labelPosition: 'top'
+    optionLayout: 'vertical'
   }
 };
 
-export const Invalid: Story = {
+export const TopLabel: Story = {
   args: {
-    value: null,
-    invalid: true,
-    errorMessage: 'Status is required'
+    labelPosition: 'top',
+    optionLayout: 'vertical'
   }
 };

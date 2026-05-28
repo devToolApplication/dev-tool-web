@@ -1,6 +1,6 @@
-<div class="dashboard-chart-shell">
+<app-card padding="none" class="dashboard-chart-shell">
   <div #chartRef class="dashboard-chart-canvas"></div>
   @if (!hasData) {
-    <div class="dashboard-chart-empty">{{ 'dashboard.noData' | translateContent }}</div>
+    <app-empty-state title="dashboard.noData"></app-empty-state>
   }
-</div>
+</app-card>

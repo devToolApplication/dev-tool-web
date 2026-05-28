@@ -324,8 +324,8 @@
       }
     </section>
   } @else {
-  <p-fieldset
-    [legend]="(field.label || 'general') | translateContent"
+  <app-fieldset
+    [legend]="field.label || 'general'"
     class="w-full">
 
     <div class="grid grid-cols-12 gap-4">
@@ -358,7 +358,7 @@
       }
     </div>
 
-  </p-fieldset>
+  </app-fieldset>
   }
   }
 }

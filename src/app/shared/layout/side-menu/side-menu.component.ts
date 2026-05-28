@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -11,6 +11,7 @@ export interface AppMenuItem extends MenuItem {
   hidden?: boolean;
   permissions?: readonly string[];
   shortcut?: string;
+  groupColor?: string;
   items?: AppMenuItem[];
 }
 
@@ -25,6 +26,17 @@ export class SideMenuComponent implements OnInit {
   @Input() collapsed = false;
   @Output() navigate = new EventEmitter<void>();
 
+  @ViewChild('menuSearchInput', { read: ElementRef }) menuSearchInputRef?: ElementRef<HTMLElement>;
+
+  @HostListener('window:keydown', ['$event'])
+  onGlobalKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k' && !this.collapsed) {
+      event.preventDefault();
+      const input = this.menuSearchInputRef?.nativeElement?.querySelector?.('input');
+      (input as HTMLElement | undefined)?.focus();
+    }
+  }
+
   readonly expandedState = signal<Set<string>>(new Set());
   readonly searchQuery = signal('');
   readonly currentUrl = signal('');
@@ -33,7 +45,7 @@ export class SideMenuComponent implements OnInit {
 
   private readonly expandedStorageKey = 'dev-tool.sidebarOpenGroups';
   private readonly defaultExpandedPaths = new Set([
-    'root/layout.menu.systemManagement/layout.menu.generalConfig',
+    'root/layout.menu.systemManagement/layout.menu.systemConfigs',
     'root/layout.menu.systemManagement/layout.menu.secretManagement'
   ]);
 

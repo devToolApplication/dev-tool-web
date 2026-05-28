@@ -3,7 +3,7 @@
 } @else if (error) {
   <app-error-state [message]="error"></app-error-state>
 } @else if (overview) {
-  <div class="dashboard-detail-grid">
+  <app-responsive-grid [columns]="2">
     @for (chart of overview.charts; track chart.key) {
       <app-section-panel
         [title]="chart.title"
@@ -19,32 +19,9 @@
       [empty]="overview.resources.length === 0"
       emptyTitle="dashboard.emptyResources"
     >
-      @if (overview.resources.length) {
-        <div class="resource-list">
-          @for (resource of overview.resources; track resource.name) {
-            <div class="resource-row">
-              <div>
-                <strong>{{ resource.name | translateContent }}</strong>
-                @if (resource.description) {
-                  <span>{{ resource.description | translateContent }}</span>
-                }
-              </div>
-              <div class="resource-meta">
-                @if (resource.status) {
-                  <app-badge
-                    [label]="resource.status"
-                    [variant]="resourceVariant(resource.status)"
-                    size="sm"
-                  ></app-badge>
-                }
-                <strong>{{ resource.value || '-' }}</strong>
-              </div>
-            </div>
-          }
-        </div>
-      }
+      <app-status-list [items]="resourceItems" density="comfortable"></app-status-list>
     </app-section-panel>
-  </div>
+  </app-responsive-grid>
 } @else {
   <app-empty-state title="dashboard.noData"></app-empty-state>
 }

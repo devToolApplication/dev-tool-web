@@ -1,69 +1,56 @@
+@if (inline) {
+  <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
+} @else {
 <p-floatlabel [variant]="variant">
   @if (iconClass) {
     <p-iconfield class="w-full">
       <p-inputicon [class]="iconClass"></p-inputicon>
-      <p-multiselect
-        [size]="size"
-        [inputId]="inputId"
-        appendTo="body"
-        [display]="display"
-        [showClear]="true"
-        [filter]="enableFilter"
-        [selectedItemsLabel]="'selectedItems' | translateContent"
-        [maxSelectedLabels]="maxSelectedLabels"
-        [selectionLimit]="selectionLimit"
-        [loading]="loading"
-        class="w-full"
-        [options]="options | translateContent"
-        optionLabel="label"
-        optionValue="value"
-        [placeholder]="(placeholder || '') | translateContent"
-        [ariaLabel]="(label || placeholder || inputId) | translateContent"
-        [ngModel]="value"
-        (ngModelChange)="onChange($event)"
-        [disabled]="disabled"
-        [required]="required"
-        [invalid]="invalid"
-        [styleClass]="styleClass"
-        (onBlur)="onBlur()"
-        (onFocus)="onFocus()"
-      />
+      <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
     </p-iconfield>
   } @else {
-    <p-multiselect
-      [size]="size"
-      [inputId]="inputId"
-      appendTo="body"
-      [display]="display"
-      [showClear]="true"
-      [filter]="enableFilter"
-      [selectedItemsLabel]="'selectedItems' | translateContent"
-      [maxSelectedLabels]="maxSelectedLabels"
-      [selectionLimit]="selectionLimit"
-      [loading]="loading"
-      class="w-full"
-      [options]="options | translateContent"
-      optionLabel="label"
-      optionValue="value"
-      [placeholder]="(placeholder || '') | translateContent"
-      [ariaLabel]="(label || placeholder || inputId) | translateContent"
-      [ngModel]="value"
-      (ngModelChange)="onChange($event)"
-      [disabled]="disabled"
-      [required]="required"
-      [invalid]="invalid"
-      [styleClass]="styleClass"
-      (onBlur)="onBlur()"
-      (onFocus)="onFocus()"
-    />
+    <ng-container *ngTemplateOutlet="multiSelectControl"></ng-container>
   }
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>
+}
+
+<ng-template #multiSelectControl>
+  <p-multiselect
+    [size]="size"
+    [inputId]="inputId"
+    appendTo="body"
+    [display]="display"
+    [showClear]="true"
+    [filter]="enableFilter"
+    [selectedItemsLabel]="'selectedItems' | translateContent"
+    [maxSelectedLabels]="maxSelectedLabels"
+    [selectionLimit]="selectionLimit"
+    [loading]="loading"
+    class="w-full"
+    [options]="options | translateContent"
+    optionLabel="label"
+    optionValue="value"
+    [placeholder]="(placeholder || '') | translateContent"
+    [ariaLabel]="(label || placeholder || inputId) | translateContent"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [invalid]="invalid"
+    [styleClass]="styleClass"
+    (onBlur)="onBlur()"
+    (onFocus)="onFocus()"
+  >
+    <ng-template pTemplate="chip" let-item>
+      <span class="app-chip-label" [title]="item.label">{{ item.label }}</span>
+    </ng-template>
+  </p-multiselect>
+</ng-template>
 
 @if (helpText) {
   <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
 }
 
 @if (invalid && errorMessage) {
-  <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+  <app-message severity="error" size="small" variant="simple" [text]="errorMessage"></app-message>
 }

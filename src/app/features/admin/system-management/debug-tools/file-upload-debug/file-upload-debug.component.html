@@ -1,50 +1,44 @@
-<section class="file-upload-debug-page">
-  <div class="page-header app-border app-bg-surface">
-    <div>
-      <h2>{{ 'systemManagement.fileUploadDebug.title' | translateContent }}</h2>
-      <p>POST /file-mcrs/v1/upload</p>
+<app-page-shell title="systemManagement.fileUploadDebug.title" layout="wide">
+  <app-page-header title="systemManagement.fileUploadDebug.title" subtitle="POST /file-mcrs/v1/upload">
+    <div page-actions>
+      <app-button
+        icon="pi pi-refresh"
+        label="systemManagement.fileUploadDebug.refreshStorage"
+        [loading]="loadingStorages"
+        [disabled]="loadingStorages || uploading"
+        (buttonClick)="loadStorages()"
+      ></app-button>
     </div>
+  </app-page-header>
 
-    <app-button
-      icon="pi pi-refresh"
-      label="systemManagement.fileUploadDebug.refreshStorage"
-      [loading]="loadingStorages"
-      [disabled]="loadingStorages || uploading"
-      (buttonClick)="loadStorages()"
-    ></app-button>
-  </div>
+  <app-panel>
+    <app-responsive-grid [columns]="2">
+      <app-select
+        label="systemManagement.fileUploadDebug.storage"
+        [value]="selectedStorageId"
+        (valueChange)="selectedStorageId = toStorageId($event)"
+        [options]="storageOptions"
+        placeholder="systemManagement.fileUploadDebug.defaultPinataStorage"
+        [showClear]="true"
+        [loading]="loadingStorages"
+      ></app-select>
 
-  <section class="upload-panel app-border app-bg-surface">
-    <div class="field-grid">
-      <div class="field">
-        <app-select
-          label="systemManagement.fileUploadDebug.storage"
-          [(ngModel)]="selectedStorageId"
-          [options]="storageOptions"
-          placeholder="systemManagement.fileUploadDebug.defaultPinataStorage"
-          [showClear]="true"
-          [loading]="loadingStorages"
-        ></app-select>
-      </div>
+      <app-input-text
+        label="systemManagement.fileUploadDebug.fileNameOverride"
+        [value]="fileName"
+        (valueChange)="fileName = $event || ''"
+        placeholder="systemManagement.fileUploadDebug.fileNameOverridePlaceholder"
+      ></app-input-text>
 
-      <div class="field">
-        <app-input-text
-          label="systemManagement.fileUploadDebug.fileNameOverride"
-          [(ngModel)]="fileName"
-          placeholder="systemManagement.fileUploadDebug.fileNameOverridePlaceholder"
-        ></app-input-text>
-      </div>
-
-      <div class="field full-width">
-        <app-input-area
-          label="systemManagement.fileUploadDebug.metadataJson"
-          [(ngModel)]="metadataJson"
-          [rows]="6"
-          [maxRows]="8"
-          contentType="json"
-        ></app-input-area>
-      </div>
-    </div>
+      <app-input-area
+        label="systemManagement.fileUploadDebug.metadataJson"
+        [value]="metadataJson"
+        (valueChange)="metadataJson = $event || '{}'"
+        [rows]="6"
+        [maxRows]="8"
+        contentType="json"
+      ></app-input-area>
+    </app-responsive-grid>
 
     <app-fileupload
       mode="advanced"
@@ -57,16 +51,15 @@
       cancelLabel="clear"
       (uploadHandler)="onUpload($event)"
     ></app-fileupload>
-  </section>
+  </app-panel>
 
   @if (uploadError) {
     <app-alert class="result-alert" variant="danger" [message]="uploadError"></app-alert>
   }
 
   @if (uploadResult) {
-    <section class="result-panel app-border app-bg-surface">
-      <div class="result-header">
-        <h3>{{ 'systemManagement.fileUploadDebug.uploadResult' | translateContent }}</h3>
+    <app-panel title="systemManagement.fileUploadDebug.uploadResult">
+      <div panel-actions>
         <app-button
           icon="pi pi-external-link"
           label="open"
@@ -80,6 +73,6 @@
       <div class="result-raw">
         <app-key-value-list [items]="uploadResultRawItems" layout="one-column"></app-key-value-list>
       </div>
-    </section>
+    </app-panel>
   }
-</section>
+</app-page-shell>

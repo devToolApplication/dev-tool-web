@@ -340,6 +340,12 @@ export interface InputMultiFieldConfig extends BaseFieldConfig {
   helpText?: string;
 }
 
+export interface ColorPickerFieldConfig extends BaseFieldConfig {
+  type: 'color-picker';
+  placeholder?: string;
+  format?: 'hex' | 'rgb' | 'hsb';
+}
+
 export interface SecretMetadataFieldConfig extends BaseFieldConfig {
   type: 'secret-metadata';
   optionsSource?: string;
@@ -375,6 +381,7 @@ export type FieldConfig =
   | RecordFieldConfig
   | TagsFieldConfig
   | InputMultiFieldConfig
+  | ColorPickerFieldConfig
   | SecretMetadataFieldConfig
   | TreeFieldConfig;
 
@@ -402,6 +409,7 @@ export type FieldType =
   | 'record'
   | 'tags'
   | 'input-multi'
+  | 'color-picker'
   | 'secret-metadata'
   | 'tree';
 

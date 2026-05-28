@@ -1,20 +1,5 @@
 <header class="page-header">
   <div class="page-header__main">
-    @if (breadcrumb?.length) {
-      <nav class="page-header__breadcrumb" aria-label="Breadcrumb">
-        @for (item of breadcrumb; track item.label; let last = $last) {
-          @if (item.routerLink && !last) {
-            <a [routerLink]="item.routerLink">{{ item.label | translateContent }}</a>
-          } @else {
-            <span>{{ item.label | translateContent }}</span>
-          }
-          @if (!last) {
-            <i class="pi pi-angle-right" aria-hidden="true"></i>
-          }
-        }
-      </nav>
-    }
-
     <div class="page-header__title-row">
       @if (showBack) {
         <app-button

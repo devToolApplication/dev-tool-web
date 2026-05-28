@@ -1,26 +1,26 @@
 <app-page-shell title="tradeBot.replay.title" layout="wide">
-  <app-card>
-    <div class="replay-page-header">
-      <div class="replay-page-heading">
-        <div class="replay-page-title">{{ 'tradeBot.replay.title' | translateContent }}</div>
-        <div class="replay-page-subtitle">
-          {{ replay()?.strategyCode || '-' }} / {{ replay()?.symbol || '-' }} {{ replay()?.timeframe || '' }}
-        </div>
-      </div>
-      <div class="replay-page-actions">
-        <app-tag [value]="replayStatus()" severity="info"></app-tag>
-        <app-button
-          icon="pi pi-refresh"
-          label="tradeBot.action.reset"
-          severity="secondary"
-          [disabled]="!replay()"
-          (buttonClick)="resetReplay()"
-        ></app-button>
-      </div>
-    </div>
-  </app-card>
+  <div page-actions class="replay-page-actions">
+    @if (replay()) {
+      <app-tag [value]="replayStatus()" severity="info"></app-tag>
+    }
+    <app-button
+      icon="pi pi-refresh"
+      label="tradeBot.action.reset"
+      severity="secondary"
+      [disabled]="!replay()"
+      (buttonClick)="resetReplay()"
+    ></app-button>
+  </div>
 
-  <p-fieldset [legend]="'tradeBot.replay.init' | translateContent" [toggleable]="true" [collapsed]="!!replay()">
+  @if (replay()) {
+    <app-card>
+      <div class="replay-page-subtitle">
+        {{ replay()?.strategyCode || '-' }} / {{ replay()?.symbol || '-' }} {{ replay()?.timeframe || '' }}
+      </div>
+    </app-card>
+  }
+
+  <app-fieldset legend="tradeBot.replay.init" [toggleable]="true" [collapsed]="!!replay()">
     <app-form-input
       [config]="replayForm"
       [context]="formContext"
@@ -28,7 +28,7 @@
       [submitting]="loading()"
       (formSubmit)="initReplay($event)"
     ></app-form-input>
-  </p-fieldset>
+  </app-fieldset>
 
   @if (replay()) {
     <div class="replay-summary-grid">
@@ -71,89 +71,14 @@
     </div>
 
     <app-card>
-      <div class="replay-debug-header">
-        <div class="replay-debug-title">{{ 'tradeBot.replay.debugPanel' | translateContent }}</div>
-        <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="activeTab.set($event)"></app-tabs>
-      </div>
-
-      <div class="replay-debug-content">
-        @switch (activeTab()) {
-          @case ('signal') {
-            @if (signalSummary()) {
-              <div class="replay-debug-grid">
-                <section class="replay-debug-panel">
-                  <div class="replay-debug-panel__header">
-                    <span>{{ 'tradeBot.replay.signalSummary' | translateContent }}</span>
-                    <app-tag [value]="signalSide()" severity="success"></app-tag>
-                  </div>
-                  <div class="replay-fact-list">
-                    @for (fact of signalSummaryFacts(); track fact.label) {
-                      <div class="replay-fact-row">
-                        <span>{{ fact.label | translateContent }}</span>
-                        <strong>{{ fact.value }}</strong>
-                      </div>
-                    }
-                  </div>
-                </section>
-
-                <section class="replay-debug-panel">
-                  <div class="replay-debug-panel__header">
-                    <span>{{ 'tradeBot.replay.candleDetails' | translateContent }}</span>
-                  </div>
-                  <div class="replay-fact-list">
-                    @for (fact of selectedCandleFacts(); track fact.label) {
-                      <div class="replay-fact-row">
-                        <span>{{ fact.label | translateContent }}</span>
-                        <strong>{{ fact.value }}</strong>
-                      </div>
-                    }
-                  </div>
-                </section>
-              </div>
-            } @else {
-              <div class="replay-empty-state">{{ 'tradeBot.replay.noSignal' | translateContent }}</div>
-            }
-          }
-
-          @case ('ruleTrace') {
-            @if (ruleTrace() || evaluation()) {
-              <app-rule-tree-viewer [trace]="evaluationTrace()"></app-rule-tree-viewer>
-            } @else {
-              <div class="replay-empty-state">{{ 'tradeBot.replay.noEvaluation' | translateContent }}</div>
-            }
-          }
-
-          @case ('candle') {
-            <section class="replay-debug-panel replay-debug-panel--compact">
-              <div class="replay-debug-panel__header">
-                <span>{{ 'tradeBot.replay.candleDetails' | translateContent }}</span>
-              </div>
-              <div class="replay-fact-list">
-                @for (fact of selectedCandleFacts(); track fact.label) {
-                  <div class="replay-fact-row">
-                    <span>{{ fact.label | translateContent }}</span>
-                    <strong>{{ fact.value }}</strong>
-                  </div>
-                }
-              </div>
-            </section>
-          }
-
-          @case ('raw') {
-            <div class="replay-raw-grid">
-              <p-fieldset [legend]="'tradeBot.replay.event' | translateContent" [toggleable]="true" [collapsed]="true">
-                <app-json-viewer [value]="replayEventJson()" [collapsed]="true"></app-json-viewer>
-              </p-fieldset>
-              <p-fieldset [legend]="'tradeBot.replay.evaluation' | translateContent" [toggleable]="true" [collapsed]="true">
-                <app-json-viewer [value]="evaluationJson()" [collapsed]="true"></app-json-viewer>
-              </p-fieldset>
-              <p-fieldset [legend]="'tradeBot.replay.overlays' | translateContent" [toggleable]="true" [collapsed]="true">
-                <app-json-viewer [value]="replayJson()" [collapsed]="true"></app-json-viewer>
-              </p-fieldset>
-            </div>
-          }
-        }
-      </div>
+      <app-replay-debug-panel
+        [evaluation]="evaluation()"
+        [strategySignal]="strategySignal()"
+        [ruleTrace]="ruleTrace()"
+        [selectedCandle]="selectedCandle()"
+        [replayEvent]="replayEvent()"
+        [replayOverlays]="replay()?.overlay?.overlays ?? {}"
+      ></app-replay-debug-panel>
     </app-card>
   }
 </app-page-shell>

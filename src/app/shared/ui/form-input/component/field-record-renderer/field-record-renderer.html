@@ -1,4 +1,4 @@
-<p-fieldset [legend]="(field.label || 'record') | translateContent" class="record-fieldset">
+<app-fieldset [legend]="field.label || 'record'" class="record-fieldset">
   <div class="record-field" [class.disabled]="field.disabled()">
     <div class="record-field__header">
       <span>{{ (recordConfig?.keyLabel || 'key') | translateContent }}</span>
@@ -46,4 +46,4 @@
       (buttonClick)="onRecordAdd()">
     </app-button>
   </div>
-</p-fieldset>
+</app-fieldset>

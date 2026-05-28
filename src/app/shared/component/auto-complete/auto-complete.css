@@ -7,3 +7,7 @@
   margin-top: 0.45rem;
   color: var(--app-text-muted);
 }
+
+.app-suggestion-exact {
+  font-weight: 600;
+}

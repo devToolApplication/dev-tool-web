@@ -1,17 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { InputNumber } from './input-number';
 
 const meta: Meta<InputNumber> = {
-  title: 'Shared/Components/Form Controls/Input Number',
+  title: 'Shared/Components/Form/InputNumber',
   component: InputNumber,
   args: {
-    label: 'Capital',
-    placeholder: 'Enter amount',
-    value: 125000,
+    label: 'Quantity',
+    placeholder: 'Enter quantity',
+    value: null,
     min: 0,
-    step: 1000,
-    showClear: true
+    max: 100,
+    step: 1,
+    disabled: false,
+    showClear: false
   }
 };
 
@@ -19,20 +20,35 @@ export default meta;
 
 type Story = StoryObj<InputNumber>;
 
-export const Decimal: Story = {};
+export const Default: Story = {};
 
 export const Currency: Story = {
   args: {
+    label: 'Price',
+    placeholder: 'Enter amount',
     mode: 'currency',
     currency: 'USD',
-    minFractionDigits: 0,
-    maxFractionDigits: 0
+    min: 0,
+    max: 1000000,
+    minFractionDigits: 2,
+    maxFractionDigits: 2
   }
 };
 
-export const Invalid: Story = {
+export const WithMinMax: Story = {
   args: {
-    invalid: true,
-    errorMessage: 'Amount must be greater than 0'
+    label: 'Percentage limit',
+    min: 0,
+    max: 100,
+    value: 50,
+    suffix: '%'
+  }
+};
+
+export const WithStep: Story = {
+  args: {
+    label: 'Stepped Quantity',
+    step: 5,
+    value: 20
   }
 };

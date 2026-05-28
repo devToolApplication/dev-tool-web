@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { Password } from './password';
 
 const meta: Meta<Password> = {
-  title: 'Shared/Components/Form Controls/Password',
+  title: 'Shared/Components/Form/Password',
   component: Password,
   args: {
-    label: 'Password',
-    placeholder: 'Enter password',
-    value: 'DemoPassword1',
+    label: 'Account Password',
+    placeholder: 'Enter secure password',
     feedback: true,
-    toggleMask: true
+    toggleMask: true,
+    disabled: false
   }
 };
 
@@ -20,10 +19,15 @@ type Story = StoryObj<Password>;
 
 export const Default: Story = {};
 
-export const Invalid: Story = {
+export const NoFeedback: Story = {
   args: {
-    value: '',
-    invalid: true,
-    errorMessage: 'Password is required'
+    feedback: false
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    value: 'secret_value'
   }
 };

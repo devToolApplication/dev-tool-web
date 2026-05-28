@@ -1,26 +1,24 @@
-<p-toolbar class="header-toolbar">
-  <ng-template #start>
-    <div class="header-start">
-      <app-button
-        icon="pi pi-bars"
-        [text]="true"
-        severity="secondary"
-        styleClass="sidebar-toggle-button"
-        [ariaLabel]="toggleSidebarLabel()"
-        (buttonClick)="onToggleSidebar()"
-      ></app-button>
+<app-toolbar styleClass="header-toolbar">
+  <div toolbar-start class="header-start">
+    <app-button
+      icon="pi pi-bars"
+      [text]="true"
+      severity="secondary"
+      styleClass="sidebar-toggle-button"
+      [ariaLabel]="toggleSidebarLabel()"
+      (buttonClick)="onToggleSidebar()"
+    ></app-button>
 
-      <div class="page-context">
-        <p-breadcrumb
-          [home]="homeItem | translateContent"
-          [model]="breadcrumbItems | translateContent"
-        ></p-breadcrumb>
-        <h1>{{ pageTitle() | translateContent }}</h1>
-      </div>
+    <div class="page-context">
+      <app-breadcrumb
+        [home]="homeItem | translateContent"
+        [items]="breadcrumbItems | translateContent"
+      ></app-breadcrumb>
+      <h1>{{ pageTitle() | translateContent }}</h1>
     </div>
-  </ng-template>
+  </div>
 
-  <ng-template #end>
+  <div toolbar-end>
     <button
       type="button"
       class="user-menu-button"
@@ -32,10 +30,10 @@
         <strong>{{ userDisplayName() | translateContent }}</strong>
         <small>{{ userRoleLabel() | translateContent }}</small>
       </span>
-      <p-avatar [label]="userInitials()" shape="circle"></p-avatar>
+      <app-avatar [label]="userInitials()" shape="circle"></app-avatar>
       <i class="pi pi-chevron-down user-menu-chevron" aria-hidden="true"></i>
     </button>
 
-    <p-tieredMenu #userMenu [model]="accountMenuItems | translateContent" [popup]="true" appendTo="body"></p-tieredMenu>
-  </ng-template>
-</p-toolbar>
+    <app-tiered-menu #userMenu [items]="accountMenuItems | translateContent" [popup]="true" appendTo="body"></app-tiered-menu>
+  </div>
+</app-toolbar>

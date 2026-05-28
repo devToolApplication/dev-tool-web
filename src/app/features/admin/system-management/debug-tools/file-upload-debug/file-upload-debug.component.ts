@@ -129,6 +129,10 @@ export class FileUploadDebugComponent implements OnInit {
     }
   }
 
+  toStorageId(value: string | number | boolean | null): string | null {
+    return typeof value === 'string' ? value : null;
+  }
+
   private parseMetadataJson(): Record<string, string> | null {
     const raw = this.metadataJson.trim();
     if (!raw) {

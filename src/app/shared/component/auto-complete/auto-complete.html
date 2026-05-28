@@ -18,6 +18,9 @@
     (onInputKeydown)="onEnter($event)"
     (onFocus)="onFocus()"
     (onBlur)="onBlur()">
+    <ng-template pTemplate="item" let-item>
+      <span [class.app-suggestion-exact]="item === value">{{ item }}</span>
+    </ng-template>
   </p-autocomplete>
   <label [attr.for]="inputId">{{ label | translateContent }}</label>
 </p-floatlabel>

@@ -1,18 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { Fileupload } from './fileupload';
 
 const meta: Meta<Fileupload> = {
-  title: 'Shared/Components/Form Controls/File Upload',
+  title: 'Shared/Components/Form/FileUpload',
   component: Fileupload,
   args: {
     mode: 'basic',
-    chooseLabel: 'Choose file',
+    chooseLabel: 'Choose File',
     uploadLabel: 'Upload',
     cancelLabel: 'Cancel',
-    accept: '.csv,.json',
     multiple: false,
-    customUpload: true
+    customUpload: true,
+    disabled: false
   }
 };
 
@@ -24,8 +23,13 @@ export const Basic: Story = {};
 
 export const Advanced: Story = {
   args: {
+    mode: 'advanced'
+  }
+};
+
+export const Multiple: Story = {
+  args: {
     mode: 'advanced',
-    multiple: true,
-    maxFileSize: 1000000
+    multiple: true
   }
 };

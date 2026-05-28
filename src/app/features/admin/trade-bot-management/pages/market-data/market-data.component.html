@@ -13,12 +13,13 @@
     }
   </div>
 
-  <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
+  <app-card>
+    <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
+  </app-card>
 
   @switch (activeTab()) {
     @case ('overview') {
-      <app-card>
-        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.tab.overview' | translateContent }}</div>
+      <app-section-panel title="tradeBot.market.tab.overview" density="compact">
         <app-data-quality-warning [candles]="candles()" [gaps]="gaps()"></app-data-quality-warning>
         <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           @for (fact of overviewFacts(); track fact.label) {
@@ -28,120 +29,53 @@
             </div>
           }
         </div>
-      </app-card>
+      </app-section-panel>
     }
 
     @case ('candles') {
-      <app-card>
-        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.query' | translateContent }}</div>
-        <app-form-input
-          [config]="queryForm"
-          [context]="formContext"
-          [initialValue]="queryInitialValue"
-          [submitting]="loading()"
-          (formSubmit)="loadCandles($event)"
-        ></app-form-input>
-      </app-card>
-
-      <app-data-quality-warning [candles]="candles()" [gaps]="gaps()"></app-data-quality-warning>
-
-      @if (candles().length) {
-        <app-candle-chart
-          [mode]="'HISTORICAL'"
-          [config]="chartConfig()"
-          [candles]="chartCandles()"
-          (rangeBoundaryReached)="loadMoreCandles($event)"
-        ></app-candle-chart>
-      }
-
-      <app-table
-        [config]="tableConfig"
-        [data]="candles()"
+      <app-market-data-candle-tab
+        [candles]="candles()"
         [loading]="loading()"
         [error]="candleError()"
-        (retry)="loadCandles(candleQueryModel())"
-      ></app-table>
+        [gaps]="gaps()"
+        (querySubmit)="loadCandles($event)"
+        (rangeBoundaryReached)="loadMoreCandles($event)"
+        (retryQuery)="loadCandles(candleQueryModel())"
+        (viewGapsAround)="onTabChange('gaps'); loadGaps({ status: 'OPEN', source: $event.source, symbol: $event.symbol, timeframe: $event.timeframe })"
+      ></app-market-data-candle-tab>
     }
 
     @case ('sync') {
-      <app-card>
-        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.sync.title' | translateContent }}</div>
-        <app-form-input
-          [config]="syncForm"
-          [context]="formContext"
-          [initialValue]="syncInitialValue"
-          [submitting]="syncLoading()"
-          (formSubmit)="syncBinanceUsdm($event)"
-        ></app-form-input>
-        <div class="mt-3">
-          <app-realtime-progress-bar [state]="syncProgress()" [showCancel]="true" (cancel)="cancelSync()"></app-realtime-progress-bar>
-        </div>
-      </app-card>
-
-      <app-table
-        [config]="syncRunTableConfig"
-        [data]="syncRuns()"
-        [loading]="syncLoading()"
-        [error]="syncRunError()"
-        (retry)="loadSyncRuns()"
-      ></app-table>
+      <app-market-data-sync-tab
+        [syncRuns]="syncRuns()"
+        [syncLoading]="syncLoading()"
+        [syncRunError]="syncRunError()"
+        [syncProgress]="syncProgress()"
+        (syncSubmit)="syncBinanceUsdm($event)"
+        (cancelSync)="cancelSync()"
+        (retrySyncRuns)="loadSyncRuns()"
+      ></app-market-data-sync-tab>
     }
 
     @case ('gaps') {
-      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        @for (card of gapSummaryCards(); track card.label) {
-          <app-summary-metric-card [label]="card.label" [value]="card.value"></app-summary-metric-card>
-        }
-      </div>
-
-      <app-table
-        [config]="gapTableConfig"
-        [data]="gaps()"
+      <app-market-data-gap-tab
+        [gaps]="gaps()"
         [loading]="syncLoading()"
         [error]="gapError()"
         (search)="loadGaps($event)"
         (resetFilter)="loadGaps({ status: 'OPEN' })"
-        (retry)="loadGaps()"
-      ></app-table>
+        (retryGaps)="loadGaps()"
+        (repairGap)="repairGap($event)"
+        (ignoreGap)="ignoreGap($event)"
+        (navigateToSync)="onTabChange('sync')"
+      ></app-market-data-gap-tab>
     }
 
     @case ('import') {
-      <app-card>
-        <div class="mb-3 text-lg font-semibold">{{ 'tradeBot.market.import' | translateContent }}</div>
-        <app-form-input
-          [config]="importForm"
-          [context]="formContext"
-          [initialValue]="importInitialValue"
-          [submitting]="loading()"
-          (formSubmit)="importCandles($event)"
-        ></app-form-input>
-      </app-card>
+      <app-market-data-import-tab
+        [loading]="loading()"
+        (importSubmit)="importCandles($event)"
+      ></app-market-data-import-tab>
     }
   }
-
-  <app-drawer
-    [open]="!!selectedRawCandle()"
-    (openChange)="handleRawCandleOpenChange($event)"
-    (closed)="closeRawCandle()"
-    title="tradeBot.market.rawCandle"
-    size="lg"
-  >
-    @if (selectedRawCandle(); as candle) {
-      <div class="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <div class="rounded-lg border app-border app-bg-soft p-3">
-          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.symbol' | translateContent }}</div>
-          <div class="mt-1 app-text">{{ candle.symbol }}</div>
-        </div>
-        <div class="rounded-lg border app-border app-bg-soft p-3">
-          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.timeframe' | translateContent }}</div>
-          <div class="mt-1 app-text">{{ candle.timeframe }}</div>
-        </div>
-        <div class="rounded-lg border app-border app-bg-soft p-3">
-          <div class="text-xs font-semibold uppercase app-text-muted">{{ 'tradeBot.field.openTime' | translateContent }}</div>
-          <div class="mt-1 app-text">{{ candle.openTime }}</div>
-        </div>
-      </div>
-      <app-json-viewer [value]="rawCandleJson()" [collapsed]="true"></app-json-viewer>
-    }
-  </app-drawer>
 </app-page-shell>

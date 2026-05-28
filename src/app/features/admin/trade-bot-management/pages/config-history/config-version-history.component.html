@@ -1,11 +1,11 @@
 <app-page-shell title="tradeBot.configHistory.title" subtitle="tradeBot.configHistory.subtitle" layout="wide">
   <app-section-panel title="tradeBot.configHistory.overview" subtitle="tradeBot.configHistory.overviewSubtitle">
-    <div section-actions class="flex flex-wrap items-center gap-2">
+    <ng-container section-actions>
       @if (latestVersion()?.status) {
         <app-badge [label]="latestVersion()?.status || '-'" [variant]="statusVariant(latestVersion()?.status)"></app-badge>
       }
       <app-button icon="pi pi-arrow-left" label="tradeBot.action.back" severity="secondary" (buttonClick)="goBack()"></app-button>
-    </div>
+    </ng-container>
     <app-key-value-list [items]="overviewItems()" layout="two-column"></app-key-value-list>
   </app-section-panel>
 
@@ -18,7 +18,7 @@
   ></app-table>
 
   <app-section-panel title="tradeBot.configHistory.compare" subtitle="tradeBot.configHistory.compareSubtitle">
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+    <app-responsive-grid [columns]="2">
       <app-select
         label="tradeBot.configHistory.oldVersion"
         [options]="versionOptions()"
@@ -33,7 +33,7 @@
         [value]="selectedTargetVersion()"
         (valueChange)="selectTargetVersion($event)"
       ></app-select>
-    </div>
+    </app-responsive-grid>
   </app-section-panel>
 
   <app-section-panel

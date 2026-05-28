@@ -1,5 +1,5 @@
 <div class="action-toolbar">
-  @for (action of visibleActions('primary'); track action.id) {
+  @for (action of primaryActions; track action.id) {
     <app-button
       size="small"
       [label]="action.label"
@@ -12,7 +12,7 @@
     ></app-button>
   }
 
-  @for (action of visibleActions('secondary'); track action.id) {
+  @for (action of secondaryActions; track action.id) {
     <app-button
       size="small"
       [label]="action.label"

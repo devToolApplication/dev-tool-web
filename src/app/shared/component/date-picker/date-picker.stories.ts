@@ -1,15 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { DatePicker } from './date-picker';
 
 const meta: Meta<DatePicker> = {
-  title: 'Shared/Components/Form Controls/Date Picker',
+  title: 'Shared/Components/Form/DatePicker',
   component: DatePicker,
   args: {
-    label: 'Start date',
-    placeholder: 'Select date',
-    value: new Date(2026, 3, 29),
-    showIcon: true
+    label: 'Start Date',
+    placeholder: 'Choose date',
+    showIcon: true,
+    dateFormat: 'dd/mm/yy',
+    showTime: false,
+    hourFormat: '24',
+    selectionMode: 'single',
+    disabled: false
   }
 };
 
@@ -21,17 +24,16 @@ export const Default: Story = {};
 
 export const WithTime: Story = {
   args: {
-    label: 'Run at',
+    label: 'Start Date & Time',
     showTime: true,
-    hourFormat: '24',
-    value: new Date(2026, 3, 29, 9, 30)
+    dateFormat: 'dd/mm/yy'
   }
 };
 
-export const Range: Story = {
+export const RangeSelection: Story = {
   args: {
-    label: 'Date range',
+    label: 'Duration Range',
     selectionMode: 'range',
-    value: [new Date(2026, 3, 20), new Date(2026, 3, 29)]
+    placeholder: 'Choose range'
   }
 };
