@@ -1,0 +1,21 @@
+<div class="candle-chart-header">
+  <div class="candle-chart-header__main">
+    @if (chartTitle) {
+      <span class="candle-chart-header__title">{{ chartTitle }}</span>
+    }
+    @if (candle) {
+      <span class="candle-chart-header__metric">O {{ formatPrice(candle.open) }}</span>
+      <span class="candle-chart-header__metric">H {{ formatPrice(candle.high) }}</span>
+      <span class="candle-chart-header__metric">L {{ formatPrice(candle.low) }}</span>
+      <span class="candle-chart-header__metric">C {{ formatPrice(candle.close) }}</span>
+      <span class="candle-chart-header__change" [ngClass]="'candle-chart-header__change--' + tone">
+        {{ formatPrice(change) }} ({{ changePercent | number: '1.2-2' }}%)
+      </span>
+    }
+  </div>
+  @if (candle?.volume != null) {
+    <div class="candle-chart-header__volume">
+      Vol <span>{{ formatVolume(candle?.volume) }}</span>
+    </div>
+  }
+</div>

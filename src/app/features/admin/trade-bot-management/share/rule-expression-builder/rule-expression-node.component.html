@@ -1,0 +1,176 @@
+@if (node.type === 'condition') {
+  <app-rule-condition-row
+    [node]="$any(node)"
+    [selectedNodeId]="selectedNodeId"
+    [issues]="issues"
+    [indicatorConfigs]="indicatorConfigs"
+    [ruleConfigs]="ruleConfigs"
+    [currentRuleId]="currentRuleId"
+    [readonly]="readonly"
+    [disabled]="disabled"
+    (selectNode)="selectNode.emit($event)"
+    (nodeChange)="nodeChange.emit($event)"
+    (removeNode)="removeNode.emit($event)"
+    (duplicateNode)="duplicateNode.emit($event)"
+    (toggleDisabled)="toggleDisabled.emit($event)"
+    (wrapNode)="wrapNode.emit($event)"
+  ></app-rule-condition-row>
+} @else {
+  <article
+    class="rule-expression-node"
+    [class.rule-expression-node--selected]="selected"
+    [class.rule-expression-node--disabled]="node.disabled"
+    [class.rule-expression-node--invalid]="nodeIssues(node).length > 0"
+    [class.rule-expression-node--not]="node.type === 'not'"
+    (click)="select()"
+  >
+    <div class="rule-expression-node__main">
+      <div class="rule-expression-node__content">
+        <div class="rule-expression-node__title">
+          @if (node.type === 'group') {
+            <app-select
+              label="tradeBot.ruleExpression.field.groupOperator"
+              [options]="groupOperatorOptions"
+              [value]="groupNode(node).operator"
+              [disabled]="readonlyOrDisabled"
+              (valueChange)="updateGroupOperator(groupNode(node), $event)"
+            ></app-select>
+            <span class="rule-expression-node__description">
+              {{ groupDescription(groupNode(node).operator) | translateContent }}
+            </span>
+          } @else if (node.type === 'not') {
+            <app-tag value="tradeBot.ruleExpression.group.NOT" severity="warn"></app-tag>
+            <span class="rule-expression-node__description">
+              {{ 'tradeBot.ruleExpression.groupDescription.NOT' | translateContent }}
+            </span>
+          } @else {
+            <app-tag value="tradeBot.ruleExpression.type.ruleRef" severity="info"></app-tag>
+            <app-select
+              label="tradeBot.ruleExpression.field.ruleRef"
+              [options]="ruleOptions()"
+              [value]="ruleRefNode(node).ruleCode || null"
+              [disabled]="readonlyOrDisabled"
+              [showClear]="true"
+              (valueChange)="updateRuleCode(ruleRefNode(node), $event)"
+            ></app-select>
+          }
+
+          @if (node.disabled) {
+            <app-tag value="tradeBot.ruleExpression.disabled" severity="warn"></app-tag>
+          }
+        </div>
+      </div>
+
+      <div class="rule-expression-node__actions">
+        <app-button
+          icon="pi pi-ellipsis-v"
+          label="tradeBot.ruleExpression.action.more"
+          severity="secondary"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="toggleMore()"
+        ></app-button>
+      </div>
+    </div>
+
+    @if (moreOpen()) {
+      <div class="rule-node-menu" role="menu">
+        <app-button icon="pi pi-sitemap" label="tradeBot.ruleExpression.action.wrapAnd" severity="secondary" [text]="true" (buttonClick)="wrap('AND')"></app-button>
+        <app-button icon="pi pi-share-alt" label="tradeBot.ruleExpression.action.wrapOr" severity="secondary" [text]="true" (buttonClick)="wrap('OR')"></app-button>
+        <app-button icon="pi pi-code" label="tradeBot.ruleExpression.action.wrapXor" severity="secondary" [text]="true" (buttonClick)="wrap('XOR')"></app-button>
+        <app-button icon="pi pi-ban" label="tradeBot.ruleExpression.action.wrapNot" severity="secondary" [text]="true" (buttonClick)="wrapNot()"></app-button>
+        <app-button icon="pi pi-copy" label="tradeBot.ruleExpression.action.duplicate" severity="secondary" [text]="true" (buttonClick)="duplicate()"></app-button>
+        <app-button
+          [icon]="node.disabled ? 'pi pi-eye' : 'pi pi-eye-slash'"
+          [label]="node.disabled ? 'tradeBot.ruleExpression.action.enable' : 'tradeBot.ruleExpression.action.disable'"
+          severity="secondary"
+          [text]="true"
+          (buttonClick)="toggle()"
+        ></app-button>
+        <app-button icon="pi pi-trash" label="tradeBot.action.delete" severity="danger" [text]="true" (buttonClick)="remove()"></app-button>
+      </div>
+    }
+
+    @if (nodeIssues(node).length) {
+      <div class="rule-expression-node__issues">
+        @for (issue of nodeIssues(node); track issue.message + issue.path) {
+          <div
+            class="rule-expression-issue"
+            [class.rule-expression-issue--warning]="issue.severity === 'warning'"
+          >
+            {{ issue.message | translateContent }}
+          </div>
+        }
+      </div>
+    }
+
+    @if (children(node).length) {
+      <div class="rule-expression-node__children">
+        @for (child of children(node); track child.id) {
+          <app-rule-expression-node
+            [node]="child"
+            [selectedNodeId]="selectedNodeId"
+            [issues]="issues"
+            [indicatorConfigs]="indicatorConfigs"
+            [ruleConfigs]="ruleConfigs"
+            [currentRuleId]="currentRuleId"
+            [readonly]="readonly"
+            [disabled]="disabled"
+            (selectNode)="selectNode.emit($event)"
+            (nodeChange)="nodeChange.emit($event)"
+            (addChild)="addChild.emit($event)"
+            (removeNode)="removeNode.emit($event)"
+            (duplicateNode)="duplicateNode.emit($event)"
+            (toggleDisabled)="toggleDisabled.emit($event)"
+            (wrapNode)="wrapNode.emit($event)"
+          ></app-rule-expression-node>
+        }
+      </div>
+    }
+
+    @if (canAddChild(node)) {
+      <div class="rule-expression-node__footer">
+        <app-button
+          icon="pi pi-plus"
+          label="tradeBot.ruleExpression.action.condition"
+          severity="success"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="add('condition')"
+        ></app-button>
+        <app-button
+          icon="pi pi-sitemap"
+          label="tradeBot.ruleExpression.action.groupAnd"
+          severity="secondary"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="add('group', 'AND')"
+        ></app-button>
+        <app-button
+          icon="pi pi-share-alt"
+          label="tradeBot.ruleExpression.action.groupOr"
+          severity="secondary"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="add('group', 'OR')"
+        ></app-button>
+        <app-button
+          icon="pi pi-code"
+          label="tradeBot.ruleExpression.action.groupXor"
+          severity="secondary"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="add('group', 'XOR')"
+        ></app-button>
+        <app-button
+          icon="pi pi-link"
+          label="tradeBot.ruleExpression.action.ruleRef"
+          severity="secondary"
+          [text]="true"
+          [disabled]="readonlyOrDisabled"
+          (buttonClick)="add('ruleRef')"
+        ></app-button>
+      </div>
+    }
+  </article>
+}

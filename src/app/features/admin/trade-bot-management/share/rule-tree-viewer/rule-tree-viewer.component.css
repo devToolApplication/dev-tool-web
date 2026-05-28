@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+.rule-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rule-tree-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-card-bg);
+}
+
+.rule-tree-heading,
+.rule-tree-controls,
+.rule-tree-actions,
+.rule-tree-summary,
+.rule-tree-meta,
+.rule-tree-node-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rule-tree-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.rule-tree-heading {
+  justify-content: space-between;
+}
+
+.rule-tree-controls {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) minmax(14rem, auto) auto;
+  align-items: end;
+}
+
+.rule-tree-summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface-soft);
+  color: var(--app-text-soft);
+  font-size: 0.75rem;
+}
+
+.rule-tree-summary-item--passed {
+  border-color: var(--app-control-success-border);
+  color: var(--app-control-success-text);
+}
+
+.rule-tree-summary-item--failed {
+  border-color: var(--app-control-danger-border);
+  color: var(--app-control-danger-text);
+}
+
+.rule-tree-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: min(64vh, 46rem);
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.rule-tree-node {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.9fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-left-width: 0.25rem;
+  border-radius: 8px;
+  background: var(--app-card-bg);
+}
+
+.rule-tree-node--passed {
+  border-left-color: var(--app-control-success-text);
+}
+
+.rule-tree-node--failed {
+  border-left-color: var(--app-control-danger-text);
+}
+
+.rule-tree-node--unknown {
+  border-left-color: var(--app-text-muted);
+}
+
+.rule-tree-node-main {
+  display: flex;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.rule-tree-toggle-spacer {
+  flex: 0 0 2.25rem;
+}
+
+.rule-tree-node-copy,
+.rule-tree-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rule-tree-code {
+  font-weight: 700;
+}
+
+.rule-tree-path {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.rule-tree-meta {
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.rule-tree-message {
+  padding: 0.625rem;
+  border-radius: 8px;
+  background: var(--app-surface-soft);
+  font-size: 0.875rem;
+}
+
+.rule-tree-empty {
+  border: 1px dashed var(--app-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--app-card-bg);
+}
+
+@media (max-width: 64rem) {
+  .rule-tree-controls,
+  .rule-tree-node {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-tree-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 40rem) {
+  .rule-tree-node-main {
+    padding-left: 0 !important;
+  }
+}

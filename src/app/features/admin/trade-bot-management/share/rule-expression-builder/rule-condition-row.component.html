@@ -1,0 +1,124 @@
+<article
+  class="rule-condition-row"
+  [class.rule-condition-row--selected]="selected"
+  [class.rule-condition-row--disabled]="node.disabled"
+  [class.rule-condition-row--invalid]="nodeIssues().length > 0"
+  [class.rule-condition-row--range]="slots().length > 2"
+  (click)="select()"
+>
+  <div class="rule-condition-row__main">
+    <span class="rule-condition-row__handle pi pi-bars" aria-hidden="true"></span>
+
+    @for (slot of slots(); track slot.name; let index = $index) {
+      <app-rule-expression-operand-picker
+        [label]="slot.label"
+        [placeholder]="slot.label"
+        [operand]="operandAt(index)"
+        [allowedValueTypes]="slot.allowedValueTypes"
+        [indicatorConfigs]="indicatorConfigs"
+        [ruleConfigs]="ruleConfigs"
+        [currentRuleId]="currentRuleId"
+        [readonly]="readonly"
+        [disabled]="disabled"
+        (operandChange)="updateOperand(index, $event)"
+      ></app-rule-expression-operand-picker>
+
+      @if (index === 0) {
+        <app-select
+          label="tradeBot.ruleExpression.field.operator"
+          [options]="operatorOptions"
+          [value]="node.operator"
+          [disabled]="readonlyOrDisabled"
+          (valueChange)="updateOperator($event)"
+        ></app-select>
+      }
+    } @empty {
+      <app-select
+        label="tradeBot.ruleExpression.field.operator"
+        [options]="operatorOptions"
+        [value]="node.operator"
+        [disabled]="readonlyOrDisabled"
+        (valueChange)="updateOperator($event)"
+      ></app-select>
+    }
+
+    <app-button
+      icon="pi pi-ellipsis-v"
+      label=""
+      tooltip="tradeBot.ruleExpression.action.more"
+      ariaLabel="tradeBot.ruleExpression.action.more"
+      styleClass="rule-condition-row__more-button"
+      severity="secondary"
+      [text]="true"
+      [disabled]="readonlyOrDisabled"
+      (buttonClick)="toggleMore()"
+    ></app-button>
+  </div>
+
+  @if (quickParams().length) {
+    <div class="rule-condition-row__params">
+      @for (param of quickParams(); track param.key) {
+        @if (param.type === 'number') {
+          <app-input-number
+            [label]="param.label"
+            [suffix]="param.suffix"
+            [helpText]="param.helpText"
+            [value]="$any(quickParamValue(param))"
+            [disabled]="readonlyOrDisabled"
+            (valueChange)="updateQuickParam(param, $event)"
+          ></app-input-number>
+        } @else if (param.type === 'boolean') {
+          <app-select
+            [label]="param.label"
+            [options]="[
+              { label: 'true', value: true },
+              { label: 'false', value: false }
+            ]"
+            [value]="$any(quickParamValue(param))"
+            [disabled]="readonlyOrDisabled"
+            (valueChange)="updateQuickParam(param, $event)"
+          ></app-select>
+        } @else {
+          <app-input-text
+            [label]="param.label"
+            [helpText]="param.helpText"
+            [value]="$any(quickParamValue(param) || '')"
+            [disabled]="readonlyOrDisabled"
+            (valueChange)="updateQuickParam(param, $event)"
+          ></app-input-text>
+        }
+      }
+    </div>
+  }
+
+  @if (moreOpen()) {
+    <div class="rule-node-menu" role="menu">
+      <app-button icon="pi pi-sitemap" label="tradeBot.ruleExpression.action.wrapAnd" severity="secondary" [text]="true" (buttonClick)="wrap('AND')"></app-button>
+      <app-button icon="pi pi-share-alt" label="tradeBot.ruleExpression.action.wrapOr" severity="secondary" [text]="true" (buttonClick)="wrap('OR')"></app-button>
+      <app-button icon="pi pi-code" label="tradeBot.ruleExpression.action.wrapXor" severity="secondary" [text]="true" (buttonClick)="wrap('XOR')"></app-button>
+      <app-button icon="pi pi-ban" label="tradeBot.ruleExpression.action.wrapNot" severity="secondary" [text]="true" (buttonClick)="wrapNot()"></app-button>
+      <app-button icon="pi pi-copy" label="tradeBot.ruleExpression.action.duplicate" severity="secondary" [text]="true" (buttonClick)="duplicate()"></app-button>
+      <app-button
+        [icon]="node.disabled ? 'pi pi-eye' : 'pi pi-eye-slash'"
+        [label]="node.disabled ? 'tradeBot.ruleExpression.action.enable' : 'tradeBot.ruleExpression.action.disable'"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="requestToggleDisabled()"
+      ></app-button>
+      <app-button icon="pi pi-trash" label="tradeBot.action.delete" severity="danger" [text]="true" (buttonClick)="remove()"></app-button>
+    </div>
+  }
+
+  @if (nodeIssues().length) {
+    <div class="rule-expression-node__issues">
+      @for (issue of nodeIssues(); track issue.message + issue.path) {
+        <div
+          class="rule-expression-issue"
+          [class.rule-expression-issue--warning]="issue.severity === 'warning'"
+        >
+          {{ issue.message | translateContent }}
+        </div>
+      }
+    </div>
+  }
+</article>

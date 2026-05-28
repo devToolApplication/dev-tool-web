@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.trade-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 60;
+  width: min(34rem, 100vw);
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: var(--app-shadow-lg);
+}

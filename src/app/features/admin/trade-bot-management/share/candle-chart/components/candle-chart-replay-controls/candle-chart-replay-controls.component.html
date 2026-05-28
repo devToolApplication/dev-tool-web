@@ -1,0 +1,57 @@
+<div class="candle-chart-toolbar__group candle-chart-toolbar__group--replay">
+  <app-button
+    label=""
+    icon="pi pi-step-backward"
+    styleClass="candle-chart-icon-button"
+    tooltip="tradeBot.chart.replay.first"
+    (buttonClick)="first.emit()"
+  />
+  <app-button
+    label=""
+    icon="pi pi-chevron-left"
+    styleClass="candle-chart-icon-button"
+    tooltip="tradeBot.chart.replay.previous"
+    (buttonClick)="previous.emit()"
+  />
+  @if (isPlaying) {
+    <app-button
+      label=""
+      icon="pi pi-pause"
+      styleClass="candle-chart-icon-button candle-chart-icon-button--primary"
+      tooltip="tradeBot.chart.replay.pause"
+      (buttonClick)="pause.emit()"
+    />
+  } @else {
+    <app-button
+      label=""
+      icon="pi pi-play"
+      styleClass="candle-chart-icon-button candle-chart-icon-button--primary"
+      tooltip="tradeBot.chart.replay.play"
+      (buttonClick)="play.emit()"
+    />
+  }
+  <app-button
+    label=""
+    icon="pi pi-chevron-right"
+    styleClass="candle-chart-icon-button"
+    tooltip="tradeBot.chart.replay.next"
+    (buttonClick)="next.emit()"
+  />
+  <app-button
+    label=""
+    icon="pi pi-step-forward"
+    styleClass="candle-chart-icon-button"
+    tooltip="tradeBot.chart.replay.last"
+    (buttonClick)="last.emit()"
+  />
+
+  <app-select
+    class="candle-chart-speed-select"
+    [options]="speedOptions"
+    optionLabel="label"
+    optionValue="value"
+    [value]="speedMs"
+    (valueChange)="onSpeedChange($event)"
+    [ariaLabel]="'tradeBot.chart.replay.speed'"
+  ></app-select>
+</div>

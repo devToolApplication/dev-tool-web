@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, inject } from '@angular/core';
 import { SelectOption } from '../select/select';
 import { BaseInput, provideValueAccessor } from '../base-input';
 
@@ -45,6 +45,15 @@ export class SelectMulti extends BaseInput<Array<string | number>> {
       current.push(val as string | number);
     }
     this.onChange(current);
+  }
+
+  private readonly host = inject(ElementRef);
+
+  @HostListener('document:click', ['$event.target'])
+  onClickOutside(target: EventTarget | null): void {
+    if (this.dropdownOpen && target instanceof HTMLElement && !this.host.nativeElement.contains(target)) {
+      this.dropdownOpen = false;
+    }
   }
 
   removeItem(label: string): void {

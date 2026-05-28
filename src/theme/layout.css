@@ -10,3 +10,40 @@ body {
   background: var(--app-bg);
   color: var(--app-text);
 }
+
+@keyframes app-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.app-field--invalid input,
+.app-field--invalid textarea,
+.app-field--invalid select {
+  border-color: var(--app-control-danger-text) !important;
+}
+
+.app-field--invalid label {
+  color: var(--app-control-danger-text) !important;
+}
+
+.app-field--disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
