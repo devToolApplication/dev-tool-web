@@ -2,10 +2,6 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, withHashLocation } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { providePrimeNG } from 'primeng/config';
-
-import { APP_THEME_PRESETS } from '../../core/ui-services/theme-presets';
 
 export function provideSharedTesting(): Array<Provider | EnvironmentProviders> {
   installMatchMediaMock();
@@ -15,17 +11,7 @@ export function provideSharedTesting(): Array<Provider | EnvironmentProviders> {
   return [
     provideHttpClient(),
     provideNoopAnimations(),
-    provideRouter([], withHashLocation()),
-    MessageService,
-    providePrimeNG({
-      overlayAppendTo: 'body',
-      theme: {
-        preset: APP_THEME_PRESETS.aura,
-        options: {
-          darkModeSelector: '[data-theme="dark"]'
-        }
-      }
-    })
+    provideRouter([], withHashLocation())
   ];
 }
 

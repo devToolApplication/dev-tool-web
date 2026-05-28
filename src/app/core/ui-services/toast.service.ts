@@ -1,18 +1,25 @@
-import { Injectable } from '@angular/core';
-import { MessageService } from 'primeng/api';
+import { Injectable, signal } from '@angular/core';
 import { I18nService } from './i18n.service';
 
 type ToastSeverity = 'success' | 'error' | 'info';
+
+export interface ToastMessage {
+  id: number;
+  severity: ToastSeverity;
+  summary: string;
+  detail?: string;
+  life: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
   private readonly recentMessages = new Map<string, number>();
   private readonly dedupeWindowMs = 2500;
+  private nextId = 0;
 
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly i18nService: I18nService
-  ) {}
+  readonly messages = signal<ToastMessage[]>([]);
+
+  constructor(private readonly i18nService: I18nService) {}
 
   success(summary: string, detail?: string): void {
     this.show('success', summary, detail);
@@ -26,6 +33,10 @@ export class ToastService {
     this.show('info', summary, detail);
   }
 
+  dismiss(id: number): void {
+    this.messages.update(msgs => msgs.filter(m => m.id !== id));
+  }
+
   private show(severity: ToastSeverity, summary: string, detail?: string): void {
     const translatedSummary = this.i18nService.t(summary);
     const translatedDetail = this.i18nService.t(detail);
@@ -36,7 +47,12 @@ export class ToastService {
     }
 
     this.recentMessages.set(dedupeKey, Date.now());
-    this.messageService.add({ severity, summary: translatedSummary, detail: translatedDetail, life: 3000 });
+    const life = 3000;
+    const id = this.nextId++;
+    const msg: ToastMessage = { id, severity, summary: translatedSummary, detail: translatedDetail, life };
+    this.messages.update(msgs => [...msgs, msg]);
+
+    setTimeout(() => this.dismiss(id), life);
   }
 
   private isDuplicate(dedupeKey: string): boolean {

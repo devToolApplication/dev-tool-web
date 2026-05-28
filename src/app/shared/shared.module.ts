@@ -3,50 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AvatarModule } from 'primeng/avatar';
-import { AutoCompleteModule } from 'primeng/autocomplete';
-import { BadgeModule } from 'primeng/badge';
-import { BreadcrumbModule } from 'primeng/breadcrumb';
-import { ButtonModule } from 'primeng/button';
-import { DatePickerModule } from 'primeng/datepicker';
-import { FieldsetModule } from 'primeng/fieldset';
-import { FileUploadModule } from 'primeng/fileupload';
-import { FloatLabel } from 'primeng/floatlabel';
-import { FluidModule } from 'primeng/fluid';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ColorPickerModule } from 'primeng/colorpicker';
-import { InputTextModule } from 'primeng/inputtext';
-import { DialogModule } from 'primeng/dialog';
-import { MessageModule } from 'primeng/message';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { PanelModule } from 'primeng/panel';
-import { PanelMenuModule } from 'primeng/panelmenu';
-import { PaginatorModule } from 'primeng/paginator';
-import { PasswordModule } from 'primeng/password';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { RippleModule } from 'primeng/ripple';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { SelectModule } from 'primeng/select';
-import { SliderModule } from 'primeng/slider';
-import { SpeedDialModule } from 'primeng/speeddial';
-import { SplitButtonModule } from 'primeng/splitbutton';
-import { TagModule } from 'primeng/tag';
-import { TableModule } from 'primeng/table';
-import { TabsModule } from 'primeng/tabs';
-import { TextareaModule } from 'primeng/textarea';
-import { TieredMenuModule } from 'primeng/tieredmenu';
-import { TimelineModule } from 'primeng/timeline';
-import { ToastModule } from 'primeng/toast';
-import { TooltipModule } from 'primeng/tooltip';
-import { ToggleButtonModule } from 'primeng/togglebutton';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ToolbarModule } from 'primeng/toolbar';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AvatarComponent } from './component/avatar/avatar';
 import { DialogComponent } from './component/dialog/dialog';
 import { Breadcrumb } from './component/breadcrumb/breadcrumb';
@@ -322,51 +278,7 @@ export const SHARED_UI_COMPONENTS = [
     CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule,
-    AutoCompleteModule,
-    ButtonModule,
-    SpeedDialModule,
-    SplitButtonModule,
-    CheckboxModule,
-    ConfirmDialogModule,
-    DatePickerModule,
-    FileUploadModule,
-    InputNumberModule,
-    ColorPickerModule,
-    InputTextModule,
-    DialogModule,
-    PaginatorModule,
-    PasswordModule,
-    RadioButtonModule,
-    SelectButtonModule,
-    MultiSelectModule,
-    PanelModule,
-    TreeSelectModule,
-    SelectModule,
-    SliderModule,
-    ToggleButtonModule,
-    ToggleSwitchModule,
-    BreadcrumbModule,
-    TextareaModule,
-    FloatLabel,
-    FluidModule,
-    MessageModule,
-    FieldsetModule,
-    TableModule,
-    PanelMenuModule,
-    BadgeModule,
-    RippleModule,
-    ToastModule,
-    TooltipModule,
-    ProgressSpinnerModule,
-    TagModule,
-    ToolbarModule,
-    AvatarModule,
-    TieredMenuModule,
-    TabsModule,
-    TimelineModule,
-    IconFieldModule,
-    InputIconModule
+    ReactiveFormsModule
   ],
   exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })

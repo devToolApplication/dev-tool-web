@@ -1,18 +1,26 @@
 import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { MenuItem } from 'primeng/api';
 import { filter } from 'rxjs';
 import { PermissionService } from '../../../core/auth/permission.service';
 import { environment } from '../../../../enviroment/environment';
 
-export interface AppMenuItem extends MenuItem {
+export interface AppMenuItem {
+  label?: string;
+  icon?: string;
+  routerLink?: string | any[];
+  url?: string;
+  target?: string;
+  disabled?: boolean;
+  visible?: boolean;
+  separator?: boolean;
   badge?: string;
   hidden?: boolean;
   permissions?: readonly string[];
   shortcut?: string;
   groupColor?: string;
   items?: AppMenuItem[];
+  command?: (event?: unknown) => void;
 }
 
 @Component({

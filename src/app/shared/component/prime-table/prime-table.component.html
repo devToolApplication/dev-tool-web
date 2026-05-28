@@ -1,14 +1,7 @@
-<p-table
-  [value]="value"
-  [loading]="loading"
-  [paginator]="paginator"
-  [rows]="rows"
-  [rowsPerPageOptions]="rowsPerPageOptions"
-  [rowTrackBy]="rowTrackBy"
-  [responsiveLayout]="responsiveLayout"
-  [scrollable]="scrollable"
-  [scrollHeight]="scrollHeight"
-  [styleClass]="styleClass"
->
-  <ng-content></ng-content>
-</p-table>
+<div class="rounded-2xl border border-[var(--app-border)] overflow-hidden shadow-[var(--app-shadow-md)]" [class]="styleClass">
+  <div class="overflow-x-auto" [class.opacity-60]="loading" [style.max-height]="scrollable ? scrollHeight : null">
+    <table class="w-full text-sm">
+      <ng-content></ng-content>
+    </table>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import type { MenuItem } from 'primeng/api';
+import type { AppMenuItem } from '../button-split/button-split';
 
 import { Breadcrumb } from './breadcrumb';
 

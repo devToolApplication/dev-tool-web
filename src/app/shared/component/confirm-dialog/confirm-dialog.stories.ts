@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig } from '@storybook/angular';
 import { PrimeConfirmDialogComponent } from './confirm-dialog';
-import { ConfirmationService } from 'primeng/api';
 
 const meta: Meta<PrimeConfirmDialogComponent> = {
   title: 'Shared/Components/Overlay/ConfirmDialog',

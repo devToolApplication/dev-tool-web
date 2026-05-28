@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TreeNode } from 'primeng/api';
-import { PaginatorState } from 'primeng/paginator';
+import { TreeNodeOption } from '../../shared/component/select-tree/select-tree';
+import { AppPaginatorState } from '../../shared/component/paginator/paginator';
 import { SelectOption } from '../../shared/component/select/select';
 import { AppMenuItem } from '../../shared/component/button-split/button-split';
 import { ActionToolbarAction } from '../../shared/ui/layout/action-toolbar/action-toolbar.component';
@@ -70,7 +70,7 @@ export class DemoComponent {
 
   treeValue: string | string[] | null = null;
   treeSelectionMode: 'single' | 'multiple' | 'checkbox' = 'single';
-  treeOptions: TreeNode[] = [
+  treeOptions: TreeNodeOption[] = [
     {
       key: 'dev',
       label: 'Development',
@@ -423,7 +423,7 @@ export class DemoComponent {
     this.speedDialDirection = mode === 'linear' ? 'up' : 'right';
   }
 
-  onPageChange(state: PaginatorState): void {
+  onPageChange(state: AppPaginatorState): void {
     this.paginatorFirst = state.first ?? 0;
     this.paginatorRows = state.rows ?? 10;
   }

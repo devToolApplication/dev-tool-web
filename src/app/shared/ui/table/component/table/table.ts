@@ -352,6 +352,19 @@ export class TableComponent implements OnChanges {
     });
   }
 
+  onSortColumn(field: string): void {
+    if (this.sortField === field) {
+      this.sortOrder = this.sortOrder === 1 ? -1 : this.sortOrder === -1 ? 0 : 1;
+    } else {
+      this.sortField = field;
+      this.sortOrder = 1;
+    }
+    if (this.sortOrder === 0) {
+      this.sortField = null;
+    }
+    this.onSort({ field: this.sortField ?? undefined, order: this.sortOrder });
+  }
+
   onSearch(filters: Record<string, any>): void {
     if (this.loading) {
       return;

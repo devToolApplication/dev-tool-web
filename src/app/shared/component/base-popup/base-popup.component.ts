@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -6,104 +6,94 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
   selector: 'app-base-popup',
   standalone: false,
   styles: [`
-    ::ng-deep .base-popup.p-dialog {
-      border: 1px solid var(--app-border-strong);
-      border-radius: 1.2rem;
-      background:
-        var(--app-card-highlight),
-        var(--app-card-bg-strong);
-      color: var(--app-text);
-      box-shadow: var(--app-shadow-overlay);
-      backdrop-filter: blur(18px);
-      overflow: hidden;
-    }
-
-    ::ng-deep .base-popup .p-dialog-header,
-    ::ng-deep .base-popup .p-dialog-content,
-    ::ng-deep .base-popup .p-dialog-footer {
-      background: var(--app-transparent);
-      color: inherit;
-    }
-
-    ::ng-deep .base-popup .p-dialog-header {
-      padding: 1.35rem 1.4rem 0.85rem;
-      border-bottom: 1px solid var(--app-border-soft);
-    }
-
-    ::ng-deep .base-popup .p-dialog-content {
-      padding: 1.1rem 1.4rem;
-    }
-
-    ::ng-deep .base-popup .p-dialog-footer {
-      padding: 0.95rem 1.4rem 1.25rem;
-      border-top: 1px solid var(--app-border-soft);
-    }
-
-    ::ng-deep .base-popup .p-dialog-header-icon {
-      color: var(--app-text-muted);
-      background: var(--app-surface-soft);
-      border: 1px solid var(--app-border-soft);
-    }
-
-    ::ng-deep .base-popup .p-dialog-header-icon:hover {
-      background: var(--app-surface-alt);
-      color: var(--app-text);
-    }
+    :host { display: contents; }
   `],
   template: `
-    <p-dialog
-      [visible]="visible"
-      [modal]="modal"
-      [appendTo]="appendTo"
-      [baseZIndex]="baseZIndex"
-      [position]="position"
-      [maskStyleClass]="maskStyleClass"
-      [dismissableMask]="dismissableMask"
-      [closeOnEscape]="closeOnEscape"
-      [draggable]="false"
-      [resizable]="false"
-      [maximizable]="maximizable"
-      [closable]="showCloseIcon"
-      [styleClass]="resolvedStyleClass"
-      [style]="{ width: popupWidth }"
-      (visibleChange)="onVisibleChange($event)"
-      (onHide)="onHide()"
-    >
-      <ng-template pTemplate="header">
-        <div class="flex w-full items-center justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <ng-content select="[popup-header]"></ng-content>
-            @if (!hasProjectedHeader) {
-              <div class="flex flex-col gap-1">
-                <span class="text-lg font-semibold">{{ header | translateContent }}</span>
-                <small *ngIf="subheader" class="app-text-muted">{{ subheader | translateContent }}</small>
+    @if (visible) {
+      <div class="fixed inset-0 z-[2400] flex items-center justify-center" [class]="maskStyleClass"
+        [ngClass]="{
+          'items-start pt-8': position === 'top',
+          'items-end pb-8': position === 'bottom'
+        }"
+      >
+        @if (modal) {
+          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="dismissableMask ? onDismiss() : null"></div>
+        }
+
+        <div
+          role="dialog"
+          [attr.aria-label]="resolvedAriaLabel"
+          [attr.aria-modal]="modal"
+          class="relative z-10 flex max-h-[90vh] flex-col rounded-2xl border border-[var(--app-border-strong)] bg-[var(--app-overlay-bg)] shadow-2xl backdrop-blur-lg animate-[app-dialog-in_200ms_ease-out]"
+          [class]="resolvedStyleClass"
+          [style.width]="popupWidth"
+          (keydown.escape)="closeOnEscape ? onDismiss() : null"
+        >
+          <!-- Header -->
+          <header class="flex items-center justify-between gap-3 border-b border-[var(--app-border-soft)] px-5 py-3.5">
+            <div class="min-w-0 flex-1">
+              <ng-content select="[popup-header]"></ng-content>
+              @if (!hasProjectedHeader) {
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-lg font-semibold text-[var(--app-text)]">{{ header | translateContent }}</span>
+                  @if (subheader) {
+                    <small class="text-[var(--app-text-muted)]">{{ subheader | translateContent }}</small>
+                  }
+                </div>
+              }
+            </div>
+            <div class="flex items-center gap-2">
+              @if (loading) {
+                <span class="inline-flex items-center gap-1 rounded-full bg-[var(--app-control-info-bg)] px-2 py-0.5 text-xs text-[var(--app-control-info-text)] border border-[var(--app-control-info-border)]">
+                  <i class="pi pi-spinner pi-spin text-[0.6rem]"></i> loading
+                </span>
+              }
+              @if (maximizable) {
+                <button type="button" class="rounded-md p-1.5 text-[var(--app-text-muted)] border border-[var(--app-border-soft)] bg-[var(--app-surface-soft)] hover:bg-[var(--app-surface-alt)] hover:text-[var(--app-text)] transition-colors" (click)="maximized = !maximized">
+                  <i [class]="maximized ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" class="text-sm"></i>
+                </button>
+              }
+              @if (showCloseIcon) {
+                <button type="button" class="rounded-md p-1.5 text-[var(--app-text-muted)] border border-[var(--app-border-soft)] bg-[var(--app-surface-soft)] hover:bg-[var(--app-surface-alt)] hover:text-[var(--app-text)] transition-colors" aria-label="Close" (click)="onDismiss()">
+                  <i class="pi pi-times text-sm"></i>
+                </button>
+              }
+            </div>
+          </header>
+
+          <!-- Content -->
+          <div class="flex-1 overflow-y-auto px-5 py-4">
+            <div class="flex flex-col gap-4">
+              <ng-content></ng-content>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          @if (showFooter) {
+            <footer class="flex items-center justify-between gap-3 border-t border-[var(--app-border-soft)] px-5 py-3.5">
+              <ng-content select="[popup-footer-start]"></ng-content>
+              <div class="flex items-center gap-2 ml-auto">
+                @if (showDefaultCancel) {
+                  <button type="button" class="rounded-lg px-4 py-2 text-sm font-medium text-[var(--app-text-soft)] hover:text-[var(--app-primary)] hover:bg-[var(--app-chart-primary-fill)] transition-all" [disabled]="loading" (click)="cancel.emit()">
+                    {{ cancelLabel | translateContent }}
+                  </button>
+                }
+                @if (showDefaultConfirm) {
+                  <button type="button" class="rounded-lg bg-[var(--app-primary)] px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition-all disabled:opacity-60" [disabled]="loading" (click)="confirm.emit()">
+                    @if (loading) { <i class="pi pi-spinner pi-spin mr-1"></i> }
+                    {{ confirmLabel | translateContent }}
+                  </button>
+                }
+                <ng-content select="[popup-footer]"></ng-content>
               </div>
-            }
-          </div>
-          <app-tag *ngIf="loading" [value]="'loading' | translateContent" severity="info"></app-tag>
+            </footer>
+          }
         </div>
-      </ng-template>
-
-      <div class="flex flex-col gap-4">
-        <ng-content></ng-content>
       </div>
-
-      @if (showFooter) {
-      <ng-template pTemplate="footer">
-        <div class="flex items-center justify-between gap-3">
-          <ng-content select="[popup-footer-start]"></ng-content>
-          <div class="flex items-center gap-2">
-            <button *ngIf="showDefaultCancel" pButton type="button" class="p-button-text" [disabled]="loading" (click)="cancel.emit()">{{ cancelLabel | translateContent }}</button>
-            <button *ngIf="showDefaultConfirm" pButton type="button" [loading]="loading" (click)="confirm.emit()">{{ confirmLabel | translateContent }}</button>
-            <ng-content select="[popup-footer]"></ng-content>
-          </div>
-        </div>
-      </ng-template>
-      }
-    </p-dialog>
+    }
   `
 })
-export class BasePopupComponent implements AfterViewChecked {
+export class BasePopupComponent {
   @Input() visible = false;
   @Input() header = '';
   @Input() subheader = '';
@@ -132,15 +122,7 @@ export class BasePopupComponent implements AfterViewChecked {
   @Output() cancel = new EventEmitter<void>();
   @Output() hide = new EventEmitter<void>();
 
-  constructor(private readonly host: ElementRef<HTMLElement>) {}
-
-  ngAfterViewChecked(): void {
-    const dialog = this.host.nativeElement.querySelector<HTMLElement>('.base-popup[role="dialog"]');
-    if (!dialog || dialog.getAttribute('aria-label')) {
-      return;
-    }
-    dialog.setAttribute('aria-label', this.resolvedAriaLabel);
-  }
+  maximized = false;
 
   get resolvedAriaLabel(): string {
     return this.header || this.subheader || 'dialog';
@@ -151,34 +133,27 @@ export class BasePopupComponent implements AfterViewChecked {
   }
 
   get resolvedStyleClass(): string {
-    return ['base-popup', this.sizeClass, this.styleClass].filter(Boolean).join(' ');
+    const classes = [this.sizeClass, this.styleClass].filter(Boolean).join(' ');
+    if (this.maximized) return classes + ' !w-[96vw] !max-h-[96vh]';
+    return classes;
   }
 
   get popupWidth(): string {
-    if (this.width) {
-      return this.width;
-    }
+    if (this.maximized) return '96vw';
+    if (this.width) return this.width;
     switch (this.size) {
-      case 'sm':
-        return '28rem';
-      case 'lg':
-        return '58rem';
-      case 'xl':
-        return '78rem';
+      case 'sm': return '28rem';
+      case 'lg': return '58rem';
+      case 'xl': return '78rem';
       case 'md':
-      default:
-        return '42rem';
+      default: return '42rem';
     }
   }
 
-  onVisibleChange(visible: boolean): void {
-    this.visibleChange.emit(visible);
-    if (!visible) {
-      this.cancel.emit();
-    }
-  }
-
-  onHide(): void {
+  onDismiss(): void {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.cancel.emit();
     this.hide.emit();
   }
 }

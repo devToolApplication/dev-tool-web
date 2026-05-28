@@ -1,20 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { MessageService } from 'primeng/api';
 
 import { I18nService } from './i18n.service';
 import { ToastService } from './toast.service';
 
 describe('ToastService', () => {
   let service: ToastService;
-  let messageService: { add: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    messageService = { add: vi.fn() };
-
     TestBed.configureTestingModule({
       providers: [
         ToastService,
-        { provide: MessageService, useValue: messageService },
         { provide: I18nService, useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') } }
       ]
     });
@@ -32,8 +27,8 @@ describe('ToastService', () => {
     service.error('loadError');
     service.error('loadError');
 
-    expect(messageService.add).toHaveBeenCalledTimes(1);
-    expect(messageService.add).toHaveBeenCalledWith(
+    expect(service.messages().length).toBe(1);
+    expect(service.messages()[0]).toEqual(
       expect.objectContaining({ severity: 'error', summary: 'loadError' })
     );
   });
@@ -45,6 +40,6 @@ describe('ToastService', () => {
     service.info('saved');
     service.info('saved');
 
-    expect(messageService.add).toHaveBeenCalledTimes(2);
+    expect(service.messages().length).toBe(2);
   });
 });

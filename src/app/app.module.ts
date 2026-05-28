@@ -4,19 +4,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutes } from './app.routes';
 import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { providePrimeNG } from 'primeng/config';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './core/http/auth.interceptor';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { APP_THEME_PRESETS } from './core/ui-services/theme-presets';
 import { KeycloakService } from './core/auth/keycloak.service';
 
-// DEV NOTE: Keycloak APP_INITIALIZER đang được comment để bypass login
-// trong môi trường dev/demo. Khi cần bật lại, bỏ comment hàm này và
-// block APP_INITIALIZER ở providers bên dưới.
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () => keycloak.init();
 }
@@ -27,15 +18,10 @@ export function initializeKeycloak(keycloak: KeycloakService) {
     BrowserModule,
     HttpClientModule,
     AppRoutes,
-    SharedModule,
-    ToastModule,
-    ConfirmDialogModule,
-    ProgressSpinnerModule
+    SharedModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // Để bypass login Keycloak khi dev/demo.
-    // Khi cần bật lại, chỉ cần bỏ comment block APP_INITIALIZER bên dưới.
     {
       provide: APP_INITIALIZER,
       useFactory: initializeKeycloak,
@@ -46,18 +32,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    },
-    MessageService,
-    ConfirmationService,
-    providePrimeNG({
-      overlayAppendTo: 'body',
-      theme: {
-        preset: APP_THEME_PRESETS.aura,
-        options: {
-          darkModeSelector: '[data-theme="dark"]'
-        }
-      }
-    })
+    }
   ],
   bootstrap: [AppComponent]
 })

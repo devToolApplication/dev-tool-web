@@ -1,14 +1,27 @@
-<p-toast
-  [key]="key"
-  [position]="position"
-  [baseZIndex]="baseZIndex"
-  [autoZIndex]="autoZIndex"
-  [preventOpenDuplicates]="preventOpenDuplicates"
-  [preventDuplicates]="preventDuplicates"
-  [showTransformOptions]="showTransformOptions"
-  [hideTransformOptions]="hideTransformOptions"
-  [showTransitionOptions]="showTransitionOptions"
-  [hideTransitionOptions]="hideTransitionOptions"
-  [life]="life"
-  [styleClass]="severity ? 'app-toast--' + severity : undefined"
-/>
+<div class="fixed top-4 right-4 z-[2600] flex flex-col gap-2 max-w-sm">
+  @for (msg of toastService.messages(); track msg.id) {
+    <div
+      class="flex items-start gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-md animate-[slideIn_200ms_ease-out]"
+      [ngClass]="{
+        'bg-[var(--app-control-success-bg)] border-[var(--app-control-success-border)] text-[var(--app-control-success-text)]': msg.severity === 'success',
+        'bg-[var(--app-control-danger-bg)] border-[var(--app-control-danger-border)] text-[var(--app-control-danger-text)]': msg.severity === 'error',
+        'bg-[var(--app-control-info-bg)] border-[var(--app-control-info-border)] text-[var(--app-control-info-text)]': msg.severity === 'info'
+      }"
+    >
+      <i [ngClass]="{
+        'pi pi-check-circle': msg.severity === 'success',
+        'pi pi-times-circle': msg.severity === 'error',
+        'pi pi-info-circle': msg.severity === 'info'
+      }" class="mt-0.5"></i>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium">{{ msg.summary }}</div>
+        @if (msg.detail) {
+          <div class="text-xs opacity-80 mt-0.5">{{ msg.detail }}</div>
+        }
+      </div>
+      <button type="button" class="opacity-60 hover:opacity-100 transition-opacity" (click)="toastService.dismiss(msg.id)">
+        <i class="pi pi-times text-xs"></i>
+      </button>
+    </div>
+  }
+</div>

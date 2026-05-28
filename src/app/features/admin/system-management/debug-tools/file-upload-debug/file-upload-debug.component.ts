@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FileUploadHandlerEvent } from 'primeng/fileupload';
+import { AppFileUploadHandlerEvent } from '../../../../../shared/component/fileupload/fileupload';
 import { finalize } from 'rxjs';
 import { UploadFileResponse } from '../../../../../core/models/file-storage/upload-file.model';
 import { UploadStorageResponse } from '../../../../../core/models/file-storage/upload-storage.model';
@@ -86,7 +86,7 @@ export class FileUploadDebugComponent implements OnInit {
       });
   }
 
-  onUpload(event: FileUploadHandlerEvent): void {
+  onUpload(event: AppFileUploadHandlerEvent): void {
     const file = event.files?.[0];
     if (!file) {
       this.toastService.error('systemManagement.fileUploadDebug.toast.chooseFileRequired');

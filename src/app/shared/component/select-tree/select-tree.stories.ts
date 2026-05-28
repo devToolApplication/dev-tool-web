@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { SelectTree } from './select-tree';
-import type { TreeNode } from 'primeng/api';
+import type { TreeNodeOption } from './select-tree';
 
-const sampleTreeData: TreeNode[] = [
+const sampleTreeData: TreeNodeOption[] = [
   {
     key: '0',
     label: 'Documents',

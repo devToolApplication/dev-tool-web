@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, OnDestroy, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FileSelectEvent } from 'primeng/fileupload';
+import { AppFileSelectEvent } from '../../../../shared/component/fileupload/fileupload';
 import { finalize, firstValueFrom } from 'rxjs';
 import { PermissionService } from '../../../../core/auth/permission.service';
 import { I18nService } from '../../../../core/ui-services/i18n.service';
@@ -504,7 +504,7 @@ export class CreateDataFormPageComponent implements AfterViewInit, OnDestroy {
     this.toastService.success('dataForm.toast.validJson');
   }
 
-  async onImportJson(event: FileSelectEvent): Promise<void> {
+  async onImportJson(event: AppFileSelectEvent): Promise<void> {
     if (!this.canImport() || !this.canUpdateConfig()) {
       this.toastService.error('dataForm.toast.permissionDenied');
       return;

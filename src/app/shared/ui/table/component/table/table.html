@@ -134,145 +134,137 @@
 } @else if (loading && resolvedData.length === 0) {
   <app-loading-skeleton type="table" [rows]="resolvedRows" [columns]="visibleColumns.length"></app-loading-skeleton>
 } @else {
-<p-table
-    [attr.aria-busy]="loading"
-    [styleClass]="tableStyleClass"
-    [value]="resolvedData"
-    [rows]="resolvedRows"
-    [paginator]="config.pagination ?? true"
-    [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
-    [loading]="loading"
-    [lazy]="serverSidePagination"
-    [totalRecords]="resolvedTotalRecords"
-    [first]="first"
-    [sortField]="sortField ?? undefined"
-    [sortOrder]="sortOrder"
-    [tableStyle]="{ 'min-width': tableMinWidth }"
-    [rowHover]="true"
-    [currentPageReportTemplate]="'showingEntries' | translateContent"
-    [showCurrentPageReport]="true"
-    [scrollable]="scrollable"
-    [scrollHeight]="scrollHeight"
-    responsiveLayout="scroll"
-    (onPage)="onPage($event)"
-    (onSort)="onSort($event)"
-  >
-  <ng-template pTemplate="caption">
-    <div class="table-caption">
-      <h5 class="m-0">{{ (config.title ?? 'dataTable') | translateContent }}</h5>
+<div class="app-table-wrapper rounded-2xl border border-[var(--app-border)] overflow-hidden shadow-[var(--app-shadow-md)]" [class]="tableStyleClass" [attr.aria-busy]="loading">
+  <!-- Caption -->
+  <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)]">
+    <h5 class="m-0 text-sm font-semibold text-[var(--app-text)]">{{ (config.title ?? 'dataTable') | translateContent }}</h5>
+    @if ((config.filters ?? []).length > 0) {
+      <app-table-filter
+        [fields]="config.filters ?? []"
+        [options]="config.filterOptions ?? {}"
+        [loading]="loading"
+        (search)="onSearch($event)"
+        (reset)="onResetFilter()"
+      ></app-table-filter>
+    }
+  </div>
 
-      @if ((config.filters ?? []).length > 0) {
-        <app-table-filter
-          [fields]="config.filters ?? []"
-          [options]="config.filterOptions ?? {}"
-          [loading]="loading"
-          (search)="onSearch($event)"
-          (reset)="onResetFilter()"
-        ></app-table-filter>
-      }
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="header">
-    <tr>
-      @if (selectionEnabled) {
-        <th class="app-table-selection-column">
-          @if (multipleSelection && (config.selection?.showSelectAll ?? true)) {
-            <span (click)="$event.stopPropagation()">
-              <app-check-box
-                label=""
-                [value]="allCurrentRowsSelected"
-                [disabled]="loading"
-                (valueChange)="toggleAllCurrentRows($event)"
-              ></app-check-box>
-            </span>
+  <!-- Table -->
+  <div class="overflow-x-auto" [class.opacity-60]="loading" [style.max-height]="scrollable ? scrollHeight : null">
+    <table class="w-full text-sm">
+      <thead>
+        <tr>
+          @if (selectionEnabled) {
+            <th class="px-3 py-2.5 text-left bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] w-10">
+              @if (multipleSelection && (config.selection?.showSelectAll ?? true)) {
+                <span (click)="$event.stopPropagation()">
+                  <app-check-box
+                    label=""
+                    [value]="allCurrentRowsSelected"
+                    [disabled]="loading"
+                    (valueChange)="toggleAllCurrentRows($event)"
+                  ></app-check-box>
+                </span>
+              }
+            </th>
           }
-        </th>
-      }
-      @for (col of visibleColumns; track col.field) {
-        <th
-          pFrozenColumn
-          [pSortableColumn]="col.sortable ? col.field : undefined"
-          [style.width]="col.width ?? null"
-          [style.minWidth]="col.minWidth ?? col.width ?? null"
-          [style.maxWidth]="col.maxWidth ?? null"
-          [style.textAlign]="col.align ?? null"
-          [frozen]="col.frozen ?? false"
-          [alignFrozen]="col.alignFrozen ?? 'left'"
-          [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
-        >
-          {{ col.header | translateContent }}
-          @if (col.sortable) {
-            <p-sortIcon [field]="col.field"></p-sortIcon>
+          @for (col of visibleColumns; track col.field) {
+            <th
+              class="px-3 py-2.5 text-left text-xs font-semibold text-[var(--app-text-soft)] bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] whitespace-nowrap"
+              [style.width]="col.width ?? null"
+              [style.min-width]="col.minWidth ?? col.width ?? null"
+              [style.max-width]="col.maxWidth ?? null"
+              [style.text-align]="col.align ?? null"
+              [class.cursor-pointer]="col.sortable"
+              [class.select-none]="col.sortable"
+              (click)="col.sortable ? onSortColumn(col.field) : null"
+            >
+              <span class="inline-flex items-center gap-1">
+                {{ col.header | translateContent }}
+                @if (col.sortable) {
+                  <i class="pi text-[0.6rem] text-[var(--app-text-muted)]"
+                    [ngClass]="{
+                      'pi-sort-alt': sortField !== col.field,
+                      'pi-sort-amount-up-alt': sortField === col.field && sortOrder === 1,
+                      'pi-sort-amount-down': sortField === col.field && sortOrder === -1
+                    }"
+                  ></i>
+                }
+              </span>
+            </th>
           }
-        </th>
-      }
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="body" let-row>
-    <tr
-      [class.app-table-row-selected]="isRowSelected(row)"
-      [class.app-table-row-clickable]="config.rowClickable === true"
-      [attr.tabindex]="config.rowClickable ? 0 : -1"
-      (click)="onRowClick(row)"
-      (keydown.enter)="onRowClick(row)"
-    >
-      @if (selectionEnabled) {
-        <td class="app-table-selection-column">
-          <span (click)="$event.stopPropagation()">
-            <app-check-box
-              label=""
-              [value]="isRowSelected(row)"
-              [disabled]="loading"
-              (valueChange)="toggleRowSelection(row, $event)"
-            ></app-check-box>
-          </span>
-        </td>
-      }
-      @for (col of visibleColumns; track col.field) {
-        <td
-          pFrozenColumn
-          [style.width]="col.width ?? null"
-          [style.minWidth]="col.minWidth ?? col.width ?? null"
-          [style.maxWidth]="col.maxWidth ?? null"
-          [style.textAlign]="col.align ?? null"
-          [frozen]="col.frozen ?? false"
-          [alignFrozen]="col.alignFrozen ?? 'left'"
-          [class.app-table-actions-column]="col.frozen === true && col.alignFrozen === 'right'"
-        >
-          <app-table-cell
-            [column]="col"
-            [rowData]="row"
-            [customTemplates]="customTemplates"
-            (actionClick)="onActionClick($event)"
-          ></app-table-cell>
-        </td>
-      }
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td [attr.colspan]="visibleColumns.length + (selectionEnabled ? 1 : 0)" class="text-center">
-        @if (loading) {
-          <app-loading-skeleton type="table" [rows]="resolvedRows" [columns]="visibleColumns.length"></app-loading-skeleton>
-        } @else {
-          <app-empty-state
-            [title]="resolvedEmptyTitle"
-            [description]="resolvedEmptyDescription"
-            [secondaryActionLabel]="hasActiveFilters ? 'shared.table.clearFilters' : undefined"
-            (secondaryAction)="onResetFilter()"
-          ></app-empty-state>
+        </tr>
+      </thead>
+      <tbody>
+        @if (resolvedData.length === 0 && !loading) {
+          <tr>
+            <td [attr.colspan]="visibleColumns.length + (selectionEnabled ? 1 : 0)" class="text-center py-8 bg-[var(--app-table-cell-bg)]">
+              <app-empty-state
+                [title]="resolvedEmptyTitle"
+                [description]="resolvedEmptyDescription"
+                [secondaryActionLabel]="hasActiveFilters ? 'shared.table.clearFilters' : undefined"
+                (secondaryAction)="onResetFilter()"
+              ></app-empty-state>
+            </td>
+          </tr>
         }
-      </td>
-    </tr>
-  </ng-template>
+        @for (row of resolvedData; track $index) {
+          <tr
+            class="transition-colors hover:bg-[var(--app-table-row-hover-bg)] border-b border-[var(--app-border-soft)]"
+            [class.bg-[var(--app-chart-primary-fill)]]="isRowSelected(row)"
+            [class.cursor-pointer]="config.rowClickable === true"
+            [attr.tabindex]="config.rowClickable ? 0 : -1"
+            (click)="onRowClick(row)"
+            (keydown.enter)="onRowClick(row)"
+          >
+            @if (selectionEnabled) {
+              <td class="px-3 py-2 bg-[var(--app-table-cell-bg)] w-10">
+                <span (click)="$event.stopPropagation()">
+                  <app-check-box
+                    label=""
+                    [value]="isRowSelected(row)"
+                    [disabled]="loading"
+                    (valueChange)="toggleRowSelection(row, $event)"
+                  ></app-check-box>
+                </span>
+              </td>
+            }
+            @for (col of visibleColumns; track col.field) {
+              <td
+                class="px-3 py-2 text-[var(--app-text)] bg-[var(--app-table-cell-bg)]"
+                [style.width]="col.width ?? null"
+                [style.min-width]="col.minWidth ?? col.width ?? null"
+                [style.max-width]="col.maxWidth ?? null"
+                [style.text-align]="col.align ?? null"
+              >
+                <app-table-cell
+                  [column]="col"
+                  [rowData]="row"
+                  [customTemplates]="customTemplates"
+                  (actionClick)="onActionClick($event)"
+                ></app-table-cell>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 
-  <ng-template pTemplate="summary">
-    <div class="table-summary">
-      {{ (('totalRecords' | translateContent).replace('{{count}}', resolvedTotalRecords.toString())) }}
+  <!-- Pagination -->
+  @if (config.pagination ?? true) {
+    <div class="flex items-center justify-between px-4 py-3 border-t border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)] text-sm">
+      <span class="text-[var(--app-text-muted)]">
+        {{ (('totalRecords' | translateContent).replace('{{count}}', resolvedTotalRecords.toString())) }}
+      </span>
+      <app-paginator
+        [first]="first"
+        [rows]="resolvedRows"
+        [totalRecords]="resolvedTotalRecords"
+        [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
+        (pageChange)="onPage($event)"
+      ></app-paginator>
     </div>
-  </ng-template>
-</p-table>
+  }
+</div>
 }

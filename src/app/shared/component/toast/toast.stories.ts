@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig } from '@storybook/angular';
 import { ToastComponent } from './toast';
-import { MessageService } from 'primeng/api';
 
 const meta: Meta<ToastComponent> = {
   title: 'Shared/Components/Feedback/Toast',
