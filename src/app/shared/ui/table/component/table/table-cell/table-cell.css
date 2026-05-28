@@ -9,6 +9,29 @@
   position: relative;
 }
 
+.table-actions__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  min-width: 10rem;
+  margin-top: 0.25rem;
+  padding: 0.35rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-overlay-bg);
+  box-shadow: var(--app-shadow-lg);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.table-actions__menu-item {
+  width: 100%;
+  text-align: left;
+}
+
 .table-cell-truncate {
   display: inline-block;
   max-width: 100%;

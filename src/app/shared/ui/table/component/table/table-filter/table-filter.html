@@ -17,7 +17,7 @@
         [label]="activeFilterCount() > 0 ? activeFilterCount().toString() : ''"
         ariaLabel="showFilters"
         [disabled]="loading || !visibleAdvancedFields().length"
-        (buttonClick)="openDrawer()"
+        (buttonClick)="toggleDrawer()"
       ></app-button>
       <app-button
         icon="pi pi-times"
@@ -61,174 +61,127 @@
       ></app-button>
     </div>
   }
-</section>
 
-<app-dialog
-  [visible]="drawerOpen()"
-  [modal]="true"
-  [dismissableMask]="true"
-  [closeOnEscape]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [closable]="false"
-  [appendTo]="'body'"
-  [position]="'right'"
-  [baseZIndex]="2400"
-  [blockScroll]="true"
-  [styleClass]="'table-filter-drawer'"
-  [maskStyleClass]="'table-filter-drawer-mask'"
-  width="min(40rem, 100vw)"
-  [contentStyle]="{ padding: '0', overflow: 'hidden' }"
-  (visibleChange)="onDrawerVisibleChange($event)"
->
-  <div dialog-header>
-    <header class="drawer-header">
-      <div class="drawer-title-block">
-        <p class="drawer-eyebrow">{{ 'filters' | translateContent }}</p>
-        <h3>{{ (options.drawerTitle ?? 'advancedFilters') | translateContent }}</h3>
+  @if (drawerOpen()) {
+    <div class="filter-panel" role="region" [attr.aria-label]="(options.drawerTitle ?? 'advancedFilters') | translateContent">
+      <div class="filter-panel__grid">
+        @for (field of visibleAdvancedFields(); track field.field) {
+          <div class="filter-panel__field" [class.full-span]="field.type === 'date-range' || field.type === 'number-range'">
+            <label>{{ field.label | translateContent }}</label>
+
+            @switch (field.type ?? 'text') {
+              @case ('select') {
+                <app-select
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [showClear]="true"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-select>
+              }
+              @case ('multi-select') {
+                <app-select-multi
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [enableFilter]="true"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-select-multi>
+              }
+              @case ('boolean') {
+                <app-select
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [showClear]="true"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-select>
+              }
+              @case ('date') {
+                <app-date-picker
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-date-picker>
+              }
+              @case ('date-range') {
+                <div class="date-range-grid">
+                  <app-date-picker
+                    [value]="valueOf(field)?.start"
+                    [placeholder]="'fromDate'"
+                    [disabled]="loading || isFieldDisabled(field)"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
+                  ></app-date-picker>
+                  <app-date-picker
+                    [value]="valueOf(field)?.end"
+                    [placeholder]="'toDate'"
+                    [disabled]="loading || isFieldDisabled(field)"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
+                  ></app-date-picker>
+                </div>
+              }
+              @case ('number-range') {
+                <div class="date-range-grid">
+                  <app-input-number
+                    [label]="(field.label | translateContent) + ' ' + ('shared.filter.min' | translateContent)"
+                    [value]="valueOf(field)?.start"
+                    [placeholder]="'shared.filter.min'"
+                    [disabled]="loading || isFieldDisabled(field)"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
+                  ></app-input-number>
+                  <app-input-number
+                    [label]="(field.label | translateContent) + ' ' + ('shared.filter.max' | translateContent)"
+                    [value]="valueOf(field)?.end"
+                    [placeholder]="'shared.filter.max'"
+                    [disabled]="loading || isFieldDisabled(field)"
+                    (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
+                  ></app-input-number>
+                </div>
+              }
+              @case ('autocomplete') {
+                <app-auto-complete
+                  [label]="field.label"
+                  [options]="optionsOf(field)"
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-auto-complete>
+              }
+              @default {
+                <app-input-text
+                  [value]="valueOf(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [disabled]="loading || isFieldDisabled(field)"
+                  (valueChange)="onFieldChange(field, $event)"
+                ></app-input-text>
+              }
+            }
+
+            @if (optionLoading(field)) {
+              <app-loading-skeleton type="list" [rows]="1"></app-loading-skeleton>
+            }
+            @if (fieldErrors(field).length) {
+              <div class="table-filter__errors" role="alert">
+                @for (error of fieldErrors(field); track error.message) {
+                  <small>{{ error.message | translateContent }}</small>
+                }
+              </div>
+            }
+            @if (optionError(field)) {
+              <app-error-state [message]="optionError(field)!" [compact]="true" (retry)="retryLoadOptions(field)"></app-error-state>
+            } @else if (optionsOf(field).length === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {
+              <small class="table-filter__empty">{{ (field.emptyMessage ?? 'noDataFound') | translateContent }}</small>
+            }
+          </div>
+        }
       </div>
 
-      <app-button
-        styleClass="drawer-close-button"
-        icon="pi pi-times"
-        severity="secondary"
-        [text]="true"
-        [label]="''"
-        ariaLabel="close"
-        (buttonClick)="closeDrawer()"
-      ></app-button>
-    </header>
-  </div>
-
-  <div class="drawer-content">
-    <div class="drawer-grid">
-      @for (field of visibleAdvancedFields(); track field.field) {
-        <div class="drawer-field" [class.full-span]="field.type === 'date-range'">
-          <label>{{ field.label | translateContent }}</label>
-
-          @switch (field.type ?? 'text') {
-            @case ('select') {
-              <app-select
-                [options]="optionsOf(field)"
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [showClear]="true"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-select>
-            }
-            @case ('multi-select') {
-              <app-select-multi
-                [options]="optionsOf(field)"
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [enableFilter]="true"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-select-multi>
-            }
-            @case ('boolean') {
-              <app-select
-                [options]="optionsOf(field)"
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [showClear]="true"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-select>
-            }
-            @case ('date') {
-              <app-date-picker
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-date-picker>
-            }
-            @case ('date-range') {
-              <div class="date-range-grid">
-                <app-date-picker
-                  [value]="valueOf(field)?.start"
-                  [placeholder]="'fromDate'"
-                  [disabled]="loading || isFieldDisabled(field)"
-                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
-                ></app-date-picker>
-                <app-date-picker
-                  [value]="valueOf(field)?.end"
-                  [placeholder]="'toDate'"
-                  [disabled]="loading || isFieldDisabled(field)"
-                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
-                ></app-date-picker>
-              </div>
-            }
-            @case ('number-range') {
-              <div class="date-range-grid">
-                <app-input-number
-                  [label]="(field.label | translateContent) + ' ' + ('shared.filter.min' | translateContent)"
-                  [value]="valueOf(field)?.start"
-                  [placeholder]="'shared.filter.min'"
-                  [disabled]="loading || isFieldDisabled(field)"
-                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), start: $event })"
-                ></app-input-number>
-                <app-input-number
-                  [label]="(field.label | translateContent) + ' ' + ('shared.filter.max' | translateContent)"
-                  [value]="valueOf(field)?.end"
-                  [placeholder]="'shared.filter.max'"
-                  [disabled]="loading || isFieldDisabled(field)"
-                  (valueChange)="onFieldChange(field, { ...(valueOf(field) ?? {}), end: $event })"
-                ></app-input-number>
-              </div>
-            }
-            @case ('autocomplete') {
-              <app-auto-complete
-                [label]="field.label"
-                [options]="optionsOf(field)"
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-auto-complete>
-            }
-            @default {
-              <app-input-text
-                [value]="valueOf(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [disabled]="loading || isFieldDisabled(field)"
-                (valueChange)="onFieldChange(field, $event)"
-              ></app-input-text>
-            }
-          }
-
-          @if (optionLoading(field)) {
-            <app-loading-skeleton type="list" [rows]="1"></app-loading-skeleton>
-          }
-          @if (fieldErrors(field).length) {
-            <div class="table-filter__errors" role="alert">
-              @for (error of fieldErrors(field); track error.message) {
-                <small>{{ error.message | translateContent }}</small>
-              }
-            </div>
-          }
-          @if (optionError(field)) {
-            <app-error-state [message]="optionError(field)!" [compact]="true" (retry)="retryLoadOptions(field)"></app-error-state>
-          } @else if (optionsOf(field).length === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {
-            <small class="table-filter__empty">{{ (field.emptyMessage ?? 'noDataFound') | translateContent }}</small>
-          }
-        </div>
-      }
-    </div>
-  </div>
-
-  <div dialog-footer>
-    <footer class="drawer-footer">
-      <app-button
-        severity="secondary"
-        [text]="true"
-        [label]="options.cancelLabel ?? 'cancel'"
-        (buttonClick)="closeDrawer()"
-      ></app-button>
-
-      <div class="drawer-footer-actions">
+      <div class="filter-panel__actions">
         <app-button
           severity="secondary"
           [label]="options.resetLabel ?? 'reset'"
@@ -239,6 +192,6 @@
           (buttonClick)="onApplyAdvanced()"
         ></app-button>
       </div>
-    </footer>
-  </div>
-</app-dialog>
+    </div>
+  }
+</section>

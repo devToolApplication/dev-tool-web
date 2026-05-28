@@ -6,7 +6,7 @@
 .form-section-card {
   display: grid;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--app-border);
   border-radius: 0.5rem;
   background: var(--app-card-surface);

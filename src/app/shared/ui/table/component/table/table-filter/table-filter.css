@@ -3,24 +3,22 @@
 }
 
 .table-filter-shell {
-  width: min(100%, 48rem);
+  width: 100%;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .filter-search-row,
 .filter-search-actions,
-.drawer-header,
-.drawer-footer,
-.drawer-footer-actions {
+.filter-chip-row,
+.filter-panel__actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
 .filter-search-row,
-.drawer-header,
-.drawer-footer {
+.filter-panel__actions {
   justify-content: space-between;
 }
 
@@ -74,104 +72,41 @@ app-input-text {
   flex: 1;
 }
 
-:host ::ng-deep .table-filter-drawer-mask {
-  padding: 0;
-  background: color-mix(in srgb, var(--app-text) 24%, var(--app-transparent));
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-:host ::ng-deep .table-filter-drawer.p-dialog {
-  margin: 0;
-  max-height: 100vh;
-  border: none;
-  border-left: 1px solid color-mix(in srgb, var(--app-border) 92%, var(--app-transparent));
-  border-radius: 0;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-overlay-bg) 96%, var(--app-transparent)), color-mix(in srgb, var(--app-card-surface-strong) 90%, var(--app-transparent))),
-    var(--app-card-highlight);
-  color: var(--app-text);
-  box-shadow:
-    -24px 0 48px color-mix(in srgb, var(--app-text) 18%, var(--app-transparent)),
-    0 0 0 1px var(--app-border-soft);
-  overflow: hidden;
-}
-
-:host ::ng-deep .table-filter-drawer .p-dialog-header,
-:host ::ng-deep .table-filter-drawer .p-dialog-content,
-:host ::ng-deep .table-filter-drawer .p-dialog-footer {
-  padding: 0;
-  background: var(--app-transparent);
-}
-
-:host ::ng-deep .table-filter-drawer .p-dialog-content {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.drawer-header,
-.drawer-footer {
-  width: 100%;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 85%, var(--app-transparent));
-}
-
-.drawer-footer {
-  border-top: 1px solid color-mix(in srgb, var(--app-border) 85%, var(--app-transparent));
-  border-bottom: none;
-}
-
-.drawer-title-block {
+.filter-panel {
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  background: var(--app-card-surface);
+  box-shadow: var(--app-shadow-sm);
   display: grid;
-  gap: 0.25rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.drawer-eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--app-text) 55%, var(--app-transparent));
-}
-
-.drawer-header h3 {
-  margin: 0;
-}
-
-:host ::ng-deep .drawer-close-button.p-button {
-  margin-left: auto;
-  flex: 0 0 auto;
-  min-width: 2.75rem;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  border-radius: 999px;
-}
-
-.drawer-content {
-  overflow: auto;
-  padding: 1.5rem;
-  min-height: 0;
-}
-
-.drawer-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.drawer-field {
+.filter-panel__grid {
   display: grid;
-  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.drawer-field label {
+.filter-panel__field {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.filter-panel__field label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: color-mix(in srgb, var(--app-text) 80%, var(--app-transparent));
+  color: color-mix(in srgb, var(--app-text) 80%, transparent);
+}
+
+.filter-panel__field.full-span {
+  grid-column: 1 / -1;
+}
+
+.filter-panel__actions {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--app-border-soft);
 }
 
 .table-filter__errors {
@@ -180,8 +115,9 @@ app-input-text {
   color: var(--app-control-danger-text);
 }
 
-.drawer-field.full-span {
-  grid-column: 1 / -1;
+.table-filter__empty {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
 }
 
 .date-range-grid {
@@ -190,23 +126,30 @@ app-input-text {
   gap: 0.75rem;
 }
 
+@media (max-width: 1024px) {
+  .filter-panel__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-panel__field.full-span {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 768px) {
   .filter-search-row,
   .filter-search-actions,
   .filter-chip-row,
-  .drawer-footer,
-  .drawer-footer-actions {
+  .filter-panel__actions {
     flex-wrap: wrap;
   }
 
-  .drawer-grid,
+  .filter-panel__grid,
   .date-range-grid {
     grid-template-columns: 1fr;
   }
 
-  .drawer-header,
-  .drawer-footer,
-  .drawer-content {
-    padding-inline: 1rem;
+  .filter-panel__field.full-span {
+    grid-column: span 1;
   }
 }

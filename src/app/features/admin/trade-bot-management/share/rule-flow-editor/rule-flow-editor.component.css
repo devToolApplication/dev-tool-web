@@ -2,10 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid var(--p-surface-200);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--p-surface-0);
+  background: var(--app-surface);
 }
 
 .rule-flow-editor__toolbar {
@@ -13,7 +13,7 @@
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--p-surface-200);
+  border-bottom: 1px solid var(--app-border-soft);
   background: transparent;
   flex-wrap: wrap;
 }
@@ -21,7 +21,7 @@
 .rule-flow-editor__separator {
   width: 1px;
   height: 24px;
-  background: var(--p-surface-200);
+  background: var(--app-border);
   margin: 0 4px;
 }
 
@@ -30,5 +30,5 @@
   min-height: 500px;
   overflow: auto;
   position: relative;
-  background: var(--p-surface-50);
+  background: var(--app-surface-soft);
 }
