@@ -3,11 +3,8 @@ import { applicationConfig, moduleMetadata } from '@storybook/angular';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, withHashLocation } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { providePrimeNG } from 'primeng/config';
 import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 
-import { APP_THEME_PRESETS } from '../src/app/core/ui-services/theme-presets';
 import { SharedModule } from '../src/app/shared/shared.module';
 
 if (typeof document !== 'undefined') {
@@ -22,25 +19,7 @@ const preview: Preview = {
       providers: [
         provideHttpClient(),
         provideNoopAnimations(),
-        provideRouter([], withHashLocation()),
-        MessageService,
-        providePrimeNG({
-          overlayAppendTo: 'body',
-          theme: {
-            preset: APP_THEME_PRESETS.aura,
-            options: {
-              darkModeSelector: '[data-theme="dark"]',
-              cssLayer: false
-            }
-          },
-          ripple: true,
-          zIndex: {
-            modal: 1100,
-            overlay: 1000,
-            menu: 1000,
-            tooltip: 1100
-          }
-        })
+        provideRouter([], withHashLocation())
       ]
     }),
     moduleMetadata({

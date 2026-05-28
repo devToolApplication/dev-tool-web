@@ -5,6 +5,7 @@ export interface TreeNodeOption {
   key?: string;
   label?: string;
   data?: unknown;
+  icon?: string;
   children?: TreeNodeOption[];
   selectable?: boolean;
 }

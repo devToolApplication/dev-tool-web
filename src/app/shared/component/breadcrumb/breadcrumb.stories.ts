@@ -3,7 +3,7 @@ import type { AppMenuItem } from '../button-split/button-split';
 
 import { Breadcrumb } from './breadcrumb';
 
-const items: MenuItem[] = [
+const items: AppMenuItem[] = [
   { label: 'Admin' },
   { label: 'Workflows' },
   { label: 'Configuration' }
