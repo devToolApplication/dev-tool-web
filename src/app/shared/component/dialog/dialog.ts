@@ -30,4 +30,10 @@ export class DialogComponent {
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() hide = new EventEmitter<void>();
+
+  close(): void {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.hide.emit();
+  }
 }

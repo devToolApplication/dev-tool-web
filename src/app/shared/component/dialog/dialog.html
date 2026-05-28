@@ -1,32 +1,54 @@
-<p-dialog
-  [visible]="visible"
-  [header]="header | translateContent"
-  [modal]="modal"
-  [appendTo]="appendTo"
-  [baseZIndex]="baseZIndex"
-  [dismissableMask]="dismissableMask"
-  [closeOnEscape]="closeOnEscape"
-  [closable]="closable"
-  [draggable]="draggable"
-  [resizable]="resizable"
-  [maximizable]="maximizable"
-  [position]="position"
-  [styleClass]="styleClass"
-  [maskStyleClass]="maskStyleClass"
-  [style]="width ? { width } : undefined"
-  [blockScroll]="blockScroll"
-  [contentStyle]="contentStyle"
-  [attr.aria-label]="(ariaLabel || header || 'dialog') | translateContent"
-  (visibleChange)="visibleChange.emit($event)"
-  (onHide)="hide.emit()"
->
-  <ng-template pTemplate="header">
-    <ng-content select="[dialog-header]"></ng-content>
-  </ng-template>
+@if (visible) {
+  <div
+    class="fixed inset-0 z-[2400] flex items-center justify-center"
+    [ngClass]="{
+      'items-start pt-8': position === 'top',
+      'items-end pb-8': position === 'bottom',
+      'justify-start pl-8': position === 'left',
+      'justify-end pr-8': position === 'right'
+    }"
+    [class]="maskStyleClass"
+  >
+    @if (modal) {
+      <div
+        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        (click)="dismissableMask ? close() : null"
+      ></div>
+    }
 
-  <ng-content></ng-content>
+    <div
+      role="dialog"
+      [attr.aria-label]="(ariaLabel || header || 'dialog') | translateContent"
+      [attr.aria-modal]="modal"
+      class="relative z-10 flex max-h-[90vh] flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-2xl backdrop-blur-md animate-[app-dialog-in_200ms_ease-out]"
+      [class]="styleClass"
+      [style.width]="width || 'min(90vw, 32rem)'"
+      (keydown.escape)="closeOnEscape ? close() : null"
+    >
+      <header class="flex items-center justify-between border-b border-[var(--app-border-soft)] px-5 py-3">
+        <h2 class="text-base font-semibold text-[var(--app-text)]">
+          <ng-content select="[dialog-header]"></ng-content>
+          @if (header) { {{ header | translateContent }} }
+        </h2>
+        @if (closable) {
+          <button
+            type="button"
+            class="rounded-md p-1 text-[var(--app-text-muted)] hover:text-[var(--app-primary)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
+            aria-label="Close"
+            (click)="close()"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        }
+      </header>
 
-  <ng-template pTemplate="footer">
-    <ng-content select="[dialog-footer]"></ng-content>
-  </ng-template>
-</p-dialog>
+      <div class="flex-1 overflow-y-auto px-5 py-4" [ngStyle]="contentStyle || {}">
+        <ng-content></ng-content>
+      </div>
+
+      <footer class="border-t border-[var(--app-border-soft)] px-5 py-3">
+        <ng-content select="[dialog-footer]"></ng-content>
+      </footer>
+    </div>
+  </div>
+}

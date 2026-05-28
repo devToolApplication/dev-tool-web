@@ -1,7 +1,7 @@
 <div class="input-area">
   @if (contentType === 'json') {
     <div class="input-area__json-shell" [class.input-area__json-shell--invalid]="invalid">
-      <div class="input-area__json-label">{{ label | translateContent }}</div>
+      <div class="text-sm font-semibold text-[var(--app-text-soft)]">{{ label | translateContent }}</div>
       <div
         class="input-area__json-editor"
         [class.input-area__json-editor--with-zoom]="showZoomButton"
@@ -11,100 +11,75 @@
         @if (showZoomButton) {
           <div class="input-area__zoom-overlay">
             <button
-              pButton
               type="button"
-              icon="pi pi-window-maximize"
-              class="p-button-text p-button-sm input-area__zoom-button"
+              class="rounded p-1 text-[var(--app-text-muted)] hover:text-[var(--app-primary)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
               [disabled]="disabled"
               [attr.aria-label]="'shared.inputArea.expand' | translateContent"
               [attr.title]="'shared.inputArea.expand' | translateContent"
               (click)="openZoom()"
-            ></button>
+            ><i class="pi pi-window-maximize text-sm"></i></button>
           </div>
         }
         <div #inlineJsonHost class="input-area__json-editor-host"></div>
       </div>
     </div>
   } @else {
-    <p-floatlabel [variant]="variant">
-      <div class="input-area__editor-frame">
+    <div class="app-field" [class.app-field--invalid]="invalid">
+      <div class="relative">
         @if (showZoomButton) {
-          <div class="input-area__zoom-overlay">
+          <div class="absolute top-2 right-2 z-10">
             <button
-              pButton
               type="button"
-              icon="pi pi-window-maximize"
-              class="p-button-text p-button-sm input-area__zoom-button"
+              class="rounded p-1 text-[var(--app-text-muted)] hover:text-[var(--app-primary)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
               [disabled]="disabled"
               [attr.aria-label]="'shared.inputArea.expand' | translateContent"
               [attr.title]="'shared.inputArea.expand' | translateContent"
               (click)="openZoom()"
-            ></button>
+            ><i class="pi pi-window-maximize text-sm"></i></button>
           </div>
         }
         @if (iconClass) {
-          <p-iconfield [style.width.%]="fluid ? 100 : null">
-            <p-inputicon [class]="iconClass"></p-inputicon>
-            <textarea
-              pTextarea
-              [id]="inputId"
-              [rows]="rows"
-              [autoResize]="false"
-              [ngModel]="value"
-              (ngModelChange)="onChange($event)"
-              [disabled]="disabled"
-              [readonly]="readonly"
-              [required]="required"
-              [autofocus]="autofocus"
-              [attr.placeholder]="(placeholder || null) | translateContent"
-              [invalid]="invalid"
-              autocomplete="off"
-              [style.width.%]="fluid ? 100 : null"
-              [style.maxHeight]="inlineTextMaxHeight"
-              [class]="styleClass"
-              [class.input-area__inline-textarea]="true"
-              [class.input-area__inline-textarea--with-zoom]="showZoomButton"
-              [attr.title]="(tooltip || null) | translateContent"
-              (blur)="onBlur()"
-              (focus)="onFocus()"
-            ></textarea>
-          </p-iconfield>
-        } @else {
-          <textarea
-            pTextarea
-            [id]="inputId"
-            [rows]="rows"
-            [autoResize]="false"
-            [ngModel]="value"
-            (ngModelChange)="onChange($event)"
-            [disabled]="disabled"
-            [readonly]="readonly"
-            [required]="required"
-            [autofocus]="autofocus"
-            [attr.placeholder]="(placeholder || null) | translateContent"
-            [invalid]="invalid"
-            autocomplete="off"
-            [style.width.%]="fluid ? 100 : null"
-            [style.maxHeight]="inlineTextMaxHeight"
-            [class]="styleClass"
-            [class.input-area__inline-textarea]="true"
-            [class.input-area__inline-textarea--with-zoom]="showZoomButton"
-            [attr.title]="(tooltip || null) | translateContent"
-            (blur)="onBlur()"
-            (focus)="onFocus()"
-          ></textarea>
+          <span class="absolute left-3 top-3 text-[var(--app-text-muted)]" aria-hidden="true">
+            <i [class]="iconClass"></i>
+          </span>
+        }
+        <textarea
+          [id]="inputId"
+          [rows]="rows"
+          [ngModel]="value"
+          (ngModelChange)="onChange($event)"
+          [disabled]="disabled"
+          [readOnly]="readonly"
+          [required]="required"
+          [attr.autofocus]="autofocus ? true : null"
+          [attr.placeholder]="(placeholder || ' ') | translateContent"
+          [attr.aria-invalid]="invalid || null"
+          autocomplete="off"
+          class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] placeholder-transparent outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60 resize-y overflow-y-auto"
+          [class.pl-9]="iconClass"
+          [class.pr-10]="showZoomButton"
+          [class]="styleClass || ''"
+          [style.maxHeight]="inlineTextMaxHeight"
+          (blur)="onBlur()"
+          (focus)="onFocus()"
+        ></textarea>
+        @if (label) {
+          <label
+            [attr.for]="inputId"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
+            [class.left-9]="iconClass"
+          >{{ label | translateContent }}</label>
         }
       </div>
-      <label [attr.for]="inputId">{{ label | translateContent }}</label>
-    </p-floatlabel>
+    </div>
   }
 
   @if (helpText) {
-    <small [id]="inputId + '-help'" class="app-text-soft">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <p-message severity="error" size="small" variant="simple">{{ errorMessage | translateContent }}</p-message>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
   }
 </div>
 
@@ -129,14 +104,12 @@
     <div #dialogJsonContainer class="input-area__json-editor input-area__json-editor--dialog"></div>
   } @else {
     <textarea
-      pTextarea
-      class="input-area__zoom-textarea"
+      class="w-full min-h-[65vh] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] outline-none border-[var(--app-input-border)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 resize-y overflow-y-auto"
       [rows]="rows"
-      [autoResize]="false"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
-      [readonly]="readonly"
+      [readOnly]="readonly"
       [required]="required"
       [attr.placeholder]="(placeholder || null) | translateContent"
       autocomplete="off"

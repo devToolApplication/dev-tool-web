@@ -1,14 +1,45 @@
-<p-fileupload
-  [mode]="mode"
-  [chooseLabel]="chooseLabel | translateContent"
-  [uploadLabel]="uploadLabel | translateContent"
-  [cancelLabel]="cancelLabel | translateContent"
-  [accept]="accept"
-  [multiple]="multiple"
-  [customUpload]="customUpload"
-  [auto]="auto"
-  [disabled]="disabled"
-  [maxFileSize]="maxFileSize"
-  (onSelect)="fileSelect.emit($event)"
-  (uploadHandler)="uploadHandler.emit($event)"
-/>
+<div class="app-field">
+  <div
+    class="relative rounded-lg border-2 border-dashed border-[var(--app-border)] bg-[var(--app-surface-soft)] p-4 text-center transition-colors hover:border-[var(--app-primary)] hover:bg-[var(--app-chart-primary-fill)]"
+    [class.opacity-60]="disabled"
+    [class.cursor-not-allowed]="disabled"
+  >
+    <input
+      type="file"
+      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      [accept]="accept || ''"
+      [multiple]="multiple"
+      [disabled]="disabled"
+      (change)="onFileChange($event)"
+    />
+    <div class="flex flex-col items-center gap-2">
+      <i class="pi pi-cloud-upload text-2xl text-[var(--app-text-muted)]"></i>
+      <span class="text-sm text-[var(--app-text-soft)]">{{ chooseLabel | translateContent }}</span>
+    </div>
+  </div>
+
+  @if (selectedFiles.length > 0) {
+    <div class="mt-3 space-y-2">
+      @for (file of selectedFiles; track $index) {
+        <div class="flex items-center justify-between rounded-md border border-[var(--app-border-soft)] bg-[var(--app-surface)] px-3 py-2 text-sm">
+          <span class="text-[var(--app-text)] truncate max-w-[200px]">{{ file.name }}</span>
+          <span class="text-xs text-[var(--app-text-muted)]">{{ (file.size / 1024).toFixed(1) }} KB</span>
+          <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-control-danger-text)] transition-colors" (click)="removeFile($index)">
+            <i class="pi pi-times text-xs"></i>
+          </button>
+        </div>
+      }
+
+      @if (customUpload && !auto) {
+        <div class="flex gap-2 mt-2">
+          <button type="button" class="rounded-md bg-[var(--app-primary)] px-3 py-1.5 text-xs font-medium text-white hover:brightness-110 transition-all" (click)="upload()">
+            {{ uploadLabel | translateContent }}
+          </button>
+          <button type="button" class="rounded-md border border-[var(--app-border)] px-3 py-1.5 text-xs font-medium text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] transition-all" (click)="clear()">
+            {{ cancelLabel | translateContent }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

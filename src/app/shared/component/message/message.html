@@ -1,3 +1,36 @@
-<p-message [severity]="severity" [size]="size" [variant]="variant" [icon]="icon">
-  {{ text | translateContent }}
-</p-message>
+<div
+  role="alert"
+  class="inline-flex items-center gap-2 text-sm"
+  [ngClass]="{
+    'text-xs': size === 'small',
+    'text-base': size === 'large',
+    'px-3 py-2 rounded-lg border': variant === 'outlined',
+    'px-3 py-2 rounded-lg': variant === 'text',
+    '': variant === 'simple',
+    'text-[var(--app-control-success-text)]': severity === 'success',
+    'text-[var(--app-control-info-text)]': severity === 'info',
+    'text-[var(--app-control-warn-text)]': severity === 'warn',
+    'text-[var(--app-control-danger-text)]': severity === 'error',
+    'text-[var(--app-control-secondary-text)]': severity === 'secondary',
+    'text-[var(--app-control-contrast-text)]': severity === 'contrast',
+    'border-[var(--app-control-success-border)] bg-[var(--app-control-success-bg)]': severity === 'success' && variant === 'outlined',
+    'border-[var(--app-control-info-border)] bg-[var(--app-control-info-bg)]': severity === 'info' && variant === 'outlined',
+    'border-[var(--app-control-warn-border)] bg-[var(--app-control-warn-bg)]': severity === 'warn' && variant === 'outlined',
+    'border-[var(--app-control-danger-border)] bg-[var(--app-control-danger-bg)]': severity === 'error' && variant === 'outlined',
+    'border-[var(--app-control-secondary-border)] bg-[var(--app-control-secondary-bg)]': severity === 'secondary' && variant === 'outlined',
+    'border-[var(--app-control-contrast-border)] bg-[var(--app-control-contrast-bg)]': severity === 'contrast' && variant === 'outlined'
+  }"
+>
+  @if (icon) {
+    <i [class]="icon"></i>
+  } @else {
+    <i [ngClass]="{
+      'pi pi-check-circle': severity === 'success',
+      'pi pi-info-circle': severity === 'info',
+      'pi pi-exclamation-triangle': severity === 'warn',
+      'pi pi-times-circle': severity === 'error',
+      'pi pi-circle': severity === 'secondary' || severity === 'contrast'
+    }"></i>
+  }
+  <span>{{ text | translateContent }}</span>
+</div>

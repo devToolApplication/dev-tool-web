@@ -1,5 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FileSelectEvent, FileUploadHandlerEvent } from 'primeng/fileupload';
+
+export interface AppFileSelectEvent {
+  originalEvent: Event;
+  files: File[];
+  currentFiles: File[];
+}
+
+export interface AppFileUploadHandlerEvent {
+  files: File[];
+}
 
 @Component({
   selector: 'app-fileupload',
@@ -18,6 +27,32 @@ export class Fileupload {
   @Input() auto = false;
   @Input() disabled = false;
   @Input() maxFileSize?: number;
-  @Output() fileSelect = new EventEmitter<FileSelectEvent>();
-  @Output() uploadHandler = new EventEmitter<FileUploadHandlerEvent>();
+  @Output() fileSelect = new EventEmitter<AppFileSelectEvent>();
+  @Output() uploadHandler = new EventEmitter<AppFileUploadHandlerEvent>();
+
+  selectedFiles: File[] = [];
+
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    const files = Array.from(input.files);
+    const filtered = this.maxFileSize ? files.filter(f => f.size <= this.maxFileSize!) : files;
+    this.selectedFiles = this.multiple ? [...this.selectedFiles, ...filtered] : filtered;
+    this.fileSelect.emit({ originalEvent: event, files: filtered, currentFiles: this.selectedFiles });
+    if (this.auto && this.customUpload) {
+      this.upload();
+    }
+  }
+
+  upload(): void {
+    this.uploadHandler.emit({ files: this.selectedFiles });
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  clear(): void {
+    this.selectedFiles = [];
+  }
 }
