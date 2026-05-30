@@ -333,6 +333,14 @@ export class TradingSystemService {
     return this.http.post<BaseResponse<OverlayResponse>>(`${this.apiUrl}/overlays`, payload).pipe(map((res) => res.data));
   }
 
+  previewIndicator(payload: Record<string, unknown>): Observable<Record<string, unknown>> {
+    return this.http.post<BaseResponse<Record<string, unknown>>>(`${this.apiUrl}/preview/indicator`, payload).pipe(map((res) => res.data));
+  }
+
+  previewRule(payload: Record<string, unknown>): Observable<Record<string, unknown>> {
+    return this.http.post<BaseResponse<Record<string, unknown>>>(`${this.apiUrl}/preview/rule`, payload).pipe(map((res) => res.data));
+  }
+
   evaluateTrace(runId: string, index: number): Observable<Record<string, unknown>> {
     return this.http
       .post<BaseResponse<Record<string, unknown>>>(`${this.apiUrl}/backtests/${runId}/evaluate-trace`, { index })

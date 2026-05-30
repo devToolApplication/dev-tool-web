@@ -5,7 +5,7 @@ import { AppPaginatorState } from '../../shared/component/paginator/paginator';
 import { SelectOption } from '../../shared/component/select/select';
 import { AppMenuItem } from '../../shared/component/button-split/button-split';
 import { ActionToolbarAction } from '../../shared/ui/layout/action-toolbar/action-toolbar.component';
-import { CandleChartConfig } from '../admin/trade-bot-management/share/candle-chart/candle-chart';
+import { CandleChartConfig } from '../../shared/ui/candle-chart';
 
 export type DemoSection =
   | 'input-text'

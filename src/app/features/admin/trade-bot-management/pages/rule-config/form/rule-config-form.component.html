@@ -5,43 +5,78 @@
   [formInitialValue]="formInitialValue"
   [submitting]="submitting()"
   (valueChange)="onValueChange($event)"
+  (actionClick)="onActionClick($event)"
   (formSubmit)="submit($event)"
 >
   <div crud-page-after-first-section class="rule-editor-section">
-    <div class="rule-editor-section__toggle">
-      <app-button
-        icon="pi pi-list"
-        label="tradeBot.ruleExpression.viewTree"
-        [severity]="ruleEditorMode() === 'tree' ? 'info' : 'secondary'"
-        [text]="ruleEditorMode() !== 'tree'"
-        (buttonClick)="ruleEditorMode.set('tree')"
-      ></app-button>
-      <app-button
-        icon="pi pi-sitemap"
-        label="tradeBot.ruleExpression.viewFlow"
-        [severity]="ruleEditorMode() === 'flow' ? 'info' : 'secondary'"
-        [text]="ruleEditorMode() !== 'flow'"
-        (buttonClick)="ruleEditorMode.set('flow')"
-      ></app-button>
-    </div>
+      <app-flow-builder
+        class="rule-editor-section__flow"
+        [value]="ruleFlowDefinition()"
+        [nodeTypes]="ruleFlowNodeTypes"
+        [toolbar]="ruleFlowToolbar"
+        [mode]="submitting() ? 'readonly' : 'edit'"
+        [autoLayout]="true"
+        (valueChange)="onFlowValueChange($event)"
+        (nodeClick)="onFlowNodeClick($event)"
+        (connect)="onFlowConnect($event)"
+        (command)="onFlowCommand($event)"
+      >
+        <ng-template appFlowNodeTemplate="rule-group" let-node>
+          <div class="rule-flow-node rule-flow-node--group" [class.rule-flow-node--disabled]="node.disabled">
+            <span class="rule-flow-node__operator">{{ ruleFlowGroupOperator(node) }}</span>
+            @if (ruleFlowChildCount(node)) {
+              <span class="rule-flow-node__count">{{ ruleFlowChildCount(node) }}</span>
+            }
+          </div>
+        </ng-template>
 
-    @if (ruleEditorMode() === 'tree') {
-      <app-rule-expression-builder
-        [value]="ruleExpressionValue()"
-        [indicatorConfigs]="indicatorConfigs"
-        [ruleConfigs]="ruleConfigs"
-        [currentRuleCode]="currentRuleCode()"
-        [currentRuleId]="id"
-        [disabled]="submitting()"
-        (valueChange)="onRuleExpressionValueChange($event)"
-        (validationChange)="onRuleExpressionValidationChange($event)"
-      ></app-rule-expression-builder>
-    } @else {
-      <app-rule-flow-editor
-        [value]="ruleExpressionValue()"
-        [readonly]="submitting()"
-        (valueChange)="onRuleExpressionValueChange($event)"
-      ></app-rule-flow-editor>
-    }
+        <ng-template appFlowNodeTemplate="rule-condition" let-node>
+          <div class="rule-flow-node rule-flow-node--condition" [class.rule-flow-node--disabled]="node.disabled">
+            <div class="rule-flow-node__header">
+              <span class="rule-flow-node__chip">{{ ruleFlowConditionOperatorSymbol(node) }}</span>
+              <strong>{{ ruleFlowConditionOperatorLabel(node) | translateContent }}</strong>
+            </div>
+            @if (ruleFlowConditionIsRange(node)) {
+              <div class="rule-flow-node__expression rule-flow-node__expression--range">
+                <span>{{ ruleFlowConditionOperand(node, 0) }}</span>
+                <code>{{ ruleFlowConditionOperatorSymbol(node) }}</code>
+                <span>{{ ruleFlowConditionOperand(node, 1) }}</span>
+                <span>{{ ruleFlowConditionOperand(node, 2) }}</span>
+              </div>
+            } @else {
+              <div class="rule-flow-node__expression">
+                <span>{{ ruleFlowConditionOperand(node, 0) }}</span>
+                <code>{{ ruleFlowConditionOperatorSymbol(node) }}</code>
+                <span>{{ ruleFlowConditionOperand(node, 1) }}</span>
+              </div>
+            }
+            @if (ruleFlowConditionParamSummary(node)) {
+              <small class="rule-flow-node__meta">{{ ruleFlowConditionParamSummary(node) }}</small>
+            }
+          </div>
+        </ng-template>
+
+        <ng-template appFlowNodeTemplate="rule-ref" let-node>
+          <div class="rule-flow-node rule-flow-node--ref" [class.rule-flow-node--disabled]="node.disabled">
+            <span class="rule-flow-node__chip">REF</span>
+            <strong>{{ ruleFlowRefCode(node) }}</strong>
+          </div>
+        </ng-template>
+
+        <ng-template appFlowNodeTemplate="rule-not" let-node>
+          <div class="rule-flow-node rule-flow-node--not" [class.rule-flow-node--disabled]="node.disabled">
+            <span class="rule-flow-node__chip">NOT</span>
+            <strong>{{ ruleFlowNotChildLabel(node) }}</strong>
+          </div>
+        </ng-template>
+      </app-flow-builder>
   </div>
 </app-base-crud-page>
+
+@if (showPreview()) {
+  <app-config-preview-panel
+    previewType="rule"
+    [configPayload]="previewPayload()"
+    (closed)="showPreview.set(false)"
+  />
+}

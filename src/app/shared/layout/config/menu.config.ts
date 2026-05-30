@@ -25,6 +25,16 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         ]
       },
       {
+        label: 'layout.menu.aiAgentPlatform',
+        icon: 'pi pi-sparkles',
+        items: [
+          { label: 'layout.menu.aiAgentModels', icon: 'pi pi-server', routerLink: '/admin/system-management/ai-agent-models' },
+          { label: 'layout.menu.aiAgentAccounts', icon: 'pi pi-key', routerLink: '/admin/system-management/ai-agent-accounts' },
+          { label: 'layout.menu.aiAgentCrawlers', icon: 'pi pi-search', routerLink: '/admin/system-management/ai-agent-crawlers' },
+          { label: 'layout.menu.aiAgents', icon: 'pi pi-user', routerLink: '/admin/system-management/ai-agents' }
+        ]
+      },
+      {
         label: 'layout.menu.generalConfigs',
         icon: 'pi pi-sliders-h',
         items: [
@@ -63,15 +73,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
           { label: 'layout.menu.sandbox', icon: 'pi pi-bolt', routerLink: '/admin/trade-bot/sandbox' },
           { label: 'layout.menu.cacheMonitor', icon: 'pi pi-server', routerLink: '/admin/trade-bot/cache-monitor' },
           { label: 'layout.menu.systemLogs', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/system-logs' }
-        ]
-      },
-      {
-        label: 'layout.menu.aiAgentPlatform',
-        icon: 'pi pi-sparkles',
-        items: [
-          { label: 'layout.menu.aiAgentModels', icon: 'pi pi-server', routerLink: '/admin/system-management/ai-agent-models' },
-          { label: 'layout.menu.aiAgentCrawlers', icon: 'pi pi-search', routerLink: '/admin/system-management/ai-agent-crawlers' },
-          { label: 'layout.menu.aiAgents', icon: 'pi pi-user', routerLink: '/admin/system-management/ai-agents' }
         ]
       },
       {

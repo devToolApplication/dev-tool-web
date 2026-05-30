@@ -37,8 +37,23 @@ import { parseJson, stringifyJson } from '../../../trade-bot-form-utils';
 import { STATUS_OPTIONS, TRADE_BOT_ROUTES } from '../../../trade-bot-runtime.constants';
 import { deriveChildRulesFromExpression } from '../../../share/rule-expression-builder/rule-expression-dependencies';
 import { cloneRuleLogicValue } from '../../../share/rule-expression-builder/rule-expression-factory';
+import { defaultParamsForOperator, operatorDefinition } from '../../../share/rule-expression-builder/rule-expression-operators';
+import { printRuleExpressionOperand } from '../../../share/rule-expression-builder/rule-expression-printer';
+import { ruleExpressionToFlowDefinition } from '../../../share/rule-flow/rule-flow-adapter';
+import { flowDefinitionToRuleExpression } from '../../../share/rule-flow/rule-flow-reverse-adapter';
+import { buildRuleFlowNodeTypes } from '../../../share/rule-flow/rule-flow-node-catalog';
+import {
+  FlowDefinition,
+  FlowNode,
+  FlowConnectEvent,
+  FlowCommandEvent,
+  FlowNodeTypeDefinition,
+  FlowToolbarConfig
+} from '../../../../../../shared/ui/flow-builder/models';
 import { ruleExpressionFromConfigAndChildRules } from '../../../share/rule-expression-builder/rule-expression-legacy';
 import {
+  RuleExpressionConditionOperator,
+  RuleExpressionOperand,
   RuleExpressionValidationResult,
   RuleLogicFormValue
 } from '../../../share/rule-expression-builder/rule-expression.models';
@@ -47,7 +62,8 @@ import { validateRuleExpression } from '../../../share/rule-expression-builder/r
 @Component({
   selector: 'app-rule-config-form',
   standalone: false,
-  templateUrl: './rule-config-form.component.html'
+  templateUrl: './rule-config-form.component.html',
+  styleUrls: ['./rule-config-form.component.css']
 })
 export class RuleConfigFormComponent implements OnInit {
   @ViewChild(BaseCrudPageComponent) private readonly crudPage?: BaseCrudPageComponent;
@@ -55,6 +71,8 @@ export class RuleConfigFormComponent implements OnInit {
   formConfig: FormConfig = { fields: [] };
   formContext: FormContext = { user: null, mode: 'create' };
   readonly submitting = signal(false);
+  readonly showPreview = signal(false);
+  readonly previewPayload = signal<Record<string, unknown>>({});
   readonly ruleExpressionValue = signal<RuleLogicFormValue>({ root: null });
   readonly ruleExpressionValidation = signal<RuleExpressionValidationResult>(
     validateRuleExpression({ root: null })
@@ -62,15 +80,38 @@ export class RuleConfigFormComponent implements OnInit {
   readonly ruleExpressionDirty = signal(false);
   readonly ruleEditorMode = signal<'tree' | 'flow'>('tree');
   readonly currentRuleCode = signal('');
+  readonly ruleFlowDefinition = signal<FlowDefinition>(ruleExpressionToFlowDefinition(this.ruleExpressionValue()));
+  ruleFlowNodeTypes: FlowNodeTypeDefinition[] = buildRuleFlowNodeTypes();
+  readonly ruleFlowToolbar: FlowToolbarConfig = {
+    mode: 'floating',
+    commands: [
+      'undo',
+      'redo',
+      'fit',
+      'zoomIn',
+      'zoomOut',
+      'resetZoom',
+      'autoLayout',
+      'toggleNavigator',
+      'toggleInspector',
+      'fullscreen',
+      'duplicateSelection',
+      'deleteSelection',
+      'exportJson',
+      'importJson'
+    ],
+  };
   readonly pageConfig: CrudPageConfig = {
     title: 'tradeBot.rule.formTitle',
     actions: [
       { id: 'back', label: 'tradeBot.action.back', icon: 'pi pi-arrow-left', goBack: true },
+      { id: 'preview', label: 'tradeBot.action.preview', icon: 'pi pi-eye', severity: 'secondary' },
       { id: 'save', label: 'tradeBot.action.save', icon: 'pi pi-save', submitForm: true, type: 'submit' }
     ]
   };
   formInitialValue: Record<string, unknown> = this.toFormValue();
   id: string | null = null;
+  private lastModel: Record<string, unknown> = {};
   private executors: ExecutorVersionResponse[] = [];
   indicatorConfigs: IndicatorConfigResponse[] = [];
   ruleConfigs: RuleConfigResponse[] = [];
@@ -93,6 +134,27 @@ export class RuleConfigFormComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get('id');
     this.formContext = { ...this.formContext, mode: this.id ? 'edit' : 'create' };
     this.loadInitialData();
+  }
+
+  onActionClick(actionId: string): void {
+    if (actionId === 'preview') {
+      this.openPreview();
+    }
+  }
+
+  openPreview(): void {
+    this.previewPayload.set({
+      executor: stringValue(this.lastModel['executor']),
+      executorVersion: stringValue(this.lastModel['executorVersion']),
+      config: {
+        ...asRecord(this.lastModel['config']),
+        ruleExpression: this.ruleExpressionValue()
+      },
+      indicators: asArray(this.lastModel['indicators']),
+      childRules: this.lastModel['childRules'] ?? [],
+      overlay: this.lastModel['overlay'] ?? {}
+    });
+    this.showPreview.set(true);
   }
 
   submit(model: Record<string, unknown>): void {
@@ -128,6 +190,7 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   onValueChange(model: Record<string, unknown>): void {
+    this.lastModel = model;
     const executor = stringValue(model['executor']);
     this.currentRuleCode.set(stringValue(model['code']));
     const normalizedModel: Record<string, unknown> = {
@@ -166,12 +229,133 @@ export class RuleConfigFormComponent implements OnInit {
 
   onRuleExpressionValueChange(value: RuleLogicFormValue): void {
     this.ruleExpressionValue.set(cloneRuleLogicValue(value));
+    this.ruleFlowDefinition.set(ruleExpressionToFlowDefinition(value));
     this.ruleExpressionDirty.set(true);
     this.validateCurrentRuleExpression();
   }
 
   onRuleExpressionValidationChange(result: RuleExpressionValidationResult): void {
     this.ruleExpressionValidation.set(result);
+  }
+
+  onFlowNodeClick(node: FlowNode): void {
+  }
+
+  onFlowConnect(event: FlowConnectEvent): void {
+  }
+
+  onFlowCommand(event: FlowCommandEvent): void {
+  }
+
+  onFlowNodeDataChange(event: { nodeId: string; data: Record<string, unknown> }): void {
+    const definition = this.ruleFlowDefinition();
+    if (!definition) return;
+    const updated: FlowDefinition = {
+      ...definition,
+      nodes: definition.nodes.map(n => n.id === event.nodeId ? this.withRuleFlowNodeData(n, event.data) : n),
+    };
+    this.ruleFlowDefinition.set(updated);
+    const result = flowDefinitionToRuleExpression(updated);
+    this.ruleExpressionValue.set(result);
+    this.ruleExpressionDirty.set(true);
+    this.validateCurrentRuleExpression();
+  }
+
+  ruleFlowGroupOperator(node: FlowNode): string {
+    return stringValue(node.data?.['operator'], 'AND').toUpperCase();
+  }
+
+  ruleFlowChildCount(node: FlowNode): number {
+    return this.ruleFlowDefinition().edges.filter(edge => edge.source.nodeId === node.id).length;
+  }
+
+  ruleFlowConditionOperator(node: FlowNode): RuleExpressionConditionOperator | null {
+    const operator = node.data?.['operator'];
+    return typeof operator === 'string' && operator ? operator as RuleExpressionConditionOperator : null;
+  }
+
+  ruleFlowConditionOperatorLabel(node: FlowNode): string {
+    return operatorDefinition(this.ruleFlowConditionOperator(node))?.label ?? 'tradeBot.ruleExpression.placeholder.selectOperator';
+  }
+
+  ruleFlowConditionOperatorSymbol(node: FlowNode): string {
+    switch (this.ruleFlowConditionOperator(node)) {
+      case 'GT':
+        return '>';
+      case 'GTE':
+        return '>=';
+      case 'LT':
+        return '<';
+      case 'LTE':
+        return '<=';
+      case 'EQ':
+        return '==';
+      case 'NEQ':
+        return '!=';
+      case 'BETWEEN':
+        return 'BETWEEN';
+      case 'OUTSIDE':
+        return 'OUTSIDE';
+      case 'CROSSOVER':
+        return 'CROSSOVER';
+      case 'CROSSUNDER':
+        return 'CROSSUNDER';
+      default:
+        return '?';
+    }
+  }
+
+  ruleFlowConditionIsRange(node: FlowNode): boolean {
+    return operatorDefinition(this.ruleFlowConditionOperator(node))?.arity === 'range';
+  }
+
+  ruleFlowConditionOperand(node: FlowNode, index: number): string {
+    return printRuleExpressionOperand(this.ruleFlowConditionOperands(node)[index]);
+  }
+
+  ruleFlowConditionParamSummary(node: FlowNode): string {
+    const operator = this.ruleFlowConditionOperator(node);
+    const quickParams = operatorDefinition(operator)?.quickParams ?? [];
+    if (!quickParams.length) {
+      return '';
+    }
+
+    const defaults = defaultParamsForOperator(operator) ?? {};
+    const params = { ...defaults, ...asRecord(node.data?.['params']) };
+    return quickParams
+      .map(param => `${param.key}: ${String(params[param.key] ?? param.defaultValue ?? '')}`)
+      .join(' / ');
+  }
+
+  ruleFlowRefCode(node: FlowNode): string {
+    return stringValue(node.data?.['ruleCode'], '?');
+  }
+
+  ruleFlowNotChildLabel(node: FlowNode): string {
+    const definition = this.ruleFlowDefinition();
+    const childId = definition.edges.find(edge => edge.source.nodeId === node.id)?.target.nodeId;
+    const child = childId ? definition.nodes.find(item => item.id === childId) : null;
+    if (!child) {
+      return '?';
+    }
+    if (child.type === 'rule-condition') {
+      return this.ruleFlowConditionDisplayLabel(child);
+    }
+    if (child.type === 'rule-group') {
+      return this.ruleFlowGroupOperator(child);
+    }
+    if (child.type === 'rule-ref') {
+      return this.ruleFlowRefCode(child);
+    }
+    return child.label ?? child.type;
+  }
+
+  onFlowValueChange(definition: FlowDefinition): void {
+    this.ruleFlowDefinition.set(definition);
+    const result = flowDefinitionToRuleExpression(definition);
+    this.ruleExpressionValue.set(result);
+    this.ruleExpressionDirty.set(true);
+    this.validateCurrentRuleExpression();
   }
 
   private loadInitialData(): void {
@@ -192,6 +376,7 @@ export class RuleConfigFormComponent implements OnInit {
           this.executors = executors;
           this.indicatorConfigs = indicatorConfigs;
           this.ruleConfigs = ruleConfigs;
+          this.refreshRuleFlowNodeTypes();
           if (detail) {
             this.applyExistingConfig(detail);
             return;
@@ -258,8 +443,9 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   private initializeCreateForm(): void {
-    const executor = this.executors[0]?.executor ?? '';
-    const executorVersion = this.executors[0]?.latestVersion ?? 'LATEST';
+    const defaultExecutor = this.defaultRuleExecutor();
+    const executor = defaultExecutor?.executor ?? '';
+    const executorVersion = defaultExecutor?.latestVersion ?? 'LATEST';
     const initialValue = { ...this.toFormValue(), executor, executorVersion };
     this.applyTemplateState(initialValue, this.templateForExecutor(executor), executor);
   }
@@ -279,6 +465,7 @@ export class RuleConfigFormComponent implements OnInit {
     this.currentExecutor = currentExecutor;
     this.currentRuleCode.set(stringValue(model['code']));
     this.ruleExpressionValue.set(ruleExpressionFromModel(model, this.ruleExpressionValue()));
+    this.ruleFlowDefinition.set(ruleExpressionToFlowDefinition(this.ruleExpressionValue()));
     if ('ruleExpression' in model) {
       this.ruleExpressionDirty.set(false);
     }
@@ -286,6 +473,43 @@ export class RuleConfigFormComponent implements OnInit {
     this.formInitialValue = this.withLegacyTexts(model);
     this.formConfig = this.buildFormConfig(this.currentFormTemplate, currentExecutor);
     this.updateTemplateFallbackInfo(currentExecutor, this.currentFormTemplate);
+  }
+
+  private withRuleFlowNodeData(node: FlowNode, data: Record<string, unknown>): FlowNode {
+    return {
+      ...node,
+      label: this.ruleFlowNodeDisplayLabel(node, data),
+      data,
+      disabled: 'disabled' in data ? data['disabled'] === true : node.disabled,
+    };
+  }
+
+  private ruleFlowNodeDisplayLabel(node: FlowNode, data: Record<string, unknown>): string {
+    switch (node.type) {
+      case 'rule-group':
+        return stringValue(data['operator'], 'AND').toUpperCase();
+      case 'rule-condition':
+        return this.ruleFlowConditionDisplayLabel({ ...node, data });
+      case 'rule-ref':
+        return data['ruleCode'] ? `Rule: ${String(data['ruleCode'])}` : 'Rule: ?';
+      case 'rule-not':
+        return 'NOT';
+      default:
+        return node.label ?? node.type;
+    }
+  }
+
+  private ruleFlowConditionDisplayLabel(node: FlowNode): string {
+    const operator = this.ruleFlowConditionOperatorSymbol(node);
+    if (this.ruleFlowConditionIsRange(node)) {
+      return `${this.ruleFlowConditionOperand(node, 0)} ${operator} ${this.ruleFlowConditionOperand(node, 1)} ~ ${this.ruleFlowConditionOperand(node, 2)}`;
+    }
+    return `${this.ruleFlowConditionOperand(node, 0)} ${operator} ${this.ruleFlowConditionOperand(node, 1)}`;
+  }
+
+  private ruleFlowConditionOperands(node: FlowNode): RuleExpressionOperand[] {
+    const operands = node.data?.['operands'];
+    return Array.isArray(operands) ? operands as RuleExpressionOperand[] : [];
   }
 
   private withLegacyTexts(value: Record<string, unknown>): Record<string, unknown> {
@@ -799,6 +1023,10 @@ export class RuleConfigFormComponent implements OnInit {
     return hasFormTemplateFields(template) ? cloneFormConfig(template) : undefined;
   }
 
+  private defaultRuleExecutor(): ExecutorVersionResponse | undefined {
+    return this.executors.find((item) => item.executor === 'EXPRESSION') ?? this.executors[0];
+  }
+
   private shouldUseExecutorSelect(executor: string): boolean {
     return this.executors.length > 0 && (!executor || this.executors.some((item) => item.executor === executor));
   }
@@ -828,6 +1056,14 @@ export class RuleConfigFormComponent implements OnInit {
     });
     this.ruleExpressionValidation.set(result);
     return result;
+  }
+
+  private refreshRuleFlowNodeTypes(): void {
+    this.ruleFlowNodeTypes = buildRuleFlowNodeTypes({
+      indicatorConfigs: this.indicatorConfigs,
+      ruleConfigs: this.ruleConfigs,
+      currentRuleId: this.id
+    });
   }
 }
 

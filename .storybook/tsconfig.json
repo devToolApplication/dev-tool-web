@@ -3,7 +3,9 @@
   "include": [
     "./preview.ts",
     "../src/app/shared/**/*.stories.ts",
-    "../src/app/shared/**/*.mdx"
+    "../src/app/shared/**/*.mdx",
+    "../src/app/features/**/*.stories.ts",
+    "../src/app/features/**/*.mdx"
   ],
   "exclude": [
     "../src/**/*.spec.ts"

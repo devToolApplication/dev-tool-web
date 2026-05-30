@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { DataQualityWarningComponent } from './data-quality-warning.component';
 
 const meta: Meta<DataQualityWarningComponent> = {
-  title: 'Shared/UI/DataQualityWarning',
+  title: 'Features/Trade Bot/Data Quality Warning',
   component: DataQualityWarningComponent,
   args: {
     candles: [

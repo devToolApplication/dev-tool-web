@@ -11,7 +11,7 @@
       [disabled]="disabled"
       [attr.aria-invalid]="invalid || null"
       [attr.aria-expanded]="dropdownOpen"
-      class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 pr-9 text-left text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      class="peer w-full min-h-[2.625rem] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 pr-9 text-left text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
       [class.pl-9]="iconClass"
       [ngClass]="styleClass || ''"
       (click)="dropdownOpen = !dropdownOpen"
@@ -32,7 +32,7 @@
       <label
         [attr.for]="inputId"
         class="absolute transition-all duration-150 pointer-events-none"
-        [ngClass]="(value != null && value !== '') || dropdownOpen
+        [ngClass]="(value != null && value !== '') || dropdownOpen || placeholder
           ? 'left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1'
           : 'left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)]'"
         [class.left-9]="iconClass"

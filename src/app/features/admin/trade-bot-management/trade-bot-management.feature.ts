@@ -28,6 +28,7 @@ import { SandboxComponent } from './pages/sandbox/sandbox.component';
 import { StrategyConfigFormComponent } from './pages/strategy-config/form/strategy-config-form.component';
 import { StrategyConfigListComponent } from './pages/strategy-config/list/strategy-config-list.component';
 import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
+import { ConfigPreviewPanelComponent } from './share/config-preview-panel/config-preview-panel.component';
 
 export const TRADE_BOT_FEATURE_COMPONENTS = [
   TradingSystemDashboardComponent,
@@ -57,7 +58,8 @@ export const TRADE_BOT_FEATURE_COMPONENTS = [
   PaperTradeChartSectionComponent,
   PaperTradeCreateDialogsComponent,
   CacheMonitorComponent,
-  SystemLogsComponent
+  SystemLogsComponent,
+  ConfigPreviewPanelComponent
 ];
 
 export const tradeBotRoutes: Routes = [

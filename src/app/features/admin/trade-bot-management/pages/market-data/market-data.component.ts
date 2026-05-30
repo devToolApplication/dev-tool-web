@@ -11,12 +11,12 @@ import { MarketDataService } from '../../../../../core/services/trade-bot-servic
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../core/ui-services/toast.service';
-import { CandleChartRangeBoundaryEvent } from '../../share/candle-chart/candle-chart';
+import { CandleChartRangeBoundaryEvent } from '../../../../../shared/ui/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../share/candle-chart/candle-window-loader';
+} from '../../../../../shared/ui/candle-chart';
 import { AppTabItem } from '../../../../../shared/component/tabs/tabs.component';
 import { ConfirmDialogService } from '../../../../../shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { parseJson } from '../../trade-bot-form-utils';

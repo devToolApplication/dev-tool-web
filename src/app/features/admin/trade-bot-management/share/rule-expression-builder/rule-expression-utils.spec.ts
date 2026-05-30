@@ -58,9 +58,9 @@ describe('rule expression utilities', () => {
     expect(validateRuleExpression({ root: range }).errors[0].message).toBe('tradeBot.ruleExpression.validation.rangeOrder');
   });
 
-  it('rejects boolean rule references for crossover operands', () => {
+  it('allows rule references for crossover operands because runtime compares rule values', () => {
     const expression = createRuleExpressionCondition({
-      id: 'invalid-operand',
+      id: 'rule-value-crossover',
       operator: 'CROSSOVER',
       operands: [
         { type: 'ruleRef', ruleCode: 'TREND_FILTER' },
@@ -70,7 +70,19 @@ describe('rule expression utilities', () => {
 
     expect(validateRuleExpression({ root: expression }).errors.some((error) =>
       error.message === 'tradeBot.ruleExpression.validation.incompatibleOperand'
-    )).toBe(true);
+    )).toBe(false);
+
+    const ruleToRule = createRuleExpressionCondition({
+      id: 'rule-value-comparison',
+      operator: 'GT',
+      operands: [
+        { type: 'ruleRef', ruleCode: 'FAST_RULE' },
+        { type: 'ruleRef', ruleCode: 'SLOW_RULE' }
+      ]
+    });
+    expect(validateRuleExpression({ root: ruleToRule }).errors.some((error) =>
+      error.message === 'tradeBot.ruleExpression.validation.incompatibleOperand'
+    )).toBe(false);
   });
 
   it('extracts dependencies and derives active childRules from rule refs', () => {

@@ -94,6 +94,9 @@
                 <div class="rule-tree-path app-text-muted">{{ row.pathLabel }}</div>
                 <div class="rule-tree-meta app-text-soft">
                   <span>{{ 'tradeBot.ruleTrace.operator' | translateContent }}: {{ row.operator }}</span>
+                  @if (row.value) {
+                    <span>{{ 'tradeBot.ruleTrace.value' | translateContent }}: {{ row.value }}</span>
+                  }
                   <span>{{ 'tradeBot.ruleTrace.indicators' | translateContent }}: {{ row.indicatorCount }}</span>
                   <span>{{ 'tradeBot.ruleTrace.children' | translateContent }}: {{ row.childCount }}</span>
                 </div>

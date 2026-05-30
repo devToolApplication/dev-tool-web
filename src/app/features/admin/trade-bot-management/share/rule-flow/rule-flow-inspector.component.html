@@ -1,0 +1,85 @@
+<div class="rule-flow-inspector rule-expression-panel">
+  @switch (nodeType) {
+    @case ('rule-group') {
+      <div class="rule-flow-inspector__section">
+        <label class="rule-flow-inspector__label">{{ 'tradeBot.ruleExpression.field.operator' | translateContent }}</label>
+        <app-select
+          [options]="groupOperatorOptions"
+          [value]="groupOperator"
+          (valueChange)="onGroupOperatorChange($event)"
+        ></app-select>
+      </div>
+    }
+
+    @case ('rule-condition') {
+      <div class="rule-flow-inspector__section">
+        <label class="rule-flow-inspector__label">{{ 'tradeBot.ruleExpression.field.operator' | translateContent }}</label>
+        <app-select
+          [options]="operatorOptions"
+          [value]="operator"
+          placeholder="tradeBot.ruleExpression.placeholder.selectOperator"
+          (valueChange)="onConditionOperatorChange($event)"
+        ></app-select>
+      </div>
+
+      @for (param of conditionQuickParams; track param.key) {
+        <div class="rule-flow-inspector__section">
+          <label class="rule-flow-inspector__label">{{ param.label | translateContent }}</label>
+          @if (param.type === 'number') {
+            <app-input-number
+              [label]="param.label"
+              [suffix]="param.suffix"
+              [helpText]="param.helpText"
+              [value]="$any(conditionParams[param.key] ?? param.defaultValue)"
+              (valueChange)="onQuickParamChange(param.key, $event)"
+            ></app-input-number>
+          } @else if (param.type === 'boolean') {
+            <app-select
+              [options]="[{ label: 'true', value: true }, { label: 'false', value: false }]"
+              [value]="$any(conditionParams[param.key] ?? param.defaultValue)"
+              (valueChange)="onQuickParamChange(param.key, $event)"
+            ></app-select>
+          } @else {
+            <app-input-text
+              [label]="param.label"
+              [value]="$any(conditionParams[param.key] ?? param.defaultValue ?? '')"
+              (valueChange)="onQuickParamChange(param.key, $event)"
+            ></app-input-text>
+          }
+        </div>
+      }
+
+      @for (slot of conditionSlots; track slot.index) {
+        <div class="rule-flow-inspector__section">
+          <label class="rule-flow-inspector__label">{{ slot.label | translateContent }}</label>
+          <app-rule-expression-operand-picker
+            [label]="slot.label"
+            [operand]="conditionOperand(slot.index)"
+            [allowedValueTypes]="$any(slot.allowedValueTypes)"
+            [indicatorConfigs]="indicatorConfigs"
+            [ruleConfigs]="ruleConfigs"
+            [currentRuleId]="currentRuleId"
+            (operandChange)="onConditionOperandChange(slot.index, $event)"
+          ></app-rule-expression-operand-picker>
+        </div>
+      }
+    }
+
+    @case ('rule-ref') {
+      <div class="rule-flow-inspector__section">
+        <label class="rule-flow-inspector__label">{{ 'tradeBot.ruleExpression.field.ruleCode' | translateContent }}</label>
+        <app-select
+          [options]="ruleRefOptions"
+          [value]="ruleCode"
+          placeholder="tradeBot.ruleExpression.placeholder.selectRule"
+          [showClear]="true"
+          (valueChange)="onRuleCodeChange($event)"
+        ></app-select>
+      </div>
+    }
+
+    @case ('rule-not') {
+      <p class="rule-flow-inspector__hint">{{ 'tradeBot.ruleExpression.hint.notNode' | translateContent }}</p>
+    }
+  }
+</div>

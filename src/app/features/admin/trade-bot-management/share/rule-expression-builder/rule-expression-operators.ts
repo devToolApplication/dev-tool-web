@@ -35,11 +35,12 @@ export interface RuleExpressionOperatorDefinition {
   description: string;
 }
 
-const NUMERIC_SERIES_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries'];
-const NUMERIC_VALUE_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'number'];
+const NUMERIC_SERIES_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'ruleValue'];
+const NUMERIC_VALUE_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'ruleValue', 'number'];
 const COMPARABLE_VALUE_TYPES: RuleExpressionOperandValueType[] = [
   'numericSeries',
   'priceSeries',
+  'ruleValue',
   'number',
   'boolean',
   'string'
@@ -223,7 +224,7 @@ export function operandValueTypes(operand: RuleExpressionOperand | null | undefi
     return ['priceSeries'];
   }
   if (operand.type === 'ruleRef') {
-    return ['boolean'];
+    return ['ruleValue'];
   }
   if (operand.valueType === 'boolean') {
     return ['boolean'];

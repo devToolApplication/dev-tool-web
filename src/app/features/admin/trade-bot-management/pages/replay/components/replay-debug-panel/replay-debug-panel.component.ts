@@ -1,6 +1,6 @@
 import { Component, computed, EventEmitter, Input, Output } from '@angular/core';
 import { AppTabItem } from '../../../../../../../shared/component/tabs/tabs.component';
-import { ChartCandle } from '../../../../share/candle-chart/candle-chart';
+import { ChartCandle } from '../../../../../../../shared/ui/candle-chart';
 import { RealtimeProgressEvent } from '../../../../../../../core/models/realtime/realtime.model';
 
 @Component({

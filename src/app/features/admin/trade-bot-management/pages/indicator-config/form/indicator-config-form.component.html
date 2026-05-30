@@ -5,5 +5,14 @@
   [formInitialValue]="formInitialValue"
   [submitting]="submitting()"
   (valueChange)="onValueChange($event)"
+  (actionClick)="onActionClick($event)"
   (formSubmit)="submit($event)"
 ></app-base-crud-page>
+
+@if (showPreview()) {
+  <app-config-preview-panel
+    previewType="indicator"
+    [configPayload]="previewPayload()"
+    (closed)="showPreview.set(false)"
+  />
+}

@@ -1,15 +1,13 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, signal, inject } from '@angular/core';
 import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
 import {
   RuleExpressionConstantType,
   RuleExpressionOperand,
   RuleExpressionOperandValueType,
-  RuleExpressionPriceSeries
 } from './rule-expression.models';
 import {
   RULE_EXPRESSION_BOOLEAN_OPTIONS,
   RULE_EXPRESSION_CONSTANT_TYPES,
-  RULE_EXPRESSION_PRICE_SERIES
 } from './rule-expression-operators';
 import { printRuleExpressionOperand } from './rule-expression-printer';
 
@@ -47,8 +45,10 @@ export class RuleExpressionOperandPickerComponent {
 
   @Output() readonly operandChange = new EventEmitter<RuleExpressionOperand>();
 
+  private readonly elRef = inject(ElementRef);
   readonly open = signal(false);
   readonly query = signal('');
+  readonly menuStyle = signal<Record<string, string>>({});
   readonly constantTypeOptions = RULE_EXPRESSION_CONSTANT_TYPES;
   readonly booleanOptions = RULE_EXPRESSION_BOOLEAN_OPTIONS;
 
@@ -88,7 +88,18 @@ export class RuleExpressionOperandPickerComponent {
     if (this.readonlyOrDisabled) {
       return;
     }
-    this.open.update((value) => !value);
+    const willOpen = !this.open();
+    this.open.set(willOpen);
+    if (willOpen) {
+      const rect = this.elRef.nativeElement.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const menuHeight = Math.min(28 * 16, window.innerHeight * 0.5);
+      const top = spaceBelow > menuHeight ? rect.bottom + 4 : rect.top - menuHeight - 4;
+      this.menuStyle.set({
+        top: `${Math.max(top, 8)}px`,
+        left: `${rect.left}px`,
+      });
+    }
   }
 
   close(): void {
@@ -146,41 +157,17 @@ export class RuleExpressionOperandPickerComponent {
 
   private allOptions(): OperandPickerOption[] {
     return [
-      ...this.priceSeriesOptions(),
       ...this.indicatorOptions(),
       ...this.ruleOptions(),
       ...this.constantOptions()
     ];
   }
 
-  private priceSeriesOptions(): OperandPickerOption[] {
-    const seen = new Set<string>();
-    const options: OperandPickerOption[] = [];
-    RULE_EXPRESSION_PRICE_SERIES
-      .filter((series) => series !== 'CLOSE')
-      .forEach((series) => {
-        const label = this.priceSeriesLabel(series);
-        if (seen.has(label)) {
-          return;
-        }
-        seen.add(label);
-        options.push({
-          id: `price-${series}`,
-          groupLabel: 'tradeBot.ruleExpression.operandGroup.priceSeries',
-          label,
-          meta: 'tradeBot.ruleExpression.operandMeta.priceSeries',
-          value: { type: 'priceSeries', series },
-          valueTypes: ['priceSeries']
-        });
-      });
-    return options;
-  }
-
   private indicatorOptions(): OperandPickerOption[] {
     return this.indicatorConfigs
       .map((item) => ({
         id: `indicator-${item.code}`,
-        groupLabel: 'tradeBot.ruleExpression.operandGroup.indicators',
+        groupLabel: item.group || 'tradeBot.ruleExpression.operandGroup.indicators',
         label: item.code,
         meta: item.status === 'ACTIVE'
           ? 'tradeBot.ruleExpression.operandMeta.indicatorActive'
@@ -189,7 +176,7 @@ export class RuleExpressionOperandPickerComponent {
         valueTypes: ['numericSeries'] as RuleExpressionOperandValueType[],
         disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
       }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+      .sort((a, b) => a.groupLabel.localeCompare(b.groupLabel) || a.label.localeCompare(b.label));
   }
 
   private ruleOptions(): OperandPickerOption[] {
@@ -197,16 +184,16 @@ export class RuleExpressionOperandPickerComponent {
       .filter((item) => item.id !== this.currentRuleId)
       .map((item) => ({
         id: `rule-${item.code}`,
-        groupLabel: 'tradeBot.ruleExpression.operandGroup.rules',
+        groupLabel: item.group || 'tradeBot.ruleExpression.operandGroup.rules',
         label: item.code,
         meta: item.status === 'ACTIVE'
           ? 'tradeBot.ruleExpression.operandMeta.ruleActive'
           : 'tradeBot.ruleExpression.operandMeta.rule',
         value: { type: 'ruleRef' as const, ruleCode: item.code },
-        valueTypes: ['boolean'] as RuleExpressionOperandValueType[],
+        valueTypes: ['ruleValue'] as RuleExpressionOperandValueType[],
         disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
       }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+      .sort((a, b) => a.groupLabel.localeCompare(b.groupLabel) || a.label.localeCompare(b.label));
   }
 
   private constantOptions(): OperandPickerOption[] {
@@ -262,16 +249,6 @@ export class RuleExpressionOperandPickerComponent {
       return true;
     }
     return `${option.label} ${option.meta}`.toLowerCase().includes(keyword);
-  }
-
-  private priceSeriesLabel(series: RuleExpressionPriceSeries): string {
-    if (series === 'CLOSE' || series === 'CLOSEPRICE') {
-      return 'CLOSEPRICE';
-    }
-    if (series === 'OPEN' || series === 'HIGH' || series === 'LOW') {
-      return `${series}PRICE`;
-    }
-    return series;
   }
 
   private isConstantType(value: unknown): value is RuleExpressionConstantType {

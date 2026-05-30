@@ -1,17 +1,28 @@
 <div class="rule-operand-picker" [class.rule-operand-picker--open]="open()">
-  <app-button
-    icon="pi pi-search"
-    [label]="resolvedLabel"
-    severity="secondary"
-    [text]="!hasValue"
-    [disabled]="readonlyOrDisabled"
-    [styleClass]="hasValue ? 'rule-operand-picker__trigger' : 'rule-operand-picker__trigger rule-operand-picker__trigger--empty'"
-    [ariaLabel]="label"
-    (buttonClick)="toggleOpen()"
-  ></app-button>
+  <div class="rule-operand-picker__row">
+    <app-button
+      icon="pi pi-search"
+      [label]="resolvedLabel"
+      severity="secondary"
+      [text]="!hasValue"
+      [disabled]="readonlyOrDisabled"
+      [styleClass]="hasValue ? 'rule-operand-picker__trigger' : 'rule-operand-picker__trigger rule-operand-picker__trigger--empty'"
+      [ariaLabel]="label"
+      (buttonClick)="toggleOpen()"
+    ></app-button>
+
+    @if (constantOperand; as constant) {
+      <app-input-number
+        label=""
+        [value]="$any(constant.value ?? 0)"
+        [disabled]="readonlyOrDisabled"
+        (valueChange)="updateConstantNumber($event)"
+      ></app-input-number>
+    }
+  </div>
 
   @if (open()) {
-    <div class="rule-operand-picker__menu">
+    <div class="rule-operand-picker__menu" [ngStyle]="menuStyle()">
       <app-input-text
         label="tradeBot.ruleExpression.searchOperand"
         [value]="query()"
@@ -39,43 +50,6 @@
           <div class="rule-operand-picker__empty">{{ 'noDataFound' | translateContent }}</div>
         }
       </div>
-    </div>
-  }
-
-  @if (constantOperand; as constant) {
-    <div class="rule-operand-picker__constant">
-      <app-select
-        label="tradeBot.ruleExpression.field.constantType"
-        [options]="constantTypeOptions"
-        [value]="constant.valueType || 'number'"
-        [disabled]="readonlyOrDisabled"
-        (valueChange)="updateConstantType($event)"
-      ></app-select>
-
-      @if ((constant.valueType || 'number') === 'number') {
-        <app-input-number
-          label="tradeBot.ruleExpression.field.constantNumber"
-          suffix=" value"
-          [value]="$any(constant.value)"
-          [disabled]="readonlyOrDisabled"
-          (valueChange)="updateConstantNumber($event)"
-        ></app-input-number>
-      } @else if (constant.valueType === 'boolean') {
-        <app-select
-          label="tradeBot.ruleExpression.field.constantBoolean"
-          [options]="booleanOptions"
-          [value]="constant.value === true"
-          [disabled]="readonlyOrDisabled"
-          (valueChange)="updateConstantBoolean($event)"
-        ></app-select>
-      } @else {
-        <app-input-text
-          label="tradeBot.ruleExpression.field.constantText"
-          [value]="$any(constant.value || '')"
-          [disabled]="readonlyOrDisabled"
-          (valueChange)="updateConstantText($event)"
-        ></app-input-text>
-      }
     </div>
   }
 </div>

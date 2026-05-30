@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SimpleChange } from '@angular/core';
 
 import { SharedModule } from '../../shared.module';
 import { provideSharedTesting } from '../../testing/shared-test.providers';
@@ -18,22 +19,25 @@ describe('InputMulti', () => {
     component = fixture.componentInstance;
   });
 
-  it('normalizes model changes into unique string values', () => {
+  it('normalizes value changes into unique string values', () => {
     const valueChange = vi.spyOn(component.valueChange, 'emit');
 
-    component.onModelChange([
-      { label: 'Alpha', value: 'alpha' },
+    component.value = [
+      'alpha',
       'beta',
-      { label: 'Duplicate Alpha', value: 'alpha' },
+      'alpha',
       ''
-    ]);
+    ];
+    component.ngOnChanges({
+      value: new SimpleChange(null, component.value, false)
+    });
 
     expect(component.model).toEqual(['alpha', 'beta']);
     expect(component.selectedOptions).toEqual([
       { label: 'alpha', value: 'alpha' },
       { label: 'beta', value: 'beta' }
     ]);
-    expect(valueChange).toHaveBeenCalledWith(['alpha', 'beta']);
+    expect(valueChange).not.toHaveBeenCalled();
   });
 
   it('commits a typed value on enter without duplicating existing chips', () => {
@@ -57,13 +61,15 @@ describe('InputMulti', () => {
       { label: 'Alpha', value: 'alpha' },
       { label: 'Beta', value: 'beta' }
     ];
-    component.onModelChange(['alpha']);
+    component.value = ['alpha'];
+    component.ngOnChanges({
+      value: new SimpleChange(null, component.value, false)
+    });
 
     component.onSearch('');
 
     expect(component.suggestions).toEqual([
-      { label: 'alpha', value: 'alpha' },
-      { label: 'beta', value: 'beta' }
+      { label: 'Beta', value: 'beta' }
     ]);
   });
 });

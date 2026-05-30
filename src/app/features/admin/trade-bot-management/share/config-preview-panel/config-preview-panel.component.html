@@ -1,0 +1,82 @@
+<div class="config-preview-panel__backdrop" (click)="close()"></div>
+<div class="config-preview-panel">
+  <div class="config-preview-panel__header">
+    <h3>{{ 'tradeBot.preview.title' | translateContent }}</h3>
+    <button class="p-button p-button-text p-button-sm" (click)="close()">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+
+  <div class="config-preview-panel__form">
+    <div class="config-preview-panel__form-row">
+      <div class="config-preview-panel__field">
+        <app-input-text
+          label="tradeBot.field.symbol"
+          placeholder="BTCUSDT"
+          [value]="symbol()"
+          (valueChange)="onSymbolChange($event)"
+        ></app-input-text>
+      </div>
+      <div class="config-preview-panel__field">
+        <app-select
+          label="tradeBot.field.timeframe"
+          [options]="timeframeOptions"
+          [value]="timeframe()"
+          (valueChange)="onTimeframeChange($event)"
+        ></app-select>
+      </div>
+    </div>
+    <div class="config-preview-panel__form-row">
+      <div class="config-preview-panel__field">
+        <app-date-picker
+          label="tradeBot.field.fromTime"
+          [showTime]="true"
+          [value]="fromTimeDate()"
+          (valueChange)="onFromTimeChange($event)"
+        ></app-date-picker>
+      </div>
+      <div class="config-preview-panel__field">
+        <app-date-picker
+          label="tradeBot.field.toTime"
+          [showTime]="true"
+          [value]="toTimeDate()"
+          (valueChange)="onToTimeChange($event)"
+        ></app-date-picker>
+      </div>
+    </div>
+    <div class="config-preview-panel__actions">
+      <button class="p-button p-button-sm" [disabled]="loading()" (click)="runPreview()">
+        <i class="pi pi-play"></i>
+        <span>{{ 'tradeBot.preview.run' | translateContent }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="config-preview-panel__loading">
+      <app-progress-spinner></app-progress-spinner>
+    </div>
+  }
+
+  @if (hasResult() && !loading()) {
+    <div class="config-preview-panel__chart">
+      <app-candle-chart
+        [candles]="candles()"
+        [indicators]="indicators()"
+        [overlays]="overlays()"
+        [config]="{ showCandles: true, showVolume: true, showIndicators: true, height: 400 }"
+      ></app-candle-chart>
+    </div>
+
+    @if (previewType() === 'rule' && ruleResults().length) {
+      <div class="config-preview-panel__summary">
+        <span class="config-preview-panel__stat">
+          {{ 'tradeBot.preview.totalBars' | translateContent }}: {{ ruleResults().length }}
+        </span>
+        <span class="config-preview-panel__stat config-preview-panel__stat--success">
+          {{ 'tradeBot.preview.satisfied' | translateContent }}: {{ satisfiedCount() }}
+        </span>
+      </div>
+    }
+  }
+</div>

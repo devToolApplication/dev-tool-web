@@ -145,7 +145,7 @@
             (buttonClick)="toggleActions()"
           ></app-button>
           @if (actionsOpen()) {
-            <div class="table-actions__menu" role="menu" (click)="$event.stopPropagation()">
+            <div class="table-actions__menu" role="menu" [ngStyle]="menuStyle" (click)="$event.stopPropagation()">
               @for (action of moreActions; track action.id ?? action.label ?? action.icon) {
                 <app-button
                   class="table-actions__menu-item"

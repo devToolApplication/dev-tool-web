@@ -27,6 +27,7 @@ export type RuleExpressionConstantType = 'number' | 'string' | 'boolean';
 export type RuleExpressionOperandValueType =
   | 'numericSeries'
   | 'priceSeries'
+  | 'ruleValue'
   | 'number'
   | 'boolean'
   | 'string';

@@ -21,6 +21,10 @@ import { AiAgentCrawlerListComponent } from './ai-agent-crawler/list/ai-agent-cr
 import { AiAgentCrawlerFormComponent } from './ai-agent-crawler/form/ai-agent-crawler-form.component';
 import { AiAgentCatalogListComponent } from './ai-agent-catalog/list/ai-agent-catalog-list.component';
 import { AiAgentCatalogFormComponent } from './ai-agent-catalog/form/ai-agent-catalog-form.component';
+import { AiAgentAuthProfileListComponent } from './ai-agent-auth-profile/list/ai-agent-auth-profile-list.component';
+import { AiAgentAuthProfileFormComponent } from './ai-agent-auth-profile/form/ai-agent-auth-profile-form.component';
+import { AiAgentAccountListComponent } from './ai-agent-account/list/ai-agent-account-list.component';
+import { AiAgentAccountFormComponent } from './ai-agent-account/form/ai-agent-account-form.component';
 
 export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   StorageSecretListComponent,
@@ -41,7 +45,11 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentCrawlerListComponent,
   AiAgentCrawlerFormComponent,
   AiAgentCatalogListComponent,
-  AiAgentCatalogFormComponent
+  AiAgentCatalogFormComponent,
+  AiAgentAuthProfileListComponent,
+  AiAgentAuthProfileFormComponent,
+  AiAgentAccountListComponent,
+  AiAgentAccountFormComponent
 ];
 
 export const systemManagementRoutes: Routes = [
@@ -107,6 +115,22 @@ export const systemManagementRoutes: Routes = [
       { path: '', component: AiAgentCatalogListComponent },
       { path: 'create', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-auth-profiles',
+    children: [
+      { path: '', component: AiAgentAuthProfileListComponent },
+      { path: 'create', component: AiAgentAuthProfileFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentAuthProfileFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-accounts',
+    children: [
+      { path: '', component: AiAgentAccountListComponent },
+      { path: 'create', component: AiAgentAccountFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentAccountFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
   },
   {

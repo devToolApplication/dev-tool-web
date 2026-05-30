@@ -1,0 +1,30 @@
+[22:25:55.029] [INFO] storybook v10.3.6
+[22:25:57.466] [DEBUG] Getting package.json info for D:/Code/dev-tool-web/package.json...
+[22:26:09.328] [DEBUG] Serving static files from [36mnode_modules/@chromatic-com/storybook/assets[39m at [36m/addon-visual-tests-assets[39m
+[22:26:09.329] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[22:26:09.330] [INFO] Starting...
+[22:26:11.323] [DEBUG] Starting preview..
+[22:26:11.584] [INFO] Addon-docs: using MDX3
+[22:26:11.880] [INFO] Using implicit CSS loaders
+[22:26:24.539] [ERROR] Failed to build the preview
+[22:26:24.540] [ERROR] [38;2;241;97;97mSB_FRAMEWORK_ANGULAR_0001 (AngularLegacyBuildOptionsError): Your Storybook startup script uses a solution that is not supported anymore.
+You must use Angular builder to have an explicit configuration on the project used in angular.json.
+
+Please run 'npx storybook automigrate' to automatically fix your config.
+
+More info: 
+	- https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#angular-drop-support-for-calling-storybook-directly
+	- https://github.com/storybookjs/storybook/tree/next/code/frameworks/angular#how-do-i-migrate-to-an-angular-storybook-builder
+[39m
+    at checkForLegacyBuildOptions (file:///D:/Code/dev-tool-web/node_modules/@storybook/angular/dist/server/framework-preset-angular-cli.js:159:11)
+    at Object.webpackFinal (file:///D:/Code/dev-tool-web/node_modules/@storybook/angular/dist/server/framework-preset-angular-cli.js:93:3)
+    at async Object.webpack (file:///D:/Code/dev-tool-web/node_modules/@storybook/builder-webpack5/dist/presets/custom-webpack-preset.js:282:28)
+    at async starter (file:///D:/Code/dev-tool-web/node_modules/@storybook/builder-webpack5/dist/index.js:753:16)
+    at async Module.start (file:///D:/Code/dev-tool-web/node_modules/@storybook/builder-webpack5/dist/index.js:857:14)
+    at async storybookDevServer (file:///D:/Code/dev-tool-web/node_modules/storybook/dist/core-server/index.js:7503:83)
+    at async buildOrThrow (file:///D:/Code/dev-tool-web/node_modules/storybook/dist/core-server/index.js:4508:12)
+    at async buildDevStandalone (file:///D:/Code/dev-tool-web/node_modules/storybook/dist/core-server/index.js:8033:41)
+    at async withTelemetry (file:///D:/Code/dev-tool-web/node_modules/storybook/dist/_node-chunks/chunk-UYONHJJP.js:225:12)
+    at async dev (file:///D:/Code/dev-tool-web/node_modules/storybook/dist/bin/core.js:2736:3)
+[22:26:24.544] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.

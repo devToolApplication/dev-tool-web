@@ -1,0 +1,12 @@
+@if (resolvedConfig) {
+  <div class="flow-inspector-form-panel">
+    <app-form-input
+      [config]="resolvedConfig"
+      [context]="resolvedContext"
+      [initialValue]="initialValue"
+      [showSubmit]="false"
+      (valueChange)="onFormValueChange($event)"
+      (validChange)="onFormValidChange($event)"
+    ></app-form-input>
+  </div>
+}

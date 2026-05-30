@@ -26,4 +26,18 @@ export class InputNumber extends BaseInput<number> {
   /* ========= Decimal Pipe ========= */
   @Input() minFractionDigits?: number;
   @Input() maxFractionDigits?: number;
+
+  increment(): void {
+    const s = this.step ?? 1;
+    const next = (this.value ?? 0) + s;
+    if (this.max != null && next > this.max) return;
+    this.onChange(next);
+  }
+
+  decrement(): void {
+    const s = this.step ?? 1;
+    const next = (this.value ?? 0) - s;
+    if (this.min != null && next < this.min) return;
+    this.onChange(next);
+  }
 }

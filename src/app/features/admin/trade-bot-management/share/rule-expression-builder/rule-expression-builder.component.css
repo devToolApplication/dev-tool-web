@@ -81,7 +81,7 @@
 
 .rule-expression-builder__layout {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(20rem, 3fr);
+  grid-template-columns: minmax(0, 7fr) minmax(18rem, 3fr);
   gap: var(--app-space-4);
 }
 
@@ -144,7 +144,7 @@
 }
 
 .rule-expression-node__title app-select {
-  min-width: 12rem;
+  min-width: 0;
   max-width: 18rem;
 }
 
@@ -219,13 +219,13 @@
 
 .rule-condition-row__main {
   display: grid;
-  grid-template-columns: auto minmax(12rem, 1fr) minmax(11rem, 0.82fr) minmax(12rem, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 0.82fr) minmax(0, 1fr) auto;
   gap: var(--app-space-2);
   align-items: start;
 }
 
 .rule-condition-row--range .rule-condition-row__main {
-  grid-template-columns: auto repeat(4, minmax(8rem, 1fr)) auto;
+  grid-template-columns: auto repeat(4, minmax(0, 1fr)) auto;
 }
 
 .rule-condition-row__handle {
@@ -239,14 +239,36 @@
 .rule-condition-row__params,
 .rule-operand-picker__constant {
   display: grid;
-  grid-template-columns: repeat(2, minmax(10rem, 1fr));
+  grid-template-columns: repeat(2, minmax(8rem, 1fr));
   gap: var(--app-space-3);
   padding-left: calc(var(--app-space-4) + var(--app-space-2));
+}
+
+.rule-expression-panel .rule-operand-picker__constant {
+  grid-template-columns: 1fr;
+  padding-left: 0;
 }
 
 .rule-operand-picker {
   position: relative;
   min-width: 0;
+}
+
+.rule-operand-picker__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.rule-operand-picker__row > app-button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rule-operand-picker__row > app-input-number {
+  flex: 0 0 6rem;
+  max-width: 6rem;
 }
 
 .rule-operand-picker__trigger {
@@ -257,6 +279,9 @@
   justify-content: flex-start;
   width: 100%;
   min-height: 2.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 :host ::ng-deep .rule-operand-picker__trigger--empty.p-button {
@@ -271,15 +296,13 @@
 }
 
 .rule-operand-picker__menu {
-  position: absolute;
+  position: fixed;
   z-index: var(--app-z-popup);
-  top: calc(100% + var(--app-space-2));
-  left: 0;
   display: flex;
   flex-direction: column;
   gap: var(--app-space-3);
   width: min(24rem, 82vw);
-  max-height: 28rem;
+  max-height: min(28rem, 50vh);
   overflow: auto;
   border: 1px solid var(--app-border-strong);
   border-radius: var(--app-radius-md);

@@ -1,0 +1,261 @@
+<div
+  class="flow-builder"
+  [class.flow-builder--readonly]="resolvedMode !== 'edit'"
+  [class.flow-builder--fullscreen]="fullscreen()"
+  [class.flow-builder--floating-toolbar]="resolvedToolbar.mode === 'floating'"
+>
+  <input
+    #importInput
+    type="file"
+    accept="application/json,.json"
+    class="flow-builder__file-input"
+    [attr.aria-label]="'shared.flowBuilder.toolbar.import' | translateContent"
+    (change)="onImportFile($event)"
+  />
+
+  @if (resolvedToolbar.visible !== false && resolvedMode === 'edit') {
+    <div class="flow-builder__toolbar">
+      @if (isCommandVisible('undo')) {
+        <app-button icon="pi pi-undo" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('undo')" tooltip="shared.flowBuilder.toolbar.undo" (buttonClick)="executeCommand('undo')"></app-button>
+      }
+      @if (isCommandVisible('redo')) {
+        <app-button icon="pi pi-refresh" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('redo')" tooltip="shared.flowBuilder.toolbar.redo" (buttonClick)="executeCommand('redo')"></app-button>
+      }
+      <span class="flow-builder__toolbar-separator"></span>
+      @if (isCommandVisible('fit')) {
+        <app-button icon="pi pi-arrows-alt" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('fit')" tooltip="shared.flowBuilder.toolbar.fit" (buttonClick)="executeCommand('fit')"></app-button>
+      }
+      @if (isCommandVisible('zoomIn')) {
+        <app-button icon="pi pi-search-plus" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('zoomIn')" tooltip="shared.flowBuilder.toolbar.zoomIn" (buttonClick)="executeCommand('zoomIn')"></app-button>
+      }
+      @if (isCommandVisible('zoomOut')) {
+        <app-button icon="pi pi-search-minus" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('zoomOut')" tooltip="shared.flowBuilder.toolbar.zoomOut" (buttonClick)="executeCommand('zoomOut')"></app-button>
+      }
+      @if (isCommandVisible('resetZoom')) {
+        <app-button icon="pi pi-sync" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('resetZoom')" tooltip="shared.flowBuilder.toolbar.resetZoom" (buttonClick)="executeCommand('resetZoom')"></app-button>
+      }
+      <span class="flow-builder__toolbar-separator"></span>
+      @if (isCommandVisible('autoLayout')) {
+        <app-button icon="pi pi-sitemap" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('autoLayout')" tooltip="shared.flowBuilder.toolbar.autoLayout" (buttonClick)="executeCommand('autoLayout')"></app-button>
+      }
+      @if (isCommandVisible('toggleNavigator')) {
+        <app-button icon="pi pi-map" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('toggleNavigator')" tooltip="shared.flowBuilder.toolbar.navigator" (buttonClick)="executeCommand('toggleNavigator')"></app-button>
+      }
+      @if (isCommandVisible('toggleInspector')) {
+        <app-button icon="pi pi-window-maximize" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('toggleInspector')" tooltip="shared.flowBuilder.toolbar.inspector" (buttonClick)="executeCommand('toggleInspector')"></app-button>
+      }
+      @if (isCommandVisible('fullscreen')) {
+        <app-button icon="pi pi-expand" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('fullscreen')" tooltip="shared.flowBuilder.toolbar.fullscreen" (buttonClick)="executeCommand('fullscreen')"></app-button>
+      }
+      <span class="flow-builder__toolbar-separator"></span>
+      @if (isCommandVisible('duplicateSelection')) {
+        <app-button icon="pi pi-clone" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('duplicateSelection')" tooltip="shared.flowBuilder.toolbar.duplicate" (buttonClick)="executeCommand('duplicateSelection')"></app-button>
+      }
+      @if (isCommandVisible('deleteSelection')) {
+        <app-button icon="pi pi-trash" severity="danger" [text]="true" [disabled]="!isCommandEnabled('deleteSelection')" tooltip="shared.flowBuilder.toolbar.delete" (buttonClick)="executeCommand('deleteSelection')"></app-button>
+      }
+      <span class="flow-builder__toolbar-separator"></span>
+      @if (isCommandVisible('exportJson')) {
+        <app-button icon="pi pi-download" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('exportJson')" tooltip="shared.flowBuilder.toolbar.export" (buttonClick)="executeCommand('exportJson')"></app-button>
+      }
+      @if (isCommandVisible('importJson')) {
+        <app-button icon="pi pi-upload" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('importJson')" tooltip="shared.flowBuilder.toolbar.import" (buttonClick)="executeCommand('importJson')"></app-button>
+      }
+      <ng-content select="[flowToolbarExtra]"></ng-content>
+    </div>
+  }
+
+  <div class="flow-builder__body">
+    @if (resolvedMode === 'edit' && resolvedPalette.visible !== false && resolvedNodeTypes.length) {
+      <app-flow-palette
+        class="flow-builder__palette"
+        [nodeTypes]="resolvedNodeTypes"
+        [config]="resolvedPalette"
+        (nodeTypeAdd)="onPaletteNodeAdd($event)"
+      ></app-flow-palette>
+    }
+
+    <div class="flow-builder__workspace">
+      <app-flow-canvas
+        class="flow-builder__canvas"
+        [value]="value"
+        [nodeTypes]="resolvedNodeTypes"
+        [edgeTypes]="resolvedEdgeTypes"
+        [nodeTemplates]="nodeTemplates"
+        [mode]="resolvedMode"
+        [selectedId]="selectedId"
+        [autoLayout]="autoLayout"
+        [fitOnLoad]="fitOnLoad"
+        (nodeClick)="onNodeClick($event)"
+        (edgeClick)="onEdgeClick($event)"
+        (blankClick)="onBlankClick()"
+        (connect)="onConnect($event)"
+        (nodeMove)="onNodeMove($event)"
+        (contextMenu)="onContextMenu($event)"
+        (nodeDrop)="onNodeDrop($event)"
+        (addNodeFromPort)="onAddNodeFromPort($event)"
+        (viewportChange)="onViewportChange($event)"
+      ></app-flow-canvas>
+
+      @if (resolvedCapabilities.navigator && navigatorOpen()) {
+        <div class="flow-builder__navigator-panel">
+          <app-flow-navigator
+            [value]="value"
+            [selectedId]="selectedId"
+            [nodeTypes]="resolvedNodeTypes"
+            [viewport]="viewport()"
+            (nodeSelect)="onNodeClick($event)"
+            (zoomIn)="executeCommand('zoomIn')"
+            (zoomOut)="executeCommand('zoomOut')"
+            (fit)="executeCommand('fit')"
+            (close)="executeCommand('toggleNavigator')"
+            (viewportPan)="onNavigatorViewportPan($event)"
+          ></app-flow-navigator>
+        </div>
+      }
+    </div>
+
+    @if (resolvedInspector.visible !== false && resolvedCapabilities.inspector && inspectorOpen()) {
+      <aside class="flow-builder__inspector">
+        @if (selectedNode) {
+          @if (inspectorTemplate; as tmpl) {
+            <ng-container *ngTemplateOutlet="tmpl.templateRef; context: { $implicit: selectedNode, node: selectedNode }"></ng-container>
+          } @else if (selectedNodeType?.inspectorForm; as inspectorForm) {
+            <app-flow-inspector-form-panel
+              [node]="selectedNode"
+              [config]="inspectorForm"
+              [context]="resolvedInspector.formContext ?? null"
+              [readonly]="resolvedMode !== 'edit'"
+              (formValueChange)="onInspectorFormValueChange($event)"
+            ></app-flow-inspector-form-panel>
+          } @else if (selectedNodeType?.inspector; as schema) {
+            <div class="flow-builder__inspector-schema">
+              <div class="flow-builder__inspector-header">
+                @if (selectedNodeType?.icon) {
+                  <i [class]="selectedNodeType?.icon" aria-hidden="true"></i>
+                }
+                <div>
+                  <h4>{{ inspectorTitle }}</h4>
+                  <p>{{ selectedNode.type }}</p>
+                </div>
+              </div>
+
+              @for (section of schema.sections; track section.id) {
+                <section class="flow-builder__inspector-section">
+                  <h5>{{ section.title | translateContent }}</h5>
+                  <div class="flow-builder__inspector-fields">
+                    @for (field of section.fields; track field.key) {
+                      @switch (field.type) {
+                        @case ('text') {
+                          <app-input-text
+                            [label]="field.label"
+                            [required]="field.required || false"
+                            [readonly]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [value]="inspectorFieldText(field)"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-input-text>
+                        }
+                        @case ('number') {
+                          <app-input-number
+                            [label]="field.label"
+                            [required]="field.required || false"
+                            [readonly]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [value]="inspectorFieldNumber(field)"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-input-number>
+                        }
+                        @case ('boolean') {
+                          <app-check-box
+                            [label]="field.label"
+                            [readonly]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [value]="inspectorFieldBoolean(field)"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-check-box>
+                        }
+                        @case ('select') {
+                          <app-select
+                            [label]="field.label"
+                            [required]="field.required || false"
+                            [disabled]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [options]="inspectorFieldOptions(field)"
+                            [value]="$any(inspectorFieldValue(field))"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-select>
+                        }
+                        @case ('textarea') {
+                          <app-input-area
+                            [label]="field.label"
+                            [required]="field.required || false"
+                            [readonly]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [rows]="3"
+                            [maxRows]="8"
+                            [value]="inspectorFieldText(field)"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-input-area>
+                        }
+                        @case ('json') {
+                          <app-input-area
+                            [label]="field.label"
+                            [required]="field.required || false"
+                            [readonly]="resolvedMode !== 'edit' || field.readonly || false"
+                            [helpText]="field.hint"
+                            [rows]="5"
+                            [maxRows]="10"
+                            contentType="json"
+                            [showZoomButton]="true"
+                            [value]="inspectorFieldText(field)"
+                            (valueChange)="onInspectorFieldChange(field, $event)"
+                          ></app-input-area>
+                        }
+                        @default {
+                          <div class="flow-builder__readonly-field">
+                            <span>{{ field.label | translateContent }}</span>
+                            <strong>{{ inspectorFieldText(field) }}</strong>
+                          </div>
+                        }
+                      }
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+          } @else {
+            <div class="flow-builder__inspector-default">
+              <h4>{{ selectedNode.type }}</h4>
+              <p>{{ selectedNode.label }}</p>
+            </div>
+          }
+        } @else if (selectedEdge) {
+          <div class="flow-builder__inspector-default">
+            <h4>{{ 'shared.flowBuilder.inspector.edgeTitle' | translateContent }}</h4>
+            <p>{{ selectedEdge.source.nodeId }} &rarr; {{ selectedEdge.target.nodeId }}</p>
+          </div>
+        } @else {
+          <div class="flow-builder__inspector-empty">
+            <p>{{ 'shared.flowBuilder.inspector.emptyDescription' | translateContent }}</p>
+          </div>
+        }
+      </aside>
+    }
+
+    @if (contextMenuState(); as menu) {
+      <div class="flow-builder__context-menu" [ngStyle]="contextMenuStyle(menu)" role="menu">
+        <div class="flow-builder__context-menu-title">{{ contextMenuTitle(menu) | translateContent }}</div>
+        @if (menu.targetType === 'blank') {
+          <app-button size="small" icon="pi pi-arrows-alt" label="shared.flowBuilder.toolbar.fit" severity="secondary" [text]="true" (buttonClick)="runContextMenuCommand('fit')"></app-button>
+          <app-button size="small" icon="pi pi-sitemap" label="shared.flowBuilder.toolbar.autoLayout" severity="secondary" [text]="true" (buttonClick)="runContextMenuCommand('autoLayout')"></app-button>
+        } @else {
+          @if (menu.targetType === 'node') {
+            <app-button size="small" icon="pi pi-clone" label="shared.flowBuilder.toolbar.duplicate" severity="secondary" [text]="true" [disabled]="!isCommandEnabled('duplicateSelection')" (buttonClick)="runContextMenuCommand('duplicateSelection')"></app-button>
+          }
+          <app-button size="small" icon="pi pi-trash" label="shared.flowBuilder.toolbar.delete" severity="danger" [text]="true" [disabled]="!isCommandEnabled('deleteSelection')" (buttonClick)="runContextMenuCommand('deleteSelection')"></app-button>
+        }
+      </div>
+    }
+  </div>
+</div>

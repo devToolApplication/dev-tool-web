@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { FieldGuidePanelComponent } from './field-guide-panel.component';
 
 const meta: Meta<FieldGuidePanelComponent> = {
-  title: 'Shared/UI/FieldGuidePanel',
+  title: 'Shared/UI/Layout/FieldGuidePanel',
   component: FieldGuidePanelComponent,
   args: {
     title: 'codexAgent.form.fieldGuideTitle',

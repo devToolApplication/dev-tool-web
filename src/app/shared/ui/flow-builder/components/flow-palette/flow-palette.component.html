@@ -1,0 +1,37 @@
+<aside
+  class="flow-palette"
+  [style.width]="config.width || null"
+  [attr.aria-label]="(config.title || 'shared.flowBuilder.palette.title') | translateContent"
+>
+  <div class="flow-palette__header">
+    <span>{{ (config.title || 'shared.flowBuilder.palette.title') | translateContent }}</span>
+  </div>
+
+  <div class="flow-palette__items">
+    @for (type of visibleNodeTypes; track type.type) {
+      <button
+        type="button"
+        class="flow-palette__item"
+        draggable="true"
+        [attr.title]="(type.description || type.label) | translateContent"
+        (dragstart)="onDragStart($event, type)"
+        (dblclick)="nodeTypeAdd.emit(type.type)"
+      >
+        <span class="flow-palette__icon" aria-hidden="true">
+          @if (type.icon) {
+            <i [class]="type.icon"></i>
+          } @else {
+            {{ type.label.slice(0, 2).toUpperCase() }}
+          }
+        </span>
+        <span class="flow-palette__copy">
+          <strong>{{ type.label | translateContent }}</strong>
+          @if (type.description) {
+            <small>{{ type.description | translateContent }}</small>
+          }
+        </span>
+        <i class="pi pi-bars flow-palette__handle" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+</aside>

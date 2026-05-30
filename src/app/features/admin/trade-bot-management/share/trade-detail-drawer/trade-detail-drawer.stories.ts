@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { TradeDetailDrawerComponent } from './trade-detail-drawer.component';
 
 const meta: Meta<TradeDetailDrawerComponent> = {
-  title: 'Shared/UI/TradeDetailDrawer',
+  title: 'Features/Trade Bot/Trade Detail Drawer',
   component: TradeDetailDrawerComponent,
   args: {
     trade: {

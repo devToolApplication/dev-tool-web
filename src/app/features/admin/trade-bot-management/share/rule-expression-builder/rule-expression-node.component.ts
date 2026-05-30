@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
 import {
+  RuleExpressionConditionNode,
   RuleExpressionGroupNode,
   RuleExpressionGroupOperator,
   RuleExpressionNode,
@@ -8,6 +9,7 @@ import {
   RuleExpressionRuleRefNode,
   RuleExpressionValidationIssue
 } from './rule-expression.models';
+import { printRuleExpressionOperand } from './rule-expression-printer';
 
 @Component({
   selector: 'app-rule-expression-node',
@@ -42,6 +44,27 @@ export class RuleExpressionNodeComponent {
   }>();
 
   readonly moreOpen = signal(false);
+  readonly collapsed = signal(false);
+
+  conditionLabel(node: RuleExpressionConditionNode): string {
+    const op = node.operator ?? '?';
+    const left = node.operands[0] ? printRuleExpressionOperand(node.operands[0]) : '?';
+    const right = node.operands[1] ? printRuleExpressionOperand(node.operands[1]) : '?';
+    return `${left} ${op} ${right}`;
+  }
+
+  nodeLabel(node: RuleExpressionNode): string {
+    switch (node.type) {
+      case 'group':
+        return (node as RuleExpressionGroupNode).operator;
+      case 'not':
+        return 'NOT';
+      case 'ruleRef':
+        return `Rule: ${(node as RuleExpressionRuleRefNode).ruleCode || '?'}`;
+      default:
+        return node.type;
+    }
+  }
 
   readonly groupOperatorOptions: Array<{ label: string; value: RuleExpressionGroupOperator }> = [
     { label: 'tradeBot.ruleExpression.group.AND', value: 'AND' },

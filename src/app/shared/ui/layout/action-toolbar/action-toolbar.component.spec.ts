@@ -33,6 +33,7 @@ describe('ActionToolbarComponent', () => {
     const action = { id: 'create', label: 'Create', placement: 'primary' as const, variant: 'primary' as const };
     const emit = vi.spyOn(component.actionClick, 'emit');
     component.actions = [action];
+    component.ngOnChanges();
     fixture.detectChanges();
 
     await component.emitAction(action);
@@ -53,6 +54,7 @@ describe('ActionToolbarComponent', () => {
     const moreAction = { id: 'archive', label: 'Archive', placement: 'more' as const };
     const emit = vi.spyOn(component.actionClick, 'emit');
     component.actions = [moreAction];
+    component.ngOnChanges();
     fixture.detectChanges();
 
     component.toggleMore();
@@ -108,9 +110,10 @@ describe('ActionToolbarComponent', () => {
     const emit = vi.spyOn(component.actionClick, 'emit');
 
     component.actions = [action];
+    component.ngOnChanges();
     fixture.detectChanges();
 
-    expect(component.visibleActions('secondary')).toEqual([action]);
+    expect(component.secondaryActions).toEqual([action]);
     expect(component.isActionDisabled(action)).toBe(true);
     expect(component.actionTooltip(action)).toBe('shared.permission.deniedAction');
 

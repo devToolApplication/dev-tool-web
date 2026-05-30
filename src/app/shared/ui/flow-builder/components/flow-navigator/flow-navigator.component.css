@@ -1,0 +1,211 @@
+:host {
+  display: block;
+}
+
+.flow-navigator {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  background: var(--app-card-surface);
+  box-shadow: var(--app-shadow-sm, 0 1px 2px rgb(15 23 42 / 0.08));
+}
+
+.flow-navigator__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--app-border-soft);
+  flex-shrink: 0;
+}
+
+.flow-navigator__title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.flow-navigator__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.flow-navigator__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 100ms ease, color 100ms ease;
+}
+
+.flow-navigator__action:hover {
+  background: var(--app-chart-primary-fill, rgba(122, 119, 255, 0.08));
+  color: var(--app-primary);
+}
+
+.flow-navigator__action:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: -1px;
+}
+
+.flow-navigator__action i {
+  font-size: 11px;
+}
+
+.flow-navigator__action--close:hover {
+  background: color-mix(in srgb, var(--app-control-danger-bg) 60%, transparent);
+  color: var(--app-control-danger-text);
+}
+
+.flow-navigator__body {
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.flow-navigator__edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.flow-navigator__edges line {
+  stroke: var(--app-text-muted, #94a3b8);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.flow-navigator__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--app-border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--app-border) 45%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.flow-navigator__node {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12px;
+  min-height: 8px;
+  border: 1px solid var(--app-border-strong, var(--app-border));
+  border-radius: 3px;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+  z-index: 3;
+  overflow: hidden;
+  padding: 0;
+}
+
+.flow-navigator__node:hover,
+.flow-navigator__node:focus-visible {
+  border-color: var(--app-primary);
+  background: var(--app-chart-primary-fill);
+  outline: none;
+}
+
+.flow-navigator__node--selected {
+  border-color: var(--app-primary);
+  background: var(--app-primary);
+  color: var(--app-primary-contrast, #fff);
+  transform: scale(1.08);
+}
+
+.flow-navigator__node--condition {
+  border-radius: 999px;
+}
+
+.flow-navigator__node--html {
+  border-width: 1.5px;
+  border-radius: 4px;
+}
+
+.flow-navigator__node--tone-primary {
+  border-color: var(--app-primary);
+  background: color-mix(in srgb, var(--app-primary) 14%, var(--app-card-surface));
+}
+
+.flow-navigator__node--tone-info {
+  border-color: var(--app-control-info-border, #3b82f6);
+  background: color-mix(in srgb, var(--app-control-info-bg, #dbeafe) 56%, var(--app-card-surface));
+}
+
+.flow-navigator__node--tone-success {
+  border-color: var(--app-control-success-border, #22c55e);
+  background: color-mix(in srgb, var(--app-control-success-bg, #dcfce7) 56%, var(--app-card-surface));
+}
+
+.flow-navigator__node--tone-warning {
+  border-color: var(--app-control-warn-border, #f97316);
+  background: color-mix(in srgb, var(--app-control-warn-bg, #ffedd5) 56%, var(--app-card-surface));
+}
+
+.flow-navigator__node--tone-danger {
+  border-color: var(--app-control-danger-border, #ef4444);
+  background: color-mix(in srgb, var(--app-control-danger-bg, #fee2e2) 56%, var(--app-card-surface));
+}
+
+.flow-navigator__node--tone-muted,
+.flow-navigator__node--tone-neutral {
+  border-color: var(--app-border-strong, var(--app-border));
+  background: color-mix(in srgb, var(--app-surface-soft, #f8fafc) 72%, var(--app-card-surface));
+}
+
+.flow-navigator__node-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.flow-navigator__viewport {
+  position: absolute;
+  border: 1.5px solid var(--app-primary);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--app-primary) 8%, transparent);
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+  transition: border-color 100ms ease;
+}
+
+.flow-navigator__viewport:hover {
+  border-color: var(--app-primary);
+  background: color-mix(in srgb, var(--app-primary) 12%, transparent);
+}
+
+.flow-navigator__viewport--dragging {
+  cursor: grabbing;
+  border-color: var(--app-primary);
+  background: color-mix(in srgb, var(--app-primary) 16%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-primary) 20%, transparent);
+}

@@ -5,10 +5,11 @@
   width: 100%;
 }
 
-.color-picker-wrapper :host ::ng-deep .p-colorpicker-preview {
+.color-picker-wrapper .color-preview {
   width: 2rem;
   height: 2rem;
-  border-radius: var(--p-border-radius-sm);
+  border-radius: 0.375rem;
+  border: 1px solid var(--app-border);
 }
 
 .color-text-input {

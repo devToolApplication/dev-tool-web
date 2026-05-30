@@ -1,5 +1,6 @@
-export type ModelProviderType = 'EXTERNAL' | 'LOCAL';
-export type ModelProviderCode = 'OPENROUTER' | 'OPUSMAX' | 'LOCAL' | 'OTHER';
+export type ModelProviderType = 'EXTERNAL' | 'LOCAL' | 'API' | 'AGENT_CLI';
+export type ModelProviderCode = 'OPENROUTER' | 'OPUSMAX' | 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'CODEX' | 'CLAUDE' | 'ANTIGRAVITY' | 'LOCAL' | 'OTHER';
+export type AuthMethod = 'API_KEY' | 'OAUTH_TOKEN' | 'SESSION_CREDENTIALS';
 export type AiAgentFeatureStatus = 'ENABLED' | 'DISABLED';
 
 export interface AiAgentModelConfigResponse {
@@ -12,6 +13,11 @@ export interface AiAgentModelConfigResponse {
   secretReferenceName?: string;
   description?: string;
   status: AiAgentFeatureStatus;
+  authMethod?: AuthMethod;
+  baseUrl?: string;
+  maxTokens?: number;
+  temperature?: number;
+  capabilities?: string[];
 }
 
 export interface AiAgentModelConfigRequest {
@@ -22,4 +28,9 @@ export interface AiAgentModelConfigRequest {
   secretReferenceId?: string;
   description?: string;
   status: AiAgentFeatureStatus;
+  authMethod?: AuthMethod;
+  baseUrl?: string;
+  maxTokens?: number;
+  temperature?: number;
+  capabilities?: string[];
 }

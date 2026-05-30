@@ -3,7 +3,7 @@ import { RealtimeProgressBarComponent } from './realtime-progress-bar.component'
 import type { ProgressState } from './realtime-progress-bar.component';
 
 const meta: Meta<RealtimeProgressBarComponent> = {
-  title: 'Shared/UI/RealtimeProgressBar',
+  title: 'Shared/UI/Feedback/RealtimeProgressBar',
   component: RealtimeProgressBarComponent,
   args: {
     showCancel: true,

@@ -1,3 +1,9 @@
+---
+title: figma-sync-guide
+type: note
+permalink: dev-tool-web/docs/figma-sync-guide
+---
+
 # Figma ↔ Storybook Sync Guide
 
 ## Overview

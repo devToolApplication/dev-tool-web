@@ -23,7 +23,6 @@ describe('ProgressSpinnerComponent', () => {
 
     fixture.detectChanges();
     await fixture.whenStable();
-    component.ngAfterViewChecked();
 
     const progressbar: HTMLElement | null = fixture.nativeElement.querySelector('[role="progressbar"]');
     expect(progressbar?.getAttribute('aria-label')).toBe('shared.loading');

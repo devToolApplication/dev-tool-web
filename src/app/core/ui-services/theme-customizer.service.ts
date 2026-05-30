@@ -92,56 +92,56 @@ const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
   surface: [
     { label: 'white', value: '#ffffff' },
     { label: 'slate50', value: '#f8fafc' },
-    { label: 'surface0', value: 'var(--p-surface-0)' },
-    { label: 'surface50', value: 'var(--p-surface-50)' }
+    { label: 'cardSurface', value: 'var(--app-card-surface)' },
+    { label: 'surfaceSoft', value: 'var(--app-surface-soft)' }
   ],
   border: [
     { label: 'slateBorder', value: '#d8dee8' },
     { label: 'slateSoft', value: '#e2e8f0' },
-    { label: 'surface200', value: 'var(--p-surface-200)' },
-    { label: 'surface300', value: 'var(--p-surface-300)' }
+    { label: 'appBorder', value: 'var(--app-border)' },
+    { label: 'appBorderSoft', value: 'var(--app-border-soft)' }
   ],
   successText: [
     { label: 'green', value: '#047857' },
     { label: 'emerald', value: '#059669' },
     { label: 'chartSuccess', value: 'var(--app-chart-success)' },
-    { label: 'primeGreen', value: 'var(--p-green-700)' }
+    { label: 'successText', value: 'var(--app-control-success-text)' }
   ],
   dangerText: [
     { label: 'rose', value: '#be123c' },
     { label: 'red', value: '#dc2626' },
     { label: 'chartDanger', value: 'var(--app-chart-danger)' },
-    { label: 'primeRed', value: 'var(--p-red-700)' }
+    { label: 'dangerText', value: 'var(--app-control-danger-text)' }
   ],
   selectBackground: [
-    { label: 'contentBackground', value: 'var(--p-content-background)' },
-    { label: 'surface0', value: 'var(--p-surface-0)' },
-    { label: 'surface50', value: 'var(--p-surface-50)' },
-    { label: 'surface100', value: 'var(--p-surface-100)' }
+    { label: 'cardSurface', value: 'var(--app-card-surface)' },
+    { label: 'surface', value: 'var(--app-surface)' },
+    { label: 'surfaceSoft', value: 'var(--app-surface-soft)' },
+    { label: 'inputBg', value: 'var(--app-custom-input-bg)' }
   ],
   selectText: [
-    { label: 'contentColor', value: 'var(--p-content-color)' },
-    { label: 'textColor', value: 'var(--p-text-color)' },
-    { label: 'surface900', value: 'var(--p-surface-900)' },
-    { label: 'surface950', value: 'var(--p-surface-950)' }
+    { label: 'text', value: 'var(--app-text)' },
+    { label: 'textSoft', value: 'var(--app-text-soft)' },
+    { label: 'inputText', value: 'var(--app-custom-input-text)' },
+    { label: 'textMuted', value: 'var(--app-text-muted)' }
   ],
   inputBackground: [
-    { label: 'formFieldBackground', value: 'var(--p-form-field-background)' },
-    { label: 'surface0', value: 'var(--p-surface-0)' },
-    { label: 'surface50', value: 'var(--p-surface-50)' },
-    { label: 'surface100', value: 'var(--p-surface-100)' }
+    { label: 'inputBg', value: 'var(--app-custom-input-bg)' },
+    { label: 'surface', value: 'var(--app-surface)' },
+    { label: 'surfaceSoft', value: 'var(--app-surface-soft)' },
+    { label: 'cardSurface', value: 'var(--app-card-surface)' }
   ],
   inputText: [
-    { label: 'formFieldColor', value: 'var(--p-form-field-color)' },
-    { label: 'textColor', value: 'var(--p-text-color)' },
-    { label: 'surface900', value: 'var(--p-surface-900)' },
-    { label: 'surface950', value: 'var(--p-surface-950)' }
+    { label: 'inputText', value: 'var(--app-custom-input-text)' },
+    { label: 'text', value: 'var(--app-text)' },
+    { label: 'textSoft', value: 'var(--app-text-soft)' },
+    { label: 'textMuted', value: 'var(--app-text-muted)' }
   ],
   appText: [
-    { label: 'textColor', value: 'var(--p-text-color)' },
-    { label: 'contentColor', value: 'var(--p-content-color)' },
-    { label: 'surface900', value: 'var(--p-surface-900)' },
-    { label: 'surface950', value: 'var(--p-surface-950)' }
+    { label: 'text', value: 'var(--app-text)' },
+    { label: 'textSoft', value: 'var(--app-text-soft)' },
+    { label: 'textMuted', value: 'var(--app-text-muted)' },
+    { label: 'primary', value: 'var(--app-primary)' }
   ]
 };
 

@@ -1,0 +1,109 @@
+:host {
+  display: block;
+  min-width: 13.5rem;
+  max-width: 18rem;
+  height: 100%;
+  min-height: 0;
+}
+
+.flow-palette {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  border-right: 1px solid var(--app-border-soft);
+  background: var(--app-card-surface);
+}
+
+.flow-palette__header {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border-bottom: 1px solid var(--app-border-soft);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--app-text-soft, var(--app-text));
+  text-transform: uppercase;
+}
+
+.flow-palette__items {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  padding: 0.75rem;
+  overflow-y: auto;
+}
+
+.flow-palette__item {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 1rem;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  text-align: left;
+  cursor: grab;
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+
+.flow-palette__item:hover,
+.flow-palette__item:focus-visible {
+  border-color: var(--app-primary);
+  background: var(--app-chart-primary-fill);
+  outline: none;
+}
+
+.flow-palette__item:active {
+  cursor: grabbing;
+  transform: scale(0.99);
+}
+
+.flow-palette__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--app-chart-primary-fill);
+  color: var(--app-text-soft, var(--app-text));
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.flow-palette__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.flow-palette__copy strong,
+.flow-palette__copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-palette__copy strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.flow-palette__copy small {
+  font-size: 0.71875rem;
+  color: var(--app-text-muted);
+}
+
+.flow-palette__handle {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}

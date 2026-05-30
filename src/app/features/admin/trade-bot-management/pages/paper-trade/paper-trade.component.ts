@@ -13,12 +13,12 @@ import { LoadingService } from '../../../../../core/ui-services/loading.service'
 import { ToastService } from '../../../../../core/ui-services/toast.service';
 import { AppTabItem } from '../../../../../shared/component/tabs/tabs.component';
 import { SelectOption } from '../../../../../shared/component/select/select';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../share/candle-chart/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../../../shared/ui/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../share/candle-chart/candle-window-loader';
+} from '../../../../../shared/ui/candle-chart';
 import { FormConfig, FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { PaperTradeApiService } from '../../data-access/api/paper-trade-api.service';

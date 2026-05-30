@@ -1,5 +1,5 @@
 <div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
-  <div class="relative">
+  <div class="relative input-number-wrap">
     @if (iconClass) {
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]" aria-hidden="true">
         <i [class]="iconClass"></i>
@@ -34,10 +34,20 @@
       >{{ label | translateContent }}</label>
     }
     @if (suffix) {
-      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ suffix }}</span>
+      <span class="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ suffix }}</span>
     }
     @if (prefix) {
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ prefix }}</span>
+    }
+    @if (!readonly && !disabled) {
+      <div class="input-number-controls">
+        <button type="button" tabindex="-1" aria-label="Increase" [disabled]="max != null && (value ?? 0) >= max" (click)="increment()">
+          <i class="pi pi-chevron-up"></i>
+        </button>
+        <button type="button" tabindex="-1" aria-label="Decrease" [disabled]="min != null && (value ?? 0) <= min" (click)="decrement()">
+          <i class="pi pi-chevron-down"></i>
+        </button>
+      </div>
     }
   </div>
 

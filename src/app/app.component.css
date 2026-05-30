@@ -61,7 +61,7 @@
 }
 
 :host ::ng-deep .loading-box .p-progressspinner-circle {
-  stroke: var(--p-primary-color);
+  stroke: var(--app-primary);
   stroke-linecap: round;
 }
 

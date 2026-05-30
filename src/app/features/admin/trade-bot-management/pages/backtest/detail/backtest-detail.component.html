@@ -91,7 +91,12 @@
           @if (ruleTraceViewMode() === 'tree') {
             <app-rule-tree-viewer [trace]="trace()"></app-rule-tree-viewer>
           } @else {
-            <app-rule-flow-viewer [trace]="trace()"></app-rule-flow-viewer>
+            <app-flow-builder
+              [value]="traceFlowDefinition()"
+              [nodeTypes]="ruleFlowNodeTypes"
+              mode="trace"
+              [autoLayout]="true"
+            ></app-flow-builder>
           }
         </div>
       }

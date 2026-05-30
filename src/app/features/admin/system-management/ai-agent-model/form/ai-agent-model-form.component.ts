@@ -31,6 +31,8 @@ export class AiAgentModelFormComponent implements OnInit {
         label: 'systemManagement.field.providerType',
         width: '1/2',
         options: [
+          { label: 'systemManagement.providerType.api', value: 'API' },
+          { label: 'systemManagement.providerType.agentCli', value: 'AGENT_CLI' },
           { label: 'systemManagement.providerType.external', value: 'EXTERNAL' },
           { label: 'systemManagement.providerType.local', value: 'LOCAL' }
         ],
@@ -44,7 +46,12 @@ export class AiAgentModelFormComponent implements OnInit {
         options: [
           { label: 'OPENROUTER', value: 'OPENROUTER' },
           { label: 'OPUSMAX', value: 'OPUSMAX' },
-          { label: 'LOCAL', value: 'LOCAL' },
+          { label: 'OPENAI', value: 'OPENAI' },
+          { label: 'ANTHROPIC', value: 'ANTHROPIC' },
+          { label: 'GOOGLE', value: 'GOOGLE' },
+          { label: 'CODEX', value: 'CODEX' },
+          { label: 'CLAUDE', value: 'CLAUDE' },
+          { label: 'ANTIGRAVITY', value: 'ANTIGRAVITY' },
           { label: 'OTHER', value: 'OTHER' }
         ],
         validation: [Rules.required('systemManagement.validation.providerCodeRequired')]
@@ -52,11 +59,26 @@ export class AiAgentModelFormComponent implements OnInit {
       { type: 'text', name: 'modelName', label: 'systemManagement.field.modelName', width: '1/2', validation: [Rules.required('systemManagement.validation.modelNameRequired')] },
       {
         type: 'select',
+        name: 'authMethod',
+        label: 'systemManagement.field.authMethod',
+        width: '1/2',
+        options: [
+          { label: 'API_KEY', value: 'API_KEY' },
+          { label: 'OAUTH_TOKEN', value: 'OAUTH_TOKEN' },
+          { label: 'SESSION_CREDENTIALS', value: 'SESSION_CREDENTIALS' }
+        ]
+      },
+      { type: 'text', name: 'baseUrl', label: 'systemManagement.field.baseUrl', width: '1/2', visibleWhen: "model.providerType !== 'AGENT_CLI'" },
+      {
+        type: 'select',
         name: 'secretReferenceId',
         label: 'systemManagement.field.secretReferenceName',
         width: '1/2',
-        optionsExpression: 'context.extra?.secretOptions || []'
+        optionsExpression: 'context.extra?.secretOptions || []',
+        visibleWhen: "model.providerType !== 'AGENT_CLI'"
       },
+      { type: 'number', name: 'maxTokens', label: 'systemManagement.field.maxTokens', width: '1/4', visibleWhen: "model.providerType !== 'AGENT_CLI'" },
+      { type: 'number', name: 'temperature', label: 'systemManagement.field.temperature', width: '1/4', visibleWhen: "model.providerType !== 'AGENT_CLI'" },
       {
         type: 'select',
         name: 'status',
@@ -68,6 +90,7 @@ export class AiAgentModelFormComponent implements OnInit {
         ],
         validation: [Rules.required('statusRequired')]
       },
+      { type: 'tags', name: 'capabilities', label: 'systemManagement.field.capabilities', width: 'full' },
       { type: 'textarea', name: 'description', label: 'description', width: 'full' }
     ]
   };

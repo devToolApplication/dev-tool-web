@@ -1,0 +1,49 @@
+<div class="flow-navigator" [style.width.px]="mapWidth" [style.height.px]="mapHeight">
+  <div class="flow-navigator__header">
+    <span class="flow-navigator__title">{{ 'shared.flowBuilder.navigator.title' | translateContent }}</span>
+    <div class="flow-navigator__actions">
+      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.zoomIn' | translateContent" [attr.title]="'shared.flowBuilder.navigator.zoomIn' | translateContent" (click)="zoomIn.emit()">+</button>
+      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.zoomOut' | translateContent" [attr.title]="'shared.flowBuilder.navigator.zoomOut' | translateContent" (click)="zoomOut.emit()">-</button>
+      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.fit' | translateContent" [attr.title]="'shared.flowBuilder.navigator.fit' | translateContent" (click)="fit.emit()"><i class="pi pi-arrows-alt"></i></button>
+      <button type="button" class="flow-navigator__action flow-navigator__action--close" [attr.aria-label]="'shared.flowBuilder.navigator.close' | translateContent" [attr.title]="'shared.flowBuilder.navigator.close' | translateContent" (click)="close.emit()"><i class="pi pi-times"></i></button>
+    </div>
+  </div>
+
+  <div #body class="flow-navigator__body" [style.height.px]="bodyHeight" (click)="onBodyClick($event)">
+    <div class="flow-navigator__grid" aria-hidden="true"></div>
+
+    <svg class="flow-navigator__edges" [attr.width]="mapWidth" [attr.height]="bodyHeight" aria-hidden="true">
+      @for (line of edgeLines; track $index) {
+        <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" />
+      }
+    </svg>
+
+    @for (node of nodes; track node.id) {
+      <button
+        type="button"
+        class="flow-navigator__node"
+        [ngClass]="nodeClass(node)"
+        [ngStyle]="nodeStyle(node)"
+        [attr.aria-label]="'shared.flowBuilder.navigator.selectNode' | translateContent"
+        [attr.title]="node.label || node.type"
+        (click)="$event.stopPropagation(); nodeSelect.emit(node.id)"
+      >
+        @if (nodeMiniLabel(node); as miniLabel) {
+          <span class="flow-navigator__node-label">{{ miniLabel }}</span>
+        }
+      </button>
+    }
+
+    @if (viewportStyle(); as vpStyle) {
+      <div
+        class="flow-navigator__viewport"
+        [class.flow-navigator__viewport--dragging]="dragging"
+        [ngStyle]="vpStyle"
+        (pointerdown)="onViewportPointerDown($event)"
+        (pointermove)="onViewportPointerMove($event)"
+        (pointerup)="onViewportPointerUp($event)"
+        (pointercancel)="onViewportPointerUp($event)"
+      ></div>
+    }
+  </div>
+</div>

@@ -1,7 +1,7 @@
 import { Component, computed, EventEmitter, Input, Output } from '@angular/core';
 import { CandleBarResponse } from '../../../../../../../core/models/trade-bot/trading-system.model';
 import { PaperTradePosition } from '../../../../data-access/models/paper-trade.model';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../../share/candle-chart/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../../../../../shared/ui/candle-chart';
 
 @Component({
   selector: 'app-paper-trade-chart-section',

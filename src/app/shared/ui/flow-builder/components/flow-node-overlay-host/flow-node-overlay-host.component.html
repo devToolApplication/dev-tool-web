@@ -1,0 +1,68 @@
+<div class="flow-node-overlays" [class.flow-node-overlays--link-dragging]="linkDragging" [ngStyle]="overlayStyle()">
+  @for (node of htmlNodes; track node.id) {
+    <div
+      class="flow-node-overlay"
+      [attr.data-flow-node-id]="node.id"
+      [class.flow-node-overlay--selected]="node.id === selectedId"
+      [class.flow-node-overlay--dragging]="node.id === dragState?.nodeId"
+      [ngStyle]="nodeStyle(node)"
+      (pointerdown)="onNodePointerDown($event, node)"
+      (pointermove)="onNodePointerMove($event)"
+      (pointerup)="onNodePointerUp($event, node)"
+      (pointercancel)="onNodePointerCancel($event)"
+      (contextmenu)="onNodeContextMenu($event, node)"
+    >
+      @if (templateFor(node); as template) {
+        <ng-container *ngTemplateOutlet="template.templateRef; context: nodeContext(node)"></ng-container>
+      } @else if (commonTemplateName(node); as templateName) {
+        <app-flow-common-templates [node]="node" [template]="templateName"></app-flow-common-templates>
+      } @else {
+        <div class="flow-node-overlay__fallback">
+          <span class="flow-node-overlay__fallback-title">{{ node.label || node.type }}</span>
+          @if (node.data?.['subtitle'] || node.data?.['description']) {
+            <span class="flow-node-overlay__fallback-subtitle">{{ node.data?.['subtitle'] || node.data?.['description'] }}</span>
+          }
+        </div>
+      }
+
+      @if (mode === 'edit') {
+        @if (hasInPort(node)) {
+          <div class="flow-node-overlay__port flow-node-overlay__port--in" data-flow-node-no-drag data-port="in"></div>
+        }
+        @if (hasOutPort(node)) {
+          <div class="flow-node-overlay__port flow-node-overlay__port--out" data-flow-node-no-drag data-port="out" (pointerdown)="onPortDragStart($event, node)"></div>
+        }
+      }
+    </div>
+  }
+
+  @if (mode === 'edit') {
+    @for (node of connectableNodes; track node.id) {
+      <div class="flow-add-button" [ngStyle]="addButtonStyle(node)" data-flow-node-no-drag>
+        <button
+          type="button"
+          class="flow-add-button__trigger"
+          [attr.aria-label]="'shared.flowBuilder.addNode' | translateContent"
+          (click)="toggleAddMenu(node.id, $event)"
+        >+</button>
+
+        @if (addMenuNodeId === node.id) {
+          <div class="flow-add-button__menu" (click)="$event.stopPropagation()">
+            @for (type of addableNodeTypes; track type.type) {
+              <button
+                type="button"
+                class="flow-add-button__menu-item"
+                (click)="selectAddType(node.id, type.type)"
+              >
+                @if (type.icon) {
+                  <i [class]="type.icon" aria-hidden="true"></i>
+                }
+                <span>{{ type.label }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

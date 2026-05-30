@@ -36,7 +36,12 @@ export class AiAgentModelListComponent extends BasePagedList<AiAgentModelConfigR
         options: [
           { label: 'OPENROUTER', value: 'OPENROUTER' },
           { label: 'OPUSMAX', value: 'OPUSMAX' },
-          { label: 'LOCAL', value: 'LOCAL' },
+          { label: 'OPENAI', value: 'OPENAI' },
+          { label: 'ANTHROPIC', value: 'ANTHROPIC' },
+          { label: 'GOOGLE', value: 'GOOGLE' },
+          { label: 'CODEX', value: 'CODEX' },
+          { label: 'CLAUDE', value: 'CLAUDE' },
+          { label: 'ANTIGRAVITY', value: 'ANTIGRAVITY' },
           { label: 'OTHER', value: 'OTHER' }
         ]
       },
@@ -57,6 +62,13 @@ export class AiAgentModelListComponent extends BasePagedList<AiAgentModelConfigR
       { field: 'providerType', header: 'systemManagement.field.providerType', sortable: true },
       { field: 'providerCode', header: 'systemManagement.field.providerCode', sortable: true },
       { field: 'modelName', header: 'systemManagement.field.modelName', sortable: true },
+      {
+        field: 'authMethod',
+        header: 'systemManagement.field.authMethod',
+        type: 'badge',
+        badgeMap: { API_KEY: 'info', OAUTH_TOKEN: 'warning', SESSION_CREDENTIALS: 'muted' }
+      },
+      { field: 'baseUrl', header: 'systemManagement.field.baseUrl' },
       { field: 'secretReferenceName', header: 'systemManagement.field.secretReferenceName' },
       {
         field: 'status',

@@ -38,10 +38,13 @@ export class IndicatorConfigFormComponent implements OnInit {
   formConfig: FormConfig = { fields: [] };
   formContext: FormContext = { user: null, mode: 'create' };
   readonly submitting = signal(false);
+  readonly showPreview = signal(false);
+  readonly previewPayload = signal<Record<string, unknown>>({});
   readonly pageConfig: CrudPageConfig = {
     title: 'tradeBot.indicator.formTitle',
     actions: [
       { id: 'back', label: 'tradeBot.action.back', icon: 'pi pi-arrow-left', goBack: true },
+      { id: 'preview', label: 'tradeBot.action.preview', icon: 'pi pi-eye', severity: 'secondary' },
       { id: 'save', label: 'tradeBot.action.save', icon: 'pi pi-save', submitForm: true, type: 'submit' }
     ]
   };
@@ -52,6 +55,7 @@ export class IndicatorConfigFormComponent implements OnInit {
   private currentFormTemplate?: FormConfig;
   private currentTemplateSignature = '';
   private currentExecutor = '';
+  private lastModel: Record<string, unknown> = {};
 
   constructor(
     private readonly service: TradingSystemService,
@@ -67,6 +71,23 @@ export class IndicatorConfigFormComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get('id');
     this.formContext = { ...this.formContext, mode: this.id ? 'edit' : 'create' };
     this.loadInitialData();
+  }
+
+  onActionClick(actionId: string): void {
+    if (actionId === 'preview') {
+      this.openPreview();
+    }
+  }
+
+  openPreview(): void {
+    this.previewPayload.set({
+      executor: stringValue(this.lastModel['executor']),
+      executorVersion: stringValue(this.lastModel['executorVersion']),
+      config: this.lastModel['config'] ?? {},
+      children: this.lastModel['children'] ?? [],
+      overlay: this.lastModel['overlay'] ?? {}
+    });
+    this.showPreview.set(true);
   }
 
   submit(model: Record<string, unknown>): void {
@@ -95,6 +116,7 @@ export class IndicatorConfigFormComponent implements OnInit {
   }
 
   onValueChange(model: Record<string, unknown>): void {
+    this.lastModel = model;
     const executor = stringValue(model['executor']);
     const normalizedModel: Record<string, unknown> = {
       ...model,

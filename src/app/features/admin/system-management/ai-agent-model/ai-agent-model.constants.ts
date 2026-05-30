@@ -7,10 +7,15 @@ export const AI_AGENT_MODEL_ROUTES = {
 
 export const AI_AGENT_MODEL_INITIAL_VALUE: AiAgentModelConfigRequest = {
   name: '',
-  providerType: 'EXTERNAL',
+  providerType: 'API',
   providerCode: 'OPENROUTER',
   modelName: '',
   secretReferenceId: '',
   description: '',
-  status: 'ENABLED'
+  status: 'ENABLED',
+  authMethod: undefined,
+  baseUrl: '',
+  maxTokens: undefined,
+  temperature: undefined,
+  capabilities: []
 };

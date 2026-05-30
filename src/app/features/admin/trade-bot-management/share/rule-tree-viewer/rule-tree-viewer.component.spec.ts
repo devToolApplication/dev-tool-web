@@ -54,7 +54,7 @@ const trace = {
   operator: 'AND',
   passed: false,
   children: [
-    { ruleCode: 'PASS_CHILD', operator: 'GT', passed: true, message: 'EMA accepted' },
+    { ruleCode: 'PASS_CHILD', operator: 'GT', passed: true, value: 101.25, message: 'EMA accepted' },
     {
       ruleCode: 'FAIL_GROUP',
       operator: 'AND',
@@ -119,6 +119,16 @@ describe('RuleTreeViewerComponent', () => {
     component.updateQuery('volume');
 
     expect(component.visibleRows().map((row) => row.code)).toEqual(['ROOT_ENTRY', 'FAIL_GROUP', 'UNKNOWN_LEAF']);
+  });
+
+  it('exposes trace value as secondary searchable metadata', () => {
+    fixture.componentRef.setInput('trace', trace);
+    fixture.detectChanges();
+
+    component.updateQuery('101.25');
+
+    expect(component.visibleRows().map((row) => row.code)).toEqual(['ROOT_ENTRY', 'PASS_CHILD']);
+    expect(component.visibleRows().find((row) => row.code === 'PASS_CHILD')?.value).toBe('101.25');
   });
 
   it('collapses and expands the whole tree', () => {

@@ -22,8 +22,8 @@ import {
   ChartIndicator,
   EvaluationConfig,
   ReplayConfig
-} from '../../share/candle-chart/candle-chart';
-import { CandleChartOverlayMapper } from '../../share/candle-chart/candle-chart-overlay.mapper';
+} from '../../../../../shared/ui/candle-chart';
+import { CandleChartOverlayMapper } from '../../../../../shared/ui/candle-chart';
 import { FormContext } from '../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../shared/ui/table/models/table-config.model';
 import { EVALUATE_FORM, REPLAY_INIT_FORM } from '../../trade-bot-runtime.constants';

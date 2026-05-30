@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, Output, TemplateRef, signal } from '@angular/core';
 import { PermissionService } from '../../../../../../core/auth/permission.service';
 import { ConfirmDialogService } from '../../../../overlay/confirm-dialog/confirm-dialog.service';
 import { TableAction, TableBadgeVariant, TableColumn } from '../../../models/table-config.model';
@@ -19,10 +19,12 @@ export class TableCellComponent {
 
   readonly jsonOpen = signal(false);
   readonly actionsOpen = signal(false);
+  menuStyle: Record<string, string> = {};
 
   constructor(
     private readonly confirmDialogService: ConfirmDialogService,
-    private readonly permissionService: PermissionService
+    private readonly permissionService: PermissionService,
+    private readonly elRef: ElementRef
   ) {}
 
   get value(): any {
@@ -133,7 +135,26 @@ export class TableCellComponent {
   }
 
   toggleActions(): void {
-    this.actionsOpen.update((value) => !value);
+    if (this.actionsOpen()) {
+      this.actionsOpen.set(false);
+      return;
+    }
+    const wrap = this.elRef.nativeElement.querySelector('.table-actions__more-wrap');
+    if (wrap) {
+      const rect = (wrap as HTMLElement).getBoundingClientRect();
+      this.menuStyle = {
+        top: `${rect.bottom + 4}px`,
+        right: `${document.documentElement.clientWidth - rect.right}px`
+      };
+    }
+    this.actionsOpen.set(true);
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  onDocumentClick(target: EventTarget | null): void {
+    if (this.actionsOpen() && target instanceof HTMLElement && !this.elRef.nativeElement.contains(target)) {
+      this.actionsOpen.set(false);
+    }
   }
 
   closeActions(): void {

@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.flow-inspector-form-panel {
+  display: block;
+  min-width: 0;
+}
+
+.flow-inspector-form-panel app-form-input {
+  display: block;
+}

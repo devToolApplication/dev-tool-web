@@ -7,3 +7,68 @@
   margin-top: 0.45rem;
   color: var(--app-text-muted);
 }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.input-number-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.input-number-wrap input {
+  padding-right: 2.5rem;
+}
+
+.input-number-controls {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--app-input-border);
+  border-radius: 0 0.5rem 0.5rem 0;
+  overflow: hidden;
+}
+
+.input-number-controls button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  border: none;
+  background: var(--app-surface-soft);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  font-size: 0.65rem;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.input-number-controls button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--app-primary) 12%, var(--app-surface-soft));
+  color: var(--app-primary);
+}
+
+.input-number-controls button:active:not(:disabled) {
+  background: color-mix(in srgb, var(--app-primary) 20%, var(--app-surface-soft));
+}
+
+.input-number-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.input-number-controls button + button {
+  border-top: 1px solid var(--app-input-border);
+}

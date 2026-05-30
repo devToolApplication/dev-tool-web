@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { SummaryMetricCardComponent } from './summary-metric-card.component';
 
 const meta: Meta<SummaryMetricCardComponent> = {
-  title: 'Shared/UI/SummaryMetricCard',
+  title: 'Shared/UI/DataDisplay/SummaryMetricCard',
   component: SummaryMetricCardComponent,
   args: {
     label: 'totalRecords',

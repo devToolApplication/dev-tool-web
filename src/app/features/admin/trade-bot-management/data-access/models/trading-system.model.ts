@@ -171,6 +171,7 @@ export interface IndicatorConfigResponse {
   executor: string;
   executorVersion: string;
   displayType?: string;
+  group?: string;
   config: Record<string, unknown>;
   children: IndicatorChildConfig[];
   overlay: Record<string, unknown>;
@@ -185,6 +186,7 @@ export interface RuleConfigResponse {
   code: string;
   executor: string;
   executorVersion: string;
+  group?: string;
   config: Record<string, unknown>;
   indicators: string[];
   childRules: Array<Record<string, unknown>>;
@@ -306,7 +308,7 @@ export interface BacktestRuleTraceResponse {
   tradeId: string;
   barIndex: number;
   evaluatedAt: string;
-  trace: Record<string, unknown>;
+  trace: RuleEvaluationTrace | Record<string, unknown>;
 }
 
 export interface BacktestOrderResponse extends Record<string, unknown> {
@@ -399,14 +401,35 @@ export interface EvaluateBarRequest {
   params?: Record<string, unknown>;
 }
 
+export interface RuleEvaluationTrace {
+  [key: string]: unknown;
+  ruleId?: string | null;
+  ruleCode?: string;
+  name?: string;
+  executor?: string;
+  executorVersion?: string;
+  operator?: string;
+  index?: number;
+  time?: string;
+  passed?: boolean;
+  satisfied?: boolean;
+  value?: unknown;
+  message?: string;
+  reason?: string;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  indicatorValues?: Array<Record<string, unknown>> | Record<string, unknown>;
+  children?: RuleEvaluationTrace[];
+}
+
 export interface EvaluateBarResponse {
   candleRangeHash: string;
   index: number;
   signal: Record<string, unknown>;
-  trace: Record<string, unknown>;
+  trace: RuleEvaluationTrace | Record<string, unknown>;
   candle?: CandleBarResponse | Record<string, unknown>;
   finalSignal?: Record<string, unknown>;
-  ruleTrace?: Record<string, unknown>;
+  ruleTrace?: RuleEvaluationTrace | Record<string, unknown>;
   indicatorValues?: Record<string, unknown>;
 }
 

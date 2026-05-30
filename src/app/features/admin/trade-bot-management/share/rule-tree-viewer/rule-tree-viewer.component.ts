@@ -16,6 +16,7 @@ interface RuleTreeRow {
   statusLabel: string;
   severity: TagSeverity;
   message: string;
+  value: string;
   indicatorCount: number;
   pathLabel: string;
   searchableText: string;
@@ -145,6 +146,7 @@ function flattenTrace(
   const status = resolveStatus(node);
   const key = `${parentKey ?? 'root'}:${rows.length}:${textValue(node['ruleId'] ?? node['id'] ?? code, 'node')}`;
   const message = messageValue(node['message'] ?? node['reason'] ?? node['error']);
+  const value = traceValue(node);
   const pathLabel = [...path, code].join(' / ');
 
   rows.push({
@@ -159,9 +161,10 @@ function flattenTrace(
     statusLabel: statusLabel(status),
     severity: statusSeverity(status),
     message,
+    value,
     indicatorCount: indicatorCount(node),
     pathLabel,
-    searchableText: normalizeText([code, operator, status, message, pathLabel].join(' '))
+    searchableText: normalizeText([code, operator, status, value, message, pathLabel].join(' '))
   });
 
   children.forEach((child) => flattenTrace(child, depth + 1, key, rows, [...path, code]));
@@ -371,6 +374,15 @@ function messageValue(value: unknown): string {
   } catch {
     return '';
   }
+}
+
+function traceValue(node: Record<string, unknown>): string {
+  const directValue = node['value'];
+  if (directValue !== null && directValue !== undefined && directValue !== '') {
+    return messageValue(directValue);
+  }
+  const output = node['output'];
+  return isRecord(output) ? messageValue(output['value']) : '';
 }
 
 function normalizeText(value: string): string {

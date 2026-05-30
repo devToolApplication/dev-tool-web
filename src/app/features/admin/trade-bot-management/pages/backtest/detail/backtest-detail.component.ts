@@ -1,6 +1,9 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { ruleTraceToFlowDefinition, resetTraceCounter } from '../../../share/rule-flow/rule-flow-trace-adapter';
+import { RULE_FLOW_NODE_TYPES } from '../../../share/rule-flow/rule-flow-node-catalog';
+import { FlowNodeTypeDefinition } from '../../../../../../shared/ui/flow-builder/models';
 import {
   BacktestChartReviewResponse,
   BacktestCurvePointResponse,
@@ -18,12 +21,12 @@ import { I18nService } from '../../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../../../core/ui-services/toast.service';
 import { AppTabItem } from '../../../../../../shared/component/tabs/tabs.component';
-import { CandleChartRangeBoundaryEvent, ChartOverlay } from '../../../share/candle-chart/candle-chart';
+import { CandleChartRangeBoundaryEvent, ChartOverlay } from '../../../../../../shared/ui/candle-chart';
 import {
   buildAdjacentCandleWindow,
   CANDLE_CHART_WINDOW_LIMIT,
   mergeCandlesByOpenTime
-} from '../../../share/candle-chart/candle-window-loader';
+} from '../../../../../../shared/ui/candle-chart';
 import { TableConfig } from '../../../../../../shared/ui/table/models/table-config.model';
 
 @Component({
@@ -56,6 +59,11 @@ export class BacktestDetailComponent implements OnInit {
   readonly selectedTradeTrace = signal<Record<string, unknown> | null>(null);
   readonly activeTab = signal('overview');
   readonly ruleTraceViewMode = signal<'tree' | 'flow'>('tree');
+  readonly traceFlowDefinition = computed(() => {
+    resetTraceCounter();
+    return ruleTraceToFlowDefinition(this.trace());
+  });
+  readonly ruleFlowNodeTypes: FlowNodeTypeDefinition[] = RULE_FLOW_NODE_TYPES;
 
   readonly tabs: AppTabItem[] = [
     { label: 'tradeBot.backtest.tab.overview', value: 'overview' },

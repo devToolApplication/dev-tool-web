@@ -1,6 +1,6 @@
 import { Component, computed, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CandleBarResponse, CandleGapResponse } from '../../../../../../../core/models/trade-bot/trading-system.model';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle } from '../../../../share/candle-chart/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle } from '../../../../../../../shared/ui/candle-chart';
 import { FormContext } from '../../../../../../../shared/ui/form-input/models/form-config.model';
 import { TableConfig } from '../../../../../../../shared/ui/table/models/table-config.model';
 import { MARKET_DATA_QUERY_FORM } from '../../../../trade-bot-runtime.constants';

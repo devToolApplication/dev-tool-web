@@ -19,7 +19,7 @@ const sampleJson = {
 };
 
 const meta: Meta = {
-  title: 'Shared UI/Foundation',
+  title: 'Shared/UI/Foundation',
   tags: ['autodocs']
 };
 

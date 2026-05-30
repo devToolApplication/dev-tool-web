@@ -1,0 +1,55 @@
+@switch (template) {
+  @case ('__form') {
+    <div class="flow-tpl flow-tpl--form" [ngClass]="'flow-tpl--tone-' + tone()">
+      <div class="flow-tpl__header">
+        <span class="flow-tpl__title">{{ title() }}</span>
+        @if (statusLabel()) {
+          <span class="flow-tpl__badge">{{ statusLabel() }}</span>
+        }
+      </div>
+      <div class="flow-tpl__rows">
+        @for (field of fields(); track field.key) {
+          <div class="flow-tpl__row">
+            <span>{{ field.label }}</span>
+            <strong>{{ displayValue(field.value) }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  }
+  @case ('__status') {
+    <div class="flow-tpl flow-tpl--status" [ngClass]="'flow-tpl--tone-' + tone()">
+      <span class="flow-tpl__icon" aria-hidden="true">
+        @if (iconClass()) {
+          <i [class]="iconClass()"></i>
+        } @else {
+          {{ title().slice(0, 2).toUpperCase() }}
+        }
+      </span>
+      <span class="flow-tpl__title">{{ title() }}</span>
+      @if (statusLabel()) {
+        <span class="flow-tpl__badge">{{ statusLabel() }}</span>
+      }
+    </div>
+  }
+  @default {
+    <div class="flow-tpl flow-tpl--info" [ngClass]="'flow-tpl--tone-' + tone()">
+      <span class="flow-tpl__icon" aria-hidden="true">
+        @if (iconClass()) {
+          <i [class]="iconClass()"></i>
+        } @else {
+          {{ title().slice(0, 2).toUpperCase() }}
+        }
+      </span>
+      <span class="flow-tpl__copy">
+        <strong>{{ title() }}</strong>
+        @if (subtitle()) {
+          <small>{{ subtitle() }}</small>
+        }
+      </span>
+      @if (statusLabel()) {
+        <span class="flow-tpl__badge">{{ statusLabel() }}</span>
+      }
+    </div>
+  }
+}
