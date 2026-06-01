@@ -29,7 +29,7 @@
   overflow-y: auto;
   border: 1px solid var(--app-input-border);
   border-radius: 0.75rem;
-  background: var(--app-surface-card);
+  background: var(--app-surface-overlay);
   padding: 1.5rem;
   box-shadow: var(--app-shadow-lg);
 }

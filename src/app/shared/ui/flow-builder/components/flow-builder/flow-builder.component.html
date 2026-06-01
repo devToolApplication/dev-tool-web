@@ -81,7 +81,6 @@
         [value]="value"
         [nodeTypes]="resolvedNodeTypes"
         [edgeTypes]="resolvedEdgeTypes"
-        [nodeTemplates]="nodeTemplates"
         [mode]="resolvedMode"
         [selectedId]="selectedId"
         [autoLayout]="autoLayout"
@@ -93,7 +92,6 @@
         (nodeMove)="onNodeMove($event)"
         (contextMenu)="onContextMenu($event)"
         (nodeDrop)="onNodeDrop($event)"
-        (addNodeFromPort)="onAddNodeFromPort($event)"
         (viewportChange)="onViewportChange($event)"
       ></app-flow-canvas>
 

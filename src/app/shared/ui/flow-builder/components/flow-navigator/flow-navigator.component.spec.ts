@@ -58,7 +58,7 @@ describe('FlowNavigatorComponent', () => {
       {
         type: 'rule-group',
         label: 'Group',
-        shape: 'html',
+        shape: 'rectangle',
         defaultSize: { width: 150, height: 78 },
         ports: [],
         labelResolver: node => String(node.data?.['operator'] ?? 'GROUP'),

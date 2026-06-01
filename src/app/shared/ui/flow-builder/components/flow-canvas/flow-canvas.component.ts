@@ -7,7 +7,6 @@ import {
   OnChanges,
   OnDestroy,
   Output,
-  QueryList,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -23,7 +22,6 @@ import {
 } from '../../models';
 import { JointFlowEngine } from '../../joint/joint-flow-engine';
 import { FLOW_NODE_DRAG_TYPE } from '../flow-palette/flow-palette.component';
-import { FlowNodeTemplateDirective } from '../../directives/flow-template.directives';
 
 @Component({
   selector: 'app-flow-canvas',
@@ -31,20 +29,6 @@ import { FlowNodeTemplateDirective } from '../../directives/flow-template.direct
   template: `
     <div #canvasContainer class="flow-canvas" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
       <div #paperContainer class="flow-canvas__paper"></div>
-      <app-flow-node-overlay-host
-        [value]="value"
-        [nodeTypes]="nodeTypes ?? []"
-        [nodeTemplates]="nodeTemplates"
-        [viewport]="viewportSnapshot"
-        [selectedId]="selectedId"
-        [mode]="mode"
-        [linkDragging]="linkDragging"
-        (nodeClick)="nodeClick.emit($event)"
-        (nodeMove)="nodeMove.emit($event)"
-        (contextMenu)="contextMenu.emit($event)"
-        (addNodeFromPort)="addNodeFromPort.emit($event)"
-        (portDragStart)="onPortDragStart($event)"
-      ></app-flow-node-overlay-host>
     </div>
   `,
   styleUrls: ['./flow-canvas.component.css'],
@@ -56,7 +40,6 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
   @Input() value: FlowDefinition | null = null;
   @Input() nodeTypes: FlowNodeTypeDefinition[] | null = [];
   @Input() edgeTypes: FlowEdgeTypeDefinition[] | null = [];
-  @Input() nodeTemplates: QueryList<FlowNodeTemplateDirective> | null = null;
   @Input() mode: FlowBuilderMode = 'edit';
   @Input() selectedId: string | null = null;
   @Input() autoLayout = false;
@@ -70,8 +53,6 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
   @Output() readonly contextMenu = new EventEmitter<FlowContextMenuEvent>();
   @Output() readonly nodeDrop = new EventEmitter<FlowNodeDropEvent>();
   @Output() readonly viewportChange = new EventEmitter<FlowViewportSnapshot>();
-  @Output() readonly addNodeFromPort = new EventEmitter<{ sourceNodeId: string; sourcePortId: string; nodeType: string }>();
-  @Output() readonly portDragStart = new EventEmitter<{ nodeId: string; portId: string; clientX: number; clientY: number }>();
 
   private engine!: JointFlowEngine;
   private initialized = false;
@@ -84,7 +65,6 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
   private initialViewportPending = false;
   private pendingViewportSnapshot: FlowViewportSnapshot | null = null;
   viewportSnapshot: FlowViewportSnapshot | null = null;
-  linkDragging = false;
 
   get engineInstance(): JointFlowEngine {
     return this.engine;
@@ -103,8 +83,8 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
         onContextMenu: (event) => this.contextMenu.emit(event),
         onViewportChange: (snapshot) => this.handleViewportChange(snapshot),
         onViewportInteraction: () => this.handleViewportInteraction(),
-        onLinkDragStart: () => { this.linkDragging = true; },
-        onLinkDragEnd: () => { this.linkDragging = false; },
+        onLinkDragStart: () => undefined,
+        onLinkDragEnd: () => undefined,
       },
     });
 
@@ -162,12 +142,6 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.userInteracted = true;
     const point = this.engine.clientToLocalPoint(event.clientX, event.clientY);
     this.nodeDrop.emit({ nodeType, x: point.x, y: point.y });
-  }
-
-  onPortDragStart(event: { nodeId: string; portId: string; clientX: number; clientY: number }): void {
-    if (this.mode !== 'edit') return;
-    this.linkDragging = true;
-    this.engine.startLinkFromPort(event.nodeId, event.portId, event.clientX, event.clientY);
   }
 
   private renderGraph(): void {
@@ -279,4 +253,5 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.engine.clearHighlights();
     }
   }
+
 }

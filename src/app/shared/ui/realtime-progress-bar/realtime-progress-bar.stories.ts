@@ -9,15 +9,15 @@ const meta: Meta<RealtimeProgressBarComponent> = {
     showCancel: true,
     showDetails: true,
     state: {
-      taskId: 'JOB_001',
-      taskType: 'IMPORT',
-      status: 'RUNNING',
-      progressPercent: 42,
+      id: 'JOB_001',
+      title: 'Data import',
+      status: 'running',
+      percent: 42,
       current: 420,
       total: 1000,
       step: 'VALIDATING',
       message: 'Import running'
-    }
+    } satisfies ProgressState
   }
 };
 
@@ -57,13 +57,13 @@ export const RunningIndeterminate: Story = {
 export const Completed: Story = {
   args: {
     state: {
-      taskId: 'JOB_002',
-      taskType: 'IMPORT',
-      status: 'COMPLETED',
-      progressPercent: 100,
+      id: 'JOB_002',
+      title: 'Dataset sync',
+      status: 'completed',
+      percent: 100,
       step: 'COMPLETED',
       message: 'Dataset sync completed'
-    }
+    } satisfies ProgressState
   }
 };
 
@@ -85,12 +85,12 @@ export const Failed: Story = {
 export const Cancelled: Story = {
   args: {
     state: {
-      taskId: 'JOB_003',
-      taskType: 'IMPORT',
-      status: 'CANCELLED',
-      progressPercent: 100,
+      id: 'JOB_003',
+      title: 'Data import',
+      status: 'cancelled',
+      percent: 100,
       step: 'CANCELLED',
       message: 'Import was cancelled'
-    }
+    } satisfies ProgressState
   }
 };

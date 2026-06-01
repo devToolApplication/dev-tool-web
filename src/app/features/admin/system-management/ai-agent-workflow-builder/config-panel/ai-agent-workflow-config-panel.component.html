@@ -1,0 +1,137 @@
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-title">
+      <span class="config-type-dot" [style.background]="nodeColor"></span>
+      <span>{{ nodeTypeLabel }}</span>
+    </div>
+    <button class="config-close-btn" (click)="onClose()">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+
+  <div class="config-panel-body">
+    <!-- Common: Node Name -->
+    <div class="config-field">
+      <label>Node Name</label>
+      <input type="text" [value]="node.name" (input)="onNameChange($event)" class="config-input" />
+    </div>
+
+    <!-- AI_AGENT_STEP Config -->
+    @if (node.type === 'AI_AGENT_STEP') {
+      <div class="config-field">
+        <label>Agent Config ID</label>
+        <input type="text" [value]="parsedConfig['agentConfigId'] ?? ''"
+          (input)="onConfigFieldChange('agentConfigId', $any($event.target).value)"
+          class="config-input" placeholder="Select agent config..." />
+      </div>
+      <div class="config-field">
+        <label>Prompt Template</label>
+        <textarea [value]="parsedConfig['promptTemplate'] ?? ''"
+          (input)="onConfigFieldChange('promptTemplate', $any($event.target).value)"
+          class="config-textarea" rows="6"
+          placeholder="Use #{#input.field} or #{#results.nodeId.field} for variables"></textarea>
+      </div>
+      <div class="config-field-row">
+        <div class="config-field">
+          <label>Timeout (ms)</label>
+          <input type="number" [value]="parsedConfig['timeoutMs'] ?? 60000"
+            (input)="onConfigFieldChange('timeoutMs', +$any($event.target).value)"
+            class="config-input" min="1000" max="300000" />
+        </div>
+        <div class="config-field">
+          <label>Max Retries</label>
+          <input type="number" [value]="parsedConfig['maxRetries'] ?? 0"
+            (input)="onConfigFieldChange('maxRetries', +$any($event.target).value)"
+            class="config-input" min="0" max="5" />
+        </div>
+      </div>
+    }
+
+    <!-- LOGIC_STEP Config -->
+    @if (node.type === 'LOGIC_STEP') {
+      <div class="config-field">
+        <label>Logic Code</label>
+        <select [value]="parsedConfig['logicCode'] ?? ''"
+          (change)="onConfigFieldChange('logicCode', $any($event.target).value)"
+          class="config-select">
+          <option value="" disabled>Select logic code...</option>
+          @for (code of logicCodes; track code.value) {
+            <option [value]="code.value">{{ code.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="config-field">
+        <label>Params (JSON)</label>
+        <textarea [value]="parsedConfig['params'] ? (parsedConfig['params'] | json) : '{}'"
+          (input)="onConfigFieldChange('params', $any($event.target).value)"
+          class="config-textarea config-code" rows="8"
+          placeholder='{"key": "value"}'></textarea>
+      </div>
+      <div class="config-field-row">
+        <div class="config-field">
+          <label>Timeout (ms)</label>
+          <input type="number" [value]="parsedConfig['timeoutMs'] ?? 30000"
+            (input)="onConfigFieldChange('timeoutMs', +$any($event.target).value)"
+            class="config-input" min="1000" max="300000" />
+        </div>
+        <div class="config-field">
+          <label>Max Retries</label>
+          <input type="number" [value]="parsedConfig['maxRetries'] ?? 0"
+            (input)="onConfigFieldChange('maxRetries', +$any($event.target).value)"
+            class="config-input" min="0" max="5" />
+        </div>
+      </div>
+    }
+
+    <!-- BRANCH_NODE Config -->
+    @if (node.type === 'BRANCH_NODE') {
+      <div class="config-info">
+        <i class="pi pi-info-circle"></i>
+        <span>Configure conditions on outgoing edges. Click an edge to set its SpEL condition.</span>
+      </div>
+      @if (nodeOutgoingEdges.length > 0) {
+        <div class="config-field">
+          <label>Outgoing Edges ({{ nodeOutgoingEdges.length }})</label>
+          @for (edge of nodeOutgoingEdges; track edge.id) {
+            <div class="edge-item">
+              <span class="edge-target">→ {{ edge.target }}</span>
+              <span class="edge-condition">{{ edge.condition || '(default)' }}</span>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- REVIEW_NODE Config -->
+    @if (node.type === 'REVIEW_NODE') {
+      <div class="config-field">
+        <label>Review Instructions</label>
+        <textarea [value]="parsedConfig['instructions'] ?? ''"
+          (input)="onConfigFieldChange('instructions', $any($event.target).value)"
+          class="config-textarea" rows="4"
+          placeholder="Instructions for the reviewer..."></textarea>
+      </div>
+      <div class="config-field">
+        <label>Auto-approve Timeout (minutes, 0 = disabled)</label>
+        <input type="number" [value]="parsedConfig['autoApproveTimeoutMinutes'] ?? 0"
+          (input)="onConfigFieldChange('autoApproveTimeoutMinutes', +$any($event.target).value)"
+          class="config-input" min="0" />
+      </div>
+    }
+
+    <!-- END_NODE Config -->
+    @if (node.type === 'END_NODE') {
+      <div class="config-info">
+        <i class="pi pi-check-circle"></i>
+        <span>This is a terminal node. The workflow will complete when execution reaches this node.</span>
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="config-panel-footer">
+    <button class="btn btn--danger btn--outline" (click)="onDelete()">
+      <i class="pi pi-trash"></i> Delete Node
+    </button>
+  </div>
+</div>

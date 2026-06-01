@@ -132,7 +132,7 @@ function statusToStroke(status?: string): string | null {
 }
 
 export function createNodeShape(node: FlowNode, typeDef?: FlowNodeTypeDefinition): joint.dia.Element {
-  const shape = typeDef?.shape === 'html' || typeDef?.template ? 'html' : (typeDef?.shape ?? 'rectangle');
+  const shape = typeDef?.shape ?? 'rectangle';
   const size = node.size ?? typeDef?.defaultSize ?? { width: 200, height: 70 };
   const label = resolveLabel(node, typeDef);
   const subtitle = resolveSubtitle(node, typeDef);
@@ -237,29 +237,6 @@ export function createNodeShape(node: FlowNode, typeDef?: FlowNodeTypeDefinition
             fontSize: 11,
             fontFamily: 'Inter, sans-serif',
             fill: 'var(--app-text-muted, #94a3b8)',
-            pointerEvents: 'none',
-          },
-        },
-        ports,
-      });
-      break;
-    }
-    case 'html': {
-      el = new joint.shapes.standard.Rectangle({
-        size,
-        attrs: {
-          body: {
-            width: 'calc(w)',
-            height: 'calc(h)',
-            rx: 8,
-            ry: 8,
-            fill: 'transparent',
-            stroke: 'transparent',
-            strokeWidth: 0,
-            magnet: 'passive',
-          },
-          label: {
-            text: '',
             pointerEvents: 'none',
           },
         },
@@ -439,25 +416,13 @@ export function updateNodeShape(el: joint.dia.Element, node: FlowNode, typeDef?:
   const iconUrl = resolveIconUrl(node, typeDef);
   const iconLabel = resolveIconLabel(node, typeDef);
   const strokeColor = statusToStroke(node.status) ?? toneToColor(typeDef?.tone);
-  const shape = (el.get('flowNodeShape') as string | undefined) ?? (typeDef?.shape === 'html' || typeDef?.template ? 'html' : (typeDef?.shape ?? 'rectangle'));
+  const shape = (el.get('flowNodeShape') as string | undefined) ?? (typeDef?.shape ?? 'rectangle');
 
   if (node.size) {
     el.resize(node.size.width, node.size.height);
   }
 
-  if (shape === 'html') {
-    el.attr({
-      body: {
-        stroke: 'transparent',
-        strokeWidth: 0,
-        opacity: 1,
-        pointerEvents: 'none',
-      },
-      label: {
-        text: '',
-      },
-    });
-  } else if (shape === 'rectangle' || shape === 'custom') {
+  if (shape === 'rectangle' || shape === 'custom') {
     el.attr({
       body: {
         stroke: strokeColor,

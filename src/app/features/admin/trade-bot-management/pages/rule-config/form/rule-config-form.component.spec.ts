@@ -160,6 +160,22 @@ describe('RuleConfigFormComponent', () => {
     );
   });
 
+  it('uses loaded edit data when opening preview before form changes', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.openPreview();
+
+    expect(component.previewPayload()).toEqual(
+      expect.objectContaining({
+        executor: 'TREND',
+        executorVersion: 'v1',
+        indicators: ['TEST_CLOSE_PRICE'],
+        overlay: { label: 'Trend entry' }
+      })
+    );
+  });
+
   it('shows a warning and keeps configText in advanced JSON when executor template is missing', async () => {
     fixture.detectChanges();
     await fixture.whenStable();

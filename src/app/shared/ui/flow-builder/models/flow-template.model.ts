@@ -3,7 +3,7 @@ import { FlowSize } from './flow-common.model';
 import { FlowPortDefinition } from './flow-port.model';
 import type { FormConfig } from '../../form-input/models/form-config.model';
 
-export type FlowNodeShape = 'rectangle' | 'diamond' | 'capsule' | 'note' | 'placeholder' | 'custom' | 'html';
+export type FlowNodeShape = 'rectangle' | 'diamond' | 'capsule' | 'note' | 'placeholder' | 'custom';
 
 export type FlowNodeTone = 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'neutral';
 
@@ -19,7 +19,6 @@ export interface FlowNodeTypeDefinition {
   shape: FlowNodeShape;
   defaultSize: FlowSize;
   defaultData?: Record<string, unknown> | FlowNodeDefaultDataFactory;
-  template?: string;
   minSize?: FlowSize;
   maxSize?: FlowSize;
   ports: FlowPortDefinition[];

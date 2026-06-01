@@ -1,3 +1,9 @@
+---
+title: flow-navigator-level-3-viewport-drag-plan
+type: note
+permalink: dev-tool-web/docs/plans/flow-navigator-level-3-viewport-drag-plan
+---
+
 # Flow Navigator Level 3 Plan - Drag Viewport To Pan
 
 Date: 2026-05-29
@@ -226,4 +232,3 @@ Remove:
 - `viewportPan` output and pointer handlers.
 - Builder event binding and handler.
 - Drag CSS.
-

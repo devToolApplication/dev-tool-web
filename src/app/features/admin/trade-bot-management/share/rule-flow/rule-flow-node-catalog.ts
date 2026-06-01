@@ -1,4 +1,4 @@
-import { FlowNodeTypeDefinition } from '../../../../../shared/ui/flow-builder/models';
+import { FlowNode, FlowNodeTypeDefinition } from '../../../../../shared/ui/flow-builder/models';
 import type { FieldConfig, FormConfig, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
 import type { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
 import {
@@ -7,8 +7,14 @@ import {
   RULE_EXPRESSION_OPERATOR_CATALOG,
   RULE_EXPRESSION_PRICE_SERIES,
   defaultParamsForOperator,
+  operatorDefinition,
 } from '../rule-expression-builder/rule-expression-operators';
-import type { RuleExpressionOperandValueType } from '../rule-expression-builder/rule-expression.models';
+import { printRuleExpressionOperand } from '../rule-expression-builder/rule-expression-printer';
+import type {
+  RuleExpressionConditionOperator,
+  RuleExpressionOperand,
+  RuleExpressionOperandValueType,
+} from '../rule-expression-builder/rule-expression.models';
 
 export interface RuleFlowNodeTypeCatalogOptions {
   indicatorConfigs?: IndicatorConfigResponse[];
@@ -22,8 +28,8 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       type: 'rule-group',
       label: 'Group',
       description: 'Logical rule group',
-      shape: 'html',
-      defaultSize: { width: 150, height: 78 },
+      shape: 'rectangle',
+      defaultSize: { width: 190, height: 74 },
       defaultData: { operator: 'AND' },
       icon: 'pi pi-sitemap',
       tone: 'info',
@@ -36,6 +42,7 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowDelete: true,
       allowMove: true,
       labelResolver: (node) => String(node.data?.['operator'] ?? 'GROUP'),
+      subtitleResolver: () => 'Boolean group',
       badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : null,
       inspectorForm: groupInspectorForm(),
     },
@@ -43,8 +50,8 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       type: 'rule-condition',
       label: 'Condition',
       description: 'Comparison or cross condition',
-      shape: 'html',
-      defaultSize: { width: 290, height: 112 },
+      shape: 'rectangle',
+      defaultSize: { width: 320, height: 88 },
       defaultData: {
         operator: null,
         operands: [],
@@ -59,16 +66,17 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowConnectTo: true,
       allowDelete: true,
       allowMove: true,
-      labelResolver: (node) => String(node.data?.['operator'] ?? node.label ?? '?'),
-      badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : null,
+      labelResolver: conditionTitle,
+      subtitleResolver: conditionExpression,
+      badgeResolver: conditionBadge,
       inspectorForm: conditionInspectorForm(options),
     },
     {
       type: 'rule-ref',
       label: 'Rule Ref',
       description: 'Referenced child rule',
-      shape: 'html',
-      defaultSize: { width: 220, height: 72 },
+      shape: 'rectangle',
+      defaultSize: { width: 340, height: 72 },
       icon: 'pi pi-share-alt',
       tone: 'primary',
       ports: [
@@ -78,7 +86,8 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowConnectTo: true,
       allowDelete: true,
       allowMove: true,
-      labelResolver: (node) => node.data?.['ruleCode'] ? `Rule: ${node.data['ruleCode']}` : 'Rule: ?',
+      labelResolver: (node) => node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?',
+      subtitleResolver: () => 'Referenced rule value',
       badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : { label: 'REF', tone: 'primary' },
       inspectorForm: ruleRefInspectorForm(options),
     },
@@ -86,8 +95,8 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       type: 'rule-not',
       label: 'NOT',
       description: 'Boolean NOT operator',
-      shape: 'html',
-      defaultSize: { width: 150, height: 70 },
+      shape: 'rectangle',
+      defaultSize: { width: 180, height: 68 },
       icon: 'pi pi-ban',
       tone: 'danger',
       ports: [
@@ -99,6 +108,7 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowDelete: true,
       allowMove: true,
       labelResolver: () => 'NOT',
+      subtitleResolver: () => 'Negate child result',
       badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : null,
       inspectorForm: notInspectorForm(),
     },
@@ -408,4 +418,90 @@ function numericCompareOperatorExpression(): string {
 
 function equalityOperatorExpression(): string {
   return "model.operator === 'EQ' || model.operator === 'NEQ'";
+}
+
+function conditionTitle(node: FlowNode): string {
+  return conditionOperator(node) ?? 'Choose operator';
+}
+
+function conditionExpression(node: FlowNode): string {
+  const operator = conditionOperator(node);
+  if (!operator) {
+    return 'Select operands';
+  }
+
+  const operands = conditionOperands(node);
+  const first = printRuleExpressionOperand(operands[0]);
+  const definition = operatorDefinition(operator);
+
+  if (definition?.arity === 'range') {
+    return `${first} ${operator} ${printRuleExpressionOperand(operands[1])} AND ${printRuleExpressionOperand(operands[2])}`;
+  }
+
+  return `${first} ${operatorSymbol(operator)} ${printRuleExpressionOperand(operands[1])}`;
+}
+
+function conditionBadge(node: FlowNode): { label: string; tone?: 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'neutral' } | null {
+  if (node.disabled) {
+    return { label: 'OFF', tone: 'muted' };
+  }
+  const operator = conditionOperator(node);
+  if (!operator) {
+    return { label: 'SET', tone: 'warning' };
+  }
+  const params = conditionParamSummary(node);
+  if (params) {
+    return { label: params, tone: 'warning' };
+  }
+  return null;
+}
+
+function conditionOperator(node: FlowNode): RuleExpressionConditionOperator | null {
+  const operator = node.data?.['operator'];
+  return typeof operator === 'string' && operator ? operator as RuleExpressionConditionOperator : null;
+}
+
+function conditionOperands(node: FlowNode): RuleExpressionOperand[] {
+  const operands = node.data?.['operands'];
+  return Array.isArray(operands) ? operands as RuleExpressionOperand[] : [];
+}
+
+function conditionParamSummary(node: FlowNode): string {
+  const operator = conditionOperator(node);
+  const quickParams = operatorDefinition(operator)?.quickParams ?? [];
+  if (!quickParams.length) {
+    return '';
+  }
+
+  const defaults = defaultParamsForOperator(operator) ?? {};
+  const params = node.data?.['params'];
+  const values = params && typeof params === 'object' && !Array.isArray(params)
+    ? { ...defaults, ...(params as Record<string, unknown>) }
+    : defaults;
+
+  const lookback = values['lookback'];
+  const tolerance = values['tolerance'];
+  if (tolerance != null && Number(tolerance) !== 0) {
+    return `LB ${lookback ?? 1} / T ${tolerance}`;
+  }
+  return `LB ${lookback ?? 1}`;
+}
+
+function operatorSymbol(operator: RuleExpressionConditionOperator): string {
+  switch (operator) {
+    case 'GT':
+      return '>';
+    case 'GTE':
+      return '>=';
+    case 'LT':
+      return '<';
+    case 'LTE':
+      return '<=';
+    case 'EQ':
+      return '==';
+    case 'NEQ':
+      return '!=';
+    default:
+      return operator;
+  }
 }

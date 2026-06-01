@@ -1,0 +1,121 @@
+<div class="workflow-builder-page">
+  <header class="workflow-builder-header">
+    <div class="workflow-builder-header__title">
+      <app-button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [text]="true"
+        ariaLabel="Back to workflows"
+        (buttonClick)="goBack()"
+      ></app-button>
+      <div class="workflow-builder-header__copy">
+        <span class="workflow-builder-header__eyebrow">AI Agent Workflow</span>
+        <h2>{{ workflow()?.name ?? 'Workflow Builder' }}</h2>
+      </div>
+      <span class="workflow-builder-header__status" [class]="'workflow-builder-header__status--' + (workflow()?.status ?? 'DRAFT').toLowerCase()">
+        {{ workflow()?.status ?? 'DRAFT' }}
+      </span>
+    </div>
+
+    <div class="workflow-builder-header__actions">
+      <span class="workflow-builder-header__save" [class.workflow-builder-header__save--saving]="saving()">
+        @if (saving()) {
+          Saving...
+        } @else {
+          Saved
+        }
+      </span>
+      <app-button
+        icon="pi pi-check-circle"
+        label="Validate"
+        severity="info"
+        [loading]="validating()"
+        [disabled]="validating()"
+        (buttonClick)="validate()"
+      ></app-button>
+      <app-button
+        icon="pi pi-upload"
+        label="Publish"
+        severity="success"
+        [disabled]="!canPublish()"
+        (buttonClick)="publish()"
+      ></app-button>
+    </div>
+  </header>
+
+  @if (validationErrors().length > 0) {
+    <section class="workflow-validation" aria-live="polite">
+      <div class="workflow-validation__title">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <strong>Validation errors</strong>
+        <span>{{ validationErrors().length }}</span>
+      </div>
+      <div class="workflow-validation__items">
+        @for (error of validationErrors(); track error) {
+          <span>{{ error }}</span>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="workflow-builder-shell">
+    <app-flow-builder
+      class="workflow-flow-builder"
+      [value]="flowDefinition()"
+      [nodeTypes]="flowNodeTypes"
+      [toolbar]="flowToolbar"
+      [palette]="flowPalette"
+      [inspector]="flowInspector"
+      [capabilities]="flowCapabilities"
+      [validationIssues]="validationIssues()"
+      [selectedId]="selectedFlowId()"
+      [mode]="workflow()?.status === 'ARCHIVED' ? 'readonly' : 'edit'"
+      [autoLayout]="true"
+      [fitOnLoad]="true"
+      (valueChange)="onFlowValueChange($event)"
+      (selectedIdChange)="onSelectedIdChange($event)"
+      (nodeClick)="onNodeClick($event)"
+      (edgeClick)="onEdgeClick($event)"
+      (blankClick)="onBlankClick()"
+      (command)="onFlowCommand($event)"
+    />
+
+    @if (selectedWorkflowEdge(); as edge) {
+      <aside class="workflow-edge-panel">
+        <div class="workflow-edge-panel__header">
+          <div>
+            <span>Edge</span>
+            <strong>{{ edge.source }} -> {{ edge.target }}</strong>
+          </div>
+          <app-button
+            icon="pi pi-times"
+            severity="secondary"
+            [text]="true"
+            ariaLabel="Close edge panel"
+            (buttonClick)="closeEdgePanel()"
+          ></app-button>
+        </div>
+        <app-input-text
+          label="Label"
+          [value]="edge.label ?? ''"
+          placeholder="Display label"
+          (valueChange)="updateSelectedEdgeLabel($event)"
+        ></app-input-text>
+        <app-input-area
+          label="Condition"
+          [value]="edge.condition ?? ''"
+          placeholder="SpEL condition for branch edges"
+          [rows]="3"
+          [maxRows]="6"
+          (valueChange)="updateSelectedEdgeCondition($event)"
+        ></app-input-area>
+      </aside>
+    }
+  </section>
+
+  <footer class="workflow-builder-statusbar">
+    <span>Nodes: {{ nodeCount() }}</span>
+    <span>Edges: {{ edgeCount() }}</span>
+    <span>Draft graph autosaves after edits</span>
+  </footer>
+</div>

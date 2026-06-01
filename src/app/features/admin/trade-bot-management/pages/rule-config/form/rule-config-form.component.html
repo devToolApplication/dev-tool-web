@@ -20,56 +20,7 @@
         (nodeClick)="onFlowNodeClick($event)"
         (connect)="onFlowConnect($event)"
         (command)="onFlowCommand($event)"
-      >
-        <ng-template appFlowNodeTemplate="rule-group" let-node>
-          <div class="rule-flow-node rule-flow-node--group" [class.rule-flow-node--disabled]="node.disabled">
-            <span class="rule-flow-node__operator">{{ ruleFlowGroupOperator(node) }}</span>
-            @if (ruleFlowChildCount(node)) {
-              <span class="rule-flow-node__count">{{ ruleFlowChildCount(node) }}</span>
-            }
-          </div>
-        </ng-template>
-
-        <ng-template appFlowNodeTemplate="rule-condition" let-node>
-          <div class="rule-flow-node rule-flow-node--condition" [class.rule-flow-node--disabled]="node.disabled">
-            <div class="rule-flow-node__header">
-              <span class="rule-flow-node__chip">{{ ruleFlowConditionOperatorSymbol(node) }}</span>
-              <strong>{{ ruleFlowConditionOperatorLabel(node) | translateContent }}</strong>
-            </div>
-            @if (ruleFlowConditionIsRange(node)) {
-              <div class="rule-flow-node__expression rule-flow-node__expression--range">
-                <span>{{ ruleFlowConditionOperand(node, 0) }}</span>
-                <code>{{ ruleFlowConditionOperatorSymbol(node) }}</code>
-                <span>{{ ruleFlowConditionOperand(node, 1) }}</span>
-                <span>{{ ruleFlowConditionOperand(node, 2) }}</span>
-              </div>
-            } @else {
-              <div class="rule-flow-node__expression">
-                <span>{{ ruleFlowConditionOperand(node, 0) }}</span>
-                <code>{{ ruleFlowConditionOperatorSymbol(node) }}</code>
-                <span>{{ ruleFlowConditionOperand(node, 1) }}</span>
-              </div>
-            }
-            @if (ruleFlowConditionParamSummary(node)) {
-              <small class="rule-flow-node__meta">{{ ruleFlowConditionParamSummary(node) }}</small>
-            }
-          </div>
-        </ng-template>
-
-        <ng-template appFlowNodeTemplate="rule-ref" let-node>
-          <div class="rule-flow-node rule-flow-node--ref" [class.rule-flow-node--disabled]="node.disabled">
-            <span class="rule-flow-node__chip">REF</span>
-            <strong>{{ ruleFlowRefCode(node) }}</strong>
-          </div>
-        </ng-template>
-
-        <ng-template appFlowNodeTemplate="rule-not" let-node>
-          <div class="rule-flow-node rule-flow-node--not" [class.rule-flow-node--disabled]="node.disabled">
-            <span class="rule-flow-node__chip">NOT</span>
-            <strong>{{ ruleFlowNotChildLabel(node) }}</strong>
-          </div>
-        </ng-template>
-      </app-flow-builder>
+      />
   </div>
 </app-base-crud-page>
 

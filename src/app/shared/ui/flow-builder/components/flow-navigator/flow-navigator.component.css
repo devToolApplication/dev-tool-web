@@ -138,11 +138,6 @@
   border-radius: 999px;
 }
 
-.flow-navigator__node--html {
-  border-width: 1.5px;
-  border-radius: 4px;
-}
-
 .flow-navigator__node--tone-primary {
   border-color: var(--app-primary);
   background: color-mix(in srgb, var(--app-primary) 14%, var(--app-card-surface));

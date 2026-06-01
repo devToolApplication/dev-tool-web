@@ -8,7 +8,7 @@ export const FLOW_PAPER_OPTIONS: Partial<joint.dia.Paper.Options> = {
   background: { color: 'var(--app-surface-soft, #f8fafc)' },
   defaultConnector: { name: 'rounded', args: { radius: 8 } },
   defaultRouter: { name: 'manhattan', args: { step: 20 } },
-  async: true,
+  async: false,
   sorting: joint.dia.Paper.sorting.APPROX,
   snapLinks: { radius: 48 },
   preventDefaultBlankAction: false,

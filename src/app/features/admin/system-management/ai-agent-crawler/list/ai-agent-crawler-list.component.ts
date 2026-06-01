@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DEFAULT_TABLE_ROWS, DEFAULT_TABLE_ROWS_PER_PAGE } from '../../../../../core/constants/system.constants';
-import { AiAgentCrawlerConfigResponse } from '../../../../../core/models/ai-agent/ai-agent-crawler.model';
+import { AiAgentCrawlerConfigResponse, AiAgentCrawlerTestRunResponse } from '../../../../../core/models/ai-agent/ai-agent-crawler.model';
 import { AiAgentCrawlerConfigService } from '../../../../../core/services/ai-agent-service/ai-agent-crawler.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../../core/ui-services/loading.service';
@@ -13,7 +13,8 @@ import { AI_AGENT_CRAWLER_ROUTES } from '../ai-agent-crawler.constants';
 @Component({
   selector: 'app-ai-agent-crawler-list',
   standalone: false,
-  templateUrl: './ai-agent-crawler-list.component.html'
+  templateUrl: './ai-agent-crawler-list.component.html',
+  styleUrl: './ai-agent-crawler-list.component.css'
 })
 export class AiAgentCrawlerListComponent extends BasePagedList<AiAgentCrawlerConfigResponse> implements OnInit {
   readonly tableConfig: TableConfig = {
@@ -66,10 +67,17 @@ export class AiAgentCrawlerListComponent extends BasePagedList<AiAgentCrawlerCon
         field: 'actions',
         header: 'actions',
         type: 'actions',
-        minWidth: '12rem',
+        minWidth: '16rem',
         frozen: true,
         alignFrozen: 'right',
         actions: [
+          {
+            label: 'systemManagement.aiAgentCrawler.action.testRun',
+            icon: 'pi pi-play',
+            severity: 'success',
+            disabled: (row) => this.runningCrawlerIds().has(row.id),
+            onClick: (row) => this.testRun(row)
+          },
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           {
             label: 'delete',
@@ -86,6 +94,15 @@ export class AiAgentCrawlerListComponent extends BasePagedList<AiAgentCrawlerCon
     rows: DEFAULT_TABLE_ROWS,
     rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
   };
+
+  readonly runningCrawlerIds = signal<Set<string>>(new Set());
+  readonly activeTestRunId = signal<string | null>(null);
+  readonly testRunResult = signal<AiAgentCrawlerTestRunResponse | null>(null);
+  readonly testRunResultContext = signal<{ name: string; type: string } | null>(null);
+  readonly testRunLoading = computed(() => {
+    const activeId = this.activeTestRunId();
+    return activeId !== null && this.runningCrawlerIds().has(activeId);
+  });
 
   constructor(
     private readonly service: AiAgentCrawlerConfigService,
@@ -124,6 +141,67 @@ export class AiAgentCrawlerListComponent extends BasePagedList<AiAgentCrawlerCon
     this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.sorts, this.filters)), {
       errorMessage: 'systemManagement.aiAgentCrawler.toast.loadListFailed',
       onError: () => this.toastService.error('systemManagement.aiAgentCrawler.toast.loadListFailed')
+    });
+  }
+
+  get testRunSubtitle(): string {
+    const context = this.testRunResultContext();
+    if (!context) {
+      return '';
+    }
+    return this.i18nService.t('systemManagement.aiAgentCrawler.testRun.subtitle')
+      .replace('{name}', context.name)
+      .replace('{type}', context.type);
+  }
+
+  private setCrawlerRunning(id: string, running: boolean): void {
+    this.runningCrawlerIds.update((set) => {
+      const next = new Set(set);
+      if (running) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  }
+
+  testRun(row: AiAgentCrawlerConfigResponse): void {
+    this.setCrawlerRunning(row.id, true);
+    this.activeTestRunId.set(row.id);
+    this.testRunResult.set(null);
+
+    this.testRunResultContext.set({
+      name: row.name,
+      type: row.crawlerType
+    });
+
+    this.service.testRun(row.id, { inputJson: '{}', actorId: 'admin' }).subscribe({
+      next: (response) => {
+        this.setCrawlerRunning(row.id, false);
+        if (this.activeTestRunId() === row.id) {
+          this.testRunResult.set(response);
+          if (response.success) {
+            this.toastService.success('systemManagement.aiAgentCrawler.toast.testRunSuccess');
+          } else {
+            const errorMsg = response.safeErrorMessage || 'systemManagement.aiAgentCrawler.toast.testRunFailed';
+            this.toastService.error(errorMsg);
+          }
+        }
+      },
+      error: (err) => {
+        this.setCrawlerRunning(row.id, false);
+        if (this.activeTestRunId() === row.id) {
+          const errMsg = err?.error?.message || err?.message || 'systemManagement.aiAgentCrawler.toast.testRunFailed';
+          this.testRunResult.set({
+            crawlerConfigId: row.id,
+            success: false,
+            previewJson: '',
+            safeErrorMessage: errMsg
+          });
+          this.toastService.error(errMsg);
+        }
+      }
     });
   }
 }

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { FileUploadDebugComponent } from './debug-tools/file-upload-debug/file-upload-debug.component';
+import { TokenCacheDebugComponent } from './debug-tools/token-cache-debug/token-cache-debug.component';
 import { AiAgentConfigFormComponent } from './general-config/ai-agent-system/form/ai-agent-config-form.component';
 import { AiAgentConfigListComponent } from './general-config/ai-agent-system/list/ai-agent-config-list.component';
 
@@ -26,6 +27,13 @@ import { AiAgentAuthProfileFormComponent } from './ai-agent-auth-profile/form/ai
 import { AiAgentAccountListComponent } from './ai-agent-account/list/ai-agent-account-list.component';
 import { AiAgentAccountFormComponent } from './ai-agent-account/form/ai-agent-account-form.component';
 
+import { AiAgentWorkflowListComponent } from './ai-agent-workflow-builder/list/ai-agent-workflow-list.component';
+import { AiAgentWorkflowCanvasComponent } from './ai-agent-workflow-builder/canvas/ai-agent-workflow-canvas.component';
+import { AiAgentWorkflowConfigPanelComponent } from './ai-agent-workflow-builder/config-panel/ai-agent-workflow-config-panel.component';
+import { AiAgentWorkflowMonitorListComponent } from './ai-agent-workflow-monitor/list/ai-agent-workflow-monitor-list.component';
+import { AiAgentWorkflowMonitorDetailComponent } from './ai-agent-workflow-monitor/detail/ai-agent-workflow-monitor-detail.component';
+import { AiAgentExecutionComponent } from './ai-agent-execution/ai-agent-execution.component';
+
 export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   StorageSecretListComponent,
   StorageSecretFormComponent,
@@ -40,6 +48,7 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   TradeBotConfigListComponent,
   TradeBotConfigFormComponent,
   FileUploadDebugComponent,
+  TokenCacheDebugComponent,
   AiAgentModelListComponent,
   AiAgentModelFormComponent,
   AiAgentCrawlerListComponent,
@@ -49,7 +58,13 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
   AiAgentAuthProfileListComponent,
   AiAgentAuthProfileFormComponent,
   AiAgentAccountListComponent,
-  AiAgentAccountFormComponent
+  AiAgentAccountFormComponent,
+  AiAgentWorkflowListComponent,
+  AiAgentWorkflowCanvasComponent,
+  AiAgentWorkflowConfigPanelComponent,
+  AiAgentWorkflowMonitorListComponent,
+  AiAgentWorkflowMonitorDetailComponent,
+  AiAgentExecutionComponent
 ];
 
 export const systemManagementRoutes: Routes = [
@@ -138,11 +153,33 @@ export const systemManagementRoutes: Routes = [
     component: FileUploadDebugComponent
   },
   {
+    path: 'admin/system-management/token-cache',
+    component: TokenCacheDebugComponent
+  },
+  {
     path: 'admin/system-management/trade-bot-configs',
     children: [
       { path: '', component: TradeBotConfigListComponent },
       { path: 'create', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
     ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-workflow-builder',
+    children: [
+      { path: '', component: AiAgentWorkflowListComponent },
+      { path: 'canvas/:id', component: AiAgentWorkflowCanvasComponent }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-workflow-monitor',
+    children: [
+      { path: '', component: AiAgentWorkflowMonitorListComponent },
+      { path: 'detail/:id', component: AiAgentWorkflowMonitorDetailComponent }
+    ]
+  },
+  {
+    path: 'admin/system-management/ai-agent-execution',
+    component: AiAgentExecutionComponent
   }
 ];

@@ -1,3 +1,9 @@
+---
+title: flow-navigator-level-4-template-parity-plan
+type: note
+permalink: dev-tool-web/docs/plans/flow-navigator-level-4-template-parity-plan
+---
+
 # Flow Navigator Level 4 Plan - Template Parity Polish
 
 Date: 2026-05-29
@@ -303,4 +309,3 @@ Optional Playwright checks:
 - Build and Storybook build pass.
 - Browser smoke tests cover desktop and mobile.
 - No direct third-party UI components are introduced.
-

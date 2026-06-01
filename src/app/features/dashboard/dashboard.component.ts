@@ -61,6 +61,7 @@ export class DashboardComponent implements OnInit {
 
     return [
       { id: 'ai-playground', label: 'layout.menu.playground', icon: 'pi pi-play-circle', variant: 'primary', placement: 'primary' },
+      { id: 'pending-reviews', label: 'dashboard.pendingReviews', icon: 'pi pi-exclamation-triangle', variant: 'warning', placement: 'primary' },
       { id: 'execution-traces', label: 'layout.menu.executionTraces', icon: 'pi pi-history', placement: 'secondary' },
       { id: 'ai-models', label: 'layout.menu.aiModels', icon: 'pi pi-microchip-ai', placement: 'secondary' }
     ];
@@ -156,10 +157,17 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    if (action.id === 'pending-reviews') {
+      void this.router.navigate(['/admin/system-management/ai-agent-workflow-monitor'], {
+        queryParams: { status: 'WAITING_REVIEW' }
+      });
+      return;
+    }
+
     const routes: Record<string, string> = {
-      'ai-playground': '/admin/ai-agent/runtime/playground',
-      'execution-traces': '/admin/ai-agent/execution-traces',
-      'ai-models': '/admin/ai-agent/models',
+      'ai-playground': '/admin/system-management/ai-agent-execution',
+      'execution-traces': '/admin/system-management/ai-agent-workflow-monitor',
+      'ai-models': '/admin/system-management/ai-agent-models',
       'storage-repository': '/admin/upload-storage/storage',
       'uploaded-files': '/admin/upload-storage/files'
     };
@@ -174,11 +182,25 @@ export class DashboardComponent implements OnInit {
       return '/admin/upload-storage/files';
     }
 
-    if (String(metric.severity ?? '').toLowerCase() === 'danger') {
-      return '/admin/ai-agent/execution-traces';
+    const severity = String(metric.severity ?? '').toLowerCase();
+    if (['danger', 'warning', 'action-required', 'failed', 'error'].includes(severity)) {
+      return '/admin/system-management/ai-agent-workflow-monitor';
     }
 
-    return '/admin/ai-agent/runtime/playground';
+    return '/admin/system-management/ai-agent-execution';
+  }
+
+  metricQueryParams(tab: DashboardTabType, metric: DashboardMetric): Record<string, string> | undefined {
+    if (tab === 'file-storage') {
+      return undefined;
+    }
+
+    const severity = String(metric.severity ?? '').toLowerCase();
+    if (['warning', 'action-required'].includes(severity)) {
+      return { status: 'WAITING_REVIEW' };
+    }
+
+    return undefined;
   }
 
   metricVariant(severity: string | undefined): BadgeVariant {

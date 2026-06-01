@@ -19,7 +19,9 @@
     "dashboard.generatedAt": "Cập nhật lúc",
     "dashboard.emptyActivities": "Chưa có hoạt động",
     "dashboard.noAttention": "Không có vấn đề cần xử lý",
-    "dashboard.emptyResources": "Chưa có tài nguyên"
+    "dashboard.emptyResources": "Chưa có tài nguyên",
+    "dashboard.pendingReviews": "Chờ duyệt",
+    "dashboard.quickNavigation": "Điều hướng nhanh"
   },
   "en": {
     "dashboard.title": "System Admin Dashboard",
@@ -41,6 +43,8 @@
     "dashboard.generatedAt": "Updated at",
     "dashboard.emptyActivities": "No recent activity",
     "dashboard.noAttention": "No issues need attention",
-    "dashboard.emptyResources": "No resources"
+    "dashboard.emptyResources": "No resources",
+    "dashboard.pendingReviews": "Pending Reviews",
+    "dashboard.quickNavigation": "Quick Navigation"
   }
 }

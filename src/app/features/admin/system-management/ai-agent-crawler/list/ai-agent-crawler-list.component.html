@@ -14,4 +14,45 @@
     (create)="onCreate()"
     (retry)="refreshPage()"
   ></app-table>
+
+  @if (testRunResultContext()) {
+    <div class="crawler-result-container">
+      <app-section-panel
+        [title]="'systemManagement.aiAgentCrawler.testRun.title'"
+        [subtitle]="testRunSubtitle"
+        density="compact"
+        [loading]="testRunLoading()"
+      >
+        @if (testRunResult()) {
+          @if (testRunResult()?.success) {
+            <div class="alert-wrapper">
+              <app-alert
+                variant="success"
+                [title]="'systemManagement.aiAgentCrawler.testRun.successTitle'"
+                [message]="'systemManagement.aiAgentCrawler.toast.testRunSuccess'"
+              ></app-alert>
+            </div>
+
+            <div>
+              <h4 class="crawler-result-preview-title">
+                {{ 'systemManagement.aiAgentCrawler.testRun.previewTitle' | translateContent }}
+              </h4>
+              <app-json-viewer
+                [value]="testRunResult()?.previewJson"
+                [collapsed]="false"
+                [showSearch]="true"
+                [showRawToggle]="true"
+              ></app-json-viewer>
+            </div>
+          } @else {
+            <app-alert
+              variant="danger"
+              [title]="'systemManagement.aiAgentCrawler.testRun.errorTitle'"
+              [message]="testRunResult()?.safeErrorMessage || 'systemManagement.aiAgentCrawler.toast.testRunFailed'"
+            ></app-alert>
+          }
+        }
+      </app-section-panel>
+    </div>
+  }
 </app-page-shell>

@@ -19,6 +19,7 @@
           [trend]="metric.trendLabel || null"
           [trendVariant]="metricVariant(metric.severity)"
           [routerLink]="metricRouterLink(activeTab(), metric)"
+          [queryParams]="metricQueryParams(activeTab(), metric)"
         ></app-summary-metric-card>
       }
     </app-responsive-grid>

@@ -1,3 +1,9 @@
+---
+title: flow-navigator-level-1-controls-plan
+type: note
+permalink: dev-tool-web/docs/plans/flow-navigator-level-1-controls-plan
+---
+
 # Flow Navigator Level 1 Plan - Controls Only
 
 Date: 2026-05-29
@@ -184,4 +190,3 @@ Revert only:
 - Header/actions markup and CSS.
 - Event wiring in `flow-builder.component.html`.
 - New i18n keys.
-

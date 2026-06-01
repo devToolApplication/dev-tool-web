@@ -1,5 +1,6 @@
 :root {
   --app-transparent: transparent;
+  --app-color-scheme: light;
 
   /* Shared scale */
   --app-space-1: 0.25rem;
@@ -40,6 +41,7 @@
   --app-surface-alt: rgba(255, 255, 255, 0.58);
   --app-surface-soft: rgba(255, 255, 255, 0.42);
   --app-surface-strong: rgba(255, 255, 255, 0.86);
+  --app-surface-overlay: #ffffff;
   --app-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.58));
   --app-card-bg-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.68));
   --app-card-surface: rgba(255, 255, 255, 0.66);

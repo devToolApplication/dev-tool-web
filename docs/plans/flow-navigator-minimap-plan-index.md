@@ -1,3 +1,9 @@
+---
+title: flow-navigator-minimap-plan-index
+type: note
+permalink: dev-tool-web/docs/plans/flow-navigator-minimap-plan-index
+---
+
 # Flow Navigator Minimap Plan Index
 
 Date: 2026-05-29
@@ -83,4 +89,3 @@ Primary implementation files:
 - Server persistence for minimap state.
 - Reworking node renderer visual design.
 - Full image thumbnail rendering of the paper.
-

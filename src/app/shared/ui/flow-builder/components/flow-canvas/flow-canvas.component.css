@@ -19,5 +19,4 @@
 .flow-canvas__paper {
   position: absolute;
   inset: 0;
-  z-index: 1;
 }

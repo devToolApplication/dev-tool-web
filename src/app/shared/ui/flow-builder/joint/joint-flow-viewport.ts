@@ -54,6 +54,14 @@ export function resolveViewportSize(
   return { width, height };
 }
 
+export function resolvePaperViewportSize(
+  paper: Partial<JointFlowViewportSize> | null | undefined,
+  parentCanvas?: Partial<JointFlowViewportSize> | null,
+  last?: Partial<JointFlowViewportSize> | null
+): JointFlowViewportSize {
+  return resolveViewportSize(parentCanvas, paper, last);
+}
+
 export function computeLocalCenter(
   viewport: JointFlowViewportSize,
   transform: JointFlowTransform

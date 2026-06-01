@@ -160,7 +160,6 @@ export class FlowNavigatorComponent {
     return {
       'flow-navigator__node--selected': node.id === this.selectedId,
       'flow-navigator__node--condition': typeDef?.shape === 'diamond' || node.type === 'condition' || node.type === 'rule-condition' || node.type === 'rule-group',
-      'flow-navigator__node--html': typeDef?.shape === 'html',
       [`flow-navigator__node--tone-${tone}`]: true,
     };
   }

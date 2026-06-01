@@ -143,18 +143,21 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   openPreview(): void {
-    this.previewPayload.set({
-      executor: stringValue(this.lastModel['executor']),
-      executorVersion: stringValue(this.lastModel['executorVersion']),
-      config: {
-        ...asRecord(this.lastModel['config']),
-        ruleExpression: this.ruleExpressionValue()
-      },
-      indicators: asArray(this.lastModel['indicators']),
-      childRules: this.lastModel['childRules'] ?? [],
-      overlay: this.lastModel['overlay'] ?? {}
-    });
-    this.showPreview.set(true);
+    const expressionValidation = this.validateCurrentRuleExpression();
+    if (!expressionValidation.valid) {
+      this.toastService.error(this.i18nService.t('tradeBot.ruleExpression.validation.invalidExpression'));
+      return;
+    }
+
+    try {
+      this.previewPayload.set(this.toPayload(this.previewSourceModel()) as unknown as Record<string, unknown>);
+      this.showPreview.set(true);
+    } catch (error) {
+      const key = error instanceof Error && error.message === 'INVALID_FORM_TEMPLATE'
+        ? 'tradeBot.message.invalidFormTemplate'
+        : 'tradeBot.message.invalidJson';
+      this.toastService.error(this.i18nService.t(key));
+    }
   }
 
   submit(model: Record<string, unknown>): void {
@@ -190,13 +193,13 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   onValueChange(model: Record<string, unknown>): void {
-    this.lastModel = model;
     const executor = stringValue(model['executor']);
     this.currentRuleCode.set(stringValue(model['code']));
     const normalizedModel: Record<string, unknown> = {
       ...model,
       executorVersion: this.resolveVersion(executor, model['executorVersion'])
     };
+    this.lastModel = normalizedModel;
 
     const template = this.templateForExecutor(executor) ?? (executor === this.currentExecutor ? this.currentFormTemplate : undefined);
     const signature = formTemplateSignature(template);
@@ -387,6 +390,19 @@ export class RuleConfigFormComponent implements OnInit {
       });
   }
 
+  private previewSourceModel(): Record<string, unknown> {
+    return {
+      ...this.lastModel,
+      code: this.currentRuleCode() || stringValue(this.lastModel['code']),
+      executor: stringValue(this.lastModel['executor'] ?? this.currentExecutor),
+      executorVersion: this.resolveVersion(
+        stringValue(this.lastModel['executor'] ?? this.currentExecutor),
+        this.lastModel['executorVersion']
+      ),
+      ruleExpression: cloneRuleLogicValue(this.ruleExpressionValue())
+    };
+  }
+
   private toPayload(model: Record<string, unknown>): RuleConfigDto {
     const template = this.currentFormTemplate;
     const basePayload = {
@@ -463,6 +479,7 @@ export class RuleConfigFormComponent implements OnInit {
     this.currentFormTemplate = cloneFormConfig(template);
     this.currentTemplateSignature = formTemplateSignature(template);
     this.currentExecutor = currentExecutor;
+    this.lastModel = model;
     this.currentRuleCode.set(stringValue(model['code']));
     this.ruleExpressionValue.set(ruleExpressionFromModel(model, this.ruleExpressionValue()));
     this.ruleFlowDefinition.set(ruleExpressionToFlowDefinition(this.ruleExpressionValue()));

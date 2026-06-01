@@ -1,0 +1,14 @@
+.crawler-result-container {
+  margin-top: calc(var(--app-space-4) * 1.5);
+}
+
+.crawler-result-preview-title {
+  margin: var(--app-space-4) 0 var(--app-space-2) 0;
+  font-size: var(--app-font-size-sm);
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.alert-wrapper {
+  margin-bottom: var(--app-space-4);
+}

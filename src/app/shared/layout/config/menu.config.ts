@@ -28,8 +28,12 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.aiAgentPlatform',
         icon: 'pi pi-sparkles',
         items: [
+          { label: 'layout.menu.aiAgentExecution', icon: 'pi pi-play', routerLink: '/admin/system-management/ai-agent-execution' },
           { label: 'layout.menu.aiAgentModels', icon: 'pi pi-server', routerLink: '/admin/system-management/ai-agent-models' },
           { label: 'layout.menu.aiAgentAccounts', icon: 'pi pi-key', routerLink: '/admin/system-management/ai-agent-accounts' },
+          { label: 'layout.menu.aiAgentAuthProfiles', icon: 'pi pi-shield', routerLink: '/admin/system-management/ai-agent-auth-profiles' },
+          { label: 'layout.menu.aiAgentWorkflowBuilder', icon: 'pi pi-sitemap', routerLink: '/admin/system-management/ai-agent-workflow-builder' },
+          { label: 'layout.menu.aiAgentWorkflowMonitor', icon: 'pi pi-eye', routerLink: '/admin/system-management/ai-agent-workflow-monitor' },
           { label: 'layout.menu.aiAgentCrawlers', icon: 'pi pi-search', routerLink: '/admin/system-management/ai-agent-crawlers' },
           { label: 'layout.menu.aiAgents', icon: 'pi pi-user', routerLink: '/admin/system-management/ai-agents' }
         ]
@@ -42,7 +46,8 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
           { label: 'layout.menu.dataForms', icon: 'pi pi-file-edit', routerLink: '/admin/data-forms/create', permissions: ['FORM_CONFIG_CREATE'] },
           { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
           { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
-          { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' }
+          { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' },
+          { label: 'layout.menu.tokenCache', icon: 'pi pi-sync', routerLink: '/admin/system-management/token-cache' }
         ]
       },
       {

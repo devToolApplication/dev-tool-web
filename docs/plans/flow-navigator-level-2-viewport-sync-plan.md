@@ -1,3 +1,9 @@
+---
+title: flow-navigator-level-2-viewport-sync-plan
+type: note
+permalink: dev-tool-web/docs/plans/flow-navigator-level-2-viewport-sync-plan
+---
+
 # Flow Navigator Level 2 Plan - Viewport Rectangle Sync
 
 Date: 2026-05-29
@@ -242,4 +248,3 @@ Remove:
 - Engine viewport snapshot/callback.
 - Canvas/Builder viewport outputs.
 - Navigator viewport input and DOM.
-

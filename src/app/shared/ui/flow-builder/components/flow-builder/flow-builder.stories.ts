@@ -118,19 +118,21 @@ const ruleFlowDefinition: FlowDefinition = {
   ],
 };
 
-const ruleHtmlNodeTypes: FlowNodeTypeDefinition[] = [
+const ruleSvgNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'rule-ref',
     label: 'Rule Ref',
-    shape: 'html',
-    defaultSize: { width: 220, height: 72 },
+    shape: 'rectangle',
+    defaultSize: { width: 340, height: 72 },
     tone: 'primary',
     ports: [{ id: 'in', group: 'in', position: 'top' }],
     allowConnectFrom: false,
     allowConnectTo: true,
     allowDelete: true,
     allowMove: true,
-    labelResolver: (node) => node.data?.['ruleCode'] ? `Rule: ${node.data['ruleCode']}` : 'Rule: ?',
+    labelResolver: (node) => node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?',
+    subtitleResolver: () => 'Referenced rule value',
+    badgeResolver: () => ({ label: 'REF', tone: 'primary' }),
   },
 ];
 
@@ -152,7 +154,7 @@ const htmlConnectionNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'source-html',
     label: 'Source',
-    shape: 'html',
+    shape: 'rectangle',
     defaultSize: { width: 180, height: 64 },
     tone: 'success',
     ports: [{ id: 'out', group: 'out', position: 'bottom' }],
@@ -164,7 +166,7 @@ const htmlConnectionNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'target-html',
     label: 'Target',
-    shape: 'html',
+    shape: 'rectangle',
     defaultSize: { width: 180, height: 64 },
     tone: 'primary',
     ports: [{ id: 'in', group: 'in', position: 'top' }],
@@ -205,8 +207,7 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'trigger',
     label: 'Trigger',
-    shape: 'html',
-    template: '__status',
+    shape: 'rectangle',
     defaultSize: { width: 220, height: 60 },
     defaultData: { triggerType: 'New Message Received', description: 'Slack channel', tone: 'success', statusLabel: 'event' },
     tone: 'success',
@@ -223,8 +224,7 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'agent',
     label: 'AI Agent',
-    shape: 'html',
-    template: '__info',
+    shape: 'rectangle',
     defaultSize: { width: 240, height: 80 },
     defaultData: { name: 'New Agent', model: 'claude-sonnet-4', prompt: '', tone: 'primary' },
     tone: 'primary',
@@ -262,8 +262,7 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
   {
     type: 'action',
     label: 'Action',
-    shape: 'html',
-    template: '__form',
+    shape: 'rectangle',
     defaultSize: { width: 220, height: 65 },
     defaultData: { actionName: 'New Action', app: 'Slack', config: {}, tone: 'info' },
     tone: 'info',
@@ -382,7 +381,6 @@ const fullToolbar: FlowToolbarConfig = {
     'zoomOut',
     'resetZoom',
     'autoLayout',
-    'toggleNavigator',
     'toggleInspector',
     'fullscreen',
     'duplicateSelection',
@@ -475,7 +473,7 @@ export const SingleRuleRefInitialFit: Story = {
   tags: ['flow-builder-initial-fit'],
   args: {
     value: singleRuleRefFlowDefinition,
-    nodeTypes: ruleHtmlNodeTypes,
+    nodeTypes: ruleSvgNodeTypes,
     mode: 'edit',
     autoLayout: true,
     fitOnLoad: true,
@@ -494,70 +492,25 @@ export const SingleRuleRefInitialFit: Story = {
           [mode]="mode"
           [autoLayout]="autoLayout"
           [fitOnLoad]="fitOnLoad"
-        >
-          <ng-template appFlowNodeTemplate="rule-ref" let-node>
-            <div class="rule-story-node">
-              <span>REF</span>
-              <strong>{{ node.data?.ruleCode }}</strong>
-            </div>
-          </ng-template>
-        </app-flow-builder>
+        />
       </div>
     `,
-    styles: [`
-      .rule-story-node {
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        height: 100%;
-        min-width: 0;
-        padding: 10px 12px;
-        border: 1px solid var(--app-primary);
-        border-radius: 8px;
-        background: color-mix(in srgb, var(--app-card-surface) 96%, transparent);
-        color: var(--app-text);
-      }
-
-      .rule-story-node span {
-        display: inline-flex;
-        flex: 0 0 auto;
-        align-items: center;
-        justify-content: center;
-        height: 24px;
-        padding: 0 8px;
-        border-radius: 999px;
-        background: var(--app-chart-primary-fill);
-        color: var(--app-text-soft, var(--app-text));
-        font-size: 10px;
-        font-weight: 800;
-      }
-
-      .rule-story-node strong {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 13px;
-        font-weight: 800;
-      }
-    `],
   }),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const canvas = canvasElement.querySelector('.flow-canvas');
-      const overlay = canvasElement.querySelector('.flow-node-overlay');
+      const node = canvasElement.querySelector('.joint-element');
 
       expect(canvas).toBeTruthy();
-      expect(overlay).toBeTruthy();
+      expect(node).toBeTruthy();
 
       const canvasRect = canvas!.getBoundingClientRect();
-      const overlayRect = overlay!.getBoundingClientRect();
-      expect(overlayRect.left - canvasRect.left).toBeGreaterThan(80);
-      expect(overlayRect.top - canvasRect.top).toBeGreaterThan(80);
-      expect(overlayRect.left).toBeGreaterThan(canvasRect.left);
-      expect(overlayRect.top).toBeGreaterThan(canvasRect.top);
+      const nodeRect = node!.getBoundingClientRect();
+      expect(nodeRect.left - canvasRect.left).toBeGreaterThan(80);
+      expect(nodeRect.top - canvasRect.top).toBeGreaterThan(80);
+      expect(nodeRect.left).toBeGreaterThan(canvasRect.left);
+      expect(nodeRect.top).toBeGreaterThan(canvasRect.top);
+      expect(node!.textContent).toContain('TREND_IS_BEARISH_INTERNAL');
     });
   },
 };
@@ -583,118 +536,15 @@ export const HtmlPortConnection: Story = {
           [mode]="mode"
           [autoLayout]="autoLayout"
           [fitOnLoad]="fitOnLoad"
-        >
-          <ng-template appFlowNodeTemplate="source-html" let-node>
-            <div class="html-connection-node html-connection-node--source">
-              <strong>{{ node.label }}</strong>
-              <span>{{ node.data?.subtitle }}</span>
-            </div>
-          </ng-template>
-          <ng-template appFlowNodeTemplate="target-html" let-node>
-            <div class="html-connection-node html-connection-node--target">
-              <strong>{{ node.label }}</strong>
-              <span>{{ node.data?.subtitle }}</span>
-            </div>
-          </ng-template>
-        </app-flow-builder>
+        />
       </div>
     `,
-    styles: [`
-      .html-connection-node {
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 3px;
-        width: 100%;
-        height: 100%;
-        min-width: 0;
-        padding: 10px 12px;
-        border: 1px solid var(--app-border-soft);
-        border-radius: 8px;
-        background: color-mix(in srgb, var(--app-card-surface) 96%, transparent);
-        color: var(--app-text);
-      }
-
-      .html-connection-node--source {
-        border-color: var(--app-control-success-border, var(--app-primary));
-      }
-
-      .html-connection-node--target {
-        border-color: var(--app-primary);
-      }
-
-      .html-connection-node strong,
-      .html-connection-node span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .html-connection-node strong {
-        font-size: 13px;
-        font-weight: 800;
-      }
-
-      .html-connection-node span {
-        font-size: 11px;
-        color: var(--app-text-soft, var(--app-text));
-      }
-    `],
   }),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector('[data-flow-node-id="source-1"] .flow-node-overlay__port--out')).toBeTruthy();
-      expect(canvasElement.querySelector('[data-flow-node-id="target-1"] .flow-node-overlay__port--in')).toBeTruthy();
+      expect(canvasElement.querySelectorAll('.joint-element').length).toBe(2);
       expect(canvasElement.querySelector('svg [port="out"]')).toBeTruthy();
       expect(canvasElement.querySelector('svg [port="in"]')).toBeTruthy();
-    });
-
-    const sourcePort = canvasElement.querySelector('[data-flow-node-id="source-1"] .flow-node-overlay__port--out') as HTMLElement;
-    const targetPort = canvasElement.querySelector('[data-flow-node-id="target-1"] .flow-node-overlay__port--in') as HTMLElement;
-    const sourceRect = sourcePort.getBoundingClientRect();
-    const targetRect = targetPort.getBoundingClientRect();
-    const sourceX = sourceRect.left + sourceRect.width / 2;
-    const sourceY = sourceRect.top + sourceRect.height / 2;
-    const targetX = targetRect.left + targetRect.width / 2;
-    const targetY = targetRect.top + targetRect.height / 2;
-
-    sourcePort.dispatchEvent(new PointerEvent('pointerdown', {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-      buttons: 1,
-      clientX: sourceX,
-      clientY: sourceY,
-      pointerId: 1,
-      pointerType: 'mouse',
-    }));
-
-    await nextAnimationFrame();
-
-    targetPort.dispatchEvent(new PointerEvent('pointermove', {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-      buttons: 1,
-      clientX: targetX,
-      clientY: targetY,
-      pointerId: 1,
-      pointerType: 'mouse',
-    }));
-    targetPort.dispatchEvent(new PointerEvent('pointerup', {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-      buttons: 0,
-      clientX: targetX,
-      clientY: targetY,
-      pointerId: 1,
-      pointerType: 'mouse',
-    }));
-
-    await waitFor(() => {
-      expect(canvasElement.querySelectorAll('.joint-link').length).toBeGreaterThan(0);
     });
   },
 };
@@ -802,6 +652,3 @@ function generateLargeGraph(count: number): FlowDefinition {
   return { id: 'large-flow', version: 1, nodes, edges };
 }
 
-function nextAnimationFrame(): Promise<void> {
-  return new Promise(resolve => requestAnimationFrame(() => resolve()));
-}

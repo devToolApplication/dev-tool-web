@@ -39,7 +39,7 @@ import {
   FlowSelectionItem,
 } from '../../models';
 import { FlowCanvasComponent } from '../flow-canvas/flow-canvas.component';
-import { FlowNodeTemplateDirective, FlowInspectorTemplateDirective } from '../../directives/flow-template.directives';
+import { FlowInspectorTemplateDirective } from '../../directives/flow-template.directives';
 import { FlowDiagramData } from '../../core/flow-diagram-data';
 import { FlowHistory } from '../../core/flow-history';
 import { areFlowDefinitionsEqual, cloneFlowDefinition, cloneFlowValue } from '../../core/flow-serialization';
@@ -60,7 +60,6 @@ type ActiveFlowContextMenu = FlowContextMenuEvent & { localX: number; localY: nu
 export class FlowBuilderComponent implements OnChanges {
   @ViewChild(FlowCanvasComponent) canvas!: FlowCanvasComponent;
   @ViewChild('importInput') importInput?: ElementRef<HTMLInputElement>;
-  @ContentChildren(FlowNodeTemplateDirective) nodeTemplates!: QueryList<FlowNodeTemplateDirective>;
   @ContentChildren(FlowInspectorTemplateDirective) inspectorTemplates!: QueryList<FlowInspectorTemplateDirective>;
 
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -188,6 +187,9 @@ export class FlowBuilderComponent implements OnChanges {
   }
 
   isCommandVisible(cmd: FlowCommand): boolean {
+    if (!this.isCommandSupported(cmd)) {
+      return false;
+    }
     return !this.resolvedToolbar.commands?.length || this.resolvedToolbar.commands.includes(cmd);
   }
 
@@ -212,6 +214,34 @@ export class FlowBuilderComponent implements OnChanges {
         return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.deleteSelection && this.selectedIds.length > 0;
       case 'duplicateSelection':
         return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.duplicateSelection && this.selectedIds.length > 0;
+      case 'exportJson':
+      case 'importJson':
+        return !!this.resolvedCapabilities.importExport;
+      default:
+        return true;
+    }
+  }
+
+  private isCommandSupported(cmd: FlowCommand): boolean {
+    const commandOverrides = this.resolvedCapabilities.commands;
+    if (commandOverrides?.[cmd] === false) return false;
+
+    switch (cmd) {
+      case 'undo':
+      case 'redo':
+        return !!this.resolvedCapabilities.history;
+      case 'autoLayout':
+        return !!this.resolvedCapabilities.autoLayout;
+      case 'toggleNavigator':
+        return !!this.resolvedCapabilities.navigator;
+      case 'toggleInspector':
+        return !!this.resolvedCapabilities.inspector;
+      case 'fullscreen':
+        return !!this.resolvedCapabilities.fullscreen;
+      case 'deleteSelection':
+        return !!this.resolvedCapabilities.deleteSelection;
+      case 'duplicateSelection':
+        return !!this.resolvedCapabilities.duplicateSelection;
       case 'exportJson':
       case 'importJson':
         return !!this.resolvedCapabilities.importExport;
@@ -288,46 +318,6 @@ export class FlowBuilderComponent implements OnChanges {
 
   onNodeDrop(event: FlowNodeDropEvent): void {
     this.addNodeFromType(event.nodeType, event.x, event.y);
-  }
-
-  onAddNodeFromPort(event: { sourceNodeId: string; sourcePortId: string; nodeType: string }): void {
-    if (!this.value || this.resolvedMode !== 'edit') return;
-    const sourceNode = this.value.nodes.find(n => n.id === event.sourceNodeId);
-    if (!sourceNode) return;
-
-    const sourcePos = sourceNode.position ?? { x: 0, y: 0 };
-    const sourceSize = sourceNode.size ?? { width: 200, height: 70 };
-    const newX = sourcePos.x;
-    const newY = sourcePos.y + sourceSize.height + 80;
-
-    const typeDef = this.resolvedNodeTypes.find(t => t.type === event.nodeType);
-    if (!typeDef) return;
-
-    const size = typeDef.defaultSize ?? { width: 200, height: 70 };
-    const newNode: FlowNode = {
-      id: this.createNodeId(event.nodeType),
-      type: event.nodeType,
-      label: typeDef.label,
-      size,
-      position: { x: Math.round(newX + sourceSize.width / 2 - size.width / 2), y: Math.round(newY) },
-      data: typeof typeDef.defaultData === 'function' ? typeDef.defaultData() : { ...(typeDef.defaultData ?? {}) },
-    };
-
-    const newEdge: FlowEdge = {
-      id: `edge-${event.sourceNodeId}-${newNode.id}-${Date.now().toString(36)}`,
-      source: { nodeId: event.sourceNodeId, portId: event.sourcePortId },
-      target: { nodeId: newNode.id, portId: 'in' },
-    };
-
-    const updated: FlowDefinition = {
-      ...this.value,
-      nodes: [...this.value.nodes, newNode],
-      edges: [...this.value.edges, newEdge],
-    };
-
-    this.emitDefinition(updated, { command: 'deleteSelection' as any, payload: newNode.id });
-    this.selectSingle({ id: newNode.id, kind: 'node' });
-    this.scheduleCanvasFit();
   }
 
   executeCommand(cmd: FlowCommand): void {

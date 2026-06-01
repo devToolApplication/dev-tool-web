@@ -5,6 +5,7 @@ import {
   computeTranslateForLocalCenter,
   computeWheelZoomScale,
   computeZoomTransformAtLocalPoint,
+  resolvePaperViewportSize,
   resolveViewportSize,
 } from './joint-flow-viewport';
 
@@ -50,6 +51,16 @@ describe('joint flow viewport helpers', () => {
     );
 
     expect(size).toEqual({ width: 580, height: 520 });
+  });
+
+  it('uses the parent canvas size when the JointJS paper is stuck at a stale 1px size', () => {
+    const size = resolvePaperViewportSize(
+      { width: 1, height: 1 },
+      { width: 769, height: 433 },
+      { width: 1, height: 1 }
+    );
+
+    expect(size).toEqual({ width: 769, height: 433 });
   });
 
   it('falls back to the last measured size when current DOM size is transiently unavailable', () => {

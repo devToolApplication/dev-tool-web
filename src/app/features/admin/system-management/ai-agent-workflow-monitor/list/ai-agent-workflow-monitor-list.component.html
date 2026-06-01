@@ -1,0 +1,109 @@
+<div class="workflow-monitor-list">
+  <div class="page-header">
+    <h2>{{ 'systemManagement.aiAgentWorkflowMonitor.title' | translateContent }}</h2>
+    <div class="header-actions">
+      <div class="status-filter">
+        @for (opt of statusOptions; track opt.value) {
+          <app-button
+            [label]="opt.label"
+            [severity]="statusFilter() === opt.value ? null : 'secondary'"
+            [text]="statusFilter() !== opt.value"
+            (buttonClick)="onStatusFilterChange(opt.value)"
+          ></app-button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (isInboxMode()) {
+    <app-alert
+      variant="warning"
+      [message]="'systemManagement.aiAgentWorkflowMonitor.inbox.description'"
+      icon="pi pi-exclamation-triangle"
+    ></app-alert>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>{{ 'systemManagement.aiAgentWorkflowMonitor.loading' | translateContent }}</span>
+    </div>
+  } @else if (runs().length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-inbox"></i>
+      @if (isInboxMode()) {
+        <p>{{ 'systemManagement.aiAgentWorkflowMonitor.inbox.empty' | translateContent }}</p>
+      } @else {
+        <p>{{ 'systemManagement.aiAgentWorkflowMonitor.empty' | translateContent }}</p>
+      }
+    </div>
+  } @else {
+    <div class="runs-table">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.workflow' | translateContent }}</th>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.status' | translateContent }}</th>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.currentNode' | translateContent }}</th>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.started' | translateContent }}</th>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.duration' | translateContent }}</th>
+            <th>{{ 'systemManagement.aiAgentWorkflowMonitor.col.actions' | translateContent }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (run of runs(); track run.id) {
+            <tr
+              [class.action-required]="isActionRequired(run)"
+              (click)="openRunDetail(run)"
+            >
+              <td class="workflow-name">
+                <span class="run-id">{{ run.id | slice:0:8 }}...</span>
+                @if (run.workflowName) {
+                  <span class="wf-name">{{ run.workflowName }}</span>
+                }
+              </td>
+              <td>
+                <app-badge
+                  [label]="getStatusI18nKey(run.status)"
+                  [variant]="getStatusBadgeVariant(run.status)"
+                  [icon]="getStatusIcon(run.status)"
+                  size="sm"
+                ></app-badge>
+              </td>
+              <td class="current-node">
+                {{ run.currentNodeId || '-' }}
+              </td>
+              <td class="started-at">
+                {{ run.startedAt || '-' }}
+              </td>
+              <td class="duration">
+                @if (run.durationMs) {
+                  {{ (run.durationMs / 1000).toFixed(1) }}s
+                } @else {
+                  -
+                }
+              </td>
+              <td class="actions" (click)="$event.stopPropagation()">
+                @if (isActionRequired(run)) {
+                  <app-button
+                    [label]="'systemManagement.aiAgentWorkflowMonitor.action.review'"
+                    icon="pi pi-eye"
+                    severity="warn"
+                    (buttonClick)="openRunDetail(run)"
+                  ></app-button>
+                } @else {
+                  <app-button
+                    [label]="'systemManagement.aiAgentWorkflowMonitor.action.view'"
+                    icon="pi pi-arrow-right"
+                    severity="secondary"
+                    (buttonClick)="openRunDetail(run)"
+                  ></app-button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

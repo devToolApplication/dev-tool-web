@@ -1,0 +1,31 @@
+<div class="token-cache-debug">
+  <div class="header">
+    <h3>Token Cache Management</h3>
+    <p class="description">Clear cached service-to-service tokens. Use after changing roles on Keycloak.</p>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-danger" [disabled]="clearingAll" (click)="clearAll()">
+      <i class="pi pi-trash"></i>
+      {{ clearingAll ? 'Clearing...' : 'Clear All Caches' }}
+    </button>
+  </div>
+
+  <div class="target-list">
+    @for (target of targets; track target.label) {
+      <div class="target-item">
+        <div class="target-info">
+          <i class="pi pi-server"></i>
+          <span class="target-label">{{ target.label }}</span>
+        </div>
+        <button
+          class="btn btn-outline"
+          [disabled]="clearingTarget === target.label"
+          (click)="clearSingle(target)">
+          <i class="pi pi-refresh"></i>
+          {{ clearingTarget === target.label ? 'Clearing...' : 'Clear' }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -14,12 +14,11 @@ import {
   computeFitTransform,
   computeLocalCenter,
   computePanTranslate,
+  resolvePaperViewportSize,
   computeTranslateForLocalCenter,
   computeWheelZoomScale,
   computeZoomTransformAtLocalPoint,
-  resolveViewportSize,
 } from './joint-flow-viewport';
-import { CancelJointLinkDragInteraction, startJointLinkDragInteraction } from './joint-link-drag-interaction';
 
 export interface FlowEngineCallbacks {
   onNodeClick?: (nodeId: string) => void;
@@ -55,7 +54,6 @@ export class JointFlowEngine {
   private abortController = new AbortController();
   private lastClientWidth = 0;
   private lastClientHeight = 0;
-  private cancelActiveLinkDrag: CancelJointLinkDragInteraction | null = null;
   private readonly minScale = 0.3;
   private readonly maxScale = 3;
 
@@ -71,10 +69,14 @@ export class JointFlowEngine {
         ? false
         : { elementMove: true, linkMove: true, addLinkFromMagnet: true },
       defaultLink: () => this.createDefaultLink(),
-      validateConnection: (cellViewS, _magnetS, cellViewT, magnetT) => {
+      validateMagnet: (_cellView, magnet) => magnet.getAttribute('magnet') !== 'passive',
+      validateConnection: (cellViewS, magnetS, cellViewT, magnetT) => {
         if (cellViewS === cellViewT) return false;
+        const sourcePort = magnetS?.getAttribute('port') ?? magnetS?.getAttribute('port-id');
+        if (!sourcePort || sourcePort === 'in' || sourcePort.startsWith('in-')) return false;
+        if (!magnetT) return false;
         const targetPort = magnetT?.getAttribute('port') ?? magnetT?.getAttribute('port-id');
-        if (targetPort && targetPort !== 'in') return false;
+        if (targetPort !== 'in') return false;
         if (this.callbacks.validateConnection) {
           const sourceFlowId = this.findFlowNodeId(cellViewS.model.id as string);
           const targetFlowId = this.findFlowNodeId(cellViewT.model.id as string);
@@ -90,8 +92,6 @@ export class JointFlowEngine {
   }
 
   destroy(): void {
-    this.cancelActiveLinkDrag?.();
-    this.cancelActiveLinkDrag = null;
     if (this.viewportChangeFrame) cancelAnimationFrame(this.viewportChangeFrame);
     this.abortController.abort();
     this.paper.remove();
@@ -292,39 +292,6 @@ export class JointFlowEngine {
     this.scheduleViewportChange();
   }
 
-  startLinkFromPort(flowNodeId: string, portId: string, clientX: number, clientY: number): void {
-    this.cancelActiveLinkDrag?.();
-    this.cancelActiveLinkDrag = null;
-
-    const elId = this.nodeMap.get(flowNodeId);
-    if (!elId) return;
-    const el = this.graph.getCell(elId);
-    if (!el?.isElement()) return;
-
-    const elementView = this.paper.findViewByModel(el as joint.dia.Element) as joint.dia.ElementView | null;
-    if (!elementView) return;
-
-    const portEl = (elementView.el as SVGElement).querySelector(`[port="${portId}"]`);
-    if (!portEl) return;
-
-    this.cancelActiveLinkDrag = startJointLinkDragInteraction({
-      paper: this.paper,
-      elementView,
-      magnet: portEl as SVGElement,
-      clientX,
-      clientY,
-      onStart: () => {
-        this.options.el.classList.add('joint-link-dragging');
-        this.callbacks.onLinkDragStart?.();
-      },
-      onEnd: () => {
-        this.options.el.classList.remove('joint-link-dragging');
-        this.cancelActiveLinkDrag = null;
-        this.callbacks.onLinkDragEnd?.();
-      },
-    });
-  }
-
   scheduleViewportChange(): void {
     if (this.viewportChangeFrame) return;
     this.viewportChangeFrame = requestAnimationFrame(() => {
@@ -356,11 +323,15 @@ export class JointFlowEngine {
   }
 
   private measureViewportSize(): { width: number; height: number } {
-    return resolveViewportSize(
-      { width: this.options.el.clientWidth, height: this.options.el.clientHeight },
+    const parent = this.options.el.parentElement;
+    return resolvePaperViewportSize(
       {
-        width: this.options.el.parentElement?.clientWidth,
-        height: this.options.el.parentElement?.clientHeight,
+        width: this.options.el.clientWidth,
+        height: this.options.el.clientHeight,
+      },
+      {
+        width: parent?.clientWidth,
+        height: parent?.clientHeight,
       },
       { width: this.lastClientWidth, height: this.lastClientHeight }
     );
@@ -655,8 +626,6 @@ export class JointFlowEngine {
     if (!(target instanceof Element)) return false;
     if (target.closest([
       '.joint-cell',
-      '.flow-node-overlay',
-      '.flow-add-button',
       '[data-flow-node-no-drag]',
       'button',
       'input',

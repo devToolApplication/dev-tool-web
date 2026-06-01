@@ -17,7 +17,7 @@ export interface FlowCapabilities {
 export const DEFAULT_FLOW_CAPABILITIES: Required<Omit<FlowCapabilities, 'commands'>> = {
   history: true,
   importExport: true,
-  navigator: true,
+  navigator: false,
   inspector: true,
   fullscreen: true,
   autoLayout: true,
