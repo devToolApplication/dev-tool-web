@@ -12,7 +12,7 @@ export class ErrorPageComponent {
   @Input() title = '';
   @Input() description = '';
   @Input() actionLabel = 'errors.backToDashboard';
-  @Input() actionRouterLink: string | any[] = '/admin/dashboard';
+  @Input() actionRouterLink: string | any[] = '/admin/overview';
 
   @Output() actionClick = new EventEmitter<void>();
 }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permissionGuard } from '../../../core/auth/permission.guard';
 import { BacktestDetailComponent } from './pages/backtest/detail/backtest-detail.component';
 import { BacktestOverviewTabComponent } from './pages/backtest/detail/components/backtest-overview-tab/backtest-overview-tab.component';
 import { BacktestChartTabComponent } from './pages/backtest/detail/components/backtest-chart-tab/backtest-chart-tab.component';
@@ -64,24 +65,130 @@ export const TRADE_BOT_FEATURE_COMPONENTS = [
 
 export const tradeBotRoutes: Routes = [
   { path: 'admin/trade-bot', pathMatch: 'full', redirectTo: 'admin/trade-bot/dashboard' },
-  { path: 'admin/trade-bot/dashboard', component: TradingSystemDashboardComponent },
-  { path: 'admin/trade-bot/market-data', component: MarketDataComponent },
-  { path: 'admin/trade-bot/indicator-configs', component: IndicatorConfigListComponent },
-  { path: 'admin/trade-bot/indicator-configs/create', component: IndicatorConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/indicator-configs/edit/:id', component: IndicatorConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/rule-configs', component: RuleConfigListComponent },
-  { path: 'admin/trade-bot/rule-configs/create', component: RuleConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/rule-configs/edit/:id', component: RuleConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/strategy-configs', component: StrategyConfigListComponent },
-  { path: 'admin/trade-bot/strategy-configs/create', component: StrategyConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/strategy-configs/edit/:id', component: StrategyConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'admin/trade-bot/config-history/:type/:id', component: ConfigVersionHistoryComponent },
-  { path: 'admin/trade-bot/backtests', component: BacktestListComponent },
-  { path: 'admin/trade-bot/backtests/:runId/:reviewTab', component: BacktestDetailComponent },
-  { path: 'admin/trade-bot/backtests/:runId', component: BacktestDetailComponent },
-  { path: 'admin/trade-bot/sandbox', component: SandboxComponent },
-  { path: 'admin/trade-bot/replay', component: ReplayComponent },
-  { path: 'admin/trade-bot/paper-trade', component: PaperTradeComponent },
-  { path: 'admin/trade-bot/cache-monitor', component: CacheMonitorComponent },
-  { path: 'admin/trade-bot/system-logs', component: SystemLogsComponent }
+  {
+    path: 'admin/trade-bot/dashboard',
+    component: TradingSystemDashboardComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/market-data',
+    component: MarketDataComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/indicator-configs',
+    component: IndicatorConfigListComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_READ'] }
+  },
+  {
+    path: 'admin/trade-bot/indicator-configs/create',
+    component: IndicatorConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/indicator-configs/edit/:id',
+    component: IndicatorConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/rule-configs',
+    component: RuleConfigListComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_READ'] }
+  },
+  {
+    path: 'admin/trade-bot/rule-configs/create',
+    component: RuleConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/rule-configs/edit/:id',
+    component: RuleConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/strategy-configs',
+    component: StrategyConfigListComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_READ'] }
+  },
+  {
+    path: 'admin/trade-bot/strategy-configs/create',
+    component: StrategyConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/strategy-configs/edit/:id',
+    component: StrategyConfigFormComponent,
+    canActivate: [permissionGuard],
+    canDeactivate: [unsavedChangesGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/trade-bot/config-history/:type/:id',
+    component: ConfigVersionHistoryComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_READ'] }
+  },
+  {
+    path: 'admin/trade-bot/backtests',
+    component: BacktestListComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/backtests/:runId/:reviewTab',
+    component: BacktestDetailComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/backtests/:runId',
+    component: BacktestDetailComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/sandbox',
+    component: SandboxComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/replay',
+    component: ReplayComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/paper-trade',
+    component: PaperTradeComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/cache-monitor',
+    component: CacheMonitorComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  },
+  {
+    path: 'admin/trade-bot/system-logs',
+    component: SystemLogsComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_RUNTIME_OPERATE'] }
+  }
 ];

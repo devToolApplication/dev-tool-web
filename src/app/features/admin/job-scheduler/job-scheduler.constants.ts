@@ -6,8 +6,8 @@ import {
 } from './data-access/models/job-scheduler.model';
 
 export const JOB_SCHEDULER_ROUTES = {
-  list: '/admin/job-scheduler',
-  create: '/admin/job-scheduler/create'
+  list: '/admin/jobs',
+  create: '/admin/jobs/create'
 } as const;
 
 export const JOB_HTTP_METHOD_OPTIONS: { label: string; value: JobHttpMethod }[] = [

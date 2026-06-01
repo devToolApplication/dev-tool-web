@@ -126,7 +126,7 @@ export class UploadStorageFormComponent implements OnInit {
       next: () => {
         this.toastService.success(this.editId ? this.i18nService.t('uploadStorage.updateSuccess') : this.i18nService.t('uploadStorage.createSuccess'));
         this.crudPage?.markFormPristine();
-        void this.router.navigate(['/admin/upload-storage/storage']);
+        void this.router.navigate(['/admin/file-storage/repositories']);
       },
       error: () => this.toastService.error(this.i18nService.t('uploadStorage.saveError'))
     });
@@ -158,7 +158,7 @@ export class UploadStorageFormComponent implements OnInit {
       },
       error: () => {
         this.toastService.error(this.i18nService.t('uploadStorage.detailError'));
-        void this.router.navigate(['/admin/upload-storage/storage']);
+        void this.router.navigate(['/admin/file-storage/repositories']);
       }
     });
   }

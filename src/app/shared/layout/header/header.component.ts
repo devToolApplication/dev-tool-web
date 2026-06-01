@@ -33,7 +33,7 @@ export class HeaderComponent implements OnInit {
 
   readonly homeItem: MenuItemType = {
     icon: 'pi pi-home',
-    routerLink: '/admin/dashboard'
+    routerLink: '/admin/overview'
   };
   readonly pageTitle = signal('layout.brandName');
   readonly userDisplayName = signal('layout.userUnknown');

@@ -6,102 +6,85 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     icon: 'pi pi-home',
     groupColor: '#7a77ff',
     items: [
-      { label: 'layout.menu.dashboard', icon: 'pi pi-gauge', routerLink: '/admin/dashboard' }
-    ]
-  },
-
-  {
-    label: 'layout.menu.systemConfigs',
-    icon: 'pi pi-cog',
-    groupColor: '#b37dff',
-    items: [
       {
-        label: 'layout.menu.tradingConfigs',
-        icon: 'pi pi-chart-line',
-        items: [
-          { label: 'layout.menu.indicatorConfigs', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/indicator-configs' },
-          { label: 'layout.menu.ruleConfigs', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/rule-configs' },
-          { label: 'layout.menu.strategyConfigs', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs' }
-        ]
-      },
-      {
-        label: 'layout.menu.aiAgentPlatform',
-        icon: 'pi pi-sparkles',
-        items: [
-          { label: 'layout.menu.aiAgentExecution', icon: 'pi pi-play', routerLink: '/admin/system-management/ai-agent-execution' },
-          { label: 'layout.menu.aiAgentModels', icon: 'pi pi-server', routerLink: '/admin/system-management/ai-agent-models' },
-          { label: 'layout.menu.aiAgentAccounts', icon: 'pi pi-key', routerLink: '/admin/system-management/ai-agent-accounts' },
-          { label: 'layout.menu.aiAgentAuthProfiles', icon: 'pi pi-shield', routerLink: '/admin/system-management/ai-agent-auth-profiles' },
-          { label: 'layout.menu.aiAgentWorkflowBuilder', icon: 'pi pi-sitemap', routerLink: '/admin/system-management/ai-agent-workflow-builder' },
-          { label: 'layout.menu.aiAgentWorkflowMonitor', icon: 'pi pi-eye', routerLink: '/admin/system-management/ai-agent-workflow-monitor' },
-          { label: 'layout.menu.aiAgentCrawlers', icon: 'pi pi-search', routerLink: '/admin/system-management/ai-agent-crawlers' },
-          { label: 'layout.menu.aiAgents', icon: 'pi pi-user', routerLink: '/admin/system-management/ai-agents' }
-        ]
-      },
-      {
-        label: 'layout.menu.generalConfigs',
-        icon: 'pi pi-sliders-h',
-        items: [
-          { label: 'layout.menu.jobScheduler', icon: 'pi pi-clock', routerLink: '/admin/job-scheduler' },
-          { label: 'layout.menu.dataForms', icon: 'pi pi-file-edit', routerLink: '/admin/data-forms/create', permissions: ['FORM_CONFIG_CREATE'] },
-          { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-configs' },
-          { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-configs' },
-          { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-configs' },
-          { label: 'layout.menu.tokenCache', icon: 'pi pi-sync', routerLink: '/admin/system-management/token-cache' }
-        ]
-      },
-      {
-        label: 'layout.menu.secretManagement',
-        icon: 'pi pi-key',
-        items: [
-          { label: 'layout.menu.storageSystem', icon: 'pi pi-database', routerLink: '/admin/system-management/storage-secrets' },
-          { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-sparkles', routerLink: '/admin/system-management/ai-agent-secrets' },
-          { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-chart-line', routerLink: '/admin/system-management/trade-bot-secrets' }
-        ]
+        label: 'layout.menu.overview',
+        icon: 'pi pi-gauge',
+        routerLink: '/admin/overview',
+        permissions: ['ADMIN_OVERVIEW_READ']
       }
     ]
   },
   {
-    label: 'layout.menu.serviceManagement',
-    icon: 'pi pi-th-large',
+    label: 'layout.menu.aiAgentPlatform',
+    icon: 'pi pi-sparkles',
+    groupColor: '#9333ea',
+    items: [
+      { label: 'layout.menu.aiAgentExecution', icon: 'pi pi-play', routerLink: '/admin/ai-agent/execution', permissions: ['AI_AGENT_EXECUTE'] },
+      { label: 'layout.menu.aiAgentWorkflowBuilder', icon: 'pi pi-sitemap', routerLink: '/admin/ai-agent/workflows', permissions: ['AI_AGENT_WORKFLOW_WRITE'] },
+      { label: 'layout.menu.aiAgentWorkflowMonitor', icon: 'pi pi-eye', routerLink: '/admin/ai-agent/workflow-runs', permissions: ['AI_AGENT_WORKFLOW_REVIEW'] },
+      { label: 'layout.menu.aiAgents', icon: 'pi pi-user', routerLink: '/admin/ai-agent/agents', permissions: ['AI_AGENT_READ'] },
+      { label: 'layout.menu.aiAgentCrawlers', icon: 'pi pi-search', routerLink: '/admin/ai-agent/crawlers', permissions: ['AI_AGENT_READ'] },
+      { label: 'layout.menu.aiAgentModels', icon: 'pi pi-server', routerLink: '/admin/ai-agent/models', permissions: ['AI_AGENT_READ'] },
+      { label: 'layout.menu.aiAgentAuthProfiles', icon: 'pi pi-shield', routerLink: '/admin/ai-agent/auth-profiles', permissions: ['AI_AGENT_READ'] },
+      { label: 'layout.menu.aiAgentAccounts', icon: 'pi pi-key', routerLink: '/admin/ai-agent/accounts', permissions: ['AI_AGENT_READ'] },
+      { label: 'layout.menu.aiAgentSystem', icon: 'pi pi-cog', routerLink: '/admin/ai-agent/configs', permissions: ['AI_AGENT_CONFIG_WRITE'] },
+      { label: 'layout.menu.secretManagement', icon: 'pi pi-lock', routerLink: '/admin/ai-agent/secrets', permissions: ['AI_AGENT_SECRET_WRITE'] }
+    ]
+  },
+  {
+    label: 'layout.menu.tradeBotManagement',
+    icon: 'pi pi-chart-line',
     groupColor: '#f97316',
     items: [
-      {
-        label: 'layout.menu.tradeBotManagement',
-        icon: 'pi pi-chart-line',
-        items: [
-          { label: 'layout.menu.tradingDashboard', icon: 'pi pi-gauge', routerLink: '/admin/trade-bot/dashboard' },
-          { label: 'layout.menu.marketData', icon: 'pi pi-database', routerLink: '/admin/trade-bot/market-data' },
-          { label: 'layout.menu.backtests', icon: 'pi pi-history', routerLink: '/admin/trade-bot/backtests' },
-          { label: 'layout.menu.paperTrade', icon: 'pi pi-wallet', routerLink: '/admin/trade-bot/paper-trade' },
-          { label: 'layout.menu.replay', icon: 'pi pi-play-circle', routerLink: '/admin/trade-bot/replay' },
-          { label: 'layout.menu.sandbox', icon: 'pi pi-bolt', routerLink: '/admin/trade-bot/sandbox' },
-          { label: 'layout.menu.cacheMonitor', icon: 'pi pi-server', routerLink: '/admin/trade-bot/cache-monitor' },
-          { label: 'layout.menu.systemLogs', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/system-logs' }
-        ]
-      },
-      {
-        label: 'layout.menu.fileStorageManagement',
-        icon: 'pi pi-cloud-upload',
-        items: [
-          { label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/upload-storage/storage' },
-          { label: 'layout.menu.uploadedFiles', icon: 'pi pi-file', routerLink: '/admin/upload-storage/files' },
-          { label: 'layout.menu.fileUpload', icon: 'pi pi-upload', routerLink: '/admin/system-management/file-upload' }
-        ]
-      }
+      { label: 'layout.menu.tradingDashboard', icon: 'pi pi-gauge', routerLink: '/admin/trade-bot/dashboard', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.marketData', icon: 'pi pi-database', routerLink: '/admin/trade-bot/market-data', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.indicatorConfigs', icon: 'pi pi-chart-bar', routerLink: '/admin/trade-bot/indicator-configs', permissions: ['TRADE_BOT_READ'] },
+      { label: 'layout.menu.ruleConfigs', icon: 'pi pi-sitemap', routerLink: '/admin/trade-bot/rule-configs', permissions: ['TRADE_BOT_READ'] },
+      { label: 'layout.menu.strategyConfigs', icon: 'pi pi-sliders-h', routerLink: '/admin/trade-bot/strategy-configs', permissions: ['TRADE_BOT_READ'] },
+      { label: 'layout.menu.backtests', icon: 'pi pi-history', routerLink: '/admin/trade-bot/backtests', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.paperTrade', icon: 'pi pi-wallet', routerLink: '/admin/trade-bot/paper-trade', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.replay', icon: 'pi pi-play-circle', routerLink: '/admin/trade-bot/replay', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.sandbox', icon: 'pi pi-bolt', routerLink: '/admin/trade-bot/sandbox', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.cacheMonitor', icon: 'pi pi-server', routerLink: '/admin/trade-bot/cache-monitor', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.systemLogs', icon: 'pi pi-list-check', routerLink: '/admin/trade-bot/system-logs', permissions: ['TRADE_BOT_RUNTIME_OPERATE'] },
+      { label: 'layout.menu.tradeBotSystem', icon: 'pi pi-cog', routerLink: '/admin/trade-bot/configs', permissions: ['TRADE_BOT_CONFIG_WRITE'] },
+      { label: 'layout.menu.secretManagement', icon: 'pi pi-lock', routerLink: '/admin/trade-bot/secrets', permissions: ['TRADE_BOT_SECRET_WRITE'] }
     ]
   },
   {
-    label: 'layout.menu.aiSystem',
-    icon: 'pi pi-microchip-ai',
-    groupColor: '#9333ea',
-    hidden: true,
+    label: 'layout.menu.fileStorageManagement',
+    icon: 'pi pi-cloud-upload',
+    groupColor: '#0ea5e9',
     items: [
-      {
-        label: 'layout.menu.mcpClient',
-        icon: 'pi pi-desktop',
-        routerLink: '/ai-system/mcp-client'
-      }
+      { label: 'layout.menu.storageRepository', icon: 'pi pi-database', routerLink: '/admin/file-storage/repositories', permissions: ['FILE_STORAGE_READ'] },
+      { label: 'layout.menu.uploadedFiles', icon: 'pi pi-file', routerLink: '/admin/file-storage/files', permissions: ['FILE_STORAGE_READ'] },
+      { label: 'layout.menu.storageSystem', icon: 'pi pi-cog', routerLink: '/admin/file-storage/configs', permissions: ['FILE_STORAGE_CONFIG_WRITE'] },
+      { label: 'layout.menu.secretManagement', icon: 'pi pi-lock', routerLink: '/admin/file-storage/secrets', permissions: ['FILE_STORAGE_SECRET_WRITE'] }
+    ]
+  },
+  {
+    label: 'layout.menu.jobScheduler',
+    icon: 'pi pi-clock',
+    groupColor: '#22c55e',
+    items: [
+      { label: 'layout.menu.jobScheduler', icon: 'pi pi-clock', routerLink: '/admin/jobs', permissions: ['JOB_SCHEDULER_READ'] }
+    ]
+  },
+  {
+    label: 'layout.menu.dataForms',
+    icon: 'pi pi-file-edit',
+    groupColor: '#14b8a6',
+    items: [
+      { label: 'layout.menu.dataForms', icon: 'pi pi-file-edit', routerLink: '/admin/data-forms', permissions: ['DATA_FORM_READ'] }
+    ]
+  },
+  {
+    label: 'layout.menu.devtools',
+    icon: 'pi pi-wrench',
+    groupColor: '#64748b',
+    items: [
+      { label: 'layout.menu.fileUpload', icon: 'pi pi-upload', routerLink: '/admin/devtools/file-upload', permissions: ['DEVTOOLS_OPERATE'] },
+      { label: 'layout.menu.tokenCache', icon: 'pi pi-sync', routerLink: '/admin/devtools/token-cache', permissions: ['DEVTOOLS_OPERATE'] }
     ]
   }
 ];

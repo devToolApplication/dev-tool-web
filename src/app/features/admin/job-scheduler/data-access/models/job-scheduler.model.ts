@@ -1,7 +1,7 @@
 import { BasePageResponse } from '../../../../../core/models/base-response.model';
 
 export type JobHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-export type JobAuthType = 'NONE' | 'BASIC' | 'API_KEY' | 'KEYCLOAK_CLIENT_CREDENTIALS';
+export type JobAuthType = 'NONE' | 'BASIC' | 'API_KEY' | 'KEYCLOAK_CLIENT_CREDENTIALS' | 'SECRET_REF';
 export type JobRunStatus = 'RUNNING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
 export type JobTriggerType = 'SCHEDULED' | 'MANUAL';
 
@@ -33,6 +33,7 @@ export interface JobAuthConfig {
     headerName?: string;
     headerPrefix?: string;
   };
+  secretCode?: string;
 }
 
 export interface JobConfigResponse {

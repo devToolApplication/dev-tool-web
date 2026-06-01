@@ -14,16 +14,16 @@ describe('SideMenuComponent', () => {
     {
       label: 'Operations',
       items: [
-        { label: 'Dashboard', icon: 'pi pi-gauge', routerLink: '/admin/dashboard' },
+        { label: 'Overview', icon: 'pi pi-gauge', routerLink: '/admin/overview' },
         { label: 'Models', icon: 'pi pi-microchip-ai', routerLink: '/admin/ai-agent/models' },
-        { label: 'Data Forms', icon: 'pi pi-file-edit', routerLink: '/admin/data-forms/create', permissions: ['FORM_CONFIG_CREATE'] }
+        { label: 'Data Forms', icon: 'pi pi-file-edit', routerLink: '/admin/data-forms', permissions: ['DATA_FORM_READ'] }
       ]
     }
   ];
 
   beforeEach(async () => {
     permissionService = {
-      hasAll: vi.fn((permissions: readonly string[]) => permissions.includes('FORM_CONFIG_CREATE'))
+      hasAll: vi.fn((permissions: readonly string[]) => permissions.includes('DATA_FORM_READ'))
     };
 
     localStorage.clear();
@@ -45,27 +45,27 @@ describe('SideMenuComponent', () => {
     permissionService.hasAll.mockReturnValue(false);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Dashboard');
+    expect(fixture.nativeElement.textContent).toContain('Overview');
     expect(fixture.nativeElement.textContent).toContain('Models');
     expect(fixture.nativeElement.textContent).not.toContain('Data Forms');
 
     component.onSearchChange('models');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).not.toContain('Dashboard');
+    expect(fixture.nativeElement.textContent).not.toContain('Overview');
     expect(fixture.nativeElement.textContent).toContain('Models');
   });
 
   it('keeps collapsed menu usable with active state and tooltips', () => {
     component.collapsed = true;
-    component.currentUrl.set('/admin/dashboard');
+    component.currentUrl.set('/admin/overview');
     fixture.detectChanges();
 
     const sidebar: HTMLElement = fixture.nativeElement.querySelector('.sidebar');
     const activeLink: HTMLAnchorElement = fixture.nativeElement.querySelector('a.menu-link.active');
 
     expect(sidebar.classList).toContain('sidebar--collapsed');
-    expect(activeLink?.getAttribute('title')).toBe('Dashboard');
+    expect(activeLink?.getAttribute('title')).toBe('Overview');
     expect(activeLink?.getAttribute('aria-current')).toBe('page');
   });
 });

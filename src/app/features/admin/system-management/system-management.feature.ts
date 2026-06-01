@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
+import { permissionGuard } from '../../../core/auth/permission.guard';
 import { FileUploadDebugComponent } from './debug-tools/file-upload-debug/file-upload-debug.component';
 import { TokenCacheDebugComponent } from './debug-tools/token-cache-debug/token-cache-debug.component';
 import { AiAgentConfigFormComponent } from './general-config/ai-agent-system/form/ai-agent-config-form.component';
@@ -68,118 +69,154 @@ export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
 ];
 
 export const systemManagementRoutes: Routes = [
+  // AI Agent routes
   {
-    path: 'admin/system-management/storage-secrets',
-    children: [
-      { path: '', component: StorageSecretListComponent },
-      { path: 'create', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
+    path: 'admin/ai-agent/execution',
+    component: AiAgentExecutionComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_EXECUTE'] }
   },
   {
-    path: 'admin/system-management/storage-configs',
-    children: [
-      { path: '', component: StorageConfigListComponent },
-      { path: 'create', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agent-secrets',
-    children: [
-      { path: '', component: AiAgentSecretListComponent },
-      { path: 'create', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/trade-bot-secrets',
-    children: [
-      { path: '', component: TradeBotSecretListComponent },
-      { path: 'create', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agent-configs',
-    children: [
-      { path: '', component: AiAgentConfigListComponent },
-      { path: 'create', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agent-models',
+    path: 'admin/ai-agent/models',
     children: [
       { path: '', component: AiAgentModelListComponent },
       { path: 'create', component: AiAgentModelFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: AiAgentModelFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_READ'] }
   },
   {
-    path: 'admin/system-management/ai-agent-crawlers',
-    children: [
-      { path: '', component: AiAgentCrawlerListComponent },
-      { path: 'create', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agents',
-    children: [
-      { path: '', component: AiAgentCatalogListComponent },
-      { path: 'create', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] },
-      { path: 'edit/:id', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agent-auth-profiles',
+    path: 'admin/ai-agent/auth-profiles',
     children: [
       { path: '', component: AiAgentAuthProfileListComponent },
       { path: 'create', component: AiAgentAuthProfileFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: AiAgentAuthProfileFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_READ'] }
   },
   {
-    path: 'admin/system-management/ai-agent-accounts',
+    path: 'admin/ai-agent/accounts',
     children: [
       { path: '', component: AiAgentAccountListComponent },
       { path: 'create', component: AiAgentAccountFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: AiAgentAccountFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_READ'] }
   },
   {
-    path: 'admin/system-management/file-upload',
-    component: FileUploadDebugComponent
+    path: 'admin/ai-agent/workflows',
+    children: [
+      { path: '', component: AiAgentWorkflowListComponent },
+      { path: 'canvas/:id', component: AiAgentWorkflowCanvasComponent }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_WORKFLOW_WRITE'] }
   },
   {
-    path: 'admin/system-management/token-cache',
-    component: TokenCacheDebugComponent
+    path: 'admin/ai-agent/workflow-runs',
+    children: [
+      { path: '', component: AiAgentWorkflowMonitorListComponent },
+      { path: 'detail/:id', component: AiAgentWorkflowMonitorDetailComponent }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_WORKFLOW_REVIEW'] }
   },
   {
-    path: 'admin/system-management/trade-bot-configs',
+    path: 'admin/ai-agent/crawlers',
+    children: [
+      { path: '', component: AiAgentCrawlerListComponent },
+      { path: 'create', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentCrawlerFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_READ'] }
+  },
+  {
+    path: 'admin/ai-agent/agents',
+    children: [
+      { path: '', component: AiAgentCatalogListComponent },
+      { path: 'create', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentCatalogFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_READ'] }
+  },
+  {
+    path: 'admin/ai-agent/configs',
+    children: [
+      { path: '', component: AiAgentConfigListComponent },
+      { path: 'create', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/ai-agent/secrets',
+    children: [
+      { path: '', component: AiAgentSecretListComponent },
+      { path: 'create', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['AI_AGENT_SECRET_WRITE'] }
+  },
+  // File Storage config/secrets
+  {
+    path: 'admin/file-storage/configs',
+    children: [
+      { path: '', component: StorageConfigListComponent },
+      { path: 'create', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: StorageConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['FILE_STORAGE_CONFIG_WRITE'] }
+  },
+  {
+    path: 'admin/file-storage/secrets',
+    children: [
+      { path: '', component: StorageSecretListComponent },
+      { path: 'create', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['FILE_STORAGE_SECRET_WRITE'] }
+  },
+  // Trade Bot config/secrets
+  {
+    path: 'admin/trade-bot/configs',
     children: [
       { path: '', component: TradeBotConfigListComponent },
       { path: 'create', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: TradeBotConfigFormComponent, canDeactivate: [unsavedChangesGuard] }
-    ]
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_CONFIG_WRITE'] }
   },
   {
-    path: 'admin/system-management/ai-agent-workflow-builder',
+    path: 'admin/trade-bot/secrets',
     children: [
-      { path: '', component: AiAgentWorkflowListComponent },
-      { path: 'canvas/:id', component: AiAgentWorkflowCanvasComponent }
-    ]
+      { path: '', component: TradeBotSecretListComponent },
+      { path: 'create', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
+      { path: 'edit/:id', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
+    ],
+    canActivate: [permissionGuard],
+    data: { permissions: ['TRADE_BOT_SECRET_WRITE'] }
+  },
+  // Devtools
+  {
+    path: 'admin/devtools/file-upload',
+    component: FileUploadDebugComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['DEVTOOLS_OPERATE'] }
   },
   {
-    path: 'admin/system-management/ai-agent-workflow-monitor',
-    children: [
-      { path: '', component: AiAgentWorkflowMonitorListComponent },
-      { path: 'detail/:id', component: AiAgentWorkflowMonitorDetailComponent }
-    ]
-  },
-  {
-    path: 'admin/system-management/ai-agent-execution',
-    component: AiAgentExecutionComponent
+    path: 'admin/devtools/token-cache',
+    component: TokenCacheDebugComponent,
+    canActivate: [permissionGuard],
+    data: { permissions: ['DEVTOOLS_OPERATE'] }
   }
 ];

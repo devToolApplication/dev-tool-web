@@ -76,7 +76,7 @@ export class BaseLayoutComponent implements OnInit {
   }
 
   private updatePageWrapper(url: string): void {
-    this.usePageWrapper.set(!url.startsWith('/admin/dashboard'));
+    this.usePageWrapper.set(!url.startsWith('/admin/overview'));
   }
 
   private readStoredBoolean(key: string): boolean {

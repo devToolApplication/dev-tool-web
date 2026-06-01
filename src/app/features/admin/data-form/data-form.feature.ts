@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
-import { FeaturePlaceholderComponent } from '../../feature-placeholder/feature-placeholder.component';
 import { permissionGuard } from '../../../core/auth/permission.guard';
 import { unsavedChangesGuard } from '../../../shared/ui/form-input/unsaved-changes.guard';
 import { CreateDataFormPageComponent } from './create/create-data-form-page.component';
 import { DataFormValidationPanelComponent } from './create/components/data-form-validation-panel/data-form-validation-panel.component';
 import { DataFormPermissionSectionComponent } from './create/components/data-form-permission-section/data-form-permission-section.component';
+import { DataFormListComponent } from './list/data-form-list.component';
 
 export const DATA_FORM_FEATURE_COMPONENTS = [
+  DataFormListComponent,
   CreateDataFormPageComponent,
   DataFormValidationPanelComponent,
   DataFormPermissionSectionComponent
@@ -19,11 +20,9 @@ export const dataFormRoutes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        component: FeaturePlaceholderComponent,
-        data: {
-          title: 'dataForm.list.title',
-          description: 'dataForm.list.description'
-        }
+        component: DataFormListComponent,
+        canActivate: [permissionGuard],
+        data: { permissions: ['DATA_FORM_READ'] }
       },
       {
         path: 'create',

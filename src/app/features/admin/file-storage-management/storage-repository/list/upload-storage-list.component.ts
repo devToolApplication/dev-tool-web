@@ -151,7 +151,7 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
   }
 
   goCreate(): void {
-    void this.router.navigate(['/admin/upload-storage/storage/create']);
+    void this.router.navigate(['/admin/file-storage/repositories/create']);
   }
 
   removeSelected(): void {
@@ -180,7 +180,7 @@ export class UploadStorageListComponent extends BasePagedList<UploadStorageRespo
   }
 
   private goEdit(id: string): void {
-    void this.router.navigate(['/admin/upload-storage/storage/edit', id]);
+    void this.router.navigate(['/admin/file-storage/repositories/edit', id]);
   }
 
   private removeById(id: string): void {

@@ -58,7 +58,7 @@ const FEATURE_ROUTES: Routes = [
   ...tradeBotRoutes,
   ...dataFormRoutes,
   ...errorRoutes,
-  { path: '', pathMatch: 'full', redirectTo: 'admin/dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'admin/overview' },
   { path: '**', redirectTo: '404' }
 ];
 

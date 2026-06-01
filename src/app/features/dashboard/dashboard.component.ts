@@ -158,18 +158,18 @@ export class DashboardComponent implements OnInit {
     }
 
     if (action.id === 'pending-reviews') {
-      void this.router.navigate(['/admin/system-management/ai-agent-workflow-monitor'], {
+      void this.router.navigate(['/admin/ai-agent/workflow-runs'], {
         queryParams: { status: 'WAITING_REVIEW' }
       });
       return;
     }
 
     const routes: Record<string, string> = {
-      'ai-playground': '/admin/system-management/ai-agent-execution',
-      'execution-traces': '/admin/system-management/ai-agent-workflow-monitor',
-      'ai-models': '/admin/system-management/ai-agent-models',
-      'storage-repository': '/admin/upload-storage/storage',
-      'uploaded-files': '/admin/upload-storage/files'
+      'ai-playground': '/admin/ai-agent/execution',
+      'execution-traces': '/admin/ai-agent/workflow-runs',
+      'ai-models': '/admin/ai-agent/models',
+      'storage-repository': '/admin/file-storage/repositories',
+      'uploaded-files': '/admin/file-storage/files'
     };
     const route = routes[action.id];
     if (route) {
@@ -179,15 +179,15 @@ export class DashboardComponent implements OnInit {
 
   metricRouterLink(tab: DashboardTabType, metric: DashboardMetric): string {
     if (tab === 'file-storage') {
-      return '/admin/upload-storage/files';
+      return '/admin/file-storage/files';
     }
 
     const severity = String(metric.severity ?? '').toLowerCase();
     if (['danger', 'warning', 'action-required', 'failed', 'error'].includes(severity)) {
-      return '/admin/system-management/ai-agent-workflow-monitor';
+      return '/admin/ai-agent/workflow-runs';
     }
 
-    return '/admin/system-management/ai-agent-execution';
+    return '/admin/ai-agent/execution';
   }
 
   metricQueryParams(tab: DashboardTabType, metric: DashboardMetric): Record<string, string> | undefined {

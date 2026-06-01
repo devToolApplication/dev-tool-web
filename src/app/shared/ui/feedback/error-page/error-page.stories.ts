@@ -12,7 +12,7 @@ const meta: Meta<ErrorPageComponent> = {
     title: 'errors.notFound.title',
     description: 'errors.notFound.description',
     actionLabel: 'errors.backToDashboard',
-    actionRouterLink: '/admin/dashboard'
+    actionRouterLink: '/admin/overview'
   }
 };
 
