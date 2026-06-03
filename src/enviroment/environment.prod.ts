@@ -1,6 +1,7 @@
 export const environment = {
   applicationName: 'Hệ thống hỗ trợ dev',
   production: true,
+  dangerouslySkipPermissions: false,
   keycloak: {
     enabled: true,
     url: 'https://keycloak.103.77.243.66.nip.io',

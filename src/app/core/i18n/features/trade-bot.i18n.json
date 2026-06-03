@@ -227,6 +227,7 @@
     "tradeBot.chart.overlay.takeProfit": "TP",
     "tradeBot.chart.overlay.indicators": "Indicator",
     "tradeBot.chart.overlay.failedEntries": "Entry lỗi",
+    "tradeBot.chart.overlay.rules": "Rule",
     "tradeBot.chart.state.loading": "Đang tải chart",
     "tradeBot.chart.state.empty": "Không có dữ liệu chart",
     "tradeBot.status.active": "Hoạt động",
@@ -875,6 +876,7 @@
     "tradeBot.chart.overlay.takeProfit": "TP",
     "tradeBot.chart.overlay.indicators": "Indicators",
     "tradeBot.chart.overlay.failedEntries": "Failed Entries",
+    "tradeBot.chart.overlay.rules": "Rules",
     "tradeBot.chart.state.loading": "Loading chart",
     "tradeBot.chart.state.empty": "No chart data",
     "tradeBot.status.active": "Active",
@@ -1291,6 +1293,8 @@
     "tradeBot.validation.duplicateChildRules": "Duplicate child rules are not allowed",
     "tradeBot.validation.invalidChildRules": "Child rules are invalid",
     "tradeBot.validation.selfChildRule": "The current rule cannot be selected as a child",
-    "tradeBot.validation.inactiveChildRule": "Child rule is inactive or disabled"
+    "tradeBot.validation.inactiveChildRule": "Child rule is inactive or disabled",
+    "tradeBot.ruleExpression.viewFlow": "View Flow",
+    "tradeBot.ruleExpression.viewTree": "View Tree"
   }
 }

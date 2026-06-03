@@ -77,6 +77,7 @@ export class BacktestListComponent implements OnInit {
         minWidth: '10rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [{ label: 'tradeBot.action.detail', icon: 'pi pi-eye', severity: 'info', onClick: (row) => this.openDetail(row.runId) }]
       }
     ],

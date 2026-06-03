@@ -5,6 +5,7 @@ import { I18nService } from '../../../../../core/ui-services/i18n.service';
 import {
   TableAction,
   TableBulkAction,
+  TableColumn,
   TableConfig,
   TableDensity,
   TableExportScope,
@@ -267,6 +268,22 @@ export class TableComponent implements OnChanges {
 
   get tableMinWidth(): string {
     return this.config.minWidth ?? '64rem';
+  }
+
+  isFrozenLeft(column: TableColumn): boolean {
+    return column.frozen === true && this.frozenAlign(column) === 'left';
+  }
+
+  isFrozenRight(column: TableColumn): boolean {
+    return column.frozen === true && this.frozenAlign(column) === 'right';
+  }
+
+  frozenLeft(column: TableColumn): string | null {
+    return this.isFrozenLeft(column) ? this.frozenOffset(column, 'left') : null;
+  }
+
+  frozenRight(column: TableColumn): string | null {
+    return this.isFrozenRight(column) ? this.frozenOffset(column, 'right') : null;
   }
 
   isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean {
@@ -551,6 +568,32 @@ export class TableComponent implements OnChanges {
     return this.config.columns
       .filter((column) => column.visible !== false && column.hideable !== false)
       .map((column) => column.field);
+  }
+
+  private frozenAlign(column: TableColumn): 'left' | 'right' {
+    return column.alignFrozen ?? 'left';
+  }
+
+  private frozenOffset(column: TableColumn, align: 'left' | 'right'): string {
+    const columnIndex = this.visibleColumns.indexOf(column);
+    if (columnIndex < 0) {
+      return '0';
+    }
+
+    const offsetColumns =
+      align === 'left'
+        ? this.visibleColumns.slice(0, columnIndex)
+        : this.visibleColumns.slice(columnIndex + 1);
+    const sizes = offsetColumns
+      .filter((item) => item.frozen === true && this.frozenAlign(item) === align)
+      .map((item) => item.width ?? item.minWidth)
+      .filter((size): size is string => !!size);
+
+    if (sizes.length === 0) {
+      return '0';
+    }
+
+    return sizes.length === 1 ? sizes[0] : `calc(${sizes.join(' + ')})`;
   }
 
   private countActiveFilters(filters: Record<string, any>): number {

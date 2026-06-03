@@ -1,6 +1,13 @@
 import { FlowNode, FlowNodeTypeDefinition } from '../../../../../shared/ui/flow-builder/models';
-import type { FieldConfig, FormConfig, SelectOption } from '../../../../../shared/ui/form-input/models/form-config.model';
-import type { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
+import type {
+  FieldConfig,
+  FormConfig,
+  SelectOption,
+} from '../../../../../shared/ui/form-input/models/form-config.model';
+import type {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../data-access/models/trading-system.model';
 import {
   RULE_EXPRESSION_BOOLEAN_OPTIONS,
   RULE_EXPRESSION_CONSTANT_TYPES,
@@ -8,13 +15,11 @@ import {
   RULE_EXPRESSION_PRICE_SERIES,
   defaultParamsForOperator,
   operatorDefinition,
-} from '../rule-expression-builder/rule-expression-operators';
-import { printRuleExpressionOperand } from '../rule-expression-builder/rule-expression-printer';
-import type {
+  printRuleExpressionOperand,
   RuleExpressionConditionOperator,
   RuleExpressionOperand,
   RuleExpressionOperandValueType,
-} from '../rule-expression-builder/rule-expression.models';
+} from '../rule-expression-builder/domain';
 
 export interface RuleFlowNodeTypeCatalogOptions {
   indicatorConfigs?: IndicatorConfigResponse[];
@@ -22,7 +27,9 @@ export interface RuleFlowNodeTypeCatalogOptions {
   currentRuleId?: string | null;
 }
 
-export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions = {}): FlowNodeTypeDefinition[] {
+export function buildRuleFlowNodeTypes(
+  options: RuleFlowNodeTypeCatalogOptions = {},
+): FlowNodeTypeDefinition[] {
   return [
     {
       type: 'rule-group',
@@ -43,7 +50,7 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowMove: true,
       labelResolver: (node) => String(node.data?.['operator'] ?? 'GROUP'),
       subtitleResolver: () => 'Boolean group',
-      badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : null,
+      badgeResolver: (node) => (node.disabled ? { label: 'OFF', tone: 'muted' } : null),
       inspectorForm: groupInspectorForm(),
     },
     {
@@ -59,9 +66,7 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       },
       icon: 'pi pi-code-branch',
       tone: 'warning',
-      ports: [
-        { id: 'in', group: 'in', position: 'top' },
-      ],
+      ports: [{ id: 'in', group: 'in', position: 'top' }],
       allowConnectFrom: false,
       allowConnectTo: true,
       allowDelete: true,
@@ -79,16 +84,16 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       defaultSize: { width: 340, height: 72 },
       icon: 'pi pi-share-alt',
       tone: 'primary',
-      ports: [
-        { id: 'in', group: 'in', position: 'top' },
-      ],
+      ports: [{ id: 'in', group: 'in', position: 'top' }],
       allowConnectFrom: false,
       allowConnectTo: true,
       allowDelete: true,
       allowMove: true,
-      labelResolver: (node) => node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?',
+      labelResolver: (node) =>
+        node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?',
       subtitleResolver: () => 'Referenced rule value',
-      badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : { label: 'REF', tone: 'primary' },
+      badgeResolver: (node) =>
+        node.disabled ? { label: 'OFF', tone: 'muted' } : { label: 'REF', tone: 'primary' },
       inspectorForm: ruleRefInspectorForm(options),
     },
     {
@@ -109,7 +114,7 @@ export function buildRuleFlowNodeTypes(options: RuleFlowNodeTypeCatalogOptions =
       allowMove: true,
       labelResolver: () => 'NOT',
       subtitleResolver: () => 'Negate child result',
-      badgeResolver: (node) => node.disabled ? { label: 'OFF', tone: 'muted' } : null,
+      badgeResolver: (node) => (node.disabled ? { label: 'OFF', tone: 'muted' } : null),
       inspectorForm: notInspectorForm(),
     },
   ];
@@ -164,22 +169,81 @@ function conditionInspectorForm(options: RuleFlowNodeTypeCatalogOptions): FormCo
         type: 'select',
         label: 'tradeBot.ruleExpression.field.operator',
         placeholder: 'tradeBot.ruleExpression.placeholder.selectOperator',
-        options: RULE_EXPRESSION_OPERATOR_CATALOG.map(item => ({ label: item.label, value: item.value })),
+        options: RULE_EXPRESSION_OPERATOR_CATALOG.map((item) => ({
+          label: item.label,
+          value: item.value,
+        })),
         sectionId: 'operator',
         width: 'full',
         required: true,
-        validation: [{ type: 'required', message: 'tradeBot.ruleExpression.validation.operatorRequired' }],
+        validation: [
+          { type: 'required', message: 'tradeBot.ruleExpression.validation.operatorRequired' },
+        ],
       },
       ...crossParamFields(),
-      ...operandSlotFields(0, 'tradeBot.ruleExpression.field.leftOperand', options, crossOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue']),
-      ...operandSlotFields(1, 'tradeBot.ruleExpression.field.rightOperand', options, crossOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue']),
-      ...operandSlotFields(0, 'tradeBot.ruleExpression.field.leftOperand', options, numericCompareOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue', 'number']),
-      ...operandSlotFields(1, 'tradeBot.ruleExpression.field.rightOperand', options, numericCompareOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue', 'number']),
-      ...operandSlotFields(0, 'tradeBot.ruleExpression.field.leftOperand', options, equalityOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue', 'number', 'boolean', 'string']),
-      ...operandSlotFields(1, 'tradeBot.ruleExpression.field.rightOperand', options, equalityOperatorExpression(), ['numericSeries', 'priceSeries', 'ruleValue', 'number', 'boolean', 'string']),
-      ...operandSlotFields(0, 'tradeBot.ruleExpression.field.leftOperand', options, rangeOperatorExpression(), ['numericSeries', 'priceSeries']),
-      ...operandSlotFields(1, 'tradeBot.ruleExpression.field.minOperand', options, rangeOperatorExpression(), ['number']),
-      ...operandSlotFields(2, 'tradeBot.ruleExpression.field.maxOperand', options, rangeOperatorExpression(), ['number']),
+      ...operandSlotFields(
+        0,
+        'tradeBot.ruleExpression.field.leftOperand',
+        options,
+        crossOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue'],
+      ),
+      ...operandSlotFields(
+        1,
+        'tradeBot.ruleExpression.field.rightOperand',
+        options,
+        crossOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue'],
+      ),
+      ...operandSlotFields(
+        0,
+        'tradeBot.ruleExpression.field.leftOperand',
+        options,
+        numericCompareOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue', 'number'],
+      ),
+      ...operandSlotFields(
+        1,
+        'tradeBot.ruleExpression.field.rightOperand',
+        options,
+        numericCompareOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue', 'number'],
+      ),
+      ...operandSlotFields(
+        0,
+        'tradeBot.ruleExpression.field.leftOperand',
+        options,
+        equalityOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue', 'number', 'boolean', 'string'],
+      ),
+      ...operandSlotFields(
+        1,
+        'tradeBot.ruleExpression.field.rightOperand',
+        options,
+        equalityOperatorExpression(),
+        ['numericSeries', 'priceSeries', 'ruleValue', 'number', 'boolean', 'string'],
+      ),
+      ...operandSlotFields(
+        0,
+        'tradeBot.ruleExpression.field.leftOperand',
+        options,
+        rangeOperatorExpression(),
+        ['numericSeries', 'priceSeries'],
+      ),
+      ...operandSlotFields(
+        1,
+        'tradeBot.ruleExpression.field.minOperand',
+        options,
+        rangeOperatorExpression(),
+        ['number'],
+      ),
+      ...operandSlotFields(
+        2,
+        'tradeBot.ruleExpression.field.maxOperand',
+        options,
+        rangeOperatorExpression(),
+        ['number'],
+      ),
       disabledField('state'),
     ],
   });
@@ -198,7 +262,9 @@ function ruleRefInspectorForm(options: RuleFlowNodeTypeCatalogOptions): FormConf
         showClear: true,
         width: 'full',
         required: true,
-        validation: [{ type: 'required', message: 'tradeBot.ruleExpression.validation.ruleRefRequired' }],
+        validation: [
+          { type: 'required', message: 'tradeBot.ruleExpression.validation.ruleRefRequired' },
+        ],
       },
       disabledField(),
     ],
@@ -209,9 +275,7 @@ function notInspectorForm(): FormConfig {
   return baseInspectorForm({
     title: 'tradeBot.ruleExpression.type.not',
     description: 'tradeBot.ruleExpression.notConfig',
-    fields: [
-      disabledField(),
-    ],
+    fields: [disabledField()],
   });
 }
 
@@ -255,8 +319,15 @@ function operandSlotFields(
   index: number,
   label: string,
   options: RuleFlowNodeTypeCatalogOptions,
-  visibleWhen = "!!model.operator",
-  allowedTypes: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'ruleValue', 'number', 'boolean', 'string']
+  visibleWhen = '!!model.operator',
+  allowedTypes: RuleExpressionOperandValueType[] = [
+    'numericSeries',
+    'priceSeries',
+    'ruleValue',
+    'number',
+    'boolean',
+    'string',
+  ],
 ): FieldConfig[] {
   const prefix = `operands.${index}`;
   const typePath = `model.operands?.[${index}]?.type`;
@@ -296,7 +367,7 @@ function operandSlotFields(
       name: `${prefix}.series`,
       type: 'select',
       label: 'tradeBot.ruleExpression.field.priceSeries',
-      options: RULE_EXPRESSION_PRICE_SERIES.map(series => ({ label: series, value: series })),
+      options: RULE_EXPRESSION_PRICE_SERIES.map((series) => ({ label: series, value: series })),
       sectionId: 'operands',
       visibleWhen: `${visibleWhen} && ${typePath} === 'priceSeries'`,
       width: 'full',
@@ -354,7 +425,7 @@ function operandTypeOptions(allowedTypes: RuleExpressionOperandValueType[]): Sel
   if (allowedTypes.includes('numericSeries')) {
     result.push(
       { label: 'tradeBot.ruleExpression.operand.indicator', value: 'indicator' },
-      { label: 'tradeBot.ruleExpression.operand.indicatorOutput', value: 'indicatorOutput' }
+      { label: 'tradeBot.ruleExpression.operand.indicatorOutput', value: 'indicatorOutput' },
     );
   }
   if (allowedTypes.includes('priceSeries')) {
@@ -363,16 +434,18 @@ function operandTypeOptions(allowedTypes: RuleExpressionOperandValueType[]): Sel
   if (allowedTypes.includes('ruleValue')) {
     result.push({ label: 'tradeBot.ruleExpression.operand.ruleRef', value: 'ruleRef' });
   }
-  if (allowedTypes.some(type => type === 'number' || type === 'boolean' || type === 'string')) {
+  if (allowedTypes.some((type) => type === 'number' || type === 'boolean' || type === 'string')) {
     result.push({ label: 'tradeBot.ruleExpression.operand.constant', value: 'constant' });
   }
   return result;
 }
 
-function constantOptionsForAllowedTypes(allowedTypes: RuleExpressionOperandValueType[]): SelectOption[] {
-  return RULE_EXPRESSION_CONSTANT_TYPES
-    .filter(item => allowedTypes.includes(item.value))
-    .map(item => ({ label: item.label, value: item.value }));
+function constantOptionsForAllowedTypes(
+  allowedTypes: RuleExpressionOperandValueType[],
+): SelectOption[] {
+  return RULE_EXPRESSION_CONSTANT_TYPES.filter((item) => allowedTypes.includes(item.value)).map(
+    (item) => ({ label: item.label, value: item.value }),
+  );
 }
 
 function groupOperatorOptions(): SelectOption[] {
@@ -385,7 +458,7 @@ function groupOperatorOptions(): SelectOption[] {
 
 function indicatorOptions(options: RuleFlowNodeTypeCatalogOptions): SelectOption[] {
   return (options.indicatorConfigs ?? [])
-    .map(item => ({
+    .map((item) => ({
       label: `${item.code}${item.status ? ` [${item.status}]` : ''}`,
       value: item.code,
       disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
@@ -395,8 +468,8 @@ function indicatorOptions(options: RuleFlowNodeTypeCatalogOptions): SelectOption
 
 function ruleOptions(options: RuleFlowNodeTypeCatalogOptions): SelectOption[] {
   return (options.ruleConfigs ?? [])
-    .filter(item => item.id !== options.currentRuleId)
-    .map(item => ({
+    .filter((item) => item.id !== options.currentRuleId)
+    .map((item) => ({
       label: `${item.code}${item.status ? ` [${item.status}]` : ''}`,
       value: item.code,
       disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
@@ -441,7 +514,12 @@ function conditionExpression(node: FlowNode): string {
   return `${first} ${operatorSymbol(operator)} ${printRuleExpressionOperand(operands[1])}`;
 }
 
-function conditionBadge(node: FlowNode): { label: string; tone?: 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'neutral' } | null {
+function conditionBadge(
+  node: FlowNode,
+): {
+  label: string;
+  tone?: 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'neutral';
+} | null {
   if (node.disabled) {
     return { label: 'OFF', tone: 'muted' };
   }
@@ -458,12 +536,14 @@ function conditionBadge(node: FlowNode): { label: string; tone?: 'primary' | 'in
 
 function conditionOperator(node: FlowNode): RuleExpressionConditionOperator | null {
   const operator = node.data?.['operator'];
-  return typeof operator === 'string' && operator ? operator as RuleExpressionConditionOperator : null;
+  return typeof operator === 'string' && operator
+    ? (operator as RuleExpressionConditionOperator)
+    : null;
 }
 
 function conditionOperands(node: FlowNode): RuleExpressionOperand[] {
   const operands = node.data?.['operands'];
-  return Array.isArray(operands) ? operands as RuleExpressionOperand[] : [];
+  return Array.isArray(operands) ? (operands as RuleExpressionOperand[]) : [];
 }
 
 function conditionParamSummary(node: FlowNode): string {
@@ -475,9 +555,10 @@ function conditionParamSummary(node: FlowNode): string {
 
   const defaults = defaultParamsForOperator(operator) ?? {};
   const params = node.data?.['params'];
-  const values = params && typeof params === 'object' && !Array.isArray(params)
-    ? { ...defaults, ...(params as Record<string, unknown>) }
-    : defaults;
+  const values =
+    params && typeof params === 'object' && !Array.isArray(params)
+      ? { ...defaults, ...(params as Record<string, unknown>) }
+      : defaults;
 
   const lookback = values['lookback'];
   const tolerance = values['tolerance'];

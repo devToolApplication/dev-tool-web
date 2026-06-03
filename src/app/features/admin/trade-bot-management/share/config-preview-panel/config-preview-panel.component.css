@@ -98,3 +98,7 @@
 .config-preview-panel__stat--success {
   color: var(--app-control-success-text, #22c55e);
 }
+
+.config-preview-panel__field--full {
+  grid-column: 1 / -1;
+}

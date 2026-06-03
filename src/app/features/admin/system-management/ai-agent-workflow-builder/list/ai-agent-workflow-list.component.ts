@@ -58,6 +58,7 @@ export class AiAgentWorkflowListComponent extends BasePagedList<AiAgentWorkflowD
         minWidth: '14rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'design', icon: 'pi pi-sitemap', severity: 'info', onClick: (row) => this.goBuilder(row.id) },
           { label: 'edit', icon: 'pi pi-pencil', severity: 'secondary', onClick: (row) => this.goEdit(row.id) },

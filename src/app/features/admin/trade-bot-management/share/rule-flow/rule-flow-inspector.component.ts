@@ -1,16 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FlowNode } from '../../../../../shared/ui/flow-builder/models';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
 import {
-  RuleExpressionConditionOperator,
-  RuleExpressionGroupOperator,
-  RuleExpressionOperand,
-} from '../rule-expression-builder/rule-expression.models';
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../data-access/models/trading-system.model';
 import {
   RULE_EXPRESSION_OPERATOR_CATALOG,
   defaultParamsForOperator,
   operatorDefinition,
-} from '../rule-expression-builder/rule-expression-operators';
+  RuleExpressionConditionOperator,
+  RuleExpressionGroupOperator,
+  RuleExpressionOperand,
+} from '../rule-expression-builder/domain';
 
 export interface RuleFlowNodeDataChange {
   nodeId: string;
@@ -31,7 +32,10 @@ export class RuleFlowInspectorComponent {
 
   @Output() readonly nodeDataChange = new EventEmitter<RuleFlowNodeDataChange>();
 
-  readonly operatorOptions = RULE_EXPRESSION_OPERATOR_CATALOG.map(op => ({ label: op.label, value: op.value }));
+  readonly operatorOptions = RULE_EXPRESSION_OPERATOR_CATALOG.map((op) => ({
+    label: op.label,
+    value: op.value,
+  }));
   readonly groupOperatorOptions = [
     { label: 'AND', value: 'AND' },
     { label: 'OR', value: 'OR' },
@@ -93,8 +97,8 @@ export class RuleFlowInspectorComponent {
 
   get ruleRefOptions(): Array<{ label: string; value: string }> {
     return this.ruleConfigs
-      .filter(r => r.id !== this.currentRuleId)
-      .map(r => ({ label: r.code, value: r.code }));
+      .filter((r) => r.id !== this.currentRuleId)
+      .map((r) => ({ label: r.code, value: r.code }));
   }
 
   onGroupOperatorChange(value: unknown): void {
@@ -102,9 +106,8 @@ export class RuleFlowInspectorComponent {
   }
 
   onConditionOperatorChange(value: unknown): void {
-    const operator = typeof value === 'string' && value
-      ? value as RuleExpressionConditionOperator
-      : null;
+    const operator =
+      typeof value === 'string' && value ? (value as RuleExpressionConditionOperator) : null;
     const slots = operatorDefinition(operator)?.slots ?? [];
     const operands = this.conditionOperands.slice(0, slots.length);
     while (operands.length < slots.length) {

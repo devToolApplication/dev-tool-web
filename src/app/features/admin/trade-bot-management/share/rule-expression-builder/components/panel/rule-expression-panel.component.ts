@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
-import { createConstantOperand } from './rule-expression-factory';
+import {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../../../data-access/models/trading-system.model';
+import { createConstantOperand } from '../../domain/rule-expression-factory';
 import {
   RuleExpressionConditionNode,
   RuleExpressionConditionOperator,
@@ -10,13 +13,13 @@ import {
   RuleExpressionOperand,
   RuleExpressionOperandValueType,
   RuleExpressionRuleRefNode,
-  RuleExpressionValidationIssue
-} from './rule-expression.models';
+  RuleExpressionValidationIssue,
+} from '../../domain/rule-expression.models';
 import {
   RULE_EXPRESSION_OPERATOR_CATALOG,
   operandValueTypes,
-  operatorDefinition
-} from './rule-expression-operators';
+  operatorDefinition,
+} from '../../domain/rule-expression-operators';
 
 interface OperandSlot {
   index: number;
@@ -28,7 +31,7 @@ interface OperandSlot {
   selector: 'app-rule-expression-panel',
   standalone: false,
   templateUrl: './rule-expression-panel.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleExpressionPanelComponent {
   @Input() node: RuleExpressionNode | null = null;
@@ -48,12 +51,12 @@ export class RuleExpressionPanelComponent {
   readonly groupOperatorOptions: Array<{ label: string; value: RuleExpressionGroupOperator }> = [
     { label: 'tradeBot.ruleExpression.group.AND', value: 'AND' },
     { label: 'tradeBot.ruleExpression.group.OR', value: 'OR' },
-    { label: 'tradeBot.ruleExpression.group.XOR', value: 'XOR' }
+    { label: 'tradeBot.ruleExpression.group.XOR', value: 'XOR' },
   ];
 
   readonly operatorOptions = RULE_EXPRESSION_OPERATOR_CATALOG.map((item) => ({
     label: item.label,
-    value: item.value
+    value: item.value,
   }));
 
   get readonlyOrDisabled(): boolean {
@@ -82,7 +85,7 @@ export class RuleExpressionPanelComponent {
       .map((item) => ({
         label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
         value: item.code,
-        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
+        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }
@@ -92,7 +95,7 @@ export class RuleExpressionPanelComponent {
     return (definition?.slots ?? []).map((slot, index) => ({
       index,
       label: slot.label,
-      allowedValueTypes: slot.allowedValueTypes
+      allowedValueTypes: slot.allowedValueTypes,
     }));
   }
 
@@ -114,7 +117,10 @@ export class RuleExpressionPanelComponent {
     const slots = operatorDefinition(value)?.slots ?? [];
     const operands = slots.flatMap((slot, index) => {
       const current = node.operands[index];
-      if (current && operandValueTypes(current).some((type) => slot.allowedValueTypes.includes(type))) {
+      if (
+        current &&
+        operandValueTypes(current).some((type) => slot.allowedValueTypes.includes(type))
+      ) {
         return [current];
       }
       if (slot.name === 'min') {
@@ -128,7 +134,11 @@ export class RuleExpressionPanelComponent {
     this.emitChange({ ...node, operator: value, operands });
   }
 
-  updateOperand(node: RuleExpressionConditionNode, index: number, operand: RuleExpressionOperand): void {
+  updateOperand(
+    node: RuleExpressionConditionNode,
+    index: number,
+    operand: RuleExpressionOperand,
+  ): void {
     const operands = [...node.operands];
     operands[index] = operand;
     this.emitChange({ ...node, operands });

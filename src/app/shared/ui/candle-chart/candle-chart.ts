@@ -107,6 +107,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     takeProfit: true,
     indicators: true,
     failedEntries: true,
+    rules: true,
   });
   readonly previewClockLabel = signal(this.buildClockLabel());
   readonly latestEvaluation = signal<Record<string, unknown> | null>(null);
@@ -135,6 +136,7 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     { key: 'takeProfit', label: 'tradeBot.chart.overlay.takeProfit' },
     { key: 'indicators', label: 'tradeBot.chart.overlay.indicators' },
     { key: 'failedEntries', label: 'tradeBot.chart.overlay.failedEntries' },
+    { key: 'rules', label: 'tradeBot.chart.overlay.rules' },
   ];
 
   private initialized = false;
@@ -808,6 +810,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       return false;
     }
     if (!filters['indicators'] && category === 'INDICATOR') {
+      return false;
+    }
+    if (!filters['rules'] && category === 'RULE') {
       return false;
     }
     return true;

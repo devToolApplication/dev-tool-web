@@ -54,6 +54,36 @@
   font-weight: 500;
 }
 
+.app-table-scroller {
+  position: relative;
+}
+
+.app-table-cell--frozen {
+  position: sticky;
+  z-index: 2;
+  background: var(--app-table-cell-bg);
+  background-clip: padding-box;
+}
+
+thead .app-table-cell--frozen {
+  z-index: 3;
+  background: var(--app-table-header-bg);
+}
+
+tbody tr:hover .app-table-cell--frozen {
+  background: var(--app-table-row-hover-bg);
+}
+
+.app-table-cell--frozen-left {
+  border-right: 1px solid var(--app-border-soft);
+  box-shadow: 0.75rem 0 1rem -1rem var(--app-border-strong);
+}
+
+.app-table-cell--frozen-right {
+  border-left: 1px solid var(--app-border-soft);
+  box-shadow: -0.75rem 0 1rem -1rem var(--app-border-strong);
+}
+
 :host {
   display: flex;
   flex-direction: column;

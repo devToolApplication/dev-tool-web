@@ -91,6 +91,10 @@ export class SandboxComponent {
         field: 'actions',
         header: 'tradeBot.field.actions',
         type: 'actions',
+        minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [{ label: 'tradeBot.action.viewJson', icon: 'pi pi-code', severity: 'secondary', showLabel: false, onClick: (row) => this.openRaw(row) }]
       }
     ],

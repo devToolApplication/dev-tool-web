@@ -36,6 +36,7 @@ export class AiAgentSecretListComponent extends BasePagedList<AiAgentSecretRespo
       { field: 'category', header: 'category', sortable: true },
       { field: 'name', header: 'name', sortable: true },
       { field: 'code', header: 'code', type: 'copyable', sortable: true },
+      { field: 'type', header: 'type', sortable: true },
       { field: 'enabled', header: 'enabled', type: 'boolean' },
       {
         field: 'status',
@@ -51,6 +52,7 @@ export class AiAgentSecretListComponent extends BasePagedList<AiAgentSecretRespo
         minWidth: '12rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           {

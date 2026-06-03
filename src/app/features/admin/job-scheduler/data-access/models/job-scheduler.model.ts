@@ -60,6 +60,12 @@ export interface JobConfigFormModel {
   name: string;
   description?: string;
   cron: string;
+  cronSecond?: string;
+  cronMinute?: string;
+  cronHour?: string;
+  cronDayOfMonth?: string;
+  cronMonth?: string;
+  cronDayOfWeek?: string;
   timezone: string;
   enabled: boolean;
   target: {

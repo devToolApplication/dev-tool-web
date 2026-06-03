@@ -3,31 +3,31 @@ import {
   RuleExpressionNode,
   RuleExpressionOperand,
   RuleExpressionRuleRefNode,
-  RuleLogicFormValue
+  RuleLogicFormValue,
 } from './rule-expression.models';
 
 export function extractRuleExpressionDependencies(
   value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
-  includeDisabled = false
+  includeDisabled = false,
 ): RuleExpressionDependencySummary {
   const summary: RuleExpressionDependencySummary = {
     indicatorCodes: [],
     ruleCodes: [],
-    priceSeries: []
+    priceSeries: [],
   };
-  const root = isNode(value) ? value : value?.root ?? null;
+  const root = isNode(value) ? value : (value?.root ?? null);
   collectNode(root, summary, includeDisabled);
   return {
     indicatorCodes: uniqueSorted(summary.indicatorCodes),
     ruleCodes: uniqueSorted(summary.ruleCodes),
-    priceSeries: uniqueSorted(summary.priceSeries)
+    priceSeries: uniqueSorted(summary.priceSeries),
   };
 }
 
 export function deriveChildRulesFromExpression(
-  value: RuleLogicFormValue | RuleExpressionNode | null | undefined
+  value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
 ): Array<Record<string, unknown>> {
-  const root = isNode(value) ? value : value?.root ?? null;
+  const root = isNode(value) ? value : (value?.root ?? null);
   const refs: RuleExpressionRuleRefNode[] = [];
   collectRuleRefNodes(root, refs);
   const seen = new Set<string>();
@@ -53,7 +53,7 @@ export function deriveChildRulesFromExpression(
 function collectNode(
   node: RuleExpressionNode | null,
   summary: RuleExpressionDependencySummary,
-  includeDisabled: boolean
+  includeDisabled: boolean,
 ): void {
   if (!node || (!includeDisabled && node.disabled)) {
     return;
@@ -71,7 +71,10 @@ function collectNode(
   node.children.forEach((child) => collectNode(child, summary, includeDisabled));
 }
 
-function collectOperand(operand: RuleExpressionOperand, summary: RuleExpressionDependencySummary): void {
+function collectOperand(
+  operand: RuleExpressionOperand,
+  summary: RuleExpressionDependencySummary,
+): void {
   if (operand.type === 'indicator' || operand.type === 'indicatorOutput') {
     add(summary.indicatorCodes, operand.indicatorCode);
     return;
@@ -85,7 +88,10 @@ function collectOperand(operand: RuleExpressionOperand, summary: RuleExpressionD
   }
 }
 
-function collectRuleRefNodes(node: RuleExpressionNode | null, refs: RuleExpressionRuleRefNode[]): void {
+function collectRuleRefNodes(
+  node: RuleExpressionNode | null,
+  refs: RuleExpressionRuleRefNode[],
+): void {
   if (!node || node.disabled) {
     return;
   }
@@ -100,8 +106,8 @@ function collectRuleRefNodes(node: RuleExpressionNode | null, refs: RuleExpressi
         refs.push({
           id: `${node.id}-${operand.ruleCode}`,
           type: 'ruleRef',
-          ruleCode: operand.ruleCode ?? ''
-        })
+          ruleCode: operand.ruleCode ?? '',
+        }),
       );
     return;
   }
@@ -120,7 +126,8 @@ function uniqueSorted<T extends string>(items: T[]): T[] {
   return [...new Set(items)].sort((a, b) => a.localeCompare(b));
 }
 
-function isNode(value: RuleLogicFormValue | RuleExpressionNode | null | undefined): value is RuleExpressionNode {
+function isNode(
+  value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
+): value is RuleExpressionNode {
   return Boolean(value && typeof value === 'object' && 'type' in value);
 }
-

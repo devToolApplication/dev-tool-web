@@ -156,8 +156,8 @@ describe('IndicatorConfigFormComponent', () => {
     expect(basicInfoField?.type).toBe('group');
     if (basicInfoField?.type === 'group') {
       const displayTypeField = basicInfoField.children.find((field) => field.name === 'displayType');
-      expect(displayTypeField?.type).toBe('auto-complete');
-      if (displayTypeField?.type === 'auto-complete') {
+      expect(displayTypeField?.type).toBe('select');
+      if (displayTypeField?.type === 'select') {
         expect(displayTypeField.options).toContainEqual({ label: 'POINT', value: 'POINT' });
       }
     }
@@ -292,5 +292,43 @@ describe('IndicatorConfigFormComponent', () => {
     if (configField?.type === 'group') {
       expect(configField.children.map((field) => field.name)).toEqual(['left', 'right']);
     }
+  });
+  it('prefers executor registry template over stale formTemplate saved in DB', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Simulate a record whose saved formTemplate is the old flat format (period at root, no config group)
+    const staleDetail = {
+      id: 'pivot-high-1',
+      code: 'PH_FAST',
+      executor: 'PIVOT_HIGH',
+      executorVersion: 'v1',
+      config: { left: 3, right: 3 },
+      children: [],
+      overlay: {},
+      status: 'ACTIVE',
+      formTemplate: {
+        fields: [
+          { name: 'left', type: 'number', label: 'tradeBot.template.leftBars', width: '1/2', suffix: 'bars' },
+          { name: 'right', type: 'number', label: 'tradeBot.template.rightBars', width: '1/2', suffix: 'bars' }
+        ]
+      }
+    };
+
+    // Executor registry has the correct config-wrapped template
+    (component as any).applyExistingConfig(staleDetail);
+
+    // Should use executor template (config group), not the stale DB template (flat fields)
+    const fieldNames = component.formConfig.fields.map((f: any) => f.name);
+    expect(fieldNames).toContain('config');
+
+    const configField = component.formConfig.fields.find((f: any) => f.name === 'config');
+    expect(configField?.type).toBe('group');
+    if (configField?.type === 'group') {
+      expect(configField.children.map((f: any) => f.name)).toEqual(['left', 'right']);
+    }
+
+    // Initial value must have config object so fields can read their values
+    expect(component.formInitialValue['config']).toEqual({ left: 3, right: 3 });
   });
 });

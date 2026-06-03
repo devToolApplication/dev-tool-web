@@ -1,7 +1,7 @@
 import { Component, computed, EventEmitter, Input, Output } from '@angular/core';
 import { CandleBarResponse } from '../../../../../../../core/models/trade-bot/trading-system.model';
 import { PaperTradePosition } from '../../../../data-access/models/paper-trade.model';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../../../../../shared/ui/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartIndicator, ChartOverlay } from '../../../../../../../shared/ui/candle-chart';
 
 @Component({
   selector: 'app-paper-trade-chart-section',
@@ -11,6 +11,7 @@ import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOve
 export class PaperTradeChartSectionComponent {
   @Input() candles: CandleBarResponse[] = [];
   @Input() overlays: ChartOverlay[] = [];
+  @Input() indicators: ChartIndicator[] = [];
   @Input() activePositions: PaperTradePosition[] = [];
   @Input() symbol = 'BTCUSDT';
   @Input() interval = '1m';

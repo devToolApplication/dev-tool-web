@@ -126,6 +126,7 @@ const tableConfig: TableConfig = {
       minWidth: '16rem',
       frozen: true,
       alignFrozen: 'right',
+      hideable: false,
       actions: [
         {
           label: 'Edit',

@@ -1,7 +1,7 @@
 import {
   IndicatorConfigResponse,
-  RuleConfigResponse
-} from '../../data-access/models/trading-system.model';
+  RuleConfigResponse,
+} from '../../../data-access/models/trading-system.model';
 
 export type RuleExpressionNodeType = 'group' | 'condition' | 'ruleRef' | 'not';
 export type RuleExpressionGroupOperator = 'AND' | 'OR' | 'XOR';

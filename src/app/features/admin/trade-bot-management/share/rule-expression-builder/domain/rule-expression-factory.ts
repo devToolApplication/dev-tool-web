@@ -8,7 +8,7 @@ import {
   RuleExpressionNotNode,
   RuleExpressionOperand,
   RuleExpressionRuleRefNode,
-  RuleLogicFormValue
+  RuleLogicFormValue,
 } from './rule-expression.models';
 import { defaultParamsForOperator } from './rule-expression-operators';
 
@@ -23,13 +23,16 @@ export function createPriceOperand(series = 'CLOSEPRICE' as const): RuleExpressi
   return { type: 'priceSeries', series };
 }
 
-export function createConstantOperand(value: string | number | boolean | null = 0): RuleExpressionOperand {
-  const valueType = typeof value === 'boolean' ? 'boolean' : typeof value === 'number' ? 'number' : 'string';
+export function createConstantOperand(
+  value: string | number | boolean | null = 0,
+): RuleExpressionOperand {
+  const valueType =
+    typeof value === 'boolean' ? 'boolean' : typeof value === 'number' ? 'number' : 'string';
   return { type: 'constant', value, valueType };
 }
 
 export function createRuleExpressionCondition(
-  overrides: Partial<RuleExpressionConditionNode> = {}
+  overrides: Partial<RuleExpressionConditionNode> = {},
 ): RuleExpressionConditionNode {
   const operator = overrides.operator ?? 'CROSSOVER';
   return {
@@ -39,14 +42,14 @@ export function createRuleExpressionCondition(
     operands: overrides.operands ?? defaultOperands(operator),
     disabled: overrides.disabled,
     label: overrides.label,
-    params: cloneParams(overrides.params ?? defaultParamsForOperator(operator))
+    params: cloneParams(overrides.params ?? defaultParamsForOperator(operator)),
   };
 }
 
 export function createRuleExpressionGroup(
   operator: RuleExpressionGroupOperator = 'AND',
   children: RuleExpressionNode[] = [],
-  overrides: Partial<RuleExpressionGroupNode> = {}
+  overrides: Partial<RuleExpressionGroupNode> = {},
 ): RuleExpressionGroupNode {
   return {
     id: overrides.id ?? nextRuleExpressionNodeId(operator.toLocaleLowerCase()),
@@ -55,13 +58,13 @@ export function createRuleExpressionGroup(
     children: cloneRuleExpressionNodes(overrides.children ?? children),
     disabled: overrides.disabled,
     label: overrides.label,
-    params: cloneParams(overrides.params)
+    params: cloneParams(overrides.params),
   };
 }
 
 export function createRuleExpressionRuleRef(
   ruleCode = '',
-  overrides: Partial<RuleExpressionRuleRefNode> = {}
+  overrides: Partial<RuleExpressionRuleRefNode> = {},
 ): RuleExpressionRuleRefNode {
   return {
     id: overrides.id ?? nextRuleExpressionNodeId('rule-ref'),
@@ -70,13 +73,13 @@ export function createRuleExpressionRuleRef(
     slotCode: overrides.slotCode,
     disabled: overrides.disabled,
     label: overrides.label,
-    params: cloneParams(overrides.params)
+    params: cloneParams(overrides.params),
   };
 }
 
 export function createRuleExpressionNot(
   children: RuleExpressionNode[] = [],
-  overrides: Partial<RuleExpressionNotNode> = {}
+  overrides: Partial<RuleExpressionNotNode> = {},
 ): RuleExpressionNotNode {
   return {
     id: overrides.id ?? nextRuleExpressionNodeId('not'),
@@ -84,7 +87,7 @@ export function createRuleExpressionNot(
     children: cloneRuleExpressionNodes(overrides.children ?? children),
     disabled: overrides.disabled,
     label: overrides.label,
-    params: cloneParams(overrides.params)
+    params: cloneParams(overrides.params),
   };
 }
 
@@ -101,9 +104,11 @@ export function createRuleExpressionNode(type: RuleExpressionNodeType): RuleExpr
   return createRuleExpressionNot();
 }
 
-export function cloneRuleLogicValue(value: RuleLogicFormValue | null | undefined): RuleLogicFormValue {
+export function cloneRuleLogicValue(
+  value: RuleLogicFormValue | null | undefined,
+): RuleLogicFormValue {
   return {
-    root: value?.root ? cloneRuleExpressionNode(value.root) : null
+    root: value?.root ? cloneRuleExpressionNode(value.root) : null,
   };
 }
 
@@ -112,26 +117,26 @@ export function cloneRuleExpressionNode(node: RuleExpressionNode): RuleExpressio
     return {
       ...node,
       params: cloneParams(node.params),
-      children: cloneRuleExpressionNodes(node.children)
+      children: cloneRuleExpressionNodes(node.children),
     };
   }
   if (node.type === 'not') {
     return {
       ...node,
       params: cloneParams(node.params),
-      children: cloneRuleExpressionNodes(node.children)
+      children: cloneRuleExpressionNodes(node.children),
     };
   }
   if (node.type === 'condition') {
     return {
       ...node,
       params: cloneParams(node.params),
-      operands: node.operands.map((operand) => ({ ...operand }))
+      operands: node.operands.map((operand) => ({ ...operand })),
     };
   }
   return {
     ...node,
-    params: cloneParams(node.params)
+    params: cloneParams(node.params),
   };
 }
 
@@ -149,7 +154,7 @@ export function normalizeRuleLogicValue(value: unknown): RuleLogicFormValue {
 export function replaceRuleExpressionNode(
   root: RuleExpressionNode | null,
   nodeId: string,
-  replacement: RuleExpressionNode
+  replacement: RuleExpressionNode,
 ): RuleExpressionNode | null {
   if (!root) {
     return null;
@@ -161,7 +166,9 @@ export function replaceRuleExpressionNode(
   if (root.type === 'group' || root.type === 'not') {
     return {
       ...root,
-      children: root.children.map((child) => replaceRuleExpressionNode(child, nodeId, replacement) ?? child)
+      children: root.children.map(
+        (child) => replaceRuleExpressionNode(child, nodeId, replacement) ?? child,
+      ),
     };
   }
 
@@ -170,7 +177,7 @@ export function replaceRuleExpressionNode(
 
 export function removeRuleExpressionNode(
   root: RuleExpressionNode | null,
-  nodeId: string
+  nodeId: string,
 ): RuleExpressionNode | null {
   if (!root || root.id === nodeId) {
     return null;
@@ -184,13 +191,13 @@ export function removeRuleExpressionNode(
     ...root,
     children: root.children
       .filter((child) => child.id !== nodeId)
-      .map((child) => removeRuleExpressionNode(child, nodeId) ?? child)
+      .map((child) => removeRuleExpressionNode(child, nodeId) ?? child),
   };
 }
 
 export function findRuleExpressionNode(
   root: RuleExpressionNode | null,
-  nodeId: string | null | undefined
+  nodeId: string | null | undefined,
 ): RuleExpressionNode | null {
   if (!root || !nodeId) {
     return null;
@@ -212,7 +219,7 @@ export function findRuleExpressionNode(
 export function addRuleExpressionChild(
   root: RuleExpressionNode | null,
   parentId: string,
-  child: RuleExpressionNode
+  child: RuleExpressionNode,
 ): RuleExpressionNode | null {
   if (!root) {
     return null;
@@ -220,13 +227,13 @@ export function addRuleExpressionChild(
   if ((root.type === 'group' || root.type === 'not') && root.id === parentId) {
     return {
       ...root,
-      children: [...root.children, cloneRuleExpressionNode(child)]
+      children: [...root.children, cloneRuleExpressionNode(child)],
     };
   }
   if (root.type === 'group' || root.type === 'not') {
     return {
       ...root,
-      children: root.children.map((item) => addRuleExpressionChild(item, parentId, child) ?? item)
+      children: root.children.map((item) => addRuleExpressionChild(item, parentId, child) ?? item),
     };
   }
   return root;
@@ -241,15 +248,16 @@ export function wrapRuleExpressionNode(
   root: RuleExpressionNode | null,
   nodeId: string,
   wrapperType: 'group' | 'not',
-  groupOperator: RuleExpressionGroupOperator = 'AND'
+  groupOperator: RuleExpressionGroupOperator = 'AND',
 ): RuleExpressionNode | null {
   const target = findRuleExpressionNode(root, nodeId);
   if (!target) {
     return root;
   }
-  const wrapper = wrapperType === 'not'
-    ? createRuleExpressionNot([target])
-    : createRuleExpressionGroup(groupOperator, [target]);
+  const wrapper =
+    wrapperType === 'not'
+      ? createRuleExpressionNot([target])
+      : createRuleExpressionGroup(groupOperator, [target]);
   return replaceRuleExpressionNode(root, nodeId, wrapper);
 }
 
@@ -266,7 +274,7 @@ function normalizeNode(value: unknown): RuleExpressionNode | null {
       id: stringValue(record['id'], nextRuleExpressionNodeId('group')),
       disabled: Boolean(record['disabled']),
       label: stringValue(record['label']),
-      params: recordValue(record['params'])
+      params: recordValue(record['params']),
     });
   }
   if (type === 'not') {
@@ -274,7 +282,7 @@ function normalizeNode(value: unknown): RuleExpressionNode | null {
       id: stringValue(record['id'], nextRuleExpressionNodeId('not')),
       disabled: Boolean(record['disabled']),
       label: stringValue(record['label']),
-      params: recordValue(record['params'])
+      params: recordValue(record['params']),
     });
   }
   if (type === 'condition') {
@@ -288,7 +296,7 @@ function normalizeNode(value: unknown): RuleExpressionNode | null {
       operands,
       disabled: Boolean(record['disabled']),
       label: stringValue(record['label']),
-      params: recordValue(record['params'])
+      params: recordValue(record['params']),
     });
   }
   if (type === 'ruleRef') {
@@ -297,7 +305,7 @@ function normalizeNode(value: unknown): RuleExpressionNode | null {
       slotCode: stringValue(record['slotCode']),
       disabled: Boolean(record['disabled']),
       label: stringValue(record['label']),
-      params: recordValue(record['params'])
+      params: recordValue(record['params']),
     });
   }
 
@@ -324,11 +332,13 @@ function normalizeOperand(value: unknown): RuleExpressionOperand | null {
     series: priceSeriesValue(record['series']),
     ruleCode: stringValue(record['ruleCode']),
     value: scalarValue(record['value']),
-    valueType: isConstantType(record['valueType']) ? record['valueType'] : undefined
+    valueType: isConstantType(record['valueType']) ? record['valueType'] : undefined,
   };
 }
 
-function defaultOperands(operator: RuleExpressionConditionOperator | null): RuleExpressionOperand[] {
+function defaultOperands(
+  operator: RuleExpressionConditionOperator | null,
+): RuleExpressionOperand[] {
   if (operator === 'BETWEEN' || operator === 'OUTSIDE') {
     return [createPriceOperand(), createConstantOperand(0), createConstantOperand(1)];
   }
@@ -343,19 +353,19 @@ function reassignNodeIds(node: RuleExpressionNode): RuleExpressionNode {
     return {
       ...node,
       id: nextRuleExpressionNodeId('group-copy'),
-      children: node.children.map((child) => reassignNodeIds(child))
+      children: node.children.map((child) => reassignNodeIds(child)),
     };
   }
   if (node.type === 'not') {
     return {
       ...node,
       id: nextRuleExpressionNodeId('not-copy'),
-      children: node.children.map((child) => reassignNodeIds(child))
+      children: node.children.map((child) => reassignNodeIds(child)),
     };
   }
   return {
     ...node,
-    id: nextRuleExpressionNodeId(`${node.type}-copy`)
+    id: nextRuleExpressionNodeId(`${node.type}-copy`),
   };
 }
 
@@ -363,7 +373,9 @@ function cloneRuleExpressionNodes(nodes: RuleExpressionNode[]): RuleExpressionNo
   return nodes.map((node) => cloneRuleExpressionNode(node));
 }
 
-function cloneParams(value: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+function cloneParams(
+  value: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
   return value ? { ...value } : undefined;
 }
 
@@ -378,7 +390,12 @@ function stringValue(value: unknown, fallback = ''): string {
 }
 
 function scalarValue(value: unknown): string | number | boolean | null | undefined {
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null
+  ) {
     return value;
   }
   return undefined;
@@ -407,17 +424,19 @@ function isConditionOperator(value: unknown): value is RuleExpressionConditionOp
     'EQ',
     'NEQ',
     'BETWEEN',
-    'OUTSIDE'
+    'OUTSIDE',
   ].includes(String(value));
 }
 
 function isOperandType(value: unknown): value is RuleExpressionOperand['type'] {
-  return ['indicator', 'indicatorOutput', 'priceSeries', 'ruleRef', 'constant'].includes(String(value));
+  return ['indicator', 'indicatorOutput', 'priceSeries', 'ruleRef', 'constant'].includes(
+    String(value),
+  );
 }
 
 function priceSeriesValue(value: unknown): RuleExpressionOperand['series'] {
   return ['OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME', 'CLOSEPRICE'].includes(String(value))
-    ? value as RuleExpressionOperand['series']
+    ? (value as RuleExpressionOperand['series'])
     : undefined;
 }
 

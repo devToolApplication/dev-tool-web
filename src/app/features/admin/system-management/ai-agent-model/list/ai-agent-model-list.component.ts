@@ -84,6 +84,7 @@ export class AiAgentModelListComponent extends BasePagedList<AiAgentModelConfigR
         minWidth: '12rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           {

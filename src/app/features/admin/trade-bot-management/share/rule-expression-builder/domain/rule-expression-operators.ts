@@ -5,7 +5,7 @@ import {
   RuleExpressionOperandType,
   RuleExpressionOperandValueType,
   RuleExpressionOperatorSlotName,
-  RuleExpressionPriceSeries
+  RuleExpressionPriceSeries,
 } from './rule-expression.models';
 
 export type RuleExpressionOperatorArity = 'binary' | 'range';
@@ -35,15 +35,24 @@ export interface RuleExpressionOperatorDefinition {
   description: string;
 }
 
-const NUMERIC_SERIES_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'ruleValue'];
-const NUMERIC_VALUE_TYPES: RuleExpressionOperandValueType[] = ['numericSeries', 'priceSeries', 'ruleValue', 'number'];
+const NUMERIC_SERIES_TYPES: RuleExpressionOperandValueType[] = [
+  'numericSeries',
+  'priceSeries',
+  'ruleValue',
+];
+const NUMERIC_VALUE_TYPES: RuleExpressionOperandValueType[] = [
+  'numericSeries',
+  'priceSeries',
+  'ruleValue',
+  'number',
+];
 const COMPARABLE_VALUE_TYPES: RuleExpressionOperandValueType[] = [
   'numericSeries',
   'priceSeries',
   'ruleValue',
   'number',
   'boolean',
-  'string'
+  'string',
 ];
 
 const CROSS_SIGNAL_PARAMS: RuleExpressionQuickParamDefinition[] = [
@@ -53,7 +62,7 @@ const CROSS_SIGNAL_PARAMS: RuleExpressionQuickParamDefinition[] = [
     type: 'number',
     defaultValue: 1,
     suffix: ' bars',
-    helpText: 'tradeBot.ruleExpression.quickParam.lookbackHelp'
+    helpText: 'tradeBot.ruleExpression.quickParam.lookbackHelp',
   },
   {
     key: 'tolerance',
@@ -61,8 +70,8 @@ const CROSS_SIGNAL_PARAMS: RuleExpressionQuickParamDefinition[] = [
     type: 'number',
     defaultValue: 0,
     suffix: ' value',
-    helpText: 'tradeBot.ruleExpression.quickParam.toleranceHelp'
-  }
+    helpText: 'tradeBot.ruleExpression.quickParam.toleranceHelp',
+  },
 ];
 
 export const RULE_EXPRESSION_PRICE_SERIES: RuleExpressionPriceSeries[] = [
@@ -71,26 +80,32 @@ export const RULE_EXPRESSION_PRICE_SERIES: RuleExpressionPriceSeries[] = [
   'HIGH',
   'LOW',
   'CLOSE',
-  'VOLUME'
+  'VOLUME',
 ];
 
-export const RULE_EXPRESSION_OPERAND_TYPES: Array<{ label: string; value: RuleExpressionOperandType }> = [
+export const RULE_EXPRESSION_OPERAND_TYPES: Array<{
+  label: string;
+  value: RuleExpressionOperandType;
+}> = [
   { label: 'tradeBot.ruleExpression.operand.indicator', value: 'indicator' },
   { label: 'tradeBot.ruleExpression.operand.indicatorOutput', value: 'indicatorOutput' },
   { label: 'tradeBot.ruleExpression.operand.priceSeries', value: 'priceSeries' },
   { label: 'tradeBot.ruleExpression.operand.ruleRef', value: 'ruleRef' },
-  { label: 'tradeBot.ruleExpression.operand.constant', value: 'constant' }
+  { label: 'tradeBot.ruleExpression.operand.constant', value: 'constant' },
 ];
 
-export const RULE_EXPRESSION_CONSTANT_TYPES: Array<{ label: string; value: RuleExpressionConstantType }> = [
+export const RULE_EXPRESSION_CONSTANT_TYPES: Array<{
+  label: string;
+  value: RuleExpressionConstantType;
+}> = [
   { label: 'tradeBot.ruleExpression.constant.number', value: 'number' },
   { label: 'tradeBot.ruleExpression.constant.string', value: 'string' },
-  { label: 'tradeBot.ruleExpression.constant.boolean', value: 'boolean' }
+  { label: 'tradeBot.ruleExpression.constant.boolean', value: 'boolean' },
 ];
 
 export const RULE_EXPRESSION_BOOLEAN_OPTIONS: Array<{ label: string; value: boolean }> = [
   { label: 'true', value: true },
-  { label: 'false', value: false }
+  { label: 'false', value: false },
 ];
 
 export const RULE_EXPRESSION_OPERATOR_CATALOG: RuleExpressionOperatorDefinition[] = [
@@ -100,7 +115,7 @@ export const RULE_EXPRESSION_OPERATOR_CATALOG: RuleExpressionOperatorDefinition[
     arity: 'binary',
     slots: binarySlots(NUMERIC_SERIES_TYPES),
     quickParams: CROSS_SIGNAL_PARAMS,
-    description: 'tradeBot.ruleExpression.operatorDescription.CROSSOVER'
+    description: 'tradeBot.ruleExpression.operatorDescription.CROSSOVER',
   },
   {
     value: 'CROSSUNDER',
@@ -108,49 +123,49 @@ export const RULE_EXPRESSION_OPERATOR_CATALOG: RuleExpressionOperatorDefinition[
     arity: 'binary',
     slots: binarySlots(NUMERIC_SERIES_TYPES),
     quickParams: CROSS_SIGNAL_PARAMS,
-    description: 'tradeBot.ruleExpression.operatorDescription.CROSSUNDER'
+    description: 'tradeBot.ruleExpression.operatorDescription.CROSSUNDER',
   },
   {
     value: 'GT',
     label: 'tradeBot.ruleExpression.operator.GT',
     arity: 'binary',
     slots: binarySlots(NUMERIC_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.GT'
+    description: 'tradeBot.ruleExpression.operatorDescription.GT',
   },
   {
     value: 'GTE',
     label: 'tradeBot.ruleExpression.operator.GTE',
     arity: 'binary',
     slots: binarySlots(NUMERIC_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.GTE'
+    description: 'tradeBot.ruleExpression.operatorDescription.GTE',
   },
   {
     value: 'LT',
     label: 'tradeBot.ruleExpression.operator.LT',
     arity: 'binary',
     slots: binarySlots(NUMERIC_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.LT'
+    description: 'tradeBot.ruleExpression.operatorDescription.LT',
   },
   {
     value: 'LTE',
     label: 'tradeBot.ruleExpression.operator.LTE',
     arity: 'binary',
     slots: binarySlots(NUMERIC_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.LTE'
+    description: 'tradeBot.ruleExpression.operatorDescription.LTE',
   },
   {
     value: 'EQ',
     label: 'tradeBot.ruleExpression.operator.EQ',
     arity: 'binary',
     slots: binarySlots(COMPARABLE_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.EQ'
+    description: 'tradeBot.ruleExpression.operatorDescription.EQ',
   },
   {
     value: 'NEQ',
     label: 'tradeBot.ruleExpression.operator.NEQ',
     arity: 'binary',
     slots: binarySlots(COMPARABLE_VALUE_TYPES),
-    description: 'tradeBot.ruleExpression.operatorDescription.NEQ'
+    description: 'tradeBot.ruleExpression.operatorDescription.NEQ',
   },
   {
     value: 'BETWEEN',
@@ -160,20 +175,20 @@ export const RULE_EXPRESSION_OPERATOR_CATALOG: RuleExpressionOperatorDefinition[
       {
         name: 'left',
         label: 'tradeBot.ruleExpression.field.leftOperand',
-        allowedValueTypes: NUMERIC_SERIES_TYPES
+        allowedValueTypes: NUMERIC_SERIES_TYPES,
       },
       {
         name: 'min',
         label: 'tradeBot.ruleExpression.field.minOperand',
-        allowedValueTypes: ['number']
+        allowedValueTypes: ['number'],
       },
       {
         name: 'max',
         label: 'tradeBot.ruleExpression.field.maxOperand',
-        allowedValueTypes: ['number']
-      }
+        allowedValueTypes: ['number'],
+      },
     ],
-    description: 'tradeBot.ruleExpression.operatorDescription.BETWEEN'
+    description: 'tradeBot.ruleExpression.operatorDescription.BETWEEN',
   },
   {
     value: 'OUTSIDE',
@@ -183,37 +198,39 @@ export const RULE_EXPRESSION_OPERATOR_CATALOG: RuleExpressionOperatorDefinition[
       {
         name: 'left',
         label: 'tradeBot.ruleExpression.field.leftOperand',
-        allowedValueTypes: NUMERIC_SERIES_TYPES
+        allowedValueTypes: NUMERIC_SERIES_TYPES,
       },
       {
         name: 'min',
         label: 'tradeBot.ruleExpression.field.minOperand',
-        allowedValueTypes: ['number']
+        allowedValueTypes: ['number'],
       },
       {
         name: 'max',
         label: 'tradeBot.ruleExpression.field.maxOperand',
-        allowedValueTypes: ['number']
-      }
+        allowedValueTypes: ['number'],
+      },
     ],
-    description: 'tradeBot.ruleExpression.operatorDescription.OUTSIDE'
-  }
+    description: 'tradeBot.ruleExpression.operatorDescription.OUTSIDE',
+  },
 ];
 
 export function operatorDefinition(
-  value: RuleExpressionConditionOperator | null | undefined
+  value: RuleExpressionConditionOperator | null | undefined,
 ): RuleExpressionOperatorDefinition | null {
   return RULE_EXPRESSION_OPERATOR_CATALOG.find((item) => item.value === value) ?? null;
 }
 
 export function operatorSlotDefinition(
   operator: RuleExpressionConditionOperator | null | undefined,
-  slotName: RuleExpressionOperatorSlotName
+  slotName: RuleExpressionOperatorSlotName,
 ): RuleExpressionOperatorSlot | null {
   return operatorDefinition(operator)?.slots.find((slot) => slot.name === slotName) ?? null;
 }
 
-export function operandValueTypes(operand: RuleExpressionOperand | null | undefined): RuleExpressionOperandValueType[] {
+export function operandValueTypes(
+  operand: RuleExpressionOperand | null | undefined,
+): RuleExpressionOperandValueType[] {
   if (!operand) {
     return [];
   }
@@ -236,7 +253,7 @@ export function operandValueTypes(operand: RuleExpressionOperand | null | undefi
 }
 
 export function defaultParamsForOperator(
-  operator: RuleExpressionConditionOperator | null | undefined
+  operator: RuleExpressionConditionOperator | null | undefined,
 ): Record<string, unknown> | undefined {
   const quickParams = operatorDefinition(operator)?.quickParams ?? [];
   if (!quickParams.length) {
@@ -248,17 +265,19 @@ export function defaultParamsForOperator(
   }, {});
 }
 
-function binarySlots(allowedValueTypes: RuleExpressionOperandValueType[]): RuleExpressionOperatorSlot[] {
+function binarySlots(
+  allowedValueTypes: RuleExpressionOperandValueType[],
+): RuleExpressionOperatorSlot[] {
   return [
     {
       name: 'left',
       label: 'tradeBot.ruleExpression.field.leftOperand',
-      allowedValueTypes
+      allowedValueTypes,
     },
     {
       name: 'right',
       label: 'tradeBot.ruleExpression.field.rightOperand',
-      allowedValueTypes
-    }
+      allowedValueTypes,
+    },
   ];
 }

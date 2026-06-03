@@ -77,6 +77,10 @@ export class CacheMonitorComponent implements OnInit {
         field: 'actions',
         header: 'tradeBot.field.actions',
         type: 'actions',
+        minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.cache.evictCacheName', icon: 'pi pi-trash', severity: 'danger', showLabel: false, onClick: (row) => this.evict({ cacheName: row.cacheName }) }
         ]

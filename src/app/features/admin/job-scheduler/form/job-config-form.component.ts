@@ -10,6 +10,7 @@ import {
   JobConfigUpsertDto
 } from '../data-access/models/job-scheduler.model';
 import { JobSchedulerService } from '../data-access/api/job-scheduler.service';
+import { JobSecretService } from '../secrets/data-access/api/job-secret.service';
 import { I18nService } from '../../../../core/ui-services/i18n.service';
 import { LoadingService } from '../../../../core/ui-services/loading.service';
 import { ToastService } from '../../../../core/ui-services/toast.service';
@@ -77,6 +78,7 @@ export class JobConfigFormComponent implements OnInit {
 
   constructor(
     private readonly service: JobSchedulerService,
+    private readonly jobSecretService: JobSecretService,
     private readonly loadingService: LoadingService,
     private readonly toastService: ToastService,
     private readonly route: ActivatedRoute,
@@ -146,13 +148,16 @@ export class JobConfigFormComponent implements OnInit {
     const existingJobs$ = this.service.getPage(0, 500, {}, ['code,asc']).pipe(
       catchError(() => of({ data: [] } as JobConfigPageResponse))
     );
+    const secrets$ = this.jobSecretService.getOptions().pipe(
+      catchError(() => of({ options: [] }))
+    );
 
-    this.loadingService.track(forkJoin({ authTypes: authTypes$, existingJobs: existingJobs$ })).pipe(
+    this.loadingService.track(forkJoin({ authTypes: authTypes$, existingJobs: existingJobs$, secrets: secrets$ })).pipe(
       finalize(() => this.loading.set(false)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: ({ authTypes, existingJobs }) => {
-        this.formContext.extra = this.toFormOptions(authTypes.authTypes, existingJobs.data);
+      next: ({ authTypes, existingJobs, secrets }) => {
+        this.formContext.extra = this.toFormOptions(authTypes.authTypes, existingJobs.data, secrets.options);
         this.bindRouteMode();
       }
     });
@@ -191,6 +196,15 @@ export class JobConfigFormComponent implements OnInit {
     ).subscribe({
       next: (detail) => {
         this.formInitialValue = this.toFormModel(detail);
+        this.formContext.extra = {
+          ...this.formContext.extra,
+          cronSecondOptions: this.toSelectOptions(this.formInitialValue.cronSecond, this.formContext.extra?.cronSecondOptions || []),
+          cronMinuteOptions: this.toSelectOptions(this.formInitialValue.cronMinute, this.formContext.extra?.cronMinuteOptions || []),
+          cronHourOptions: this.toSelectOptions(this.formInitialValue.cronHour, this.formContext.extra?.cronHourOptions || []),
+          cronDayOfMonthOptions: this.toSelectOptions(this.formInitialValue.cronDayOfMonth, this.formContext.extra?.cronDayOfMonthOptions || []),
+          cronMonthOptions: this.toSelectOptions(this.formInitialValue.cronMonth, this.formContext.extra?.cronMonthOptions || []),
+          cronDayOfWeekOptions: this.toSelectOptions(this.formInitialValue.cronDayOfWeek, this.formContext.extra?.cronDayOfWeekOptions || [])
+        };
         this.rerenderForm();
       },
       error: () => {
@@ -216,23 +230,66 @@ export class JobConfigFormComponent implements OnInit {
         },
         { type: 'text', name: 'name', label: 'name', width: '1/3', validation: [Rules.required('jobScheduler.validation.nameRequired')] },
         { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
+        
+        // Visual Cron selections
         {
-          type: 'auto-complete',
-          name: 'cron',
-          label: 'jobScheduler.field.cron',
-          width: '1/3',
-          optionsExpression: 'context.extra?.cronOptions || []',
-          validation: [Rules.required('jobScheduler.validation.cronRequired')]
+          type: 'select',
+          name: 'cronSecond',
+          label: 'jobScheduler.cron.second',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronSecondOptions || []',
+          validation: [Rules.required('jobScheduler.validation.secondRequired')]
         },
+        {
+          type: 'select',
+          name: 'cronMinute',
+          label: 'jobScheduler.cron.minute',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronMinuteOptions || []',
+          validation: [Rules.required('jobScheduler.validation.minuteRequired')]
+        },
+        {
+          type: 'select',
+          name: 'cronHour',
+          label: 'jobScheduler.cron.hour',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronHourOptions || []',
+          validation: [Rules.required('jobScheduler.validation.hourRequired')]
+        },
+        {
+          type: 'select',
+          name: 'cronDayOfMonth',
+          label: 'jobScheduler.cron.dayOfMonth',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronDayOfMonthOptions || []',
+          validation: [Rules.required('jobScheduler.validation.dayOfMonthRequired')]
+        },
+        {
+          type: 'select',
+          name: 'cronMonth',
+          label: 'jobScheduler.cron.month',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronMonthOptions || []',
+          validation: [Rules.required('jobScheduler.validation.monthRequired')]
+        },
+        {
+          type: 'select',
+          name: 'cronDayOfWeek',
+          label: 'jobScheduler.cron.dayOfWeek',
+          width: '1/6',
+          optionsExpression: 'context.extra?.cronDayOfWeekOptions || []',
+          validation: [Rules.required('jobScheduler.validation.dayOfWeekRequired')]
+        },
+
         {
           type: 'auto-complete',
           name: 'timezone',
           label: 'jobScheduler.field.timezone',
-          width: '1/3',
+          width: '1/2',
           optionsExpression: 'context.extra?.timezoneOptions || []',
           validation: [Rules.required('jobScheduler.validation.timezoneRequired')]
         },
-        { type: 'number', name: 'retry.maxAttempts', label: 'jobScheduler.field.maxAttempts', width: '1/3', suffix: 'attempts', validation: [Rules.min(1), Rules.max(10)] },
+        { type: 'number', name: 'retry.maxAttempts', label: 'jobScheduler.field.maxAttempts', width: '1/2', suffix: 'attempts', validation: [Rules.min(1), Rules.max(10)] },
         { type: 'textarea', name: 'description', label: 'description', width: 'full', rows: 3, maxRows: 6 },
         {
           type: 'group',
@@ -270,7 +327,16 @@ export class JobConfigFormComponent implements OnInit {
           label: 'jobScheduler.form.auth',
           width: 'full',
           children: [
-            { type: 'select', name: 'type', label: 'jobScheduler.field.authType', width: '1/2', optionsExpression: 'context.extra?.authTypeOptions || []' },
+            { type: 'select', name: 'type', label: 'jobScheduler.field.authType', width: 'full', optionsExpression: 'context.extra?.authTypeOptions || []' },
+            {
+              type: 'select',
+              name: 'secretCode',
+              label: 'jobSecret.field.secretRef',
+              width: 'full',
+              optionsExpression: 'context.extra?.secretRefOptions || []',
+              rules: { visible: 'model.auth?.type === "SECRET_REF"' },
+              validation: [Rules.required('jobScheduler.validation.secretRequired')]
+            },
             {
               type: 'auto-complete',
               name: 'basic.username',
@@ -360,14 +426,54 @@ export class JobConfigFormComponent implements OnInit {
   }
 
   private createInitialValue(): JobConfigFormModel {
-    return JSON.parse(JSON.stringify(JOB_CONFIG_INITIAL_VALUE)) as JobConfigFormModel;
+    const initial = JSON.parse(JSON.stringify(JOB_CONFIG_INITIAL_VALUE)) as JobConfigFormModel;
+    return {
+      ...initial,
+      cronSecond: '*',
+      cronMinute: '*',
+      cronHour: '*',
+      cronDayOfMonth: '*',
+      cronMonth: '*',
+      cronDayOfWeek: '*'
+    } as any;
   }
 
   private toFormModel(detail: JobConfigResponse): JobConfigFormModel {
     const initial = this.createInitialValue();
+
+    const cronParts = (detail.cron || '').trim().split(/\s+/);
+    let cronSecond = '*';
+    let cronMinute = '*';
+    let cronHour = '*';
+    let cronDayOfMonth = '*';
+    let cronMonth = '*';
+    let cronDayOfWeek = '*';
+
+    if (cronParts.length === 6) {
+      cronSecond = cronParts[0];
+      cronMinute = cronParts[1];
+      cronHour = cronParts[2];
+      cronDayOfMonth = cronParts[3];
+      cronMonth = cronParts[4];
+      cronDayOfWeek = cronParts[5];
+    } else if (cronParts.length === 5) {
+      cronSecond = '0';
+      cronMinute = cronParts[0];
+      cronHour = cronParts[1];
+      cronDayOfMonth = cronParts[2];
+      cronMonth = cronParts[3];
+      cronDayOfWeek = cronParts[4];
+    }
+
     return {
       ...initial,
       ...detail,
+      cronSecond,
+      cronMinute,
+      cronHour,
+      cronDayOfMonth,
+      cronMonth,
+      cronDayOfWeek,
       description: detail.description ?? '',
       target: {
         ...initial.target,
@@ -390,7 +496,8 @@ export class JobConfigFormComponent implements OnInit {
         keycloak: {
           ...initial.auth.keycloak,
           ...detail.auth.keycloak
-        }
+        },
+        secretCode: detail.auth.type === 'SECRET_REF' ? (detail.auth as any).secretCode : ''
       },
       retry: {
         maxAttempts: detail.retry?.maxAttempts ?? 1
@@ -399,11 +506,21 @@ export class JobConfigFormComponent implements OnInit {
   }
 
   private toPayload(model: JobConfigFormModel): JobConfigUpsertDto {
+    const cronParts = [
+      model.cronSecond || '*',
+      model.cronMinute || '*',
+      model.cronHour || '*',
+      model.cronDayOfMonth || '*',
+      model.cronMonth || '*',
+      model.cronDayOfWeek || '*'
+    ];
+    const compiledCron = cronParts.join(' ').trim();
+
     return {
       code: model.code.trim(),
       name: model.name.trim(),
       description: model.description?.trim() ?? '',
-      cron: model.cron.trim(),
+      cron: compiledCron,
       timezone: model.timezone.trim(),
       enabled: model.enabled === true,
       target: {
@@ -457,6 +574,13 @@ export class JobConfigFormComponent implements OnInit {
       };
     }
 
+    if (model.auth.type === 'SECRET_REF') {
+      return {
+        type: 'SECRET_REF' as const,
+        secretCode: (model.auth as any).secretCode ?? ''
+      };
+    }
+
     return { type: 'NONE' as const };
   }
 
@@ -473,18 +597,81 @@ export class JobConfigFormComponent implements OnInit {
   }
 
   private toAuthTypeOptions(items: JobAuthTypeOptionResponse[]) {
-    const options = items.length
-      ? items
+    const options: any[] = items.length
+      ? [...items]
       : [
-          { type: 'NONE', label: 'jobScheduler.auth.none' },
-          { type: 'BASIC', label: 'jobScheduler.auth.basic' },
-          { type: 'API_KEY', label: 'jobScheduler.auth.apiKey' },
-          { type: 'KEYCLOAK_CLIENT_CREDENTIALS', label: 'jobScheduler.auth.keycloakClientCredentials' }
+          { type: 'NONE', label: 'jobScheduler.auth.none', fields: [] },
+          { type: 'BASIC', label: 'jobScheduler.auth.basic', fields: [] },
+          { type: 'API_KEY', label: 'jobScheduler.auth.apiKey', fields: [] },
+          { type: 'KEYCLOAK_CLIENT_CREDENTIALS', label: 'jobScheduler.auth.keycloakClientCredentials', fields: [] },
+          { type: 'SECRET_REF', label: 'jobScheduler.auth.secretRef', fields: [] }
         ];
+    
+    if (items.length && !options.some((item) => item.type === 'SECRET_REF')) {
+      options.push({ type: 'SECRET_REF', label: 'jobScheduler.auth.secretRef', fields: [] });
+    }
+    
     return options.map((item) => ({ label: item.label, value: item.type }));
   }
 
-  private toFormOptions(authTypes: JobAuthTypeOptionResponse[], jobs: JobConfigResponse[]) {
+  private toSelectOptions(value: string | undefined, presets: { label: string, value: string }[]): { label: string, value: string }[] {
+    const list = [...presets];
+    if (value && !list.some((item) => item.value === value)) {
+      list.push({ label: value, value });
+    }
+    return list;
+  }
+
+  private toFormOptions(authTypes: JobAuthTypeOptionResponse[], jobs: JobConfigResponse[], secrets: any[] = []) {
+    const initial = this.formInitialValue || {};
+    
+    const secondPresets = [
+      { label: 'jobScheduler.cron.everySecond', value: '*' },
+      { label: '0', value: '0' },
+      { label: '*/5', value: '*/5' },
+      { label: '*/10', value: '*/10' },
+      { label: '*/15', value: '*/15' },
+      { label: '*/30', value: '*/30' }
+    ];
+    const minutePresets = [
+      { label: 'jobScheduler.cron.everyMinute', value: '*' },
+      { label: '0', value: '0' },
+      { label: '*/5', value: '*/5' },
+      { label: '*/10', value: '*/10' },
+      { label: '*/15', value: '*/15' },
+      { label: '*/30', value: '*/30' }
+    ];
+    const hourPresets = [
+      { label: 'jobScheduler.cron.everyHour', value: '*' },
+      { label: '0', value: '0' },
+      { label: '12', value: '12' },
+      { label: '*/2', value: '*/2' },
+      { label: '*/4', value: '*/4' },
+      { label: '*/6', value: '*/6' },
+      { label: '*/12', value: '*/12' }
+    ];
+    const dayPresets = [
+      { label: 'jobScheduler.cron.everyDay', value: '*' },
+      { label: '1', value: '1' },
+      { label: '15', value: '15' }
+    ];
+    const monthPresets = [
+      { label: 'jobScheduler.cron.everyMonth', value: '*' },
+      { label: '1', value: '1' },
+      { label: '6', value: '6' },
+      { label: '12', value: '12' }
+    ];
+    const dayOfWeekPresets = [
+      { label: 'jobScheduler.cron.everyDayOfWeek', value: '*' },
+      { label: 'jobScheduler.cron.sunday', value: '0' },
+      { label: 'jobScheduler.cron.monday', value: '1' },
+      { label: 'jobScheduler.cron.tuesday', value: '2' },
+      { label: 'jobScheduler.cron.wednesday', value: '3' },
+      { label: 'jobScheduler.cron.thursday', value: '4' },
+      { label: 'jobScheduler.cron.friday', value: '5' },
+      { label: 'jobScheduler.cron.saturday', value: '6' }
+    ];
+
     return {
       authTypeOptions: this.toAuthTypeOptions(authTypes),
       timezoneOptions: this.toTimezoneOptions(),
@@ -513,7 +700,14 @@ export class JobConfigFormComponent implements OnInit {
       keycloakHeaderPrefixOptions: this.toTextOptions([
         ...JOB_KEYCLOAK_HEADER_PREFIX_VALUES,
         ...jobs.map((job) => job.auth?.keycloak?.headerPrefix)
-      ])
+      ]),
+      secretRefOptions: secrets.map((s) => ({ label: `${s.name} (${s.code})`, value: s.code })),
+      cronSecondOptions: this.toSelectOptions(initial.cronSecond, secondPresets),
+      cronMinuteOptions: this.toSelectOptions(initial.cronMinute, minutePresets),
+      cronHourOptions: this.toSelectOptions(initial.cronHour, hourPresets),
+      cronDayOfMonthOptions: this.toSelectOptions(initial.cronDayOfMonth, dayPresets),
+      cronMonthOptions: this.toSelectOptions(initial.cronMonth, monthPresets),
+      cronDayOfWeekOptions: this.toSelectOptions(initial.cronDayOfWeek, dayOfWeekPresets)
     };
   }
 

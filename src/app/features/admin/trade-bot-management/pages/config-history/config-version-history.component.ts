@@ -94,6 +94,10 @@ export class ConfigVersionHistoryComponent implements OnInit {
         field: 'actions',
         header: 'tradeBot.field.actions',
         type: 'actions',
+        minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.action.viewJson', icon: 'pi pi-code', severity: 'secondary', showLabel: false, onClick: (row) => this.openRaw(row) },
           { label: 'tradeBot.configHistory.compareFrom', icon: 'pi pi-arrow-left', severity: 'info', showLabel: false, onClick: (row) => this.selectedBaseVersion.set(row.versionValue) },

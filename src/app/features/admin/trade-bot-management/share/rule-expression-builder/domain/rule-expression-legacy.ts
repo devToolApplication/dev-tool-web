@@ -1,13 +1,13 @@
 import {
   createRuleExpressionGroup,
   createRuleExpressionRuleRef,
-  normalizeRuleLogicValue
+  normalizeRuleLogicValue,
 } from './rule-expression-factory';
 import { RuleExpressionNode, RuleLogicFormValue } from './rule-expression.models';
 
 export function ruleExpressionFromConfigAndChildRules(
   config: Record<string, unknown> | null | undefined,
-  childRules: Array<Record<string, unknown>> | null | undefined
+  childRules: Array<Record<string, unknown>> | null | undefined,
 ): RuleLogicFormValue {
   const expression = config?.['ruleExpression'];
   const normalized = normalizeRuleLogicValue(expression);
@@ -18,7 +18,7 @@ export function ruleExpressionFromConfigAndChildRules(
 }
 
 export function ruleExpressionFromLegacyChildRules(
-  childRules: Array<Record<string, unknown>> | null | undefined
+  childRules: Array<Record<string, unknown>> | null | undefined,
 ): RuleLogicFormValue {
   const nodes = legacyRuleNodes(childRules ?? []);
   if (!nodes.length) {
@@ -43,8 +43,8 @@ function legacyRuleNodes(childRules: Array<Record<string, unknown>>): RuleExpres
         createRuleExpressionRuleRef(ruleCode, {
           id: `legacy-rule-ref-${index}-${safeId(ruleCode)}`,
           slotCode,
-          params: config
-        })
+          params: config,
+        }),
       );
     }
 
@@ -55,7 +55,10 @@ function legacyRuleNodes(childRules: Array<Record<string, unknown>>): RuleExpres
 
 function arrayRecordValue(value: unknown): Array<Record<string, unknown>> {
   return Array.isArray(value)
-    ? value.filter((item): item is Record<string, unknown> => item !== null && typeof item === 'object' && !Array.isArray(item))
+    ? value.filter(
+        (item): item is Record<string, unknown> =>
+          item !== null && typeof item === 'object' && !Array.isArray(item),
+      )
     : [];
 }
 
@@ -72,4 +75,3 @@ function stringValue(value: unknown): string {
 function safeId(value: string): string {
   return value.replace(/[^a-zA-Z0-9_-]/g, '-');
 }
-

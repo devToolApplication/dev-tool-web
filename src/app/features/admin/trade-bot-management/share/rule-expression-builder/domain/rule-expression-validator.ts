@@ -1,4 +1,4 @@
-import { RuleConfigResponse } from '../../data-access/models/trading-system.model';
+import { RuleConfigResponse } from '../../../data-access/models/trading-system.model';
 import { extractRuleExpressionDependencies } from './rule-expression-dependencies';
 import {
   RuleExpressionConditionNode,
@@ -7,15 +7,15 @@ import {
   RuleExpressionValidationContext,
   RuleExpressionValidationIssue,
   RuleExpressionValidationResult,
-  RuleLogicFormValue
+  RuleLogicFormValue,
 } from './rule-expression.models';
 import { operandValueTypes, operatorDefinition } from './rule-expression-operators';
 
 export function validateRuleExpression(
   value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
-  context: RuleExpressionValidationContext = {}
+  context: RuleExpressionValidationContext = {},
 ): RuleExpressionValidationResult {
-  const root = isNode(value) ? value : value?.root ?? null;
+  const root = isNode(value) ? value : (value?.root ?? null);
   const issues: RuleExpressionValidationIssue[] = [];
 
   if (!root) {
@@ -35,7 +35,7 @@ function validateNode(
   node: RuleExpressionNode,
   context: RuleExpressionValidationContext,
   issues: RuleExpressionValidationIssue[],
-  path: string
+  path: string,
 ): void {
   if (node.disabled) {
     return;
@@ -48,7 +48,7 @@ function validateNode(
         nodeId: node.id,
         path,
         message: 'tradeBot.ruleExpression.validation.groupMinChildren',
-        severity: 'error'
+        severity: 'error',
       });
     }
     if (node.operator === 'XOR' && activeChildren.length !== 2) {
@@ -56,10 +56,12 @@ function validateNode(
         nodeId: node.id,
         path,
         message: 'tradeBot.ruleExpression.validation.xorChildCount',
-        severity: 'error'
+        severity: 'error',
       });
     }
-    node.children.forEach((child, index) => validateNode(child, context, issues, `${path}.${index}`));
+    node.children.forEach((child, index) =>
+      validateNode(child, context, issues, `${path}.${index}`),
+    );
     return;
   }
 
@@ -70,10 +72,12 @@ function validateNode(
         nodeId: node.id,
         path,
         message: 'tradeBot.ruleExpression.validation.notChildCount',
-        severity: 'error'
+        severity: 'error',
       });
     }
-    node.children.forEach((child, index) => validateNode(child, context, issues, `${path}.not.${index}`));
+    node.children.forEach((child, index) =>
+      validateNode(child, context, issues, `${path}.not.${index}`),
+    );
     return;
   }
 
@@ -89,7 +93,7 @@ function validateCondition(
   node: RuleExpressionConditionNode,
   context: RuleExpressionValidationContext,
   issues: RuleExpressionValidationIssue[],
-  path: string
+  path: string,
 ): void {
   const definition = operatorDefinition(node.operator);
   if (!definition) {
@@ -97,7 +101,7 @@ function validateCondition(
       nodeId: node.id,
       path,
       message: 'tradeBot.ruleExpression.validation.operatorRequired',
-      severity: 'error'
+      severity: 'error',
     });
     return;
   }
@@ -109,7 +113,7 @@ function validateCondition(
         nodeId: node.id,
         path: `${path}.operand.${slot.name}`,
         message: 'tradeBot.ruleExpression.validation.operandRequired',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
@@ -120,7 +124,7 @@ function validateCondition(
         nodeId: node.id,
         path: operandPath,
         message: 'tradeBot.ruleExpression.validation.operandRequired',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
@@ -131,7 +135,7 @@ function validateCondition(
         nodeId: node.id,
         path: operandPath,
         message: 'tradeBot.ruleExpression.validation.incompatibleOperand',
-        severity: 'error'
+        severity: 'error',
       });
     }
   });
@@ -144,7 +148,7 @@ function validateCondition(
 function validateRangeOperands(
   node: RuleExpressionConditionNode,
   issues: RuleExpressionValidationIssue[],
-  path: string
+  path: string,
 ): void {
   const min = node.operands[1];
   const max = node.operands[2];
@@ -159,7 +163,7 @@ function validateRangeOperands(
       nodeId: node.id,
       path,
       message: 'tradeBot.ruleExpression.validation.rangeOrder',
-      severity: 'error'
+      severity: 'error',
     });
   }
 }
@@ -169,20 +173,32 @@ function validateOperand(
   nodeId: string,
   context: RuleExpressionValidationContext,
   issues: RuleExpressionValidationIssue[],
-  path: string
+  path: string,
 ): void {
   if (operand.type === 'indicator' || operand.type === 'indicatorOutput') {
     const code = operand.indicatorCode?.trim() ?? '';
     if (!code) {
       return;
     }
-    const indicator = context.indicatorConfigs?.find((item) => item.code === code);
-    if (!indicator) {
-      issues.push({ nodeId, path, message: 'tradeBot.ruleExpression.validation.missingIndicator', severity: 'error' });
-      return;
-    }
-    if (indicator.status === 'INACTIVE' || indicator.status === 'DISABLED') {
-      issues.push({ nodeId, path, message: 'tradeBot.ruleExpression.validation.inactiveIndicator', severity: 'warning' });
+    if (Array.isArray(context.indicatorConfigs)) {
+      const indicator = context.indicatorConfigs.find((item) => item.code === code);
+      if (!indicator) {
+        issues.push({
+          nodeId,
+          path,
+          message: 'tradeBot.ruleExpression.validation.missingIndicator',
+          severity: 'error',
+        });
+        return;
+      }
+      if (indicator.status === 'INACTIVE' || indicator.status === 'DISABLED') {
+        issues.push({
+          nodeId,
+          path,
+          message: 'tradeBot.ruleExpression.validation.inactiveIndicator',
+          severity: 'warning',
+        });
+      }
     }
     return;
   }
@@ -197,11 +213,16 @@ function validateRuleRef(
   nodeId: string,
   context: RuleExpressionValidationContext,
   issues: RuleExpressionValidationIssue[],
-  path: string
+  path: string,
 ): void {
   const code = ruleCode.trim();
   if (!code) {
-    issues.push({ nodeId, path, message: 'tradeBot.ruleExpression.validation.ruleRefRequired', severity: 'error' });
+    issues.push({
+      nodeId,
+      path,
+      message: 'tradeBot.ruleExpression.validation.ruleRefRequired',
+      severity: 'error',
+    });
     return;
   }
 
@@ -210,9 +231,18 @@ function validateRuleRef(
     issues.push({ nodeId, path, message: 'tradeBot.validation.selfChildRule', severity: 'error' });
   }
 
-  const rule = context.ruleConfigs?.find((item) => item.code === code);
+  if (!Array.isArray(context.ruleConfigs)) {
+    return;
+  }
+
+  const rule = context.ruleConfigs.find((item) => item.code === code);
   if (!rule) {
-    issues.push({ nodeId, path, message: 'tradeBot.ruleExpression.validation.missingRuleRef', severity: 'error' });
+    issues.push({
+      nodeId,
+      path,
+      message: 'tradeBot.ruleExpression.validation.missingRuleRef',
+      severity: 'error',
+    });
     return;
   }
 
@@ -221,16 +251,23 @@ function validateRuleRef(
   }
 
   if (rule.status === 'INACTIVE' || rule.status === 'DISABLED') {
-    issues.push({ nodeId, path, message: 'tradeBot.validation.inactiveChildRule', severity: 'warning' });
+    issues.push({
+      nodeId,
+      path,
+      message: 'tradeBot.validation.inactiveChildRule',
+      severity: 'warning',
+    });
   }
 
-  const circularPath = currentRuleCode ? circularDependencyPath(currentRuleCode, code, context.ruleConfigs ?? []) : null;
+  const circularPath = currentRuleCode
+    ? circularDependencyPath(currentRuleCode, code, context.ruleConfigs ?? [])
+    : null;
   if (circularPath) {
     issues.push({
       nodeId,
       path,
       message: `Circular child rule dependency: ${circularPath.join(' -> ')}`,
-      severity: 'error'
+      severity: 'error',
     });
   }
 }
@@ -238,7 +275,7 @@ function validateRuleRef(
 function circularDependencyPath(
   currentCode: string,
   candidateCode: string,
-  ruleConfigs: RuleConfigResponse[]
+  ruleConfigs: RuleConfigResponse[],
 ): string[] | null {
   if (!currentCode || !candidateCode || currentCode === candidateCode) {
     return null;
@@ -251,7 +288,7 @@ function findDependencyPath(
   fromCode: string,
   targetCode: string,
   ruleConfigs: RuleConfigResponse[],
-  visited: Set<string>
+  visited: Set<string>,
 ): string[] | null {
   if (fromCode === targetCode) {
     return [fromCode];
@@ -290,7 +327,9 @@ function findDependencyPath(
 
 function ruleDependencyPaths(rule: RuleConfigResponse): string[][] {
   const expression = rule.config?.['ruleExpression'];
-  const expressionDeps = extractRuleExpressionDependencies(expression as RuleLogicFormValue | RuleExpressionNode | null | undefined).ruleCodes;
+  const expressionDeps = extractRuleExpressionDependencies(
+    expression as RuleLogicFormValue | RuleExpressionNode | null | undefined,
+  ).ruleCodes;
   const childRuleDeps = childRulePaths(rule.childRules);
   const paths = [...expressionDeps.map((code) => [code]), ...childRuleDeps];
   const seen = new Set<string>();
@@ -309,18 +348,15 @@ function childRulePaths(childRules: Array<Record<string, unknown>> | undefined):
   return (childRules ?? []).flatMap((child) => {
     const code = textValue(child['ruleCode'] ?? child['code']);
     const nested = Array.isArray(child['childRules'])
-      ? child['childRules'] as Array<Record<string, unknown>>
+      ? (child['childRules'] as Array<Record<string, unknown>>)
       : Array.isArray(child['children'])
-        ? child['children'] as Array<Record<string, unknown>>
+        ? (child['children'] as Array<Record<string, unknown>>)
         : [];
     const nestedPaths = childRulePaths(nested);
     if (!code) {
       return nestedPaths;
     }
-    return [
-      [code],
-      ...nestedPaths.map((path) => [code, ...path])
-    ];
+    return [[code], ...nestedPaths.map((path) => [code, ...path])];
   });
 }
 
@@ -349,7 +385,9 @@ function operandCompatible(operand: RuleExpressionOperand, allowedValueTypes: st
 }
 
 function constantNumber(operand: RuleExpressionOperand): number | null {
-  return operand.type === 'constant' && operand.valueType === 'number' && typeof operand.value === 'number'
+  return operand.type === 'constant' &&
+    operand.valueType === 'number' &&
+    typeof operand.value === 'number'
     ? operand.value
     : null;
 }
@@ -361,7 +399,7 @@ function validationResult(issues: RuleExpressionValidationIssue[]): RuleExpressi
     valid: errors.length === 0,
     issues,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -369,6 +407,8 @@ function textValue(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function isNode(value: RuleLogicFormValue | RuleExpressionNode | null | undefined): value is RuleExpressionNode {
+function isNode(
+  value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
+): value is RuleExpressionNode {
   return Boolean(value && typeof value === 'object' && 'type' in value);
 }

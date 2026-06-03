@@ -1,5 +1,17 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  computed,
+  signal,
+} from '@angular/core';
+import {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../../../data-access/models/trading-system.model';
 import {
   addRuleExpressionChild,
   cloneRuleLogicValue,
@@ -13,32 +25,32 @@ import {
   normalizeRuleLogicValue,
   removeRuleExpressionNode,
   replaceRuleExpressionNode,
-  wrapRuleExpressionNode
-} from './rule-expression-factory';
-import { extractRuleExpressionDependencies } from './rule-expression-dependencies';
+  wrapRuleExpressionNode,
+} from '../../domain/rule-expression-factory';
+import { extractRuleExpressionDependencies } from '../../domain/rule-expression-dependencies';
 import {
   RuleExpressionDependencySummary,
   RuleExpressionGroupOperator,
   RuleExpressionNode,
   RuleExpressionNodeType,
   RuleExpressionValidationResult,
-  RuleLogicFormValue
-} from './rule-expression.models';
-import { printRuleExpression } from './rule-expression-printer';
-import { validateRuleExpression } from './rule-expression-validator';
+  RuleLogicFormValue,
+} from '../../domain/rule-expression.models';
+import { printRuleExpression } from '../../domain/rule-expression-printer';
+import { validateRuleExpression } from '../../domain/rule-expression-validator';
 
 const EMPTY_VALIDATION: RuleExpressionValidationResult = {
   valid: false,
   issues: [{ message: 'tradeBot.ruleExpression.validation.rootRequired', severity: 'error' }],
   errors: [{ message: 'tradeBot.ruleExpression.validation.rootRequired', severity: 'error' }],
-  warnings: []
+  warnings: [],
 };
 
 @Component({
   selector: 'app-rule-expression-builder',
   standalone: false,
   templateUrl: './rule-expression-builder.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleExpressionBuilderComponent implements OnChanges {
   @Input() value: RuleLogicFormValue | null | undefined;
@@ -57,13 +69,18 @@ export class RuleExpressionBuilderComponent implements OnChanges {
   readonly validation = signal<RuleExpressionValidationResult>(EMPTY_VALIDATION);
 
   readonly preview = computed(() => printRuleExpression(this.expression()));
-  readonly dependencies = computed<RuleExpressionDependencySummary>(() => extractRuleExpressionDependencies(this.expression()));
-  readonly dependencyTotal = computed(() =>
-    this.dependencies().indicatorCodes.length +
-    this.dependencies().ruleCodes.length +
-    this.dependencies().priceSeries.length
+  readonly dependencies = computed<RuleExpressionDependencySummary>(() =>
+    extractRuleExpressionDependencies(this.expression()),
   );
-  readonly selectedNode = computed(() => findRuleExpressionNode(this.expression().root, this.selectedNodeId()));
+  readonly dependencyTotal = computed(
+    () =>
+      this.dependencies().indicatorCodes.length +
+      this.dependencies().ruleCodes.length +
+      this.dependencies().priceSeries.length,
+  );
+  readonly selectedNode = computed(() =>
+    findRuleExpressionNode(this.expression().root, this.selectedNodeId()),
+  );
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
@@ -116,12 +133,17 @@ export class RuleExpressionBuilderComponent implements OnChanges {
     this.commit(next, node.id);
   }
 
-  onAddChild(event: { parentId: string; type: RuleExpressionNodeType; operator?: RuleExpressionGroupOperator }): void {
-    const child = event.type === 'ruleRef'
-      ? createRuleExpressionRuleRef(this.defaultRuleCode())
-      : event.type === 'group'
-        ? createRuleExpressionGroup(event.operator ?? 'AND')
-        : createRuleExpressionNode(event.type);
+  onAddChild(event: {
+    parentId: string;
+    type: RuleExpressionNodeType;
+    operator?: RuleExpressionGroupOperator;
+  }): void {
+    const child =
+      event.type === 'ruleRef'
+        ? createRuleExpressionRuleRef(this.defaultRuleCode())
+        : event.type === 'group'
+          ? createRuleExpressionGroup(event.operator ?? 'AND')
+          : createRuleExpressionNode(event.type);
     const next = addRuleExpressionChild(this.expression().root, event.parentId, child);
     this.commit(next, child.id);
   }
@@ -148,8 +170,17 @@ export class RuleExpressionBuilderComponent implements OnChanges {
     this.onNodeChange({ ...target, disabled: !target.disabled });
   }
 
-  onWrapNode(event: { nodeId: string; wrapperType: 'group' | 'not'; operator?: RuleExpressionGroupOperator }): void {
-    const next = wrapRuleExpressionNode(this.expression().root, event.nodeId, event.wrapperType, event.operator ?? 'AND');
+  onWrapNode(event: {
+    nodeId: string;
+    wrapperType: 'group' | 'not';
+    operator?: RuleExpressionGroupOperator;
+  }): void {
+    const next = wrapRuleExpressionNode(
+      this.expression().root,
+      event.nodeId,
+      event.wrapperType,
+      event.operator ?? 'AND',
+    );
     this.commit(next, event.nodeId);
   }
 
@@ -201,7 +232,7 @@ export class RuleExpressionBuilderComponent implements OnChanges {
       indicatorConfigs: this.indicatorConfigs,
       ruleConfigs: this.ruleConfigs,
       currentRuleCode: this.currentRuleCode,
-      currentRuleId: this.currentRuleId
+      currentRuleId: this.currentRuleId,
     });
     this.validation.set(result);
     this.validationChange.emit(result);
@@ -209,9 +240,11 @@ export class RuleExpressionBuilderComponent implements OnChanges {
   }
 
   private defaultRuleCode(): string {
-    return this.ruleConfigs
-      .filter((item) => item.id !== this.currentRuleId)
-      .filter((item) => item.status !== 'INACTIVE' && item.status !== 'DISABLED')
-      .sort((a, b) => a.code.localeCompare(b.code))[0]?.code ?? '';
+    return (
+      this.ruleConfigs
+        .filter((item) => item.id !== this.currentRuleId)
+        .filter((item) => item.status !== 'INACTIVE' && item.status !== 'DISABLED')
+        .sort((a, b) => a.code.localeCompare(b.code))[0]?.code ?? ''
+    );
   }
 }

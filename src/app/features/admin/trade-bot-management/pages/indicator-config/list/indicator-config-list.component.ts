@@ -51,6 +51,7 @@ export class IndicatorConfigListComponent extends BasePagedList<IndicatorConfigR
         minWidth: '12rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.action.edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           { label: 'tradeBot.action.versions', icon: 'pi pi-history', severity: 'secondary', onClick: (row) => this.goVersions(row.id) },

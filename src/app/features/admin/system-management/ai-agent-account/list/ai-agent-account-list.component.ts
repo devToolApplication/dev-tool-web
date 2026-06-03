@@ -75,6 +75,7 @@ export class AiAgentAccountListComponent extends BasePagedList<AgentAccountRespo
         minWidth: '16rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           { label: 'login', icon: 'pi pi-sign-in', severity: 'warn', onClick: (row) => this.doLogin(row) },

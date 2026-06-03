@@ -79,6 +79,10 @@ export class MarketDataCandleTabComponent {
         field: 'actions',
         header: 'tradeBot.field.actions',
         type: 'actions',
+        minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.action.viewRaw', icon: 'pi pi-code', severity: 'info', showLabel: false, onClick: (row) => this.onViewRaw(row) },
           { label: 'tradeBot.action.viewGapsAround', icon: 'pi pi-search', severity: 'secondary', showLabel: false, onClick: (row) => this.viewGapsAround.emit(row) }

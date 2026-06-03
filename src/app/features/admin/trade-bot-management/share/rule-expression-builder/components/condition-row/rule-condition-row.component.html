@@ -72,7 +72,7 @@
             [label]="param.label"
             [options]="[
               { label: 'true', value: true },
-              { label: 'false', value: false }
+              { label: 'false', value: false },
             ]"
             [value]="$any(quickParamValue(param))"
             [disabled]="readonlyOrDisabled"
@@ -93,19 +93,59 @@
 
   @if (moreOpen()) {
     <div class="rule-node-menu" role="menu">
-      <app-button icon="pi pi-sitemap" label="tradeBot.ruleExpression.action.wrapAnd" severity="secondary" [text]="true" (buttonClick)="wrap('AND')"></app-button>
-      <app-button icon="pi pi-share-alt" label="tradeBot.ruleExpression.action.wrapOr" severity="secondary" [text]="true" (buttonClick)="wrap('OR')"></app-button>
-      <app-button icon="pi pi-code" label="tradeBot.ruleExpression.action.wrapXor" severity="secondary" [text]="true" (buttonClick)="wrap('XOR')"></app-button>
-      <app-button icon="pi pi-ban" label="tradeBot.ruleExpression.action.wrapNot" severity="secondary" [text]="true" (buttonClick)="wrapNot()"></app-button>
-      <app-button icon="pi pi-copy" label="tradeBot.ruleExpression.action.duplicate" severity="secondary" [text]="true" (buttonClick)="duplicate()"></app-button>
+      <app-button
+        icon="pi pi-sitemap"
+        label="tradeBot.ruleExpression.action.wrapAnd"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="wrap('AND')"
+      ></app-button>
+      <app-button
+        icon="pi pi-share-alt"
+        label="tradeBot.ruleExpression.action.wrapOr"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="wrap('OR')"
+      ></app-button>
+      <app-button
+        icon="pi pi-code"
+        label="tradeBot.ruleExpression.action.wrapXor"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="wrap('XOR')"
+      ></app-button>
+      <app-button
+        icon="pi pi-ban"
+        label="tradeBot.ruleExpression.action.wrapNot"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="wrapNot()"
+      ></app-button>
+      <app-button
+        icon="pi pi-copy"
+        label="tradeBot.ruleExpression.action.duplicate"
+        severity="secondary"
+        [text]="true"
+        (buttonClick)="duplicate()"
+      ></app-button>
       <app-button
         [icon]="node.disabled ? 'pi pi-eye' : 'pi pi-eye-slash'"
-        [label]="node.disabled ? 'tradeBot.ruleExpression.action.enable' : 'tradeBot.ruleExpression.action.disable'"
+        [label]="
+          node.disabled
+            ? 'tradeBot.ruleExpression.action.enable'
+            : 'tradeBot.ruleExpression.action.disable'
+        "
         severity="secondary"
         [text]="true"
         (buttonClick)="requestToggleDisabled()"
       ></app-button>
-      <app-button icon="pi pi-trash" label="tradeBot.action.delete" severity="danger" [text]="true" (buttonClick)="remove()"></app-button>
+      <app-button
+        icon="pi pi-trash"
+        label="tradeBot.action.delete"
+        severity="danger"
+        [text]="true"
+        (buttonClick)="remove()"
+      ></app-button>
     </div>
   }
 

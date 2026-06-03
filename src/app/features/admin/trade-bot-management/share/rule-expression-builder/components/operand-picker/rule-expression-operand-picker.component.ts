@@ -1,15 +1,18 @@
 import { Component, ElementRef, EventEmitter, Input, Output, signal, inject } from '@angular/core';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
+import {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../../../data-access/models/trading-system.model';
 import {
   RuleExpressionConstantType,
   RuleExpressionOperand,
   RuleExpressionOperandValueType,
-} from './rule-expression.models';
+} from '../../domain/rule-expression.models';
 import {
   RULE_EXPRESSION_BOOLEAN_OPTIONS,
   RULE_EXPRESSION_CONSTANT_TYPES,
-} from './rule-expression-operators';
-import { printRuleExpressionOperand } from './rule-expression-printer';
+} from '../../domain/rule-expression-operators';
+import { printRuleExpressionOperand } from '../../domain/rule-expression-printer';
 
 interface OperandPickerOption {
   id: string;
@@ -30,7 +33,7 @@ interface OperandPickerGroup {
   selector: 'app-rule-expression-operand-picker',
   standalone: false,
   templateUrl: './rule-expression-operand-picker.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleExpressionOperandPickerComponent {
   @Input() operand: RuleExpressionOperand | null | undefined;
@@ -151,16 +154,12 @@ export class RuleExpressionOperandPickerComponent {
       valueType: 'number',
       value: 0,
       ...this.constantOperand,
-      ...partial
+      ...partial,
     });
   }
 
   private allOptions(): OperandPickerOption[] {
-    return [
-      ...this.indicatorOptions(),
-      ...this.ruleOptions(),
-      ...this.constantOptions()
-    ];
+    return [...this.indicatorOptions(), ...this.ruleOptions(), ...this.constantOptions()];
   }
 
   private indicatorOptions(): OperandPickerOption[] {
@@ -169,12 +168,13 @@ export class RuleExpressionOperandPickerComponent {
         id: `indicator-${item.code}`,
         groupLabel: item.group || 'tradeBot.ruleExpression.operandGroup.indicators',
         label: item.code,
-        meta: item.status === 'ACTIVE'
-          ? 'tradeBot.ruleExpression.operandMeta.indicatorActive'
-          : 'tradeBot.ruleExpression.operandMeta.indicator',
+        meta:
+          item.status === 'ACTIVE'
+            ? 'tradeBot.ruleExpression.operandMeta.indicatorActive'
+            : 'tradeBot.ruleExpression.operandMeta.indicator',
         value: { type: 'indicator' as const, indicatorCode: item.code },
         valueTypes: ['numericSeries'] as RuleExpressionOperandValueType[],
-        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
+        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
       }))
       .sort((a, b) => a.groupLabel.localeCompare(b.groupLabel) || a.label.localeCompare(b.label));
   }
@@ -186,12 +186,13 @@ export class RuleExpressionOperandPickerComponent {
         id: `rule-${item.code}`,
         groupLabel: item.group || 'tradeBot.ruleExpression.operandGroup.rules',
         label: item.code,
-        meta: item.status === 'ACTIVE'
-          ? 'tradeBot.ruleExpression.operandMeta.ruleActive'
-          : 'tradeBot.ruleExpression.operandMeta.rule',
+        meta:
+          item.status === 'ACTIVE'
+            ? 'tradeBot.ruleExpression.operandMeta.ruleActive'
+            : 'tradeBot.ruleExpression.operandMeta.rule',
         value: { type: 'ruleRef' as const, ruleCode: item.code },
         valueTypes: ['ruleValue'] as RuleExpressionOperandValueType[],
-        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
+        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
       }))
       .sort((a, b) => a.groupLabel.localeCompare(b.groupLabel) || a.label.localeCompare(b.label));
   }
@@ -209,22 +210,22 @@ export class RuleExpressionOperandPickerComponent {
         label: 'tradeBot.ruleExpression.constant.number',
         valueType: 'number',
         value: 0,
-        valueTypes: ['number']
+        valueTypes: ['number'],
       },
       {
         id: 'constant-boolean',
         label: 'tradeBot.ruleExpression.constant.boolean',
         valueType: 'boolean',
         value: false,
-        valueTypes: ['boolean']
+        valueTypes: ['boolean'],
       },
       {
         id: 'constant-string',
         label: 'tradeBot.ruleExpression.constant.string',
         valueType: 'string',
         value: '',
-        valueTypes: ['string']
-      }
+        valueTypes: ['string'],
+      },
     ];
 
     return options.map((item) => ({
@@ -233,7 +234,7 @@ export class RuleExpressionOperandPickerComponent {
       label: item.label,
       meta: 'tradeBot.ruleExpression.operandMeta.constant',
       value: { type: 'constant', valueType: item.valueType, value: item.value },
-      valueTypes: item.valueTypes
+      valueTypes: item.valueTypes,
     }));
   }
 

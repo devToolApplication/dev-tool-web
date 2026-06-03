@@ -11,6 +11,7 @@ export interface AiAgentSecretResponse {
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;
+  type?: string;
   status: UploadStorageStatus;
 }
 
@@ -23,6 +24,7 @@ export interface AiAgentSecretCreateDto {
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;
+  type?: string;
   status: UploadStorageStatus;
 }
 
@@ -35,5 +37,6 @@ export interface AiAgentSecretUpdateDto {
   enabled?: boolean;
   rotationVersion?: number;
   description?: string;
+  type?: string;
   status?: UploadStorageStatus;
 }

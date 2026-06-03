@@ -77,6 +77,7 @@ export class AiAgentAuthProfileListComponent extends BasePagedList<AiAgentAuthPr
         minWidth: '14rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.id) },
           { label: 'login', icon: 'pi pi-sign-in', severity: 'warn', onClick: (row) => this.doLogin(row) },

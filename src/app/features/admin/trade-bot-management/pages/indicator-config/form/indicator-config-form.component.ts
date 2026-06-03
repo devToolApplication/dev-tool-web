@@ -80,12 +80,14 @@ export class IndicatorConfigFormComponent implements OnInit {
   }
 
   openPreview(): void {
+    // fallback to formInitialValue when user hasn't changed the form yet
+    const source = Object.keys(this.lastModel).length ? this.lastModel : this.formInitialValue;
     this.previewPayload.set({
-      executor: stringValue(this.lastModel['executor']),
-      executorVersion: stringValue(this.lastModel['executorVersion']),
-      config: this.lastModel['config'] ?? {},
-      children: this.lastModel['children'] ?? [],
-      overlay: this.lastModel['overlay'] ?? {}
+      executor: stringValue(source['executor']),
+      executorVersion: stringValue(source['executorVersion']),
+      config: source['config'] ?? {},
+      children: source['children'] ?? [],
+      overlay: source['overlay'] ?? {}
     });
     this.showPreview.set(true);
   }
@@ -231,9 +233,8 @@ export class IndicatorConfigFormComponent implements OnInit {
   private applyExistingConfig(value: IndicatorConfigResponse): void {
     const executorVersion = this.resolveVersion(value.executor, value.executorVersion);
     const initialValue = { ...this.toFormValue(value), executorVersion };
-    const template = hasFormTemplateFields(value.formTemplate)
-      ? cloneFormConfig(value.formTemplate)
-      : this.templateForExecutor(value.executor);
+    const template = this.templateForExecutor(value.executor)
+      ?? (hasFormTemplateFields(value.formTemplate) ? cloneFormConfig(value.formTemplate) : undefined);
     this.applyTemplateState(initialValue, template, value.executor);
   }
 

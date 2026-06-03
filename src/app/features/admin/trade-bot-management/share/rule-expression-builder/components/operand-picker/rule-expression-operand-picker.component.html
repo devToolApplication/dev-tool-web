@@ -6,7 +6,11 @@
       severity="secondary"
       [text]="!hasValue"
       [disabled]="readonlyOrDisabled"
-      [styleClass]="hasValue ? 'rule-operand-picker__trigger' : 'rule-operand-picker__trigger rule-operand-picker__trigger--empty'"
+      [styleClass]="
+        hasValue
+          ? 'rule-operand-picker__trigger'
+          : 'rule-operand-picker__trigger rule-operand-picker__trigger--empty'
+      "
       [ariaLabel]="label"
       (buttonClick)="toggleOpen()"
     ></app-button>

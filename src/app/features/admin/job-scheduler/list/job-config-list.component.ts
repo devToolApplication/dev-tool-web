@@ -187,6 +187,7 @@ export class JobConfigListComponent extends BasePagedList<JobConfigResponse> imp
           minWidth: '22rem',
           frozen: true,
           alignFrozen: 'right',
+          hideable: false,
           actions: [
             { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row) => this.goEdit(row.code) },
             { label: 'jobScheduler.action.runs', icon: 'pi pi-history', severity: 'secondary', onClick: (row) => this.goRuns(row.code) },

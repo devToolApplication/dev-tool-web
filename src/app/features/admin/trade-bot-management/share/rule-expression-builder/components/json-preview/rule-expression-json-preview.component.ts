@@ -4,7 +4,7 @@ import { Component, Input, signal } from '@angular/core';
   selector: 'app-rule-expression-json-preview',
   standalone: false,
   templateUrl: './rule-expression-json-preview.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleExpressionJsonPreviewComponent {
   @Input() value: unknown;
@@ -23,4 +23,3 @@ export class RuleExpressionJsonPreviewComponent {
     }
   }
 }
-

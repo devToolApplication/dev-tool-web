@@ -1,5 +1,8 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
+import {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../../../data-access/models/trading-system.model';
 import {
   RuleExpressionConditionNode,
   RuleExpressionGroupNode,
@@ -7,15 +10,15 @@ import {
   RuleExpressionNode,
   RuleExpressionNodeType,
   RuleExpressionRuleRefNode,
-  RuleExpressionValidationIssue
-} from './rule-expression.models';
-import { printRuleExpressionOperand } from './rule-expression-printer';
+  RuleExpressionValidationIssue,
+} from '../../domain/rule-expression.models';
+import { printRuleExpressionOperand } from '../../domain/rule-expression-printer';
 
 @Component({
   selector: 'app-rule-expression-node',
   standalone: false,
   templateUrl: './rule-expression-node.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleExpressionNodeComponent {
   @Input({ required: true }) node!: RuleExpressionNode;
@@ -69,7 +72,7 @@ export class RuleExpressionNodeComponent {
   readonly groupOperatorOptions: Array<{ label: string; value: RuleExpressionGroupOperator }> = [
     { label: 'tradeBot.ruleExpression.group.AND', value: 'AND' },
     { label: 'tradeBot.ruleExpression.group.OR', value: 'OR' },
-    { label: 'tradeBot.ruleExpression.group.XOR', value: 'XOR' }
+    { label: 'tradeBot.ruleExpression.group.XOR', value: 'XOR' },
   ];
 
   get selected(): boolean {
@@ -113,7 +116,7 @@ export class RuleExpressionNodeComponent {
       .map((item) => ({
         label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
         value: item.code,
-        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED'
+        disabled: item.status === 'INACTIVE' || item.status === 'DISABLED',
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }

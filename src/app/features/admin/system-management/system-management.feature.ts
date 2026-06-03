@@ -16,6 +16,7 @@ import { StorageSecretFormComponent } from './secret-management/storage-system/f
 import { StorageSecretListComponent } from './secret-management/storage-system/list/storage-secret-list.component';
 import { TradeBotSecretFormComponent } from './secret-management/trade-bot-system/form/trade-bot-secret-form.component';
 import { TradeBotSecretListComponent } from './secret-management/trade-bot-system/list/trade-bot-secret-list.component';
+import { SecretManagementComponent } from './secret-management/secret-management.component';
 
 import { AiAgentModelListComponent } from './ai-agent-model/list/ai-agent-model-list.component';
 import { AiAgentModelFormComponent } from './ai-agent-model/form/ai-agent-model-form.component';
@@ -36,6 +37,7 @@ import { AiAgentWorkflowMonitorDetailComponent } from './ai-agent-workflow-monit
 import { AiAgentExecutionComponent } from './ai-agent-execution/ai-agent-execution.component';
 
 export const SYSTEM_MANAGEMENT_FEATURE_COMPONENTS = [
+  SecretManagementComponent,
   StorageSecretListComponent,
   StorageSecretFormComponent,
   StorageConfigListComponent,
@@ -157,7 +159,7 @@ export const systemManagementRoutes: Routes = [
   {
     path: 'admin/ai-agent/secrets',
     children: [
-      { path: '', component: AiAgentSecretListComponent },
+      { path: '', redirectTo: '/admin/system/secrets?tab=ai-agent', pathMatch: 'full' },
       { path: 'create', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: AiAgentSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ],
@@ -178,7 +180,7 @@ export const systemManagementRoutes: Routes = [
   {
     path: 'admin/file-storage/secrets',
     children: [
-      { path: '', component: StorageSecretListComponent },
+      { path: '', redirectTo: '/admin/system/secrets?tab=file-storage', pathMatch: 'full' },
       { path: 'create', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: StorageSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ],
@@ -199,12 +201,22 @@ export const systemManagementRoutes: Routes = [
   {
     path: 'admin/trade-bot/secrets',
     children: [
-      { path: '', component: TradeBotSecretListComponent },
+      { path: '', redirectTo: '/admin/system/secrets?tab=trade-bot', pathMatch: 'full' },
       { path: 'create', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] },
       { path: 'edit/:id', component: TradeBotSecretFormComponent, canDeactivate: [unsavedChangesGuard] }
     ],
     canActivate: [permissionGuard],
     data: { permissions: ['TRADE_BOT_SECRET_WRITE'] }
+  },
+  // Unified Secret Management Route
+  {
+    path: 'admin/system/secrets',
+    component: SecretManagementComponent,
+    canActivate: [permissionGuard],
+    data: {
+      permissions: ['AI_AGENT_SECRET_WRITE', 'TRADE_BOT_SECRET_WRITE', 'FILE_STORAGE_SECRET_WRITE', 'JOB_SCHEDULER_READ'],
+      permissionsMode: 'any'
+    }
   },
   // Devtools
   {

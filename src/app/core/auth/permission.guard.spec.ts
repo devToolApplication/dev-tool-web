@@ -1,8 +1,8 @@
-import { APP_ROLE_PERMISSIONS, AppRole, DEVELOPER_GROUP_ROLES } from './permission.service';
+﻿import { APP_ROLE_PERMISSIONS, AppRole, DEVELOPER_GROUP_ROLES } from './permission.service';
 
 describe('permissionGuard logic', () => {
   it('guard allows when no permissions required', () => {
-    const permissions: string[] | undefined = undefined;
+    const permissions = undefined as unknown as string[] | undefined;
     expect(!permissions?.length).toBe(true);
   });
 

@@ -31,7 +31,7 @@ export class CandleChartOverlayMapper {
         }
       });
 
-      const meta = this.resolveIndicatorMeta(code);
+      const meta = this.resolveIndicatorMetaPublic(code);
       return [
         {
           code,
@@ -158,7 +158,7 @@ export class CandleChartOverlayMapper {
     return Number.isNaN(numericValue) ? null : numericValue;
   }
 
-  private resolveIndicatorMeta(code: string): {
+  resolveIndicatorMetaPublic(code: string): {
     pane: CandleChartIndicatorPane;
     type: CandleChartIndicatorType;
     color: string;
@@ -176,6 +176,12 @@ export class CandleChartOverlayMapper {
     }
     if (normalized.includes('rsi')) {
       return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-violet)' };
+    }
+    if (normalized.includes('atr')) {
+      return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-warning)' };
+    }
+    if (normalized.includes('stoch') || normalized.includes('cci') || normalized.includes('adx') || normalized.includes('obv') || normalized.includes('mfi')) {
+      return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-info)' };
     }
     if (normalized.includes('bb') || normalized.includes('bollinger')) {
       return { pane: 'MAIN', type: 'LINE', color: 'var(--app-chart-primary)' };

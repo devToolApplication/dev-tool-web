@@ -5,6 +5,7 @@ export interface TradeBotSecretResponse {
   code: string;
   secretValue: string;
   description?: string;
+  type?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETE';
 }
 
@@ -14,6 +15,7 @@ export interface TradeBotSecretCreateDto {
   code: string;
   secretValue: string;
   description?: string;
+  type?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETE';
 }
 
@@ -23,5 +25,6 @@ export interface TradeBotSecretUpdateDto {
   code?: string;
   secretValue?: string;
   description?: string;
+  type?: string;
   status?: 'ACTIVE' | 'INACTIVE' | 'DELETE';
 }

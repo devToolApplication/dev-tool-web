@@ -164,8 +164,10 @@ describe('RuleConfigFormComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
+    expect(component.ruleExpressionValidation().valid).toBe(false);
     component.openPreview();
 
+    expect(component.showPreview()).toBe(true);
     expect(component.previewPayload()).toEqual(
       expect.objectContaining({
         executor: 'TREND',

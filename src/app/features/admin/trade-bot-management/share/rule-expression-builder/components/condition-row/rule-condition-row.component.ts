@@ -1,26 +1,29 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { IndicatorConfigResponse, RuleConfigResponse } from '../../data-access/models/trading-system.model';
-import { createConstantOperand } from './rule-expression-factory';
+import {
+  IndicatorConfigResponse,
+  RuleConfigResponse,
+} from '../../../../data-access/models/trading-system.model';
+import { createConstantOperand } from '../../domain/rule-expression-factory';
 import {
   RuleExpressionConditionNode,
   RuleExpressionConditionOperator,
   RuleExpressionGroupOperator,
   RuleExpressionOperand,
-  RuleExpressionValidationIssue
-} from './rule-expression.models';
+  RuleExpressionValidationIssue,
+} from '../../domain/rule-expression.models';
 import {
   RULE_EXPRESSION_OPERATOR_CATALOG,
   RuleExpressionOperatorSlot,
   RuleExpressionQuickParamDefinition,
   operandValueTypes,
-  operatorDefinition
-} from './rule-expression-operators';
+  operatorDefinition,
+} from '../../domain/rule-expression-operators';
 
 @Component({
   selector: 'app-rule-condition-row',
   standalone: false,
   templateUrl: './rule-condition-row.component.html',
-  styleUrl: './rule-expression-builder.component.css'
+  styleUrl: '../../styles/rule-expression-builder.component.css',
 })
 export class RuleConditionRowComponent {
   @Input({ required: true }) node!: RuleExpressionConditionNode;
@@ -46,7 +49,7 @@ export class RuleConditionRowComponent {
   readonly moreOpen = signal(false);
   readonly operatorOptions = RULE_EXPRESSION_OPERATOR_CATALOG.map((item) => ({
     label: item.label,
-    value: item.value
+    value: item.value,
   }));
 
   get selected(): boolean {
@@ -94,18 +97,19 @@ export class RuleConditionRowComponent {
       if (current && this.operandCompatible(current, slot)) {
         return [current];
       }
-      const fallback = slot.name === 'min'
-        ? createConstantOperand(0)
-        : slot.name === 'max'
-          ? createConstantOperand(1)
-          : null;
+      const fallback =
+        slot.name === 'min'
+          ? createConstantOperand(0)
+          : slot.name === 'max'
+            ? createConstantOperand(1)
+            : null;
       return fallback ? [fallback] : [];
     });
     this.emitChange({
       ...this.node,
       operator: value,
       operands,
-      params: this.paramsWithQuickDefaults(value, this.node.params)
+      params: this.paramsWithQuickDefaults(value, this.node.params),
     });
   }
 
@@ -123,14 +127,17 @@ export class RuleConditionRowComponent {
     return null;
   }
 
-  updateQuickParam(param: RuleExpressionQuickParamDefinition, value: number | string | boolean | null): void {
+  updateQuickParam(
+    param: RuleExpressionQuickParamDefinition,
+    value: number | string | boolean | null,
+  ): void {
     const nextValue = value ?? param.defaultValue;
     this.emitChange({
       ...this.node,
       params: {
         ...(this.node.params ?? {}),
-        [param.key]: nextValue
-      }
+        [param.key]: nextValue,
+      },
     });
   }
 
@@ -175,22 +182,28 @@ export class RuleConditionRowComponent {
     }
   }
 
-  private operandCompatible(operand: RuleExpressionOperand, slot: RuleExpressionOperatorSlot): boolean {
+  private operandCompatible(
+    operand: RuleExpressionOperand,
+    slot: RuleExpressionOperatorSlot,
+  ): boolean {
     return operandValueTypes(operand).some((type) => slot.allowedValueTypes.includes(type));
   }
 
   private paramsWithQuickDefaults(
     operator: RuleExpressionConditionOperator,
-    params: Record<string, unknown> | undefined
+    params: Record<string, unknown> | undefined,
   ): Record<string, unknown> | undefined {
     const quickParams = operatorDefinition(operator)?.quickParams ?? [];
     if (!quickParams.length) {
       return params;
     }
-    return quickParams.reduce<Record<string, unknown>>((next, item) => {
-      next[item.key] = next[item.key] ?? item.defaultValue;
-      return next;
-    }, { ...(params ?? {}) });
+    return quickParams.reduce<Record<string, unknown>>(
+      (next, item) => {
+        next[item.key] = next[item.key] ?? item.defaultValue;
+        return next;
+      },
+      { ...(params ?? {}) },
+    );
   }
 
   private isConditionOperator(value: unknown): value is RuleExpressionConditionOperator {

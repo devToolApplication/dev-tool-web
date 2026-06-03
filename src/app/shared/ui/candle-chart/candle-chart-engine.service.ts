@@ -281,11 +281,9 @@ export class CandleChartEngineService {
     const commonOptions = {
       priceLineVisible: false,
       lastValueVisible: input.config.showOverlayLabels && input.config.showPriceAxisLabels,
-      priceFormat: {
-        type: 'price' as const,
-        precision: 2,
-        minMove: 0.01,
-      },
+      priceFormat: isSubchart
+        ? { type: 'price' as const, precision: 0, minMove: 1 }
+        : { type: 'price' as const, precision: 2, minMove: 0.01 },
       title: input.config.showOverlayLabels ? indicator.name : '',
     };
 

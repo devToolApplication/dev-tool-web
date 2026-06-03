@@ -104,6 +104,9 @@ export class BacktestDetailComponent implements OnInit {
         header: 'tradeBot.field.actions',
         type: 'actions',
         minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.action.detail', icon: 'pi pi-eye', severity: 'info', showLabel: false, onClick: (row) => this.openTrade(row) },
           { label: 'tradeBot.action.trace', icon: 'pi pi-sitemap', severity: 'secondary', showLabel: false, onClick: (row) => this.loadTrace(row.tradeId) }

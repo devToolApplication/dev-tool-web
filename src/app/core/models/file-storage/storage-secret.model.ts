@@ -7,6 +7,7 @@ export interface StorageSecretResponse {
   code: string;
   secretValue: string;
   description?: string;
+  type?: string;
   status: UploadStorageStatus;
 }
 
@@ -16,6 +17,7 @@ export interface StorageSecretCreateDto {
   code: string;
   secretValue: string;
   description?: string;
+  type?: string;
   status: UploadStorageStatus;
 }
 
@@ -25,5 +27,6 @@ export interface StorageSecretUpdateDto {
   code?: string;
   secretValue?: string;
   description?: string;
+  type?: string;
   status?: UploadStorageStatus;
 }

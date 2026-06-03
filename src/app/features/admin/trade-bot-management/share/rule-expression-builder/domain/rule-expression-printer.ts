@@ -2,12 +2,14 @@ import {
   RuleExpressionConditionNode,
   RuleExpressionNode,
   RuleExpressionOperand,
-  RuleLogicFormValue
+  RuleLogicFormValue,
 } from './rule-expression.models';
 import { operatorDefinition } from './rule-expression-operators';
 
-export function printRuleExpression(value: RuleLogicFormValue | RuleExpressionNode | null | undefined): string {
-  const root = isNode(value) ? value : value?.root ?? null;
+export function printRuleExpression(
+  value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
+): string {
+  const root = isNode(value) ? value : (value?.root ?? null);
   return root ? printNode(root, false) : '';
 }
 
@@ -15,7 +17,9 @@ export function printRuleExpressionNode(node: RuleExpressionNode): string {
   return printNode(node, false);
 }
 
-export function printRuleExpressionOperand(operand: RuleExpressionOperand | null | undefined): string {
+export function printRuleExpressionOperand(
+  operand: RuleExpressionOperand | null | undefined,
+): string {
   if (!operand) {
     return '?';
   }
@@ -25,7 +29,9 @@ export function printRuleExpressionOperand(operand: RuleExpressionOperand | null
   }
   if (operand.type === 'indicatorOutput') {
     const code = operand.indicatorCode || '?';
-    return !operand.outputName || operand.outputName === 'VALUE' ? code : `${code}.${operand.outputName}`;
+    return !operand.outputName || operand.outputName === 'VALUE'
+      ? code
+      : `${code}.${operand.outputName}`;
   }
   if (operand.type === 'priceSeries') {
     return operand.series ? printPriceSeries(operand.series) : '?';
@@ -93,6 +99,8 @@ function printPriceSeries(series: string): string {
   return series;
 }
 
-function isNode(value: RuleLogicFormValue | RuleExpressionNode | null | undefined): value is RuleExpressionNode {
+function isNode(
+  value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
+): value is RuleExpressionNode {
   return Boolean(value && typeof value === 'object' && 'type' in value);
 }

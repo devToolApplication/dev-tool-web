@@ -16,13 +16,6 @@ import { JOB_SECRET_ROUTES } from '../job-secret.constants';
   templateUrl: './job-secret-list.component.html'
 })
 export class JobSecretListComponent extends BasePagedList<SecretResponse> implements OnInit {
-  readonly activeTab = signal<SecretType>('PLAINTEXT');
-
-  readonly tabs: { label: string; value: SecretType }[] = [
-    { label: 'jobSecret.tab.plaintext', value: 'PLAINTEXT' },
-    { label: 'jobSecret.tab.keycloak', value: 'KEYCLOAK_CLIENT_CREDENTIALS' }
-  ];
-
   readonly tableConfig: TableConfig = this.buildTableConfig();
 
   constructor(
@@ -40,13 +33,8 @@ export class JobSecretListComponent extends BasePagedList<SecretResponse> implem
     this.loadPage();
   }
 
-  onTabChange(type: SecretType): void {
-    this.activeTab.set(type);
-    this.onPageChange({ page: 0, rows: this.pageSize, first: 0 });
-  }
-
   onCreate(): void {
-    void this.router.navigate([JOB_SECRET_ROUTES.create], { queryParams: { type: this.activeTab() } });
+    void this.router.navigate([JOB_SECRET_ROUTES.create]);
   }
 
   private goEdit(code: string): void {
@@ -64,8 +52,7 @@ export class JobSecretListComponent extends BasePagedList<SecretResponse> implem
   }
 
   protected loadPage(): void {
-    const filters = { ...this.filters, type: this.activeTab() };
-    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, filters, this.sorts)), {
+    this.runPageRequest(this.loadingService.track(this.service.getPage(this.page, this.pageSize, this.filters, this.sorts)), {
       errorMessage: 'jobSecret.toast.loadListFailed',
       onError: () => this.toastService.error('jobSecret.toast.loadListFailed')
     });
@@ -79,7 +66,7 @@ export class JobSecretListComponent extends BasePagedList<SecretResponse> implem
       emptyDescription: 'shared.table.emptyDescription',
       errorTitle: 'loadError',
       toolbar: {
-        new: { visible: true, label: 'jobSecret.action.newSecret', icon: 'pi pi-plus', severity: 'success' },
+        new: { visible: true, label: 'jobSecret.action.newSecret', icon: 'pi pi-plus', severity: 'success', permissions: ['JOB_SCHEDULER_WRITE'] },
         columnVisibility: { visible: true },
         density: { visible: true }
       },
@@ -90,6 +77,7 @@ export class JobSecretListComponent extends BasePagedList<SecretResponse> implem
       columns: [
         { field: 'code', header: 'code', type: 'copyable', sortable: true },
         { field: 'name', header: 'name', sortable: true },
+        { field: 'type', header: 'type', sortable: true },
         { field: 'description', header: 'description' },
         { field: 'updatedAt', header: 'updatedAt', type: 'date', sortable: true },
         {
@@ -99,13 +87,15 @@ export class JobSecretListComponent extends BasePagedList<SecretResponse> implem
           minWidth: '12rem',
           frozen: true,
           alignFrozen: 'right',
+          hideable: false,
           actions: [
-            { label: 'edit', icon: 'pi pi-pencil', severity: 'info', onClick: (row: SecretResponse) => this.goEdit(row.code) },
+            { label: 'edit', icon: 'pi pi-pencil', severity: 'info', permissions: ['JOB_SCHEDULER_WRITE'], onClick: (row: SecretResponse) => this.goEdit(row.code) },
             {
               label: 'delete',
               icon: 'pi pi-trash',
               severity: 'danger',
               variant: 'danger',
+              permissions: ['JOB_SCHEDULER_WRITE'],
               confirm: { message: 'shared.confirm.dangerAction', variant: 'danger' },
               onClick: (row: SecretResponse) => this.remove(row.code)
             }

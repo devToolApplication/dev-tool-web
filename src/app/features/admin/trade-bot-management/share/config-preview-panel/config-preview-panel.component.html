@@ -27,20 +27,14 @@
       </div>
     </div>
     <div class="config-preview-panel__form-row">
-      <div class="config-preview-panel__field">
+      <div class="config-preview-panel__field config-preview-panel__field--full">
         <app-date-picker
-          label="tradeBot.field.fromTime"
+          selectionMode="range"
           [showTime]="true"
-          [value]="fromTimeDate()"
-          (valueChange)="onFromTimeChange($event)"
-        ></app-date-picker>
-      </div>
-      <div class="config-preview-panel__field">
-        <app-date-picker
-          label="tradeBot.field.toTime"
-          [showTime]="true"
-          [value]="toTimeDate()"
-          (valueChange)="onToTimeChange($event)"
+          labelFrom="tradeBot.field.fromTime"
+          labelTo="tradeBot.field.toTime"
+          [value]="$any(dateRange())"
+          (valueChange)="onDateRangeChange($any($event))"
         ></app-date-picker>
       </div>
     </div>
@@ -64,7 +58,7 @@
         [candles]="candles()"
         [indicators]="indicators()"
         [overlays]="overlays()"
-        [config]="{ showCandles: true, showVolume: true, showIndicators: true, height: 400 }"
+        [config]="{ showCandles: true, showVolume: true, showIndicators: true, showToolbar: true, showOverlayLabels: true, height: 400 }"
       ></app-candle-chart>
     </div>
 

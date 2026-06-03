@@ -264,6 +264,60 @@ describe('TableComponent', () => {
     expect(component.density()).toBe('compact');
   });
 
+  it('applies frozen column styles and keeps non-hideable actions visible from config', () => {
+    localStorage.setItem(
+      'dev-tool.table.frozen-actions',
+      JSON.stringify({ columns: ['name'], density: 'compact' })
+    );
+    component.config = {
+      ...baseConfig,
+      stateKey: 'frozen-actions',
+      minWidth: '90rem',
+      columns: [
+        { field: 'name', header: 'Name', minWidth: '16rem' },
+        { field: 'status', header: 'Status', minWidth: '12rem' },
+        {
+          field: 'actions',
+          header: 'Actions',
+          type: 'actions',
+          minWidth: '10rem',
+          frozen: true,
+          alignFrozen: 'right',
+          hideable: false,
+          actions: [{ label: 'View', onClick: vi.fn() }]
+        }
+      ]
+    };
+    component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
+    component.ngOnChanges({
+      config: {
+        currentValue: component.config,
+        previousValue: baseConfig,
+        firstChange: false,
+        isFirstChange: () => false
+      }
+    });
+
+    fixture.detectChanges();
+
+    expect(component.selectedColumnFields()).toEqual(['name']);
+    expect(component.visibleColumns.map((column) => column.field)).toEqual(['name', 'actions']);
+    expect(component.columnOptions.map((option) => option.value)).toEqual(['name', 'status']);
+    expect(fixture.nativeElement.querySelector('table')?.style.minWidth).toBe('90rem');
+
+    const actionHeader = fixture.nativeElement.querySelector('thead th.app-table-cell--frozen-right') as HTMLElement;
+    const actionCell = fixture.nativeElement.querySelector('tbody td.app-table-cell--frozen-right') as HTMLElement;
+
+    expect(actionHeader).toBeTruthy();
+    expect(actionCell).toBeTruthy();
+    expect(actionHeader.style.right).toMatch(/^0(px)?$/);
+    expect(actionCell.style.right).toMatch(/^0(px)?$/);
+
+    component.onColumnFieldsChange([]);
+
+    expect(component.visibleColumns.map((column) => column.field)).toEqual(['actions']);
+  });
+
   it('uses a filtered empty state with clear filters action when search is active', () => {
     renderTable({ loading: false, data: [] });
     component.config = {

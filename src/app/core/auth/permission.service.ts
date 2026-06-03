@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { KeycloakService } from './keycloak.service';
+import { environment } from '../../../enviroment/environment';
 
 export type AppPermission =
   | 'ADMIN_OVERVIEW_READ'
@@ -81,10 +82,38 @@ export const DEVELOPER_GROUP_ROLES: readonly AppRole[] = [
 @Injectable({ providedIn: 'root' })
 export class PermissionService {
   private readonly fullAccessRoles = ['ADMIN', 'SUPER_ADMIN'];
+  private hasWarned = false;
 
   constructor(private readonly keycloakService: KeycloakService) {}
 
+  private hasBypassFlag(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasParam = urlParams.has('dangerously-skip-permissions') || urlParams.get('skip-permissions') === 'true';
+    const hasStorage = window.localStorage.getItem('dangerously-skip-permissions') === 'true';
+    const hasEnv = (environment as any).dangerouslySkipPermissions === true;
+
+    const shouldBypass = hasParam || hasStorage || hasEnv;
+
+    if (shouldBypass && !this.hasWarned) {
+      this.hasWarned = true;
+      console.warn(
+        '%c⚠️ DANGEROUSLY SKIP PERMISSIONS ACTIVE ⚠️\nAll permission checks are being bypassed.',
+        'color: #ff3333; font-weight: bold; font-size: 14px; background-color: #ffe6e6; padding: 6px 12px; border: 2px solid #ff3333; border-radius: 4px;'
+      );
+    }
+
+    return shouldBypass;
+  }
+
   has(permission: AppPermission | string): boolean {
+    if (this.hasBypassFlag()) {
+      return true;
+    }
+
     if (this.isFullAccess()) {
       return true;
     }

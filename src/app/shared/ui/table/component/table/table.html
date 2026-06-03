@@ -150,8 +150,8 @@
   </div>
 
   <!-- Table -->
-  <div class="overflow-x-auto" [class.opacity-60]="loading" [style.max-height]="scrollable ? scrollHeight : null">
-    <table class="w-full text-sm">
+  <div class="app-table-scroller overflow-x-auto" [class.opacity-60]="loading" [style.max-height]="scrollable ? scrollHeight : null">
+    <table class="w-full text-sm" [style.min-width]="tableMinWidth">
       <thead>
         <tr>
           @if (selectionEnabled) {
@@ -175,6 +175,11 @@
               [style.min-width]="col.minWidth ?? col.width ?? null"
               [style.max-width]="col.maxWidth ?? null"
               [style.text-align]="col.align ?? null"
+              [style.left]="frozenLeft(col)"
+              [style.right]="frozenRight(col)"
+              [class.app-table-cell--frozen]="col.frozen"
+              [class.app-table-cell--frozen-left]="isFrozenLeft(col)"
+              [class.app-table-cell--frozen-right]="isFrozenRight(col)"
               [class.cursor-pointer]="col.sortable"
               [class.select-none]="col.sortable"
               (click)="col.sortable ? onSortColumn(col.field) : null"
@@ -236,6 +241,11 @@
                 [style.min-width]="col.minWidth ?? col.width ?? null"
                 [style.max-width]="col.maxWidth ?? null"
                 [style.text-align]="col.align ?? null"
+                [style.left]="frozenLeft(col)"
+                [style.right]="frozenRight(col)"
+                [class.app-table-cell--frozen]="col.frozen"
+                [class.app-table-cell--frozen-left]="isFrozenLeft(col)"
+                [class.app-table-cell--frozen-right]="isFrozenRight(col)"
               >
                 <app-table-cell
                   [column]="col"

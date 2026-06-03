@@ -59,6 +59,9 @@ export class MarketDataGapTabComponent {
         header: 'tradeBot.field.actions',
         type: 'actions',
         minWidth: '13rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           {
             label: 'tradeBot.action.repairGap',

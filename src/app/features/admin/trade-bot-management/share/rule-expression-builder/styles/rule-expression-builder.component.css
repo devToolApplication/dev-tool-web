@@ -4,9 +4,7 @@
   gap: var(--app-space-4);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
-  background:
-    var(--app-card-highlight),
-    var(--app-card-bg);
+  background: var(--app-card-highlight), var(--app-card-bg);
   box-shadow: var(--app-shadow-sm);
   padding: var(--app-space-4);
 }
@@ -74,7 +72,7 @@
   border-radius: var(--app-radius-sm);
   background: var(--app-surface-strong);
   color: var(--app-text);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
   overflow-wrap: anywhere;
   padding: var(--app-space-3);
 }
@@ -163,7 +161,7 @@
 .rule-expression-node__subtitle {
   margin-top: var(--app-space-1);
   color: var(--app-text-soft);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
   font-size: var(--app-font-size-sm);
   overflow-wrap: anywhere;
 }

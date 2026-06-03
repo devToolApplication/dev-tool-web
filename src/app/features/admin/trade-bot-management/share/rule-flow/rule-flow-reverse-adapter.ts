@@ -7,7 +7,7 @@ import {
   RuleExpressionOperand,
   RuleExpressionRuleRefNode,
   RuleLogicFormValue,
-} from '../rule-expression-builder/rule-expression.models';
+} from '../rule-expression-builder/domain';
 import { FlowDefinition, FlowNode, FlowEdge } from '../../../../../shared/ui/flow-builder/models';
 
 export function flowDefinitionToRuleExpression(definition: FlowDefinition | null): RuleLogicFormValue {

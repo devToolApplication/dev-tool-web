@@ -16,7 +16,7 @@ describe('RuleExpressionBuilderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [RuleExpressionBuilderComponent, TranslateContentPipeStub],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RuleExpressionBuilderComponent);
@@ -30,8 +30,8 @@ describe('RuleExpressionBuilderComponent', () => {
         config: {},
         children: [],
         overlay: {},
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     ]);
     fixture.componentRef.setInput('ruleConfigs', [
       {
@@ -43,8 +43,8 @@ describe('RuleExpressionBuilderComponent', () => {
         indicators: [],
         childRules: [],
         overlay: {},
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     ]);
     fixture.detectChanges();
   });
@@ -60,8 +60,8 @@ describe('RuleExpressionBuilderComponent', () => {
         type: 'condition',
         operator: 'CROSSOVER',
         operands: [],
-        params: { lookback: 1, tolerance: 0 }
-      })
+        params: { lookback: 1, tolerance: 0 },
+      }),
     );
     expect(component.preview()).toBe('? CROSSOVER ?');
     expect(emitted.length).toBe(1);
@@ -71,7 +71,9 @@ describe('RuleExpressionBuilderComponent', () => {
     component.addCondition();
     component.addCondition();
 
-    expect(component.expression().root).toEqual(expect.objectContaining({ type: 'group', operator: 'AND' }));
+    expect(component.expression().root).toEqual(
+      expect.objectContaining({ type: 'group', operator: 'AND' }),
+    );
     expect(component.preview()).toBe('? CROSSOVER ? AND ? CROSSOVER ?');
   });
 
@@ -86,7 +88,7 @@ describe('RuleExpressionBuilderComponent', () => {
     expect(root).toEqual(expect.objectContaining({ type: 'group', operator: 'AND' }));
     expect(root?.type === 'group' ? root.children[0]?.id : null).toBe(conditionId);
     expect(root?.type === 'group' ? root.children[1] : null).toEqual(
-      expect.objectContaining({ type: 'group', operator: 'OR' })
+      expect.objectContaining({ type: 'group', operator: 'OR' }),
     );
   });
 
@@ -96,7 +98,9 @@ describe('RuleExpressionBuilderComponent', () => {
 
     component.addRuleRef();
 
-    expect(component.expression().root).toEqual(expect.objectContaining({ type: 'ruleRef', ruleCode: 'CONFIRM_VOLUME' }));
+    expect(component.expression().root).toEqual(
+      expect.objectContaining({ type: 'ruleRef', ruleCode: 'CONFIRM_VOLUME' }),
+    );
     expect(component.dependencies().ruleCodes).toEqual(['CONFIRM_VOLUME']);
     expect(validations.at(-1)).toBe(true);
   });

@@ -1,13 +1,13 @@
 import {
+  operatorDefinition,
+  printRuleExpressionOperand,
   RuleExpressionConditionNode,
   RuleExpressionGroupNode,
   RuleExpressionNode,
   RuleExpressionNotNode,
   RuleExpressionRuleRefNode,
   RuleLogicFormValue,
-} from '../rule-expression-builder/rule-expression.models';
-import { operatorDefinition } from '../rule-expression-builder/rule-expression-operators';
-import { printRuleExpressionOperand } from '../rule-expression-builder/rule-expression-printer';
+} from '../rule-expression-builder/domain';
 import { FlowDefinition, FlowNode, FlowEdge } from '../../../../../shared/ui/flow-builder/models';
 
 export function ruleExpressionToFlowDefinition(value: RuleLogicFormValue): FlowDefinition {

@@ -1,6 +1,6 @@
 import { Component, computed, EventEmitter, Input, Output } from '@angular/core';
 import { CandleBarResponse } from '../../../../../../../../core/models/trade-bot/trading-system.model';
-import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOverlay } from '../../../../../../../../shared/ui/candle-chart';
+import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartIndicator, ChartOverlay } from '../../../../../../../../shared/ui/candle-chart';
 
 @Component({
   selector: 'app-backtest-chart-tab',
@@ -10,6 +10,7 @@ import { CandleChartConfig, CandleChartRangeBoundaryEvent, ChartCandle, ChartOve
 export class BacktestChartTabComponent {
   @Input() chartCandlesRaw: CandleBarResponse[] = [];
   @Input() chartReviewOverlays: ChartOverlay[] = [];
+  @Input() indicators: ChartIndicator[] = [];
   @Input() marketDataSnapshot: Record<string, unknown> | null = null;
   @Input() symbol = '';
   @Input() timeframe = '';
@@ -22,7 +23,7 @@ export class BacktestChartTabComponent {
     showLines: false,
     showBoxAreas: false,
     showPoints: false,
-    showIndicators: false,
+    showIndicators: true,
     symbol: this.symbol,
     interval: this.timeframe,
     height: 460,

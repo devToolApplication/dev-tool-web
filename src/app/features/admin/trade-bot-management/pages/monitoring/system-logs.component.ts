@@ -95,6 +95,9 @@ export class SystemLogsComponent implements OnInit {
         header: 'tradeBot.field.actions',
         type: 'actions',
         minWidth: '10rem',
+        frozen: true,
+        alignFrozen: 'right',
+        hideable: false,
         actions: [
           { label: 'tradeBot.action.detail', icon: 'pi pi-eye', severity: 'info', showLabel: false, onClick: (row) => this.selectedLog.set(row) },
           { label: 'tradeBot.logs.openRelated', icon: 'pi pi-arrow-up-right', severity: 'secondary', showLabel: false, onClick: (row) => this.openRelated(row) }

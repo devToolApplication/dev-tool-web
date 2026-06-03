@@ -15,29 +15,31 @@ import { SettingsComponent } from './settings/settings.component';
 
 import {
   FILE_STORAGE_FEATURE_COMPONENTS,
-  fileStorageRoutes
+  fileStorageRoutes,
 } from './admin/file-storage-management/file-storage-management.feature';
 import {
   JOB_SCHEDULER_FEATURE_COMPONENTS,
-  jobSchedulerRoutes
+  jobSchedulerRoutes,
 } from './admin/job-scheduler/job-scheduler.feature';
 import {
   SYSTEM_MANAGEMENT_FEATURE_COMPONENTS,
-  systemManagementRoutes
+  systemManagementRoutes,
 } from './admin/system-management/system-management.feature';
 import {
   TRADE_BOT_FEATURE_COMPONENTS,
-  tradeBotRoutes
+  tradeBotRoutes,
 } from './admin/trade-bot-management/trade-bot-management.feature';
 import { DATA_FORM_FEATURE_COMPONENTS, dataFormRoutes } from './admin/data-form/data-form.feature';
 import { CandleChartModule } from '../shared/ui/candle-chart';
 import { DataQualityWarningComponent } from './admin/trade-bot-management/share/data-quality-warning/data-quality-warning.component';
-import { RuleExpressionBuilderComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-builder.component';
-import { RuleConditionRowComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-condition-row.component';
-import { RuleExpressionJsonPreviewComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-json-preview.component';
-import { RuleExpressionNodeComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-node.component';
-import { RuleExpressionOperandPickerComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-operand-picker.component';
-import { RuleExpressionPanelComponent } from './admin/trade-bot-management/share/rule-expression-builder/rule-expression-panel.component';
+import {
+  RuleConditionRowComponent,
+  RuleExpressionBuilderComponent,
+  RuleExpressionJsonPreviewComponent,
+  RuleExpressionNodeComponent,
+  RuleExpressionOperandPickerComponent,
+  RuleExpressionPanelComponent,
+} from './admin/trade-bot-management/share/rule-expression-builder/components';
 import { RuleTreeViewerComponent } from './admin/trade-bot-management/share/rule-tree-viewer/rule-tree-viewer.component';
 import { RuleFlowInspectorComponent } from './admin/trade-bot-management/share/rule-flow/rule-flow-inspector.component';
 import { FlowBuilderModule } from '../shared/ui/flow-builder/flow-builder.module';
@@ -59,7 +61,7 @@ const FEATURE_ROUTES: Routes = [
   ...dataFormRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'admin/overview' },
-  { path: '**', redirectTo: '404' }
+  { path: '**', redirectTo: '404' },
 ];
 
 const FEATURE_COMPONENTS = [
@@ -86,7 +88,7 @@ const FEATURE_COMPONENTS = [
   RuleExpressionPanelComponent,
   RuleTreeViewerComponent,
   RuleFlowInspectorComponent,
-  TradeDetailDrawerComponent
+  TradeDetailDrawerComponent,
 ];
 
 @NgModule({
@@ -96,8 +98,8 @@ const FEATURE_COMPONENTS = [
     RouterModule.forChild(FEATURE_ROUTES),
     SharedModule,
     FlowBuilderModule,
-    CandleChartModule
+    CandleChartModule,
   ],
-  providers: [...FEATURE_FORM_INPUT_OPTIONS_LOADERS]
+  providers: [...FEATURE_FORM_INPUT_OPTIONS_LOADERS],
 })
 export class AppFeatureModule {}

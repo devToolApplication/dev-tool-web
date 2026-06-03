@@ -55,6 +55,7 @@ export class UploadFileListComponent extends BasePagedList<UploadFileResponse> i
         width: '16rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           {
             label: 'Open',

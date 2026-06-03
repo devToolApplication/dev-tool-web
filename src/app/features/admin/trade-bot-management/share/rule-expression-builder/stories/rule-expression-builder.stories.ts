@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
-import { SharedModule } from '../../../../../shared/shared.module';
-import { RuleExpressionBuilderComponent } from './rule-expression-builder.component';
-import { RuleConditionRowComponent } from './rule-condition-row.component';
-import { RuleExpressionJsonPreviewComponent } from './rule-expression-json-preview.component';
-import { RuleExpressionNodeComponent } from './rule-expression-node.component';
-import { RuleExpressionOperandPickerComponent } from './rule-expression-operand-picker.component';
-import { RuleExpressionPanelComponent } from './rule-expression-panel.component';
+import { SharedModule } from '../../../../../../shared/shared.module';
+import { RuleExpressionBuilderComponent } from '../components/builder/rule-expression-builder.component';
+import { RuleConditionRowComponent } from '../components/condition-row/rule-condition-row.component';
+import { RuleExpressionJsonPreviewComponent } from '../components/json-preview/rule-expression-json-preview.component';
+import { RuleExpressionNodeComponent } from '../components/node/rule-expression-node.component';
+import { RuleExpressionOperandPickerComponent } from '../components/operand-picker/rule-expression-operand-picker.component';
+import { RuleExpressionPanelComponent } from '../components/panel/rule-expression-panel.component';
 
 const value = {
   root: {
@@ -20,9 +20,9 @@ const value = {
         operator: 'CROSSOVER' as const,
         operands: [
           { type: 'indicator' as const, indicatorCode: 'MACD' },
-          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const }
+          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const },
         ],
-        params: { lookback: 1, tolerance: 0 }
+        params: { lookback: 1, tolerance: 0 },
       },
       {
         id: 'story-condition-bb',
@@ -30,12 +30,12 @@ const value = {
         operator: 'CROSSUNDER' as const,
         operands: [
           { type: 'indicator' as const, indicatorCode: 'BOLLINGER_BAND_LOW' },
-          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const }
+          { type: 'priceSeries' as const, series: 'CLOSEPRICE' as const },
         ],
-        params: { lookback: 1, tolerance: 0 }
-      }
-    ]
-  }
+        params: { lookback: 1, tolerance: 0 },
+      },
+    ],
+  },
 };
 
 const nestedValue = {
@@ -47,7 +47,7 @@ const nestedValue = {
       {
         id: 'story-rule-a',
         type: 'ruleRef' as const,
-        ruleCode: 'RULE_A'
+        ruleCode: 'RULE_A',
       },
       {
         id: 'story-nested-and',
@@ -57,7 +57,7 @@ const nestedValue = {
           {
             id: 'story-rule-c',
             type: 'ruleRef' as const,
-            ruleCode: 'RULE_C'
+            ruleCode: 'RULE_C',
           },
           {
             id: 'story-condition-de',
@@ -65,14 +65,14 @@ const nestedValue = {
             operator: 'CROSSOVER' as const,
             operands: [
               { type: 'indicator' as const, indicatorCode: 'D' },
-              { type: 'indicator' as const, indicatorCode: 'E' }
+              { type: 'indicator' as const, indicatorCode: 'E' },
             ],
-            params: { lookback: 1, tolerance: 0 }
-          }
-        ]
-      }
-    ]
-  }
+            params: { lookback: 1, tolerance: 0 },
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const meta: Meta<RuleExpressionBuilderComponent> = {
@@ -85,10 +85,10 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         RuleExpressionJsonPreviewComponent,
         RuleExpressionNodeComponent,
         RuleExpressionOperandPickerComponent,
-        RuleExpressionPanelComponent
+        RuleExpressionPanelComponent,
       ],
-      imports: [SharedModule]
-    })
+      imports: [SharedModule],
+    }),
   ],
   args: {
     value,
@@ -103,7 +103,7 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         config: {},
         children: [],
         overlay: {},
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'indicator-slow',
@@ -113,7 +113,7 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         config: {},
         children: [],
         overlay: {},
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'indicator-d',
@@ -123,7 +123,7 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         config: {},
         children: [],
         overlay: {},
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'indicator-e',
@@ -133,8 +133,8 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         config: {},
         children: [],
         overlay: {},
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     ],
     ruleConfigs: [
       {
@@ -146,7 +146,7 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         indicators: [],
         childRules: [],
         overlay: {},
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'rule-c',
@@ -157,10 +157,10 @@ const meta: Meta<RuleExpressionBuilderComponent> = {
         indicators: [],
         childRules: [],
         overlay: {},
-        status: 'ACTIVE'
-      }
-    ]
-  }
+        status: 'ACTIVE',
+      },
+    ],
+  },
 };
 
 export default meta;
@@ -171,14 +171,14 @@ export const Default: Story = {};
 
 export const Empty: Story = {
   args: {
-    value: { root: null }
-  }
+    value: { root: null },
+  },
 };
 
 export const NestedOrAnd: Story = {
   args: {
-    value: nestedValue
-  }
+    value: nestedValue,
+  },
 };
 
 export const InvalidMissingOperand: Story = {
@@ -189,10 +189,10 @@ export const InvalidMissingOperand: Story = {
         type: 'condition',
         operator: 'CROSSOVER',
         operands: [{ type: 'indicator', indicatorCode: 'MACD' }],
-        params: { lookback: 1, tolerance: 0 }
-      }
-    }
-  }
+        params: { lookback: 1, tolerance: 0 },
+      },
+    },
+  },
 };
 
 export const DisabledNode: Story = {
@@ -204,16 +204,16 @@ export const DisabledNode: Story = {
           value.root.children[0],
           {
             ...value.root.children[1],
-            disabled: true
-          }
-        ]
-      }
-    }
-  }
+            disabled: true,
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const Readonly: Story = {
   args: {
-    readonly: true
-  }
+    readonly: true,
+  },
 };

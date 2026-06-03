@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { SecretCreateDto, SecretResponse, SecretType, SecretUpdateDto } from '../data-access/models/job-secret.model';
 import { JobSecretService } from '../data-access/api/job-secret.service';
 import { I18nService } from '../../../../../core/ui-services/i18n.service';
@@ -27,7 +27,7 @@ export class JobSecretFormComponent implements OnInit {
   readonly formVisible = signal(true);
   editCode: string | null = null;
   secretType: SecretType = 'PLAINTEXT';
-  formInitialValue: SecretCreateDto = { ...JOB_SECRET_PLAINTEXT_INITIAL_VALUE };
+  formInitialValue: any = { ...JOB_SECRET_PLAINTEXT_INITIAL_VALUE };
 
   constructor(
     private readonly service: JobSecretService,
@@ -41,18 +41,51 @@ export class JobSecretFormComponent implements OnInit {
 
   ngOnInit(): void {
     const code = this.route.snapshot.paramMap.get('code');
-    const typeParam = this.route.snapshot.queryParamMap.get('type') as SecretType | null;
 
     if (code) {
       this.editCode = code;
       this.formContext.mode = 'edit';
       this.loadDetail(code);
     } else {
-      this.secretType = typeParam === 'KEYCLOAK_CLIENT_CREDENTIALS' ? 'KEYCLOAK_CLIENT_CREDENTIALS' : 'PLAINTEXT';
+      this.secretType = 'PLAINTEXT';
+      this.formConfig = this.buildPlaintextFormConfig();
+      this.formInitialValue = {
+        type: 'PLAINTEXT',
+        code: '',
+        name: '',
+        secretValue: '',
+        description: ''
+      };
+    }
+  }
+
+  onValueChange(model: any): void {
+    if (model && model.type && model.type !== this.secretType && !this.editCode) {
+      this.secretType = model.type;
       this.formConfig = this.secretType === 'KEYCLOAK_CLIENT_CREDENTIALS' ? this.buildKeycloakFormConfig() : this.buildPlaintextFormConfig();
       this.formInitialValue = this.secretType === 'KEYCLOAK_CLIENT_CREDENTIALS'
-        ? { ...JOB_SECRET_KEYCLOAK_INITIAL_VALUE }
-        : { ...JOB_SECRET_PLAINTEXT_INITIAL_VALUE };
+        ? {
+            type: 'KEYCLOAK_CLIENT_CREDENTIALS',
+            code: model.code ?? '',
+            name: model.name ?? '',
+            baseUrl: '',
+            realm: '',
+            clientId: '',
+            clientSecret: '',
+            scope: 'openid',
+            tokenField: 'access_token',
+            headerName: 'Authorization',
+            headerPrefix: 'Bearer',
+            description: model.description ?? ''
+          }
+        : {
+            type: 'PLAINTEXT',
+            code: model.code ?? '',
+            name: model.name ?? '',
+            secretValue: '',
+            description: model.description ?? ''
+          };
+      this.rerenderForm();
     }
   }
 
@@ -99,7 +132,7 @@ export class JobSecretFormComponent implements OnInit {
     return this.crudPage?.confirmDiscardChanges() ?? true;
   }
 
-  private save(request$: any): void {
+  private save(request$: Observable<SecretResponse>): void {
     this.loading.set(true);
     this.loadingService.track(request$).pipe(
       finalize(() => this.loading.set(false)),
@@ -139,6 +172,7 @@ export class JobSecretFormComponent implements OnInit {
       return {
         code: detail.code,
         name: detail.name,
+        type: detail.type,
         description: detail.description,
         baseUrl: data.baseUrl ?? '',
         realm: data.realm ?? '',
@@ -153,6 +187,7 @@ export class JobSecretFormComponent implements OnInit {
     return {
       code: detail.code,
       name: detail.name,
+      type: detail.type,
       description: detail.description,
       secretValue: (detail.data as any).value ?? ''
     };
@@ -166,6 +201,17 @@ export class JobSecretFormComponent implements OnInit {
   private buildPlaintextFormConfig(): FormConfig {
     return {
       fields: [
+        {
+          type: 'select',
+          name: 'type',
+          label: 'type',
+          width: 'full',
+          options: [
+            { label: 'jobSecret.tab.plaintext', value: 'PLAINTEXT' },
+            { label: 'jobSecret.tab.keycloak', value: 'KEYCLOAK_CLIENT_CREDENTIALS' }
+          ],
+          disabledWhen: this.editCode ? 'true' : ''
+        },
         { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('jobSecret.validation.codeRequired')], disabledWhen: this.editCode ? 'true' : '' },
         { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('jobSecret.validation.nameRequired')] },
         { type: 'textarea', name: 'secretValue', label: 'jobSecret.field.secretValue', width: 'full', showZoomButton: true, validation: [Rules.required('jobSecret.validation.valueRequired')] },
@@ -177,6 +223,17 @@ export class JobSecretFormComponent implements OnInit {
   private buildKeycloakFormConfig(): FormConfig {
     return {
       fields: [
+        {
+          type: 'select',
+          name: 'type',
+          label: 'type',
+          width: 'full',
+          options: [
+            { label: 'jobSecret.tab.plaintext', value: 'PLAINTEXT' },
+            { label: 'jobSecret.tab.keycloak', value: 'KEYCLOAK_CLIENT_CREDENTIALS' }
+          ],
+          disabledWhen: this.editCode ? 'true' : ''
+        },
         { type: 'text', name: 'code', label: 'code', width: '1/2', validation: [Rules.required('jobSecret.validation.codeRequired')], disabledWhen: this.editCode ? 'true' : '' },
         { type: 'text', name: 'name', label: 'name', width: '1/2', validation: [Rules.required('jobSecret.validation.nameRequired')] },
         { type: 'text', name: 'baseUrl', label: 'jobSecret.field.baseUrl', width: '1/2', validation: [Rules.required('jobSecret.validation.baseUrlRequired')] },

@@ -1,15 +1,22 @@
 <aside class="rule-expression-panel">
   <div class="rule-expression-panel__header">
     <div>
-      <div class="rule-expression-section-title">{{ 'tradeBot.ruleExpression.nodeConfig' | translateContent }}</div>
-      <div class="rule-expression-section-subtitle">{{ 'tradeBot.ruleExpression.nodeConfigSubtitle' | translateContent }}</div>
+      <div class="rule-expression-section-title">
+        {{ 'tradeBot.ruleExpression.nodeConfig' | translateContent }}
+      </div>
+      <div class="rule-expression-section-subtitle">
+        {{ 'tradeBot.ruleExpression.nodeConfigSubtitle' | translateContent }}
+      </div>
     </div>
   </div>
 
   @if (node; as selectedNode) {
     <div class="rule-expression-panel__body">
       <div class="rule-expression-panel__meta">
-        <app-tag [value]="'tradeBot.ruleExpression.type.' + selectedNode.type" severity="info"></app-tag>
+        <app-tag
+          [value]="'tradeBot.ruleExpression.type.' + selectedNode.type"
+          severity="info"
+        ></app-tag>
         @if (selectedNode.disabled) {
           <app-tag value="tradeBot.ruleExpression.disabled" severity="warn"></app-tag>
         }
@@ -69,7 +76,9 @@
           (valueChange)="updateSlotCode(ruleRefNode(selectedNode), $event)"
         ></app-input-text>
       } @else {
-        <div class="rule-expression-panel__empty">{{ 'tradeBot.ruleExpression.notConfig' | translateContent }}</div>
+        <div class="rule-expression-panel__empty">
+          {{ 'tradeBot.ruleExpression.notConfig' | translateContent }}
+        </div>
       }
 
       <app-input-area
@@ -116,6 +125,8 @@
       </div>
     </div>
   } @else {
-    <div class="rule-expression-panel__empty">{{ 'tradeBot.ruleExpression.selectNode' | translateContent }}</div>
+    <div class="rule-expression-panel__empty">
+      {{ 'tradeBot.ruleExpression.selectNode' | translateContent }}
+    </div>
   }
 </aside>

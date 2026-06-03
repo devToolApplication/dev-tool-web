@@ -17,6 +17,7 @@ export interface AppMenuItem {
   badge?: string;
   hidden?: boolean;
   permissions?: readonly string[];
+  permissionsMode?: 'all' | 'any';
   shortcut?: string;
   groupColor?: string;
   items?: AppMenuItem[];
@@ -190,7 +191,15 @@ export class SideMenuComponent implements OnInit {
       return false;
     }
 
-    return !item.permissions?.length || this.permissionService.hasAll(item.permissions);
+    if (!item.permissions?.length) {
+      return true;
+    }
+
+    if (item.permissionsMode === 'any') {
+      return this.permissionService.hasAny(item.permissions);
+    }
+
+    return this.permissionService.hasAll(item.permissions);
   }
 
   private itemMatchesSearch(item: AppMenuItem): boolean {

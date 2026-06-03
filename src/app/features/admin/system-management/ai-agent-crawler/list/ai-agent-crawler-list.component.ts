@@ -70,6 +70,7 @@ export class AiAgentCrawlerListComponent extends BasePagedList<AiAgentCrawlerCon
         minWidth: '16rem',
         frozen: true,
         alignFrozen: 'right',
+        hideable: false,
         actions: [
           {
             label: 'systemManagement.aiAgentCrawler.action.testRun',
