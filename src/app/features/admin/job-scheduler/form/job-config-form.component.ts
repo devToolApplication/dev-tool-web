@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
+﻿import { Component, DestroyRef, OnInit, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
@@ -20,6 +20,7 @@ import { FormConfig, FormContext } from '../../../../shared/ui/form-input/models
 import { Rules } from '../../../../shared/ui/form-input/utils/validation-rules';
 import {
   JOB_CONFIG_INITIAL_VALUE,
+  JOB_CONCURRENCY_POLICY_OPTIONS,
   JOB_HTTP_METHOD_OPTIONS,
   JOB_SCHEDULER_ROUTES
 } from '../job-scheduler.constants';
@@ -230,6 +231,21 @@ export class JobConfigFormComponent implements OnInit {
         },
         { type: 'text', name: 'name', label: 'name', width: '1/3', validation: [Rules.required('jobScheduler.validation.nameRequired')] },
         { type: 'checkbox', name: 'enabled', label: 'enabled', width: '1/3' },
+        {
+          type: 'select',
+          name: 'concurrencyPolicy',
+          label: 'jobScheduler.field.concurrencyPolicy',
+          width: '1/3',
+          optionsExpression: 'context.extra?.concurrencyPolicyOptions || []',
+          validation: [Rules.required('jobScheduler.validation.concurrencyPolicyRequired')]
+        },
+        {
+          type: 'number',
+          name: 'maxRunningInstances',
+          label: 'jobScheduler.field.maxRunningInstances',
+          width: '1/3',
+          validation: [Rules.required('jobScheduler.validation.maxRunningInstancesRequired')]
+        },
         
         // Visual Cron selections
         {
@@ -523,6 +539,8 @@ export class JobConfigFormComponent implements OnInit {
       cron: compiledCron,
       timezone: model.timezone.trim(),
       enabled: model.enabled === true,
+      concurrencyPolicy: model.concurrencyPolicy ?? 'ALLOW',
+      maxRunningInstances: model.maxRunningInstances ? Number(model.maxRunningInstances) : 1,
       target: {
         method: model.target.method,
         url: model.target.url.trim(),
@@ -673,6 +691,7 @@ export class JobConfigFormComponent implements OnInit {
     ];
 
     return {
+      concurrencyPolicyOptions: JOB_CONCURRENCY_POLICY_OPTIONS,
       authTypeOptions: this.toAuthTypeOptions(authTypes),
       timezoneOptions: this.toTimezoneOptions(),
       cronOptions: this.toTextOptions([...JOB_CRON_PRESET_VALUES, ...jobs.map((job) => job.cron)]),

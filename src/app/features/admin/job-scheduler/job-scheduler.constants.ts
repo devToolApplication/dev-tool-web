@@ -1,4 +1,4 @@
-import {
+﻿import {
   JobConfigFormModel,
   JobHttpMethod,
   JobRunStatus,
@@ -9,6 +9,12 @@ export const JOB_SCHEDULER_ROUTES = {
   list: '/admin/jobs',
   create: '/admin/jobs/create'
 } as const;
+
+export const JOB_CONCURRENCY_POLICY_OPTIONS = [
+  { label: 'jobScheduler.concurrency.allow', value: 'ALLOW' as const },
+  { label: 'jobScheduler.concurrency.skipIfRunning', value: 'SKIP_IF_RUNNING' as const },
+  { label: 'jobScheduler.concurrency.queue', value: 'QUEUE' as const }
+];
 
 export const JOB_HTTP_METHOD_OPTIONS: { label: string; value: JobHttpMethod }[] = [
   { label: 'GET', value: 'GET' },
@@ -37,6 +43,8 @@ export const JOB_CONFIG_INITIAL_VALUE: JobConfigFormModel = {
   cron: '*/5 * * * *',
   timezone: 'Asia/Ho_Chi_Minh',
   enabled: true,
+  concurrencyPolicy: 'ALLOW',
+  maxRunningInstances: 1,
   target: {
     method: 'POST',
     url: '',

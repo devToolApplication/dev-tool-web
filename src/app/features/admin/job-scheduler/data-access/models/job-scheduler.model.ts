@@ -1,6 +1,7 @@
-import { BasePageResponse } from '../../../../../core/models/base-response.model';
+﻿import { BasePageResponse } from '../../../../../core/models/base-response.model';
 
 export type JobHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type JobConcurrencyPolicy = 'ALLOW' | 'SKIP_IF_RUNNING' | 'QUEUE';
 export type JobAuthType = 'NONE' | 'BASIC' | 'API_KEY' | 'KEYCLOAK_CLIENT_CREDENTIALS' | 'SECRET_REF';
 export type JobRunStatus = 'RUNNING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
 export type JobTriggerType = 'SCHEDULED' | 'MANUAL';
@@ -44,6 +45,8 @@ export interface JobConfigResponse {
   cron: string;
   timezone: string;
   enabled: boolean;
+  concurrencyPolicy?: JobConcurrencyPolicy;
+  maxRunningInstances?: number;
   target: JobTargetConfig;
   auth: JobAuthConfig;
   retry?: {
@@ -68,6 +71,8 @@ export interface JobConfigFormModel {
   cronDayOfWeek?: string;
   timezone: string;
   enabled: boolean;
+  concurrencyPolicy?: JobConcurrencyPolicy;
+  maxRunningInstances?: number;
   target: {
     method: JobHttpMethod;
     url: string;
@@ -88,6 +93,8 @@ export interface JobConfigUpsertDto {
   cron: string;
   timezone: string;
   enabled: boolean;
+  concurrencyPolicy?: JobConcurrencyPolicy;
+  maxRunningInstances?: number;
   target: JobTargetConfig;
   auth: JobAuthConfig;
   retry: {
