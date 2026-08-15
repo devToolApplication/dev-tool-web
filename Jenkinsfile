@@ -1,4 +1,4 @@
-pipeline {
+﻿pipeline {
     agent {
         kubernetes {
             label 'develop-tool-portal-web-build'
@@ -42,8 +42,8 @@ pipeline {
                     sh '''
                     echo "Building image with Kaniko..."
                     /kaniko/executor \
-                      --dockerfile=Dockerfile \
-                      --context=dir://$(pwd) \
+                      --dockerfile="${WORKSPACE}/Dockerfile" \
+                      --context=dir://"${WORKSPACE}" \
                       --destination=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
                       --destination=${DOCKER_REGISTRY}/${IMAGE_NAME}:latest \
                       --cache=true \
