@@ -1,4 +1,4 @@
-﻿pipeline {
+pipeline {
     agent {
         kubernetes {
             label 'develop-tool-portal-web-build'
