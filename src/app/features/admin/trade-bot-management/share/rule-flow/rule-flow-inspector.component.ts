@@ -11,6 +11,7 @@ import {
   RuleExpressionConditionOperator,
   RuleExpressionGroupOperator,
   RuleExpressionOperand,
+  allowedRuleReference,
 } from '../rule-expression-builder/domain';
 
 export interface RuleFlowNodeDataChange {
@@ -28,6 +29,7 @@ export class RuleFlowInspectorComponent {
   @Input() node!: FlowNode;
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleId: string | null = null;
 
   @Output() readonly nodeDataChange = new EventEmitter<RuleFlowNodeDataChange>();
@@ -98,6 +100,7 @@ export class RuleFlowInspectorComponent {
   get ruleRefOptions(): Array<{ label: string; value: string }> {
     return this.ruleConfigs
       .filter((r) => r.id !== this.currentRuleId)
+      .filter((r) => allowedRuleReference(this.currentExecutor, r))
       .map((r) => ({ label: r.code, value: r.code }));
   }
 

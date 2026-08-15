@@ -61,4 +61,42 @@ describe('rule flow node catalog', () => {
       });
     }
   });
+
+  it('hides trend rule references from SMC event executor inspector options', () => {
+    const ruleRefType = buildRuleFlowNodeTypes({
+      currentExecutor: 'BEARISH_CHOCH',
+      ruleConfigs: [
+        {
+          id: 'rule-trend',
+          code: 'TREND_BULLISH_FILTER',
+          executor: 'TREND_IS_BULLISH',
+          executorVersion: 'v1',
+          config: {},
+          indicators: [],
+          childRules: [],
+          overlay: {},
+          status: 'ACTIVE',
+        },
+        {
+          id: 'rule-safe',
+          code: 'SAFE_OB',
+          executor: 'BULLISH_ORDER_BLOCK',
+          executorVersion: 'v1',
+          config: {},
+          indicators: [],
+          childRules: [],
+          overlay: {},
+          status: 'ACTIVE',
+        },
+      ],
+    }).find((type) => type.type === 'rule-ref');
+    const ruleCodeField = ruleRefType?.inspectorForm?.fields?.find(
+      (field) => field.name === 'ruleCode',
+    );
+
+    const options = (ruleCodeField as { options?: Array<{ value: unknown }> } | undefined)
+      ?.options;
+
+    expect(options?.map((option) => option.value)).toEqual(['SAFE_OB']);
+  });
 });

@@ -102,6 +102,7 @@ export interface RuleExpressionValidationResult {
 export interface RuleExpressionValidationContext {
   indicatorConfigs?: IndicatorConfigResponse[];
   ruleConfigs?: RuleConfigResponse[];
+  currentExecutor?: string | null;
   currentRuleCode?: string | null;
   currentRuleId?: string | null;
 }

@@ -215,4 +215,29 @@ describe('rule expression utilities', () => {
     );
     expect(self.errors[0].message).toBe('tradeBot.validation.selfChildRule');
   });
+
+  it('rejects trend rule references from SMC event executors', () => {
+    const ruleConfigs: RuleConfigResponse[] = [
+      {
+        id: 'rule-trend-bearish',
+        code: 'TREND_BEARISH_FILTER',
+        executor: 'TREND_IS_BEARISH',
+        executorVersion: 'v1',
+        config: {},
+        indicators: [],
+        childRules: [],
+        overlay: {},
+        status: 'ACTIVE',
+      },
+    ];
+
+    const result = validateRuleExpression(
+      { root: createRuleExpressionRuleRef('TREND_BEARISH_FILTER', { id: 'trend-ref' }) },
+      { currentExecutor: 'BULLISH_BOS', ruleConfigs },
+    );
+
+    expect(result.errors[0].message).toBe(
+      'tradeBot.ruleExpression.validation.smcEventTrendDependency',
+    );
+  });
 });

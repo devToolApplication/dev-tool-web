@@ -31,6 +31,7 @@ export class RuleConditionRowComponent {
   @Input() issues: RuleExpressionValidationIssue[] = [];
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
   @Input() disabled = false;

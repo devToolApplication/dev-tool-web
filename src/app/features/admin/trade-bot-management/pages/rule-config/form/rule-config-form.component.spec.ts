@@ -101,7 +101,7 @@ describe('RuleConfigFormComponent', () => {
       status: 'ACTIVE',
       indicators: [],
       config: {},
-      childRules: [{ ruleCode: 'TEST_ENTRY_TREND_BUY', config: {} }],
+      childRules: [],
       overlay: {}
     };
 
@@ -164,7 +164,7 @@ describe('RuleConfigFormComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(component.ruleExpressionValidation().valid).toBe(false);
+    expect(component.ruleExpressionValidation().valid).toBe(true);
     component.openPreview();
 
     expect(component.showPreview()).toBe(true);
@@ -260,6 +260,19 @@ describe('RuleConfigFormComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
+    component.ruleConfigs = [
+      {
+        id: 'rule-child',
+        code: 'TEST_CHILD',
+        executor: 'TREND',
+        executorVersion: 'v1',
+        status: 'ACTIVE',
+        indicators: [],
+        config: {},
+        childRules: [{ ruleCode: 'TEST_ENTRY_TREND_BUY', config: {} }],
+        overlay: {}
+      }
+    ];
     component.onRuleExpressionValueChange({
       root: { id: 'child', type: 'ruleRef', ruleCode: 'TEST_CHILD' }
     });
@@ -343,5 +356,44 @@ describe('RuleConfigFormComponent', () => {
     expect(payload.childRules).toEqual([{ ruleCode: 'SAFE_CHILD', slotCode: 'confirm' }]);
     expect(payload.indicators).toEqual(['TEST_CLOSE_PRICE']);
     expect(payload.overlay).toEqual({ label: 'Trend entry' });
+  });
+
+  it('blocks SMC event rule configs from saving trend rule references', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const toast = TestBed.inject(ToastService) as unknown as { error: ReturnType<typeof vi.fn> };
+    component.ruleConfigs = [
+      {
+        id: 'rule-trend',
+        code: 'TREND_BEARISH_FILTER',
+        executor: 'TREND_IS_BEARISH',
+        executorVersion: 'v1',
+        status: 'ACTIVE',
+        indicators: [],
+        config: {},
+        childRules: [],
+        overlay: {}
+      }
+    ];
+    component.onRuleExpressionValueChange({
+      root: { id: 'trend-ref', type: 'ruleRef', ruleCode: 'TREND_BEARISH_FILTER' }
+    });
+
+    component.submit({
+      code: 'TEST_BULLISH_BOS',
+      executor: 'BULLISH_BOS',
+      executorVersion: 'v1',
+      status: 'ACTIVE',
+      indicators: [],
+      config: {},
+      overlay: {}
+    });
+
+    expect(component.ruleExpressionValidation().errors[0].message).toBe(
+      'tradeBot.ruleExpression.validation.smcEventTrendDependency'
+    );
+    expect(toast.error).toHaveBeenCalledWith('tradeBot.ruleExpression.validation.invalidExpression');
+    expect(serviceMock.saveRuleConfig).not.toHaveBeenCalled();
   });
 });

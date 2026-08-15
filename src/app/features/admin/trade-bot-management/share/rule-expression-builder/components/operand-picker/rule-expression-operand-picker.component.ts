@@ -13,6 +13,7 @@ import {
   RULE_EXPRESSION_CONSTANT_TYPES,
 } from '../../domain/rule-expression-operators';
 import { printRuleExpressionOperand } from '../../domain/rule-expression-printer';
+import { allowedRuleReference } from '../../domain/rule-expression-smc-policy';
 
 interface OperandPickerOption {
   id: string;
@@ -42,6 +43,7 @@ export class RuleExpressionOperandPickerComponent {
   @Input() allowedValueTypes: RuleExpressionOperandValueType[] = [];
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
   @Input() disabled = false;
@@ -182,6 +184,7 @@ export class RuleExpressionOperandPickerComponent {
   private ruleOptions(): OperandPickerOption[] {
     return this.ruleConfigs
       .filter((item) => item.id !== this.currentRuleId)
+      .filter((item) => allowedRuleReference(this.currentExecutor, item))
       .map((item) => ({
         id: `rule-${item.code}`,
         groupLabel: item.group || 'tradeBot.ruleExpression.operandGroup.rules',

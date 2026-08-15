@@ -13,6 +13,7 @@ import {
   RuleExpressionValidationIssue,
 } from '../../domain/rule-expression.models';
 import { printRuleExpressionOperand } from '../../domain/rule-expression-printer';
+import { allowedRuleReference } from '../../domain/rule-expression-smc-policy';
 
 @Component({
   selector: 'app-rule-expression-node',
@@ -26,6 +27,7 @@ export class RuleExpressionNodeComponent {
   @Input() issues: RuleExpressionValidationIssue[] = [];
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
   @Input() disabled = false;
@@ -113,6 +115,7 @@ export class RuleExpressionNodeComponent {
   ruleOptions(): Array<{ label: string; value: string; disabled?: boolean }> {
     return this.ruleConfigs
       .filter((item) => item.id !== this.currentRuleId)
+      .filter((item) => allowedRuleReference(this.currentExecutor, item))
       .map((item) => ({
         label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
         value: item.code,

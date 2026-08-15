@@ -104,4 +104,39 @@ describe('RuleExpressionBuilderComponent', () => {
     expect(component.dependencies().ruleCodes).toEqual(['CONFIRM_VOLUME']);
     expect(validations.at(-1)).toBe(true);
   });
+
+  it('skips trend rule references when adding defaults for SMC event executors', () => {
+    fixture.componentRef.setInput('currentExecutor', 'BULLISH_BOS');
+    fixture.componentRef.setInput('ruleConfigs', [
+      {
+        id: 'rule-trend',
+        code: 'TREND_BEARISH_FILTER',
+        executor: 'TREND_IS_BEARISH',
+        executorVersion: 'v1',
+        config: {},
+        indicators: [],
+        childRules: [],
+        overlay: {},
+        status: 'ACTIVE',
+      },
+      {
+        id: 'rule-safe',
+        code: 'SAFE_CONFIRM',
+        executor: 'ORDER_BLOCK',
+        executorVersion: 'v1',
+        config: {},
+        indicators: [],
+        childRules: [],
+        overlay: {},
+        status: 'ACTIVE',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.addRuleRef();
+
+    expect(component.expression().root).toEqual(
+      expect.objectContaining({ type: 'ruleRef', ruleCode: 'SAFE_CONFIRM' }),
+    );
+  });
 });

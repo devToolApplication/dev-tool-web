@@ -20,6 +20,7 @@ import {
   operandValueTypes,
   operatorDefinition,
 } from '../../domain/rule-expression-operators';
+import { allowedRuleReference } from '../../domain/rule-expression-smc-policy';
 
 interface OperandSlot {
   index: number;
@@ -38,6 +39,7 @@ export class RuleExpressionPanelComponent {
   @Input() issues: RuleExpressionValidationIssue[] = [];
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
   @Input() disabled = false;
@@ -82,6 +84,7 @@ export class RuleExpressionPanelComponent {
   ruleOptions(): Array<{ label: string; value: string; disabled?: boolean }> {
     return this.ruleConfigs
       .filter((item) => item.id !== this.currentRuleId)
+      .filter((item) => allowedRuleReference(this.currentExecutor, item))
       .map((item) => ({
         label: `${item.code} - ${item.executor}/${item.executorVersion}${item.status ? ` [${item.status}]` : ''}`,
         value: item.code,

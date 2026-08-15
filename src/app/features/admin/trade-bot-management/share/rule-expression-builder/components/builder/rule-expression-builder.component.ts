@@ -38,6 +38,7 @@ import {
 } from '../../domain/rule-expression.models';
 import { printRuleExpression } from '../../domain/rule-expression-printer';
 import { validateRuleExpression } from '../../domain/rule-expression-validator';
+import { allowedRuleReference } from '../../domain/rule-expression-smc-policy';
 
 const EMPTY_VALIDATION: RuleExpressionValidationResult = {
   valid: false,
@@ -56,6 +57,7 @@ export class RuleExpressionBuilderComponent implements OnChanges {
   @Input() value: RuleLogicFormValue | null | undefined;
   @Input() indicatorConfigs: IndicatorConfigResponse[] = [];
   @Input() ruleConfigs: RuleConfigResponse[] = [];
+  @Input() currentExecutor: string | null = null;
   @Input() currentRuleCode: string | null = null;
   @Input() currentRuleId: string | null = null;
   @Input() readonly = false;
@@ -231,6 +233,7 @@ export class RuleExpressionBuilderComponent implements OnChanges {
     const result = validateRuleExpression(this.expression(), {
       indicatorConfigs: this.indicatorConfigs,
       ruleConfigs: this.ruleConfigs,
+      currentExecutor: this.currentExecutor,
       currentRuleCode: this.currentRuleCode,
       currentRuleId: this.currentRuleId,
     });
@@ -243,6 +246,7 @@ export class RuleExpressionBuilderComponent implements OnChanges {
     return (
       this.ruleConfigs
         .filter((item) => item.id !== this.currentRuleId)
+        .filter((item) => allowedRuleReference(this.currentExecutor, item))
         .filter((item) => item.status !== 'INACTIVE' && item.status !== 'DISABLED')
         .sort((a, b) => a.code.localeCompare(b.code))[0]?.code ?? ''
     );

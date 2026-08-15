@@ -4,7 +4,7 @@ export const environment = {
   dangerouslySkipPermissions: true,
   keycloak: {
     enabled: true,
-    url: 'https://keycloak.103.77.243.66.nip.io',
+    url: 'https://keycloak.169.58.153.62.nip.io',
     realm: 'develop_tool_realm',
     clientId: 'develop_tool_web',
     service: {
@@ -17,14 +17,14 @@ export const environment = {
   apiUrl:{
     adminAiGenerator: 'http://localhost:31001/ai-agent-mcrs/v1/admin',
     aiGenerator: 'http://localhost:31001/ai-agent-mcrs/v1',
-    adminFileServiceUrl: 'https://api.103.77.243.66.nip.io/file-mcrs/v1/admin',
+    adminFileServiceUrl: 'https://api.169.58.153.62.nip.io/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'http://localhost:31002/trade-bot-mcrs/v1/admin',
     tradeBotUrl: 'http://localhost:31002/trade-bot-mcrs/v1',
-    jobSchedulerAdminUrl: 'https://api.103.77.243.66.nip.io/job-service/v1/admin',
-    bpmEngineAdminUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1/admin',
-    bpmEngineUrl: 'https://api.103.77.243.66.nip.io/bpm-engine/v1'
+    jobSchedulerAdminUrl: 'https://api.169.58.153.62.nip.io/job-service/v1/admin',
+    bpmEngineAdminUrl: 'https://api.169.58.153.62.nip.io/bpm-engine/v1/admin',
+    bpmEngineUrl: 'https://api.169.58.153.62.nip.io/bpm-engine/v1'
   },
   ws: {
-    tradeBotWs: 'wss://api.103.77.243.66.nip.io/trade-bot-mcrs/ws'
+    tradeBotWs: 'wss://api.169.58.153.62.nip.io/trade-bot-mcrs/ws'
   }
 };

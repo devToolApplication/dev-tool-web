@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${SERVICE_NAME}
@@ -53,10 +53,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - devtool.103.77.243.66.nip.io
+        - devtool.169.58.153.62.nip.io
       secretName: ${SERVICE_NAME}-ingress-tls
   rules:
-    - host: devtool.103.77.243.66.nip.io
+    - host: devtool.169.58.153.62.nip.io
       http:
         paths:
           - path: /storybook

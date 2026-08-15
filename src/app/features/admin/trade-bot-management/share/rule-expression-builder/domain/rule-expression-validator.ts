@@ -10,6 +10,10 @@ import {
   RuleLogicFormValue,
 } from './rule-expression.models';
 import { operandValueTypes, operatorDefinition } from './rule-expression-operators';
+import {
+  isSmcTrendDependency,
+  SMC_EVENT_TREND_DEPENDENCY_MESSAGE,
+} from './rule-expression-smc-policy';
 
 export function validateRuleExpression(
   value: RuleLogicFormValue | RuleExpressionNode | null | undefined,
@@ -86,7 +90,7 @@ function validateNode(
     return;
   }
 
-  validateRuleRef(node.ruleCode, node.id, context, issues, path);
+  validateRuleRef(node.ruleCode, node.id, context, issues, path, node.slotCode);
 }
 
 function validateCondition(
@@ -214,6 +218,7 @@ function validateRuleRef(
   context: RuleExpressionValidationContext,
   issues: RuleExpressionValidationIssue[],
   path: string,
+  slotCode?: string | null,
 ): void {
   const code = ruleCode.trim();
   if (!code) {
@@ -231,11 +236,29 @@ function validateRuleRef(
     issues.push({ nodeId, path, message: 'tradeBot.validation.selfChildRule', severity: 'error' });
   }
 
+  const rule = Array.isArray(context.ruleConfigs)
+    ? context.ruleConfigs.find((item) => item.code === code)
+    : undefined;
+  if (
+    isSmcTrendDependency(context.currentExecutor, {
+      ruleCode: code,
+      slotCode,
+      executor: rule?.executor,
+    })
+  ) {
+    issues.push({
+      nodeId,
+      path,
+      message: SMC_EVENT_TREND_DEPENDENCY_MESSAGE,
+      severity: 'error',
+    });
+    return;
+  }
+
   if (!Array.isArray(context.ruleConfigs)) {
     return;
   }
 
-  const rule = context.ruleConfigs.find((item) => item.code === code);
   if (!rule) {
     issues.push({
       nodeId,

@@ -152,7 +152,7 @@ export class RuleConfigFormComponent implements OnInit {
   }
 
   openPreview(): void {
-    const expressionValidation = validateRuleExpression(this.ruleExpressionValue());
+    const expressionValidation = this.validateCurrentRuleExpression();
     if (!expressionValidation.valid) {
       this.toastService.error(
         this.i18nService.t('tradeBot.ruleExpression.validation.invalidExpression'),
@@ -176,6 +176,7 @@ export class RuleConfigFormComponent implements OnInit {
 
   submit(model: Record<string, unknown>): void {
     this.currentRuleCode.set(stringValue(model['code']));
+    this.currentExecutor = stringValue(model['executor'] ?? this.currentExecutor);
     const expressionValidation = this.validateCurrentRuleExpression();
     if (!expressionValidation.valid) {
       this.toastService.error(
@@ -516,6 +517,7 @@ export class RuleConfigFormComponent implements OnInit {
     this.currentTemplateSignature = formTemplateSignature(template);
     this.currentExecutor = currentExecutor;
     this.lastModel = model;
+    this.refreshRuleFlowNodeTypes();
     this.currentRuleCode.set(stringValue(model['code']));
     this.ruleExpressionValue.set(ruleExpressionFromModel(model, this.ruleExpressionValue()));
     this.ruleFlowDefinition.set(ruleExpressionToFlowDefinition(this.ruleExpressionValue()));
@@ -1175,6 +1177,7 @@ export class RuleConfigFormComponent implements OnInit {
     const result = validateRuleExpression(this.ruleExpressionValue(), {
       indicatorConfigs: this.indicatorConfigs,
       ruleConfigs: this.ruleConfigs,
+      currentExecutor: this.currentExecutor,
       currentRuleCode: this.currentRuleCode(),
       currentRuleId: this.id,
     });
@@ -1186,6 +1189,7 @@ export class RuleConfigFormComponent implements OnInit {
     this.ruleFlowNodeTypes = buildRuleFlowNodeTypes({
       indicatorConfigs: this.indicatorConfigs,
       ruleConfigs: this.ruleConfigs,
+      currentExecutor: this.currentExecutor,
       currentRuleId: this.id,
     });
   }

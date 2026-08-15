@@ -19,11 +19,13 @@ import {
   RuleExpressionConditionOperator,
   RuleExpressionOperand,
   RuleExpressionOperandValueType,
+  allowedRuleReference,
 } from '../rule-expression-builder/domain';
 
 export interface RuleFlowNodeTypeCatalogOptions {
   indicatorConfigs?: IndicatorConfigResponse[];
   ruleConfigs?: RuleConfigResponse[];
+  currentExecutor?: string | null;
   currentRuleId?: string | null;
 }
 
@@ -469,6 +471,7 @@ function indicatorOptions(options: RuleFlowNodeTypeCatalogOptions): SelectOption
 function ruleOptions(options: RuleFlowNodeTypeCatalogOptions): SelectOption[] {
   return (options.ruleConfigs ?? [])
     .filter((item) => item.id !== options.currentRuleId)
+    .filter((item) => allowedRuleReference(options.currentExecutor, item))
     .map((item) => ({
       label: `${item.code}${item.status ? ` [${item.status}]` : ''}`,
       value: item.code,
