@@ -17,17 +17,21 @@ echo "data:" >> k8s-configmap.yaml
 
 if [ -n "$CONFIG_SOURCE" ]; then
   echo "Appending data from ${CONFIG_SOURCE}..."
-  while IFS='=' read -r key value || [ -n "$key" ]; do
-    key=$(echo "$key" | tr -d '\r')
-    value=$(echo "$value" | tr -d '\r')
-
+  # Strip UTF-8 BOM, carriage returns, and process lines
+  sed '1s/^\xef\xbb\xbf//' "$CONFIG_SOURCE" | tr -d '\r' | while IFS='=' read -r key value || [ -n "$key" ]; do
     case "$key" in
       ""|\#*) continue ;;
     esac
 
+    # Sanitize key name for kubernetes configmap (strip non-standard chars)
+    clean_key=$(echo "$key" | tr -cd 'a-zA-Z0-9_.-')
+    if [ -z "$clean_key" ]; then
+      continue
+    fi
+
     escaped_value=$(printf '%s' "$value" | sed 's/"/\\"/g')
-    echo "  $key: \"$escaped_value\"" >> k8s-configmap.yaml
-  done < "$CONFIG_SOURCE"
+    echo "  $clean_key: \"$escaped_value\"" >> k8s-configmap.yaml
+  done
 else
   echo "No cicd/k8s/.env or cicd/k8s/.env.example file found. Creating an empty ConfigMap data block."
 fi
