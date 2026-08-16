@@ -9,7 +9,7 @@ spec:
       image: gcr.io/kaniko-project/executor:debug
       command: ["/busybox/sh", "-c"]
       args:
-        - sleep 1500
+        - sleep 3600
       tty: true
       volumeMounts:
         - name: docker-config
