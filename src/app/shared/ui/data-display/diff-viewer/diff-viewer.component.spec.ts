@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { SharedModule } from '../../../shared.module';
-import { provideSharedTesting } from '../../../testing/shared-test.providers';
+import { SharedModule } from '@shared/shared.module';
+import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { JsonViewerComponent } from '../json-viewer/json-viewer.component';
 import { DiffViewerComponent } from './diff-viewer.component';
 

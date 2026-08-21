@@ -1,0 +1,59 @@
+.tiered-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.tiered-menu--popup .tiered-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: var(--app-z-overlay, 1000);
+}
+
+.tiered-menu__panel {
+  min-width: 13rem;
+  padding: 0.25rem;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-overlay-bg);
+  box-shadow: var(--app-shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.tiered-menu__separator {
+  margin: 0.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--app-border-soft);
+}
+
+.tiered-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--app-text);
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tiered-menu__item:hover,
+.tiered-menu__item:focus-visible {
+  background: var(--app-chart-primary-fill);
+  color: var(--app-primary);
+  outline: none;
+}
+
+.tiered-menu__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tiered-menu__item-icon {
+  color: var(--app-text-muted);
+}

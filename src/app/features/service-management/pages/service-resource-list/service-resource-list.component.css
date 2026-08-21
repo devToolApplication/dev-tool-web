@@ -1,0 +1,37 @@
+.service-detail {
+  display: grid;
+  gap: 1rem;
+}
+
+.service-detail__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  background: var(--app-card-surface-strong);
+}
+
+.service-detail__hero h2 {
+  margin: 0;
+  color: var(--app-text);
+}
+
+.service-detail__hero p {
+  margin: 0.25rem 0 0;
+  color: var(--app-text-muted);
+}
+
+.service-detail__eyebrow {
+  color: var(--app-primary) !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.service-detail__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

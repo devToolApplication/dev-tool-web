@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
-import { FormConfig, FormContext } from '../../form-input/models/form-config.model';
+import { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
 
 export interface ConfigTemplate {
   title?: string;

@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 
-import { ArrayFieldState, FieldConfig, FieldState, GroupFieldState, SelectOption } from '../ui/form-input/models/form-config.model';
+import { ArrayFieldState, FieldConfig, FieldState, GroupFieldState, SelectOption } from '@shared/ui/patterns/form-input/models/form-config.model';
 
 export function createFieldState(config: FieldConfig, initialValue: unknown = ''): FieldState {
   const value = signal(initialValue);

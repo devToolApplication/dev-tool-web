@@ -1,0 +1,54 @@
+<section class="crud-page">
+  <div class="header-row">
+    <div class="header-row__content">
+      <h2 class="header-row__title">{{ config.title | translateContent }}</h2>
+      @if (config.description) {
+        <p class="header-row__description">{{ config.description | translateContent }}</p>
+      }
+    </div>
+
+    @if (visibleActions.length) {
+      <div class="header-actions">
+        @for (action of visibleActions; track action.id) {
+          <app-button
+            type="button"
+            [icon]="action.icon ?? ''"
+            [label]="action.label"
+            [severity]="action.severity ?? null"
+            [disabled]="isActionDisabled(action)"
+            [loading]="isActionLoading(action)"
+            (buttonClick)="onActionClick(action)"
+          ></app-button>
+        }
+      </div>
+    }
+  </div>
+
+  <ng-content select="[crud-page-before-form]"></ng-content>
+
+  <div class="form-wrap">
+    @if (config.infoSection) {
+      <div class="form-wrap__info">
+        <div class="form-wrap__info-title">{{ config.infoSection.title | translateContent }}</div>
+        @if (config.infoSection.description) {
+          <div class="form-wrap__info-description">{{ config.infoSection.description | translateContent }}</div>
+        }
+      </div>
+    }
+
+    <app-form-input
+      [config]="config.form"
+      [context]="context"
+      [initialValue]="model"
+      [showSubmit]="false"
+      [loading]="busy"
+      [submitting]="busy"
+      [apiError]="apiError"
+      [apiFieldErrors]="apiFieldErrors"
+      (formSubmit)="onFormSubmit($event)"
+      (valueChange)="onValueChange($event)"
+    ></app-form-input>
+
+    <ng-content select="[crud-page-after-form]"></ng-content>
+  </div>
+</section>

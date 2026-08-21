@@ -1,21 +1,21 @@
 import { SimpleChange, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SharedModule } from '../shared.module';
-import { AvatarComponent } from '../component/avatar/avatar';
-import { PrimeConfirmDialogComponent } from '../component/confirm-dialog/confirm-dialog';
-import { DialogComponent } from '../component/dialog/dialog';
-import { FluidComponent } from '../component/fluid/fluid';
-import { IconFieldComponent } from '../component/icon-field/icon-field';
-import { MessageComponent } from '../component/message/message';
-import { PanelMenuComponent } from '../component/panel-menu/panel-menu';
-import { PrimeBadgeComponent } from '../component/prime-badge/prime-badge';
-import { RippleComponent } from '../component/ripple/ripple';
-import { TieredMenuComponent } from '../component/tiered-menu/tiered-menu';
-import { ToastComponent } from '../component/toast/toast';
-import { ToolbarComponent } from '../component/toolbar/toolbar';
-import { TooltipComponent } from '../component/tooltip/tooltip';
-import { provideSharedTesting } from '../testing/shared-test.providers';
+import { SharedModule } from '@shared/shared.module';
+import { AvatarComponent } from '@shared/ui/primitives/avatar/avatar';
+import { PrimeConfirmDialogComponent } from '@shared/ui/primitives/confirm-dialog/confirm-dialog';
+import { DialogComponent } from '@shared/ui/primitives/dialog/dialog';
+import { FluidComponent } from '@shared/ui/primitives/fluid/fluid';
+import { IconFieldComponent } from '@shared/ui/primitives/icon-field/icon-field';
+import { MessageComponent } from '@shared/ui/primitives/message/message';
+import { PanelMenuComponent } from '@shared/ui/primitives/panel-menu/panel-menu';
+import { PrimeBadgeComponent } from '@shared/ui/primitives/prime-badge/prime-badge';
+import { RippleComponent } from '@shared/ui/primitives/ripple/ripple';
+import { TieredMenuComponent } from '@shared/ui/primitives/tiered-menu/tiered-menu';
+import { ToastComponent } from '@shared/ui/primitives/toast/toast';
+import { ToolbarComponent } from '@shared/ui/primitives/toolbar/toolbar';
+import { TooltipComponent } from '@shared/ui/primitives/tooltip/tooltip';
+import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { BadgeComponent } from './data-display/badge/badge.component';
 import { CopyableTextComponent } from './data-display/copyable-text/copyable-text.component';
 import { DiffViewerComponent } from './data-display/diff-viewer/diff-viewer.component';
@@ -26,7 +26,7 @@ import { AlertComponent } from './feedback/alert/alert.component';
 import { EmptyStateComponent } from './feedback/empty-state/empty-state.component';
 import { ErrorStateComponent } from './feedback/error-state/error-state.component';
 import { LoadingSkeletonComponent } from './feedback/loading-skeleton/loading-skeleton.component';
-import { FormInput } from './form-input/form-input';
+import { FormInput } from './patterns/form-input/form-input';
 import { ConfigTemplateFormComponent } from './forms/config-template-form/config-template-form.component';
 import { ValidationSummaryComponent } from './forms/validation-summary/validation-summary.component';
 import { ActionToolbarComponent } from './layout/action-toolbar/action-toolbar.component';
@@ -36,7 +36,7 @@ import { PageShellComponent } from './layout/page-shell/page-shell.component';
 import { SectionPanelComponent } from './layout/section-panel/section-panel.component';
 import { ConfirmDialogHostComponent } from './overlay/confirm-dialog/confirm-dialog-host.component';
 import { DrawerComponent } from './overlay/drawer/drawer.component';
-import { TableComponent } from './table/component/table/table';
+import { TableComponent } from './patterns/table/component/table/table';
 
 describe('Shared UI foundation', () => {
   beforeEach(async () => {

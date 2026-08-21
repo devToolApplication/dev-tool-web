@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SharedModule } from '../../../shared.module';
-import { provideSharedTesting } from '../../../testing/shared-test.providers';
+import { SharedModule } from '@shared/shared.module';
+import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { ConfirmDialogHostComponent } from './confirm-dialog-host.component';
 import { ConfirmDialogService } from './confirm-dialog.service';
 

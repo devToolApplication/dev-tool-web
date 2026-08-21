@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig } from '@storybook/angular';
 import { ConfirmDialogHostComponent } from './confirm-dialog-host.component';
 import { ConfirmDialogService } from './confirm-dialog.service';
-import { I18nService } from '../../../../core/ui-services/i18n.service';
+import { I18nService } from '@core/i18n/i18n.service';
 
 const meta: Meta<ConfirmDialogHostComponent> = {
   title: 'Shared/UI/Overlay/ConfirmDialogHost',

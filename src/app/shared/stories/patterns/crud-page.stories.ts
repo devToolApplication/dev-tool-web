@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 
 import type { FilterPanelField } from '../../ui/layout/filter-panel/filter-panel.component';
 import type { ActionToolbarAction } from '../../ui/layout/action-toolbar/action-toolbar.component';
-import type { TableConfig } from '../../ui/table/models/table-config.model';
+import type { TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 
 const filters: FilterPanelField[] = [
   { key: 'keyword', label: 'Keyword', type: 'text', placeholder: 'Search by name...' },

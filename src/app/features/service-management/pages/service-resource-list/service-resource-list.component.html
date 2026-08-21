@@ -1,0 +1,77 @@
+<app-page-shell
+  [title]="screen.title"
+  [subtitle]="screen.description"
+  [breadcrumb]="screen.breadcrumb"
+  layout="wide"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="screen.actions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <app-section-panel
+    page-toolbar
+    title="serviceManagement.filter.title"
+    subtitle="serviceManagement.filter.description"
+  >
+    <app-filter-panel
+      [filters]="screen.filters"
+      [values]="filterValues()"
+      (valueChange)="onFilterChange($event)"
+      (apply)="onFilterChange($event)"
+      (reset)="onFilterReset()"
+    ></app-filter-panel>
+  </app-section-panel>
+
+  <app-table
+    [config]="screen.table"
+    [data]="records()"
+    (rowClick)="openDetail($event)"
+    (actionClick)="onTableAction($event)"
+  ></app-table>
+</app-page-shell>
+
+<app-drawer
+  [open]="drawerOpen()"
+  title="serviceManagement.drawer.resourceTitle"
+  size="lg"
+  (closed)="closeDrawer()"
+>
+  @if (selectedRecord(); as record) {
+    <div class="service-detail">
+      <div class="service-detail__hero">
+        <div>
+          <p class="service-detail__eyebrow">{{ record.key }}</p>
+          <h2>{{ record.name }}</h2>
+          <p>{{ record.description }}</p>
+        </div>
+        <app-badge
+          [label]="record.statusLabel"
+          [variant]="record.status === 'active' ? 'success' : record.status === 'rotating' ? 'warning' : 'muted'"
+        ></app-badge>
+      </div>
+
+      <app-section-panel title="serviceManagement.drawer.overview" density="compact">
+        <app-key-value-list [items]="selectedRecordDetails()"></app-key-value-list>
+      </app-section-panel>
+
+      <app-section-panel title="serviceManagement.drawer.payload" density="compact">
+        <app-json-viewer [value]="record.payload" [collapsed]="true"></app-json-viewer>
+      </app-section-panel>
+    </div>
+  }
+
+  <div drawer-footer class="service-detail__footer">
+    <app-button
+      label="close"
+      severity="secondary"
+      (buttonClick)="closeDrawer()"
+    ></app-button>
+    <app-button
+      label="edit"
+      icon="pi pi-pencil"
+      (buttonClick)="editSelectedRecord()"
+    ></app-button>
+  </div>
+</app-drawer>

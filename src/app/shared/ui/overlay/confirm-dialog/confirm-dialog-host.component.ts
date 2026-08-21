@@ -1,7 +1,7 @@
 import { Component, DestroyRef, ElementRef, HostListener, ViewChild, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConfirmDialogRequest, ConfirmDialogService } from './confirm-dialog.service';
-import { I18nService } from '../../../../core/ui-services/i18n.service';
+import { I18nService } from '@core/i18n/i18n.service';
 
 @Component({
   selector: 'app-confirm-dialog-host',

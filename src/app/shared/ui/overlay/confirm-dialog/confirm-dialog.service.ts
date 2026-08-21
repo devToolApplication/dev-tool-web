@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { I18nService } from '../../../../core/ui-services/i18n.service';
+import { I18nService } from '@core/i18n/i18n.service';
 
 export type ConfirmDialogVariant = 'default' | 'warning' | 'danger' | 'info';
 export type ConfirmDialogResult = 'confirmed' | 'cancelled' | 'dismissed';

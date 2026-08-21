@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig } from '@storybook/angular';
 import { ActionToolbarComponent } from './action-toolbar.component';
-import { PermissionService } from '../../../../core/auth/permission.service';
+import { PermissionService } from '@core/auth/permission.service';
 import { ConfirmDialogService } from '../../overlay/confirm-dialog/confirm-dialog.service';
 
 const meta: Meta<ActionToolbarComponent> = {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnChanges, Output, signal } from '@angular/core';
-import { PermissionService } from '../../../../core/auth/permission.service';
-import { ConfirmDialogConfig, ConfirmDialogService } from '../../overlay/confirm-dialog/confirm-dialog.service';
+import { PermissionService } from '@core/auth/permission.service';
+import { ConfirmDialogConfig, ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 
 export type ActionToolbarVariant = 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
 

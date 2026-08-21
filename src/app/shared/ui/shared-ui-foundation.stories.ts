@@ -4,10 +4,10 @@ import type { FilterPanelField } from './layout/filter-panel/filter-panel.compon
 import type { ActionToolbarAction } from './layout/action-toolbar/action-toolbar.component';
 import type { KeyValueItem } from './data-display/key-value-list/key-value-list.component';
 import type { TimelineItem } from './data-display/timeline/timeline.component';
-import type { TableConfig } from './table/models/table-config.model';
-import type { FormConfig, FormContext } from './form-input/models/form-config.model';
-import type { FieldGuideFieldItem, FieldGuideOptionItem } from './field-guide-panel/field-guide-panel.component';
-import type { ProgressState } from './realtime-progress-bar/realtime-progress-bar.component';
+import type { TableConfig } from './patterns/table/models/table-config.model';
+import type { FormConfig, FormContext } from './patterns/form-input/models/form-config.model';
+import type { FieldGuideFieldItem, FieldGuideOptionItem } from './forms/field-guide-panel/field-guide-panel.component';
+import type { ProgressState } from './feedback/realtime-progress-bar/realtime-progress-bar.component';
 
 const sampleJson = {
   id: 'cfg-001',

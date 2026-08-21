@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
-import type { FormConfig, FormContext } from '../../ui/form-input/models/form-config.model';
+import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
 
 const formConfig: FormConfig = {
   title: 'Create Configuration',

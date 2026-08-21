@@ -1,8 +1,8 @@
 import { Component, NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SharedModule } from '../../../shared.module';
-import { provideSharedTesting } from '../../../testing/shared-test.providers';
+import { SharedModule } from '@shared/shared.module';
+import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { PageHeaderComponent } from './page-header.component';
 
 @Component({

@@ -1,8 +1,9 @@
-import {APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners} from '@angular/core';
+import { APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { AppRoutes } from './app.routes';
-import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing/app-routing.module';
+import { AppComponent } from './app-shell/app.component';
+import { AppShellModule } from './app-shell/app-shell.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './core/http/auth.interceptor';
@@ -17,7 +18,8 @@ export function initializeKeycloak(keycloak: KeycloakService) {
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutes,
+    AppRoutingModule,
+    AppShellModule,
     SharedModule
   ],
   providers: [

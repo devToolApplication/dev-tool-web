@@ -5,12 +5,20 @@ import { environment } from '../../../enviroment/environment';
 describe('PermissionService', () => {
   let service: PermissionService;
   let keycloakService: { hasRole: ReturnType<typeof vi.fn> };
+  const originalDangerouslySkipPermissions = environment.dangerouslySkipPermissions;
 
   beforeEach(() => {
+    (environment as any).dangerouslySkipPermissions = false;
+    localStorage.removeItem('dangerously-skip-permissions');
     keycloakService = {
       hasRole: vi.fn().mockReturnValue(false)
     };
     service = new PermissionService(keycloakService as unknown as KeycloakService);
+  });
+
+  afterEach(() => {
+    localStorage.removeItem('dangerously-skip-permissions');
+    (environment as any).dangerouslySkipPermissions = originalDangerouslySkipPermissions;
   });
 
   it('denies when no roles match', () => {

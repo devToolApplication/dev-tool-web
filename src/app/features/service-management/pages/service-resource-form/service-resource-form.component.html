@@ -1,0 +1,21 @@
+<app-page-shell
+  [title]="screen.title"
+  [subtitle]="screen.description"
+  [breadcrumb]="screen.breadcrumb"
+>
+  <app-base-crud-page
+    [config]="screen.crudConfig"
+    [context]="context"
+    [model]="model"
+    (submit)="onSubmit()"
+    (action)="onAction($event)"
+    (valueChange)="onValueChange($event)"
+  >
+    <app-alert
+      crud-page-before-form
+      variant="info"
+      title="serviceManagement.form.previewNoticeTitle"
+      message="serviceManagement.form.previewNoticeDescription"
+    ></app-alert>
+  </app-base-crud-page>
+</app-page-shell>

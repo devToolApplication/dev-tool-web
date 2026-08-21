@@ -11,6 +11,9 @@
         ></app-button>
       }
       <div class="page-header__title-block">
+        @if (breadcrumb?.length) {
+          <app-breadcrumb [items]="breadcrumb ?? []"></app-breadcrumb>
+        }
         <h1>{{ title | translateContent }}</h1>
         @if (subtitle) {
           <p>{{ subtitle | translateContent }}</p>

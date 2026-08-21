@@ -1,0 +1,29 @@
+<div class="tiered-menu" [class.tiered-menu--popup]="popup" [class]="styleClass || ''">
+  @if (!popup || visible) {
+    <nav
+      [id]="id"
+      class="tiered-menu__panel"
+      role="menu"
+      [attr.aria-label]="ariaLabel | translateContent"
+    >
+      @for (item of items; track item.label) {
+        @if (item.separator) {
+          <hr class="tiered-menu__separator" />
+        } @else if (item.visible !== false) {
+          <button
+            type="button"
+            class="tiered-menu__item"
+            role="menuitem"
+            [disabled]="item.disabled || false"
+            (click)="onItemClick(item)"
+          >
+            @if (item.icon) {
+              <i [class]="item.icon" class="tiered-menu__item-icon" aria-hidden="true"></i>
+            }
+            <span>{{ item.label | translateContent }}</span>
+          </button>
+        }
+      }
+    </nav>
+  }
+</div>

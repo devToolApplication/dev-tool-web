@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SharedModule } from '../../../shared.module';
-import { provideSharedTesting } from '../../../testing/shared-test.providers';
-import { PermissionService } from '../../../../core/auth/permission.service';
+import { SharedModule } from '@shared/shared.module';
+import { provideSharedTesting } from '@shared/testing/shared-test.providers';
+import { PermissionService } from '@core/auth/permission.service';
 import { ConfirmDialogService } from '../../overlay/confirm-dialog/confirm-dialog.service';
 import { ActionToolbarComponent } from './action-toolbar.component';
 
