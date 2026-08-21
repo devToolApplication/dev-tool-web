@@ -72,7 +72,7 @@ export const OverlayAndLayout: Story = {
       ] satisfies FilterPanelField[],
       actions: [
         { id: 'refresh', label: 'Refresh', icon: 'pi pi-refresh', placement: 'primary', variant: 'primary' },
-        { id: 'delete', label: 'Delete', icon: 'pi pi-trash', placement: 'secondary', variant: 'danger' }
+        { id: 'delete', label: 'Delete', icon: 'pi pi-trash', placement: 'secondary', variant: 'destructive' }
       ] satisfies ActionToolbarAction[]
     },
     template: `
@@ -105,30 +105,17 @@ export const ConfirmDialog: Story = {
           id: 'confirm-danger',
           label: 'Open danger confirm',
           icon: 'pi pi-trash',
-          variant: 'danger',
+          variant: 'destructive',
           placement: 'primary',
-          confirm: {
-            title: 'Delete configuration',
-            message: 'Delete this saved configuration and stop showing it in lists.',
-            confirmText: 'Delete',
-            cancelText: 'Keep',
-            variant: 'danger'
-          }
+          
         },
         {
           id: 'confirm-warning',
           label: 'Open text confirm',
           icon: 'pi pi-exclamation-triangle',
-          variant: 'warning',
+          variant: 'secondary',
           placement: 'secondary',
-          confirm: {
-            title: 'Reset runtime state',
-            message: 'Reset clears temporary runtime state for this workspace.',
-            confirmText: 'Reset',
-            cancelText: 'Cancel',
-            variant: 'warning',
-            requireText: 'RESET'
-          }
+          
         }
       ] satisfies ActionToolbarAction[]
     },
@@ -189,8 +176,8 @@ export const TableAndForm: Story = {
                 id: 'delete',
                 label: 'Delete',
                 icon: 'pi pi-trash',
-                variant: 'danger',
-                confirm: { message: 'Delete this item?', variant: 'danger' },
+                variant: 'destructive',
+                
                 onClick: () => undefined
               }
             ]
@@ -286,3 +273,5 @@ export const AdvancedControlsAndMetrics: Story = {
     `
   })
 };
+
+

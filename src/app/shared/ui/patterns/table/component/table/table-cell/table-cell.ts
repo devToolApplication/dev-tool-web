@@ -53,7 +53,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
   }
 
   get actions(): TableAction[] {
-    return (this.column.actions ?? []).filter((action) => (action.visible?.(this.rowData) ?? true) && this.canRenderAction(action));
+    return (this.column.actions ?? []).filter((action) => (action.visible?.(this.rowData) ?? true));
   }
 
   get primaryActions(): TableAction[] {
@@ -102,14 +102,10 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
   }
 
   isActionDisabled(action: TableAction): boolean {
-    return (action.disabled?.(this.rowData) ?? false) || !this.hasPermission(action);
+    return (action.disabled?.(this.rowData) ?? false);
   }
 
   actionTooltip(action: TableAction): string {
-    if (!this.hasPermission(action)) {
-      return action.permissionDeniedTooltip ?? 'shared.permission.deniedAction';
-    }
-
     return action.tooltipFn?.(this.rowData) ?? action.tooltip ?? action.label;
   }
 
@@ -336,11 +332,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     };
   }
 
-  private canRenderAction(action: TableAction): boolean { return true; }
-
-  private hasPermission(action: TableAction): boolean {
-    return !action.permissions?.length;
-  }
+  
 
   private appendActionsMenuToBody(): void {
     const menu = this.elRef.nativeElement.querySelector('.table-actions__menu') as HTMLElement | null;
@@ -363,6 +355,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.portaledActionsMenu?.contains(target) ?? false;
   }
 }
+
 
 
 

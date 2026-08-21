@@ -18,7 +18,7 @@ const timelineItems: TimelineItem[] = [
   { title: 'Deployed to production', description: 'Version 2.4.1 deployed successfully.', variant: 'success', time: '2026-05-27 14:00' },
   { title: 'Configuration updated', description: 'Timeout increased from 3000ms to 5000ms.', variant: 'info', time: '2026-05-25 10:30' },
   { title: 'Failed health check', description: 'Connection timeout to downstream service.', variant: 'danger', time: '2026-05-24 03:15' },
-  { title: 'Auto-recovered', description: 'Service restarted after 2 failed attempts.', variant: 'warning', time: '2026-05-24 03:18' },
+  { title: 'Auto-recovered', description: 'Service restarted after 2 failed attempts.', variant: 'muted', time: '2026-05-24 03:18' },
   { title: 'Created', description: 'Initial deployment from CI/CD pipeline.', variant: 'success', time: '2026-05-10 08:00' }
 ];
 
@@ -30,8 +30,8 @@ const actions: ActionToolbarAction[] = [
     label: 'Delete',
     icon: 'pi pi-trash',
     placement: 'secondary',
-    variant: 'danger',
-    confirm: { title: 'Delete job', message: 'This will permanently remove the job and its history.', variant: 'danger' }
+    variant: 'destructive',
+    
   }
 ];
 
@@ -97,3 +97,7 @@ export const WithError: Story = {
     `
   })
 };
+
+
+
+

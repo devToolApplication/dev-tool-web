@@ -38,7 +38,7 @@ const meta: Meta<ActionToolbarComponent> = {
         id: 'edit',
         label: 'common.edit',
         icon: 'pi pi-pencil',
-        variant: 'default',
+        variant: 'secondary',
         placement: 'secondary',
       },
       {
@@ -52,14 +52,14 @@ const meta: Meta<ActionToolbarComponent> = {
         id: 'delete',
         label: 'common.delete',
         icon: 'pi pi-trash',
-        variant: 'danger',
+        variant: 'destructive',
         placement: 'secondary',
       },
       {
         id: 'archive',
         label: 'common.archive',
         icon: 'pi pi-box',
-        variant: 'default',
+        variant: 'secondary',
         placement: 'more',
       },
     ],
@@ -75,10 +75,10 @@ export const Default: Story = {};
 export const WithVariants: Story = {
   args: {
     actions: [
-      { id: 'default', label: 'Default', variant: 'default', placement: 'primary' },
+      { id: 'default', label: 'Default', variant: 'secondary', placement: 'primary' },
       { id: 'primary', label: 'Primary', variant: 'primary', placement: 'primary' },
-      { id: 'warning', label: 'Warning', variant: 'warning', placement: 'primary' },
-      { id: 'danger', label: 'Danger', variant: 'danger', placement: 'primary' },
+      { id: 'warning', label: 'Warning', variant: 'secondary', placement: 'primary' },
+      { id: 'danger', label: 'Danger', variant: 'destructive', placement: 'primary' },
       { id: 'ghost', label: 'Ghost', variant: 'ghost', placement: 'primary' },
     ],
   },
@@ -123,3 +123,4 @@ export const MixedPlacement: Story = {
     ],
   },
 };
+

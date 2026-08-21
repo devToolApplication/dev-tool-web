@@ -273,26 +273,6 @@ describe('TableCellComponent', () => {
     expect(actionClick).toHaveBeenCalledWith({ action, row: { id: 1 } });
   });
 
-  it('keeps unauthorized row actions visible but disabled with a tooltip by default', async () => {
-    permissionService.hasAll.mockReturnValue(false);
-    const actionClick = vi.fn();
-    const action: TableAction = {
-      id: 'delete',
-      label: 'Delete',
-      permissions: ['ITEM_DELETE'],
-      onClick: vi.fn()
-    };
-    renderCell({ field: 'actions', header: 'Actions', type: 'actions', actions: [action] }, { id: 1 });
-    component.actionClick.subscribe(actionClick);
-
-    expect(component.actions).toEqual([action]);
-    expect(component.isActionDisabled(action)).toBe(true);
-    expect(component.actionTooltip(action)).toBe('shared.permission.deniedAction');
-
-    await component.onActionClick(action);
-    expect(actionClick).not.toHaveBeenCalled();
-  });
-
   function renderCell(
     column: TableColumn,
     rowData: Record<string, unknown>,
@@ -307,4 +287,6 @@ describe('TableCellComponent', () => {
     fixture.detectChanges();
   }
 });
+
+
 

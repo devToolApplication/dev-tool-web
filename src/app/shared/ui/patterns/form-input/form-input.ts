@@ -220,7 +220,7 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
   }
 
   onSubmit() {
-    if (this.submitting || this.loading || this.readonlyMode() || this.config?.actions?.submitDisabled) {
+    if (this.submitting || this.loading || this.readonlyMode()) {
       return;
     }
 
@@ -435,5 +435,6 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     });
   }
 }
+
 
 

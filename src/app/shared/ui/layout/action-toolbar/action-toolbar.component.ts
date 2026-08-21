@@ -8,13 +8,8 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { PermissionService } from '@core/auth/permission.service';
-import {
-  ConfirmDialogConfig,
-  ConfirmDialogService,
-} from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 
-export type ActionToolbarVariant = 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
+export type ActionToolbarVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 export interface ActionToolbarAction {
   id: string;
@@ -25,11 +20,7 @@ export interface ActionToolbarAction {
   disabled?: boolean;
   loading?: boolean;
   tooltip?: string;
-  permissions?: readonly string[];
-  permissionMode?: 'hide' | 'disable';
-  permissionDeniedTooltip?: string;
   placement?: 'primary' | 'secondary' | 'more';
-  confirm?: ConfirmDialogConfig;
 }
 
 @Component({
@@ -48,11 +39,6 @@ export class ActionToolbarComponent implements OnChanges {
   secondaryActions: ActionToolbarAction[] = [];
   moreActions: ActionToolbarAction[] = [];
 
-  constructor(
-    private readonly confirmDialogService: ConfirmDialogService,
-    private readonly permissionService: PermissionService,
-  ) {}
-
   ngOnChanges(): void {
     this.primaryActions = this.filterActions('primary');
     this.secondaryActions = this.filterActions('secondary');
@@ -64,54 +50,12 @@ export class ActionToolbarComponent implements OnChanges {
   }
 
   buttonVariant(action: ActionToolbarAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
-    switch (action.variant) {
-      case 'primary':
-        return 'primary';
-      case 'danger':
-        return 'destructive';
-      case 'ghost':
-        return 'ghost';
-      default:
-        return 'secondary';
-    }
+    return action.variant ?? 'secondary';
   }
 
-  severity(
-    action: ActionToolbarAction,
-  ): 'secondary' | 'success' | 'info' | 'warn' | 'danger' | null {
-    switch (action.variant) {
-      case 'primary':
-        return 'info';
-      case 'warning':
-        return 'warn';
-      case 'danger':
-        return 'danger';
-      case 'ghost':
-      case 'default':
-      default:
-        return 'secondary';
-    }
-  }
-
-  async emitAction(action: ActionToolbarAction): Promise<void> {
-    if (this.isActionDisabled(action) || action.loading) {
+  emitAction(action: ActionToolbarAction): void {
+    if (action.disabled || action.loading) {
       return;
-    }
-    const confirmConfig =
-      action.confirm ??
-      (action.variant === 'danger'
-        ? { message: 'shared.confirm.dangerAction', variant: 'danger' as const }
-        : undefined);
-
-    if (confirmConfig) {
-      const confirmed = await this.confirmDialogService.confirm({
-        variant: action.variant === 'danger' ? 'danger' : confirmConfig.variant,
-        ...confirmConfig,
-      });
-      if (!confirmed) {
-        this.moreOpen.set(false);
-        return;
-      }
     }
     this.moreOpen.set(false);
     this.actionClick.emit(action);
@@ -119,18 +63,6 @@ export class ActionToolbarComponent implements OnChanges {
 
   toggleMore(): void {
     this.moreOpen.update((value) => !value);
-  }
-
-  isActionDisabled(action: ActionToolbarAction): boolean {
-    return action.disabled === true || !this.hasPermission(action);
-  }
-
-  actionTooltip(action: ActionToolbarAction): string | undefined {
-    if (!this.hasPermission(action)) {
-      return action.permissionDeniedTooltip ?? 'shared.permission.deniedAction';
-    }
-
-    return action.tooltip;
   }
 
   @HostListener('document:keydown.escape')
@@ -142,21 +74,7 @@ export class ActionToolbarComponent implements OnChanges {
     return this.actions.filter(
       (action) =>
         (action.visible ?? true) &&
-        (action.placement ?? 'secondary') === placement &&
-        this.canRenderAction(action),
+        (action.placement ?? 'secondary') === placement
     );
   }
-
-  private canRenderAction(action: ActionToolbarAction): boolean {
-    if (action.permissionMode === 'hide' && !this.hasPermission(action)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private hasPermission(action: ActionToolbarAction): boolean {
-    return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
-  }
 }
-

@@ -5,9 +5,9 @@
       [label]="action.label"
       [icon]="action.icon"
       variant="primary"
-      [disabled]="isActionDisabled(action)"
+      [disabled]="action.disabled ?? false"
       [loading]="action.loading ?? false"
-      [tooltip]="actionTooltip(action)"
+      [tooltip]="action.tooltip"
       (buttonClick)="emitAction(action)"
     ></app-button>
   }
@@ -18,9 +18,9 @@
       [label]="action.label"
       [icon]="action.icon"
       [variant]="buttonVariant(action)"
-      [disabled]="isActionDisabled(action)"
+      [disabled]="action.disabled ?? false"
       [loading]="action.loading ?? false"
-      [tooltip]="actionTooltip(action)"
+      [tooltip]="action.tooltip"
       (buttonClick)="emitAction(action)"
     ></app-button>
   }
@@ -46,9 +46,9 @@
               [label]="action.label"
               [icon]="action.icon"
               [variant]="buttonVariant(action)"
-              [disabled]="isActionDisabled(action)"
+              [disabled]="action.disabled ?? false"
               [loading]="action.loading ?? false"
-              [tooltip]="actionTooltip(action)"
+              [tooltip]="action.tooltip"
               (buttonClick)="emitAction(action)"
             ></app-button>
           }

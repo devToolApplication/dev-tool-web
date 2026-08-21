@@ -47,7 +47,7 @@ export interface TableAction {
   text?: boolean;
   styleClass?: string;
   severity?: TableActionSeverity;
-  variant?: 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
   placement?: 'primary' | 'more';
   permissions?: readonly string[];
   permissionMode?: 'hide' | 'disable';
@@ -70,7 +70,7 @@ export interface TableBulkAction {
   icon?: string;
   tooltip?: string;
   severity?: TableActionSeverity;
-  variant?: 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
   permissions?: readonly string[];
   permissionMode?: 'hide' | 'disable';
   permissionDeniedTooltip?: string;
@@ -261,3 +261,5 @@ export interface TableToolbarConfig {
   export?: TableToolbarExportConfig;
   bulkActions?: TableBulkAction[];
 }
+
+

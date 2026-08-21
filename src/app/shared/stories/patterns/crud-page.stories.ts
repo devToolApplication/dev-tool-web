@@ -27,8 +27,8 @@ const actions: ActionToolbarAction[] = [
     label: 'Delete',
     icon: 'pi pi-trash',
     placement: 'secondary',
-    variant: 'danger',
-    confirm: { message: 'Delete selected items?', variant: 'danger' }
+    variant: 'destructive',
+    
   }
 ];
 
@@ -49,8 +49,8 @@ const tableConfig: TableConfig = {
           id: 'delete',
           label: 'Delete',
           icon: 'pi pi-trash',
-          variant: 'danger',
-          confirm: { message: 'Delete this item?', variant: 'danger' },
+          variant: 'destructive',
+          
           onClick: () => undefined
         }
       ]
@@ -129,3 +129,5 @@ export const LoadingState: Story = {
     `
   })
 };
+
+
