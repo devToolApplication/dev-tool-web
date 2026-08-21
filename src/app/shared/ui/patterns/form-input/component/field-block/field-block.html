@@ -1,16 +1,22 @@
 <div class="field-block" [class.field-block--invalid]="invalid">
-  @if (label || helpText) {
+  @if (label || description) {
     <div class="field-block__header">
       @if (label) {
-        <label [attr.for]="inputId">
-          {{ label | translateContent }}
-          @if (required) {
-            <span aria-hidden="true">*</span>
-          }
-        </label>
+        <div class="field-block__label-row">
+          <label [attr.for]="inputId">
+            {{ label | translateContent }}
+            @if (required) {
+              <span class="field-block__required" aria-hidden="true">*</span>
+            } @else if (optional) {
+              <span class="field-block__optional">({{ 'common.optional' | translateContent }})</span>
+            }
+          </label>
+        </div>
       }
-      @if (helpText) {
-        <small>{{ helpText | translateContent }}</small>
+      @if (description) {
+        <p [id]="inputId ? inputId + '-description' : null" class="field-block__description">
+          {{ description | translateContent }}
+        </p>
       }
     </div>
   }
@@ -20,6 +26,12 @@
   </div>
 
   @if (invalid && errorMessage) {
-    <app-message severity="error" size="small" variant="simple" [text]="errorMessage"></app-message>
+    <p [id]="inputId ? inputId + '-error' : null" class="field-block__error" role="alert">
+      {{ errorMessage | translateContent }}
+    </p>
+  } @else if (resolvedHint) {
+    <p [id]="inputId ? inputId + '-hint' : null" class="field-block__hint">
+      {{ resolvedHint | translateContent }}
+    </p>
   }
 </div>
