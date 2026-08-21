@@ -15,11 +15,13 @@ describe('BaseInput', () => {
 
     input.registerOnChange(onChange);
     input.writeValue('initial');
-    input.setDisabledState(true);
-    input.onChange('next');
+    expect(input.value).toBe('initial');
 
-    expect(input.value).toBe('next');
+    input.setDisabledState(true);
     expect(input.disabled).toBe(true);
+
+    input.onChange('next');
+    expect(input.value).toBe('next');
     expect(onChange).toHaveBeenCalledWith('next');
     expect(valueChange).toHaveBeenCalledWith('next');
   });

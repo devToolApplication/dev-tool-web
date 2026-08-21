@@ -15,6 +15,31 @@
   --app-font-size-sm: 0.875rem;
   --app-font-size-md: 1rem;
   --app-font-size-lg: 1.125rem;
+  --app-space-6: 1.5rem;
+  --app-space-8: 2rem;
+  --app-space-12: 3rem;
+  --app-space-16: 4rem;
+
+  /* Control sizing */
+  --app-control-height-sm: 2rem;
+  --app-control-height-md: 2.5rem;
+  --app-control-height-lg: 2.75rem;
+
+  /* Focus tokens */
+  --app-focus-width: 2px;
+  --app-focus-offset: 2px;
+  --app-focus-ring: color-mix(in srgb, var(--app-primary) 65%, transparent);
+
+  /* Typography tokens */
+  --app-line-height-tight: 1.25;
+  --app-line-height-normal: 1.5;
+  --app-font-weight-medium: 500;
+  --app-font-weight-semibold: 600;
+
+  /* Motion tokens */
+  --app-motion-fast: 120ms;
+  --app-motion-normal: 180ms;
+  --app-ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
   /* Shared stacking */
   --app-z-content: 1;
