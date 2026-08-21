@@ -397,7 +397,7 @@ export const Default: Story = {
     config: formConfig,
     context,
     initialValue,
-    showSubmit: true,
+    
     submitting: false
   },
   render: (args) => ({
@@ -442,7 +442,7 @@ export const Submitting: Story = {
     config: formConfig,
     context,
     initialValue,
-    showSubmit: true,
+    
     submitting: true
   },
   render: Default.render
@@ -458,7 +458,7 @@ export const WithErrors: Story = {
       budget: 0,
       jsonConfig: '{ invalid'
     },
-    showSubmit: true,
+    
     submitting: false,
     apiFieldErrors: {
       status: 'Status is required for active workflows'
@@ -472,7 +472,7 @@ export const Loading: Story = {
     config: formConfig,
     context,
     initialValue,
-    showSubmit: true,
+    
     loading: true
   },
   render: Default.render
@@ -486,7 +486,8 @@ export const ReadonlyDetail: Story = {
       mode: 'view'
     },
     initialValue,
-    showSubmit: true
+    
   },
   render: Default.render
 };
+

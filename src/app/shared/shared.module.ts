@@ -163,7 +163,7 @@ const FEEDBACK_OVERLAY_COMPONENTS = [
   ToastComponent
 ];
 
-const LEGACY_PRIMITIVE_COMPONENTS = [
+const PRIMITIVE_COMPONENTS = [
   ...ACTION_COMPONENTS,
   ...FORM_CONTROL_COMPONENTS,
   ...NAVIGATION_COMPONENTS,
@@ -241,7 +241,7 @@ const UI_COMPONENT = [
   TableFilterComponent
 ];
 export const SHARED_PRIMITIVE_COMPONENTS = [
-  ...LEGACY_PRIMITIVE_COMPONENTS
+  ...PRIMITIVE_COMPONENTS
 ];
 
 export const SHARED_UI_COMPONENTS = [
@@ -260,6 +260,8 @@ export const SHARED_UI_COMPONENTS = [
   exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })
 export class SharedModule {}
+
+
 
 
 

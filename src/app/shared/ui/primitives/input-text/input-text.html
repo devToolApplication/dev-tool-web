@@ -15,7 +15,7 @@
     [required]="required"
     [attr.autofocus]="autofocus ? true : null"
     [attr.placeholder]="(placeholder || null) | translateContent"
-    [attr.title]="(tooltip || null) | translateContent"
+    
     [attr.aria-invalid]="invalid || null"
     [attr.aria-describedby]="describedBy || null"
     [attr.autocomplete]="autocomplete"
@@ -27,3 +27,4 @@
     (focus)="onFocus()"
   />
 </div>
+

@@ -4,9 +4,10 @@
       [config]="resolvedConfig"
       [context]="resolvedContext"
       [initialValue]="initialValue"
-      [showSubmit]="false"
-      (valueChange)="onFormValueChange($event)"
+      
+      (valueChange)="onFormValueChange($any($event))"
       (validChange)="onFormValidChange($event)"
     ></app-form-input>
   </div>
 }
+

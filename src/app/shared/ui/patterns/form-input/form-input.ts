@@ -1,15 +1,27 @@
-import { Component, computed, DoCheck, effect, EventEmitter, Injector, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
-import {createFormEngine} from './utils/form-engine';
+import {
+  Component,
+  computed,
+  effect,
+  EventEmitter,
+  Injector,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  signal,
+  SimpleChanges,
+} from '@angular/core';
+import { createFormEngine } from './utils/form-engine';
 import {
   ArrayFieldState,
   FieldState,
   FormConfig,
-  FormLayoutConfig,
   FormContext,
+  FormLayoutConfig,
   FormValidationError,
   GridWidth,
   GroupFieldState,
-  TreeFieldState
+  TreeFieldState,
 } from './models/form-config.model';
 import { getColClass } from './utils/form.utils';
 import { ValidationSummaryItem } from '@shared/ui/forms/validation-summary/validation-summary.component';
@@ -17,7 +29,7 @@ import {
   buildFormSections,
   fieldErrorEntries,
   flattenFormFields,
-  FormRenderableField
+  FormRenderableField,
 } from './utils/form-sections';
 
 @Component({
@@ -26,25 +38,22 @@ import {
   templateUrl: './form-input.html',
   styleUrl: './form-input.css',
 })
-export class FormInput implements OnInit, OnChanges, DoCheck {
+export class FormInput implements OnInit, OnChanges {
   private suppressValueChange = true;
-  private readonly engineRevision = signal(0);
-  private readonly inputRevision = signal(0);
-  private lastContextRef: FormContext | null = null;
-  private lastContextSignature = '';
 
   constructor(private readonly injector: Injector) {}
 
   @Input() config!: FormConfig;
-  @Input() context!: FormContext;
-  @Input() initialValue!: any;
+  @Input() context: FormContext = { user: null };
+  @Input() initialValue: unknown = {};
   @Input() submitting = false;
   @Input() loading = false;
   @Input() apiError?: string | null;
   @Input() apiFieldErrors?: Record<string, string | string[]> | FormValidationError[] | null;
-  @Input() showSubmit = true;
-  @Output() formSubmit = new EventEmitter<any>();
-  @Output() valueChange = new EventEmitter<any>();
+
+  @Output() formSubmit = new EventEmitter<unknown>();
+  @Output() valueChange = new EventEmitter<unknown>();
+  @Output() dirtyChange = new EventEmitter<boolean>();
   @Output() validChange = new EventEmitter<boolean>();
 
   engine: any;
@@ -52,7 +61,6 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
   readonly activeSectionId = signal<string | null>(null);
 
   readonly layout = computed<FormLayoutConfig>(() => ({
-    ...this.trackConfigRevision(),
     mode: 'smart',
     density: 'comfortable',
     labelPlacement: 'top',
@@ -62,18 +70,17 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     autoScrollToError: true,
     showValidationSummary: true,
     readonlyMode: 'detail',
-    ...(this.config?.layout ?? {})
+    ...(this.config?.layout ?? {}),
   }));
 
   readonly renderSections = computed(() => {
-    this.engineRevision();
     if (!this.engine) {
       return [];
     }
 
     return buildFormSections(this.config, this.engine.fields as FormRenderableField[], {
       activeSectionId: this.activeSectionId(),
-      submitted: this.submitted()
+      submitted: this.submitted(),
     });
   });
 
@@ -81,7 +88,6 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
   readonly remainingRenderSections = computed(() => this.renderSections().slice(1));
 
   private readonly flatFields = computed<FieldState[]>(() => {
-    this.engineRevision();
     if (!this.engine) {
       return [];
     }
@@ -95,8 +101,8 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
       flattenFormFields(section.fields).forEach((field) =>
         sectionByField.set(field.path, {
           id: section.id,
-          title: section.title
-        })
+          title: section.title,
+        }),
       );
     });
     return sectionByField;
@@ -132,8 +138,8 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
         label: field.label ?? field.name,
         message: error.message,
         section: sectionByField.get(field.path)?.title,
-        severity: error.severity
-      }))
+        severity: error.severity,
+      })),
     );
   });
 
@@ -141,22 +147,22 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     return this.flatFields().some((field) => field.dirty());
   });
 
-  readonly errorCount = computed(() =>
-    this.validationSummaryItems().filter((item) => (item.severity ?? 'error') === 'error').length
+  readonly errorCount = computed(
+    () =>
+      this.validationSummaryItems().filter((item) => (item.severity ?? 'error') === 'error').length,
   );
 
-  readonly warningCount = computed(() =>
-    this.validationSummaryItems().filter((item) => item.severity === 'warning').length
+  readonly warningCount = computed(
+    () => this.validationSummaryItems().filter((item) => item.severity === 'warning').length,
   );
 
-  readonly readonlyMode = computed(() =>
-    (this.engine?.context?.()?.mode ?? this.context?.mode) === 'view' &&
-    this.layout().readonlyMode !== 'disabled-controls'
+  readonly readonlyMode = computed(
+    () =>
+      (this.engine?.context?.()?.mode ?? this.context?.mode) === 'view' &&
+      this.layout().readonlyMode !== 'disabled-controls',
   );
 
   readonly submitDisabled = computed(() => {
-    this.engineRevision();
-    this.inputRevision();
     const actions = this.config?.actions;
     if (this.loading || this.submitting || this.readonlyMode() || actions?.submitDisabled) {
       return true;
@@ -164,23 +170,27 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     return actions?.disableSubmitWhenInvalid === true && !this.isValid();
   });
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.rebuildEngine();
 
-    effect(() => {
-      this.engineRevision();
-      if (!this.engine) {
-        return;
-      }
-      const model = this.engine.model();
-      this.validChange.emit(this.engine.valid());
-      if (this.suppressValueChange) {
-        this.suppressValueChange = false;
-        return;
-      }
+    effect(
+      () => {
+        if (!this.engine) {
+          return;
+        }
+        const model = this.engine.model();
+        this.validChange.emit(this.engine.valid());
+        this.dirtyChange.emit(this.dirty());
 
-      this.valueChange.emit(model);
-    }, { injector: this.injector });
+        if (this.suppressValueChange) {
+          this.suppressValueChange = false;
+          return;
+        }
+
+        this.valueChange.emit(model);
+      },
+      { injector: this.injector },
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -194,7 +204,7 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     }
 
     if (changes['context']?.currentValue) {
-      this.syncContextInput();
+      this.engine.context.set({ ...this.context });
     }
 
     if (changes['apiFieldErrors']) {
@@ -205,21 +215,13 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
       this.suppressValueChange = true;
       this.engine.reset(this.initialValue);
     }
-
-    if (changes['submitting'] || changes['loading'] || changes['showSubmit']) {
-      this.inputRevision.update((revision) => revision + 1);
-    }
   }
 
-  ngDoCheck(): void {
-    this.syncContextInput();
+  showSectionNav(): boolean {
+    return this.renderSections().length >= 2;
   }
 
-    showSectionNav(): boolean {
-    return (this.renderSections().length >= 2);
-  }
-
-  onSubmit() {
+  onSubmit(): void {
     if (this.submitting || this.loading || this.readonlyMode()) {
       return;
     }
@@ -241,7 +243,7 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     return Boolean(this.engine?.valid?.());
   }
 
-  getModel<TModel = any>(): TModel {
+  getModel<TModel = unknown>(): TModel {
     return this.engine?.model?.() as TModel;
   }
 
@@ -266,7 +268,9 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
       return;
     }
 
-    const element = document.querySelector(`[data-field-path="${item.fieldPath}"]`) as HTMLElement | null;
+    const element = document.querySelector(
+      `[data-field-path="${item.fieldPath}"]`,
+    ) as HTMLElement | null;
     if (typeof element?.scrollIntoView === 'function') {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -309,58 +313,15 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     this.suppressValueChange = true;
     this.engine.reset(this.initialValue);
     this.submitted.set(false);
-    this.engineRevision.update((revision) => revision + 1);
   }
 
   private rebuildEngine(): void {
     this.suppressValueChange = true;
-    const context = this.cloneFormContext(this.context);
-    this.engine = createFormEngine(this.config, context, this.initialValue);
-    this.lastContextRef = this.context;
-    this.lastContextSignature = this.contextSignature(this.context);
+    const context = { ...this.context };
+    this.engine = createFormEngine(this.config, context, (this.initialValue ?? {}) as object);
     this.submitted.set(false);
     this.activeSectionId.set(null);
-    this.engineRevision.update((revision) => revision + 1);
     this.applyApiFieldErrors();
-  }
-
-  private syncContextInput(): void {
-    if (!this.engine || !this.context) {
-      return;
-    }
-
-    const signature = this.contextSignature(this.context);
-    if (this.context === this.lastContextRef && signature === this.lastContextSignature) {
-      return;
-    }
-
-    this.lastContextRef = this.context;
-    this.lastContextSignature = signature;
-    this.engine.context.set(this.cloneFormContext(this.context));
-    this.engineRevision.update((revision) => revision + 1);
-  }
-
-  private cloneFormContext(context: FormContext): FormContext {
-    return {
-      ...context,
-      extra: context.extra ? { ...context.extra } : context.extra
-    };
-  }
-
-  private contextSignature(context: FormContext): string {
-    return this.stringifyContextValue({
-      mode: context.mode,
-      user: context.user,
-      extra: context.extra
-    });
-  }
-
-  private stringifyContextValue(value: unknown): string {
-    try {
-      return JSON.stringify(value, (_key, item) => (typeof item === 'function' ? `[function:${item.name || 'anonymous'}]` : item)) ?? '';
-    } catch {
-      return String(value ?? '');
-    }
   }
 
   private applyApiFieldErrors(): void {
@@ -382,7 +343,7 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
       }
       target.externalErrors.set({
         ...(target.externalErrors() ?? {}),
-        [`api-${Object.keys(target.externalErrors() ?? {}).length}`]: error.message
+        [`api-${Object.keys(target.externalErrors() ?? {}).length}`]: error.message,
       });
     }
   }
@@ -401,14 +362,9 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
       return messages.map((message) => ({
         fieldPath,
         message,
-        severity: 'error' as const
+        severity: 'error' as const,
       }));
     });
-  }
-
-  private trackConfigRevision(): Record<string, never> {
-    this.engineRevision();
-    return {};
   }
 
   private scrollToFirstInvalidField(): void {
@@ -427,7 +383,9 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
         this.activeSectionId.set(targetSection.id);
       }
 
-      const element = document.querySelector(`[data-field-path="${firstInvalid.path}"]`) as HTMLElement | null;
+      const element = document.querySelector(
+        `[data-field-path="${firstInvalid.path}"]`,
+      ) as HTMLElement | null;
       if (typeof element?.scrollIntoView === 'function') {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -435,6 +393,4 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     });
   }
 }
-
-
 
