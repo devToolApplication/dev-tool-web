@@ -6,12 +6,12 @@ This file is the authoritative backlog. Update status only after verifying curre
 
 | ID | Priority | Area | Open issue | Required result |
 |---|---|---|---|---|
-| UI-001 | P0 | Form actions | `FormInput` projects only `[form-actions], .form-actions, footer`, but current Job/ServiceResource consumers project a plain `<div>` | Consumers use one explicit `[form-actions]` contract; exactly one action bar renders |
+| UI-001 | P0 | Form actions (RESOLVED) | `FormInput` projects only `[form-actions], .form-actions, footer`, but current Job/ServiceResource consumers project a plain `<div>` | Consumers use one explicit `[form-actions]` contract; exactly one action bar renders |
 | UI-002 | P0 | Tests | F01 removed assertions/reset test instead of replacing with integration tests for projection contract | Host/integration tests prove one Cancel/Save, submit once, invalid/submitting behavior |
 | UI-003 | P0 | Readonly | Tree readonly branch is empty; readonly contract is inconsistent across fields | Every supported field renders readable detail; no field disappears |
-| UI-004 | P0 | Permission | `ActionToolbar` imports/injects `PermissionService` | Zero application permission service in shared UI |
-| UI-005 | P0 | Action policy | `ActionToolbar` owns confirmation policy and legacy severity mapping | Feature/application owns confirmation; shared action model is presentation-only |
-| UI-006 | P0 | Table permissions | Table/TableCell keep permission metadata or placeholder permission helpers | Permission metadata and fake helpers removed; feature pre-resolves actions |
+| UI-004 | P0 | Permission (RESOLVED) | `ActionToolbar` imports/injects `PermissionService` | Zero application permission service in shared UI |
+| UI-005 | P0 | Action policy (RESOLVED) | `ActionToolbar` owns confirmation policy and legacy severity mapping | Feature/application owns confirmation; shared action model is presentation-only |
+| UI-006 | P0 | Table permissions (RESOLVED) | Table/TableCell keep permission metadata or placeholder permission helpers | Permission metadata and fake helpers removed; feature pre-resolves actions |
 | UI-007 | P0 | Quality gate | `lint` uses `ng lint` without a real configured lint target/toolchain | ESLint + Angular template lint executes and passes |
 | UI-008 | P1 | Form reactivity | `FormInput` still uses `DoCheck`, revision signals and JSON context signatures | Immutable/change-driven typed engine updates; hacks deleted |
 | UI-009 | P1 | Type safety | `any` remains on FormInput/FormConfig/Table core boundaries | Generic/unknown-based typed public contracts; near-zero core `any` |
@@ -63,3 +63,4 @@ manual document.body overlay portal/focus trapping
 LEGACY_PRIMITIVE_COMPONENTS public grouping
 Storybook forced light theme
 ```
+
