@@ -209,16 +209,12 @@ export interface TableConfig {
 
 export interface TableToolbarButtonConfig {
   visible?: boolean;
-  label?: string;
-  icon?: string;
-  severity?: TableActionSeverity;
   disabled?: boolean;
-  loading?: boolean;
-  permissions?: readonly string[];
-  permissionMode?: 'hide' | 'disable';
-  permissionDeniedTooltip?: string;
+  icon?: string;
+  label?: string;
+  tooltip?: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
 }
-
 export interface TableToolbarSearchConfig {
   visible?: boolean;
   field?: string;
@@ -261,5 +257,6 @@ export interface TableToolbarConfig {
   export?: TableToolbarExportConfig;
   bulkActions?: TableBulkAction[];
 }
+
 
 

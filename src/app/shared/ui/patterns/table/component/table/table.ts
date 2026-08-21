@@ -190,7 +190,7 @@ export class TableComponent implements OnChanges {
   }
 
   get visibleBulkActions(): TableBulkAction[] {
-    return (this.toolbarConfig.bulkActions ?? []).filter((action) => (action.visible ?? true) && this.canRenderAction(action));
+    return (this.toolbarConfig.bulkActions ?? []).filter((action) => (action.visible ?? true));
   }
 
   get hasActiveFilters(): boolean {
@@ -266,33 +266,15 @@ export class TableComponent implements OnChanges {
     return this.isFrozenRight(column) ? this.frozenOffset(column, 'right') : null;
   }
 
-  isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean {
-    return buttonConfig?.visible === true && this.canRenderToolbarButton(buttonConfig);
-  }
+  isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean { return buttonConfig?.visible === true; }
 
-  isButtonDisabled(buttonConfig?: TableToolbarButtonConfig): boolean {
-    return (buttonConfig?.disabled ?? false) || !this.hasToolbarButtonPermission(buttonConfig);
-  }
+  isButtonDisabled(buttonConfig?: TableToolbarButtonConfig): boolean { return buttonConfig?.disabled ?? false; }
 
-  buttonTooltip(buttonConfig?: TableToolbarButtonConfig): string | undefined {
-    if (!this.hasToolbarButtonPermission(buttonConfig)) {
-      return buttonConfig?.permissionDeniedTooltip ?? 'shared.permission.deniedAction';
-    }
+  buttonTooltip(buttonConfig?: TableToolbarButtonConfig): string | undefined { return buttonConfig?.tooltip; }
 
-    return undefined;
-  }
+  isBulkActionDisabled(action: TableBulkAction): boolean { return action.disabled === true; }
 
-  isBulkActionDisabled(action: TableBulkAction): boolean {
-    return action.disabled === true || !this.hasActionPermission(action);
-  }
-
-  bulkActionTooltip(action: TableBulkAction): string | undefined {
-    if (!this.hasActionPermission(action)) {
-      return action.permissionDeniedTooltip ?? 'shared.permission.deniedAction';
-    }
-
-    return action.tooltip;
-  }
+  bulkActionTooltip(action: TableBulkAction): string | undefined { return action.tooltip; }
 
   onCreate(): void {
     this.create.emit();
@@ -622,29 +604,6 @@ export class TableComponent implements OnChanges {
     return value === 'compact' || value === 'comfortable' || value === 'spacious';
   }
 
-  private canRenderToolbarButton(buttonConfig?: TableToolbarButtonConfig): boolean {
-    if (buttonConfig?.permissionMode === 'hide' && !this.hasToolbarButtonPermission(buttonConfig)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private canRenderAction(action: TableBulkAction): boolean {
-    if (action.permissionMode === 'hide' && !this.hasActionPermission(action)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private hasToolbarButtonPermission(buttonConfig?: TableToolbarButtonConfig): boolean {
-    return !buttonConfig?.permissions?.length || true;
-  }
-
-  private hasActionPermission(action: TableBulkAction): boolean {
-    return !action.permissions?.length || true;
-  }
 
   private rowKey(row: any): string {
     const configuredKey = this.config.rowKey ?? this.config.dataKey;
@@ -669,6 +628,9 @@ export class TableComponent implements OnChanges {
     );
   }
 }
+
+
+
 
 
 

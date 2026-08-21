@@ -1,7 +1,4 @@
 @if (field.visible()) {
-  @if (readonlyMode) {
-    
-  } @else {
   @if (!isTemplateTree) {
     <section class="field-tree">
       @let visibleNodes = visibleTree;
@@ -346,7 +343,6 @@
 
   </app-fieldset>
   }
-  }
 }
 
 <ng-template #nodeTemplate let-view="view" let-level="level">
@@ -634,6 +630,7 @@
 >
   <app-json-viewer [value]="detailNode()"></app-json-viewer>
 </app-drawer>
+
 
 
 

@@ -802,6 +802,52 @@ describe('FormInput', () => {
     expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeTruthy();
   });
 
+  
+  it('integrates with projected form-actions correctly: single cancel/save, valid/invalid submit and cancel handling', () => {
+    let cancelCalled = false;
+    let submitCalledWith: unknown = null;
+
+    applyConfig({
+      fields: [
+        { type: 'text', name: 'title', label: 'Title', validation: [{ type: 'required', message: 'Title is required' }] }
+      ]
+    }, { title: '' });
+
+    // Simulate consumer projecting actions
+    const actionsContainer = document.createElement('div');
+    actionsContainer.setAttribute('form-actions', '');
+    actionsContainer.innerHTML = '<button type="button" id="test-cancel">Cancel</button><button type="submit" id="test-save">Save</button>';
+        fixture.nativeElement.appendChild(actionsContainer);
+    fixture.detectChanges();
+
+    const cancelBtn = fixture.nativeElement.querySelector('#test-cancel') as HTMLButtonElement;
+    const saveBtn = fixture.nativeElement.querySelector('#test-save') as HTMLButtonElement;
+
+    expect(cancelBtn).toBeTruthy();
+    expect(saveBtn).toBeTruthy();
+
+    component.formSubmit.subscribe((val) => { submitCalledWith = val; });
+
+    // Invalid submit - should not emit
+    component.onSubmit();
+    fixture.detectChanges();
+    expect(submitCalledWith).toBeNull();
+    expect(component.validationSummaryItems().length).toBeGreaterThan(0);
+
+    // Make valid and submit
+    component.engine.fields[0].setValue('Valid Title');
+    fixture.detectChanges();
+
+    component.onSubmit();
+    expect(submitCalledWith).toEqual({ title: 'Valid Title' });
+
+    // Submitting state blocks duplicate submit
+    submitCalledWith = null;
+    component.submitting = true;
+    component.onSubmit();
+    expect(submitCalledWith).toBeNull();
+  });
+
   function applyConfig(config: FormConfig, initialValue: unknown, context: FormContext = { user: null }): void {
     fixture.destroy();
     fixture = TestBed.createComponent(FormInput);
@@ -824,6 +870,8 @@ describe('FormInput', () => {
     return buttonDebugElement.componentInstance as Button;
   }
 });
+
+
 
 
 

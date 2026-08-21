@@ -115,8 +115,8 @@
         variant="secondary"
         [label]="exportButtonLabel"
         [icon]="exportButtonIcon"
-        [disabled]="isButtonDisabled(exportButtonConfig) || (exportButtonConfig.loading ?? false)"
-        [loading]="exportButtonConfig.loading ?? false"
+        [disabled]="isButtonDisabled(exportButtonConfig)"
+        
         [tooltip]="buttonTooltip(exportButtonConfig)"
         (buttonClick)="onExport()"
       />
@@ -278,5 +278,6 @@
   }
 </div>
 }
+
 
 

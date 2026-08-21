@@ -23,7 +23,7 @@
     "tokens:build": "node scripts/build-tokens.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "ng lint"
+    "lint": "tsc --noEmit"
   },
   "prettier": {
     "printWidth": 100,

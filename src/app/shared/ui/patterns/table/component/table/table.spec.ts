@@ -396,35 +396,28 @@ describe('TableComponent', () => {
     expect(bulkAction).toHaveBeenCalledWith({ action, rows });
   });
 
-  it('applies permission rules to toolbar buttons and bulk actions', async () => {
-    permissionService.hasAll.mockReturnValue(false);
+    it('handles toolbar buttons and bulk actions visibility and state', () => {
     const action: TableBulkAction = {
       id: 'export-selected',
       label: 'Export selected',
-      permissions: ['REPORT_EXPORT'],
       onClick: vi.fn()
     };
     component.config = {
       ...baseConfig,
       selection: { mode: 'multiple' },
       toolbar: {
-        new: { visible: true, permissions: ['ITEM_CREATE'] },
-        delete: { visible: true, permissions: ['ITEM_DELETE'], permissionMode: 'hide' },
+        new: { visible: true },
+        delete: { visible: false },
         bulkActions: [action]
       }
     };
     component.selectedRows.set([{ id: 1 }]);
-    const bulkAction = vi.fn();
-    component.bulkAction.subscribe(bulkAction);
 
     expect(component.isButtonVisible(component.newButtonConfig)).toBe(true);
     expect(component.isButtonDisabled(component.newButtonConfig)).toBe(false);
-    // permission decoupled in R06
-    expect(component.isButtonVisible(component.deleteButtonConfig)).toBe(true);
+    expect(component.isButtonVisible(component.deleteButtonConfig)).toBe(false);
     expect(component.visibleBulkActions).toEqual([action]);
     expect(component.isBulkActionDisabled(action)).toBe(false);
-
-    // permission decoupled in R06
   });
 
   function renderTable(state: Partial<Pick<TableComponent, 'loading' | 'error' | 'data'>>): void {
@@ -438,5 +431,6 @@ describe('TableComponent', () => {
     fixture.detectChanges();
   }
 });
+
 
 

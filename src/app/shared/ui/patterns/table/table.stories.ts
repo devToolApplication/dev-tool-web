@@ -53,20 +53,20 @@ const tableConfig: TableConfig = {
       visible: true,
       label: 'New',
       icon: 'pi pi-plus',
-      severity: 'success'
+      
     },
     delete: {
       visible: true,
       label: 'Delete',
       icon: 'pi pi-trash',
-      severity: 'danger',
+      
       disabled: true
     },
     export: {
       visible: true,
       label: 'Export',
       icon: 'pi pi-download',
-      severity: 'help'
+      
     }
   },
   filterOptions: {
@@ -131,13 +131,13 @@ const tableConfig: TableConfig = {
         {
           label: 'Edit',
           icon: 'pi pi-pencil',
-          severity: 'info',
+          
           onClick: (rowData: { id: string }) => void rowData.id
         },
         {
           label: 'Delete',
           icon: 'pi pi-trash',
-          severity: 'danger',
+          
           disabled: (rowData: { status: string }) => rowData.status === 'active',
           onClick: (rowData: { id: string }) => void rowData.id
         }
@@ -260,3 +260,4 @@ export const SelectionAndControls: Story = {
   },
   render: Default.render
 };
+
