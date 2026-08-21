@@ -40,8 +40,8 @@ const meta: Meta<DrawerComponent> = {
             <app-input-text label="Settings Field" placeholder="Enter configuration value" class="mb-4 block"></app-input-text>
           </div>
           <div drawer-footer class="flex justify-end gap-2 p-4 border-t">
-            <app-button label="common.cancel" severity="secondary"></app-button>
-            <app-button label="common.save" severity="primary"></app-button>
+            <app-button label="common.cancel" variant="secondary"></app-button>
+            <app-button label="common.save" variant="primary"></app-button>
           </div>
         </app-drawer>
       </div>
@@ -85,3 +85,4 @@ export const Empty: Story = {
     emptyDescription: 'No drawer metadata to show.'
   }
 };
+

@@ -10,9 +10,8 @@
 
       @if (collapsible && hasBody) {
         <app-button
-          size="small"
-          severity="secondary"
-          [text]="true"
+          size="sm"
+          variant="ghost"
           [icon]="collapsed() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
           [label]="collapsed() ? 'open' : 'collapse'"
           (buttonClick)="toggleCollapsed()"
@@ -69,9 +68,8 @@
                       <div class="flex items-start justify-between gap-2">
                         <div class="text-sm font-bold app-text">{{ example.title | translateContent }}</div>
                         <app-button
-                          size="small"
-                          severity="secondary"
-                          [text]="true"
+                          size="sm"
+                          variant="ghost"
                           icon="pi pi-copy"
                           label="copy"
                           (buttonClick)="copyExample(example)"
@@ -102,9 +100,8 @@
               <div class="flex items-start justify-between gap-2">
                 <div class="text-sm font-bold app-text">{{ example.title | translateContent }}</div>
                 <app-button
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
+                  size="sm"
+                  variant="ghost"
                   icon="pi pi-copy"
                   label="copy"
                   (buttonClick)="copyExample(example)"
@@ -130,3 +127,4 @@
     }
   </div>
 </section>
+

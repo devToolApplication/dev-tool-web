@@ -12,8 +12,7 @@
     <div class="filter-search-actions">
       <app-button
         icon="pi pi-sliders-h"
-        severity="secondary"
-        [text]="true"
+        variant="ghost"
         [label]="activeFilterCount() > 0 ? activeFilterCount().toString() : ''"
         ariaLabel="showFilters"
         [disabled]="loading || !visibleAdvancedFields().length"
@@ -21,8 +20,7 @@
       ></app-button>
       <app-button
         icon="pi pi-times"
-        severity="secondary"
-        [text]="true"
+        variant="ghost"
         [label]="''"
         ariaLabel="reset"
         [disabled]="loading"
@@ -43,8 +41,7 @@
           </span>
           <app-button
             icon="pi pi-times"
-            severity="secondary"
-            [text]="true"
+            variant="ghost"
             [label]="''"
             ariaLabel="shared.filter.remove"
             (buttonClick)="removeFilter(chip.field)"
@@ -53,9 +50,8 @@
       }
 
       <app-button
-        size="small"
-        severity="secondary"
-        [text]="true"
+        size="sm"
+        variant="ghost"
         label="shared.filter.clearAll"
         (buttonClick)="onReset()"
       ></app-button>
@@ -183,7 +179,7 @@
 
       <div class="filter-panel__actions">
         <app-button
-          severity="secondary"
+          variant="secondary"
           [label]="options.resetLabel ?? 'reset'"
           (buttonClick)="onReset()"
         ></app-button>
@@ -195,3 +191,4 @@
     </div>
   }
 </section>
+

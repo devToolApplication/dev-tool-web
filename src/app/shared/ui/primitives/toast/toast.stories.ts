@@ -21,8 +21,8 @@ const meta: Meta<ToastComponent> = {
       <div>
         <p class="text-sm p-4 border rounded mb-4">Click buttons to trigger toast messages:</p>
         <div class="flex gap-2">
-          <app-button label="Show Success" severity="success" (buttonClick)="showSuccess()"></app-button>
-          <app-button label="Show Error" severity="danger" (buttonClick)="showError()"></app-button>
+          <app-button label="Show Success" variant="primary" (buttonClick)="showSuccess()"></app-button>
+          <app-button label="Show Error" variant="destructive" (buttonClick)="showError()"></app-button>
         </div>
         <app-toast></app-toast>
       </div>
@@ -51,8 +51,8 @@ export const Default: Story = {
       <div>
         <p class="text-sm p-4 border rounded mb-4">Click below to trigger toast notifications:</p>
         <div class="flex gap-2 mb-4">
-          <app-button label="Show Success" severity="success" (buttonClick)="showSuccess()"></app-button>
-          <app-button label="Show Error" severity="danger" (buttonClick)="showError()"></app-button>
+          <app-button label="Show Success" variant="primary" (buttonClick)="showSuccess()"></app-button>
+          <app-button label="Show Error" variant="destructive" (buttonClick)="showError()"></app-button>
         </div>
         <app-toast></app-toast>
       </div>
@@ -75,3 +75,5 @@ export const Default: Story = {
     })
   ]
 };
+
+

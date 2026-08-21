@@ -11,10 +11,11 @@
     <app-button
       [label]="actionLabel"
       icon="pi pi-arrow-left"
-      severity="secondary"
+      variant="secondary"
       [routerLink]="actionRouterLink"
-      [text]="true"
+      variant="ghost"
       (buttonClick)="actionClick.emit()"
     ></app-button>
   </app-empty-state>
 </app-card>
+

@@ -25,9 +25,9 @@ const meta: Meta<ConfirmDialogHostComponent> = {
     template: `
       <div>
         <div class="flex gap-2 mb-6">
-          <app-button label="Trigger Danger Confirm" severity="danger" (buttonClick)="triggerDanger()"></app-button>
-          <app-button label="Trigger Warning Confirm" severity="warn" (buttonClick)="triggerWarning()"></app-button>
-          <app-button label="Trigger Required Text Confirm" severity="primary" (buttonClick)="triggerRequiredText()"></app-button>
+          <app-button label="Trigger Danger Confirm" variant="destructive" (buttonClick)="triggerDanger()"></app-button>
+          <app-button label="Trigger Warning Confirm" variant="secondary" (buttonClick)="triggerWarning()"></app-button>
+          <app-button label="Trigger Required Text Confirm" variant="primary" (buttonClick)="triggerRequiredText()"></app-button>
         </div>
 
         <app-confirm-dialog-host></app-confirm-dialog-host>
@@ -85,9 +85,9 @@ export const Default: Story = {
     template: `
       <div>
         <div class="flex gap-2 mb-6 p-4 bg-muted border rounded">
-          <app-button label="Danger Confirmation" severity="danger" (buttonClick)="triggerDanger()"></app-button>
-          <app-button label="Warning Confirmation" severity="warn" (buttonClick)="triggerWarning()"></app-button>
-          <app-button label="Required Text Confirmation" severity="primary" (buttonClick)="triggerRequiredText()"></app-button>
+          <app-button label="Danger Confirmation" variant="destructive" (buttonClick)="triggerDanger()"></app-button>
+          <app-button label="Warning Confirmation" variant="secondary" (buttonClick)="triggerWarning()"></app-button>
+          <app-button label="Required Text Confirmation" variant="primary" (buttonClick)="triggerRequiredText()"></app-button>
         </div>
 
         <app-confirm-dialog-host></app-confirm-dialog-host>
@@ -116,3 +116,5 @@ export const Default: Story = {
     })
   ]
 };
+
+

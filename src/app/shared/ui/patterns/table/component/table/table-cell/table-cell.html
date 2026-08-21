@@ -69,8 +69,7 @@
       <app-button
         icon="pi pi-code"
         label="shared.json.view"
-        severity="secondary"
-        [text]="true"
+        variant="ghost"
         (buttonClick)="jsonOpen.set(true)"
       ></app-button>
       <app-drawer
@@ -125,8 +124,8 @@
           [label]="action.showLabel === false ? '' : action.label"
           [icon]="action.icon"
           [tooltip]="actionTooltip(action)"
-          [severity]="actionSeverity(action)"
-          [text]="action.text ?? action.variant === 'ghost'"
+          [variant]="actionVariant(action)"
+          
           [styleClass]="action.styleClass"
           [disabled]="isActionDisabled(action)"
           (buttonClick)="onActionClick(action)"
@@ -140,8 +139,7 @@
             label=""
             tooltip="showMore"
             ariaLabel="showMore"
-            severity="secondary"
-            [text]="true"
+            variant="ghost"
             (buttonClick)="toggleActions()"
           ></app-button>
           @if (actionsOpen()) {
@@ -152,8 +150,8 @@
                   [label]="action.label"
                   [icon]="action.icon"
                   [tooltip]="actionTooltip(action)"
-                  [severity]="actionSeverity(action)"
-                  [text]="action.text ?? action.variant !== 'primary'"
+                  [variant]="actionVariant(action)"
+                  
                   [styleClass]="action.styleClass"
                   [disabled]="isActionDisabled(action)"
                   (buttonClick)="onActionClick(action)"
@@ -170,8 +168,7 @@
     <app-button
       icon="pi pi-list"
       label="shared.json.view"
-      severity="secondary"
-      [text]="true"
+      variant="ghost"
       (buttonClick)="jsonOpen.set(true)"
     ></app-button>
     <app-drawer
@@ -212,3 +209,5 @@
   }
 
 }
+
+

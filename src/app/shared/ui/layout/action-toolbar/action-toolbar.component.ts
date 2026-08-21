@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnChanges, Output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  Output,
+  signal,
+} from '@angular/core';
 import { PermissionService } from '@core/auth/permission.service';
-import { ConfirmDialogConfig, ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
+import {
+  ConfirmDialogConfig,
+  ConfirmDialogService,
+} from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 
 export type ActionToolbarVariant = 'default' | 'primary' | 'warning' | 'danger' | 'ghost';
 
@@ -25,7 +37,7 @@ export interface ActionToolbarAction {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './action-toolbar.component.html',
-  styleUrl: './action-toolbar.component.css'
+  styleUrl: './action-toolbar.component.css',
 })
 export class ActionToolbarComponent implements OnChanges {
   @Input() actions: ActionToolbarAction[] = [];
@@ -38,7 +50,7 @@ export class ActionToolbarComponent implements OnChanges {
 
   constructor(
     private readonly confirmDialogService: ConfirmDialogService,
-    private readonly permissionService: PermissionService
+    private readonly permissionService: PermissionService,
   ) {}
 
   ngOnChanges(): void {
@@ -51,16 +63,22 @@ export class ActionToolbarComponent implements OnChanges {
     return this.moreActions.length > 0;
   }
 
-    buttonVariant(action: ActionToolbarAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
+  buttonVariant(action: ActionToolbarAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
     switch (action.variant) {
-      case 'primary': return 'primary';
-      case 'danger': return 'destructive';
-      case 'ghost': return 'ghost';
-      default: return 'secondary';
+      case 'primary':
+        return 'primary';
+      case 'danger':
+        return 'destructive';
+      case 'ghost':
+        return 'ghost';
+      default:
+        return 'secondary';
     }
   }
 
-  severity(action: ActionToolbarAction): 'secondary' | 'success' | 'info' | 'warn' | 'danger' | null {
+  severity(
+    action: ActionToolbarAction,
+  ): 'secondary' | 'success' | 'info' | 'warn' | 'danger' | null {
     switch (action.variant) {
       case 'primary':
         return 'info';
@@ -79,14 +97,16 @@ export class ActionToolbarComponent implements OnChanges {
     if (this.isActionDisabled(action) || action.loading) {
       return;
     }
-    const confirmConfig = action.confirm ?? (action.variant === 'danger'
-      ? { message: 'shared.confirm.dangerAction', variant: 'danger' as const }
-      : undefined);
+    const confirmConfig =
+      action.confirm ??
+      (action.variant === 'danger'
+        ? { message: 'shared.confirm.dangerAction', variant: 'danger' as const }
+        : undefined);
 
     if (confirmConfig) {
       const confirmed = await this.confirmDialogService.confirm({
         variant: action.variant === 'danger' ? 'danger' : confirmConfig.variant,
-        ...confirmConfig
+        ...confirmConfig,
       });
       if (!confirmed) {
         this.moreOpen.set(false);
@@ -120,7 +140,10 @@ export class ActionToolbarComponent implements OnChanges {
 
   private filterActions(placement: ActionToolbarAction['placement']): ActionToolbarAction[] {
     return this.actions.filter(
-      (action) => (action.visible ?? true) && (action.placement ?? 'secondary') === placement && this.canRenderAction(action)
+      (action) =>
+        (action.visible ?? true) &&
+        (action.placement ?? 'secondary') === placement &&
+        this.canRenderAction(action),
     );
   }
 
@@ -136,4 +159,3 @@ export class ActionToolbarComponent implements OnChanges {
     return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
   }
 }
-

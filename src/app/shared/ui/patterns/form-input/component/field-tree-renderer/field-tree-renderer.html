@@ -22,8 +22,8 @@
           <div class="field-tree__header-actions">
             @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
               <app-button
-                size="small"
-                severity="success"
+                size="sm"
+                variant="primary"
                 icon="pi pi-plus"
                 [label]="labels.addNode ?? 'add'"
                 (buttonClick)="openAddPicker()"
@@ -31,8 +31,8 @@
             }
             @if (field.fieldConfig.treeConfig?.allowGroupNode === true) {
               <app-button
-                size="small"
-                severity="secondary"
+                size="sm"
+                variant="secondary"
                 icon="pi pi-folder-plus"
                 [label]="labels.addGroup ?? 'shared.tree.addGroup'"
                 (buttonClick)="addGroup()"
@@ -40,9 +40,8 @@
             }
             @if (nodes.length > 0) {
               <app-button
-                size="small"
-                severity="secondary"
-                [text]="true"
+                size="sm"
+                variant="ghost"
                 icon="pi pi-check-circle"
                 [label]="labels.validate ?? 'shared.tree.validate'"
                 (buttonClick)="validateTree()"
@@ -50,9 +49,8 @@
             }
             @if (nodes.length > 0) {
               <app-button
-                size="small"
-                severity="danger"
-                [text]="true"
+                size="sm"
+                variant="destructive"
                 icon="pi pi-trash"
                 [label]="labels.clear ?? 'clear'"
                 (buttonClick)="clear()"
@@ -78,25 +76,22 @@
           @if (showFilterTabs) {
             <div class="field-tree__filters" role="tablist" [attr.aria-label]="'filters' | translateContent">
               <app-button
-                size="small"
-                [severity]="treeFilterMode() === 'all' ? 'info' : 'secondary'"
-                [text]="treeFilterMode() !== 'all'"
+                size="sm"
+                [variant]="treeFilterMode() === 'all' ? 'primary' : 'secondary'"
                 icon="pi pi-list"
                 label="all"
                 (buttonClick)="setTreeFilterMode('all')"
               ></app-button>
               <app-button
-                size="small"
-                [severity]="treeFilterMode() === 'selected' ? 'info' : 'secondary'"
-                [text]="treeFilterMode() !== 'selected'"
+                size="sm"
+                [variant]="treeFilterMode() === 'selected' ? 'primary' : 'secondary'"
                 icon="pi pi-check-square"
                 [label]="labels.selectedOnly ?? 'shared.tree.selectedOnly'"
                 (buttonClick)="setTreeFilterMode('selected')"
               ></app-button>
               <app-button
-                size="small"
-                [severity]="treeFilterMode() === 'leaf' ? 'info' : 'secondary'"
-                [text]="treeFilterMode() !== 'leaf'"
+                size="sm"
+                [variant]="treeFilterMode() === 'leaf' ? 'primary' : 'secondary'"
                 icon="pi pi-sitemap"
                 [label]="labels.leafOnly ?? 'shared.tree.leafOnly'"
                 (buttonClick)="setTreeFilterMode('leaf')"
@@ -106,35 +101,31 @@
 
           <div class="field-tree__toolbar-actions">
             <app-button
-              size="small"
-              severity="secondary"
-              [text]="true"
+              size="sm"
+              variant="ghost"
               icon="pi pi-angle-double-down"
               [label]="labels.expandAll ?? 'shared.tree.expandAll'"
               (buttonClick)="expandAll()"
             ></app-button>
             <app-button
-              size="small"
-              severity="secondary"
-              [text]="true"
+              size="sm"
+              variant="ghost"
               icon="pi pi-angle-double-up"
               [label]="labels.collapseAll ?? 'shared.tree.collapseAll'"
               (buttonClick)="collapseAll()"
             ></app-button>
             @if (hasCheckboxSelection) {
               <app-button
-                size="small"
-                severity="secondary"
-                [text]="true"
+                size="sm"
+                variant="ghost"
                 icon="pi pi-directions"
                 [label]="labels.expandSelected ?? 'shared.tree.expandSelected'"
                 [disabled]="selected.length === 0"
                 (buttonClick)="expandSelected()"
               ></app-button>
               <app-button
-                size="small"
-                severity="secondary"
-                [text]="true"
+                size="sm"
+                variant="ghost"
                 icon="pi pi-check"
                 [label]="labels.selectVisible ?? 'shared.tree.selectVisible'"
                 [disabled]="visibleNodes.length === 0"
@@ -147,9 +138,8 @@
             <div class="field-tree__presets" role="group" [attr.aria-label]="(labels.presetTitle ?? 'shared.tree.presets') | translateContent">
               @for (preset of selectionPresetItems; track preset.id) {
                 <app-button
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
+                  size="sm"
+                  variant="ghost"
                   [icon]="preset.icon ?? 'pi pi-bolt'"
                   [label]="preset.label"
                   [tooltip]="preset.description"
@@ -209,9 +199,8 @@
                   <span>{{ selected.length }} {{ 'shared.tree.itemsSelected' | translateContent }}</span>
                 </div>
                 <app-button
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
+                  size="sm"
+                  variant="ghost"
                   icon="pi pi-times"
                   [label]="labels.clearSelection ?? 'shared.tree.clearSelection'"
                   [disabled]="selected.length === 0"
@@ -241,9 +230,8 @@
                         }
                       </button>
                       <app-button
-                        size="small"
-                        severity="secondary"
-                        [text]="true"
+                        size="sm"
+                        variant="ghost"
                         icon="pi pi-times"
                         [label]="labels.removeSelected ?? 'shared.tree.removeSelected'"
                         (buttonClick)="removeSelectedItem(item.node.id)"
@@ -260,9 +248,8 @@
           <footer class="field-tree__footer">
             <span>{{ selected.length }} {{ 'shared.tree.itemsSelected' | translateContent }}</span>
             <app-button
-              size="small"
-              severity="secondary"
-              [text]="true"
+              size="sm"
+              variant="ghost"
               icon="pi pi-trash"
               [label]="labels.clearSelection ?? 'shared.tree.clearSelection'"
               [disabled]="selected.length === 0"
@@ -301,16 +288,15 @@
               ></app-input-area>
               <div class="field-tree__advanced-actions">
                 <app-button
-                  size="small"
-                  severity="success"
+                  size="sm"
+                  variant="primary"
                   icon="pi pi-check"
                   [label]="labels.applyJson ?? 'shared.tree.applyJson'"
                   (buttonClick)="applyAdvancedJson()"
                 ></app-button>
                 <app-button
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
+                  size="sm"
+                  variant="ghost"
                   icon="pi pi-refresh"
                   [label]="labels.resetJson ?? 'shared.tree.resetJson'"
                   (buttonClick)="resetAdvancedJson()"
@@ -382,9 +368,8 @@
     >
       @if (hasNodeChildren(node)) {
         <app-button
-          size="small"
-          severity="secondary"
-          [text]="true"
+          size="sm"
+          variant="ghost"
           [icon]="isViewExpanded(view) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
           [label]="isViewExpanded(view) ? 'collapse' : 'open'"
           (buttonClick)="toggleNode(node.id)"
@@ -433,18 +418,17 @@
       }
       @if (canEdit()) {
         <app-button
-          size="small"
-          severity="secondary"
-          [text]="true"
+          size="sm"
+          variant="ghost"
           icon="pi pi-eye"
           [label]="labels.view ?? 'shared.tree.view'"
           (buttonClick)="viewNode(node)"
         ></app-button>
         @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
           <app-button
-            size="small"
-            severity="success"
-            [text]="true"
+            size="sm"
+            variant="primary"
+            variant="ghost"
             icon="pi pi-plus"
             [label]="labels.addNode ?? 'add'"
             (buttonClick)="openAddPicker(node.id)"
@@ -452,9 +436,8 @@
         }
         @if (showNodeActions) {
           <app-button
-            size="small"
-            severity="secondary"
-            [text]="true"
+            size="sm"
+            variant="ghost"
             icon="pi pi-ellipsis-v"
             [label]="labels.actionMenu ?? 'shared.tree.actionMenu'"
             (buttonClick)="openNodeActions(node)"
@@ -555,7 +538,7 @@
           <app-button
             label="add"
             icon="pi pi-plus"
-            severity="success"
+            variant="primary"
             [disabled]="selectedPickerOptionIds().size === 0"
             (buttonClick)="addSelectedOptions()"
           ></app-button>
@@ -574,20 +557,20 @@
   @if (actionNode(); as node) {
     <div class="field-tree-actions">
       <app-button
-        severity="secondary"
+        variant="secondary"
         icon="pi pi-eye"
         [label]="labels.view ?? 'shared.tree.view'"
         (buttonClick)="viewNode(node); actionNode.set(null)"
       ></app-button>
       @if (hasCheckboxSelection && node.children?.length) {
         <app-button
-          severity="secondary"
+          variant="secondary"
           icon="pi pi-check-square"
           [label]="labels.selectDescendants ?? 'shared.tree.selectDescendants'"
           (buttonClick)="selectDescendants(node.id); actionNode.set(null)"
         ></app-button>
         <app-button
-          severity="secondary"
+          variant="secondary"
           icon="pi pi-stop"
           [label]="labels.unselectDescendants ?? 'shared.tree.unselectDescendants'"
           (buttonClick)="unselectDescendants(node.id); actionNode.set(null)"
@@ -595,7 +578,7 @@
       }
       @if (field.fieldConfig.treeConfig?.allowGroupNode === true) {
         <app-button
-          severity="secondary"
+          variant="secondary"
           icon="pi pi-folder-plus"
           [label]="labels.addGroup ?? 'shared.tree.addGroup'"
           (buttonClick)="addGroup(node.id); actionNode.set(null)"
@@ -603,7 +586,7 @@
       }
       @if (field.fieldConfig.treeConfig?.allowReplaceNode === true && field.fieldConfig.pickerOptions?.length) {
         <app-button
-          severity="info"
+          variant="primary"
           icon="pi pi-sync"
           [label]="labels.replace ?? 'replace'"
           (buttonClick)="openReplacePicker(node.id); actionNode.set(null)"
@@ -611,14 +594,14 @@
       }
       @if (field.fieldConfig.treeConfig?.allowMoveNode !== false) {
         <app-button
-          severity="secondary"
+          variant="secondary"
           icon="pi pi-arrow-up"
           [label]="labels.moveUp ?? 'up'"
           [disabled]="!canMove(node.id, -1)"
           (buttonClick)="moveNode(node.id, -1); actionNode.set(null)"
         ></app-button>
         <app-button
-          severity="secondary"
+          variant="secondary"
           icon="pi pi-arrow-down"
           [label]="labels.moveDown ?? 'down'"
           [disabled]="!canMove(node.id, 1)"
@@ -626,14 +609,14 @@
         ></app-button>
       }
       <app-button
-        severity="secondary"
+        variant="secondary"
         icon="pi pi-copy"
         [label]="labels.duplicate ?? 'shared.tree.duplicate'"
         (buttonClick)="duplicateNode(node.id); actionNode.set(null)"
       ></app-button>
       @if (field.fieldConfig.treeConfig?.allowRemoveNode !== false) {
         <app-button
-          severity="danger"
+          variant="destructive"
           icon="pi pi-trash"
           [label]="labels.remove ?? 'delete'"
           (buttonClick)="removeNode(node.id); actionNode.set(null)"
@@ -651,3 +634,5 @@
 >
   <app-json-viewer [value]="detailNode()"></app-json-viewer>
 </app-drawer>
+
+

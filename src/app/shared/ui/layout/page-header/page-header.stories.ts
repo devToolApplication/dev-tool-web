@@ -22,8 +22,8 @@ const meta: Meta<PageHeaderComponent> = {
         [backLabel]="backLabel"
       >
         <div page-actions class="flex gap-2">
-          <app-button label="common.edit" severity="secondary" icon="pi pi-pencil"></app-button>
-          <app-button label="common.delete" severity="danger" icon="pi pi-trash"></app-button>
+          <app-button label="common.edit" variant="secondary" icon="pi pi-pencil"></app-button>
+          <app-button label="common.delete" variant="destructive" icon="pi pi-trash"></app-button>
         </div>
       </app-page-header>
     `
@@ -84,3 +84,4 @@ export const FullFeatured: Story = {
     }
   }
 };
+

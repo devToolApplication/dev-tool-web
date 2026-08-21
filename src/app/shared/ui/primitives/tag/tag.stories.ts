@@ -23,11 +23,11 @@ export const AllSeverities: Story = {
     template: `
       <div class="flex flex-wrap gap-2">
         <app-tag value="Primary"></app-tag>
-        <app-tag value="Secondary" severity="secondary"></app-tag>
+        <app-tag value="Secondary" variant="secondary"></app-tag>
         <app-tag value="Success" severity="success"></app-tag>
         <app-tag value="Info" severity="info"></app-tag>
         <app-tag value="Warning" severity="warn"></app-tag>
-        <app-tag value="Danger" severity="danger"></app-tag>
+        <app-tag value="Danger" variant="destructive"></app-tag>
         <app-tag value="Contrast" severity="contrast"></app-tag>
       </div>
     `
@@ -49,3 +49,4 @@ export const WithIcon: Story = {
     severity: 'success'
   }
 };
+

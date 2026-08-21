@@ -5,8 +5,7 @@
         <app-button
           icon="pi pi-arrow-left"
           [label]="backLabel"
-          severity="secondary"
-          [text]="true"
+          variant="ghost"
           (buttonClick)="back.emit()"
         ></app-button>
       }
@@ -33,3 +32,4 @@
     <ng-content select="[page-actions]"></ng-content>
   </div>
 </header>
+

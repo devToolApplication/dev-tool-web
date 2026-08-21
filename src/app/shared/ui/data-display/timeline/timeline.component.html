@@ -23,9 +23,8 @@
           }
           @if (item.actionLabel) {
             <app-button
-              size="small"
-              [text]="true"
-              severity="secondary"
+              size="sm"
+              variant="ghost"
               [label]="item.actionLabel"
               (buttonClick)="itemAction.emit(item)"
             ></app-button>
@@ -35,3 +34,4 @@
     }
   </ol>
 }
+

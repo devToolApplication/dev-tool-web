@@ -20,9 +20,8 @@
             @if (canValidateJson) {
               <app-button
                 type="button"
-                size="small"
-                severity="secondary"
-                [text]="true"
+                size="sm"
+                variant="ghost"
                 icon="pi pi-align-left"
                 label="shared.form.actions.formatJson"
                 [disabled]="field.disabled()"
@@ -30,9 +29,8 @@
               ></app-button>
               <app-button
                 type="button"
-                size="small"
-                severity="secondary"
-                [text]="true"
+                size="sm"
+                variant="ghost"
                 icon="pi pi-check-circle"
                 label="shared.form.actions.validateJson"
                 (buttonClick)="validateJson()"
@@ -40,18 +38,16 @@
             }
             <app-button
               type="button"
-              size="small"
-              severity="secondary"
-              [text]="true"
+              size="sm"
+              variant="ghost"
               icon="pi pi-copy"
               [label]="copied() ? 'copied' : 'copy'"
               (buttonClick)="copy()"
             ></app-button>
             <app-button
               type="button"
-              size="small"
-              severity="secondary"
-              [text]="true"
+              size="sm"
+              variant="ghost"
               icon="pi pi-window-maximize"
               label="shared.inputArea.expand"
               [disabled]="field.disabled()"
@@ -81,3 +77,4 @@
     </app-field-block>
   }
 }
+

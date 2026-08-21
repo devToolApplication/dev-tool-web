@@ -13,18 +13,16 @@
       <div class="app-alert__actions">
         @if (actionLabel) {
           <app-button
-            size="small"
-            [text]="true"
-            severity="secondary"
+            size="sm"
+            variant="ghost"
             [label]="actionLabel"
             (buttonClick)="action.emit()"
           ></app-button>
         }
         @if (dismissible) {
           <app-button
-            size="small"
-            [text]="true"
-            severity="secondary"
+            size="sm"
+            variant="ghost"
             icon="pi pi-times"
             label="close"
             (buttonClick)="dismiss()"
@@ -34,3 +32,4 @@
     }
   </section>
 }
+

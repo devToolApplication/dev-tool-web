@@ -30,16 +30,15 @@
         ></app-input-area>
         <div class="config-template-form__advanced-actions">
           <app-button
-            size="small"
+            size="sm"
             severity="success"
             icon="pi pi-check"
             label="shared.form.applyJson"
             (buttonClick)="applyAdvancedJson()"
           ></app-button>
           <app-button
-            size="small"
-            severity="secondary"
-            [text]="true"
+            size="sm"
+            variant="ghost"
             icon="pi pi-refresh"
             label="shared.form.resetJson"
             (buttonClick)="resetAdvancedJson()"
@@ -51,3 +50,4 @@
     }
   </app-section-panel>
 }
+

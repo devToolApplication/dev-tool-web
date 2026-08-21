@@ -31,7 +31,7 @@ const meta: Meta<SectionPanelComponent> = {
         [density]="density"
       >
         <div section-actions>
-          <app-button label="common.add" icon="pi pi-plus" severity="secondary" [text]="true"></app-button>
+          <app-button label="common.add" icon="pi pi-plus" variant="ghost"></app-button>
         </div>
         
         <div class="p-4 border border-dashed rounded bg-surface-ground">
@@ -107,3 +107,4 @@ export const CompactDensity: Story = {
     density: 'compact'
   }
 };
+

@@ -20,8 +20,8 @@
     <div class="error-state__actions">
       @if (retryLabel) {
         <app-button
-          size="small"
-          severity="danger"
+          size="sm"
+          variant="destructive"
           icon="pi pi-refresh"
           [label]="retryLabel"
           (buttonClick)="retry.emit()"
@@ -29,9 +29,8 @@
       }
       @if (showCopyDetail && hasDetail) {
         <app-button
-          size="small"
-          severity="secondary"
-          [text]="true"
+          size="sm"
+          variant="ghost"
           icon="pi pi-copy"
           label="shared.error.copyDetail"
           (buttonClick)="onCopyDetail()"
@@ -40,3 +39,4 @@
     </div>
   }
 </section>
+

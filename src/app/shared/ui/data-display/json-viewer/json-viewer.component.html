@@ -10,26 +10,23 @@
     <div class="json-viewer__actions">
       @if (showRawToggle) {
         <app-button
-          size="small"
-          severity="secondary"
-          [text]="true"
+          size="sm"
+          variant="ghost"
           icon="pi pi-code"
           [label]="rawMode() ? 'shared.json.pretty' : 'shared.json.raw'"
           (buttonClick)="toggleRaw()"
         ></app-button>
       }
       <app-button
-        size="small"
-        severity="secondary"
-        [text]="true"
+        size="sm"
+        variant="ghost"
         icon="pi pi-copy"
         [label]="copyLabel"
         (buttonClick)="copy()"
       ></app-button>
       <app-button
-        size="small"
-        severity="secondary"
-        [text]="true"
+        size="sm"
+        variant="ghost"
         [icon]="collapsedState() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
         [label]="collapsedState() ? 'open' : 'collapse'"
         (buttonClick)="toggleCollapsed()"
@@ -61,17 +58,15 @@
                 </div>
                 <div class="json-viewer__match-actions">
                   <app-button
-                    size="small"
-                    severity="secondary"
-                    [text]="true"
+                    size="sm"
+                    variant="ghost"
                     icon="pi pi-link"
                     label="shared.json.copyPath"
                     (buttonClick)="copyPath(result)"
                   ></app-button>
                   <app-button
-                    size="small"
-                    severity="secondary"
-                    [text]="true"
+                    size="sm"
+                    variant="ghost"
                     icon="pi pi-copy"
                     label="shared.json.copyValue"
                     (buttonClick)="copyValue(result)"
@@ -88,3 +83,4 @@
     <pre class="json-viewer__body">{{ filteredDisplayValue }}</pre>
   }
 </section>
+

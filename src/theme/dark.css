@@ -1,4 +1,4 @@
-:root[data-theme="dark"],
+:root[data-theme='dark'],
 :root.app-dark {
   --app-color-scheme: dark;
   --app-bg: #070b22;
@@ -37,8 +37,7 @@
   --app-input-disabled-placeholder: rgba(144, 160, 202, 0.72);
   --app-input-disabled-icon: rgba(150, 166, 213, 0.64);
   --app-input-disabled-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 0 0 1px rgba(110, 143, 228, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 1px rgba(110, 143, 228, 0.08);
 
   --app-overlay-bg: rgba(10, 14, 36, 0.9);
   --app-overlay-text: #f3f6ff;
@@ -49,15 +48,11 @@
   --app-custom-input-text: var(--app-custom-dark-input-text);
   --app-custom-text: var(--app-custom-dark-text);
 
-  --app-tab-list-bg:
-    var(--app-card-highlight),
-    var(--app-card-bg);
+  --app-tab-list-bg: var(--app-card-highlight), var(--app-card-bg);
   --app-tab-list-border: var(--app-border);
   --app-tab-text: #c7d1f5;
   --app-tab-text-active: #f5f8ff;
-  --app-tab-active-bg:
-    var(--app-card-highlight),
-    var(--app-card-bg-strong);
+  --app-tab-active-bg: var(--app-card-highlight), var(--app-card-bg-strong);
   --app-tab-panels-bg:
     var(--app-card-highlight),
     linear-gradient(180deg, var(--app-card-surface-strong), var(--app-card-surface));
@@ -68,9 +63,17 @@
   --app-sidebar-text: var(--app-text);
   --app-sidebar-muted: var(--app-text-muted);
   --app-sidebar-border: rgba(122, 119, 255, 0.14);
-  --app-sidebar-brand-bg: linear-gradient(135deg, rgba(154, 115, 255, 0.28), rgba(122, 119, 255, 0.22));
+  --app-sidebar-brand-bg: linear-gradient(
+    135deg,
+    rgba(154, 115, 255, 0.28),
+    rgba(122, 119, 255, 0.22)
+  );
   --app-sidebar-item-hover: linear-gradient(135deg, rgba(27, 28, 94, 0.82), rgba(18, 18, 66, 0.68));
-  --app-sidebar-item-active-bg: linear-gradient(135deg, rgba(90, 74, 208, 0.32), rgba(122, 119, 255, 0.2));
+  --app-sidebar-item-active-bg: linear-gradient(
+    135deg,
+    rgba(90, 74, 208, 0.32),
+    rgba(122, 119, 255, 0.2)
+  );
   --app-sidebar-item-active-text: #f5f8ff;
   --app-sidebar-badge-bg: rgba(27, 27, 95, 0.8);
   --app-sidebar-badge-text: #d9def8;
@@ -97,69 +100,139 @@
     linear-gradient(154deg, transparent 49%, rgba(122, 119, 255, 0.08) 50.5%, transparent 52%);
   --app-layout-streaks-opacity: 0.6;
 
-  --app-control-accent-bg: linear-gradient(90deg, rgba(104, 88, 255, 0.84), rgba(122, 119, 255, 0.74));
-  --app-control-accent-bg-hover: linear-gradient(90deg, rgba(129, 105, 255, 0.92), rgba(140, 130, 255, 0.82));
-  --app-control-accent-bg-active: linear-gradient(90deg, rgba(90, 74, 208, 0.9), rgba(104, 88, 255, 0.82));
+  --app-control-accent-bg: linear-gradient(
+    90deg,
+    rgba(104, 88, 255, 0.84),
+    rgba(122, 119, 255, 0.74)
+  );
+  --app-control-accent-bg-hover: linear-gradient(
+    90deg,
+    rgba(129, 105, 255, 0.92),
+    rgba(140, 130, 255, 0.82)
+  );
+  --app-control-accent-bg-active: linear-gradient(
+    90deg,
+    rgba(90, 74, 208, 0.9),
+    rgba(104, 88, 255, 0.82)
+  );
   --app-control-accent-border: rgba(122, 119, 255, 0.28);
-  --app-control-accent-shadow: 0 0 14px rgba(122, 119, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --app-control-accent-shadow:
+    0 0 14px rgba(122, 119, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   --app-control-neutral-bg: rgba(10, 16, 41, 0.74);
   --app-control-chip-bg: rgba(122, 119, 255, 0.18);
-  --app-control-secondary-bg: linear-gradient(135deg, rgba(24, 24, 84, 0.92), rgba(15, 15, 56, 0.84));
-  --app-control-secondary-bg-hover: linear-gradient(135deg, rgba(32, 32, 106, 0.94), rgba(21, 21, 73, 0.88));
-  --app-control-secondary-bg-active: linear-gradient(135deg, rgba(18, 18, 72, 0.96), rgba(14, 14, 54, 0.9));
+  --app-control-secondary-bg: linear-gradient(
+    135deg,
+    rgba(24, 24, 84, 0.92),
+    rgba(15, 15, 56, 0.84)
+  );
+  --app-control-secondary-bg-hover: linear-gradient(
+    135deg,
+    rgba(32, 32, 106, 0.94),
+    rgba(21, 21, 73, 0.88)
+  );
+  --app-control-secondary-bg-active: linear-gradient(
+    135deg,
+    rgba(18, 18, 72, 0.96),
+    rgba(14, 14, 54, 0.9)
+  );
   --app-control-secondary-border: rgba(122, 119, 255, 0.2);
   --app-control-secondary-text: #e0dcff;
   --app-control-secondary-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 28px rgba(4, 7, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-control-success-bg: linear-gradient(135deg, rgba(20, 74, 58, 0.94), rgba(14, 52, 42, 0.86));
-  --app-control-success-bg-hover: linear-gradient(135deg, rgba(24, 92, 71, 0.96), rgba(17, 64, 51, 0.88));
-  --app-control-success-bg-active: linear-gradient(135deg, rgba(17, 66, 51, 0.98), rgba(13, 49, 39, 0.92));
+  --app-control-success-bg-hover: linear-gradient(
+    135deg,
+    rgba(24, 92, 71, 0.96),
+    rgba(17, 64, 51, 0.88)
+  );
+  --app-control-success-bg-active: linear-gradient(
+    135deg,
+    rgba(17, 66, 51, 0.98),
+    rgba(13, 49, 39, 0.92)
+  );
   --app-control-success-border: rgba(50, 199, 140, 0.24);
   --app-control-success-text: #bdf7dc;
   --app-control-success-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-control-info-bg: linear-gradient(135deg, rgba(20, 54, 109, 0.94), rgba(14, 38, 82, 0.86));
-  --app-control-info-bg-hover: linear-gradient(135deg, rgba(24, 67, 134, 0.96), rgba(16, 46, 97, 0.88));
-  --app-control-info-bg-active: linear-gradient(135deg, rgba(18, 52, 102, 0.98), rgba(14, 38, 76, 0.92));
+  --app-control-info-bg-hover: linear-gradient(
+    135deg,
+    rgba(24, 67, 134, 0.96),
+    rgba(16, 46, 97, 0.88)
+  );
+  --app-control-info-bg-active: linear-gradient(
+    135deg,
+    rgba(18, 52, 102, 0.98),
+    rgba(14, 38, 76, 0.92)
+  );
   --app-control-info-border: rgba(93, 149, 255, 0.24);
   --app-control-info-text: #cfe1ff;
   --app-control-info-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-control-warn-bg: linear-gradient(135deg, rgba(97, 68, 17, 0.94), rgba(67, 46, 12, 0.86));
-  --app-control-warn-bg-hover: linear-gradient(135deg, rgba(118, 82, 20, 0.96), rgba(81, 56, 14, 0.88));
-  --app-control-warn-bg-active: linear-gradient(135deg, rgba(86, 60, 16, 0.98), rgba(60, 42, 12, 0.92));
+  --app-control-warn-bg-hover: linear-gradient(
+    135deg,
+    rgba(118, 82, 20, 0.96),
+    rgba(81, 56, 14, 0.88)
+  );
+  --app-control-warn-bg-active: linear-gradient(
+    135deg,
+    rgba(86, 60, 16, 0.98),
+    rgba(60, 42, 12, 0.92)
+  );
   --app-control-warn-border: rgba(246, 185, 73, 0.24);
   --app-control-warn-text: #ffe1a3;
   --app-control-warn-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-control-danger-bg: linear-gradient(135deg, rgba(108, 26, 54, 0.94), rgba(76, 17, 38, 0.86));
-  --app-control-danger-bg-hover: linear-gradient(135deg, rgba(128, 31, 64, 0.96), rgba(92, 21, 47, 0.88));
-  --app-control-danger-bg-active: linear-gradient(135deg, rgba(96, 23, 47, 0.98), rgba(69, 16, 35, 0.92));
+  --app-control-danger-bg-hover: linear-gradient(
+    135deg,
+    rgba(128, 31, 64, 0.96),
+    rgba(92, 21, 47, 0.88)
+  );
+  --app-control-danger-bg-active: linear-gradient(
+    135deg,
+    rgba(96, 23, 47, 0.98),
+    rgba(69, 16, 35, 0.92)
+  );
   --app-control-danger-border: rgba(255, 121, 157, 0.24);
   --app-control-danger-text: #ffd0dd;
   --app-control-danger-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-control-help-bg: linear-gradient(135deg, rgba(70, 35, 116, 0.94), rgba(48, 24, 81, 0.86));
-  --app-control-help-bg-hover: linear-gradient(135deg, rgba(84, 42, 137, 0.96), rgba(58, 28, 98, 0.88));
-  --app-control-help-bg-active: linear-gradient(135deg, rgba(64, 31, 106, 0.98), rgba(46, 22, 75, 0.92));
+  --app-control-help-bg-hover: linear-gradient(
+    135deg,
+    rgba(84, 42, 137, 0.96),
+    rgba(58, 28, 98, 0.88)
+  );
+  --app-control-help-bg-active: linear-gradient(
+    135deg,
+    rgba(64, 31, 106, 0.98),
+    rgba(46, 22, 75, 0.92)
+  );
   --app-control-help-border: rgba(181, 130, 255, 0.24);
   --app-control-help-text: #ead4ff;
   --app-control-help-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --app-control-contrast-bg: linear-gradient(135deg, rgba(244, 247, 255, 0.94), rgba(219, 227, 255, 0.88));
-  --app-control-contrast-bg-hover: linear-gradient(135deg, rgba(250, 252, 255, 0.96), rgba(229, 236, 255, 0.9));
-  --app-control-contrast-bg-active: linear-gradient(135deg, rgba(232, 238, 255, 0.96), rgba(210, 220, 248, 0.9));
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --app-control-contrast-bg: linear-gradient(
+    135deg,
+    rgba(244, 247, 255, 0.94),
+    rgba(219, 227, 255, 0.88)
+  );
+  --app-control-contrast-bg-hover: linear-gradient(
+    135deg,
+    rgba(250, 252, 255, 0.96),
+    rgba(229, 236, 255, 0.9)
+  );
+  --app-control-contrast-bg-active: linear-gradient(
+    135deg,
+    rgba(232, 238, 255, 0.96),
+    rgba(210, 220, 248, 0.9)
+  );
   --app-control-contrast-border: rgba(191, 205, 255, 0.24);
   --app-control-contrast-text: #172033;
   --app-control-contrast-shadow:
-    0 12px 28px rgba(4, 7, 20, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 12px 28px rgba(4, 7, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   --app-chart-primary: #7a77ff;
   --app-chart-success: #32c78c;
   --app-chart-danger: #ff799d;
@@ -193,22 +266,14 @@
   --app-finance-chart-label-bg: rgba(10, 16, 41, 0.88);
   --app-finance-chart-watermark: rgba(243, 246, 255, 0.07);
 
-  --app-shadow-xs:
-    0 10px 26px rgba(4, 7, 20, 0.26),
-    0 0 0 1px rgba(122, 119, 255, 0.08);
-  --app-shadow-sm:
-    0 14px 32px rgba(4, 7, 20, 0.3),
-    0 0 0 1px rgba(122, 119, 255, 0.1);
+  --app-shadow-xs: 0 10px 26px rgba(4, 7, 20, 0.26), 0 0 0 1px rgba(122, 119, 255, 0.08);
+  --app-shadow-sm: 0 14px 32px rgba(4, 7, 20, 0.3), 0 0 0 1px rgba(122, 119, 255, 0.1);
   --app-shadow-md:
-    0 20px 56px rgba(4, 7, 20, 0.38),
-    0 0 0 1px rgba(122, 119, 255, 0.12),
+    0 20px 56px rgba(4, 7, 20, 0.38), 0 0 0 1px rgba(122, 119, 255, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --app-shadow-lg:
-    0 24px 68px rgba(4, 7, 20, 0.42),
-    0 0 0 1px rgba(122, 119, 255, 0.14),
+    0 24px 68px rgba(4, 7, 20, 0.42), 0 0 0 1px rgba(122, 119, 255, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --app-shadow-xl:
-    0 0 0 1px rgba(122, 119, 255, 0.22),
-    0 18px 48px rgba(4, 7, 20, 0.4);
+  --app-shadow-xl: 0 0 0 1px rgba(122, 119, 255, 0.22), 0 18px 48px rgba(4, 7, 20, 0.4);
   --app-shadow-overlay: 0 24px 72px rgba(4, 7, 20, 0.48);
 }

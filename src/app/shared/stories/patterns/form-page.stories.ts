@@ -88,7 +88,7 @@ export const CreateMode: Story = {
     template: `
       <app-page-shell title="Create Configuration" subtitle="Add a new configuration entry">
         <div page-actions class="flex gap-2">
-          <app-button label="Cancel" severity="secondary"></app-button>
+          <app-button label="Cancel" variant="secondary"></app-button>
           <app-button label="Save" icon="pi pi-check"></app-button>
         </div>
         <app-config-template-form
@@ -115,7 +115,7 @@ export const EditMode: Story = {
         [breadcrumb]="[{ label: 'Configurations', routerLink: '/config' }, { label: 'Production Config' }]"
       >
         <div page-actions class="flex gap-2">
-          <app-button label="Cancel" severity="secondary"></app-button>
+          <app-button label="Cancel" variant="secondary"></app-button>
           <app-button label="Update" icon="pi pi-check"></app-button>
         </div>
         <app-config-template-form
@@ -127,3 +127,4 @@ export const EditMode: Story = {
     `
   })
 };
+

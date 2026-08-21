@@ -115,6 +115,13 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return action.tooltipFn?.(this.rowData) ?? action.tooltip ?? action.label;
   }
 
+    actionVariant(action: TableAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
+    if (action.variant === 'danger' || action.severity === 'danger') return 'destructive';
+    if (action.variant === 'primary' || action.severity === 'success') return 'primary';
+    if (action.variant === 'ghost' || action.text) return 'ghost';
+    return 'secondary';
+  }
+
   actionSeverity(action: TableAction) {
     if (action.severity !== undefined) {
       return action.severity;
@@ -379,4 +386,5 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.portaledActionsMenu?.contains(target) ?? false;
   }
 }
+
 

@@ -2,8 +2,8 @@
   <ng-container toolbar-left>
     @if (isButtonVisible(newButtonConfig)) {
       <app-button
-        [size]="'small'"
-        [severity]="newButtonConfig.severity ?? 'success'"
+        [size]="'sm'"
+        variant="primary"
         [label]="newButtonConfig.label ?? 'new'"
         [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
         [disabled]="isButtonDisabled(newButtonConfig)"
@@ -14,7 +14,7 @@
 
     @if (isButtonVisible(deleteButtonConfig)) {
       <app-button
-        [severity]="deleteButtonConfig.severity ?? 'danger'"
+        variant="destructive"
         [label]="deleteButtonConfig.label ?? 'delete'"
         [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
         [disabled]="isButtonDisabled(deleteButtonConfig)"
@@ -34,7 +34,7 @@
         ></app-input-text>
         <app-button
           icon="pi pi-search"
-          [text]="true"
+          variant="ghost"
           label="search"
           [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
           (buttonClick)="onQuickSearch()"
@@ -49,8 +49,8 @@
         </span>
         @for (action of visibleBulkActions; track action.id) {
           <app-button
-            size="small"
-            [severity]="action.severity ?? (action.variant === 'danger' ? 'danger' : 'secondary')"
+            size="sm"
+            [variant]="action.variant === 'danger' ? 'destructive' : 'secondary'"
             [label]="action.label"
             [icon]="action.icon"
             [disabled]="selectedCount === 0 || isBulkActionDisabled(action)"
@@ -65,7 +65,7 @@
   <ng-container toolbar-right>
     @if (isButtonVisible(refreshButtonConfig)) {
       <app-button
-        [severity]="refreshButtonConfig.severity ?? 'secondary'"
+        variant="secondary"
         [label]="refreshButtonConfig.label ?? 'refresh'"
         [icon]="refreshButtonConfig.icon ?? 'pi pi-refresh'"
         [disabled]="loading || isButtonDisabled(refreshButtonConfig)"
@@ -112,7 +112,7 @@
 
     @if (isButtonVisible(exportButtonConfig)) {
       <app-button
-        [severity]="exportButtonConfig.severity ?? 'help'"
+        variant="secondary"
         [label]="exportButtonLabel"
         [icon]="exportButtonIcon"
         [disabled]="isButtonDisabled(exportButtonConfig) || (exportButtonConfig.loading ?? false)"
@@ -278,3 +278,5 @@
   }
 </div>
 }
+
+

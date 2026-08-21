@@ -25,8 +25,8 @@ export const Severities: Story = {
         <app-prime-badge value="2" severity="success"></app-prime-badge>
         <app-prime-badge value="3" severity="info"></app-prime-badge>
         <app-prime-badge value="4" severity="warn"></app-prime-badge>
-        <app-prime-badge value="5" severity="danger"></app-prime-badge>
-        <app-prime-badge value="6" severity="secondary"></app-prime-badge>
+        <app-prime-badge value="5" variant="destructive"></app-prime-badge>
+        <app-prime-badge value="6" variant="secondary"></app-prime-badge>
         <app-prime-badge value="7" severity="contrast"></app-prime-badge>
       </div>
     `
@@ -39,3 +39,4 @@ export const LargeSize: Story = {
     value: '99+'
   }
 };
+

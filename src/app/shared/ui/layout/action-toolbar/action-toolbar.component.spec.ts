@@ -21,8 +21,8 @@ describe('ActionToolbarComponent', () => {
       providers: [
         ...provideSharedTesting(),
         { provide: ConfirmDialogService, useValue: confirmDialogService },
-        { provide: PermissionService, useValue: permissionService }
-      ]
+        { provide: PermissionService, useValue: permissionService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ActionToolbarComponent);
@@ -30,7 +30,12 @@ describe('ActionToolbarComponent', () => {
   });
 
   it('emits primary action clicks', async () => {
-    const action = { id: 'create', label: 'Create', placement: 'primary' as const, variant: 'primary' as const };
+    const action = {
+      id: 'create',
+      label: 'Create',
+      placement: 'primary' as const,
+      variant: 'primary' as const,
+    };
     const emit = vi.spyOn(component.actionClick, 'emit');
     component.actions = [action];
     component.ngOnChanges();
@@ -72,14 +77,14 @@ describe('ActionToolbarComponent', () => {
       id: 'delete',
       label: 'Delete',
       variant: 'danger' as const,
-      confirm: { message: 'Delete item?' }
+      confirm: { message: 'Delete item?' },
     };
     const emit = vi.spyOn(component.actionClick, 'emit');
 
     await component.emitAction(action);
 
     expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Delete item?', variant: 'danger' })
+      expect.objectContaining({ message: 'Delete item?', variant: 'danger' }),
     );
     expect(emit).toHaveBeenCalledWith(action);
 
@@ -92,14 +97,14 @@ describe('ActionToolbarComponent', () => {
     const action = {
       id: 'clear',
       label: 'Clear',
-      variant: 'danger' as const
+      variant: 'danger' as const,
     };
     const emit = vi.spyOn(component.actionClick, 'emit');
 
     await component.emitAction(action);
 
     expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'shared.confirm.dangerAction', variant: 'danger' })
+      expect.objectContaining({ message: 'shared.confirm.dangerAction', variant: 'danger' }),
     );
     expect(emit).toHaveBeenCalledWith(action);
   });

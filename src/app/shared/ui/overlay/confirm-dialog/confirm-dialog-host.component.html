@@ -45,14 +45,13 @@
       <footer class="confirm-dialog__footer">
         <app-button
           [label]="dialog.cancelText"
-          severity="secondary"
-          [text]="true"
+          variant="ghost"
           [disabled]="processing()"
           (buttonClick)="reject()"
         ></app-button>
         <app-button
           [label]="dialog.confirmText"
-          [severity]="severity(dialog)"
+          [variant]="dialog.variant === 'danger' ? 'destructive' : 'primary'"
           [disabled]="confirmDisabled"
           [loading]="processing()"
           (buttonClick)="accept()"
@@ -61,3 +60,5 @@
     </section>
   </div>
 }
+
+

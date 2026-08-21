@@ -37,9 +37,10 @@ export const Sizes: Story = {
     template: `
       <div class="flex flex-wrap gap-2 items-center">
         <app-avatar label="SM" size="normal"></app-avatar>
-        <app-avatar label="MD" size="large"></app-avatar>
+        <app-avatar label="MD" size="lg"></app-avatar>
         <app-avatar label="LG" size="xlarge"></app-avatar>
       </div>
     `
   })
 };
+

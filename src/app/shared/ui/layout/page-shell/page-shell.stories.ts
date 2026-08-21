@@ -28,8 +28,8 @@ const meta: Meta<PageShellComponent> = {
         [emptyDescription]="emptyDescription"
       >
         <div page-actions class="flex gap-2">
-          <app-button label="common.save" severity="primary"></app-button>
-          <app-button label="common.cancel" severity="secondary"></app-button>
+          <app-button label="common.save" variant="primary"></app-button>
+          <app-button label="common.cancel" variant="secondary"></app-button>
         </div>
         <div page-summary class="p-4 bg-muted rounded mb-4">
           <p class="text-sm font-semibold">Summary Metric Card Row Placeholder</p>
@@ -104,3 +104,4 @@ export const FullLayout: Story = {
     layout: 'full'
   }
 };
+

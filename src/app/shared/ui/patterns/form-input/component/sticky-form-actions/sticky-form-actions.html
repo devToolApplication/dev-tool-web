@@ -12,7 +12,7 @@
     @if (errorCount > 0) {
       <app-button
         type="button"
-        severity="secondary"
+        variant="secondary"
         icon="pi pi-list-check"
         [label]="reviewErrorsLabel"
         (buttonClick)="reviewErrors.emit()"
@@ -21,8 +21,7 @@
     @if (showReset) {
       <app-button
         type="button"
-        severity="secondary"
-        [text]="true"
+        variant="ghost"
         icon="pi pi-refresh"
         [label]="resetLabel"
         [disabled]="!dirty || loading || submitting || readonly"
@@ -32,7 +31,7 @@
     @if (showCancel) {
       <app-button
         type="button"
-        severity="secondary"
+        variant="secondary"
         [label]="cancelLabel"
         [disabled]="loading || submitting"
         (buttonClick)="cancel.emit()"
@@ -50,3 +49,4 @@
     }
   </div>
 </footer>
+
