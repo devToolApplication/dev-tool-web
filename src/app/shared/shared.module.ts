@@ -25,14 +25,11 @@ import { MessageComponent } from './ui/primitives/message/message';
 import { Paginator } from './ui/primitives/paginator/paginator';
 import { PanelComponent } from './ui/primitives/panel/panel.component';
 import { Password } from './ui/primitives/password/password';
-import { PrimeBadgeComponent } from './ui/primitives/prime-badge/prime-badge';
-import { PrimeConfirmDialogComponent } from './ui/primitives/confirm-dialog/confirm-dialog';
 import { FluidComponent } from './ui/primitives/fluid/fluid';
 import { IconFieldComponent } from './ui/primitives/icon-field/icon-field';
 import { PanelMenuComponent } from './ui/primitives/panel-menu/panel-menu';
 import { RippleComponent } from './ui/primitives/ripple/ripple';
 import { TooltipComponent } from './ui/primitives/tooltip/tooltip';
-import { PrimeTableComponent } from './ui/primitives/prime-table/prime-table.component';
 import { ProgressSpinnerComponent } from './ui/primitives/progress-spinner/progress-spinner.component';
 import { RadioButton } from './ui/primitives/radio-button/radio-button';
 import { SelectButton } from './ui/primitives/select-button/select-button';
@@ -155,8 +152,6 @@ const DATA_DISPLAY_COMPONENTS = [
   AvatarComponent,
   JsonPreviewComponent,
   PanelComponent,
-  PrimeBadgeComponent,
-  PrimeTableComponent,
   Tag,
   TimelineComponent
 ];
@@ -164,7 +159,6 @@ const DATA_DISPLAY_COMPONENTS = [
 const FEEDBACK_OVERLAY_COMPONENTS = [
   BasePopupComponent,
   DialogComponent,
-  PrimeConfirmDialogComponent,
   ProgressSpinnerComponent,
   ToastComponent
 ];
@@ -266,5 +260,6 @@ export const SHARED_UI_COMPONENTS = [
   exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })
 export class SharedModule {}
+
 
 

@@ -3,13 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SharedModule } from '@shared/shared.module';
 import { AvatarComponent } from '@shared/ui/primitives/avatar/avatar';
-import { PrimeConfirmDialogComponent } from '@shared/ui/primitives/confirm-dialog/confirm-dialog';
 import { DialogComponent } from '@shared/ui/primitives/dialog/dialog';
 import { FluidComponent } from '@shared/ui/primitives/fluid/fluid';
 import { IconFieldComponent } from '@shared/ui/primitives/icon-field/icon-field';
 import { MessageComponent } from '@shared/ui/primitives/message/message';
 import { PanelMenuComponent } from '@shared/ui/primitives/panel-menu/panel-menu';
-import { PrimeBadgeComponent } from '@shared/ui/primitives/prime-badge/prime-badge';
 import { RippleComponent } from '@shared/ui/primitives/ripple/ripple';
 import { TieredMenuComponent } from '@shared/ui/primitives/tiered-menu/tiered-menu';
 import { ToastComponent } from '@shared/ui/primitives/toast/toast';
@@ -72,9 +70,7 @@ describe('Shared UI foundation', () => {
       TieredMenuComponent,
       ToastComponent,
       ToolbarComponent,
-      PrimeBadgeComponent,
       PanelMenuComponent,
-      PrimeConfirmDialogComponent,
       FluidComponent,
       IconFieldComponent,
       RippleComponent,
@@ -164,3 +160,4 @@ describe('Shared UI foundation', () => {
     expect(component.advancedCollapsed).toBe(true);
   });
 });
+
