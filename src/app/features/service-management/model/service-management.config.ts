@@ -1,4 +1,3 @@
-import type { BaseCrudPageConfig } from '@shared/ui/patterns/base-crud-page';
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
 import type { FilterPanelField } from '@shared/ui/layout/filter-panel/filter-panel.component';
 import type { KeyValueItem } from '@shared/ui/data-display/key-value-list/key-value-list.component';
@@ -460,16 +459,7 @@ export function buildServiceResourceFormScreen(
       ...listScreen.breadcrumb,
       { label: mode === 'create' ? 'layout.route.create' : 'layout.route.edit' },
     ],
-    crudConfig: {
-      title,
-      description: `serviceManagement.${serviceKey}.${resourceKey}.formDescription`,
-      infoSection: {
-        title: 'serviceManagement.form.ownerTitle',
-        description: 'serviceManagement.form.ownerDescription',
-      },
-      actions: buildFormActions(),
-      form: resourceKind === 'secret' ? buildSecretFormConfig() : buildConfigFormConfig(),
-    },
+    formConfig: resourceKind === 'secret' ? buildSecretFormConfig() : buildConfigFormConfig(),
     model,
   };
 }
@@ -489,7 +479,7 @@ export function buildJobManagementScreen(): JobManagementScreen {
     metrics,
     table: buildJobTable(),
     jobs: JOBS,
-    form: buildJobCrudConfig('create'),
+    formConfig: buildJobFormConfig(),
   };
 }
 
@@ -507,7 +497,7 @@ export function buildJobFormScreen(mode: ServiceFormMode, jobId?: string): JobFo
       { label: 'serviceManagement.jobManagement.breadcrumb', routerLink: '/job-service/jobs' },
       { label: mode === 'create' ? 'layout.route.create' : 'layout.route.edit' },
     ],
-    crudConfig: buildJobCrudConfig(mode),
+    formConfig: buildJobFormConfig(),
     model: job ? jobToFormModel(job) : defaultJobModel(),
   };
 }
@@ -607,12 +597,6 @@ function buildListActions(createLabel = 'create'): ActionToolbarAction[] {
   ];
 }
 
-function buildFormActions(): BaseCrudPageConfig['actions'] {
-  return [
-    { id: 'cancel', label: 'cancel', icon: 'pi pi-arrow-left', kind: 'button', severity: 'secondary' },
-    { id: 'save', label: 'save', icon: 'pi pi-check', kind: 'submit', severity: 'info' },
-  ];
-}
 
 function buildResourceFilters(resourceKind: ServiceResourceKind): FilterPanelField[] {
   return [
@@ -949,20 +933,6 @@ function buildConfigFormConfig(): FormConfig {
   };
 }
 
-function buildJobCrudConfig(mode: ServiceFormMode): BaseCrudPageConfig {
-  const title = mode === 'create' ? 'serviceManagement.jobManagement.createTitle' : 'serviceManagement.jobManagement.editTitle';
-
-  return {
-    title,
-    description: 'serviceManagement.jobManagement.formDescription',
-    infoSection: {
-      title: 'serviceManagement.jobManagement.formOwnerTitle',
-      description: 'serviceManagement.jobManagement.formOwnerDescription',
-    },
-    actions: buildFormActions(),
-    form: buildJobFormConfig(),
-  };
-}
 
 function buildJobFormConfig(): FormConfig {
   return {
@@ -1152,3 +1122,4 @@ function jobStatusVariant(status: JobStatus) {
 function normalizedText(value: unknown): string {
   return String(value ?? '').trim().toLowerCase();
 }
+

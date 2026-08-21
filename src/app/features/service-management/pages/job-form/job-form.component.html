@@ -3,19 +3,32 @@
   [subtitle]="screen.description"
   [breadcrumb]="screen.breadcrumb"
 >
-  <app-base-crud-page
-    [config]="screen.crudConfig"
+  <app-alert
+    variant="info"
+    title="serviceManagement.jobManagement.previewNoticeTitle"
+    message="serviceManagement.jobManagement.previewNoticeDescription"
+    class="mb-4 block"
+  ></app-alert>
+
+  <app-form-input
+    [config]="screen.formConfig"
     [context]="context"
-    [model]="model"
-    (submit)="onSubmit()"
-    (action)="onAction($event)"
+    [initialValue]="model"
+    (formSubmit)="onSubmit()"
     (valueChange)="onValueChange($event)"
   >
-    <app-alert
-      crud-page-before-form
-      variant="info"
-      title="serviceManagement.jobManagement.previewNoticeTitle"
-      message="serviceManagement.jobManagement.previewNoticeDescription"
-    ></app-alert>
-  </app-base-crud-page>
+    <div class="mt-4 flex items-center justify-end gap-2 border-t border-[var(--app-border)] pt-4">
+      <app-button
+        type="button"
+        variant="secondary"
+        label="cancel"
+        (buttonClick)="onCancel()"
+      ></app-button>
+      <app-button
+        type="submit"
+        variant="primary"
+        label="save"
+      ></app-button>
+    </div>
+  </app-form-input>
 </app-page-shell>

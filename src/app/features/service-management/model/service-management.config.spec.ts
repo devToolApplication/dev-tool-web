@@ -22,13 +22,11 @@ describe('service management screen config', () => {
     );
   });
 
-  it('builds create/edit form screens with submit and cancel actions owned by the feature', () => {
+  it('builds create/edit form screens with FormConfig owned by the feature', () => {
     const form = buildServiceResourceFormScreen('job-service', 'config', 'edit', 'job-config-runtime');
 
     expect(form.title).toBe('serviceManagement.job.config.editTitle');
-    expect(form.crudConfig.actions?.map((action) => action.id)).toEqual(['cancel', 'save']);
-    expect(form.crudConfig.actions?.find((action) => action.id === 'save')?.kind).toBe('submit');
-    expect(form.crudConfig.form.sections?.length).toBeGreaterThan(1);
+    expect(form.formConfig.sections?.length).toBeGreaterThan(1);
     expect(form.model).toMatchObject({ id: 'job-config-runtime' });
   });
 
@@ -64,7 +62,7 @@ describe('service management screen config', () => {
     expect(filtered.map((item) => item.id)).toEqual(['job-refresh-model-metrics']);
   });
 
-  it('builds a job management screen with KPIs, job actions and a create/edit form', () => {
+  it('builds a job management screen with KPIs, job actions and formConfig', () => {
     const screen = buildJobManagementScreen();
 
     expect(screen.title).toBe('serviceManagement.jobManagement.title');
@@ -75,6 +73,6 @@ describe('service management screen config', () => {
       ]),
     );
     expect(screen.table.columns.some((column) => column.type === 'actions')).toBe(true);
-    expect(screen.form.actions?.map((action) => action.id)).toEqual(['cancel', 'save']);
+    expect(screen.formConfig.sections?.length).toBeGreaterThan(1);
   });
 });

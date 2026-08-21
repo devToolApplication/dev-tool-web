@@ -1,4 +1,4 @@
-import type { BaseCrudPageConfig } from '@shared/ui/patterns/base-crud-page';
+import type { FormConfig } from '@shared/ui/patterns/form-input/models/form-config.model';
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
 import type { FilterPanelField } from '@shared/ui/layout/filter-panel/filter-panel.component';
 import type { KeyValueItem } from '@shared/ui/data-display/key-value-list/key-value-list.component';
@@ -70,7 +70,7 @@ export interface ServiceResourceFormScreen {
   description: string;
   backLink: string;
   breadcrumb: BreadcrumbItem[];
-  crudConfig: BaseCrudPageConfig;
+  formConfig: FormConfig;
   model: Record<string, unknown>;
 }
 
@@ -113,7 +113,7 @@ export interface JobManagementScreen {
   metrics: ServiceMetric[];
   table: TableConfig;
   jobs: JobRecord[];
-  form: BaseCrudPageConfig;
+  formConfig: FormConfig;
 }
 
 export interface JobFormScreen {
@@ -122,6 +122,7 @@ export interface JobFormScreen {
   description: string;
   backLink: string;
   breadcrumb: BreadcrumbItem[];
-  crudConfig: BaseCrudPageConfig;
+  formConfig: FormConfig;
   model: Record<string, unknown>;
 }
+

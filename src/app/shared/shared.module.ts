@@ -6,7 +6,6 @@ import { RouterModule } from '@angular/router';
 import { AvatarComponent } from './ui/primitives/avatar/avatar';
 import { DialogComponent } from './ui/primitives/dialog/dialog';
 import { Breadcrumb } from './ui/primitives/breadcrumb/breadcrumb';
-import { BaseCrudPageComponent } from './ui/patterns/base-crud-page/base-crud-page.component';
 import { BasePopupComponent } from './ui/primitives/base-popup/base-popup.component';
 import { AutoComplete } from './ui/primitives/auto-complete/auto-complete';
 import { ButtonSpeedDial } from './ui/primitives/button-speed-dial/button-speed-dial';
@@ -222,8 +221,7 @@ const OVERLAY_COMPONENTS = [
 ];
 
 const FORM_EXPERIENCE_COMPONENTS = [
-  BaseCrudPageComponent,
-  FormInput,
+    FormInput,
   ValidationSummaryComponent,
   ConfigTemplateFormComponent,
   FieldGuidePanelComponent
@@ -276,3 +274,4 @@ export const SHARED_UI_COMPONENTS = [
   exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })
 export class SharedModule {}
+
