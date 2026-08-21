@@ -848,6 +848,64 @@ describe('FormInput', () => {
     expect(submitCalledWith).toBeNull();
   });
 
+    it('integrates with projected form-actions correctly: single cancel/save, valid/invalid submit and cancel handling', () => {
+    let submitCalledWith: unknown = null;
+    let cancelCalled = false;
+
+    applyConfig({
+      fields: [
+        { type: 'text', name: 'title', label: 'Title', validation: [{ type: 'required', message: 'Title is required' }] }
+      ]
+    }, { title: '' });
+
+    // Project action buttons directly into host
+    const actionsDiv = document.createElement('div');
+    actionsDiv.setAttribute('form-actions', '');
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.id = 'cancel-test-btn';
+    cancelBtn.onclick = () => { cancelCalled = true; };
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'submit';
+    saveBtn.id = 'save-test-btn';
+    actionsDiv.appendChild(cancelBtn);
+    actionsDiv.appendChild(saveBtn);
+    fixture.nativeElement.querySelector('form').appendChild(actionsDiv);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('#save-test-btn').length).toBe(1);
+    expect(fixture.nativeElement.querySelectorAll('#cancel-test-btn').length).toBe(1);
+
+    cancelBtn.click();
+    expect(cancelCalled).toBe(true);
+
+    component.formSubmit.subscribe((val) => { submitCalledWith = val; });
+
+    // Invalid submit does not emit
+    component.onSubmit();
+    fixture.detectChanges();
+    expect(submitCalledWith).toBeNull();
+    expect(component.validationSummaryItems().length).toBeGreaterThan(0);
+
+    // Valid submit emits once
+    component.engine.fields[0].setValue('Valid Title');
+    fixture.detectChanges();
+    component.onSubmit();
+    expect(submitCalledWith).toEqual({ title: 'Valid Title' });
+
+    // Submitting blocks duplicate submit
+    submitCalledWith = null;
+    component.submitting = true;
+    component.onSubmit();
+    expect(submitCalledWith).toBeNull();
+
+    // Loading blocks submit
+    component.submitting = false;
+    component.loading = true;
+    component.onSubmit();
+    expect(submitCalledWith).toBeNull();
+  });
+
   function applyConfig(config: FormConfig, initialValue: unknown, context: FormContext = { user: null }): void {
     fixture.destroy();
     fixture = TestBed.createComponent(FormInput);
@@ -870,6 +928,7 @@ describe('FormInput', () => {
     return buttonDebugElement.componentInstance as Button;
   }
 });
+
 
 
 
