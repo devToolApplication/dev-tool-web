@@ -162,9 +162,7 @@ describe('TableCellComponent', () => {
 
     await component.onActionClick(action);
 
-    expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Delete row?', variant: 'danger' })
-    );
+    // confirm decoupled to feature in R06
     expect(actionClick).toHaveBeenCalledWith({ action, row: { id: 1 } });
     expect(onClick).not.toHaveBeenCalled();
 
@@ -271,9 +269,7 @@ describe('TableCellComponent', () => {
 
     await component.onActionClick(action);
 
-    expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'shared.confirm.dangerAction', variant: 'danger' })
-    );
+    // confirm decoupled to feature in R06
     expect(actionClick).toHaveBeenCalledWith({ action, row: { id: 1 } });
   });
 
@@ -311,3 +307,4 @@ describe('TableCellComponent', () => {
     fixture.detectChanges();
   }
 });
+

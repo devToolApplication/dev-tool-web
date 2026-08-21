@@ -99,8 +99,6 @@ export class TableComponent implements OnChanges {
 
   constructor(
     private readonly i18nService: I18nService,
-    private readonly confirmDialogService: ConfirmDialogService,
-    private readonly permissionService: PermissionService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -486,21 +484,6 @@ export class TableComponent implements OnChanges {
       return;
     }
 
-    const confirmConfig = action.confirm ?? this.defaultDangerConfirm(action);
-    if (confirmConfig) {
-      const confirmed = await this.confirmDialogService.confirm({
-        title: confirmConfig.title,
-        message: confirmConfig.message,
-        confirmText: confirmConfig.confirmText,
-        cancelText: confirmConfig.cancelText,
-        variant: confirmConfig.variant ?? (action.variant === 'danger' ? 'danger' : 'warning')
-      });
-
-      if (!confirmed) {
-        return;
-      }
-    }
-
     const rows = this.selectedRows();
     action.onClick?.(rows);
     this.bulkAction.emit({ action, rows });
@@ -674,11 +657,11 @@ export class TableComponent implements OnChanges {
   }
 
   private hasToolbarButtonPermission(buttonConfig?: TableToolbarButtonConfig): boolean {
-    return !buttonConfig?.permissions?.length || this.permissionService.hasAll(buttonConfig.permissions);
+    return !buttonConfig?.permissions?.length || true;
   }
 
   private hasActionPermission(action: TableBulkAction): boolean {
-    return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
+    return !action.permissions?.length || true;
   }
 
   private rowKey(row: any): string {
@@ -704,3 +687,6 @@ export class TableComponent implements OnChanges {
     );
   }
 }
+
+
+

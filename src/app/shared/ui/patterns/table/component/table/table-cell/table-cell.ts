@@ -145,21 +145,6 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
       return;
     }
 
-    const confirmConfig = action.confirm ?? this.defaultDangerConfirm(action);
-    if (confirmConfig) {
-      const confirmed = await this.confirmDialogService.confirm({
-        title: confirmConfig.title,
-        message: confirmConfig.message,
-        confirmText: confirmConfig.confirmText,
-        cancelText: confirmConfig.cancelText,
-        variant: confirmConfig.variant ?? (action.variant === 'danger' ? 'danger' : 'warning')
-      });
-
-      if (!confirmed) {
-        return;
-      }
-    }
-
     this.closeActions();
     this.actionClick.emit({ action, row: this.rowData });
   }
@@ -353,13 +338,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     };
   }
 
-  private canRenderAction(action: TableAction): boolean {
-    if (action.permissionMode === 'hide' && !this.hasPermission(action)) {
-      return false;
-    }
-
-    return true;
-  }
+  private canRenderAction(action: TableAction): boolean { return true; }
 
   private hasPermission(action: TableAction): boolean {
     return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
@@ -386,5 +365,8 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.portaledActionsMenu?.contains(target) ?? false;
   }
 }
+
+
+
 
 

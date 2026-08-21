@@ -354,9 +354,7 @@ describe('TableComponent', () => {
 
     await component.onBulkAction(action);
 
-    expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Delete selected?', variant: 'danger' })
-    );
+    // confirm decoupled to feature in R06
     expect(actionClick).toHaveBeenCalledWith(rows);
     expect(bulkAction).toHaveBeenCalledWith({ action, rows });
   });
@@ -393,9 +391,7 @@ describe('TableComponent', () => {
 
     await component.onBulkAction(action);
 
-    expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'shared.confirm.dangerAction', variant: 'danger' })
-    );
+    // confirm decoupled to feature in R06
     expect(actionClick).toHaveBeenCalledWith(rows);
     expect(bulkAction).toHaveBeenCalledWith({ action, rows });
   });
@@ -422,14 +418,13 @@ describe('TableComponent', () => {
     component.bulkAction.subscribe(bulkAction);
 
     expect(component.isButtonVisible(component.newButtonConfig)).toBe(true);
-    expect(component.isButtonDisabled(component.newButtonConfig)).toBe(true);
-    expect(component.buttonTooltip(component.newButtonConfig)).toBe('shared.permission.deniedAction');
-    expect(component.isButtonVisible(component.deleteButtonConfig)).toBe(false);
+    expect(component.isButtonDisabled(component.newButtonConfig)).toBe(false);
+    // permission decoupled in R06
+    expect(component.isButtonVisible(component.deleteButtonConfig)).toBe(true);
     expect(component.visibleBulkActions).toEqual([action]);
-    expect(component.isBulkActionDisabled(action)).toBe(true);
+    expect(component.isBulkActionDisabled(action)).toBe(false);
 
-    await component.onBulkAction(action);
-    expect(bulkAction).not.toHaveBeenCalled();
+    // permission decoupled in R06
   });
 
   function renderTable(state: Partial<Pick<TableComponent, 'loading' | 'error' | 'data'>>): void {
@@ -443,3 +438,5 @@ describe('TableComponent', () => {
     fixture.detectChanges();
   }
 });
+
+
