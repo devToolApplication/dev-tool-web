@@ -20,8 +20,8 @@
           <app-button
             [icon]="collapsedState() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
             [label]="collapsedState() ? 'open' : 'collapse'"
-            severity="secondary"
-            [text]="true"
+            variant="ghost"
+            size="sm"
             (buttonClick)="toggle()"
           ></app-button>
         }

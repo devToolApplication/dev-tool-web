@@ -51,6 +51,15 @@ export class ActionToolbarComponent implements OnChanges {
     return this.moreActions.length > 0;
   }
 
+    buttonVariant(action: ActionToolbarAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
+    switch (action.variant) {
+      case 'primary': return 'primary';
+      case 'danger': return 'destructive';
+      case 'ghost': return 'ghost';
+      default: return 'secondary';
+    }
+  }
+
   severity(action: ActionToolbarAction): 'secondary' | 'success' | 'info' | 'warn' | 'danger' | null {
     switch (action.variant) {
       case 'primary':
@@ -127,3 +136,4 @@ export class ActionToolbarComponent implements OnChanges {
     return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
   }
 }
+
