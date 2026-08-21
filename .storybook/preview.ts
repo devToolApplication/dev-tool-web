@@ -7,14 +7,58 @@ import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 
 import { SharedModule } from '../src/app/shared/shared.module';
 
-if (typeof document !== 'undefined') {
-  document.documentElement.setAttribute('data-theme', 'light');
-  document.documentElement.classList.add('light');
-}
+const customViewports = {
+  ...MINIMAL_VIEWPORTS,
+  mobile: {
+    name: 'Mobile 390px',
+    styles: { width: '390px', height: '844px' },
+  },
+  tablet: {
+    name: 'Tablet 768px',
+    styles: { width: '768px', height: '1024px' },
+  },
+  laptop: {
+    name: 'Laptop 1024px',
+    styles: { width: '1024px', height: '768px' },
+  },
+  desktop: {
+    name: 'Desktop 1440px',
+    styles: { width: '1440px', height: '900px' },
+  }
+};
 
 const preview: Preview = {
   tags: ['autodocs'],
+  globalTypes: {
+    theme: {
+      description: 'Global theme for components',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', icon: 'circlehollow', title: 'Light' },
+          { value: 'dark', icon: 'circle', title: 'Dark' }
+        ],
+        dynamicTitle: true
+      }
+    }
+  },
   decorators: [
+    (storyFn, context) => {
+      const theme = context.globals['theme'] || 'light';
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.add('light');
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      return storyFn();
+    },
     applicationConfig({
       providers: [
         provideHttpClient(),
@@ -29,7 +73,7 @@ const preview: Preview = {
   parameters: {
     layout: 'padded',
     viewport: {
-      viewports: MINIMAL_VIEWPORTS
+      viewports: customViewports
     },
     a11y: {
       test: 'error',
@@ -62,3 +106,4 @@ const preview: Preview = {
 };
 
 export default preview;
+
