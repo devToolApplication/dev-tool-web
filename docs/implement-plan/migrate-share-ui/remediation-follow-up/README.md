@@ -2,38 +2,52 @@
 
 ## Baseline
 
-Reviewed baseline: `master` at `72917b85018f62c9113ab94287a696c779ef021a`.
+Original follow-up baseline: `master` at `72917b85018f62c9113ab94287a696c779ef021a`.
 
-This folder is the single source of truth for the remaining shared-UI remediation work. It supersedes the status assumptions from earlier migration commits. Commit titles such as `R10 final` or `F01 complete` must not be treated as proof of completion; source, tests, quality gates and legacy searches decide completion.
+Latest executable-plan baseline: `master` at `06c7f42ad1ff2ef44d35dae84439f2eb9340c3a7`.
+
+This folder is the single source of truth for the remaining shared-UI remediation work. Commit titles such as `R10 final`, `F01 complete`, `RESOLVED`, a successful build, or a successful Vercel deploy must not be treated as proof of completion. Current source, consumer migration, tests, quality gates, clean-code review and final searches decide completion.
+
+## Mandatory execution document
+
+Before implementing the next remediation change, read:
+
+- `execution-plan-clean-code-2026-08-22.md` — final executable work order containing the original F01-F08 requirements plus mandatory `CLEAN-01`, checklists, pseudo-code, concrete tests, search gates and final Definition of Done.
+
+`CLEAN-01` is required after every phase. A phase that is functionally correct but introduces/retains avoidable god components, dead APIs, fake tests, public `any`, compatibility shims or business policy inside Shared UI is not complete.
 
 ## Non-negotiable rules
 
 1. Rewrite the current implementation in place. Do not create `V2`, `Legacy*`, `New*`, compatibility flags, parallel contracts or long-lived adapters.
 2. When a public contract changes, migrate all consumers and delete the obsolete contract in the same phase.
-3. Do not remove assertions or tests merely to make a phase pass. Replace old tests with tests for the new contract.
+3. Do not remove assertions or tests merely to make a phase pass. Replace old tests with behavior/integration tests for the new contract.
 4. Shared UI must not know application permissions, business confirmation policy, API response models, feature routing workflows, business export/download workflows or feature persistence policy.
 5. Readonly/detail mode must render readable data, never disappear and must not rely on disabled form controls as the default detail presentation.
 6. Internal renderers may exist, but they must not become the public API of `SharedModule`.
-7. A phase is complete only when implementation, consumer migration, deletion, tests, formatting, linting, build and required search gates all pass.
+7. A phase is complete only when implementation, consumer migration, deletion, tests, formatting, real linting, build, CLEAN-01 and required search gates all pass.
+8. Do not use fake fallbacks such as `|| true`, no-op methods, dead compatibility mappers or comments in place of assertions.
+9. Do not start the next phase while the current phase still has a blocker.
 
-## Current status
+## Phase order
 
-| Phase | Goal | Status at baseline |
-|---|---|---|
-| F01 | P0 regressions + real quality gates | FAIL |
-| F02 | Primitive/FormField cleanup | NOT STARTED |
-| F03 | Form engine + page composition + dirty state | NOT STARTED |
-| F04 | Generic presentation-only Table | NOT STARTED |
-| F05 | Complex field decomposition | NOT STARTED |
-| F06 | Overlay/layout/action cleanup | NOT STARTED |
-| F07 | Public API + Storybook + tests + CI | NOT STARTED |
-| F08 | Final repository audit | BLOCKED |
+```text
+F01 -> CLEAN-01
+F02 -> CLEAN-01
+F03 -> CLEAN-01
+F04 -> CLEAN-01
+F05 -> CLEAN-01
+F06 -> CLEAN-01
+F07 -> CLEAN-01
+F08 -> MIGRATION_COMPLETE
+```
 
 Do not start F02 until F01 is genuinely complete.
 
 ## Files
 
-- `issues-open.md` — exhaustive current issue register.
+- `execution-plan-clean-code-2026-08-22.md` — mandatory final execution plan.
+- `review-2026-08-21.md` — detailed review that led to the current remediation pass.
+- `issues-open.md` — issue register; statuses must be verified against current source before being trusted.
 - `f01-p0-regressions-and-quality-gates.md`
 - `f02-primitives-form-field-controls.md`
 - `f03-form-engine-page-dirty-state.md`
@@ -48,18 +62,19 @@ Do not start F02 until F01 is genuinely complete.
 For every phase:
 
 ```text
-READ PHASE
+READ EXECUTION PLAN + PHASE
   -> INSPECT CURRENT MASTER
     -> SEARCH ALL CONSUMERS
       -> BUILD IMPACT MAP
         -> IMPLEMENT ONE VERTICAL SLICE
           -> MIGRATE CONSUMERS
             -> DELETE OLD CONTRACT/CODE
-              -> ADD/UPDATE TESTS
+              -> ADD/UPDATE BEHAVIOR TESTS
                 -> RUN FORMAT/LINT/BUILD/TEST
-                  -> RUN PHASE SEARCH GATES
-                    -> REVIEW DIFF
-                      -> REPORT COMPLETE/INCOMPLETE
+                  -> RUN CLEAN-01
+                    -> RUN PHASE SEARCH GATES
+                      -> REVIEW DIFF
+                        -> REPORT COMPLETE/INCOMPLETE
 ```
 
 ### Reporting contract
@@ -77,13 +92,14 @@ PHASE_INCOMPLETE
 Remaining:
 - exact path / exact issue
 - failed command or search result
+- CLEAN-01 violation if applicable
 ```
 
-Never report complete because the application compiles or because Vercel deploy succeeds.
+Never report complete only because the application compiles or deploys.
 
 ## Global quality gates
 
-Run after every phase that touches application code:
+Run after every phase touching application code:
 
 ```bash
 npm run format:check
@@ -91,6 +107,8 @@ npm run lint
 npm run build
 npm test -- --watch=false
 ```
+
+`npm run lint` must execute a real ESLint + Angular template lint configuration. `tsc --noEmit` is type-checking and does not satisfy the lint requirement.
 
 Also run when shared UI/visual behavior changes:
 
@@ -130,24 +148,27 @@ Shared UI -> feature-specific credential schema
 
 ## Final completion contract
 
-Only report `MIGRATION_COMPLETE` when all are true:
+Only report `MIGRATION_COMPLETE` when all F01-F08 requirements and the complete checklist in `execution-plan-clean-code-2026-08-22.md` pass, including:
 
 ```text
 P0 functional regressions = 0
-+ one action bar contract works for every consumer
-+ readonly/detail mode works for every supported field type
-+ permission/business confirmation logic is outside shared presentation components
-+ lint is real and passing
-+ BaseInput is low-level
-+ FormInput has no DoCheck/fake revision/stringify reactivity hacks
-+ public form/table boundaries are typed
-+ PageShell is structural only
-+ dirty/unsaved guard works
-+ Table is generic/presentation-only/a11y/mobile-ready
-+ Tree and other complex fields are decomposed
-+ Drawer uses Angular CDK overlay/focus/scroll primitives
-+ SharedModule does not export internals
-+ Storybook supports light/dark/mobile
-+ unit + Storybook interaction/a11y gates pass
-+ final legacy/dependency audit passes
++ real projected-action integration tests
++ readonly/detail renderer for every supported field
++ permission/business confirmation outside shared presentation components
++ real ESLint and template lint
++ BaseInput low-level
++ FormInput without DoCheck/revision/stringify hacks
++ typed form/table public boundaries
++ simplified FormConfig
++ verified dirty/unsaved navigation behavior
++ structural PageShell
++ generic presentation-only accessible/mobile Table
++ decomposed Tree and complex fields
++ CDK-based Drawer overlay/focus/scroll
++ clean public SharedModule API
++ light/dark/mobile Storybook coverage
++ isolated tests where practical
++ required CI gates
++ final search audit
++ CLEAN-01 with no dead code/fake tests/compatibility leftovers
 ```
