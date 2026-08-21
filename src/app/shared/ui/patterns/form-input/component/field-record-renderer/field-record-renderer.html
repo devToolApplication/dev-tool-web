@@ -1,49 +1,56 @@
-<app-fieldset [legend]="field.label || 'record'" class="record-fieldset">
-  <div class="record-field" [class.disabled]="field.disabled()">
-    <div class="record-field__header">
-      <span>{{ (recordConfig?.keyLabel || 'key') | translateContent }}</span>
-      <span>{{ (recordConfig?.valueLabel || 'value') | translateContent }}</span>
-      <span></span>
-    </div>
-
-    @for (entry of recordEntries; track $index; let i = $index) {
-      <div class="record-field__row">
-        <app-input-text
-          [label]="recordConfig?.keyLabel || 'key'"
-          [value]="entry.key"
-          [disabled]="field.disabled()"
-          (valueChange)="onRecordKeyChange(i, $any($event))">
-        </app-input-text>
-        <app-input-text
-          [label]="recordConfig?.valueLabel || 'value'"
-          [value]="entry.value"
-          [disabled]="field.disabled()"
-          (valueChange)="onRecordValueChange(i, $any($event))">
-        </app-input-text>
-        <app-button
-          type="button"
-          severity="danger"
-          [label]="'delete'"
-          [disabled]="field.disabled()"
-          (buttonClick)="onRecordRemove(i)">
-        </app-button>
-      </div>
-    }
-
-    @if (!recordEntries.length) {
-      <app-empty-state
-        title="shared.empty.title"
-        [description]="field.label || 'notAvailable'"
-        size="compact"
-      ></app-empty-state>
-    }
-
+<div class="record-field" [class.record-field--disabled]="field.disabled()">
+  <div class="record-field__header">
+    <span class="record-field__label">{{ (field.label || 'record') | translateContent }}</span>
     <app-button
       type="button"
-      severity="secondary"
+      variant="secondary"
+      size="sm"
+      icon="pi pi-plus"
       [label]="(recordConfig?.addButtonLabel || 'addRow') | translateContent"
       [disabled]="field.disabled()"
       (buttonClick)="onRecordAdd()">
     </app-button>
   </div>
-</app-fieldset>
+
+  @if (!recordEntries.length) {
+    <app-empty-state
+      title="shared.empty.title"
+      [description]="field.label || 'notAvailable'"
+      size="compact"
+    ></app-empty-state>
+  } @else {
+    <div class="record-field__table">
+      <div class="record-field__table-head">
+        <span>{{ (recordConfig?.keyLabel || 'key') | translateContent }}</span>
+        <span>{{ (recordConfig?.valueLabel || 'value') | translateContent }}</span>
+        <span></span>
+      </div>
+
+      @for (entry of recordEntries; track $index; let i = $index) {
+        <div class="record-field__row">
+          <app-input-text
+            [placeholder]="recordConfig?.keyLabel || 'key'"
+            [value]="entry.key"
+            [disabled]="field.disabled()"
+            (valueChange)="onRecordKeyChange(i, $any($event))">
+          </app-input-text>
+          <app-input-text
+            [placeholder]="recordConfig?.valueLabel || 'value'"
+            [value]="entry.value"
+            [disabled]="field.disabled()"
+            (valueChange)="onRecordValueChange(i, $any($event))">
+          </app-input-text>
+          <app-button
+            type="button"
+            variant="destructive"
+            size="sm"
+            icon="pi pi-trash"
+            [ariaLabel]="'delete'"
+            [disabled]="field.disabled()"
+            (buttonClick)="onRecordRemove(i)">
+          </app-button>
+        </div>
+      }
+    </div>
+  }
+</div>
