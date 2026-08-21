@@ -54,16 +54,12 @@ import { FieldBlockComponent } from './ui/patterns/form-input/component/field-bl
 import { FieldGroupRenderer } from './ui/patterns/form-input/component/field-group-renderer/field-group-renderer';
 import { FormSectionCardComponent } from './ui/patterns/form-input/component/form-section-card/form-section-card';
 import { FormSectionNavComponent } from './ui/patterns/form-input/component/form-section-nav/form-section-nav';
-import { FormStatusPanelComponent } from './ui/patterns/form-input/component/form-status-panel/form-status-panel';
 import { FieldRecordRenderer } from './ui/patterns/form-input/component/field-record-renderer/field-record-renderer';
 import { FieldRenderer } from './ui/patterns/form-input/component/field-renderer/field-renderer';
 import { FieldSecretMetadataRendererComponent } from './ui/patterns/form-input/component/field-secret-metadata-renderer/field-secret-metadata-renderer';
 import { FieldTreeRendererComponent } from './ui/patterns/form-input/component/field-tree-renderer/field-tree-renderer';
 import { FormInput } from './ui/patterns/form-input/form-input';
 import { JsonFieldBlockComponent } from './ui/patterns/form-input/component/json-field-block/json-field-block';
-import { ReadonlyFieldComponent } from './ui/patterns/form-input/component/readonly-field/readonly-field';
-import { ReadonlySectionComponent } from './ui/patterns/form-input/component/readonly-section/readonly-section';
-import { SmartFormShellComponent } from './ui/patterns/form-input/component/smart-form-shell/smart-form-shell';
 import { StickyFormActionsComponent } from './ui/patterns/form-input/component/sticky-form-actions/sticky-form-actions';
 import { FieldGuidePanelComponent } from './ui/forms/field-guide-panel/field-guide-panel.component';
 import { CardComponent } from './ui/layout/card/card.component';
@@ -236,14 +232,10 @@ const UI = [
   TableComponent
 ];
 const UI_COMPONENT = [
-  SmartFormShellComponent,
   FormSectionNavComponent,
   FormSectionCardComponent,
   FieldBlockComponent,
-  FormStatusPanelComponent,
   StickyFormActionsComponent,
-  ReadonlyFieldComponent,
-  ReadonlySectionComponent,
   JsonFieldBlockComponent,
   FieldRenderer,
   FieldArrayRenderer,
@@ -274,4 +266,5 @@ export const SHARED_UI_COMPONENTS = [
   exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
 })
 export class SharedModule {}
+
 

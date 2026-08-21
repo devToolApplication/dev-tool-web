@@ -1,7 +1,4 @@
 @if (field.visible()) {
-  @if (readonlyMode) {
-    <app-readonly-section [field]="field"></app-readonly-section>
-  } @else {
   <app-section-panel
     [title]="field.label || 'general'"
     [collapsible]="field.fieldConfig.collapsible ?? false"
@@ -21,5 +18,4 @@
       }
     </div>
   </app-section-panel>
-  }
 }

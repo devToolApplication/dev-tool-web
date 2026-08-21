@@ -1,142 +1,107 @@
-<app-fluid>
-  <app-smart-form-shell
-    [title]="config.title"
-    [description]="config.description"
-    [sections]="renderSections()"
-    [validationItems]="submitted() ? validationSummaryItems() : []"
-    [apiError]="apiError"
-    [loading]="loading"
-    [submitting]="submitting"
-    [dirty]="dirty()"
-    [readonly]="readonlyMode()"
-    [showSubmit]="showSubmit"
-    [showStatusPanel]="layout().showStatusPanel !== false"
-    [showValidationSummary]="layout().showValidationSummary !== false"
-    [sectionNavigation]="layout().sectionNavigation ?? 'sidebar'"
-    [density]="layout().density ?? 'comfortable'"
-    [submitDisabled]="submitDisabled()"
-    [submitLabel]="config.actions?.submitLabel ?? 'shared.form.actions.saveChanges'"
-    [cancelLabel]="config.actions?.cancelLabel ?? 'cancel'"
-    [resetLabel]="config.actions?.resetLabel ?? 'reset'"
-    [reviewErrorsLabel]="config.actions?.reviewErrorsLabel ?? 'shared.form.actions.reviewErrors'"
-    [showCancel]="config.actions?.showCancel ?? false"
-    [showReset]="config.actions?.showReset ?? false"
-    [mode]="context.mode"
-    [errorCount]="errorCount()"
-    [warningCount]="warningCount()"
-    (submitRequested)="onSubmit()"
-    (sectionSelect)="onSectionSelect($event)"
-    (summaryItemClick)="onSummaryItemClick($event)"
-    (reviewErrors)="reviewErrors()"
-    (reset)="resetToInitialValue()"
-  >
-    @if (firstRenderSection(); as section) {
-      <app-form-section-card
-        [section]="section"
-        [density]="layout().density ?? 'comfortable'"
-      >
-        <div class="form-input__grid">
-          @for (f of section.fields; track f.path) {
-            @if (f.type === 'array') {
-              <app-field-array-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asArrayField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-array-renderer>
-            } @else if (f.type === 'group') {
-              <app-field-group-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asGroupField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-group-renderer>
-            } @else if (f.type === 'tree') {
-              <app-field-tree-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asTreeField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-tree-renderer>
-            } @else {
-              <app-field-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="f"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-renderer>
-            }
-          }
-        </div>
-      </app-form-section-card>
+<form (ngSubmit)="onSubmit()" novalidate class="form-input">
+  @if (apiError) {
+    <app-alert
+      variant="danger"
+      [message]="apiError"
+      class="mb-4 block"
+    ></app-alert>
+  }
 
+  @if (submitted() && validationSummaryItems().length) {
+    <app-validation-summary
+      [items]="validationSummaryItems()"
+      (itemClick)="onSummaryItemClick($event)"
+      class="mb-4 block"
+    ></app-validation-summary>
+  }
+
+  <div class="form-workspace" [class.form-workspace--with-nav]="showSectionNav()">
+    @if (showSectionNav()) {
+      <app-form-section-nav
+        [sections]="renderSections()"
+        (sectionSelect)="onSectionSelect($event)"
+      ></app-form-section-nav>
     }
 
-    @for (section of remainingRenderSections(); track section.id) {
-      <app-form-section-card
-        [section]="section"
-        [density]="layout().density ?? 'comfortable'"
-      >
-        <div class="form-input__grid">
-          @for (f of section.fields; track f.path) {
-            @if (f.type === 'array') {
-              <app-field-array-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asArrayField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-array-renderer>
-            } @else if (f.type === 'group') {
-              <app-field-group-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asGroupField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-group-renderer>
-            } @else if (f.type === 'tree') {
-              <app-field-tree-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="asTreeField(f)"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-tree-renderer>
-            } @else {
-              <app-field-renderer
-                [attr.data-field-path]="f.path"
-                tabindex="-1"
-                class="w-full h-full"
-                [ngClass]="getCol(f.width)"
-                [field]="f"
-                [submitted]="submitted()"
-                [readonlyMode]="readonlyMode()">
-              </app-field-renderer>
+    <main class="form-workspace__main">
+      @for (section of renderSections(); track section.id) {
+        <app-form-section-card
+          [section]="section"
+          [density]="layout().density ?? 'comfortable'"
+        >
+          <div class="form-input__grid">
+            @for (f of section.fields; track f.path) {
+              @if (f.type === 'array') {
+                <app-field-array-renderer
+                  [attr.data-field-path]="f.path"
+                  class="w-full h-full"
+                  [ngClass]="getCol(f.width)"
+                  [field]="asArrayField(f)"
+                  [submitted]="submitted()"
+                  [readonlyMode]="readonlyMode()"
+                ></app-field-array-renderer>
+              } @else if (f.type === 'group') {
+                <app-field-group-renderer
+                  [attr.data-field-path]="f.path"
+                  class="w-full h-full"
+                  [ngClass]="getCol(f.width)"
+                  [field]="asGroupField(f)"
+                  [submitted]="submitted()"
+                  [readonlyMode]="readonlyMode()"
+                ></app-field-group-renderer>
+              } @else if (f.type === 'tree') {
+                <app-field-tree-renderer
+                  [attr.data-field-path]="f.path"
+                  class="w-full h-full"
+                  [ngClass]="getCol(f.width)"
+                  [field]="asTreeField(f)"
+                  [submitted]="submitted()"
+                  [readonlyMode]="readonlyMode()"
+                ></app-field-tree-renderer>
+              } @else {
+                <app-field-renderer
+                  [attr.data-field-path]="f.path"
+                  class="w-full h-full"
+                  [ngClass]="getCol(f.width)"
+                  [field]="f"
+                  [submitted]="submitted()"
+                  [readonlyMode]="readonlyMode()"
+                ></app-field-renderer>
+              }
             }
-          }
-        </div>
-      </app-form-section-card>
-    }
+          </div>
+        </app-form-section-card>
+      }
+    </main>
+  </div>
 
-    <ng-content></ng-content>
-  </app-smart-form-shell>
-</app-fluid>
+  @if (showSubmit) {
+    <footer class="form-actions mt-6 flex items-center justify-end gap-2 border-t border-[var(--app-border)] pt-4">
+      @if (config?.actions?.showReset) {
+        <app-button
+          type="button"
+          variant="ghost"
+          [label]="config.actions?.resetLabel ?? 'reset'"
+          [disabled]="!dirty()"
+          (buttonClick)="resetToInitialValue()"
+        ></app-button>
+      }
+      @if (config?.actions?.showCancel) {
+        <app-button
+          type="button"
+          variant="secondary"
+          [label]="config.actions?.cancelLabel ?? 'cancel'"
+        ></app-button>
+      }
+      <app-button
+        type="submit"
+        variant="primary"
+        [label]="config?.actions?.submitLabel ?? 'save'"
+        [loading]="submitting"
+        [disabled]="submitDisabled()"
+      ></app-button>
+    </footer>
+  }
+
+  <ng-content></ng-content>
+</form>

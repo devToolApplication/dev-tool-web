@@ -1,8 +1,5 @@
 <div>
   @if (field.visible()) {
-    @if (readonlyMode) {
-      <app-readonly-field [field]="field"></app-readonly-field>
-    } @else {
     @switch (field.type) {
       @case ('text') {
         <app-input-text
@@ -343,7 +340,6 @@
           message="shared.form.unsupportedFieldType"
         ></app-alert>
       }
-    }
     }
   }
 </div>

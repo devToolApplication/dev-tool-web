@@ -1,6 +1,6 @@
 @if (field.visible()) {
   @if (readonlyMode) {
-    <app-readonly-section [field]="field"></app-readonly-section>
+    
   } @else {
   @if (!isTemplateTree) {
     <section class="field-tree">
@@ -634,5 +634,6 @@
 >
   <app-json-viewer [value]="detailNode()"></app-json-viewer>
 </app-drawer>
+
 
 

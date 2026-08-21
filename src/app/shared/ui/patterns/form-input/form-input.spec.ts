@@ -668,7 +668,7 @@ describe('FormInput', () => {
 
     const submitButton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
 
-    expect(fixture.nativeElement.querySelector('app-smart-form-shell')).toBeTruthy();
+    // app-smart-form-shell replaced by pure form template in R03
     expect(fixture.nativeElement.querySelectorAll('app-form-section-card').length).toBe(2);
     expect(fixture.nativeElement.querySelector('app-form-section-nav')).toBeTruthy();
     expect(submitButton.disabled).toBe(false);
@@ -751,7 +751,7 @@ describe('FormInput', () => {
 
     expect(advancedCard).toBeTruthy();
     expect(advancedCard?.collapsed()).toBe(true);
-    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeNull();
 
     advancedCard?.toggleCollapsed();
     fixture.detectChanges();
@@ -825,8 +825,8 @@ describe('FormInput', () => {
       mode: 'view'
     });
 
-    expect(fixture.nativeElement.querySelectorAll('app-readonly-field').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeFalsy();
+    // readonly-field removed in R03
+    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeTruthy();
   });
 
   function applyConfig(config: FormConfig, initialValue: unknown, context: FormContext = { user: null }): void {
@@ -851,3 +851,6 @@ describe('FormInput', () => {
     return buttonDebugElement.componentInstance as Button;
   }
 });
+
+
+

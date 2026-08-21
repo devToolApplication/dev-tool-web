@@ -215,6 +215,10 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     this.syncContextInput();
   }
 
+    showSectionNav(): boolean {
+    return (this.renderSections().length >= 2);
+  }
+
   onSubmit() {
     if (this.submitting || this.loading || this.readonlyMode() || this.config?.actions?.submitDisabled) {
       return;
@@ -431,3 +435,5 @@ export class FormInput implements OnInit, OnChanges, DoCheck {
     });
   }
 }
+
+
