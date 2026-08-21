@@ -159,3 +159,4 @@ export class ActionToolbarComponent implements OnChanges {
     return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
   }
 }
+

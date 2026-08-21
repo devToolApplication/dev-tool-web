@@ -12,7 +12,6 @@ import {
   TemplateRef,
   signal
 } from '@angular/core';
-import { PermissionService } from '@core/auth/permission.service';
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { TableAction, TableBadgeVariant, TableColumn } from '../../../models/table-config.model';
 import { getValueByPath } from '../../../utils/object.util';
@@ -37,7 +36,6 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
 
   constructor(
     private readonly confirmDialogService: ConfirmDialogService,
-    private readonly permissionService: PermissionService,
     private readonly elRef: ElementRef,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
@@ -341,7 +339,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
   private canRenderAction(action: TableAction): boolean { return true; }
 
   private hasPermission(action: TableAction): boolean {
-    return !action.permissions?.length || this.permissionService.hasAll(action.permissions);
+    return !action.permissions?.length;
   }
 
   private appendActionsMenuToBody(): void {
@@ -365,6 +363,8 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.portaledActionsMenu?.contains(target) ?? false;
   }
 }
+
+
 
 
 

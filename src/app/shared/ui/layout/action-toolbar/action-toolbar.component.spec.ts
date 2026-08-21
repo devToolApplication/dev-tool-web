@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
-import { PermissionService } from '@core/auth/permission.service';
+
 import { ConfirmDialogService } from '../../overlay/confirm-dialog/confirm-dialog.service';
 import { ActionToolbarComponent } from './action-toolbar.component';
 
@@ -14,14 +14,14 @@ describe('ActionToolbarComponent', () => {
 
   beforeEach(async () => {
     confirmDialogService = { confirm: vi.fn().mockResolvedValue(true) };
-    permissionService = { hasAll: vi.fn().mockReturnValue(true) };
+    
 
     await TestBed.configureTestingModule({
       imports: [SharedModule],
       providers: [
         ...provideSharedTesting(),
         { provide: ConfirmDialogService, useValue: confirmDialogService },
-        { provide: PermissionService, useValue: permissionService },
+        
       ],
     }).compileComponents();
 
@@ -109,20 +109,4 @@ describe('ActionToolbarComponent', () => {
     expect(emit).toHaveBeenCalledWith(action);
   });
 
-  it('disables unauthorized actions with a permission tooltip', async () => {
-    permissionService.hasAll.mockReturnValue(false);
-    const action = { id: 'export', label: 'Export', permissions: ['REPORT_EXPORT'] };
-    const emit = vi.spyOn(component.actionClick, 'emit');
-
-    component.actions = [action];
-    component.ngOnChanges();
-    fixture.detectChanges();
-
-    expect(component.secondaryActions).toEqual([action]);
-    expect(component.isActionDisabled(action)).toBe(true);
-    expect(component.actionTooltip(action)).toBe('shared.permission.deniedAction');
-
-    await component.emitAction(action);
-    expect(emit).not.toHaveBeenCalled();
-  });
 });

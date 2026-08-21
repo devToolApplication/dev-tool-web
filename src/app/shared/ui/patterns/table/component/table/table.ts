@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TemplateRef, signal } from '@angular/core';
-import { PermissionService } from '@core/auth/permission.service';
-import { BasePageResponse } from '@core/http/base-response.model';
 import { I18nService } from '@core/i18n/i18n.service';
 import {
   TableAction,
@@ -55,7 +53,6 @@ export interface TableCellTemplateContext {
 export class TableComponent implements OnChanges {
   @Input() config!: TableConfig;
   @Input() data: any[] = [];
-  @Input() pageResponse: BasePageResponse<any> | null = null;
   @Input() loading = false;
   @Input() error: string | null = null;
   @Input() totalRecords: number | null = null;
@@ -153,33 +150,18 @@ export class TableComponent implements OnChanges {
     return this.config.scrollable ?? true;
   }
 
-  get resolvedRows(): number {
-    if (this.pageResponse?.metadata?.pageSize != null) {
-      return this.pageResponse.metadata.pageSize;
-    }
-    return this.rows || this.config.rows || 10;
-  }
+  get resolvedRows(): number { return this.rows || this.config.rows || 10; }
 
-  get resolvedTotalRecords(): number {
-    if (this.pageResponse?.metadata?.totalElements != null) {
-      return this.pageResponse.metadata.totalElements;
-    }
-    return this.totalRecords ?? this.data.length;
-  }
+  get resolvedTotalRecords(): number { return this.totalRecords ?? this.data.length; }
 
   get first(): number {
     return this.resolvedCurrentPage * this.resolvedRows;
   }
 
-  get resolvedCurrentPage(): number {
-    if (this.pageResponse?.metadata?.pageNumber != null) {
-      return this.pageResponse.metadata.pageNumber;
-    }
-    return this.currentPage;
-  }
+  get resolvedCurrentPage(): number { return this.currentPage; }
 
   get resolvedData(): any[] {
-    return this.pageResponse?.data ?? this.data;
+    return this.data;
   }
 
   get visibleColumns() {
@@ -257,7 +239,7 @@ export class TableComponent implements OnChanges {
   }
 
   get serverSidePagination(): boolean {
-    return this.pageResponse !== null || this.totalRecords !== null;
+    return this.totalRecords !== null;
   }
 
   get scrollHeight(): string {
@@ -687,6 +669,9 @@ export class TableComponent implements OnChanges {
     );
   }
 }
+
+
+
 
 
 
