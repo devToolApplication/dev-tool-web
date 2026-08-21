@@ -75,33 +75,5 @@
     </main>
   </div>
 
-  @if (showSubmit) {
-    <footer class="form-actions mt-6 flex items-center justify-end gap-2 border-t border-[var(--app-border)] pt-4">
-      @if (config?.actions?.showReset) {
-        <app-button
-          type="button"
-          variant="ghost"
-          [label]="config.actions?.resetLabel ?? 'reset'"
-          [disabled]="!dirty()"
-          (buttonClick)="resetToInitialValue()"
-        ></app-button>
-      }
-      @if (config?.actions?.showCancel) {
-        <app-button
-          type="button"
-          variant="secondary"
-          [label]="config.actions?.cancelLabel ?? 'cancel'"
-        ></app-button>
-      }
-      <app-button
-        type="submit"
-        variant="primary"
-        [label]="config?.actions?.submitLabel ?? 'save'"
-        [loading]="submitting"
-        [disabled]="submitDisabled()"
-      ></app-button>
-    </footer>
-  }
-
-  <ng-content></ng-content>
+  <ng-content select="[form-actions], .form-actions, footer"></ng-content>
 </form>
