@@ -1,83 +1,92 @@
-# F06 — Overlay, Layout and Action Boundaries
+# F06 — Overlay, Layout and Action Architecture
 
 ## Goal
 
-Replace manual overlay/focus DOM management and make layout components structural instead of application-state orchestrators.
+Replace manual DOM overlay infrastructure, clean structural layout responsibilities and ensure generic action UI stays presentation-only.
 
-## Scope
+## F06.1 — Rewrite Drawer with Angular CDK
+
+Current manual patterns to delete:
 
 ```text
-src/app/shared/ui/overlay/drawer/
-src/app/shared/ui/overlay/confirm-dialog/
-src/app/shared/ui/layout/page-shell/
-src/app/shared/ui/layout/section-panel/
-src/app/shared/ui/layout/action-toolbar/
-src/app/shared/ui/layout/filter-panel/
-src/app/shared/ui/layout/card/
+AfterViewChecked append overlay to body
+document.body.appendChild/removeChild
+manual body overflow lock
+document:keydown.tab focus trap
+querySelectorAll focusable elements
+manual trigger focus bookkeeping where CDK can own it
+setTimeout focus initialization
 ```
 
-## 1. Drawer -> Angular CDK
-
-Use Angular CDK primitives already available in the repo:
+Use Angular CDK:
 
 ```text
 Overlay
-Portal
-FocusTrap / cdkTrapFocus
+OverlayRef
+ComponentPortal / TemplatePortal
 BlockScrollStrategy
-Escape/backdrop handling
-focus restoration
+backdropClick
+keydownEvents / escape handling
+FocusTrap / cdkTrapFocus
+FocusMonitor where useful
 ```
 
-Delete manual behavior:
+Expected behavior:
 
 ```text
-AfterViewChecked append overlay
-appendChild(document.body)
-removeChild(document.body)
-document.body.style.overflow
-manual document Tab listener
-querySelectorAll focusable list
-setTimeout initial focus hacks where CDK handles lifecycle
+open/close controlled state
+backdrop close configurable
+Escape close configurable
+scroll blocked while open
+focus enters drawer
+focus stays in drawer
+focus returns to trigger after close
+stacking works with Dialog/Confirm
+SSR/test friendliness improved by no scattered global DOM mutation
 ```
 
-Acceptance:
+## F06.2 — Align Dialog and ConfirmDialog
+
+Avoid separate overlay stacks with different focus/backdrop implementations.
+
+Common infrastructure can provide:
 
 ```text
-open focuses expected first element
-Tab/Shift+Tab stay inside
-Escape closes when allowed
-backdrop closes when allowed
-loading can block close if intended
-close restores trigger focus
-nested/long content remains usable
-mobile drawer behaves correctly
+overlay creation
+backdrop
+focus trap
+scroll strategy
+z-index/stacking
+escape behavior
 ```
 
-## 2. ConfirmDialog
-
-Keep a typed generic confirm service/host with explicit destructive semantics.
-
-Example:
+Confirm config should be typed for presentation:
 
 ```ts
-confirm({
-  title,
-  message,
-  confirmLabel,
-  cancelLabel,
-  destructive,
-  requireText
-})
+interface ConfirmDialogConfig {
+  title?: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  tone?: 'default' | 'warning' | 'destructive';
+  requireText?: string;
+}
 ```
 
-Do not let presentational Table/Toolbar automatically invent business confirmation policy.
+Business decision of *when* to confirm remains feature/application-owned.
 
-## 3. PageShell structural only
+## F06.3 — SectionPanel becomes structural
 
-Remove loading/error/empty/retry state ownership. It should manage width/spacing/regions only.
+Keep:
 
-## 4. SectionPanel structural only
+```text
+title
+subtitle
+collapsible/collapsed
+actions slot
+content slot
+optional density/visual treatment
+```
 
 Remove:
 
@@ -85,53 +94,85 @@ Remove:
 loading
 error
 empty
+emptyTitle
+emptyDescription
 retry
 ```
 
-Keep title/subtitle/actions/collapse only if collapse is genuinely structural.
+## F06.4 — Introduce ContentState
 
-Introduce/use an explicit `ContentState` pattern where common loading/error/empty/content switching is useful.
+Create one public pattern for state composition where it is genuinely reused:
 
-## 5. ActionToolbar
+```ts
+type ContentState =
+  | { kind: 'loading' }
+  | { kind: 'error'; message: string }
+  | { kind: 'empty'; title?: string; description?: string }
+  | { kind: 'content' };
+```
 
-By this phase it should be permission-agnostic and confirmation-agnostic.
+Or an equivalent component API.
 
-Enforce one dominant primary action. Put 3+ secondary actions into overflow as appropriate.
+Do not make every layout component independently implement loading/error/empty/retry.
 
-## 6. Card
+## F06.5 — PageShell/PageHeader final alignment
 
-Remove fake `interactive` behavior unless the component renders/contains actual semantic interactive controls.
+Coordinate with F03:
 
-## 7. FilterPanel
+```text
+PageShell = width/layout
+PageHeader = title/subtitle/breadcrumb/status/page actions
+ContentState = loading/error/empty
+Feature = orchestration
+```
 
-Keep frequent filters visible. Move advanced filters into drawer/panel. Show applied filters as removable chips with Clear All.
+No nested state-shell stack.
+
+## F06.6 — ActionToolbar presentation only
+
+F01 removes auth/confirm. F06 finishes UX behavior:
+
+Rules:
+
+```text
+at most one primary action
+secondary frequent actions visible
+3+ low-frequency actions collapse into More
+More menu keyboard accessible
+Escape closes menu
+focus behavior is explicit
+variants only primary/secondary/ghost/destructive
+```
+
+If a menu needs an overlay, use the common/CDK overlay mechanism, not manual body append.
 
 ## Tests
 
 ```text
-Drawer focus trap/restore/Escape/backdrop
-Confirm destructive behavior
-PageShell structural rendering
-SectionPanel no state orchestration
-ActionToolbar placement and keyboard overflow
-FilterPanel applied-chip behavior
+Drawer focus enter/trap/restore
+Drawer backdrop/Escape behavior
+Drawer scroll strategy
+Dialog/Confirm stacking
+SectionPanel collapse only, no content-state orchestration
+ContentState loading/error/empty/content
+ActionToolbar one-primary and More behavior
+keyboard/a11y tests for overlay menus
 ```
 
 ## Search gates
 
 ```bash
-rg "AfterViewChecked|appendChild\(|body\.style\.overflow|querySelectorAll<HTMLElement>|document:keydown.tab" src/app/shared/ui/overlay
-rg "@Input\(\) loading|@Input\(\) error|@Input\(\) empty|@Output\(\) retry" src/app/shared/ui/layout/page-shell src/app/shared/ui/layout/section-panel
+rg "document\.body|appendChild|removeChild|querySelectorAll|document:keydown\.tab" src/app/shared/ui/overlay
+rg "loading|error|empty|retry" src/app/shared/ui/layout/section-panel
 ```
 
-Expected: manual overlay/focus management removed; PageShell/SectionPanel state orchestration removed.
+Manual overlay DOM matches expected zero except narrowly justified browser helpers outside overlay infrastructure.
 
 ## Definition of Done
 
-- Drawer uses CDK overlay/focus/scroll facilities;
-- manual body portal/focus trap removed;
-- ConfirmDialog generic and typed;
-- PageShell/SectionPanel structural;
-- ActionToolbar business-agnostic;
-- FilterPanel follows visible/advanced/applied-filter UX;
-- tests pass.
+- Drawer/Dialog/Confirm use consistent CDK-backed overlay infrastructure;
+- manual focus trap/body portal/scroll management removed;
+- SectionPanel structural only;
+- ContentState handles reusable state presentation;
+- ActionToolbar is presentation-only and accessible;
+- quality + Storybook gates pass.

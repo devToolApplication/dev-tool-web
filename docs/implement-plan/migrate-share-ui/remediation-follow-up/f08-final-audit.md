@@ -1,14 +1,17 @@
-# F08 — Final Audit and Acceptance
+# F08 — Final Repository Audit
 
 ## Goal
 
-Prove the remediation is complete using repository searches, quality gates and end-to-end acceptance scenarios. Do not create implementation changes in this phase unless an audit failure is found; fix failures in the owning phase and rerun the audit.
+Prove that the migration is complete. F08 contains no major architecture rewrite; if a major issue is found, return to the owning phase.
 
-## 1. Quality gates
+## Preconditions
 
-All must pass:
+F01–F07 must each be `PHASE_COMPLETE` with their own gates passing.
+
+## F08.1 — Re-run all quality gates from clean install/environment
 
 ```bash
+npm ci
 npm run format:check
 npm run lint
 npm run tokens:build
@@ -18,80 +21,99 @@ npm run build-storybook
 npm run test-storybook:ci
 ```
 
-## 2. Compatibility/dead migration audit
+Record exact command results in final report.
+
+## F08.2 — Compatibility and legacy search
 
 ```bash
-rg "\[severity\]|severity=|\[text\]|text=|size=\"small\"|size=\"large\"" src/app/shared
+rg "severity=|\[severity\]|\[text\]|size=\"small\"|size=\"large\"" src
 rg "SmartFormShell|FormStatusPanel|ReadonlyField|ReadonlySection|BaseCrudPage" src
-rg "Legacy|compatibilityMode|useNewUi|V2Component|NewComponent" src/app/shared/ui
+rg "LEGACY_|Legacy|V2|compatibilityMode|legacyMode|useNewUi" src/app/shared
 ```
 
-Expected: zero obsolete shared-UI compatibility paths, except unrelated domain words that are explicitly reviewed.
+Expected migration compatibility matches: zero unless a match is unrelated text and documented.
 
-## 3. Shared dependency audit
+## F08.3 — Shared dependency boundaries
 
 ```bash
-rg "PermissionService|@core/auth|BasePageResponse|@core/http" src/app/shared/ui
+rg "PermissionService" src/app/shared/ui
+rg "BasePageResponse" src/app/shared/ui
+rg "permissionMode|permissionDeniedTooltip|permissions\?" src/app/shared/ui
+rg "ConfirmDialogService" src/app/shared/ui/layout/action-toolbar src/app/shared/ui/patterns/table
 ```
 
-Expected: zero application auth/HTTP model dependencies in shared UI.
+Expected: zero.
 
-## 4. Form-engine audit
+## F08.4 — Form audit
 
 ```bash
-rg "DoCheck|engineRevision|inputRevision|contextSignature|JSON\.stringify" src/app/shared/ui/patterns/form-input
+rg "DoCheck|engineRevision|inputRevision|contextSignature|trackConfigRevision" src/app/shared/ui/patterns/form-input
+rg "showStatusPanel|stickyFooter|disabled-controls|mode.*smart|mode.*wizard" src/app/shared/ui/patterns/form-input
+rg "'1/2'|'1/3'|'1/4'|'1/6'" src/app/shared/ui/patterns/form-input
 rg "\bany\b" src/app/shared/ui/patterns/form-input
-rg "showStatusPanel|stickyFooter|disabled-controls|labelPlacement" src/app/shared/ui/patterns/form-input src/app/features
 ```
 
-Expected: no engine revision hacks; `any` near zero and every remaining occurrence justified; obsolete layout schema removed.
+Expected legacy/reactivity/layout matches: zero.
 
-## 5. Table audit
+Every remaining `any` must be reviewed. Core public API target is zero; unavoidable third-party template/context boundaries must be localized and documented.
 
-```bash
-rg "PermissionService|permissionMode|permissionDeniedTooltip|hasPermission|downloadCsv|document\.body\.appendChild|64rem|tabindex\]\=\"config.rowClickable" src/app/shared/ui/patterns/table
-```
-
-Expected: zero business coupling/manual portal/fake-row interaction/default desktop-only min-width strategy.
-
-Also manually verify:
+Verify runtime scenarios:
 
 ```text
-sortable header uses button
-aria-sort updates
-row navigation uses semantic control
-checkboxes have accessible names
-mobile renders record list
+create form
+edit form
+readonly/detail form
+long sectioned form
+invalid submit focus
+external API error mapping
+dirty navigation guard
+save clears dirty
 ```
 
-## 6. Overlay audit
+## F08.5 — Table audit
 
 ```bash
-rg "AfterViewChecked|appendChild\(|body\.style\.overflow|document:keydown.tab|querySelectorAll<HTMLElement>" src/app/shared/ui/overlay
+rg "PermissionService|BasePageResponse|ConfirmDialogService" src/app/shared/ui/patterns/table
+rg "Blob|createObjectURL|downloadCsv" src/app/shared/ui/patterns/table
+rg "pageResponse" src/app/shared/ui/patterns/table
+rg "\bany\b" src/app/shared/ui/patterns/table
 ```
 
-Expected: zero manual focus-trap/body-portal implementation where CDK should handle it.
-
-## 7. Public API audit
-
-```bash
-rg "FieldRenderer|FieldArrayRenderer|FieldGroupRenderer|FieldRecordRenderer|FieldTreeRenderer|TableCellComponent|TableFilterComponent" src/app/features
-```
-
-Expected: zero feature imports/usages of internal renderers.
-
-Review SharedModule exports manually; internal implementations may be declared but not exported.
-
-## 8. Storybook audit
-
-Verify both themes:
+Verify:
 
 ```text
-light
-dark
+sort keyboard/a11y
+pagination
+selection
+row action
+mobile record list
+empty/error/loading
+feature-owned delete confirm/export
 ```
 
-Verify critical widths:
+## F08.6 — Overlay audit
+
+```bash
+rg "document\.body|appendChild|removeChild|querySelectorAll|document:keydown\.tab" src/app/shared/ui/overlay
+```
+
+Expected manual overlay implementation matches: zero.
+
+Verify Drawer/Dialog/Confirm focus trap, restore, backdrop, Escape and stacking.
+
+## F08.7 — Public API audit
+
+```bash
+rg "FieldRenderer|FieldTreeRenderer|FieldArrayRenderer|FieldGroupRenderer|FieldRecordRenderer|TableCellComponent|TableFilterComponent" src/app/shared/shared.module.ts
+```
+
+Expected internal exports: zero.
+
+Search feature code for forbidden direct internal imports.
+
+## F08.8 — Storybook audit
+
+Verify all critical stories in both Light and Dark at:
 
 ```text
 1440
@@ -100,86 +122,64 @@ Verify critical widths:
 390
 ```
 
-No hard-coded forced light theme in preview.
+No hardcoded light theme.
 
-## 9. Acceptance scenarios
+No new a11y failures.
 
-### Create/Edit Form
+## F08.9 — Final architecture review
 
-- exactly one primary action;
-- persistent labels;
-- validation after interaction/submit;
-- invalid submit focuses first invalid field;
-- API field error appears at correct field;
-- double submit prevented;
-- dirty state activates after edit;
-- successful save clears dirty state;
-- navigation with unsaved changes follows page policy.
-
-### View Form
-
-- no editable disabled-control imitation;
-- text/detail list presentation;
-- Tree remains visible and readable;
-- JSON readable;
-- copy actions remain accessible where intended.
-
-### Table
-
-- sort works mouse + keyboard;
-- selection has labels;
-- actions already resolved by feature permission policy;
-- destructive action confirmation handled by feature/action workflow;
-- no data and no results are distinct;
-- mobile record list is usable without desktop squeeze.
-
-### Drawer
-
-- opens with focus inside;
-- Tab is trapped correctly;
-- Escape/backdrop behavior correct;
-- close restores trigger focus;
-- no body-scroll leak after destroy.
-
-### Themes
-
-- critical Form/Table/Drawer scenarios readable in light/dark;
-- visible focus and sufficient contrast;
-- reduced motion respected where animation exists.
-
-## 10. Final report format
-
-Agent must report:
+Confirm dependency direction:
 
 ```text
-FINAL_STATUS: PASS | FAIL
-HEAD_SHA: <sha>
+Feature
+  -> Page composition
+    -> public Form/Table patterns
+      -> internal renderers
+        -> primitives/data-display
+          -> tokens
+```
 
-Quality gates:
+Reject any reverse coupling to feature/application services.
+
+## Final report template
+
+```markdown
+# Shared UI Final Audit
+
+Baseline: <sha>
+Final HEAD: <sha>
+
+## Quality gates
 - format: PASS/FAIL
 - lint: PASS/FAIL
 - tokens: PASS/FAIL
 - build: PASS/FAIL
 - unit: PASS/FAIL
-- storybook-build: PASS/FAIL
-- storybook-tests: PASS/FAIL
+- storybook build: PASS/FAIL
+- storybook interaction/a11y: PASS/FAIL
 
-Search gates:
-- compatibility: <count>
-- shared auth/http coupling: <count>
-- form revision hacks: <count>
-- table business coupling/manual portal: <count>
-- internal renderer feature imports: <count>
+## Search gates
+- compatibility: PASS/FAIL + matches
+- permission dependencies: PASS/FAIL + matches
+- form legacy/hacks: PASS/FAIL + matches
+- table business dependencies: PASS/FAIL + matches
+- manual overlay: PASS/FAIL + matches
+- internal exports: PASS/FAIL + matches
+- explicit any review: PASS/FAIL + exceptions
 
-Acceptance scenarios:
-- create/edit form: PASS/FAIL
-- readonly/view: PASS/FAIL
-- table desktop/mobile: PASS/FAIL
-- drawer keyboard/focus: PASS/FAIL
-- light/dark: PASS/FAIL
+## Runtime acceptance
+- form create/edit/readonly: PASS/FAIL
+- dirty guard: PASS/FAIL
+- table desktop/mobile/a11y: PASS/FAIL
+- overlays: PASS/FAIL
+- dark/mobile visual check: PASS/FAIL
 
-Remaining issues:
-- exact path + reason
+## Remaining issues
+- NONE
 ```
 
-No `PASS` if any mandatory gate or acceptance scenario fails.
+Only if `Remaining issues = NONE` and all mandatory gates pass may the agent report:
+
+```text
+MIGRATION_COMPLETE
+```

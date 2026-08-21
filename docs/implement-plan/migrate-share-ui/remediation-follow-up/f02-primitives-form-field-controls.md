@@ -1,39 +1,16 @@
-# F02 — Primitive/FormField/Control Cleanup
+# F02 — Primitive and FormField Contract Cleanup
 
 ## Goal
 
-Finish the primitive foundation so field presentation is owned by FormField/FieldBlock and controls focus on value/accessibility behavior.
+Make primitives low-level, predictable and accessible. `FormField`/`FieldBlock` owns field presentation; controls own control behavior.
 
-## Scope
+## Current debt
 
-```text
-src/app/shared/ui/primitives/base-input.ts
-src/app/shared/ui/primitives/input-*/
-src/app/shared/ui/primitives/select*/
-src/app/shared/ui/primitives/password/
-src/app/shared/ui/primitives/date-picker/
-src/app/shared/ui/primitives/check-box/
-src/app/shared/ui/primitives/radio-button/
-src/app/shared/ui/primitives/toggle-*/
-src/app/shared/ui/patterns/form-input/component/field-block/
-```
+`BaseInput` currently owns CVA plus labels, placeholders, help, errors, floating-label mode, tooltip, icons, layout/fluid state and old `small|large` sizing. This duplicates field presentation and makes controls inconsistent.
 
-## 1. Reduce BaseInput
+## F02.1 — Shrink BaseInput
 
-Current presentation concerns to move out:
-
-```text
-label
-helpText
-errorMessage
-invalid presentation
-floating-label variant
-fluid layout
-icon layout
-presentation tooltip
-```
-
-Target BaseInput responsibility:
+Target responsibility:
 
 ```ts
 abstract class BaseInput<T> implements ControlValueAccessor {
@@ -41,117 +18,171 @@ abstract class BaseInput<T> implements ControlValueAccessor {
   disabled: boolean;
   readonly: boolean;
 
-  writeValue(...)
-  registerOnChange(...)
-  registerOnTouched(...)
-  setDisabledState(...)
+  writeValue(value: T | null): void;
+  registerOnChange(fn: ...): void;
+  registerOnTouched(fn: ...): void;
+  setDisabledState(disabled: boolean): void;
 
-  protected commit(...)
-  protected touch()
+  protected commit(value: T | null): void;
+  protected touch(): void;
 }
 ```
 
-Common semantic/accessibility attributes such as `name`, `required`, `aria-describedby`, `inputmode`, `autocomplete` may live on the specific control API when required.
-
-## 2. FormField owns label/help/error
-
-Target shape:
+Move out of BaseInput:
 
 ```text
-FormField
-  label
-  optional/required marker
-  description
-  projected control
-  help OR error
+label
+helpText
+errorMessage
+invalid presentation
+FloatLabelType / floating-label variant
+fluid/layout behavior
+tooltip presentation
+iconClass presentation
+autofocus policy when not genuinely common
 ```
 
-IDs must be deterministic per rendered field and wired to the control:
+Delete old types:
 
 ```text
-control id
-label for
-aria-describedby -> description/help/error ids
+InputSize = 'small' | 'large'
+FloatLabelType = 'in' | 'on' | 'over'
+```
+
+Use standardized size where a control actually needs it:
+
+```ts
+type ControlSize = 'sm' | 'md' | 'lg';
+```
+
+## F02.2 — Make FormField the presentation owner
+
+`FormField`/`FieldBlock` owns:
+
+```text
+input id association
+label
+required/optional indicator
+description
+help/hint
+error text
+aria-describedby
+layout spacing
+```
+
+Suggested contract:
+
+```ts
+interface FormFieldPresentation {
+  inputId: string;
+  label?: string;
+  description?: string;
+  help?: string;
+  error?: string;
+  required?: boolean;
+  optional?: boolean;
+}
+```
+
+Control gets only IDs/ARIA it needs:
+
+```text
+id/name
+describedBy
 aria-invalid
 ```
 
-Do not rely on placeholder as label.
+## F02.3 — Normalize control APIs
 
-## 3. Standardize size vocabulary
-
-Use one shared size vocabulary where appropriate:
+Review:
 
 ```text
-sm
-md
-lg
+InputText
+InputArea
+InputNumber
+Password
+Select
+SelectMulti
+AutoComplete
+Checkbox
+Radio
+DatePicker
+Toggle*
+ColorPicker
+InputMulti
 ```
 
-Remove `small|large` compatibility from new core contracts after consumers migrate.
-
-## 4. Control API normalization
-
-Audit each control for:
+Common behavioral contract:
 
 ```text
-value type
-name
+value
+valueChange / CVA
 disabled
-readonly
-required
+readonly when meaningful
+required when native semantics matter
+name
 autocomplete
-inputmode
-spellcheck
-aria-describedby
-focus-visible
+inputMode
+ariaDescribedBy
+size sm|md|lg only if visually supported
 ```
 
-Avoid broad `any`; use generic option types.
+Do not make every control inherit a giant common API if the property has no semantic meaning.
 
-Example:
+## F02.4 — Select option typing
+
+Replace broad `any[]` options with typed contracts:
 
 ```ts
-export interface SelectOption<T = unknown> {
+export interface SelectOption<T = string | number | boolean | null> {
   label: string;
   value: T;
   disabled?: boolean;
 }
 ```
 
-## 5. Validation timing
-
-Field errors are shown after interaction/blur or failed submit, not immediately on untouched fields.
+Use generics where practical.
 
 ## Tests
 
-For each core primitive:
+For each primary primitive class:
 
 ```text
-CVA write/change/touched
-label association through FormField
-aria-describedby
-aria-invalid
-required/optional
-keyboard interaction
-focus-visible
-readonly/disabled distinction
+CVA write/register/touched
+value emission
+disabled semantics
+readonly semantics where supported
+label association through FormField host
+help/error aria-describedby
+keyboard behavior
+size contract
 ```
+
+Primitive tests should use minimal dependencies, not full `SharedModule` by default.
 
 ## Search gates
 
 ```bash
-rg "FloatLabelType|variant: FloatLabelType|placeholder \|\| ' '" src/app/shared/ui
-rg "@Input\(\) label|@Input\(\) helpText|@Input\(\) errorMessage" src/app/shared/ui/primitives
+rg "FloatLabelType|variant: FloatLabelType|InputSize" src/app/shared/ui
+rg "size=\"small\"|size=\"large\"" src/app
 ```
 
-Any remaining occurrence must be justified as a component-specific requirement, not generic BaseInput presentation.
+Expected old sizing/floating-label contracts: zero.
+
+Review BaseInput for forbidden presentation ownership:
+
+```bash
+rg "label|helpText|errorMessage|tooltip|iconClass|fluid" src/app/shared/ui/primitives/base-input.ts
+```
+
+Expected: none unless explicitly justified as behavioral control state.
 
 ## Definition of Done
 
-- BaseInput is minimal CVA/value state;
-- FormField owns label/help/error presentation;
-- no floating-label default behavior;
-- core controls expose consistent semantic/accessibility attributes;
-- option/value types are generic or `unknown`-based;
-- tests cover CVA and a11y wiring;
-- no compatibility API introduced.
+- BaseInput is a small CVA/control-state abstraction;
+- FormField owns label/help/error/ARIA presentation;
+- controls expose consistent, semantically valid APIs;
+- old floating-label and `small|large` contracts deleted;
+- options no longer use broad `any[]` at public boundary;
+- consumer migration complete;
+- unit + format + lint + build gates pass.

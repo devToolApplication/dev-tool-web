@@ -2,85 +2,100 @@
 
 ## Goal
 
-Stop generic form internals from becoming domain editors. Split Tree/Array/Record/Secret/JSON responsibilities into composable components and pure logic.
+Break god renderers into reusable UI components plus pure logic. Keep Form Engine generic and keep feature/domain-specific credential structures outside generic configuration.
 
-## Scope
+## F05.1 — Tree architecture
 
-```text
-src/app/shared/ui/patterns/form-input/component/field-array-renderer/
-src/app/shared/ui/patterns/form-input/component/field-record-renderer/
-src/app/shared/ui/patterns/form-input/component/field-tree-renderer/
-src/app/shared/ui/patterns/form-input/component/field-secret-metadata-renderer/
-src/app/shared/ui/patterns/form-input/component/json-field-block/
-```
-
-## 1. Tree decomposition
-
-Current Tree renderer owns too many responsibilities: search, filters, selection, picker, mutation, JSON, keyboard, focus, confirmation, caching and presentation.
+Current `FieldTreeRenderer` owns too much: filtering, debounce, selection algorithms, picker state, mutation, keyboard/focus behavior, confirmation, JSON editor and rendering.
 
 Target structure:
 
 ```text
-complex/tree/
-  tree-editor/
+patterns/form-input/complex/tree/
   tree-view/
-  tree-picker/
-  tree-toolbar/
-  tree-selection-panel/
+  tree-editor/
   tree-node/
-  logic/
-    tree-filter.ts
-    tree-selection.ts
-    tree-mutation.ts
-    tree-view-model.ts
+  tree-toolbar/
+  tree-picker/
+  tree-selection-panel/
+
+patterns/form-input/complex/tree/logic/
+  tree-filter.ts
+  tree-selection.ts
+  tree-mutation.ts
+  tree-view-model.ts
 ```
 
-`FieldTreeRenderer` may remain only as an internal form adapter:
+Responsibilities:
 
 ```text
-FieldState <-> TreeEditor/TreeView
+TreeView           -> read-only hierarchy presentation
+TreeEditor         -> editor composition/orchestration
+TreeNode           -> one tree node presentation/keyboard semantics
+TreeToolbar        -> search/filter/view commands
+TreePicker         -> add/replace source selection UI
+TreeSelectionPanel -> selected item summary/actions
+logic/*            -> pure immutable transformations/selectors
 ```
 
-It should not contain tree algorithms.
+`FieldTreeRenderer` may remain only as an internal adapter:
 
-## 2. Extract pure tree logic
+```ts
+field state -> TreeEditor/TreeView input/output contract
+```
 
-Pure functions should handle:
+It must not contain hundreds of lines of business/UI algorithms.
+
+## F05.2 — Tree pure logic tests
+
+Test logic without Angular TestBed:
 
 ```text
-filtering
-flattening
-selection state
-ancestor expansion
-add/remove/replace/move
-preset application
+filter tree by query
+filter selected/leaf mode
+selection state propagation
+leafOnly/all/parentAndChildren strategy
+clear selection
+select descendants
+move/add/remove/replace node
+preserve/drop children replacement behavior
+flatten/view-model paths
 ```
 
-Unit test these without Angular TestBed.
+UI tests then focus on event wiring and accessibility.
 
-## 3. Array/repeater
+## F05.3 — Record -> KeyValueEditor
 
-Create a reusable repeater behavior:
+Create a reusable `KeyValueEditor` pattern/primitives composition.
+
+`FieldRecordRenderer` only bridges:
 
 ```text
-add
-remove
-reorder
-keyboard reorder
-stable item identity
+FieldState<Record<string, unknown>>
+  -> rows [{key,value}]
+  -> KeyValueEditor
+  -> updated record
 ```
 
-Keep array field adapter thin.
+Pure functions should handle row<->record conversion and validation.
 
-## 4. Record -> KeyValueEditor
+Readonly uses `KeyValueList`, not disabled inputs.
 
-Create reusable `KeyValueEditor` responsibility. The form adapter only maps field state to/from it.
+## F05.4 — Secret/Credential editors
 
-## 5. Secret metadata -> Credential editor
+Generic `FormConfig` must not encode OAuth/client secret business schema such as:
 
-Remove OAuth/credential-specific properties from generic `FormConfig`.
+```text
+tokenUrl
+clientId
+clientSecret
+grantType
+scope
+username
+password
+```
 
-Create dedicated editor types/components such as:
+Create explicit editors/contracts where those concepts belong, e.g.:
 
 ```text
 CredentialEditor
@@ -88,64 +103,82 @@ OAuthCredentialEditor
 SecretMetadataEditor
 ```
 
-Generic form schema references a custom field/editor registration instead of knowing `clientId`, `clientSecret`, `tokenUrl`, grant type, username/password fields.
+If generic FormInput must support extensions, use a custom field registry/renderer token rather than hardcoding all feature credential schemas into `FieldConfig`.
 
-## 6. JSON/code editors
+Readonly credential presentation is masked and copy behavior must be explicit/secure.
+
+## F05.5 — JSON and Code editors
 
 Separate:
 
 ```text
 JsonEditor
 CodeEditor
-AdvancedConfigEditor
+JsonViewer
 ```
 
-Formatting/validation/expansion behavior belongs to these editors, not generic TextField config.
+Responsibilities:
 
-## 7. Confirmation boundary
+- JSON syntax/parse validation in JsonEditor;
+- CodeMirror/code language behavior in CodeEditor;
+- readonly display in JsonViewer/code block;
+- FieldRenderer only adapts Form state.
 
-Complex editor generic UI may request a destructive confirmation through a generic overlay primitive, but feature/business policy must not be embedded in field schema.
+Do not bury editable advanced JSON inside Tree renderer; TreeEditor may compose JsonEditor as an optional advanced tool.
+
+## F05.6 — Array repeater
+
+Keep Array renderer thin. Extract pure immutable operations:
+
+```ts
+addItem<T>()
+removeItem<T>()
+moveItem<T>()
+```
+
+UI provides clear add/remove/reorder controls, accessible labels and stable identity.
 
 ## Tests
 
-Tree pure logic:
-
 ```text
-filter
-selection strategies
-add/remove/replace/move
-presets
-ancestor expansion
+Tree pure logic suite
+Tree readonly hierarchy
+Tree editor keyboard/select behaviors
+KeyValueEditor add/remove/edit/duplicate-key validation
+credential editor masking + required semantics
+JSON parse error / valid apply
+Code editor value propagation
+array add/remove/reorder identity
 ```
 
-Component interaction:
+## Search/review gates
+
+Review size/responsibility of:
 
 ```text
-readonly tree view
-editable tree editor
-picker
-keyboard navigation
-advanced JSON apply/reset
-array reorder
-key/value add/remove
-credential editor field mapping
+FieldTreeRenderer
+FieldSecretMetadataRenderer
+FieldRecordRenderer
+JsonFieldBlock
+FieldArrayRenderer
 ```
 
-## Search gates
+Search feature credential terms in generic form config:
 
 ```bash
-rg "clientIdPlaceholder|clientSecretPlaceholder|tokenUrlPlaceholder|grantTypeOptions|usernamePlaceholder|passwordPlaceholder" src/app/shared/ui/patterns/form-input/models
-rg "class FieldTreeRenderer" -n src/app/shared/ui
+rg "tokenUrl|clientId|clientSecret|grantType|username|password|scope" src/app/shared/ui/patterns/form-input/models
 ```
 
-Review class size and responsibility; Tree adapter should be small enough to understand without scrolling through unrelated algorithms.
+Expected generic model business credential matches: zero, unless a consciously documented generic extension boundary requires a neutral type.
 
 ## Definition of Done
 
-- Tree algorithms extracted from Angular renderer;
-- Tree readonly/edit components separated cleanly;
-- array and record use reusable editor responsibilities;
-- credential/OAuth schema removed from generic FormConfig;
-- JSON/code editing split from generic text control behavior;
-- tests cover pure logic and component interaction;
-- form adapters remain internal and thin.
+- Tree god component decomposed;
+- tree algorithms are pure/tested;
+- readonly TreeView reusable;
+- record uses KeyValueEditor;
+- feature/domain credential schema removed from generic FormConfig;
+- JSON/Code editors have clear responsibility;
+- array operations are simple/tested;
+- thin internal field adapters only;
+- quality gates pass.

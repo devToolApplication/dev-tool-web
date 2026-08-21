@@ -2,183 +2,181 @@
 
 ## Goal
 
-Turn Table into a generic presentational pattern with accessible sorting/selection and an intentional mobile transformation.
+Turn Table into a generic, accessible, responsive presentation pattern. Application concerns remain in feature/controller code.
 
-## Scope
-
-```text
-src/app/shared/ui/patterns/table/
-src/app/features/**/*management*/
-src/app/features/**/*list*/
-```
-
-## 1. Generic row contract
+## F04.1 — Define a generic presentation API
 
 Target direction:
 
 ```ts
+export interface TableColumn<T> {
+  id: string;
+  header: string;
+  value: (row: T) => unknown;
+  sortable?: boolean;
+  align?: 'start' | 'center' | 'end';
+  width?: string;
+}
+
+export interface TablePageState {
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export interface TableSort {
+  columnId: string;
+  direction: 'asc' | 'desc';
+}
+
 export class TableComponent<T> {
   @Input() rows: readonly T[] = [];
   @Input() columns: readonly TableColumn<T>[] = [];
   @Input() page?: TablePageState;
   @Input() sort?: TableSort;
+  @Input() selection: readonly T[] = [];
 
-  @Output() sortChange = new EventEmitter<TableSort>();
   @Output() pageChange = new EventEmitter<TablePageState>();
+  @Output() sortChange = new EventEmitter<TableSort>();
   @Output() selectionChange = new EventEmitter<readonly T[]>();
   @Output() actionClick = new EventEmitter<TableActionEvent<T>>();
 }
 ```
 
-Eliminate broad `any` from core row/action/template contracts.
+Exact names may differ; responsibility may not.
 
-## 2. Remove non-presentational concerns
+## F04.2 — Remove application/business responsibilities
 
-Move out of Table:
-
-```text
-CSV Blob/download
-business export decisions
-permission evaluation
-confirmation policy
-HTTP response mapping
-feature route decisions
-business localStorage persistence
-server query orchestration
-```
-
-If density/column visibility persistence is a generic UI preference, place it in an explicit generic preference service outside the component and make it opt-in.
-
-## 3. Delete stale compatibility schema
-
-Remove from shared table contracts after consumer migration:
+Delete from shared Table/TableCell/Table model:
 
 ```text
-severity
-text
-permissions
-permissionMode
-permissionDeniedTooltip
-confirm
-legacy danger/default/warning variant vocabulary
+PermissionService / permission metadata
+ConfirmDialogService / business confirmation policy
+BasePageResponse / HTTP response mapping
+CSV creation / Blob / download
+business export file naming
+business localStorage keys and feature persistence policy
+feature routing/navigation orchestration
+API page-number conversion
+application-specific i18n orchestration if simple translated labels can be supplied
 ```
 
-Use shared Button variants:
+Feature/controller can compose helpers for filters/export/persistence, but the table pattern must only receive presentation state and emit UI intent.
 
-```text
-primary
-secondary
-ghost
-destructive
+Delete stale code such as `changes['pageResponse']` if no `pageResponse` input exists.
+
+## F04.3 — Simplify action contract
+
+Table action presentation model:
+
+```ts
+interface TableAction<T> {
+  id: string;
+  label: string;
+  icon?: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
+  visible?: (row: T) => boolean;
+  disabled?: (row: T) => boolean;
+  tooltip?: (row: T) => string | undefined;
+  placement?: 'primary' | 'more';
+}
 ```
 
-## 4. Accessible sort headers
+No permission strings, severity compatibility, confirm config or callback that executes feature business logic inside the shared component.
 
-Do not attach click directly to `<th>`.
+Prefer `actionClick` event with action ID + row.
 
-Target:
+## F04.4 — Accessibility
+
+Sortable header:
 
 ```html
-<th scope="col" [attr.aria-sort]="ariaSort(column)">
-  <button
-    type="button"
-    (click)="requestSort(column)"
-  >
-    {{ column.header }}
+<th [attr.aria-sort]="ariaSort(column)">
+  <button type="button" (click)="requestSort(column)">
+    ...
   </button>
 </th>
 ```
 
-Keyboard behavior comes from the button.
+Do not use click handler directly on `<th>` as the only interaction.
 
-## 5. Row interactions
+Rows:
 
-Do not make arbitrary `<tr tabindex="0">` act as a fake button.
+- no fake `tabindex="0"` on a whole row merely to simulate navigation;
+- use explicit link/action in a cell when navigation is supported;
+- row selection must not conflict with row action/navigation.
 
-If row navigation is required, render a real anchor/button in a designated primary cell.
+Selection:
 
-If row selection is required, use checkbox/radio semantics with proper accessible labels.
+- select-all checkbox has an accessible name;
+- each row checkbox has an accessible name derived from row identity or configured label.
 
-## 6. Selection labels
+## F04.5 — Mobile presentation
 
-No `label=""` for selection controls.
+Desktop/tablet: semantic `<table>`.
 
-Examples:
+Mobile: record-list/card-row representation using the same column metadata or an explicit mobile field subset.
 
-```text
-Select all visible rows
-Select <row name>
-```
-
-Provide a row accessible-name resolver when necessary.
-
-## 7. Responsive transformation
-
-Desktop/tablet may use semantic `<table>`.
-
-Narrow mobile view should render a record list/card-like row representation based on high-priority columns instead of forcing a 64rem table horizontally.
-
-Avoid card decoration on every field; preserve structured label/value rows.
-
-## 8. State semantics
-
-Keep distinct:
+Do not treat:
 
 ```text
-loading
-error
-no data
-no results after filters
-content
+overflow-x-auto + min-width: 64rem
 ```
 
-Table can render these UI states but must not own the server/business logic that produces them.
+as the primary mobile UX.
 
-## 9. Split TableCell
+## F04.6 — Internal decomposition
 
-TableCell should not:
+Recommended internal pieces:
 
 ```text
-manual appendChild menu to document.body
-manual portal positioning
-confirmation
-permission
-large formatting utility collection
+table/
+  table.component
+  table-header
+  table-row
+  table-cell
+  table-mobile-record
+  table-pagination
 ```
 
-Use reusable primitives/overlay/CDK for action menus and extract formatting helpers where appropriate.
+`TableCell` remains internal and should not be exported from SharedModule.
+
+Formatting/date/badge helpers should be pure functions/pipes where practical.
+
+Avoid direct manual DOM portals for action menus; reuse overlay primitives from F06/CDK where appropriate.
 
 ## Tests
 
 ```text
-generic row typing compile test
-sort click + keyboard
-aria-sort
-selection accessible names
-selection events
-page events
-action events
-no data vs no results
-mobile record-list rendering
-no fake row tabindex
+render typed rows/columns
+sort emits correctly
+aria-sort changes
+pagination emits
+selection/select-all works with accessible labels
+action emits ID + row
+empty/error/loading composition behaves as intended
+mobile record view renders at mobile breakpoint strategy
+no permission/confirm/export business logic in shared table
 ```
 
 ## Search gates
 
 ```bash
-rg "\bany\b|PermissionService|permissionMode|permissionDeniedTooltip|severity|confirm\?|downloadCsv|document\.body\.appendChild|tableMinWidth|64rem" src/app/shared/ui/patterns/table
+rg "PermissionService|BasePageResponse|ConfirmDialogService|permissionMode|permissionDeniedTooltip" src/app/shared/ui/patterns/table
+rg "Blob|createObjectURL|downloadCsv|document\.createElement\('a'\)" src/app/shared/ui/patterns/table
+rg "pageResponse" src/app/shared/ui/patterns/table
+rg "\bany\b" src/app/shared/ui/patterns/table
 ```
 
-Every remaining hit must be reviewed; target is zero for business coupling and near-zero `any` in core contracts.
+Permission/business/stale-response matches: zero. Review every remaining `any`; core public boundaries should be typed.
 
 ## Definition of Done
 
-- generic Table API;
-- no business permission/confirm/export logic;
-- no stale permission/severity compatibility schema;
-- semantic sort buttons + aria-sort;
-- no fake clickable rows;
-- accessible row/select-all labels;
-- mobile record-list transformation;
-- no manual body portal in TableCell;
-- tests and consumer migrations pass.
+- generic presentation-only table API;
+- no app auth/API/business export/confirmation concerns;
+- sortable headers and selection are accessible;
+- no fake focusable row navigation;
+- mobile has a record-list presentation;
+- internal components are not public exports;
+- feature consumers migrated;
+- tests + quality gates pass.

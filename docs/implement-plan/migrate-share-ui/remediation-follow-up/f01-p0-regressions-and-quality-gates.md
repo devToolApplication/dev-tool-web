@@ -2,11 +2,9 @@
 
 ## Goal
 
-Fix current functional regressions first, then make formatting/linting capable of catching migration-quality problems automatically.
+Close all functional P0 issues before any deeper cleanup. F01 is a hard gate for F02.
 
 ## Scope
-
-Primary paths:
 
 ```text
 src/app/shared/ui/patterns/form-input/
@@ -15,82 +13,128 @@ src/app/shared/ui/patterns/table/
 src/app/features/**/pages/*form*/
 package.json
 angular.json
-eslint.config.* / .eslintrc.*
+eslint.config.*
 ```
 
-## 1. Fix readonly rendering regression
+## F01.1 — Fix action projection contract
 
-Current bad pattern:
+Current failure mode:
+
+```html
+<ng-content select="[form-actions], .form-actions, footer"></ng-content>
+```
+
+while feature consumers project a plain `<div>`.
+
+### Target
+
+Use one explicit contract only:
+
+```html
+<ng-content select="[form-actions]"></ng-content>
+```
+
+Every feature consumer must use:
+
+```html
+<app-form-input ...>
+  <footer form-actions class="...">
+    <app-button type="button" variant="secondary" label="cancel" />
+    <app-button type="submit" variant="primary" label="save" />
+  </footer>
+</app-form-input>
+```
+
+### Required tasks
+
+1. Search all `<app-form-input>` consumers.
+2. Identify every projected action container.
+3. Migrate each container to `[form-actions]`.
+4. Ensure the projected submit control remains inside the native `<form>` after projection.
+5. Remove default action rendering from FormInput.
+6. Delete dead `@Input() showSubmit`.
+7. Review and remove obsolete page-action properties from `FormActionConfig` if FormInput no longer owns them: `showCancel`, `showReset`, `submitLabel`, `cancelLabel`, `resetLabel`, page-level loading labels, etc.
+8. Do not introduce a compatibility fallback selector.
+
+### Tests
+
+Create a host/integration test, not only a component-unit test.
+
+Assert:
+
+```text
+exactly 1 Cancel control
+exactly 1 Save/Create submit control
+Cancel invokes feature handler
+Save emits formSubmit exactly once
+invalid form does not emit submit
+submitting/loading prevents duplicate submit
+projected action node is actually present in rendered DOM
+```
+
+Do not replace assertions with comments.
+
+## F01.2 — Fix readonly/detail rendering
+
+### Contract
+
+Readonly/detail mode displays data, not disabled controls and never empty branches.
+
+Recommended internal split:
+
+```text
+FieldRenderer
+  -> FieldEditRenderer
+  -> FieldReadonlyRenderer
+```
+
+Readonly map:
+
+```text
+text/string        -> ValueDisplay
+number/currency    -> ValueDisplay with semantic formatting
+date/datetime      -> ValueDisplay
+boolean            -> semantic text/badge
+select             -> resolved label display
+array              -> read-only repeated values
+record             -> KeyValueList
+json               -> JsonViewer
+code               -> read-only code block
+secret/credential  -> masked detail display
+tree               -> TreeView
+```
+
+### Required Tree fix
+
+Delete empty pattern:
 
 ```html
 @if (readonlyMode) {
-  <!-- empty -->
 } @else {
   ...
 }
 ```
 
-This is forbidden.
+Tree readonly must show hierarchy and meaningful labels/badges without edit actions.
 
-Target behavior:
+### Tests
 
-- readonly detail uses text/data-display components rather than disabled form controls;
-- Tree readonly mode renders a readable tree/detail view;
-- no field disappears only because mode is `view`;
-- readonly data is keyboard/screen-reader readable and not presented as disabled input UI.
-
-Suggested responsibility:
+Add readonly tests for at least:
 
 ```text
-FieldRenderer
-  -> editable control adapter
-  -> readonly value adapter using ValueDisplay/KeyValueList/JsonViewer/TreeView
+text
+number/date/boolean
+record
+json
+tree
+secret/credential
 ```
 
-Tests:
+Assert no editable control for readonly field types where detail renderer exists.
 
-```text
-text readonly renders value
-number/date/boolean readonly renders semantic display
-json readonly renders JsonViewer
-record readonly renders key/value detail
-tree readonly renders nodes
-view mode contains no editable controls for those fields
-```
+## F01.3 — Remove permission and confirmation policy from shared UI
 
-## 2. Remove duplicate action bars
-
-Define one clear ownership model.
-
-Preferred target:
-
-```text
-FormInput owns form semantics/state
-Feature page owns page actions
-```
-
-Therefore:
-
-- remove built-in page-level Cancel/Save orchestration from FormInput, or expose a single action slot with no duplicate default;
-- ensure projected submit buttons submit the same native `<form>` intentionally;
-- if FormInput keeps a default action bar, feature consumers must not project a second one;
-- add explicit cancel output only if FormInput truly owns cancel behavior.
-
-Acceptance:
-
-```text
-Job Form renders exactly one Cancel
-Job Form renders exactly one Save/Create action
-Cancel navigates back
-Save submits once
-submitting state prevents duplicate submit
-```
-
-## 3. Fix permission decoupling correctly
-
-Do not keep permission metadata in presentational shared contracts and replace evaluation with `true`.
-
-ActionToolbar target:
+### ActionToolbar target model
 
 ```ts
 export interface ActionToolbarAction {
@@ -106,57 +150,68 @@ export interface ActionToolbarAction {
 }
 ```
 
-Remove from shared toolbar model/component:
+Delete from ActionToolbar:
+
+```text
+PermissionService
+ConfirmDialogService
+permissions
+permissionMode
+permissionDeniedTooltip
+confirm
+severity()
+legacy variant names default/warning/danger
+hasPermission()
+permission-based canRenderAction()
+default destructive confirmation policy
+```
+
+Feature/application code resolves permissions and performs confirmation before executing a business action.
+
+### Table/TableCell
+
+Delete the same permission metadata and placeholder helpers from table contracts:
 
 ```text
 permissions
 permissionMode
 permissionDeniedTooltip
-PermissionService
-business confirm config/default-danger-confirm policy
-legacy severity/default/warning/danger mappings
-severity()
+hasPermission
+canRenderAction returning true
+return !action.permissions?.length
 ```
 
-Feature code resolves auth and confirmation before constructing actions or inside feature action handlers.
+Table emits presentation action events; feature handler owns confirmation and permissions.
 
-Table/TableCell target follows the same rule:
-
-- no `permissions`, `permissionMode`, `permissionDeniedTooltip` in table presentation contracts;
-- no `hasPermission()` helper in Table or TableCell;
-- feature supplies only visible/enabled actions;
-- destructive confirmation happens in feature/application action handler.
-
-Search gate:
+### Search gate
 
 ```bash
 rg "PermissionService|permissions\?|permissionMode|permissionDeniedTooltip|hasPermission" src/app/shared/ui
 ```
 
-Expected: zero for shared UI business permission behavior.
+Expected: zero business-permission matches.
 
-## 4. Remove placeholder decoupling logic
+Also:
 
-Forbidden examples:
-
-```ts
-private canRenderAction(): boolean { return true; }
-return !action.permissions?.length;
-return !permissions.length || true;
+```bash
+rg "ConfirmDialogService" src/app/shared/ui/layout/action-toolbar src/app/shared/ui/patterns/table
 ```
 
-Delete the obsolete function/contract instead.
+Expected zero.
 
-## 5. Make lint gate real
+## F01.4 — Make lint real
 
-If using Angular ESLint:
+Install/configure a toolchain compatible with Angular 21:
 
-- install compatible `eslint`, `typescript-eslint`, `@angular-eslint/*` packages;
-- add an actual lint target or use ESLint directly;
-- configure TS and Angular-template linting;
-- add rules for unused vars/imports, explicit any in shared UI, equality, template a11y where supported.
+```text
+eslint
+typescript-eslint
+@angular-eslint/eslint-plugin
+@angular-eslint/eslint-plugin-template
+@angular-eslint/template-parser
+```
 
-Suggested scripts:
+Preferred scripts:
 
 ```json
 {
@@ -167,9 +222,20 @@ Suggested scripts:
 }
 ```
 
-Do not keep `ng lint` unless the workspace has a working lint builder target.
+Do not leave `ng lint` unless a working workspace lint target exists and is verified.
 
-## Tests / gates
+Minimum rules:
+
+```text
+unused imports/vars
+prefer const
+eqeqeq
+no accidental explicit-any additions in shared/ui
+Angular template accessibility checks
+component/directive naming conventions
+```
+
+## F01 gate
 
 ```bash
 npm run format
@@ -177,15 +243,20 @@ npm run format:check
 npm run lint
 npm run build
 npm test -- --watch=false
+npm run build-storybook
+npm run test-storybook:ci
 ```
 
 ## Definition of Done
 
-- readonly Tree/content regression fixed;
+- every FormInput consumer uses the single `[form-actions]` contract;
 - exactly one action bar per form page;
-- no permission service/permission metadata inside ActionToolbar/Table shared presentation contracts;
-- no fake permission fallback methods;
-- dead `severity()`/legacy mapper removed;
-- lint command actually executes and passes;
-- formatter fixes inconsistent indentation/newline noise;
-- relevant unit/integration tests pass.
+- tests prove submit/cancel/projection behavior;
+- readonly Tree and supported detail fields render readable content;
+- no permission service/metadata/placeholder permission logic remains in shared presentation contracts;
+- ActionToolbar/Table do not own business confirmation policy;
+- dead legacy severity mapper removed;
+- lint actually executes and passes;
+- format/build/unit/Storybook gates pass.
+
+Only then mark `F01_COMPLETE`.

@@ -1,152 +1,160 @@
-# F07 — Public API, Storybook, Tests and CI Hardening
+# F07 — Public API, Storybook, Tests and CI
 
 ## Goal
 
-Make the cleaned architecture enforceable through public boundaries and automated gates.
+Make the shared UI boundary intentional and enforce it with isolated tests, visual/a11y stories and CI gates.
 
-## Scope
+## F07.1 — Reduce SharedModule public API
 
-```text
-src/app/shared/shared.module.ts
-src/app/shared/ui/**/index.ts
-.storybook/
-src/app/shared/**/*.stories.ts
-src/app/shared/**/*.spec.ts
-package.json
-CI workflow/Jenkins files used by this repo
-```
+Internal components must not be exported to feature code.
 
-## 1. Hide internal renderers
-
-Do not export from SharedModule/public barrels:
+Remove from public exports:
 
 ```text
 FieldRenderer
 FieldArrayRenderer
 FieldGroupRenderer
 FieldRecordRenderer
-FieldTreeRenderer
 FieldSecretMetadataRenderer
-JsonFieldBlock internal adapter
-TableCell
-TableFilter internal implementation
+FieldTreeRenderer
+TableCellComponent
+TableFilterComponent
+other implementation-only form/table helpers
 ```
 
-They may remain declarations/imports required internally by NgModule architecture, but must not be part of public feature API.
+They may remain declared/imported internally while the project is NgModule-based.
 
-Public features should consume patterns like:
+Delete naming/grouping such as:
+
+```text
+LEGACY_PRIMITIVE_COMPONENTS
+```
+
+once migration is complete.
+
+## F07.2 — Target public categories
+
+Public primitives:
+
+```text
+Button
+InputText/InputArea/InputNumber/etc. as genuinely reusable controls
+Select/Checkbox/Radio/Toggle/DatePicker
+Breadcrumb/Tabs/Paginator
+Tooltip where public
+```
+
+Public patterns:
 
 ```text
 FormInput
 Table
-Button/controls
-PageShell/PageHeader
+ContentState
+```
+
+Public layout:
+
+```text
+PageShell
+PageHeader
 Section
+Card
+ActionToolbar
+FilterBar/FilterPanel if retained as reusable pattern
+```
+
+Public overlay:
+
+```text
+Drawer
+Dialog
+ConfirmDialog
+```
+
+Public feedback/data display:
+
+```text
+Alert
+LoadingSkeleton
+EmptyState
+ErrorState
+Badge
+ValueDisplay
+KeyValueList
+JsonViewer
+```
+
+Review duplicate/overlapping primitives and delete obsolete variants instead of exporting both.
+
+## F07.3 — Storybook theme and viewport matrix
+
+Remove hardcoded light initialization.
+
+Add global toolbar/theme handling:
+
+```text
+Light
+Dark
+```
+
+Required viewports:
+
+```text
+1440 desktop
+1024 compact desktop/tablet landscape
+768 tablet
+390 mobile
+```
+
+Critical stories:
+
+```text
+Button/controls states
+Form basic
+Form long sections
+Form errors/validation summary
+Form readonly/detail
+Form mobile
+Table basic
+Table sort/select/actions
+Table empty/error/loading
+Table mobile record list
+Tree readonly/editor
 Drawer/Dialog/Confirm
-Alert/Empty/Error/Loading
-ValueDisplay/KeyValueList/JsonViewer
+ActionToolbar
+ContentState
 ```
 
-## 2. Reduce SharedModule dumping-ground behavior
-
-Separate internal declarations from exported public components. Gradually prefer standalone components when practical, but do not block the remediation on a full standalone migration.
-
-Remove misleading names such as `LEGACY_PRIMITIVE_COMPONENTS` once legacy/compatibility status is gone.
-
-## 3. Test isolation
-
-Do not import entire `SharedModule` in every primitive test.
-
-Prefer minimal test imports/providers for the component under test.
-
-Add architecture tests where useful:
+States per relevant component:
 
 ```text
-shared/ui must not import @core/auth
-shared/ui patterns must not import HTTP response models
-feature code must not import internal form/table renderers
-```
-
-## 4. Storybook themes
-
-Remove forced light-only initialization.
-
-Add toolbar/global decorator for:
-
-```text
-light
-dark
-```
-
-Both themes must be exercised for core stories.
-
-## 5. Viewport matrix
-
-Use at least:
-
-```text
-1440
-1024
-768
-390
-```
-
-Critical Form/Table/Drawer stories must include narrow/mobile behavior.
-
-## 6. Story coverage
-
-Core states:
-
-Form:
-
-```text
-short
-long sections
-validation
-API error
-conditional fields
-submitting
+default
+disabled
 readonly
-mobile
-dark
-```
-
-Table:
-
-```text
-basic
-sort
-selection
-actions
-no data
-no results
-error
 loading
-mobile
-dark
+error
+focus/keyboard
 ```
 
-Overlay:
+## F07.4 — Test isolation
 
-```text
-drawer
-long drawer
-drawer form
-confirm
-destructive confirm
-mobile
+Primitive/pattern tests should import the smallest dependencies possible.
+
+Avoid:
+
+```ts
+imports: [SharedModule]
 ```
 
-## 7. A11y interaction tests
+unless testing SharedModule integration itself.
 
-Keep Storybook a11y test mode at error and add interaction tests for keyboard/focus behavior.
+Use small host components for projection/CVA/accessibility contracts.
 
-## 8. CI hard gate
+## F07.5 — CI workflow
 
-CI should run:
+Required commands:
 
 ```bash
-npm ci
 npm run format:check
 npm run lint
 npm run tokens:build
@@ -156,22 +164,48 @@ npm run build-storybook
 npm run test-storybook:ci
 ```
 
-Do not use `|| true`, `continue-on-error` or equivalent for these quality gates unless explicitly documented as non-blocking for a temporary migration—which is not acceptable for final completion.
+Chromatic may be additional visual regression coverage; it does not replace unit/a11y gates.
+
+Vercel deployment is not a code-quality gate.
+
+Configure branch protection/required checks if repository policy permits:
+
+```text
+format/lint
+build
+unit tests
+storybook build + interaction/a11y
+```
+
+## F07.6 — Architecture/static checks
+
+Add lightweight scripts or ESLint boundaries for rules such as:
+
+```text
+shared/ui cannot import core/auth PermissionService
+shared/ui cannot import HTTP response models
+feature cannot import internal form renderer path
+feature cannot import TableCell/TableFilter internals
+```
+
+A small Node script/ESLint import restriction is acceptable if it reliably fails CI.
 
 ## Search gates
 
 ```bash
-rg "FieldRenderer|FieldArrayRenderer|FieldGroupRenderer|FieldTreeRenderer|TableCellComponent|TableFilterComponent" src/app/features
-rg "data-theme.*light|classList.add\('light'\)" .storybook
-rg "imports: \[SharedModule\]" src/app/shared/ui/primitives src/app/shared/ui/patterns
+rg "FieldRenderer|FieldTreeRenderer|TableCellComponent|TableFilterComponent" src/app/shared/shared.module.ts
+rg "LEGACY_PRIMITIVE_COMPONENTS|Legacy|V2|compatibilityMode" src/app/shared
+rg "data-theme.*light|classList\.add\('light'\)" .storybook
 ```
+
+Internal public-export/legacy/forced-theme target matches: zero.
 
 ## Definition of Done
 
-- internal renderers no longer public to features;
-- SharedModule public surface materially smaller;
-- primitive/pattern tests use appropriate isolation;
-- Storybook supports light/dark + required viewports;
-- critical interaction/a11y stories exist;
-- CI executes all hard gates;
-- architecture tests prevent auth/HTTP/internal-renderer coupling from returning.
+- SharedModule exports only real public API;
+- internal renderers hidden;
+- Storybook light/dark + 1440/1024/768/390 works;
+- critical Form/Table/Tree/Overlay stories exist;
+- primitive tests are isolated;
+- format/lint/build/unit/Storybook/a11y run in CI;
+- architecture import rules prevent regressions.
