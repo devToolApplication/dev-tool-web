@@ -1,7 +1,6 @@
 <div class="input-area">
   @if (contentType === 'json') {
     <div class="input-area__json-shell" [class.input-area__json-shell--invalid]="invalid">
-      <div class="text-sm font-semibold text-[var(--app-text-soft)]">{{ label | translateContent }}</div>
       <div
         class="input-area__json-editor"
         [class.input-area__json-editor--with-zoom]="showZoomButton"
@@ -52,10 +51,9 @@
           [readOnly]="readonly"
           [required]="required"
           [attr.autofocus]="autofocus ? true : null"
-          [attr.placeholder]="(placeholder || ' ') | translateContent"
+          [attr.placeholder]="(placeholder || null) | translateContent"
           [attr.aria-invalid]="invalid || null"
-          autocomplete="off"
-          class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] placeholder-transparent outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60 resize-y overflow-y-auto"
+          class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60 resize-y overflow-y-auto"
           [class.pl-9]="iconClass"
           [class.pr-10]="showZoomButton"
           [class]="styleClass || ''"
@@ -63,23 +61,8 @@
           (blur)="onBlur()"
           (focus)="onFocus()"
         ></textarea>
-        @if (label) {
-          <label
-            [attr.for]="inputId"
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
-            [class.left-9]="iconClass"
-          >{{ label | translateContent }}</label>
-        }
       </div>
     </div>
-  }
-
-  @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
-  }
-
-  @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
   }
 </div>
 
@@ -104,15 +87,11 @@
     <div #dialogJsonContainer class="input-area__json-editor input-area__json-editor--dialog"></div>
   } @else {
     <textarea
-      class="w-full min-h-[65vh] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] outline-none border-[var(--app-input-border)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 resize-y overflow-y-auto"
-      [rows]="rows"
+      class="w-full min-h-[65vh] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25"
       [ngModel]="value"
       (ngModelChange)="onChange($event)"
       [disabled]="disabled"
       [readOnly]="readonly"
-      [required]="required"
-      [attr.placeholder]="(placeholder || null) | translateContent"
-      autocomplete="off"
     ></textarea>
   }
 </app-base-popup>

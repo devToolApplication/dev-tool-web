@@ -1,4 +1,4 @@
-<div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
+<div class="app-select-wrap" [class.app-select-wrap--invalid]="invalid" [class.app-select-wrap--disabled]="disabled">
   <div class="relative">
     @if (iconClass) {
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)] z-1" aria-hidden="true">
@@ -11,7 +11,7 @@
       [disabled]="disabled"
       [attr.aria-invalid]="invalid || null"
       [attr.aria-expanded]="dropdownOpen"
-      class="peer w-full min-h-[2.625rem] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 pr-9 text-left text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
+      class="peer w-full min-h-[2.5rem] rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2 pr-9 text-left text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
       [class.pl-9]="iconClass"
       [ngClass]="styleClass || ''"
       (click)="dropdownOpen = !dropdownOpen"
@@ -27,17 +27,6 @@
     <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]">
       <i class="pi pi-chevron-down text-xs transition-transform duration-150" [class.rotate-180]="dropdownOpen"></i>
     </span>
-
-    @if (label) {
-      <label
-        [attr.for]="inputId"
-        class="absolute transition-all duration-150 pointer-events-none"
-        [ngClass]="(value != null && value !== '') || dropdownOpen || placeholder
-          ? 'left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1'
-          : 'left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)]'"
-        [class.left-9]="iconClass"
-      >{{ label | translateContent }}</label>
-    }
 
     @if (showClear && value != null && value !== '') {
       <button
@@ -81,12 +70,4 @@
       </div>
     }
   </div>
-
-  @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
-  }
-
-  @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
-  }
 </div>
