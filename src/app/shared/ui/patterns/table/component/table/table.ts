@@ -13,7 +13,7 @@ import {
   TableToolbarImportConfig
 } from '../../models/table-config.model';
 import { SelectOption } from '@shared/ui/primitives/select/select';
-import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
+
 import { getValueByPath } from '../../utils/object.util';
 
 export interface TablePageChangeEvent {
@@ -617,5 +617,6 @@ export class TableComponent implements OnChanges {
     );
   }
 }
+
 
 

@@ -1,7 +1,7 @@
 import type { FormConfig } from '@shared/ui/patterns/form-input/models/form-config.model';
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
 import type { FilterPanelField } from '@shared/ui/layout/filter-panel/filter-panel.component';
-import type { KeyValueItem } from '@shared/ui/data-display/key-value-list/key-value-list.component';
+
 import type { BadgeVariant } from '@shared/ui/data-display/badge/badge.component';
 import type { TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 
@@ -125,4 +125,5 @@ export interface JobFormScreen {
   formConfig: FormConfig;
   model: Record<string, unknown>;
 }
+
 

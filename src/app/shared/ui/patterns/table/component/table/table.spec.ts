@@ -12,7 +12,6 @@ describe('TableComponent', () => {
   let fixture: ComponentFixture<TableComponent>;
   let component: TableComponent;
   let confirmDialogService: { confirm: ReturnType<typeof vi.fn> };
-  let permissionService: { hasAll: ReturnType<typeof vi.fn> };
 
   const baseConfig: TableConfig = {
     title: 'Items',
@@ -430,6 +429,7 @@ describe('TableComponent', () => {
     fixture.detectChanges();
   }
 });
+
 
 
 

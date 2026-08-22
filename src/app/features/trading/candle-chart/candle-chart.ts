@@ -32,7 +32,6 @@ import type {
   CandleChartReplayState,
   CandleChartReplayStatusEvent,
   CandleChartRuleEvaluation,
-  CandleChartStatus,
   CandleChartStrategySignal,
   ChartOverlayCategory,
   ChartCandle,
@@ -983,3 +982,4 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     };
   }
 }
+

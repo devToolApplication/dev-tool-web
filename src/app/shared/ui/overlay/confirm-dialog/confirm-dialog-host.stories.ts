@@ -95,10 +95,10 @@ export const Default: Story = {
     `
   }),
   decorators: [
-    (storyFn, context) => {
+    (storyFn) => {
       const story = storyFn();
       // Expose service globally so render callbacks can access it easily in this isolated Storybook environment
-      const injector = (context as any).canvasElement ? null : null;
+      
       return story;
     },
     applicationConfig({
@@ -116,5 +116,6 @@ export const Default: Story = {
     })
   ]
 };
+
 
 

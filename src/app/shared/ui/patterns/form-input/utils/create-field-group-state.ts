@@ -16,7 +16,7 @@ import {
 } from '../models/form-config.model';
 import { createNestedFieldState } from './create-nested-field-state';
 
-export function createFieldGroupState<TFormModel extends object>(
+export function createFieldGroupState(
   path: string,
   config: GroupFieldConfig,
   modelSignal: any,
@@ -118,3 +118,4 @@ export function createFieldGroupState<TFormModel extends object>(
     markAsBlurred
   };
 }
+

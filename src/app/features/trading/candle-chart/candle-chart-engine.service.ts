@@ -18,7 +18,6 @@ import type {
 
 import { resolveCssColor, resolveThemeColor } from '@shared/utils/theme-colors';
 import type {
-  CandleChartConfig,
   CandleChartRange,
   ChartCandle,
   ChartIndicator,
@@ -1078,3 +1077,4 @@ export class CandleChartEngineService {
     return Number.isNaN(numericValue) ? null : numericValue;
   }
 }
+

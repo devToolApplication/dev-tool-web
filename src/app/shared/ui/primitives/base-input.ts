@@ -1,4 +1,4 @@
-import { Directive, EventEmitter, forwardRef, Input, Output, Provider, signal } from '@angular/core';
+import { Directive, EventEmitter, forwardRef, Input, Output, Provider } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export function provideValueAccessor(component: () => unknown): Provider {
@@ -68,3 +68,4 @@ export abstract class BaseInput<T> implements ControlValueAccessor {
     this.select.emit();
   }
 }
+

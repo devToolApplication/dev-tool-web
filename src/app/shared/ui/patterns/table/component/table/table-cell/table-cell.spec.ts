@@ -33,7 +33,6 @@ describe('TableCellComponent', () => {
   let fixture: ComponentFixture<TableCellComponent>;
   let component: TableCellComponent;
   let confirmDialogService: { confirm: ReturnType<typeof vi.fn> };
-  let permissionService: { hasAll: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     confirmDialogService = {
@@ -286,6 +285,7 @@ describe('TableCellComponent', () => {
     fixture.detectChanges();
   }
 });
+
 
 
 

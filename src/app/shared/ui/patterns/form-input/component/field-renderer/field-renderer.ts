@@ -27,7 +27,7 @@ export class FieldRenderer implements OnChanges {
   selectConfig?: SelectFieldConfig;
   textConfig?: TextFieldConfig;
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     if (this.isNumberLike(this.field?.type)) {
       this.numberConfig = this.field.fieldConfig as NumberFieldConfig;
       this.inputMultiConfig = undefined;
@@ -156,3 +156,4 @@ export class FieldRenderer implements OnChanges {
   }
 
 }
+

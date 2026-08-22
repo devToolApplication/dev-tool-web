@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 
 export type SectionPanelVariant = 'default' | 'muted' | 'warning' | 'danger';
 export type SectionPanelDensity = 'compact' | 'comfortable';
@@ -9,7 +9,7 @@ export type SectionPanelDensity = 'compact' | 'comfortable';
   templateUrl: './section-panel.component.html',
   styleUrl: './section-panel.component.css'
 })
-export class SectionPanelComponent {
+export class SectionPanelComponent implements OnInit {
   @Input() title?: string;
   @Input() subtitle?: string;
   @Input() collapsible = false;
@@ -36,3 +36,4 @@ export class SectionPanelComponent {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
 
 @Component({
@@ -13,3 +13,4 @@ export class CheckBox extends BaseInput<boolean>{
   @Input() hideLabel = false;
   @Input() ariaLabel?: string;
 }
+
