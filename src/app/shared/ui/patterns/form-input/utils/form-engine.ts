@@ -107,3 +107,6 @@ function resetFieldState(field: FieldState | ArrayFieldState): void {
   const children = typeof rawChildren === 'function' ? rawChildren() : rawChildren;
   children.flat().forEach((child) => resetFieldState(child));
 }
+
+
+export type FormEngineInstance = ReturnType<typeof createFormEngine>;

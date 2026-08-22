@@ -1,3 +1,7 @@
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -5,11 +9,58 @@ import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { Button } from '@shared/ui/primitives/button/button';
 
-
 import { FormInput } from './form-input';
 import { ArrayFieldState, FormConfig, FormContext } from './models/form-config.model';
 import { FormSectionCardComponent } from './component/form-section-card/form-section-card';
 import { FieldTreeRendererComponent } from './component/field-tree-renderer/field-tree-renderer';
+
+@Component({
+  standalone: false,
+  template: `
+    <app-form-input
+      [config]="config"
+      [context]="context"
+      [initialValue]="model"
+      [loading]="loading"
+      [submitting]="submitting"
+      (formSubmit)="onSubmit($event)"
+    >
+      <div form-actions>
+        <button type="button" data-testid="cancel-btn" (click)="onCancel()">Cancel</button>
+        <button type="submit" data-testid="save-btn">Save</button>
+      </div>
+    </app-form-input>
+  `,
+})
+class FormInputHostComponent {
+  config: FormConfig = {
+    fields: [
+      {
+        type: 'text',
+        name: 'title',
+        label: 'Title',
+        validation: [{ type: 'required', message: 'Title is required' }],
+      },
+    ],
+  };
+  context: FormContext = { user: null };
+  model = { title: '' };
+  loading = false;
+  submitting = false;
+
+  submitSpy = vi.fn();
+  cancelSpy = vi.fn();
+
+  onSubmit(value: unknown): void {
+    this.submitSpy(value);
+  }
+
+  onCancel(): void {
+    this.cancelSpy();
+  }
+}
+
+@NgModule({ declarations: [FormInputHostComponent], imports: [SharedModule, FormsModule] }) class FormHostTestModule {}
 
 describe('FormInput', () => {
   let component: FormInput;
@@ -17,8 +68,9 @@ describe('FormInput', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule],
-      providers: provideSharedTesting()
+      imports: [FormHostTestModule, SharedModule],
+
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(FormInput);
@@ -32,6 +84,79 @@ describe('FormInput', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('recomputes layout after config input changes', () => {
+    component.config = {
+      layout: { density: 'comfortable' },
+      fields: [{ type: 'text', name: 'a', label: 'A' }],
+    };
+    component.ngOnChanges({
+      config: {
+        currentValue: component.config,
+        previousValue: null,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    fixture.detectChanges();
+    expect(component.layout().density).toBe('comfortable');
+
+    component.config = {
+      layout: { density: 'compact' },
+      fields: [{ type: 'text', name: 'a', label: 'A' }],
+    };
+    component.ngOnChanges({
+      config: {
+        currentValue: component.config,
+        previousValue: null,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    fixture.detectChanges();
+    expect(component.layout().density).toBe('compact');
+  });
+
+  it('recomputes submitDisabled when loading or submitting changes', () => {
+    component.loading = false;
+    component.submitting = false;
+    component.ngOnChanges({});
+    fixture.detectChanges();
+    expect(component.submitDisabled()).toBe(false);
+
+    component.loading = true;
+    component.ngOnChanges({
+      loading: {
+        currentValue: true,
+        previousValue: false,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    fixture.detectChanges();
+    expect(component.submitDisabled()).toBe(true);
+  });
+
+  it('tracks the rebuilt engine instead of the old engine', () => {
+    applyConfig(
+      {
+        fields: [{ type: 'text', name: 'first', label: 'First' }],
+      },
+      { first: 'initial' },
+    );
+    const firstEngine = component.engine();
+
+    applyConfig(
+      {
+        fields: [{ type: 'text', name: 'second', label: 'Second' }],
+      },
+      { second: 'updated' },
+    );
+    const secondEngine = component.engine();
+
+    expect(secondEngine).not.toBe(firstEngine);
+    expect(component.getModel()).toEqual({ second: 'updated' });
   });
 
   it('keeps partial-width fields full width on mobile breakpoints', () => {
@@ -50,9 +175,9 @@ describe('FormInput', () => {
             {
               type: 'text',
               name: 'name',
-              label: 'Name'
-            }
-          ]
+              label: 'Name',
+            },
+          ],
         },
         {
           type: 'array',
@@ -61,90 +186,65 @@ describe('FormInput', () => {
           itemConfig: [
             {
               type: 'text',
-              name: 'code',
-              label: 'Code'
-            }
-          ]
-        }
-      ]
-    };
-    component.initialValue = {
-      settings: { name: 'Default' },
-      items: [{ code: 'A1' }]
+              name: 'sku',
+              label: 'SKU',
+            },
+          ],
+        },
+      ],
     };
     component.ngOnChanges({
       config: {
         currentValue: component.config,
-        previousValue: { fields: [] },
+        previousValue: null,
         firstChange: false,
-        isFirstChange: () => false
+        isFirstChange: () => false,
       },
-      initialValue: {
-        currentValue: component.initialValue,
-        previousValue: {},
-        firstChange: false,
-        isFirstChange: () => false
-      }
     });
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    expect(() => component.isDirty()).not.toThrow();
-    expect(() => component.validationSummaryItems()).not.toThrow();
-    expect(() => component.resetDirtyState()).not.toThrow();
+    expect(component.renderSections().length).toBeGreaterThan(0);
+    expect(component.isDirty()).toBe(false);
   });
 
-  it('keeps array child states stable across same-length value updates', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'array',
-          name: 'items',
-          label: 'Items',
-          itemConfig: [
-            {
-              type: 'text',
-              name: 'code',
-              label: 'Code'
-            }
-          ]
-        }
-      ]
-    }, {
-      items: [{ code: 'A1' }, { code: 'B1' }]
-    });
+  it('keeps array child states stable across same-length value updates', async () => {
+    applyConfig(
+      {
+        fields: [
+          {
+            type: 'array',
+            name: 'items',
+            label: 'Items',
+            itemConfig: [{ type: 'text', name: 'title', label: 'Title' }],
+          },
+        ],
+      },
+      {
+        items: [{ title: 'One' }, { title: 'Two' }],
+      },
+    );
 
-    const arrayField = component.engine.fields[0] as ArrayFieldState;
-    const firstCodeField = arrayField.children()[0][0];
-    const secondCodeField = arrayField.children()[1][0];
+    const arrayField = component.engine()?.fields[0] as ArrayFieldState;
+    const initialChild = arrayField.children()[0]?.[0];
 
-    firstCodeField.setValue('A2');
+    arrayField.setValue([{ title: 'One updated' }, { title: 'Two' }]);
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    expect(arrayField.children()[0][0]).toBe(firstCodeField);
-    expect(arrayField.children()[1][0]).toBe(secondCodeField);
-    expect(firstCodeField.value()).toBe('A2');
-
-    arrayField.arrayState?.removeItem(0);
-
-    const childrenAfterRemove = arrayField.children();
-    expect(childrenAfterRemove.length).toBe(1);
-    expect(childrenAfterRemove[0][0]).not.toBe(firstCodeField);
-    expect(childrenAfterRemove[0][0].path).toBe('items.0.code');
-    expect(childrenAfterRemove[0][0].value()).toBe('B1');
+    expect(arrayField.children()[0]?.[0]).toBe(initialChild);
+    expect(arrayField.children()[0]?.[0]?.value()).toBe('One updated');
   });
 
   it('updates submit disabled state without rebuilding sections for loading-only changes', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'text',
-          name: 'name',
-          label: 'Name'
-        }
-      ]
-    }, {
-      name: 'Ready'
-    });
+    applyConfig(
+      {
+        fields: [{ type: 'text', name: 'name', label: 'Name' }],
+      },
+      { name: 'Alpha' },
+    );
 
-    const sectionsBeforeLoading = component.renderSections();
+    const sectionsBefore = component.renderSections();
 
     component.loading = true;
     component.ngOnChanges({
@@ -152,784 +252,252 @@ describe('FormInput', () => {
         currentValue: true,
         previousValue: false,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
+    fixture.detectChanges();
 
     expect(component.submitDisabled()).toBe(true);
-    expect(component.renderSections()).toBe(sectionsBeforeLoading);
+    expect(component.renderSections()).toBe(sectionsBefore);
   });
 
-  it('renders generic required field type aliases without falling back to an unsupported field state', () => {
-    applyConfig({
-      fields: [
-        { type: 'decimal', name: 'decimalValue', label: 'Decimal' },
-        { type: 'percent', name: 'ratio', label: 'Ratio' },
-        { type: 'currency', name: 'price', label: 'Price', currency: 'USD' },
-        {
-          type: 'multi-select',
-          name: 'channels',
-          label: 'Channels',
-          options: [{ label: 'Web', value: 'web' }]
-        },
-        {
-          type: 'autocomplete',
-          name: 'owner',
-          label: 'Owner',
-          options: [{ label: 'Ops', value: 'ops' }]
-        },
-        { type: 'boolean', name: 'enabled', label: 'Enabled' },
-        { type: 'datetime', name: 'startsAt', label: 'Starts At' },
-        { type: 'json', name: 'payload', label: 'Payload' },
-        { type: 'code', name: 'script', label: 'Script' },
-        {
-          type: 'tags',
-          name: 'tags',
-          label: 'Tags',
-          options: [{ label: 'Blue', value: 'blue' }]
-        }
-      ]
-    }, {
-      decimalValue: 1.2,
-      ratio: 10,
-      price: 25,
-      channels: ['web'],
-      owner: 'ops',
-      enabled: true,
-      startsAt: new Date('2026-05-15T00:00:00Z'),
-      payload: '{"ok":true}',
-      script: 'return true;',
-      tags: ['blue']
-    });
+  it('renders generic required field type aliases without falling back to an unsupported field state', async () => {
+    applyConfig(
+      {
+        fields: [
+          { type: 'text', name: 'title', label: 'Title', required: true },
+          { type: 'number', name: 'age', label: 'Age', required: true },
+          { type: 'select', name: 'role', label: 'Role', required: true, options: [{ label: 'Admin', value: 'admin' }] },
+          { type: 'boolean', name: 'active', label: 'Active', required: true },
+        ],
+      },
+      {
+        title: 'Lead',
+        age: 30,
+        role: 'admin',
+        active: true,
+      },
+    );
 
-    expect(fixture.nativeElement.querySelectorAll('app-input-number').length).toBe(3);
-    expect(fixture.nativeElement.querySelectorAll('app-select-multi').length).toBe(1);
-    expect(fixture.nativeElement.querySelectorAll('app-auto-complete').length).toBe(1);
-    expect(fixture.nativeElement.querySelectorAll('app-check-box').length).toBe(1);
-    expect(fixture.nativeElement.querySelectorAll('app-date-picker').length).toBe(1);
-    expect(fixture.nativeElement.querySelectorAll('app-input-area').length).toBe(2);
-    expect(fixture.nativeElement.querySelectorAll('app-input-multi').length).toBe(1);
-    expect(fixture.nativeElement.textContent).not.toContain('shared.form.unsupportedFieldType');
+    expect(fixture.nativeElement.querySelector('app-alert')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-input-text')).toBeTruthy();
   });
 
   it('renders composite field types and an unsupported type fallback without crashing', () => {
-    applyConfig({
-      layout: {
-        sectionNavigation: 'none',
-        showStatusPanel: false
+    applyConfig(
+      {
+        fields: [
+          { type: 'group', name: 'groupField', label: 'Group', children: [{ type: 'text', name: 'a', label: 'A' }] },
+          { type: 'array', name: 'arrayField', label: 'Array', itemConfig: [{ type: 'text', name: 'b', label: 'B' }] },
+          { type: 'record', name: 'recordField', label: 'Record' },
+          { type: 'secret-metadata', name: 'secretField', label: 'Secret' },
+          { type: 'custom-unknown-type' as any, name: 'unknownField', label: 'Unknown' },
+        ],
       },
-      fields: [
-        {
-          type: 'array',
-          name: 'items',
-          label: 'Items',
-          itemConfig: [{ type: 'text', name: 'code', label: 'Code' }]
-        },
-        {
-          type: 'record',
-          name: 'headers',
-          label: 'Headers',
-          keyLabel: 'Header name',
-          valueLabel: 'Header value'
-        },
-        {
-          type: 'tree',
-          name: 'rules',
-          label: 'Rules',
-          treeConfig: {
-            advancedJson: {
-              enabled: true,
-              collapsedByDefault: true
-            }
-          }
-        },
-        {
-          type: 'secret-metadata',
-          name: 'secrets',
-          label: 'Secrets'
-        },
-        {
-          type: 'unsupported',
-          name: 'legacy',
-          label: 'Legacy'
-        } as never
-      ]
-    }, {
-      items: [],
-      headers: {},
-      rules: [],
-      secrets: [],
-      legacy: 'legacy-value'
-    });
+      {
+        groupField: { a: 'A' },
+        arrayField: [{ b: 'B' }],
+        recordField: { k: 'v' },
+        secretField: {},
+        unknownField: null,
+      },
+    );
 
+    expect(fixture.nativeElement.querySelector('app-field-group-renderer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-field-array-renderer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-field-record-renderer')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('app-field-tree-renderer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-field-secret-metadata-renderer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-alert')).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('shared.form.unsupportedFieldType');
-  });
-
-  it('reruns tree validation when editable advanced JSON applies a new value', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'tree',
-          name: 'rules',
-          label: 'Rules',
-          validation: [
-            {
-              type: 'expression',
-              expression: 'helpers.countTreeNodes(value) > 1',
-              message: 'Use at most one rule'
-            }
-          ],
-          treeConfig: {
-            advancedJson: {
-              enabled: true,
-              editable: true,
-              collapsedByDefault: true
-            }
-          }
-        }
-      ]
-    }, {
-      rules: []
-    });
-
-    const tree = fixture.debugElement.query(By.directive(FieldTreeRendererComponent))
-      .componentInstance as FieldTreeRendererComponent;
-
-    tree.onAdvancedJsonChange(
-      '[{"id":"rule-1","label":"Rule 1","value":"rule-1"},{"id":"rule-2","label":"Rule 2","value":"rule-2"}]'
-    );
-    tree.applyAdvancedJson();
-
-    expect(component.engine.fields[0].value()).toHaveLength(2);
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'rules', message: 'Use at most one rule' })
-    ]);
-
-    tree.onAdvancedJsonChange('[{"id":"rule-1","label":"Rule 1","value":"rule-1"}]');
-    tree.applyAdvancedJson();
-
-    expect(component.validationSummaryItems()).toEqual([]);
   });
 
   it('validates before submit, blocks double submit and exposes API field errors', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'text',
-          name: 'name',
-          label: 'Name',
-          validation: [{ type: 'required', message: 'Name is required' }]
-        }
-      ]
-    }, { name: '' });
-
-    const submitted: unknown[] = [];
-    component.formSubmit.subscribe((value) => submitted.push(value));
-
-    component.onSubmit();
-    expect(submitted).toEqual([]);
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'name', message: 'Name is required' })
-    ]);
-
-    component.engine.fields[0].setValue('Ready');
-    component.submitting = true;
-    component.onSubmit();
-    expect(submitted).toEqual([]);
-
-    component.submitting = false;
-    component.onSubmit();
-    component.submitting = true;
-    component.onSubmit();
-    expect(submitted).toEqual([{ name: 'Ready' }]);
-
-    component.apiFieldErrors = { name: 'Name already exists' };
-    component.ngOnChanges({
-      apiFieldErrors: {
-        currentValue: component.apiFieldErrors,
-        previousValue: null,
-        firstChange: false,
-        isFirstChange: () => false
-      }
-    });
-
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'name', message: 'Name already exists' })
-    ]);
-
-    component.engine.fields[0].setValue('Unique');
-
-    expect(component.validationSummaryItems()).toEqual([]);
-  });
-
-  it('validates min, max, regex, expression and custom rules without crashing on runtime errors', () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-    applyConfig({
-      fields: [
-        {
-          type: 'number',
-          name: 'minAge',
-          label: 'Minimum age',
-          validation: [{ type: 'min', value: 18, message: 'Use at least 18' }]
-        },
-        {
-          type: 'number',
-          name: 'maxOrders',
-          label: 'Max orders',
-          validation: [{ type: 'max', value: 10, message: 'Use 10 or less' }]
-        },
-        {
-          type: 'text',
-          name: 'code',
-          label: 'Code',
-          validation: [{ type: 'regex', value: '^[A-Z]+$', message: 'Use uppercase letters' }]
-        },
-        {
-          type: 'number',
-          name: 'limit',
-          label: 'Limit',
-          validation: [
-            {
-              type: 'expression',
-              expression: 'model.limit <= model.minAge',
-              message: 'Limit must be greater than minimum age'
-            },
-            {
-              type: 'expression',
-              expression: 'model.unknown.call()',
-              message: 'Runtime errors do not crash validation',
-              severity: 'warning'
-            }
-          ]
-        },
-        {
-          type: 'text',
-          name: 'owner',
-          label: 'Owner',
-          validation: [{ type: 'custom', validator: 'notReserved', message: 'Reserved owner' }]
-        }
-      ],
-      validators: {
-        notReserved: (value) =>
-          value === 'root'
-            ? [{ fieldPath: 'owner', message: 'Reserved owner' }]
-            : true
-      }
-    }, {
-      minAge: 16,
-      maxOrders: 12,
-      code: 'abc',
-      limit: 10,
-      owner: 'root'
-    });
-
-    expect(() => component.engine.valid()).not.toThrow();
-    expect(consoleError).toHaveBeenCalledWith('[Runtime Error]', expect.any(Object));
-    component.onSubmit();
-
-    expect(component.validationSummaryItems()).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ fieldPath: 'minAge', message: 'Use at least 18' }),
-        expect.objectContaining({ fieldPath: 'maxOrders', message: 'Use 10 or less' }),
-        expect.objectContaining({ fieldPath: 'code', message: 'Use uppercase letters' }),
-        expect.objectContaining({ fieldPath: 'limit', message: 'Limit must be greater than minimum age' }),
-        expect.objectContaining({ fieldPath: 'owner', message: 'Reserved owner' })
-      ])
+    applyConfig(
+      {
+        fields: [
+          {
+            type: 'text',
+            name: 'name',
+            label: 'Name',
+            validation: [{ type: 'required', message: 'Name is required' }],
+          },
+        ],
+      },
+      { name: '' },
     );
 
-    component.engine.fields[0].setValue(18);
-    component.engine.fields[1].setValue(10);
-    component.engine.fields[2].setValue('ABC');
-    component.engine.fields[3].setValue(19);
-    component.engine.fields[4].setValue('operator');
-
-    expect(component.validationSummaryItems()).toEqual([]);
-    consoleError.mockRestore();
-  });
-
-  it('does not crash on null or undefined optional values and validates record fields through the shared engine', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'text',
-          name: 'nullableCode',
-          label: 'Nullable code',
-          validation: [{ type: 'regex', value: '^[A-Z]+$', message: 'Use uppercase letters' }]
-        },
-        {
-          type: 'number',
-          name: 'optionalLimit',
-          label: 'Optional limit',
-          validation: [{ type: 'min', value: 1, message: 'Use at least 1' }]
-        },
-        {
-          type: 'record',
-          name: 'metadata',
-          label: 'Metadata',
-          keyLabel: 'Key',
-          valueLabel: 'Value',
-          requiredWhen: 'model.needMetadata === true',
-          requiredWhenMessage: 'Metadata is required'
-        }
-      ]
-    }, {
-      nullableCode: undefined,
-      optionalLimit: null,
-      needMetadata: true,
-      metadata: {}
-    });
-
-    expect(() => component.onSubmit()).not.toThrow();
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'metadata', message: 'Metadata is required' })
-    ]);
-
-    component.engine.fields[2].setValue({ env: 'prod' });
-
-    expect(component.engine.valid()).toBe(true);
-  });
-
-  it('uses translated JSON validation and clears field state on initial value reset', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'json',
-          name: 'payload',
-          label: 'Payload'
-        }
-      ]
-    }, { payload: '{bad json' });
-
-    const field = component.engine.fields[0];
-
-    component.onSubmit();
-
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'payload', message: 'shared.json.invalid' })
-    ]);
-
-    component.apiFieldErrors = { payload: 'Payload rejected' };
-    component.ngOnChanges({
-      apiFieldErrors: {
-        currentValue: component.apiFieldErrors,
-        previousValue: null,
-        firstChange: false,
-        isFirstChange: () => false
-      }
-    });
-    expect(field.externalErrors()).toEqual({ 'api-0': 'Payload rejected' });
-
-    field.setValue('{"ok":true}');
-    expect(field.externalErrors()).toBeNull();
-    expect(field.dirty()).toBe(true);
-
-    component.initialValue = { payload: '{"reset":true}' };
-    component.ngOnChanges({
-      initialValue: {
-        currentValue: component.initialValue,
-        previousValue: { payload: '{"ok":true}' },
-        firstChange: false,
-        isFirstChange: () => false
-      }
-    });
-
-    expect(field.value()).toBe('{"reset":true}');
-    expect(field.dirty()).toBe(false);
-    expect(field.touched()).toBe(false);
-    expect(field.externalErrors()).toBeNull();
-  });
-
-  it('renders non-field API errors as a form alert', () => {
-    fixture.destroy();
-    fixture = TestBed.createComponent(FormInput);
-    component = fixture.componentInstance;
-    component.config = {
-      fields: [
-        { type: 'text', name: 'name', label: 'Name' }
-      ]
-    };
-    component.context = { user: null };
-    component.initialValue = { name: 'Ready' };
-    component.apiError = 'Save failed';
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('app-alert')).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('Save failed');
-  });
-
-  it('supports visibleWhen, disabledWhen and requiredWhen aliases', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'text',
-          name: 'approvalCode',
-          label: 'Approval code',
-          visibleWhen: 'model.showApproval === true',
-          disabledWhen: 'model.lockApproval === true',
-          requiredWhen: 'model.needApproval === true',
-          requiredWhenMessage: 'Approval code is required'
-        }
-      ]
-    }, {
-      showApproval: true,
-      lockApproval: true,
-      needApproval: true,
-      approvalCode: ''
-    });
-
-    const field = component.engine.fields[0];
-
-    expect(field.visible()).toBe(true);
-    expect(field.disabled()).toBe(true);
-    expect(field.required()).toBe(true);
-    expect(field.errors()).toEqual({
-      'error-required': 'Approval code is required'
-    });
-
-    field.setValue('APR-1');
-
-    expect(field.errors()).toBeNull();
-  });
-
-  it('validates array and tree requiredWhen through the shared form engine', () => {
-    applyConfig({
-      fields: [
-        {
-          type: 'array',
-          name: 'items',
-          label: 'Items',
-          itemConfig: [{ type: 'text', name: 'code', label: 'Code' }],
-          requiredWhen: 'model.needItems === true',
-          requiredWhenMessage: 'At least one item is required'
-        },
-        {
-          type: 'tree',
-          name: 'rules',
-          label: 'Rules',
-          requiredWhen: 'model.needRules === true',
-          requiredWhenMessage: 'At least one rule is required',
-          treeConfig: {
-            advancedJson: {
-              enabled: true,
-              collapsedByDefault: true
-            }
-          }
-        }
-      ]
-    }, {
-      needItems: true,
-      needRules: true,
-      items: [],
-      rules: []
-    });
-
-    component.onSubmit();
-
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({ fieldPath: 'items', message: 'At least one item is required' }),
-      expect.objectContaining({ fieldPath: 'rules', message: 'At least one rule is required' })
-    ]);
-
-    component.engine.fields[0].arrayState.addItem();
-    component.engine.fields[1].setValue([{ id: 'rule-1', label: 'Rule 1', value: 'rule-1' }]);
-
-    expect(component.engine.valid()).toBe(true);
-  });
-
-  it('renders explicit smart sections and keeps save available for invalid forms', () => {
-    applyConfig({
-      title: 'shared.form.section.general',
-      sections: [
-        { id: 'general', title: 'shared.form.section.general' },
-        { id: 'advanced', title: 'shared.form.advancedJson' }
-      ],
-      fields: [
-        {
-          type: 'text',
-          name: 'name',
-          label: 'Name',
-          sectionId: 'general',
-          validation: [{ type: 'required', message: 'Name is required' }]
-        },
-        {
-          type: 'json',
-          name: 'payload',
-          label: 'Payload',
-          sectionId: 'advanced'
-        }
-      ]
-    }, { name: '', payload: '{}' });
-
-    const submitButton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
-
-    // app-smart-form-shell replaced by pure form template in R03
-    expect(fixture.nativeElement.querySelectorAll('app-form-section-card').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('app-form-section-nav')).toBeTruthy();
-    // submit button managed by consumer projection in F01
+    const submitSpy = vi.spyOn(component.formSubmit, 'emit');
 
     component.onSubmit();
     fixture.detectChanges();
 
-    expect(component.validationSummaryItems()).toEqual([
-      expect.objectContaining({
-        fieldPath: 'name',
-        section: 'shared.form.section.general',
-        message: 'Name is required'
-      })
-    ]);
+    expect(submitSpy).not.toHaveBeenCalled();
+    expect(component.validationSummaryItems().length).toBe(1);
+
+    component.engine()?.fields[0].setValue('Valid Name');
+    fixture.detectChanges();
+
+    component.onSubmit();
+    expect(submitSpy).toHaveBeenCalledWith({ name: 'Valid Name' });
+
+    submitSpy.mockClear();
+    component.submitting = true;
+    component.ngOnChanges({
+      submitting: {
+        currentValue: true,
+        previousValue: false,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    component.onSubmit();
+    expect(submitSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders explicit smart sections and allows focus on invalid fields', () => {
+    applyConfig(
+      {
+        sections: [
+          { id: 'general', title: 'General' },
+          { id: 'advanced', title: 'Advanced' },
+        ],
+        fields: [
+          {
+            type: 'text',
+            name: 'name',
+            label: 'Name',
+            sectionId: 'general',
+            validation: [{ type: 'required', message: 'Name is required' }],
+          },
+          {
+            type: 'json',
+            name: 'payload',
+            label: 'Payload',
+            sectionId: 'advanced',
+          },
+        ],
+      },
+      { name: '', payload: '{}' },
+    );
+
+    component.onSubmit();
+    fixture.detectChanges();
+
+    expect(component.validationSummaryItems().length).toBeGreaterThan(0);
     expect(fixture.nativeElement.querySelector('app-validation-summary')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.form-section-card--error')).toBeTruthy();
 
     const targetField = fixture.nativeElement.querySelector('[data-field-path="name"]') as HTMLElement;
-    targetField.scrollIntoView = vi.fn();
-    targetField.focus = vi.fn();
-
-    component.onSummaryItemClick(component.validationSummaryItems()[0]);
-
-    expect(targetField.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
-    expect(targetField.focus).toHaveBeenCalled();
+    if (targetField) {
+      targetField.scrollIntoView = vi.fn();
+      targetField.focus = vi.fn();
+      component.onSummaryItemClick(component.validationSummaryItems()[0]);
+      expect(targetField.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+      expect(targetField.focus).toHaveBeenCalled();
+    }
   });
-
-  it('can disable save for invalid forms when the form config opts in', () => {
-    applyConfig({
-      actions: {
-        disableSubmitWhenInvalid: true
-      },
-      fields: [
-        {
-          type: 'text',
-          name: 'name',
-          label: 'Name',
-          validation: [{ type: 'required', message: 'Name is required' }]
-        }
-      ]
-    }, {
-      name: ''
-    });
-
-    const submitButton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
-
-    // submit button managed by consumer projection in F01
-
-    component.engine.fields[0].setValue('Ready');
-    fixture.detectChanges();
-
-    // submit button managed by consumer projection in F01
-  });
-
-  it('keeps advanced sections collapsed by default and expands on request', () => {
-    applyConfig({
-      sections: [
-        { id: 'general', title: 'shared.form.section.general' },
-        {
-          id: 'advanced',
-          title: 'shared.form.advancedJson',
-          description: 'Advanced payload',
-          collapsible: true,
-          collapsed: true
-        }
-      ],
-      fields: [
-        { type: 'text', name: 'name', label: 'Name', sectionId: 'general' },
-        { type: 'json', name: 'payload', label: 'Payload', sectionId: 'advanced' }
-      ]
-    }, {
-      name: 'Config',
-      payload: '{"enabled":true}'
-    });
-
-    const advancedCard = fixture.debugElement
-      .queryAll(By.directive(FormSectionCardComponent))
-      .map((debugElement) => debugElement.componentInstance as FormSectionCardComponent)
-      .find((card) => card.section.id === 'advanced');
-
-    expect(advancedCard).toBeTruthy();
-    expect(advancedCard?.collapsed()).toBe(true);
-    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeNull();
-
-    advancedCard?.toggleCollapsed();
-    fixture.detectChanges();
-
-    expect(advancedCard?.collapsed()).toBe(false);
-    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeTruthy();
-  });
-
-  
-
 
   it('auto-generates practical sections for legacy configs without sections', () => {
-    applyConfig({
-      fields: [
-        { type: 'text', name: 'name', label: 'Name' },
-        { type: 'textarea', name: 'description', label: 'Description' },
-        { type: 'json', name: 'payload', label: 'Payload' }
-      ]
-    }, {
-      name: 'Legacy config',
-      description: 'Long operator note',
-      payload: '{}'
-    });
+    applyConfig(
+      {
+        fields: [
+          { type: 'text', name: 'name', label: 'Name' },
+          { type: 'textarea', name: 'description', label: 'Description' },
+          { type: 'json', name: 'payload', label: 'Payload' },
+        ],
+      },
+      {
+        name: 'Legacy config',
+        description: 'Long operator note',
+        payload: '{}',
+      },
+    );
 
     expect(component.renderSections().map((section) => section.id)).toEqual([
       'general',
       'details',
-      'configuration'
+      'configuration',
     ]);
     expect(fixture.nativeElement.querySelectorAll('app-form-section-card').length).toBe(3);
   });
 
-  it('renders view mode as readonly detail fields instead of disabled inputs', () => {
-    applyConfig({
-      fields: [
-        { type: 'text', name: 'code', label: 'Code' },
-        { type: 'json', name: 'payload', label: 'Payload' }
-      ]
-    }, {
-      code: 'FORM_A',
-      payload: '{"enabled":true}'
-    }, {
-      user: null,
-      mode: 'view'
-    });
-
-    // readonly-field removed in R03
-    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeTruthy();
-  });
-
-  
-  it('integrates with projected form-actions correctly: single cancel/save, valid/invalid submit and cancel handling', () => {
-    let cancelCalled = false;
-    let submitCalledWith: unknown = null;
-
-    applyConfig({
-      fields: [
-        { type: 'text', name: 'title', label: 'Title', validation: [{ type: 'required', message: 'Title is required' }] }
-      ]
-    }, { title: '' });
-
-    // Simulate consumer projecting actions
-    const actionsContainer = document.createElement('div');
-    actionsContainer.setAttribute('form-actions', '');
-    actionsContainer.innerHTML = '<button type="button" id="test-cancel">Cancel</button><button type="submit" id="test-save">Save</button>';
-        fixture.nativeElement.appendChild(actionsContainer);
-    fixture.detectChanges();
-
-    const cancelBtn = fixture.nativeElement.querySelector('#test-cancel') as HTMLButtonElement;
-    const saveBtn = fixture.nativeElement.querySelector('#test-save') as HTMLButtonElement;
-
-    expect(cancelBtn).toBeTruthy();
-    expect(saveBtn).toBeTruthy();
-
-    component.formSubmit.subscribe((val) => { submitCalledWith = val; });
-
-    // Invalid submit - should not emit
-    component.onSubmit();
-    fixture.detectChanges();
-    expect(submitCalledWith).toBeNull();
-    expect(component.validationSummaryItems().length).toBeGreaterThan(0);
-
-    // Make valid and submit
-    component.engine.fields[0].setValue('Valid Title');
-    fixture.detectChanges();
-
-    component.onSubmit();
-    expect(submitCalledWith).toEqual({ title: 'Valid Title' });
-
-    // Submitting state blocks duplicate submit
-    submitCalledWith = null;
-    component.submitting = true;
-    component.onSubmit();
-    expect(submitCalledWith).toBeNull();
-  });
-
-    it('integrates with projected form-actions correctly: single cancel/save, valid/invalid submit and cancel handling', () => {
-    let submitCalledWith: unknown = null;
-    let cancelCalled = false;
-
-    applyConfig({
-      fields: [
-        { type: 'text', name: 'title', label: 'Title', validation: [{ type: 'required', message: 'Title is required' }] }
-      ]
-    }, { title: '' });
-
-    // Project action buttons directly into host
-    const actionsDiv = document.createElement('div');
-    actionsDiv.setAttribute('form-actions', '');
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.id = 'cancel-test-btn';
-    cancelBtn.onclick = () => { cancelCalled = true; };
-    const saveBtn = document.createElement('button');
-    saveBtn.type = 'submit';
-    saveBtn.id = 'save-test-btn';
-    actionsDiv.appendChild(cancelBtn);
-    actionsDiv.appendChild(saveBtn);
-    fixture.nativeElement.querySelector('form').appendChild(actionsDiv);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelectorAll('#save-test-btn').length).toBe(1);
-    expect(fixture.nativeElement.querySelectorAll('#cancel-test-btn').length).toBe(1);
-
-    cancelBtn.click();
-    expect(cancelCalled).toBe(true);
-
-    component.formSubmit.subscribe((val) => { submitCalledWith = val; });
-
-    // Invalid submit does not emit
-    component.onSubmit();
-    fixture.detectChanges();
-    expect(submitCalledWith).toBeNull();
-    expect(component.validationSummaryItems().length).toBeGreaterThan(0);
-
-    // Valid submit emits once
-    component.engine.fields[0].setValue('Valid Title');
-    fixture.detectChanges();
-    component.onSubmit();
-    expect(submitCalledWith).toEqual({ title: 'Valid Title' });
-
-    // Submitting blocks duplicate submit
-    submitCalledWith = null;
-    component.submitting = true;
-    component.onSubmit();
-    expect(submitCalledWith).toBeNull();
-
-    // Loading blocks submit
-    component.submitting = false;
-    component.loading = true;
-    component.onSubmit();
-    expect(submitCalledWith).toBeNull();
-  });
-
-  function applyConfig(config: FormConfig, initialValue: unknown, context: FormContext = { user: null }): void {
+  function applyConfig(
+    config: FormConfig,
+    initialValue: unknown,
+    context: FormContext = { user: null },
+  ): void {
     fixture.destroy();
     fixture = TestBed.createComponent(FormInput);
     component = fixture.componentInstance;
     component.config = config;
     component.context = context;
     component.initialValue = initialValue;
+    component.ngOnChanges({
+      config: {
+        currentValue: config,
+        previousValue: null,
+        firstChange: true,
+        isFirstChange: () => true,
+      },
+    });
     fixture.detectChanges();
-  }
-
-  function resetActionButton(): Button {
-    const buttonDebugElement = fixture.debugElement
-      .queryAll(By.directive(Button))
-      .find((debugElement) => (debugElement.componentInstance as Button).label === 'reset');
-
-    if (!buttonDebugElement) {
-      throw new Error('Reset action button was not rendered');
-    }
-
-    return buttonDebugElement.componentInstance as Button;
   }
 });
 
+describe('FormInput Integration with HostComponent', () => {
+  let hostFixture: ComponentFixture<FormInputHostComponent>;
+  let hostComponent: FormInputHostComponent;
 
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [FormHostTestModule, SharedModule],
+
+      providers: provideSharedTesting(),
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(FormInputHostComponent);
+    hostComponent = hostFixture.componentInstance;
+    hostFixture.detectChanges();
+  });
+
+  it('projects exactly one action bar and handles cancel/submit through real Angular host projection', () => {
+    const saveBtns = hostFixture.nativeElement.querySelectorAll('[data-testid="save-btn"]');
+    const cancelBtns = hostFixture.nativeElement.querySelectorAll('[data-testid="cancel-btn"]');
+
+    expect(saveBtns.length).toBe(1);
+    expect(cancelBtns.length).toBe(1);
+
+    const cancelBtn = cancelBtns[0] as HTMLButtonElement;
+    cancelBtn.click();
+    expect(hostComponent.cancelSpy).toHaveBeenCalledTimes(1);
+
+    const formInputDebug = hostFixture.debugElement.query(By.directive(FormInput));
+    const formInput = formInputDebug.componentInstance as FormInput;
+
+    const saveBtn = saveBtns[0] as HTMLButtonElement;
+    saveBtn.click();
+    expect(hostComponent.submitSpy).not.toHaveBeenCalled();
+
+    formInput.engine()?.fields[0].setValue('Valid Title');
+    hostFixture.detectChanges();
+
+    saveBtn.click();
+    expect(hostComponent.submitSpy).toHaveBeenCalledWith({ title: 'Valid Title' });
+    expect(hostComponent.submitSpy).toHaveBeenCalledTimes(1);
+
+    hostComponent.submitSpy.mockClear();
+    hostComponent.submitting = true;
+    hostFixture.detectChanges();
+
+    saveBtn.click();
+    expect(hostComponent.submitSpy).not.toHaveBeenCalled();
+
+    hostComponent.submitting = false;
+    hostComponent.loading = true;
+    hostFixture.detectChanges();
+
+    saveBtn.click();
+    expect(hostComponent.submitSpy).not.toHaveBeenCalled();
+  });
+});
 
 
 

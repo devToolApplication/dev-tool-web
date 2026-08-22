@@ -11,7 +11,7 @@ import {
   signal,
   SimpleChanges,
 } from '@angular/core';
-import { createFormEngine } from './utils/form-engine';
+import { createFormEngine, FormEngineInstance } from './utils/form-engine';
 import {
   ArrayFieldState,
   FieldState,
@@ -56,7 +56,13 @@ export class FormInput implements OnInit, OnChanges {
   @Output() dirtyChange = new EventEmitter<boolean>();
   @Output() validChange = new EventEmitter<boolean>();
 
-  engine: any;
+  readonly configSignal = signal<FormConfig>({ fields: [] });
+  readonly contextSignal = signal<FormContext>({ user: null });
+  readonly initialValueSignal = signal<unknown>({});
+  readonly loadingSignal = signal<boolean>(false);
+  readonly submittingSignal = signal<boolean>(false);
+
+  readonly engine = signal<FormEngineInstance | null>(null);
   readonly submitted = signal(false);
   readonly activeSectionId = signal<string | null>(null);
 
@@ -70,15 +76,16 @@ export class FormInput implements OnInit, OnChanges {
     autoScrollToError: true,
     showValidationSummary: true,
     readonlyMode: 'detail',
-    ...(this.config?.layout ?? {}),
+    ...(this.configSignal()?.layout ?? {}),
   }));
 
   readonly renderSections = computed(() => {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return [];
     }
 
-    return buildFormSections(this.config, this.engine.fields as FormRenderableField[], {
+    return buildFormSections(this.configSignal(), currentEngine.fields as FormRenderableField[], {
       activeSectionId: this.activeSectionId(),
       submitted: this.submitted(),
     });
@@ -88,11 +95,12 @@ export class FormInput implements OnInit, OnChanges {
   readonly remainingRenderSections = computed(() => this.renderSections().slice(1));
 
   private readonly flatFields = computed<FieldState[]>(() => {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return [];
     }
 
-    return flattenFormFields(this.engine.fields as FormRenderableField[]);
+    return flattenFormFields(currentEngine.fields as FormRenderableField[]);
   });
 
   private readonly sectionByFieldPath = computed(() => {
@@ -126,7 +134,8 @@ export class FormInput implements OnInit, OnChanges {
   });
 
   readonly validationSummaryItems = computed<ValidationSummaryItem[]>(() => {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return [];
     }
 
@@ -156,30 +165,36 @@ export class FormInput implements OnInit, OnChanges {
     () => this.validationSummaryItems().filter((item) => item.severity === 'warning').length,
   );
 
-  readonly readonlyMode = computed(
-    () =>
-      (this.engine?.context?.()?.mode ?? this.context?.mode) === 'view' &&
-      this.layout().readonlyMode !== 'disabled-controls',
-  );
+  readonly readonlyMode = computed(() => {
+    const currentEngine = this.engine();
+    const mode = currentEngine?.context?.()?.mode ?? this.contextSignal()?.mode;
+    return mode === 'view' && this.layout().readonlyMode !== 'disabled-controls';
+  });
 
   readonly submitDisabled = computed(() => {
-    const actions = this.config?.actions;
-    if (this.loading || this.submitting || this.readonlyMode() || actions?.submitDisabled) {
+    const actions = this.configSignal()?.actions;
+    const isLoading = this.loadingSignal();
+    const isSubmitting = this.submittingSignal();
+    const isReadonly = this.readonlyMode();
+
+    if (isLoading || isSubmitting || isReadonly || actions?.submitDisabled) {
       return true;
     }
     return actions?.disableSubmitWhenInvalid === true && !this.isValid();
   });
 
   ngOnInit(): void {
+    this.syncInputSignals();
     this.rebuildEngine();
 
     effect(
       () => {
-        if (!this.engine) {
+        const currentEngine = this.engine();
+        if (!currentEngine) {
           return;
         }
-        const model = this.engine.model();
-        this.validChange.emit(this.engine.valid());
+        const model = currentEngine.model();
+        this.validChange.emit(currentEngine.valid());
         this.dirtyChange.emit(this.dirty());
 
         if (this.suppressValueChange) {
@@ -194,9 +209,7 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.engine) {
-      return;
-    }
+    this.syncInputSignals();
 
     if (changes['config']?.currentValue) {
       this.rebuildEngine();
@@ -204,7 +217,10 @@ export class FormInput implements OnInit, OnChanges {
     }
 
     if (changes['context']?.currentValue) {
-      this.engine.context.set({ ...this.context });
+      const currentEngine = this.engine();
+      if (currentEngine) {
+        currentEngine.context.set({ ...this.context });
+      }
     }
 
     if (changes['apiFieldErrors']) {
@@ -213,8 +229,23 @@ export class FormInput implements OnInit, OnChanges {
 
     if (changes['initialValue']) {
       this.suppressValueChange = true;
-      this.engine.reset(this.initialValue);
+      const currentEngine = this.engine();
+      if (currentEngine) {
+        currentEngine.reset((this.initialValue ?? {}) as object);
+      }
     }
+  }
+
+  private syncInputSignals(): void {
+    if (this.config) {
+      this.configSignal.set(this.config);
+    }
+    if (this.context) {
+      this.contextSignal.set(this.context);
+    }
+    this.initialValueSignal.set(this.initialValue);
+    this.loadingSignal.set(this.loading);
+    this.submittingSignal.set(this.submitting);
   }
 
   showSectionNav(): boolean {
@@ -222,29 +253,33 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   onSubmit(): void {
-    if (this.submitting || this.loading || this.readonlyMode()) {
+    if (this.submittingSignal() || this.loadingSignal() || this.readonlyMode()) {
       return;
     }
 
     this.submitted.set(true);
-    this.engine.markAllAsTouched();
-    if (!this.engine.valid()) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
+      return;
+    }
+    currentEngine.markAllAsTouched();
+    if (!currentEngine.valid()) {
       this.scrollToFirstInvalidField();
       return;
     }
-    this.formSubmit.emit(this.engine.model());
+    this.formSubmit.emit(currentEngine.model());
   }
 
   markAllAsTouched(): void {
-    this.engine?.markAllAsTouched();
+    this.engine()?.markAllAsTouched();
   }
 
   isValid(): boolean {
-    return Boolean(this.engine?.valid?.());
+    return Boolean(this.engine()?.valid?.());
   }
 
   getModel<TModel = unknown>(): TModel {
-    return this.engine?.model?.() as TModel;
+    return this.engine()?.model?.() as TModel;
   }
 
   getCol(width?: GridWidth): string {
@@ -299,33 +334,41 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   resetDirtyState(): void {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return;
     }
     this.flatFields().forEach((field) => field.dirty.set(false));
   }
 
   resetToInitialValue(): void {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return;
     }
 
     this.suppressValueChange = true;
-    this.engine.reset(this.initialValue);
+    currentEngine.reset((this.initialValueSignal() ?? {}) as object);
     this.submitted.set(false);
   }
 
   private rebuildEngine(): void {
     this.suppressValueChange = true;
-    const context = { ...this.context };
-    this.engine = createFormEngine(this.config, context, (this.initialValue ?? {}) as object);
+    const context = { ...this.contextSignal() };
+    const newEngine = createFormEngine(
+      this.configSignal(),
+      context,
+      (this.initialValueSignal() ?? {}) as object,
+    );
+    this.engine.set(newEngine);
     this.submitted.set(false);
     this.activeSectionId.set(null);
     this.applyApiFieldErrors();
   }
 
   private applyApiFieldErrors(): void {
-    if (!this.engine) {
+    const currentEngine = this.engine();
+    if (!currentEngine) {
       return;
     }
 
@@ -368,7 +411,7 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   private scrollToFirstInvalidField(): void {
-    if (this.layout().autoScrollToError === false || !this.engine) {
+    if (this.layout().autoScrollToError === false || !this.engine()) {
       return;
     }
 

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { PermissionService } from '@core/auth/permission.service';
+
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
@@ -37,7 +37,7 @@ describe('TableComponent', () => {
     confirmDialogService = {
       confirm: vi.fn().mockResolvedValue(true)
     };
-    permissionService = { hasAll: vi.fn().mockReturnValue(true) };
+    
     localStorage.clear();
 
     await TestBed.configureTestingModule({
@@ -45,8 +45,7 @@ describe('TableComponent', () => {
       providers: [
         ...provideSharedTesting(),
         { provide: ConfirmDialogService, useValue: confirmDialogService },
-        { provide: PermissionService, useValue: permissionService }
-      ]
+              ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableComponent);
@@ -339,7 +338,7 @@ describe('TableComponent', () => {
       id: 'delete',
       label: 'Delete',
       variant: 'danger',
-      confirm: { message: 'Delete selected?' },
+      
       onClick: actionClick
     };
     const rows = [{ id: 1 }];
@@ -431,6 +430,9 @@ describe('TableComponent', () => {
     fixture.detectChanges();
   }
 });
+
+
+
 
 
 

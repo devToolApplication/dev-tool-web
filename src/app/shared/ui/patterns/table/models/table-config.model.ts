@@ -50,18 +50,9 @@ export interface TableAction {
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
   placement?: 'primary' | 'more';
   permissions?: readonly string[];
-  permissionMode?: 'hide' | 'disable';
-  permissionDeniedTooltip?: string;
-  visible?: (rowData: any) => boolean;
+    visible?: (rowData: any) => boolean;
   disabled?: (rowData: any) => boolean;
-  confirm?: {
-    title?: string;
-    message: string;
-    confirmText?: string;
-    cancelText?: string;
-    variant?: 'warning' | 'danger';
-  };
-  onClick: (rowData: any) => void;
+    onClick: (rowData: any) => void;
 }
 
 export interface TableBulkAction {
@@ -72,18 +63,9 @@ export interface TableBulkAction {
   severity?: TableActionSeverity;
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
   permissions?: readonly string[];
-  permissionMode?: 'hide' | 'disable';
-  permissionDeniedTooltip?: string;
-  visible?: boolean;
+    visible?: boolean;
   disabled?: boolean;
-  confirm?: {
-    title?: string;
-    message: string;
-    confirmText?: string;
-    cancelText?: string;
-    variant?: 'warning' | 'danger';
-  };
-  onClick?: (rows: any[]) => void;
+    onClick?: (rows: any[]) => void;
 }
 
 export type TableFilterType =
@@ -257,6 +239,8 @@ export interface TableToolbarConfig {
   export?: TableToolbarExportConfig;
   bulkActions?: TableBulkAction[];
 }
+
+
 
 
 

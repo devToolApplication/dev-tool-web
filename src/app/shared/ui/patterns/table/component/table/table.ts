@@ -500,17 +500,6 @@ export class TableComponent implements OnChanges {
     return String(value);
   }
 
-  private defaultDangerConfirm(action: TableBulkAction): TableBulkAction['confirm'] | null {
-    if (action.variant !== 'danger' && action.severity !== 'danger') {
-      return null;
-    }
-
-    return {
-      message: 'shared.confirm.dangerAction',
-      variant: 'danger'
-    };
-  }
-
   private defaultColumnFields(): string[] {
     return this.config.columns
       .filter((column) => column.visible !== false && column.hideable !== false)
@@ -628,13 +617,5 @@ export class TableComponent implements OnChanges {
     );
   }
 }
-
-
-
-
-
-
-
-
 
 

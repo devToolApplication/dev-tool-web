@@ -164,7 +164,7 @@ import {
       path,
       width: config.width,
       value,
-      setValue: () => {},
+      setValue: (val: any) => { modelSignal.update((m: any) => { const next = { ...m }; const parts = path.split('.'); let cur = next; for (let i = 0; i < parts.length - 1; i++) { if (!cur[parts[i]]) cur[parts[i]] = {}; cur = cur[parts[i]]; } cur[parts[parts.length - 1]] = val; return next; }); dirty.set(true); },
       touched,
       focusing: signal(false),
       blurred: signal(false),
@@ -245,3 +245,4 @@ import {
     }
   }
   
+

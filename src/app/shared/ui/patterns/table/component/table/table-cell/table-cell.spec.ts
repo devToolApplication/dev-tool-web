@@ -2,7 +2,7 @@ import { Component, NgModule, TemplateRef, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { PermissionService } from '@core/auth/permission.service';
+
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { JsonViewerComponent } from '@shared/ui/data-display/json-viewer/json-viewer.component';
@@ -39,15 +39,14 @@ describe('TableCellComponent', () => {
     confirmDialogService = {
       confirm: vi.fn().mockResolvedValue(true)
     };
-    permissionService = { hasAll: vi.fn().mockReturnValue(true) };
+    
 
     await TestBed.configureTestingModule({
       imports: [SharedModule, TableCellTemplateHostModule],
       providers: [
         ...provideSharedTesting(),
         { provide: ConfirmDialogService, useValue: confirmDialogService },
-        { provide: PermissionService, useValue: permissionService }
-      ]
+              ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableCellComponent);
@@ -154,7 +153,7 @@ describe('TableCellComponent', () => {
       id: 'delete',
       label: 'Delete',
       variant: 'danger',
-      confirm: { message: 'Delete row?' },
+      
       onClick
     };
     renderCell({ field: 'actions', header: 'Actions', type: 'actions', actions: [action] }, { id: 1 });
@@ -287,6 +286,9 @@ describe('TableCellComponent', () => {
     fixture.detectChanges();
   }
 });
+
+
+
 
 
 

@@ -321,17 +321,6 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return Number.isNaN(value.getTime()) ? null : value;
   }
 
-  private defaultDangerConfirm(action: TableAction): TableAction['confirm'] | null {
-    if (action.variant !== 'danger' && action.severity !== 'danger') {
-      return null;
-    }
-
-    return {
-      message: 'shared.confirm.dangerAction',
-      variant: 'danger'
-    };
-  }
-
   
 
   private appendActionsMenuToBody(): void {
@@ -355,11 +344,5 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.portaledActionsMenu?.contains(target) ?? false;
   }
 }
-
-
-
-
-
-
 
 
