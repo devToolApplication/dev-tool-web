@@ -18,7 +18,7 @@
         [id]="inputId"
         type="text"
         [disabled]="disabled"
-        [attr.placeholder]="selectedOptions.length === 0 ? ((placeholder || ' ') | translateContent) : ''"
+        [attr.placeholder]="selectedOptions.length === 0 ? ((placeholder || null) | translateContent) : ''"
         [attr.aria-label]="(label || placeholder || inputId) | translateContent"
         [attr.aria-invalid]="invalid || null"
         class="flex-1 min-w-[80px] bg-transparent outline-none text-sm placeholder-[var(--app-text-muted)]"
@@ -58,3 +58,4 @@
     <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
   }
 </div>
+
