@@ -1,6 +1,7 @@
 // @ts-check
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
+import js from '@eslint/js';
 
 export default tseslint.config(
   {
@@ -12,13 +13,15 @@ export default tseslint.config(
       '**/.storybook-build-test/**',
       '**/storybook-static/**',
       '**/.angular/**',
-      '**/e2e/**',
       '**/scripts/**',
+      '**/tools/eslint-verification/fixtures/**',
+      '**/*.d.ts',
     ],
   },
   {
-    files: ['**/*.ts'],
+    files: ['src/**/*.ts'],
     extends: [
+      js.configs.recommended,
       ...tseslint.configs.recommended,
       ...angular.configs.tsRecommended,
     ],
@@ -32,6 +35,9 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
       'no-duplicate-imports': 'off',
       'no-unreachable': 'error',
@@ -46,7 +52,6 @@ export default tseslint.config(
       '@angular-eslint/no-output-on-prefix': 'off',
       '@angular-eslint/no-output-native': 'off',
       '@angular-eslint/no-host-metadata-property': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -73,7 +78,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.html'],
+    files: ['src/**/*.html'],
     extends: [
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility,
