@@ -1,4 +1,12 @@
-import { Component, HostListener, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -9,7 +17,13 @@ import {
   readonlyModeForVersion,
   workflowVersionLabel,
 } from '../model/workflow-lifecycle.config';
-import { JsonValue, WorkflowGraph, WorkflowNodePosition, WorkflowValidationIssue, WorkflowVersion } from '../model/workflow-studio.model';
+import {
+  JsonValue,
+  WorkflowGraph,
+  WorkflowNodePosition,
+  WorkflowValidationIssue,
+  WorkflowVersion,
+} from '../model/workflow-studio.model';
 import { validateWorkflowGraph } from '../model/workflow-validator';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowCanvasComponent } from '../canvas/workflow-canvas.component';
@@ -39,23 +53,44 @@ export class WorkflowBuilderPageComponent implements OnInit {
   readonly versionsOpen = signal(false);
   readonly runDialogOpen = signal(false);
   readonly running = signal(false);
+  readonly generalInfoCollapsed = signal(false);
 
   readonly selectedId = computed(() => this.store.selectedNodeId() ?? this.store.selectedEdgeId());
+  readonly selectedNode = computed(() => {
+    const nodeId = this.store.selectedNodeId();
+    if (!nodeId) {
+      return null;
+    }
+    return this.store.nodes().find((node) => node.id === nodeId) ?? null;
+  });
+  readonly nodeDrawerOpen = computed(() => !!this.selectedNode());
   readonly readonlyMode = computed(() => this.store.mode() !== 'design');
-  readonly actions = computed(() => buildWorkflowBuilderActions({
-    saving: this.store.saving(),
-    readonlyMode: this.readonlyMode(),
-    hasWorkflow: !!this.store.workflow(),
-  }));
+  readonly actions = computed(() =>
+    buildWorkflowBuilderActions({
+      saving: this.store.saving(),
+      readonlyMode: this.readonlyMode(),
+      hasWorkflow: !!this.store.workflow(),
+    }),
+  );
   readonly selectedVersionId = signal<string | null>(null);
   readonly activeRuntime = computed(() => {
     const workflow = this.store.workflow();
     const versionId = this.selectedVersionId();
-    return workflow?.versions.find((version) => version.id === versionId)?.runtime
-      ?? workflow?.versions.find((version) => version.id === workflow.definition.currentDraftVersionId)?.runtime
-      ?? workflow?.versions[0]?.runtime
-      ?? null;
+    return (
+      workflow?.versions.find((version) => version.id === versionId)?.runtime ??
+      workflow?.versions.find((version) => version.id === workflow.definition.currentDraftVersionId)
+        ?.runtime ??
+      workflow?.versions[0]?.runtime ??
+      null
+    );
   });
+  readonly generalInfoSummary = computed(() => ({
+    name: this.store.workflow()?.definition.name || 'workflowStudio.lifecycle.untitled',
+    maxParallel: this.activeRuntime()?.maxParallel ?? null,
+    statusLabel: this.store.dirty()
+      ? 'workflowStudio.productivity.unsavedChanges'
+      : 'workflowStudio.lifecycle.saved',
+  }));
 
   ngOnInit(): void {
     const workflowId = this.route.snapshot.paramMap.get('workflowId');
@@ -206,10 +241,14 @@ export class WorkflowBuilderPageComponent implements OnInit {
     const wasNew = this.isNewWorkflow();
     try {
       const saved = await this.persistence.save(this.store);
-      this.selectedVersionId.set(saved.definition.currentDraftVersionId ?? saved.versions[0]?.id ?? null);
+      this.selectedVersionId.set(
+        saved.definition.currentDraftVersionId ?? saved.versions[0]?.id ?? null,
+      );
       this.statusMessage.set('workflowStudio.lifecycle.saved');
       if (wasNew) {
-        await this.router.navigate(['/ai-agent-mcrs/workflows', saved.definition.id, 'edit'], { replaceUrl: true });
+        await this.router.navigate(['/ai-agent-mcrs/workflows', saved.definition.id, 'edit'], {
+          replaceUrl: true,
+        });
       }
     } catch (error) {
       this.error.set(errorMessage(error));
@@ -220,10 +259,14 @@ export class WorkflowBuilderPageComponent implements OnInit {
     const wasNew = this.isNewWorkflow();
     try {
       const published = await this.persistence.publish(this.store);
-      this.selectedVersionId.set(published.definition.currentDraftVersionId ?? published.versions[0]?.id ?? null);
+      this.selectedVersionId.set(
+        published.definition.currentDraftVersionId ?? published.versions[0]?.id ?? null,
+      );
       this.statusMessage.set('workflowStudio.lifecycle.published');
       if (wasNew) {
-        await this.router.navigate(['/ai-agent-mcrs/workflows', published.definition.id, 'edit'], { replaceUrl: true });
+        await this.router.navigate(['/ai-agent-mcrs/workflows', published.definition.id, 'edit'], {
+          replaceUrl: true,
+        });
       }
     } catch (error) {
       this.error.set(errorMessage(error));
@@ -260,10 +303,18 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.versionsOpen.set(false);
   }
 
+  closeNodeDrawer(): void {
+    this.store.selectNode(null);
+  }
+
+  toggleGeneralInfo(): void {
+    this.generalInfoCollapsed.update((value) => !value);
+  }
+
   closeTransientState(): void {
     this.versionsOpen.set(false);
     this.runDialogOpen.set(false);
-    this.store.selectNode(null);
+    this.closeNodeDrawer();
     this.store.selectEdge(null);
   }
 
@@ -284,7 +335,10 @@ export class WorkflowBuilderPageComponent implements OnInit {
   }
 
   updateName(value: string | null): void {
-    this.store.updateWorkflowMetadata(value ?? '', this.store.workflow()?.definition.description ?? null);
+    this.store.updateWorkflowMetadata(
+      value ?? '',
+      this.store.workflow()?.definition.description ?? null,
+    );
   }
 
   updateDescription(value: string | null): void {
@@ -327,9 +381,11 @@ function isEditableShortcutTarget(target: EventTarget | null): boolean {
   }
 
   const tagName = target.tagName.toLowerCase();
-  return target.isContentEditable
-    || tagName === 'input'
-    || tagName === 'textarea'
-    || tagName === 'select'
-    || !!target.closest('[contenteditable="true"]');
+  return (
+    target.isContentEditable ||
+    tagName === 'input' ||
+    tagName === 'textarea' ||
+    tagName === 'select' ||
+    !!target.closest('[contenteditable="true"]')
+  );
 }

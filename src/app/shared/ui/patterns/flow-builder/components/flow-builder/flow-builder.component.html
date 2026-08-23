@@ -155,7 +155,20 @@
   }
 
   <div class="flow-builder__body">
-    @if (resolvedMode === 'edit' && resolvedPalette.visible !== false && resolvedNodeTypes.length) {
+    @if (paletteVisible && paletteCollapsible) {
+      <div class="flow-builder__palette-toggle" data-testid="flow-builder-palette-toggle">
+        <app-button
+          [icon]="paletteToggleIcon"
+          [iconOnly]="true"
+          variant="ghost"
+          size="sm"
+          [tooltip]="paletteToggleTooltip"
+          (buttonClick)="togglePalette()"
+        ></app-button>
+      </div>
+    }
+
+    @if (paletteVisible && paletteExpanded) {
       <app-flow-palette
         class="flow-builder__palette"
         [nodeTypes]="resolvedNodeTypes"

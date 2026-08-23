@@ -53,8 +53,18 @@ describe('WorkflowCanvasComponent', () => {
     component.onFlowDefinitionChange({
       ...component.flowDefinition(),
       nodes: [
-        { id: 'start', type: 'START', position: { x: 10, y: 20 }, data: { workflowNode: { id: 'start', type: 'START' } } },
-        { id: 'end', type: 'END', position: { x: 300, y: 20 }, data: { workflowNode: { id: 'end', type: 'END' } } },
+        {
+          id: 'start',
+          type: 'START',
+          position: { x: 10, y: 20 },
+          data: { workflowNode: { id: 'start', type: 'START' } },
+        },
+        {
+          id: 'end',
+          type: 'END',
+          position: { x: 300, y: 20 },
+          data: { workflowNode: { id: 'end', type: 'END' } },
+        },
       ],
       edges: [
         {
@@ -94,6 +104,14 @@ describe('WorkflowCanvasComponent', () => {
     expect(connections).toEqual([{ source: 'start', target: 'ai-gate-1' }]);
   });
 
+  it('configures the shared palette as collapsible for design mode only', () => {
+    expect(component.paletteConfig()).toEqual({ visible: true, collapsible: true });
+
+    component.mode = 'runtime';
+
+    expect(component.paletteConfig()).toEqual({ visible: false, collapsible: true });
+  });
+
   it('disables shared graph mutation commands and delegates viewport controls to the shared canvas', () => {
     const executeCommand = vi.fn();
     component.flowBuilder = { executeCommand } as never;
@@ -111,7 +129,12 @@ describe('WorkflowCanvasComponent', () => {
     component.zoomOut();
     component.resetView();
 
-    expect(executeCommand.mock.calls.map(([command]) => command)).toEqual(['fit', 'zoomIn', 'zoomOut', 'resetZoom']);
+    expect(executeCommand.mock.calls.map(([command]) => command)).toEqual([
+      'fit',
+      'zoomIn',
+      'zoomOut',
+      'resetZoom',
+    ]);
   });
 
   it('maps shared viewport snapshots back to the workflow editor viewport', () => {

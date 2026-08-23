@@ -5,7 +5,7 @@
   [nodeTypes]="nodeTypes"
   [toolbar]="{ visible: false }"
   [inspector]="{ visible: false }"
-  [palette]="{ visible: mode === 'design' }"
+  [palette]="paletteConfig()"
   [capabilities]="flowCapabilities()"
   [validationIssues]="validationIssues"
   [selectedId]="selectedId"

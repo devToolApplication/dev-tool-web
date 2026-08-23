@@ -5,7 +5,7 @@
   [breadcrumb]="[
     { label: 'layout.menu.aiAgentMcrs' },
     { label: 'workflowStudio.lifecycle.workflows', routerLink: '/ai-agent-mcrs/workflows' },
-    { label: store.workflow()?.definition?.id ? 'layout.route.edit' : 'layout.route.create' }
+    { label: store.workflow()?.definition?.id ? 'layout.route.edit' : 'layout.route.create' },
   ]"
   [loading]="loading()"
   [error]="error()"
@@ -17,119 +17,163 @@
   ></app-action-toolbar>
 
   <div class="workflow-builder">
-    <aside class="workflow-builder__meta" aria-label="Workflow metadata">
-      <app-section-panel title="workflowStudio.lifecycle.details" density="compact">
-        <div class="workflow-builder__fields">
-          <app-input-text
-            label="workflowStudio.lifecycle.workflow"
-            [value]="store.workflow()?.definition?.name ?? ''"
-            [readonly]="readonlyMode()"
-            (valueChange)="updateName($event)"
-          ></app-input-text>
-          <app-input-area
-            label="workflowStudio.lifecycle.description"
-            [value]="store.workflow()?.definition?.description ?? ''"
-            [readonly]="readonlyMode()"
-            [rows]="4"
-            [maxRows]="8"
-            (valueChange)="updateDescription($event)"
-          ></app-input-area>
-          <app-input-number
-            label="workflowStudio.lifecycle.maxParallel"
-            [value]="activeRuntime()?.maxParallel ?? null"
-            [min]="1"
-            [readonly]="readonlyMode()"
-            (valueChange)="updateMaxParallel($event)"
-          ></app-input-number>
+    <section
+      class="workflow-builder__meta"
+      [class.workflow-builder__meta--collapsed]="generalInfoCollapsed()"
+      aria-labelledby="workflow-builder-details-title"
+    >
+      <header class="workflow-builder__meta-header">
+        <div class="workflow-builder__meta-heading">
+          <h2 id="workflow-builder-details-title">
+            {{ 'workflowStudio.lifecycle.details' | translateContent }}
+          </h2>
+          <dl class="workflow-builder__summary">
+            <div>
+              <dt>{{ 'workflowStudio.lifecycle.workflow' | translateContent }}</dt>
+              <dd>{{ generalInfoSummary().name | translateContent }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'workflowStudio.lifecycle.maxParallel' | translateContent }}</dt>
+              <dd>{{ generalInfoSummary().maxParallel ?? '-' }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'workflowStudio.lifecycle.status' | translateContent }}</dt>
+              <dd>
+                <app-badge
+                  [label]="generalInfoSummary().statusLabel"
+                  [variant]="store.dirty() ? 'warning' : 'success'"
+                ></app-badge>
+              </dd>
+            </div>
+          </dl>
         </div>
-      </app-section-panel>
 
-      @if (statusMessage()) {
-        <app-alert
-          variant="success"
-          [message]="statusMessage()!"
-        ></app-alert>
+        <app-button
+          [icon]="generalInfoCollapsed() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+          [iconOnly]="true"
+          variant="ghost"
+          size="sm"
+          [tooltip]="
+            generalInfoCollapsed()
+              ? 'workflowStudio.lifecycle.expandDetails'
+              : 'workflowStudio.lifecycle.collapseDetails'
+          "
+          (buttonClick)="toggleGeneralInfo()"
+        ></app-button>
+      </header>
+
+      @if (!generalInfoCollapsed()) {
+        <div class="workflow-builder__meta-body">
+          <div class="workflow-builder__fields">
+            <app-input-text
+              label="workflowStudio.lifecycle.workflow"
+              [value]="store.workflow()?.definition?.name ?? ''"
+              [readonly]="readonlyMode()"
+              (valueChange)="updateName($event)"
+            ></app-input-text>
+            <app-input-area
+              label="workflowStudio.lifecycle.description"
+              [value]="store.workflow()?.definition?.description ?? ''"
+              [readonly]="readonlyMode()"
+              [rows]="2"
+              [maxRows]="4"
+              (valueChange)="updateDescription($event)"
+            ></app-input-area>
+            <app-input-number
+              label="workflowStudio.lifecycle.maxParallel"
+              [value]="activeRuntime()?.maxParallel ?? null"
+              [min]="1"
+              [readonly]="readonlyMode()"
+              (valueChange)="updateMaxParallel($event)"
+            ></app-input-number>
+          </div>
+
+          @if (statusMessage()) {
+            <app-alert variant="success" [message]="statusMessage()!"></app-alert>
+          }
+        </div>
       }
-
-      @if (store.dirty()) {
-        <app-badge
-          label="workflowStudio.productivity.unsavedChanges"
-          variant="warning"
-        ></app-badge>
-      }
-    </aside>
-
-    <section class="workflow-builder__canvas" aria-label="Workflow canvas">
-      <div class="workflow-builder__canvas-toolbar" aria-label="Workflow canvas controls">
-        <app-button
-          icon="pi pi-sitemap"
-          variant="ghost"
-          size="sm"
-          [iconOnly]="true"
-          tooltip="workflowStudio.productivity.autoLayout"
-          [disabled]="readonlyMode()"
-          (buttonClick)="applyAutoLayout()"
-        ></app-button>
-        <app-button
-          icon="pi pi-window-maximize"
-          variant="ghost"
-          size="sm"
-          [iconOnly]="true"
-          tooltip="workflowStudio.productivity.fitView"
-          (buttonClick)="fitView()"
-        ></app-button>
-        <app-button
-          icon="pi pi-search-plus"
-          variant="ghost"
-          size="sm"
-          [iconOnly]="true"
-          tooltip="workflowStudio.productivity.zoomIn"
-          (buttonClick)="zoomIn()"
-        ></app-button>
-        <app-button
-          icon="pi pi-search-minus"
-          variant="ghost"
-          size="sm"
-          [iconOnly]="true"
-          tooltip="workflowStudio.productivity.zoomOut"
-          (buttonClick)="zoomOut()"
-        ></app-button>
-        <app-button
-          icon="pi pi-refresh"
-          variant="ghost"
-          size="sm"
-          [iconOnly]="true"
-          tooltip="workflowStudio.productivity.resetView"
-          (buttonClick)="resetView()"
-        ></app-button>
-      </div>
-      <app-workflow-canvas
-        [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
-        [workflowName]="store.workflow()?.definition?.name ?? undefined"
-        [graph]="store.graph()"
-        [positions]="store.positions()"
-        [viewport]="store.viewport()"
-        [mode]="store.mode()"
-        [selectedId]="selectedId()"
-        [validationIssues]="store.validationIssues()"
-        (nodeSelected)="store.selectNode($event)"
-        (edgeSelected)="store.selectEdge($event)"
-        (nodeAdded)="addNode($event)"
-        (nodeMoved)="moveNode($event)"
-        (connected)="store.connect($event)"
-        (viewportChange)="store.setViewport($event)"
-      ></app-workflow-canvas>
     </section>
 
-    <aside class="workflow-builder__inspector" aria-label="Workflow inspector">
-      <app-workflow-node-inspector></app-workflow-node-inspector>
-    </aside>
+    <section class="workflow-builder__workspace">
+      <section class="workflow-builder__canvas" aria-label="Workflow canvas">
+        <div class="workflow-builder__canvas-toolbar" aria-label="Workflow canvas controls">
+          <app-button
+            icon="pi pi-sitemap"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            tooltip="workflowStudio.productivity.autoLayout"
+            [disabled]="readonlyMode()"
+            (buttonClick)="applyAutoLayout()"
+          ></app-button>
+          <app-button
+            icon="pi pi-window-maximize"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            tooltip="workflowStudio.productivity.fitView"
+            (buttonClick)="fitView()"
+          ></app-button>
+          <app-button
+            icon="pi pi-search-plus"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            tooltip="workflowStudio.productivity.zoomIn"
+            (buttonClick)="zoomIn()"
+          ></app-button>
+          <app-button
+            icon="pi pi-search-minus"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            tooltip="workflowStudio.productivity.zoomOut"
+            (buttonClick)="zoomOut()"
+          ></app-button>
+          <app-button
+            icon="pi pi-refresh"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            tooltip="workflowStudio.productivity.resetView"
+            (buttonClick)="resetView()"
+          ></app-button>
+        </div>
+        <app-workflow-canvas
+          [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
+          [workflowName]="store.workflow()?.definition?.name ?? undefined"
+          [graph]="store.graph()"
+          [positions]="store.positions()"
+          [viewport]="store.viewport()"
+          [mode]="store.mode()"
+          [selectedId]="selectedId()"
+          [validationIssues]="store.validationIssues()"
+          (nodeSelected)="store.selectNode($event)"
+          (edgeSelected)="store.selectEdge($event)"
+          (nodeAdded)="addNode($event)"
+          (nodeMoved)="moveNode($event)"
+          (connected)="store.connect($event)"
+          (viewportChange)="store.setViewport($event)"
+        ></app-workflow-canvas>
+      </section>
+    </section>
   </div>
 
-  <app-workflow-problems-panel
-    [issues]="store.validationIssues()"
-  ></app-workflow-problems-panel>
+  <app-workflow-problems-panel [issues]="store.validationIssues()"></app-workflow-problems-panel>
 </app-page-shell>
+
+<app-drawer
+  [open]="nodeDrawerOpen()"
+  title="workflowStudio.inspector.staticTitle"
+  [subtitle]="selectedNode()?.id ?? undefined"
+  size="md"
+  (closed)="closeNodeDrawer()"
+>
+  @if (selectedNode()) {
+    <app-workflow-node-inspector></app-workflow-node-inspector>
+  }
+</app-drawer>
 
 <app-drawer
   [open]="versionsOpen()"

@@ -64,6 +64,7 @@ export class FlowBuilderComponent implements OnChanges {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly history = new FlowHistory();
+  private paletteStateKey = '';
 
   @Input() value: FlowDefinition | null = null;
   @Input() mode: FlowBuilderMode = 'edit';
@@ -98,6 +99,7 @@ export class FlowBuilderComponent implements OnChanges {
 
   readonly inspectorOpen = signal(true);
   readonly navigatorOpen = signal(true);
+  readonly paletteOpen = signal<boolean | null>(null);
   readonly fullscreen = signal(false);
   readonly viewport = signal<FlowViewportSnapshot | null>(null);
   readonly contextMenuState = signal<ActiveFlowContextMenu | null>(null);
@@ -110,6 +112,11 @@ export class FlowBuilderComponent implements OnChanges {
       } else if (!current || !areFlowDefinitionsEqual(current, this.value)) {
         this.history.reset(this.value);
       }
+    }
+
+    if (changes['palette'] && this.paletteStateKey !== this.currentPaletteStateKey()) {
+      this.paletteStateKey = this.currentPaletteStateKey();
+      this.paletteOpen.set(null);
     }
   }
 
@@ -144,6 +151,35 @@ export class FlowBuilderComponent implements OnChanges {
 
   get resolvedPalette(): FlowPaletteConfig {
     return this.palette ?? { visible: true };
+  }
+
+  get paletteVisible(): boolean {
+    return (
+      this.resolvedMode === 'edit' &&
+      this.resolvedPalette.visible !== false &&
+      this.resolvedNodeTypes.length > 0
+    );
+  }
+
+  get paletteCollapsible(): boolean {
+    return this.resolvedPalette.collapsible === true;
+  }
+
+  get paletteExpanded(): boolean {
+    if (!this.paletteCollapsible) {
+      return true;
+    }
+    return this.paletteOpen() ?? !this.paletteDefaultCollapsed();
+  }
+
+  get paletteToggleIcon(): string {
+    return this.paletteExpanded ? 'pi pi-chevron-left' : 'pi pi-chevron-right';
+  }
+
+  get paletteToggleTooltip(): string {
+    return this.paletteExpanded
+      ? 'shared.flowBuilder.palette.collapse'
+      : 'shared.flowBuilder.palette.expand';
   }
 
   get selectedIds(): string[] {
@@ -338,6 +374,18 @@ export class FlowBuilderComponent implements OnChanges {
   onPaletteNodeAdd(nodeType: string): void {
     const position = this.viewportCenter();
     this.addNodeFromType(nodeType, position.x, position.y);
+  }
+
+  togglePalette(): void {
+    this.paletteStateKey = this.currentPaletteStateKey();
+
+    if (!this.paletteCollapsible) {
+      this.paletteOpen.set(null);
+      return;
+    }
+
+    this.paletteOpen.set(!this.paletteExpanded);
+    this.resizeCanvasAfterPaletteChange();
   }
 
   onNodeDrop(event: FlowNodeDropEvent): void {
@@ -685,6 +733,26 @@ export class FlowBuilderComponent implements OnChanges {
   private requestExport(): void {
     if (!this.value) return;
     this.exportRequested.emit(cloneFlowDefinition(this.value));
+  }
+
+  private paletteDefaultCollapsed(): boolean {
+    return (
+      this.resolvedPalette.defaultCollapsed === true || this.resolvedPalette.collapsed === true
+    );
+  }
+
+  private currentPaletteStateKey(): string {
+    return [
+      this.resolvedPalette.visible !== false,
+      this.resolvedPalette.collapsible === true,
+      this.paletteDefaultCollapsed(),
+    ].join(':');
+  }
+
+  private resizeCanvasAfterPaletteChange(): void {
+    requestAnimationFrame(() => {
+      this.canvas?.engineInstance?.resizeToContainer();
+    });
   }
 
   private toggleFullscreen(): void {

@@ -26,6 +26,19 @@ describe('WorkflowProblemsPanelComponent', () => {
     component = fixture.componentInstance;
   });
 
+  it('renders only a compact header when there are no issues', () => {
+    component.issues = [];
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.workflow-problems__count')?.textContent).toContain(
+      '0',
+    );
+    expect(fixture.nativeElement.querySelector('.workflow-problems__toggle')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#workflow-problems-list')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('workflowStudio.problems.empty');
+  });
+
   it('renders validation issue references and emits selected issue', () => {
     const selected: WorkflowValidationIssue[] = [];
     component.issues = [
@@ -66,7 +79,10 @@ describe('WorkflowProblemsPanelComponent', () => {
           version: 1,
           status: 'DRAFT',
           definition: {
-            nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
+            nodes: [
+              { id: 'start', type: 'START' },
+              { id: 'end', type: 'END' },
+            ],
             edges: [{ source: 'start', target: 'end' }],
           },
           runtime: { maxParallel: 1 },
@@ -108,7 +124,10 @@ describe('WorkflowProblemsPanelComponent', () => {
           version: 1,
           status: 'DRAFT',
           definition: {
-            nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
+            nodes: [
+              { id: 'start', type: 'START' },
+              { id: 'end', type: 'END' },
+            ],
             edges: [{ source: 'start', target: 'end' }],
           },
           runtime: { maxParallel: 1 },

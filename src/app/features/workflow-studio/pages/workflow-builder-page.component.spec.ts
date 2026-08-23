@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, Pipe, PipeTransform } from '@angular/core';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 
@@ -10,6 +10,13 @@ import { WorkflowLayoutService } from '../services/workflow-layout.service';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 import { WorkflowBuilderPageComponent } from './workflow-builder-page.component';
+
+@Pipe({ name: 'translateContent', standalone: false })
+class TranslateContentPipeStub implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('WorkflowBuilderPageComponent', () => {
   let fixture: ComponentFixture<WorkflowBuilderPageComponent>;
@@ -30,18 +37,20 @@ describe('WorkflowBuilderPageComponent', () => {
     api = {
       getWorkflowDetail: vi.fn(() => of(savedWorkflow())),
       validateWorkflow: vi.fn(() => of({ valid: true, issues: [] })),
-      startWorkflow: vi.fn(() => of({
-        id: 'run-1',
-        workflowDefinitionId: 'wf-1',
-        workflowVersionId: 'ver-1',
-        status: 'PENDING',
-        input: {},
-        startedAt: null,
-        completedAt: null,
-        finalOutcome: null,
-        finalOutput: null,
-        nodes: [],
-      })),
+      startWorkflow: vi.fn(() =>
+        of({
+          id: 'run-1',
+          workflowDefinitionId: 'wf-1',
+          workflowVersionId: 'ver-1',
+          status: 'PENDING',
+          input: {},
+          startedAt: null,
+          completedAt: null,
+          finalOutcome: null,
+          finalOutput: null,
+          nodes: [],
+        }),
+      ),
     };
     persistence = {
       save: vi.fn(() => Promise.resolve(savedWorkflow())),
@@ -50,7 +59,7 @@ describe('WorkflowBuilderPageComponent', () => {
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
 
     TestBed.configureTestingModule({
-      declarations: [WorkflowBuilderPageComponent],
+      declarations: [WorkflowBuilderPageComponent, TranslateContentPipeStub],
       providers: [
         WorkflowEditorStore,
         WorkflowLayoutService,
@@ -106,7 +115,9 @@ describe('WorkflowBuilderPageComponent', () => {
     await component.save();
 
     expect(persistence.save).toHaveBeenCalledWith(store);
-    expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/workflows', 'wf-1', 'edit'], { replaceUrl: true });
+    expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/workflows', 'wf-1', 'edit'], {
+      replaceUrl: true,
+    });
   });
 
   it('protects the route when the builder is dirty', () => {
@@ -126,6 +137,108 @@ describe('WorkflowBuilderPageComponent', () => {
     component.selectVersion('ver-1');
 
     expect(store.mode()).toBe('readonly');
+  });
+
+  it('collapses general info into a compact summary without changing workflow data', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.updateWorkflowMetadata('Review workflow', 'Description');
+    store.updateRuntime({ maxParallel: 3 });
+
+    expect(component.generalInfoCollapsed()).toBe(false);
+
+    component.toggleGeneralInfo();
+
+    expect(component.generalInfoCollapsed()).toBe(true);
+    expect(component.generalInfoSummary()).toEqual({
+      name: 'Review workflow',
+      maxParallel: 3,
+      statusLabel: 'workflowStudio.productivity.unsavedChanges',
+    });
+    expect(store.workflow()?.definition.name).toBe('Review workflow');
+    expect(store.workflow()?.definition.description).toBe('Description');
+    expect(component.activeRuntime()?.maxParallel).toBe(3);
+  });
+
+  it('opens node drawer when a node is selected', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+
+    expect(component.selectedNode()?.id).toBe('logic');
+    expect(component.nodeDrawerOpen()).toBe(true);
+  });
+
+  it('closes node drawer and clears selection', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+
+    component.closeNodeDrawer();
+
+    expect(component.nodeDrawerOpen()).toBe(false);
+    expect(store.selectedNodeId()).toBeNull();
+  });
+
+  it('switches drawer content when another node is selected', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic-a', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+    store.addNode({ id: 'logic-b', type: 'LOGIC', operator: 'OR', config: {} }, { x: 260, y: 120 });
+
+    store.selectNode('logic-a');
+    expect(component.selectedNode()?.id).toBe('logic-a');
+
+    store.selectNode('logic-b');
+
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.selectedNode()?.id).toBe('logic-b');
+  });
+
+  it('closes drawer when the selected node is deleted', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+
+    store.deleteSelection();
+
+    expect(component.selectedNode()).toBeNull();
+    expect(component.nodeDrawerOpen()).toBe(false);
+  });
+
+  it('opens the correct node from a validation issue', () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+
+    store.selectValidationIssue({
+      code: 'workflow.test',
+      severity: 'error',
+      message: 'Invalid node',
+      nodeId: 'logic',
+    });
+
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.selectedNode()?.id).toBe('logic');
+  });
+
+  it('keeps readonly node drawer viewable without changing global save semantics', async () => {
+    configure(null);
+    fixture.detectChanges();
+    store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
+    store.setMode('readonly');
+    store.selectNode('logic');
+
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.readonlyMode()).toBe(true);
+
+    store.setMode('design');
+    store.updateNodePatch('logic', { operator: 'OR' });
+    expect(store.dirty()).toBe(true);
+
+    await component.save();
+
+    expect(persistence.save).toHaveBeenCalledWith(store);
   });
 
   it('handles save, delete, undo, redo, fit view and escape shortcuts outside editable fields', async () => {
@@ -207,7 +320,12 @@ describe('WorkflowBuilderPageComponent', () => {
 
   function keyboardEvent(
     key: string,
-    options: { ctrlKey?: boolean; metaKey?: boolean; shiftKey?: boolean; target?: EventTarget } = {},
+    options: {
+      ctrlKey?: boolean;
+      metaKey?: boolean;
+      shiftKey?: boolean;
+      target?: EventTarget;
+    } = {},
   ): KeyboardEvent {
     return {
       key,

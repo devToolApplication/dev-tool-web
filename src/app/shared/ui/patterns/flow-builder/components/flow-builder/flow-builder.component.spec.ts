@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SimpleChange } from '@angular/core';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { FlowBuilderModule } from '../../flow-builder.module';
-import { FlowDefinition } from '../../models';
+import { FlowDefinition, FlowNodeTypeDefinition, FlowPaletteConfig } from '../../models';
 import { FlowBuilderComponent } from './flow-builder.component';
 
 describe('FlowBuilderComponent', () => {
@@ -17,6 +18,60 @@ describe('FlowBuilderComponent', () => {
     fixture = TestBed.createComponent(FlowBuilderComponent);
     component = fixture.componentInstance;
     component.value = flowDefinition;
+  });
+
+  it('keeps palette visible by default for existing consumers', () => {
+    component.nodeTypes = nodeTypes;
+
+    expect(component.paletteVisible).toBe(true);
+    expect(component.paletteExpanded).toBe(true);
+    expect(component.paletteCollapsible).toBe(false);
+  });
+
+  it('allows palette collapse only when configured', () => {
+    component.nodeTypes = nodeTypes;
+    component.palette = { visible: true, collapsible: true };
+
+    component.togglePalette();
+    expect(component.paletteExpanded).toBe(false);
+
+    component.palette = { visible: true, collapsible: false };
+    component.togglePalette();
+
+    expect(component.paletteExpanded).toBe(true);
+  });
+
+  it('restores configured default collapsed state', () => {
+    component.nodeTypes = nodeTypes;
+    component.palette = { visible: true, collapsible: true, defaultCollapsed: true };
+
+    expect(component.paletteExpanded).toBe(false);
+    expect(component.paletteToggleTooltip).toBe('shared.flowBuilder.palette.expand');
+  });
+
+  it('does not mutate flow definition when palette is toggled', () => {
+    const valueSpy = vi.spyOn(component.valueChange, 'emit');
+    component.nodeTypes = nodeTypes;
+    component.palette = { visible: true, collapsible: true };
+
+    component.togglePalette();
+
+    expect(component.value).toBe(flowDefinition);
+    expect(valueSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps user palette state when an equivalent palette config object is passed again', () => {
+    component.nodeTypes = nodeTypes;
+    const previousPalette: FlowPaletteConfig = { visible: true, collapsible: true };
+    component.palette = previousPalette;
+    component.togglePalette();
+
+    component.palette = { visible: true, collapsible: true };
+    component.ngOnChanges({
+      palette: new SimpleChange(previousPalette, component.palette, false),
+    });
+
+    expect(component.paletteExpanded).toBe(false);
   });
 
   it('emits export intent without browser download side effects', () => {
@@ -91,3 +146,13 @@ const flowDefinition: FlowDefinition = {
   nodes: [{ id: 'node-1', type: 'task', label: 'Task' }],
   edges: [],
 };
+
+const nodeTypes: FlowNodeTypeDefinition[] = [
+  {
+    type: 'task',
+    label: 'Task',
+    shape: 'rectangle',
+    defaultSize: { width: 160, height: 64 },
+    ports: [],
+  },
+];

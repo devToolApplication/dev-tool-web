@@ -85,6 +85,8 @@ export interface FlowInspectorConfig {
 export interface FlowPaletteConfig {
   visible?: boolean;
   title?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
   collapsed?: boolean;
   width?: string;
   allowedTypes?: string[];

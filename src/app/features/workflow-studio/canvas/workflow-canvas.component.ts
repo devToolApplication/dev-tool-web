@@ -8,6 +8,7 @@ import {
   FlowEdge,
   FlowNode,
   FlowNodeChange,
+  FlowPaletteConfig,
   FlowValidationIssue,
   FlowViewportSnapshot,
 } from '@shared/ui/patterns/flow-builder';
@@ -54,8 +55,14 @@ export class WorkflowCanvasComponent {
   @Output() readonly viewportChange = new EventEmitter<WorkflowEditorViewport>();
   @Output() readonly nodeSelected = new EventEmitter<string | null>();
   @Output() readonly edgeSelected = new EventEmitter<string | null>();
-  @Output() readonly nodeAdded = new EventEmitter<{ node: WorkflowGraph['nodes'][number]; position: WorkflowNodePosition }>();
-  @Output() readonly nodeMoved = new EventEmitter<{ nodeId: string; position: WorkflowNodePosition }>();
+  @Output() readonly nodeAdded = new EventEmitter<{
+    node: WorkflowGraph['nodes'][number];
+    position: WorkflowNodePosition;
+  }>();
+  @Output() readonly nodeMoved = new EventEmitter<{
+    nodeId: string;
+    position: WorkflowNodePosition;
+  }>();
   @Output() readonly connected = new EventEmitter<{ source: string; target: string }>();
 
   readonly nodeTypes = WORKFLOW_FLOW_NODE_TYPES;
@@ -92,6 +99,10 @@ export class WorkflowCanvasComponent {
 
   flowReadonly(): boolean {
     return workflowCanvasReadonly(this.mode);
+  }
+
+  paletteConfig(): FlowPaletteConfig {
+    return { visible: this.mode === 'design', collapsible: true };
   }
 
   onFlowDefinitionChange(definition: FlowDefinition): void {

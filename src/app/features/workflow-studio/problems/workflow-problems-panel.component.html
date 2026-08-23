@@ -1,50 +1,65 @@
-<section class="workflow-problems" aria-labelledby="workflow-problems-title">
+<section
+  class="workflow-problems"
+  [class.workflow-problems--empty]="!issues.length"
+  aria-labelledby="workflow-problems-title"
+>
   <header class="workflow-problems__header">
     <h2 id="workflow-problems-title">{{ 'workflowStudio.problems.title' | translateContent }}</h2>
     <div class="workflow-problems__summary">
       <span class="workflow-problems__count">{{ issues.length }}</span>
-      <button
-        type="button"
-        class="workflow-problems__toggle"
-        [attr.aria-expanded]="!collapsed()"
-        aria-controls="workflow-problems-list"
-        (click)="toggleCollapsed()"
-      >
-        <i class="pi" [class.pi-chevron-down]="collapsed()" [class.pi-chevron-up]="!collapsed()" aria-hidden="true"></i>
-        <span>{{ (collapsed() ? 'workflowStudio.problems.expand' : 'workflowStudio.problems.collapse') | translateContent }}</span>
-      </button>
+      @if (issues.length) {
+        <button
+          type="button"
+          class="workflow-problems__toggle"
+          [attr.aria-expanded]="!collapsed()"
+          aria-controls="workflow-problems-list"
+          (click)="toggleCollapsed()"
+        >
+          <i
+            class="pi"
+            [class.pi-chevron-down]="collapsed()"
+            [class.pi-chevron-up]="!collapsed()"
+            aria-hidden="true"
+          ></i>
+          <span>
+            {{
+              (collapsed() ? 'workflowStudio.problems.expand' : 'workflowStudio.problems.collapse')
+                | translateContent
+            }}
+          </span>
+        </button>
+      }
     </div>
   </header>
 
-  @if (!collapsed()) {
+  @if (issues.length && !collapsed()) {
     <div id="workflow-problems-list">
-      @if (!issues.length) {
-        <p class="workflow-problems__empty">{{ 'workflowStudio.problems.empty' | translateContent }}</p>
-      } @else {
-        <ul class="workflow-problems__list">
-          @for (issue of issues; track trackIssue($index, issue)) {
-            <li class="workflow-problems__item" [class.workflow-problems__item--warning]="issue.severity === 'warning'">
-              <button type="button" class="workflow-problems__button" (click)="selectIssue(issue)">
-                <span class="workflow-problems__severity">
-                  {{ ('workflowStudio.problems.severity.' + issue.severity) | translateContent }}
-                </span>
-                <span class="workflow-problems__message">{{ issue.message }}</span>
-                <span class="workflow-problems__meta">
-                  @if (issue.nodeId) {
-                    <span>{{ issue.nodeId }}</span>
-                  }
-                  @if (issue.edgeId) {
-                    <span>{{ issue.edgeId }}</span>
-                  }
-                  @if (issue.field) {
-                    <span>{{ issue.field }}</span>
-                  }
-                </span>
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <ul class="workflow-problems__list">
+        @for (issue of issues; track trackIssue($index, issue)) {
+          <li
+            class="workflow-problems__item"
+            [class.workflow-problems__item--warning]="issue.severity === 'warning'"
+          >
+            <button type="button" class="workflow-problems__button" (click)="selectIssue(issue)">
+              <span class="workflow-problems__severity">
+                {{ 'workflowStudio.problems.severity.' + issue.severity | translateContent }}
+              </span>
+              <span class="workflow-problems__message">{{ issue.message }}</span>
+              <span class="workflow-problems__meta">
+                @if (issue.nodeId) {
+                  <span>{{ issue.nodeId }}</span>
+                }
+                @if (issue.edgeId) {
+                  <span>{{ issue.edgeId }}</span>
+                }
+                @if (issue.field) {
+                  <span>{{ issue.field }}</span>
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
     </div>
   }
 </section>
