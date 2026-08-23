@@ -13,7 +13,7 @@ describe('RealtimeProgressBarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(RealtimeProgressBarComponent);
@@ -34,7 +34,7 @@ describe('RealtimeProgressBarComponent', () => {
       total: 50,
       step: 'VALIDATING',
       message: 'Checking rows',
-      cancellable: true
+      cancellable: true,
     };
     component.cancel.subscribe(cancel);
     component.viewDetail.subscribe(viewDetail);
@@ -47,7 +47,9 @@ describe('RealtimeProgressBarComponent', () => {
     expect(text).toContain('VALIDATING');
     expect(text).toContain('Checking rows');
     expect(text).toContain('21 / 50');
-    expect((fixture.nativeElement.querySelector('.progress-fill') as HTMLElement).style.width).toBe('42%');
+    expect((fixture.nativeElement.querySelector('.progress-fill') as HTMLElement).style.width).toBe(
+      '42%',
+    );
 
     emitButton('preview');
     emitButton('cancel');
@@ -62,7 +64,7 @@ describe('RealtimeProgressBarComponent', () => {
       taskId: 'BT-001',
       taskType: 'BACKTEST',
       status: 'SKIPPED',
-      progressPercent: 150
+      progressPercent: 150,
     };
 
     expect(component.normalized()).toEqual(
@@ -70,8 +72,8 @@ describe('RealtimeProgressBarComponent', () => {
         id: 'BT-001',
         title: 'BACKTEST',
         status: 'completed',
-        percent: 150
-      })
+        percent: 150,
+      }),
     );
     expect(component.percent()).toBe(100);
     expect(component.canCancel()).toBe(false);
@@ -81,7 +83,7 @@ describe('RealtimeProgressBarComponent', () => {
     const statuses = [
       { status: 'queued' as const, variant: 'info' },
       { status: 'completed' as const, variant: 'success' },
-      { status: 'cancelled' as const, variant: 'muted' }
+      { status: 'cancelled' as const, variant: 'muted' },
     ];
 
     for (const item of statuses) {
@@ -99,7 +101,7 @@ describe('RealtimeProgressBarComponent', () => {
   it('uses indeterminate mode when running without a percent', () => {
     component.state = {
       id: 'JOB-INDET',
-      status: 'running'
+      status: 'running',
     };
 
     fixture.detectChanges();
@@ -115,7 +117,7 @@ describe('RealtimeProgressBarComponent', () => {
       id: 'JOB-002',
       status: 'failed',
       percent: 64,
-      errorMessage: 'Worker failed'
+      errorMessage: 'Worker failed',
     };
     component.retry.subscribe(retry);
 

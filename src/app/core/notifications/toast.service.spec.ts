@@ -10,8 +10,11 @@ describe('ToastService', () => {
     TestBed.configureTestingModule({
       providers: [
         ToastService,
-        { provide: I18nService, useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') } }
-      ]
+        {
+          provide: I18nService,
+          useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') },
+        },
+      ],
     });
 
     service = TestBed.inject(ToastService);
@@ -29,7 +32,7 @@ describe('ToastService', () => {
 
     expect(service.messages().length).toBe(1);
     expect(service.messages()[0]).toEqual(
-      expect.objectContaining({ severity: 'error', summary: 'loadError' })
+      expect.objectContaining({ severity: 'error', summary: 'loadError' }),
     );
   });
 

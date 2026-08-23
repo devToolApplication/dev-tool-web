@@ -103,11 +103,11 @@
   --tokenBorderRadiusXl: 12px;
   --tokenBorderRadius2xl: 16px;
   --tokenBorderRadiusFull: 9999px;
-  --tokenShadowSm: 0 1px 2px 0 rgba(0,0,0,0.05);
-  --tokenShadowDefault: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
-  --tokenShadowMd: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-  --tokenShadowLg: 0 10px 12px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
-  --tokenShadowXl: 0 20px 20px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  --tokenShadowSm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --tokenShadowDefault: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --tokenShadowMd: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --tokenShadowLg: 0 10px 12px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --tokenShadowXl: 0 20px 20px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --tokenPrimary50: var(--tokenColorIndigo50);
   --tokenPrimary100: var(--tokenColorIndigo100);
   --tokenPrimary200: var(--tokenColorIndigo200);

@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BaseInput } from '../base-input';
 
 export interface TreeNodeOption {
@@ -20,7 +21,7 @@ interface FlatNode {
   selector: 'app-select-tree',
   standalone: false,
   templateUrl: './select-tree.html',
-  styleUrl: './select-tree.css'
+  styleUrl: './select-tree.css',
 })
 export class SelectTree extends BaseInput<string | string[] | null> implements OnChanges {
   @Input() options: TreeNodeOption[] = [];
@@ -47,7 +48,7 @@ export class SelectTree extends BaseInput<string | string[] | null> implements O
       result.push({
         key: node.key ?? node.label ?? '',
         label: prefix + (node.label ?? ''),
-        selectable: node.selectable !== false
+        selectable: node.selectable !== false,
       });
       if (node.children?.length) {
         result.push(...this.flatten(node.children, depth + 1));

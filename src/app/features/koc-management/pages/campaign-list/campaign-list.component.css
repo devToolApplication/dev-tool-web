@@ -1,0 +1,9 @@
+﻿.koc-campaign-list__status-filter {
+  min-width: min(16rem, 100%);
+}
+
+@media (max-width: 48rem) {
+  .koc-campaign-list__status-filter {
+    width: 100%;
+  }
+}

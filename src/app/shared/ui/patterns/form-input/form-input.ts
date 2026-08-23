@@ -1,18 +1,20 @@
+import type { OnChanges, OnInit, QueryList, SimpleChanges } from '@angular/core';
 import {
   Component,
   computed,
+  ElementRef,
   effect,
   EventEmitter,
   Injector,
   Input,
-  OnChanges,
-  OnInit,
   Output,
+  inject,
   signal,
-  SimpleChanges,
+  ViewChildren,
 } from '@angular/core';
-import { createFormEngine, FormEngineInstance } from './utils/form-engine';
-import {
+import type { FormEngineInstance } from './utils/form-engine';
+import { createFormEngine } from './utils/form-engine';
+import type {
   ArrayFieldState,
   FieldState,
   FormConfig,
@@ -24,13 +26,9 @@ import {
   TreeFieldState,
 } from './models/form-config.model';
 import { getColClass } from './utils/form.utils';
-import { ValidationSummaryItem } from '@shared/ui/forms/validation-summary/validation-summary.component';
-import {
-  buildFormSections,
-  fieldErrorEntries,
-  flattenFormFields,
-  FormRenderableField,
-} from './utils/form-sections';
+import type { ValidationSummaryItem } from '@shared/ui/forms/validation-summary/validation-summary.component';
+import type { FormRenderableField } from './utils/form-sections';
+import { buildFormSections, fieldErrorEntries, flattenFormFields } from './utils/form-sections';
 
 @Component({
   selector: 'app-form-input',
@@ -39,17 +37,22 @@ import {
   styleUrl: './form-input.css',
 })
 export class FormInput implements OnInit, OnChanges {
+  private readonly injector = inject(Injector);
   private suppressValueChange = true;
 
-  constructor(private readonly injector: Injector) {}
+  @ViewChildren('fieldHost', { read: ElementRef })
+  private fieldHosts?: QueryList<ElementRef<HTMLElement>>;
+
+  @ViewChildren('sectionHost', { read: ElementRef })
+  private sectionHosts?: QueryList<ElementRef<HTMLElement>>;
 
   @Input() config!: FormConfig;
   @Input() context: FormContext = { user: null };
   @Input() initialValue: unknown = {};
   @Input() submitting = false;
   @Input() loading = false;
-  @Input() apiError?: string | null;
-  @Input() apiFieldErrors?: Record<string, string | string[]> | FormValidationError[] | null;
+  @Input() formError?: string | null;
+  @Input() externalErrors: FormValidationError[] = [];
 
   @Output() formSubmit = new EventEmitter<unknown>();
   @Output() valueChange = new EventEmitter<unknown>();
@@ -223,8 +226,8 @@ export class FormInput implements OnInit, OnChanges {
       }
     }
 
-    if (changes['apiFieldErrors']) {
-      this.applyApiFieldErrors();
+    if (changes['externalErrors']) {
+      this.applyExternalErrors();
     }
 
     if (changes['initialValue']) {
@@ -303,21 +306,12 @@ export class FormInput implements OnInit, OnChanges {
       return;
     }
 
-    const element = document.querySelector(
-      `[data-field-path="${item.fieldPath}"]`,
-    ) as HTMLElement | null;
-    if (typeof element?.scrollIntoView === 'function') {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    element?.focus?.();
+    this.scrollToFieldPath(item.fieldPath, 'center');
   }
 
   onSectionSelect(sectionId: string): void {
     this.activeSectionId.set(sectionId);
-    const element = document.getElementById(`form-section-${sectionId}`);
-    if (typeof element?.scrollIntoView === 'function') {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    this.scrollToSection(sectionId);
   }
 
   reviewErrors(): void {
@@ -363,10 +357,10 @@ export class FormInput implements OnInit, OnChanges {
     this.engine.set(newEngine);
     this.submitted.set(false);
     this.activeSectionId.set(null);
-    this.applyApiFieldErrors();
+    this.applyExternalErrors();
   }
 
-  private applyApiFieldErrors(): void {
+  private applyExternalErrors(): void {
     const currentEngine = this.engine();
     if (!currentEngine) {
       return;
@@ -376,7 +370,7 @@ export class FormInput implements OnInit, OnChanges {
     const lookup = this.fieldLookup();
     fields.forEach((field) => field.externalErrors.set(null));
 
-    for (const error of this.normalizeApiFieldErrors()) {
+    for (const error of this.externalErrors ?? []) {
       if (!error.fieldPath) {
         continue;
       }
@@ -386,28 +380,9 @@ export class FormInput implements OnInit, OnChanges {
       }
       target.externalErrors.set({
         ...(target.externalErrors() ?? {}),
-        [`api-${Object.keys(target.externalErrors() ?? {}).length}`]: error.message,
+        [`external-${Object.keys(target.externalErrors() ?? {}).length}`]: error.message,
       });
     }
-  }
-
-  private normalizeApiFieldErrors(): FormValidationError[] {
-    if (!this.apiFieldErrors) {
-      return [];
-    }
-
-    if (Array.isArray(this.apiFieldErrors)) {
-      return this.apiFieldErrors;
-    }
-
-    return Object.entries(this.apiFieldErrors).flatMap(([fieldPath, value]) => {
-      const messages = Array.isArray(value) ? value : [value];
-      return messages.map((message) => ({
-        fieldPath,
-        message,
-        severity: 'error' as const,
-      }));
-    });
   }
 
   private scrollToFirstInvalidField(): void {
@@ -426,14 +401,35 @@ export class FormInput implements OnInit, OnChanges {
         this.activeSectionId.set(targetSection.id);
       }
 
-      const element = document.querySelector(
-        `[data-field-path="${firstInvalid.path}"]`,
-      ) as HTMLElement | null;
-      if (typeof element?.scrollIntoView === 'function') {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      element?.focus?.();
+      this.scrollToFieldPath(firstInvalid.path, 'center');
     });
   }
-}
 
+  private scrollToFieldPath(fieldPath: string, block: ScrollLogicalPosition): void {
+    const element = this.findHostByAttribute(this.fieldHosts, 'data-field-path', fieldPath);
+    this.scrollAndFocus(element, block);
+  }
+
+  private scrollToSection(sectionId: string): void {
+    const element = this.findHostByAttribute(this.sectionHosts, 'data-form-section-id', sectionId);
+    this.scrollAndFocus(element, 'start');
+  }
+
+  private findHostByAttribute(
+    hosts: QueryList<ElementRef<HTMLElement>> | undefined,
+    attribute: string,
+    value: string,
+  ): HTMLElement | null {
+    return (
+      hosts?.find((item) => item.nativeElement.getAttribute(attribute) === value)?.nativeElement ??
+      null
+    );
+  }
+
+  private scrollAndFocus(element: HTMLElement | null, block: ScrollLogicalPosition): void {
+    if (typeof element?.scrollIntoView === 'function') {
+      element.scrollIntoView({ behavior: 'smooth', block });
+    }
+    element?.focus?.();
+  }
+}

@@ -5,10 +5,16 @@
       [class.opacity-60]="disabled"
     >
       @for (item of selectedOptions; track item.value) {
-        <span class="inline-flex items-center gap-1 rounded-md bg-[var(--app-chart-primary-fill)] px-2 py-0.5 text-xs text-[var(--app-text)]">
+        <span
+          class="inline-flex items-center gap-1 rounded-md bg-[var(--app-chart-primary-fill)] px-2 py-0.5 text-xs text-[var(--app-text)]"
+        >
           <span class="app-chip-label">{{ item.label }}</span>
           @if (!disabled) {
-            <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)]" (click)="removeTag(item.value)">
+            <button
+              type="button"
+              class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)]"
+              (click)="removeTag(item.value)"
+            >
               <i class="pi pi-times text-[0.6rem]"></i>
             </button>
           }
@@ -18,9 +24,12 @@
         [id]="inputId"
         type="text"
         [disabled]="disabled"
-        [attr.placeholder]="selectedOptions.length === 0 ? ((placeholder || null) | translateContent) : ''"
-        [attr.aria-label]="(label || placeholder || inputId) | translateContent"
+        [attr.placeholder]="
+          selectedOptions.length === 0 ? (placeholder || null | translateContent) : ''
+        "
+        [attr.aria-label]="label || placeholder || inputId | translateContent"
         [attr.aria-invalid]="invalid || null"
+        [attr.aria-describedby]="describedBy || null"
         class="flex-1 min-w-[80px] bg-transparent outline-none text-sm placeholder-[var(--app-text-muted)]"
         [(ngModel)]="currentQuery"
         (keydown.enter)="onInputKeydown($any($event))"
@@ -33,29 +42,37 @@
       <label
         [attr.for]="inputId"
         class="absolute left-3 top-0 -translate-y-1/2 text-xs bg-[var(--app-custom-input-bg)] px-1 text-[var(--app-text-muted)] pointer-events-none"
-      >{{ label | translateContent }}</label>
+        >{{ label | translateContent }}</label
+      >
     }
 
     @if (suggestions.length > 0 && suggestionsOpen) {
-      <div class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-48 overflow-y-auto">
+      <div
+        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-48 overflow-y-auto"
+      >
         @for (item of suggestions; track item.value) {
           <button
             type="button"
             class="w-full px-3 py-2 text-left text-sm text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)] transition-colors"
             [class.font-semibold]="isInModel(item.value)"
             (mousedown)="addTag(item.value)"
-          >{{ item.label }}</button>
+          >
+            {{ item.label }}
+          </button>
         }
       </div>
     }
   </div>
 
   @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>
-

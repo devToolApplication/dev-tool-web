@@ -7,8 +7,8 @@ const HTML_PORT_CONNECTION_STORY_URL =
 
 async function openStory(page: Page, url = SINGLE_RULE_REF_STORY_URL): Promise<string[]> {
   const browserErrors: string[] = [];
-  page.on('pageerror', error => browserErrors.push(error.message));
-  page.on('console', message => {
+  page.on('pageerror', (error) => browserErrors.push(error.message));
+  page.on('console', (message) => {
     if (message.type() === 'error') {
       browserErrors.push(message.text());
     }
@@ -21,7 +21,9 @@ async function openStory(page: Page, url = SINGLE_RULE_REF_STORY_URL): Promise<s
 }
 
 test.describe('Flow Builder Story Regression', () => {
-  test('renders the initial rule node in the main canvas instead of only the plus button', async ({ page }) => {
+  test('renders the initial rule node in the main canvas instead of only the plus button', async ({
+    page,
+  }) => {
     const browserErrors = await openStory(page);
     expect(browserErrors, browserErrors.join('\n')).toHaveLength(0);
 
@@ -31,7 +33,9 @@ test.describe('Flow Builder Story Regression', () => {
     await expect(page.locator('.flow-add-button__trigger')).toBeHidden();
   });
 
-  test('does not place the initial rule node at the canvas top-left corner after fit', async ({ page }) => {
+  test('does not place the initial rule node at the canvas top-left corner after fit', async ({
+    page,
+  }) => {
     await openStory(page);
 
     const canvasBox = await page.locator('.flow-canvas').boundingBox();
@@ -48,28 +52,41 @@ test.describe('Flow Builder Story Regression', () => {
 
     await page.evaluate(() => {
       const builder = document.querySelector('app-flow-builder');
-      const component = (window as Window & { ng?: { getComponent?: (element: Element | null) => unknown } })
-        .ng?.getComponent?.(builder) as
-        | { canvas?: { engineInstance?: { paper?: { setDimensions?: (width: number, height: number) => void } } } }
+      const component = (
+        window as Window & { ng?: { getComponent?: (element: Element | null) => unknown } }
+      ).ng?.getComponent?.(builder) as
+        | {
+            canvas?: {
+              engineInstance?: {
+                paper?: { setDimensions?: (width: number, height: number) => void };
+              };
+            };
+          }
         | undefined;
       component?.canvas?.engineInstance?.paper?.setDimensions(1, 1);
     });
 
-    await expect.poll(async () => {
-      const box = await page.locator('.flow-canvas__paper').boundingBox();
-      return Math.round(box?.width ?? 0);
-    }).toBe(1);
+    await expect
+      .poll(async () => {
+        const box = await page.locator('.flow-canvas__paper').boundingBox();
+        return Math.round(box?.width ?? 0);
+      })
+      .toBe(1);
 
     await page.locator('[data-testid="flow-builder-command-fit"] button').click();
 
-    await expect.poll(async () => {
-      const box = await page.locator('.flow-canvas__paper').boundingBox();
-      return Math.round(box?.width ?? 0);
-    }).toBeGreaterThan(300);
-    await expect.poll(async () => {
-      const box = await page.locator('.flow-canvas__paper').boundingBox();
-      return Math.round(box?.height ?? 0);
-    }).toBeGreaterThan(300);
+    await expect
+      .poll(async () => {
+        const box = await page.locator('.flow-canvas__paper').boundingBox();
+        return Math.round(box?.width ?? 0);
+      })
+      .toBeGreaterThan(300);
+    await expect
+      .poll(async () => {
+        const box = await page.locator('.flow-canvas__paper').boundingBox();
+        return Math.round(box?.height ?? 0);
+      })
+      .toBeGreaterThan(300);
 
     const canvasBox = await page.locator('.flow-canvas').boundingBox();
     const nodeBox = await page.locator('.joint-element').first().boundingBox();
@@ -95,9 +112,16 @@ test.describe('Flow Builder Story Regression', () => {
     expect(sourceBox).not.toBeNull();
     expect(targetBox).not.toBeNull();
 
-    await page.mouse.move(sourceBox!.x + sourceBox!.width / 2, sourceBox!.y + sourceBox!.height / 2);
+    await page.mouse.move(
+      sourceBox!.x + sourceBox!.width / 2,
+      sourceBox!.y + sourceBox!.height / 2,
+    );
     await page.mouse.down();
-    await page.mouse.move(targetBox!.x + targetBox!.width / 2, targetBox!.y + targetBox!.height / 2, { steps: 12 });
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 12 },
+    );
     await page.mouse.up();
 
     await expect(page.locator('.joint-link')).toHaveCount(1);

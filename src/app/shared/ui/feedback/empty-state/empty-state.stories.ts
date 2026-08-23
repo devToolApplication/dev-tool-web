@@ -9,8 +9,8 @@ const meta: Meta<EmptyStateComponent> = {
     description: 'There are no active records in this directory or view.',
     variant: 'default',
     size: 'default',
-    align: 'center'
-  }
+    align: 'center',
+  },
 };
 
 export default meta;
@@ -23,8 +23,8 @@ export const Search: Story = {
   args: {
     title: 'No search results',
     description: 'We could not find any matches for your search keywords.',
-    variant: 'search'
-  }
+    variant: 'search',
+  },
 };
 
 export const Create: Story = {
@@ -32,30 +32,31 @@ export const Create: Story = {
     title: 'No projects created yet',
     description: 'Get started by creating your first workflow automation project.',
     variant: 'create',
-    primaryActionLabel: 'common.create'
-  }
+    primaryActionLabel: 'common.create',
+  },
 };
 
 export const Warning: Story = {
   args: {
     title: 'Access restricted',
     description: 'You do not have access rights to view this data panel.',
-    variant: 'warning'
-  }
+    variant: 'warning',
+  },
 };
 
 export const Compact: Story = {
   args: {
     size: 'compact',
-    description: 'No sub-items available.'
-  }
+    description: 'No sub-items available.',
+  },
 };
 
 export const WithActions: Story = {
   args: {
     title: 'Empty Repository',
-    description: 'This deployment package has no versions. Upload a package or link to a repository.',
+    description:
+      'This deployment package has no versions. Upload a package or link to a repository.',
     primaryActionLabel: 'Upload Package',
-    secondaryActionLabel: 'Link Repository'
-  }
+    secondaryActionLabel: 'Link Repository',
+  },
 };

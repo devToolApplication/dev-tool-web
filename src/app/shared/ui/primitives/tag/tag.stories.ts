@@ -7,8 +7,8 @@ const meta: Meta<Tag> = {
   args: {
     value: 'Tag Label',
     severity: null,
-    rounded: false
-  }
+    rounded: false,
+  },
 };
 
 export default meta;
@@ -30,23 +30,22 @@ export const AllSeverities: Story = {
         <app-tag value="Danger" variant="destructive"></app-tag>
         <app-tag value="Contrast" severity="contrast"></app-tag>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const Rounded: Story = {
   args: {
     rounded: true,
     value: 'Rounded Tag',
-    severity: 'info'
-  }
+    severity: 'info',
+  },
 };
 
 export const WithIcon: Story = {
   args: {
     icon: 'pi pi-check',
     value: 'Verified',
-    severity: 'success'
-  }
+    severity: 'success',
+  },
 };
-

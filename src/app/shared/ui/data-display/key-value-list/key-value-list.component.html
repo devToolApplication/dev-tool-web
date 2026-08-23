@@ -12,36 +12,46 @@
           }
           @case ('number') {
             @if (numberValue(item) !== null) {
-              <span>{{ item.prefix ?? '' }}{{ numberValue(item) | number:(item.format ?? '1.0-3') }}{{ item.suffix ?? '' }}</span>
+              <span
+                >{{ item.prefix ?? '' }}{{ numberValue(item) | number: item.format ?? '1.0-3'
+                }}{{ item.suffix ?? '' }}</span
+              >
             } @else {
               <span class="key-value-list__empty">{{ displayValue(item) | translateContent }}</span>
             }
           }
           @case ('currency') {
             @if (numberValue(item) !== null) {
-              <span>{{ numberValue(item) | currency:(item.currencyCode ?? 'USD'):'symbol':(item.format ?? '1.2-2') }}</span>
+              <span>{{
+                numberValue(item)
+                  | currency: item.currencyCode ?? 'USD' : 'symbol' : item.format ?? '1.2-2'
+              }}</span>
             } @else {
               <span class="key-value-list__empty">{{ displayValue(item) | translateContent }}</span>
             }
           }
           @case ('percent') {
             @if (numberValue(item) !== null) {
-              <span>{{ numberValue(item) | percent:(item.format ?? '1.0-2') }}</span>
+              <span>{{ numberValue(item) | percent: item.format ?? '1.0-2' }}</span>
             } @else {
               <span class="key-value-list__empty">{{ displayValue(item) | translateContent }}</span>
             }
           }
           @case ('boolean') {
-            <app-value-display [value]="item.value" type="boolean" [emptyValue]="item.emptyValue ?? emptyValue"></app-value-display>
+            <app-value-display
+              [value]="item.value"
+              type="boolean"
+              [emptyValue]="item.emptyValue ?? emptyValue"
+            ></app-value-display>
           }
           @case ('copyable') {
             <app-copyable-text [value]="displayValue(item)" [shorten]="true"></app-copyable-text>
           }
           @case ('date') {
-            {{ dateValue(item) | date:'dd/MM/yyyy' }}
+            {{ dateValue(item) | date: 'dd/MM/yyyy' }}
           }
           @case ('datetime') {
-            {{ dateValue(item) | date:'dd/MM/yyyy HH:mm:ss' }}
+            {{ dateValue(item) | date: 'dd/MM/yyyy HH:mm:ss' }}
           }
           @case ('json') {
             <app-json-viewer [value]="item.value" [collapsed]="true"></app-json-viewer>

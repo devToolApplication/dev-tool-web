@@ -34,7 +34,9 @@
   width: var(--shell-sidebar-width);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width 220ms ease, transform 220ms ease;
+  transition:
+    width 220ms ease,
+    transform 220ms ease;
   background: var(--app-shell-sidebar-bg);
   backdrop-filter: blur(18px);
   z-index: var(--app-z-sidebar);

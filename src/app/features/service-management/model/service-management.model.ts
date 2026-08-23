@@ -58,7 +58,7 @@ export interface ServiceResourceListScreen {
   basePath: string;
   actions: ActionToolbarAction[];
   filters: FilterPanelField[];
-  table: TableConfig;
+  table: TableConfig<ServiceResourceRecord>;
   records: ServiceResourceRecord[];
 }
 
@@ -111,7 +111,7 @@ export interface JobManagementScreen {
   actions: ActionToolbarAction[];
   filters: FilterPanelField[];
   metrics: ServiceMetric[];
-  table: TableConfig;
+  table: TableConfig<JobRecord>;
   jobs: JobRecord[];
   formConfig: FormConfig;
 }
@@ -125,5 +125,3 @@ export interface JobFormScreen {
   formConfig: FormConfig;
   model: Record<string, unknown>;
 }
-
-

@@ -6,7 +6,7 @@ import { AppMenuItem } from '../../navigation/side-menu/side-menu.component';
   selector: 'app-base-layout',
   standalone: false,
   templateUrl: './base.layout.html',
-  styleUrls: ['./base.layout.css']
+  styleUrls: ['./base.layout.css'],
 })
 export class BaseLayoutComponent implements OnInit {
   readonly menuItems: AppMenuItem[] = APP_LAYOUT_MENU;

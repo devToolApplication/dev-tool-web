@@ -17,12 +17,14 @@ This level depends on level 2 viewport rectangle sync.
 ## User Experience
 
 User can:
+
 - Hover the viewport rectangle and see grab cursor.
 - Drag the rectangle inside the minimap.
 - Main canvas pans live or on drag end.
 - Releasing pointer keeps the canvas at the new position.
 
 Recommended behavior:
+
 - Live pan while dragging for desktop.
 - Use pointer events so mouse and touch both work.
 - Do not start drag from node mini buttons unless the target is the viewport rectangle.
@@ -36,6 +38,7 @@ Add output to `FlowNavigatorComponent`:
 ```
 
 Meaning:
+
 - `centerX`, `centerY` are local paper coordinates that should become the center of the main canvas viewport.
 
 Alternative output:
@@ -58,10 +61,7 @@ Implementation:
 const scale = this.paper.scale().sx;
 const width = this.options.el.clientWidth;
 const height = this.options.el.clientHeight;
-this.paper.translate(
-  width / 2 - centerX * scale,
-  height / 2 - centerY * scale
-);
+this.paper.translate(width / 2 - centerX * scale, height / 2 - centerY * scale);
 this.scheduleViewportChange();
 ```
 
@@ -102,6 +102,7 @@ private activePointerId: number | null = null;
 ```
 
 Handlers:
+
 - `onViewportPointerDown(event)`
 - `onViewportPointerMove(event)`
 - `onViewportPointerUp(event)`
@@ -148,10 +149,8 @@ Because pointer events on document can be brittle in Storybook iframe.
 4. Add template event bindings.
    - On viewport rectangle:
      ```html
-     (pointerdown)="onViewportPointerDown($event)"
-     (pointermove)="onViewportPointerMove($event)"
-     (pointerup)="onViewportPointerUp($event)"
-     (pointercancel)="onViewportPointerCancel($event)"
+     (pointerdown)="onViewportPointerDown($event)" (pointermove)="onViewportPointerMove($event)"
+     (pointerup)="onViewportPointerUp($event)" (pointercancel)="onViewportPointerCancel($event)"
      ```
    - Add `role="slider"` is not ideal for 2D pan. Prefer `role="button"` with aria label.
 
@@ -197,6 +196,7 @@ npm.cmd run build-storybook
 ```
 
 Manual browser checks:
+
 - Open Large Graph story.
 - Fit graph.
 - Drag minimap viewport right/down.
@@ -228,6 +228,7 @@ expect(after?.x).not.toBe(before?.x);
 ## Rollback
 
 Remove:
+
 - `panToLocalCenter()` from engine.
 - `viewportPan` output and pointer handlers.
 - Builder event binding and handler.

@@ -40,7 +40,7 @@ describe('Shared UI foundation', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
   });
 
@@ -74,7 +74,7 @@ describe('Shared UI foundation', () => {
       FluidComponent,
       IconFieldComponent,
       RippleComponent,
-      TooltipComponent
+      TooltipComponent,
     ];
 
     components.forEach((componentType) => {
@@ -93,13 +93,13 @@ describe('Shared UI foundation', () => {
         search: { visible: true },
         refresh: { visible: true },
         columnVisibility: { visible: true },
-        density: { visible: true }
+        density: { visible: true },
       },
       columns: [
         { field: 'id', header: 'id', type: 'copyable', hideable: false },
         { field: 'name', header: 'name', type: 'text' },
-        { field: 'state', header: 'status', type: 'badge', visible: false }
-      ]
+        { field: 'state', header: 'status', type: 'badge', visible: false },
+      ],
     };
     component.data = [{ id: 'item-1', name: 'Alpha', state: 'ACTIVE' }];
     component.ngOnChanges({ config: new SimpleChange(undefined, component.config, true) });
@@ -115,7 +115,7 @@ describe('Shared UI foundation', () => {
     expect(component.density()).toBe('compact');
   });
 
-  it('should map API field errors into the shared form validation summary', async () => {
+  it('should map external field errors into the shared form validation summary', async () => {
     const fixture: ComponentFixture<FormInput> = TestBed.createComponent(FormInput);
     const component = fixture.componentInstance;
     component.config = {
@@ -123,13 +123,13 @@ describe('Shared UI foundation', () => {
         {
           name: 'name',
           type: 'text',
-          label: 'name'
-        }
-      ]
+          label: 'name',
+        },
+      ],
     };
     component.context = { user: null, mode: 'create' };
     component.initialValue = { name: '' };
-    component.apiFieldErrors = [{ fieldPath: 'name', message: 'Name is already used' }];
+    component.externalErrors = [{ fieldPath: 'name', message: 'Name is already used' }];
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -142,8 +142,8 @@ describe('Shared UI foundation', () => {
         label: 'name',
         section: 'shared.form.section.general',
         message: 'Name is already used',
-        severity: 'error'
-      }
+        severity: 'error',
+      },
     ]);
   });
 
@@ -160,4 +160,3 @@ describe('Shared UI foundation', () => {
     expect(component.advancedCollapsed).toBe(true);
   });
 });
-

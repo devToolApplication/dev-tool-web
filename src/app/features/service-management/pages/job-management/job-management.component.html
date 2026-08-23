@@ -38,8 +38,13 @@
   <app-table
     [config]="screen.table"
     [data]="jobs()"
+    [columnVisibility]="tableViewState().columnVisibility"
+    [densityValue]="tableViewState().density"
     (rowClick)="openDetail($event)"
     (actionClick)="onTableAction($event)"
+    (columnVisibilityChange)="onTableColumnVisibilityChange($event)"
+    (densityChange)="onTableDensityChange($event)"
+    (exportRequested)="onTableExport($event)"
   ></app-table>
 </app-page-shell>
 
@@ -59,7 +64,15 @@
         </div>
         <app-badge
           [label]="job.statusLabel"
-          [variant]="job.status === 'running' ? 'success' : job.status === 'failed' ? 'danger' : job.status === 'paused' ? 'warning' : 'muted'"
+          [variant]="
+            job.status === 'running'
+              ? 'success'
+              : job.status === 'failed'
+                ? 'danger'
+                : job.status === 'paused'
+                  ? 'warning'
+                  : 'muted'
+          "
         ></app-badge>
       </div>
 
@@ -92,16 +105,7 @@
   }
 
   <div drawer-footer class="job-detail__footer">
-    <app-button
-      label="close"
-      variant="secondary"
-      (buttonClick)="closeDrawer()"
-    ></app-button>
-    <app-button
-      label="edit"
-      icon="pi pi-pencil"
-      (buttonClick)="editSelectedJob()"
-    ></app-button>
+    <app-button label="close" variant="secondary" (buttonClick)="closeDrawer()"></app-button>
+    <app-button label="edit" icon="pi pi-pencil" (buttonClick)="editSelectedJob()"></app-button>
   </div>
 </app-drawer>
-

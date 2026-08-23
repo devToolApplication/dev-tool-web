@@ -7,7 +7,7 @@ const meta: Meta<FieldsetComponent> = {
   args: {
     legend: 'Fieldset Legend Title',
     toggleable: false,
-    collapsed: false
+    collapsed: false,
   },
   render: (args) => ({
     props: args,
@@ -17,8 +17,8 @@ const meta: Meta<FieldsetComponent> = {
           This is some detailed content inside the fieldset layout panel.
         </p>
       </app-fieldset>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -29,6 +29,6 @@ export const Default: Story = {};
 
 export const Toggleable: Story = {
   args: {
-    toggleable: true
-  }
+    toggleable: true,
+  },
 };

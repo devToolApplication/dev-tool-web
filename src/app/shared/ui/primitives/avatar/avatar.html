@@ -6,13 +6,13 @@
     'h-10 w-10 text-base': size === 'large',
     'h-14 w-14 text-lg': size === 'xlarge',
     'rounded-full': shape === 'circle',
-    'rounded-lg': shape === 'square'
+    'rounded-lg': shape === 'square',
   }"
   [class.bg-[var(--app-chart-primary-fill)]]="!image"
   [class.text-[var(--app-primary)]]="!image"
 >
   @if (image) {
-    <img [src]="image" [alt]="(label || '') | translateContent" class="h-full w-full object-cover" />
+    <img [src]="image" [alt]="label || '' | translateContent" class="h-full w-full object-cover" />
   } @else if (icon) {
     <i [class]="icon"></i>
   } @else if (label) {

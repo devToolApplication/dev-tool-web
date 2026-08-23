@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-avatar',
   standalone: false,
   templateUrl: './avatar.html',
-  styleUrl: './avatar.css'
+  styleUrl: './avatar.css',
 })
 export class AvatarComponent {
   @Input() label?: string;

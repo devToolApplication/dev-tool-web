@@ -1,5 +1,8 @@
 <div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
-  <label class="inline-flex items-center gap-2 cursor-pointer" [class.cursor-not-allowed]="disabled">
+  <label
+    class="inline-flex items-center gap-2 cursor-pointer"
+    [class.cursor-not-allowed]="disabled"
+  >
     <input
       [id]="inputId"
       type="checkbox"
@@ -8,22 +11,29 @@
       [disabled]="disabled || readonly"
       [required]="required"
       [indeterminate]="indeterminate"
-      [attr.aria-label]="(ariaLabel || label || '') | translateContent"
+      [attr.aria-label]="ariaLabel || label || '' | translateContent"
       [attr.aria-invalid]="invalid || null"
+      [attr.aria-describedby]="describedBy || null"
       class="h-4.5 w-4.5 rounded border border-[var(--app-input-border)] bg-[var(--app-custom-input-bg)] text-[var(--app-primary)] transition-all duration-150 focus:ring-2 focus:ring-[var(--app-primary)]/25 checked:bg-[var(--app-primary)] checked:border-[var(--app-primary)] disabled:cursor-not-allowed disabled:opacity-60"
       (blur)="onBlur()"
       (focus)="onFocus()"
     />
     @if (label && !hideLabel) {
-      <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{ label | translateContent }}</span>
+      <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{
+        label | translateContent
+      }}</span>
     }
   </label>
 
   @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>

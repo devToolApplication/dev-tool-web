@@ -14,7 +14,7 @@ describe('joint flow viewport helpers', () => {
     const transform = computeFitTransform(
       { minX: 0, minY: 0, width: 200, height: 100 },
       { width: 800, height: 500 },
-      { padding: 40, minScale: 0.3, maxScale: 1 }
+      { padding: 40, minScale: 0.3, maxScale: 1 },
     );
 
     expect(transform).toEqual({ scale: 1, tx: 300, ty: 200 });
@@ -24,7 +24,7 @@ describe('joint flow viewport helpers', () => {
     const transform = computeFitTransform(
       { minX: 100, minY: 50, width: 1400, height: 800 },
       { width: 800, height: 500 },
-      { padding: 40, minScale: 0.3, maxScale: 1 }
+      { padding: 40, minScale: 0.3, maxScale: 1 },
     );
 
     expect(transform.scale).toBeCloseTo(0.514, 3);
@@ -37,7 +37,10 @@ describe('joint flow viewport helpers', () => {
     const beforeTransform = { scale: 1, tx: 300, ty: 200 };
     const center = computeLocalCenter(beforeViewport, beforeTransform);
     const afterTranslate = computeTranslateForLocalCenter(center, { width: 1000, height: 700 }, 1);
-    const afterCenter = computeLocalCenter({ width: 1000, height: 700 }, { scale: 1, ...afterTranslate });
+    const afterCenter = computeLocalCenter(
+      { width: 1000, height: 700 },
+      { scale: 1, ...afterTranslate },
+    );
 
     expect(afterCenter.x).toBeCloseTo(center.x, 3);
     expect(afterCenter.y).toBeCloseTo(center.y, 3);
@@ -47,7 +50,7 @@ describe('joint flow viewport helpers', () => {
     const size = resolveViewportSize(
       { width: 0, height: 0 },
       { width: 580, height: 520 },
-      { width: 1, height: 1 }
+      { width: 1, height: 1 },
     );
 
     expect(size).toEqual({ width: 580, height: 520 });
@@ -57,7 +60,7 @@ describe('joint flow viewport helpers', () => {
     const size = resolvePaperViewportSize(
       { width: 1, height: 1 },
       { width: 769, height: 433 },
-      { width: 1, height: 1 }
+      { width: 1, height: 1 },
     );
 
     expect(size).toEqual({ width: 769, height: 433 });
@@ -67,7 +70,7 @@ describe('joint flow viewport helpers', () => {
     const size = resolveViewportSize(
       { width: 0, height: 0 },
       { width: 0, height: 0 },
-      { width: 580, height: 520 }
+      { width: 580, height: 520 },
     );
 
     expect(size).toEqual({ width: 580, height: 520 });
@@ -113,7 +116,7 @@ describe('joint flow viewport helpers', () => {
 
 function clientPoint(
   transform: { scale: number; tx: number; ty: number },
-  localPoint: { x: number; y: number }
+  localPoint: { x: number; y: number },
 ): { x: number; y: number } {
   return {
     x: localPoint.x * transform.scale + transform.tx,

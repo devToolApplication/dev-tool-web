@@ -1,4 +1,4 @@
-import { unsavedChangesGuard } from '@shared/ui/patterns/form-input/unsaved-changes.guard';
+import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { workflowStudioRoutes } from './workflow-studio.routes';
 
 describe('workflowStudioRoutes', () => {
@@ -13,8 +13,8 @@ describe('workflowStudioRoutes', () => {
       'ai-agent-mcrs/workflow-runs/:runId',
     ]));
     expect(workflowStudioRoutes.find((route) => route.path === 'ai-agent-mcrs/workflows/create')?.canDeactivate)
-      .toContain(unsavedChangesGuard);
+      .toContain(serviceManagementUnsavedChangesGuard);
     expect(workflowStudioRoutes.find((route) => route.path === 'ai-agent-mcrs/workflows/:workflowId/edit')?.canDeactivate)
-      .toContain(unsavedChangesGuard);
+      .toContain(serviceManagementUnsavedChangesGuard);
   });
 });

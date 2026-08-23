@@ -8,7 +8,7 @@ export type ResponsiveGridGap = 'sm' | 'md' | 'lg';
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content></ng-content>`,
-  styleUrl: './responsive-grid.component.css'
+  styleUrl: './responsive-grid.component.css',
 })
 export class ResponsiveGridComponent {
   @Input() columns: ResponsiveGridColumns = 2;

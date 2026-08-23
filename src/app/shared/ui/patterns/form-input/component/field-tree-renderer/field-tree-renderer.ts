@@ -1,56 +1,59 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, Output, signal } from '@angular/core';
-import {
+import type { OnDestroy } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import type {
   ArrayFieldState,
   FieldState,
   GridWidth,
   TreeFormNode,
-  TreeSelectStrategy,
-  TreeSelectionPreset,
   TreePickerOption,
-  TreeFieldState
+  TreeSelectStrategy,
+  TreeFieldState,
 } from '../../models/form-config.model';
 import { getColClass } from '../../utils/form.utils';
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
-
-type TreeFilterMode = 'all' | 'selected' | 'leaf';
-
-interface TreeNodeSelectionState {
-  checked: boolean;
-  indeterminate: boolean;
-  selectable: boolean;
-}
-
-interface TreeViewNode {
-  node: TreeFormNode;
-  path: string;
-  code?: string;
-  children: TreeViewNode[];
-  matched: boolean;
-  forceExpanded: boolean;
-  checked: boolean;
-  indeterminate: boolean;
-  leaf: boolean;
-}
-
-interface SelectedTreeItem {
-  node: TreeFormNode;
-  path: string;
-  code?: string;
-  leaf: boolean;
-}
-
-interface TreeBadgeView {
-  label: string;
-  variant: 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
-}
+import type {
+  SelectedTreeItem,
+  TreeBadgeView,
+  TreeFilterMode,
+  TreeNodeSelectionState,
+  TreeViewNode,
+} from './field-tree-renderer.types';
+import {
+  addTreeNode,
+  applyTreeSelectionPreset,
+  buildVisibleTreeNodes,
+  canMoveTreeNode,
+  clearTreeSelection,
+  collectSelectedTreeAncestorIds,
+  collectSelectedTreeItems,
+  duplicateTreeNode,
+  findTreeNodePath,
+  flattenTreeNodes,
+  flattenTreeViewNodes,
+  isTreeNodeSelectable,
+  moveTreeNode,
+  normalizeJsonTreeNodes,
+  removeTreeNode,
+  replaceTreeNode,
+  treeNodeCode,
+  treeNodeErrorPrefix,
+  treeNodeSelectionState,
+  treePickerOptionToNode,
+  updateTreeDescendantsSelection,
+  updateTreeNodeSelection,
+  updateTreeSelectionForIds,
+} from './tree-field.state';
 
 @Component({
   selector: 'app-field-tree-renderer',
   standalone: false,
   templateUrl: './field-tree-renderer.html',
-  styleUrl: './field-tree-renderer.css'
+  styleUrl: './field-tree-renderer.css',
 })
 export class FieldTreeRendererComponent implements OnDestroy {
+  private readonly confirmDialogService = inject(ConfirmDialogService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
   @Input({ required: true })
   field!: TreeFieldState;
   @Input() pickerSearchDebounceMs = 250;
@@ -58,11 +61,6 @@ export class FieldTreeRendererComponent implements OnDestroy {
   @Input() readonlyMode = false;
   @Output() pickerRetry = new EventEmitter<void>();
   @Output() treeRetry = new EventEmitter<void>();
-
-  constructor(
-    private readonly confirmDialogService: ConfirmDialogService,
-    private readonly host: ElementRef<HTMLElement>
-  ) {}
 
   pickerOpen = false;
   pickerMode: 'add' | 'replace' = 'add';
@@ -115,7 +113,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
 
   get nodes(): TreeFormNode[] {
     const value = this.field.value();
-    return Array.isArray(value) ? value : [];
+    return Array.isArray(value) ? (value as TreeFormNode[]) : [];
   }
 
   get labels() {
@@ -155,7 +153,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   get showBadges(): boolean {
-    return this.treeConfig?.showBadges !== false && this.treeConfig?.nodeDisplay?.showBadges !== false;
+    return (
+      this.treeConfig?.showBadges !== false && this.treeConfig?.nodeDisplay?.showBadges !== false
+    );
   }
 
   get showCounts(): boolean {
@@ -179,15 +179,15 @@ export class FieldTreeRendererComponent implements OnDestroy {
     const query = this.treeQuery().trim().toLowerCase();
     const mode = this.treeFilterMode();
     if (
-      this.visibleTreeCache
-      && this.visibleTreeCache.nodes === nodes
-      && this.visibleTreeCache.query === query
-      && this.visibleTreeCache.mode === mode
+      this.visibleTreeCache &&
+      this.visibleTreeCache.nodes === nodes &&
+      this.visibleTreeCache.query === query &&
+      this.visibleTreeCache.mode === mode
     ) {
       return this.visibleTreeCache.value;
     }
 
-    const value = this.buildVisibleNodes(nodes, '', query, mode);
+    const value = buildVisibleTreeNodes(nodes, query, mode, this.selectStrategy);
     this.visibleTreeCache = { nodes, query, mode, value };
     return value;
   }
@@ -196,14 +196,14 @@ export class FieldTreeRendererComponent implements OnDestroy {
     const nodes = this.nodes;
     const strategy = this.selectStrategy;
     if (
-      this.selectedItemsCache
-      && this.selectedItemsCache.nodes === nodes
-      && this.selectedItemsCache.strategy === strategy
+      this.selectedItemsCache &&
+      this.selectedItemsCache.nodes === nodes &&
+      this.selectedItemsCache.strategy === strategy
     ) {
       return this.selectedItemsCache.value;
     }
 
-    const value = this.collectSelectedItems(nodes);
+    const value = collectSelectedTreeItems(nodes, strategy);
     this.selectedItemsCache = { nodes, strategy, value };
     return value;
   }
@@ -223,7 +223,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
       return options;
     }
     return options.filter((option) =>
-      `${option.label} ${option.subtitle ?? ''} ${option.description ?? ''}`.toLowerCase().includes(query)
+      `${option.label} ${option.subtitle ?? ''} ${option.description ?? ''}`
+        .toLowerCase()
+        .includes(query),
     );
   }
 
@@ -240,7 +242,11 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   canEdit(): boolean {
-    return !this.readonlyMode && !this.field.disabled() && this.field.fieldConfig.treeConfig?.readonly !== true;
+    return (
+      !this.readonlyMode &&
+      !this.field.disabled() &&
+      this.field.fieldConfig.treeConfig?.readonly !== true
+    );
   }
 
   async clear(): Promise<void> {
@@ -251,7 +257,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
     const confirmed = await this.confirmDialogService.confirm({
       message: 'shared.tree.confirmClear',
       confirmText: this.labels.clear ?? 'clear',
-      variant: 'danger'
+      variant: 'danger',
     });
     if (!confirmed) {
       return;
@@ -270,9 +276,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
       label,
       value: { type: 'group' },
       type: 'group',
-      children: []
+      children: [],
     };
-    this.field.setValue(this.addNode(this.nodes, node, parentId));
+    this.field.setValue(addTreeNode(this.nodes, node, parentId));
     this.field.markAsTouched();
   }
 
@@ -281,7 +287,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   collapseAll(): void {
-    this.collapsedNodeIds.set(new Set(this.flattenNodes(this.nodes).map((node) => node.id)));
+    this.collapsedNodeIds.set(new Set(flattenTreeNodes(this.nodes).map((node) => node.id)));
   }
 
   validateTree(): void {
@@ -306,8 +312,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   expandSelected(): void {
-    const ancestors = new Set<string>();
-    this.collectSelectedAncestors(this.nodes, [], ancestors);
+    const ancestors = collectSelectedTreeAncestorIds(this.nodes, this.selectStrategy);
     const next = new Set(this.collapsedNodeIds());
     ancestors.forEach((id) => next.delete(id));
     this.collapsedNodeIds.set(next);
@@ -317,7 +322,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.canSelectNode(node)) {
       return;
     }
-    this.field.setValue(this.updateNodeSelection(this.nodes, node.id, selected === true));
+    this.field.setValue(
+      updateTreeNodeSelection(this.nodes, node.id, selected === true, this.selectStrategy),
+    );
     this.field.markAsTouched();
   }
 
@@ -325,7 +332,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.hasCheckboxSelection || !this.canEdit()) {
       return;
     }
-    this.field.setValue(this.clearSelectionInNodes(this.nodes));
+    this.field.setValue(clearTreeSelection(this.nodes));
     this.field.markAsTouched();
   }
 
@@ -333,7 +340,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.hasCheckboxSelection || !this.canEdit()) {
       return;
     }
-    this.field.setValue(this.updateNodeSelection(this.nodes, nodeId, false));
+    this.field.setValue(updateTreeNodeSelection(this.nodes, nodeId, false, this.selectStrategy));
     this.field.markAsTouched();
   }
 
@@ -341,8 +348,10 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.hasCheckboxSelection || !this.canEdit()) {
       return;
     }
-    const visibleIds = new Set(this.flattenViewNodes(this.visibleTree).map((view) => view.node.id));
-    this.field.setValue(this.updateSelectionForIds(this.nodes, visibleIds, true));
+    const visibleIds = new Set(flattenTreeViewNodes(this.visibleTree).map((view) => view.node.id));
+    this.field.setValue(
+      updateTreeSelectionForIds(this.nodes, visibleIds, true, this.selectStrategy),
+    );
     this.field.markAsTouched();
   }
 
@@ -350,7 +359,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.hasCheckboxSelection || !this.canEdit()) {
       return;
     }
-    this.field.setValue(this.updateDescendantsSelection(this.nodes, nodeId, true));
+    this.field.setValue(
+      updateTreeDescendantsSelection(this.nodes, nodeId, true, this.selectStrategy),
+    );
     this.field.markAsTouched();
   }
 
@@ -358,7 +369,9 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.hasCheckboxSelection || !this.canEdit()) {
       return;
     }
-    this.field.setValue(this.updateDescendantsSelection(this.nodes, nodeId, false));
+    this.field.setValue(
+      updateTreeDescendantsSelection(this.nodes, nodeId, false, this.selectStrategy),
+    );
     this.field.markAsTouched();
   }
 
@@ -370,57 +383,13 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!preset) {
       return;
     }
-    const base = preset.clearBeforeApply === false ? this.nodes : this.clearSelectionInNodes(this.nodes);
-    this.field.setValue(this.applyPresetToNodes(base, preset));
+    const base = preset.clearBeforeApply === false ? this.nodes : clearTreeSelection(this.nodes);
+    this.field.setValue(applyTreeSelectionPreset(base, preset, this.selectStrategy));
     this.field.markAsTouched();
   }
 
   nodeSelectionState(node: TreeFormNode): TreeNodeSelectionState {
-    const selectable = this.isNodeSelectable(node);
-    const children = node.children ?? [];
-    const childStates = children.map((child) => this.nodeSelectionState(child));
-    const hasChildSelection = childStates.some((state) => state.checked || state.indeterminate);
-    const allChildrenChecked = childStates.length > 0 && childStates.every((state) => state.checked && !state.indeterminate);
-
-    if (this.selectStrategy === 'leafOnly') {
-      if (!children.length) {
-        return {
-          checked: node.checked === true,
-          indeterminate: false,
-          selectable
-        };
-      }
-      return {
-        checked: allChildrenChecked,
-        indeterminate: hasChildSelection && !allChildrenChecked,
-        selectable
-      };
-    }
-
-    if (this.selectStrategy === 'all') {
-      const checked = selectable && node.checked === true;
-      return {
-        checked,
-        indeterminate: !checked && hasChildSelection,
-        selectable
-      };
-    }
-
-    if (!children.length) {
-      return {
-        checked: selectable && node.checked === true,
-        indeterminate: false,
-        selectable
-      };
-    }
-
-    const selfChecked = selectable && node.checked === true;
-    const checked = allChildrenChecked && (selfChecked || hasChildSelection);
-    return {
-      checked,
-      indeterminate: (selfChecked || hasChildSelection) && !checked,
-      selectable
-    };
+    return treeNodeSelectionState(node, this.selectStrategy);
   }
 
   isViewExpanded(view: TreeViewNode): boolean {
@@ -545,10 +514,16 @@ export class FieldTreeRendererComponent implements OnDestroy {
       return;
     }
 
-    const node = this.optionToNode(option);
-    const nextNodes = this.pickerMode === 'replace' && this.pickerTargetId
-      ? this.replaceNode(this.nodes, this.pickerTargetId, node)
-      : this.addNode(this.nodes, node, this.pickerParentId);
+    const node = treePickerOptionToNode(option);
+    const nextNodes =
+      this.pickerMode === 'replace' && this.pickerTargetId
+        ? replaceTreeNode(
+            this.nodes,
+            this.pickerTargetId,
+            node,
+            this.field.fieldConfig.treeConfig?.replaceBehavior,
+          )
+        : addTreeNode(this.nodes, node, this.pickerParentId);
 
     this.field.setValue(nextNodes);
     this.field.markAsTouched();
@@ -584,14 +559,16 @@ export class FieldTreeRendererComponent implements OnDestroy {
     }
 
     const ids = this.selectedPickerOptionIds();
-    const selected = (this.field.fieldConfig.pickerOptions ?? []).filter((option) => ids.has(option.id) && !option.disabled);
+    const selected = (this.field.fieldConfig.pickerOptions ?? []).filter(
+      (option) => ids.has(option.id) && !option.disabled,
+    );
     if (!selected.length) {
       return;
     }
 
     const next = selected.reduce(
-      (nodes, option) => this.addNode(nodes, this.optionToNode(option), this.pickerParentId),
-      this.nodes
+      (nodes, option) => addTreeNode(nodes, treePickerOptionToNode(option), this.pickerParentId),
+      this.nodes,
     );
     this.field.setValue(next);
     this.field.markAsTouched();
@@ -603,7 +580,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!this.canEdit() || this.field.fieldConfig.treeConfig?.allowMoveNode === false) {
       return;
     }
-    this.field.setValue(this.moveInNodes(this.nodes, nodeId, direction));
+    this.field.setValue(moveTreeNode(this.nodes, nodeId, direction));
     this.field.markAsTouched();
   }
 
@@ -612,7 +589,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (!errors) {
       return false;
     }
-    return Object.keys(errors).some((key) => key.startsWith(this.nodeErrorPrefix(nodeId)));
+    return Object.keys(errors).some((key) => key.startsWith(treeNodeErrorPrefix(nodeId)));
   }
 
   nodeErrors(nodeId: string): string[] {
@@ -621,7 +598,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
       return [];
     }
     return Object.entries(errors)
-      .filter(([key]) => key.startsWith(this.nodeErrorPrefix(nodeId)))
+      .filter(([key]) => key.startsWith(treeNodeErrorPrefix(nodeId)))
       .map(([, message]) => message);
   }
 
@@ -633,13 +610,14 @@ export class FieldTreeRendererComponent implements OnDestroy {
     if (node.status) {
       badges.push({
         label: node.status,
-        variant: node.status === 'active' ? 'success' : node.status === 'inactive' ? 'muted' : 'warning'
+        variant:
+          node.status === 'active' ? 'success' : node.status === 'inactive' ? 'muted' : 'warning',
       });
     }
     if (node.severity && node.severity !== 'normal') {
       badges.push({
         label: node.severity,
-        variant: node.severity === 'critical' || node.severity === 'danger' ? 'danger' : 'warning'
+        variant: node.severity === 'critical' || node.severity === 'danger' ? 'danger' : 'warning',
       });
     }
     if (node.type && !badges.some((badge) => badge.label === node.type)) {
@@ -649,16 +627,7 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   nodeCode(node: TreeFormNode): string | undefined {
-    const valueRecord = node.value && typeof node.value === 'object' && !Array.isArray(node.value)
-      ? node.value as Record<string, unknown>
-      : {};
-    return this.nonEmptyString(
-      node.code
-        ?? node.key
-        ?? node.data?.['code']
-        ?? valueRecord['code']
-        ?? valueRecord['id']
-    );
+    return treeNodeCode(node);
   }
 
   hasNodeChildren(node: TreeFormNode): boolean {
@@ -666,14 +635,18 @@ export class FieldTreeRendererComponent implements OnDestroy {
   }
 
   canMove(nodeId: string, direction: -1 | 1): boolean {
-    return this.canEdit() && this.field.fieldConfig.treeConfig?.allowMoveNode !== false && this.canMoveInNodes(this.nodes, nodeId, direction);
+    return (
+      this.canEdit() &&
+      this.field.fieldConfig.treeConfig?.allowMoveNode !== false &&
+      canMoveTreeNode(this.nodes, nodeId, direction)
+    );
   }
 
   duplicateNode(nodeId: string): void {
     if (!this.canEdit()) {
       return;
     }
-    this.field.setValue(this.duplicateInNodes(this.nodes, nodeId));
+    this.field.setValue(duplicateTreeNode(this.nodes, nodeId));
     this.field.markAsTouched();
   }
 
@@ -689,12 +662,12 @@ export class FieldTreeRendererComponent implements OnDestroy {
     const confirmed = await this.confirmDialogService.confirm({
       message: 'shared.tree.confirmRemove',
       confirmText: this.labels.remove ?? 'delete',
-      variant: 'danger'
+      variant: 'danger',
     });
     if (!confirmed) {
       return;
     }
-    this.field.setValue(this.removeFromNodes(this.nodes, nodeId));
+    this.field.setValue(removeTreeNode(this.nodes, nodeId));
     this.field.markAsTouched();
   }
 
@@ -714,12 +687,12 @@ export class FieldTreeRendererComponent implements OnDestroy {
 
     const text = this.advancedJsonText();
     try {
-      const parsed = JSON.parse(text);
+      const parsed = JSON.parse(text) as unknown;
       if (!Array.isArray(parsed)) {
         this.advancedJsonError.set('shared.tree.invalidJsonArray');
         return;
       }
-      const normalized = this.normalizeJsonNodes(parsed);
+      const normalized = normalizeJsonTreeNodes(parsed);
       if (!normalized) {
         this.advancedJsonError.set('shared.tree.invalidJsonArray');
         return;
@@ -738,293 +711,18 @@ export class FieldTreeRendererComponent implements OnDestroy {
     this.advancedJsonError.set(null);
   }
 
-  private buildVisibleNodes(
-    nodes: TreeFormNode[],
-    parentPath: string,
-    query: string,
-    mode: TreeFilterMode
-  ): TreeViewNode[] {
-    return nodes.flatMap((node) => {
-      const path = this.nodePath(node, parentPath);
-      const code = this.nodeCode(node);
-      const children = this.buildVisibleNodes(node.children ?? [], path, query, mode);
-      const state = this.nodeSelectionState(node);
-      const leaf = (node.children?.length ?? 0) === 0;
-      const ownFilterMatch = this.matchesFilterMode(node, state, leaf, mode);
-      const ownQueryMatch = !query || this.nodeSearchText(node, path, code).includes(query);
-      const includeNode = (ownFilterMatch && ownQueryMatch) || children.length > 0;
-
-      if (!includeNode) {
-        return [];
-      }
-
-      return [{
-        node,
-        path,
-        code,
-        children,
-        matched: !!query && ownFilterMatch && ownQueryMatch,
-        forceExpanded: children.length > 0 && (!!query || mode !== 'all'),
-        checked: state.checked,
-        indeterminate: state.indeterminate,
-        leaf
-      }];
-    });
-  }
-
-  private matchesFilterMode(
-    node: TreeFormNode,
-    state: TreeNodeSelectionState,
-    leaf: boolean,
-    mode: TreeFilterMode
-  ): boolean {
-    switch (mode) {
-      case 'selected':
-        return state.checked || state.indeterminate || node.checked === true;
-      case 'leaf':
-        return leaf;
-      case 'all':
-      default:
-        return true;
-    }
-  }
-
-  private nodePath(node: TreeFormNode, parentPath: string): string {
-    const explicitPath = this.nonEmptyString(node.path);
-    if (explicitPath) {
-      return explicitPath;
-    }
-    return parentPath ? `${parentPath} / ${node.label}` : node.label;
-  }
-
-  private nodeSearchText(node: TreeFormNode, path: string, code?: string): string {
-    return [
-      node.label,
-      code,
-      path,
-      node.type,
-      node.status,
-      node.severity,
-      node.subtitle,
-      node.description
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-  }
-
-  private collectSelectedItems(nodes: TreeFormNode[], parentPath = ''): SelectedTreeItem[] {
-    return nodes.flatMap((node) => {
-      const path = this.nodePath(node, parentPath);
-      const leaf = (node.children?.length ?? 0) === 0;
-      const current = this.isSelectedForPanel(node, leaf)
-        ? [{ node, path, code: this.nodeCode(node), leaf }]
-        : [];
-      return [
-        ...current,
-        ...this.collectSelectedItems(node.children ?? [], path)
-      ];
-    });
-  }
-
-  private isSelectedForPanel(node: TreeFormNode, leaf: boolean): boolean {
-    if (node.checked !== true) {
-      return false;
-    }
-    return this.selectStrategy !== 'leafOnly' || leaf;
-  }
-
-  private collectSelectedAncestors(nodes: TreeFormNode[], ancestors: string[], result: Set<string>): void {
-    nodes.forEach((node) => {
-      const state = this.nodeSelectionState(node);
-      if (state.checked || state.indeterminate || node.checked === true) {
-        ancestors.forEach((id) => result.add(id));
-      }
-      this.collectSelectedAncestors(node.children ?? [], [...ancestors, node.id], result);
-    });
-  }
-
   canSelectNode(node: TreeFormNode): boolean {
-    return this.hasCheckboxSelection && this.canEdit() && this.isNodeSelectable(node);
-  }
-
-  private isNodeSelectable(node: TreeFormNode): boolean {
-    if (node.disabled || node.readonly || node.selectable === false) {
-      return false;
-    }
-    return true;
-  }
-
-  private updateNodeSelection(nodes: TreeFormNode[], nodeId: string, checked: boolean): TreeFormNode[] {
-    return nodes.map((node) => {
-      if (node.id === nodeId) {
-        return this.applyNodeSelection(node, checked, true);
-      }
-
-      return {
-        ...node,
-        children: node.children ? this.updateNodeSelection(node.children, nodeId, checked) : node.children
-      };
-    });
-  }
-
-  private applyNodeSelection(node: TreeFormNode, checked: boolean, cascade: boolean): TreeFormNode {
-    const children = node.children ?? [];
-
-    if (this.selectStrategy === 'leafOnly') {
-      if (children.length && cascade) {
-        return {
-          ...node,
-          checked: false,
-          indeterminate: false,
-          children: this.setSubtreeSelection(children, checked)
-        };
-      }
-      return this.setNodeCheckedOnly(node, checked);
-    }
-
-    if (this.selectStrategy === 'parentAndChildren' && cascade) {
-      return {
-        ...this.setNodeCheckedOnly(node, checked),
-        children: children.length ? this.setSubtreeSelection(children, checked) : node.children
-      };
-    }
-
-    return this.setNodeCheckedOnly(node, checked);
-  }
-
-  private setSubtreeSelection(nodes: TreeFormNode[], checked: boolean): TreeFormNode[] {
-    return nodes.map((node) => {
-      const children = node.children ?? [];
-      if (this.selectStrategy === 'leafOnly' && children.length) {
-        return {
-          ...node,
-          checked: false,
-          indeterminate: false,
-          children: this.setSubtreeSelection(children, checked)
-        };
-      }
-
-      return {
-        ...this.setNodeCheckedOnly(node, checked),
-        children: children.length ? this.setSubtreeSelection(children, checked) : node.children
-      };
-    });
-  }
-
-  private setNodeCheckedOnly(node: TreeFormNode, checked: boolean): TreeFormNode {
-    if (!this.isNodeSelectable(node)) {
-      return node;
-    }
-    if (this.selectStrategy === 'leafOnly' && (node.children?.length ?? 0) > 0) {
-      return {
-        ...node,
-        checked: false,
-        indeterminate: false
-      };
-    }
-    return {
-      ...node,
-      checked,
-      indeterminate: false
-    };
-  }
-
-  private clearSelectionInNodes(nodes: TreeFormNode[]): TreeFormNode[] {
-    return nodes.map((node) => ({
-      ...node,
-      checked: false,
-      indeterminate: false,
-      children: node.children ? this.clearSelectionInNodes(node.children) : node.children
-    }));
-  }
-
-  private updateSelectionForIds(nodes: TreeFormNode[], ids: Set<string>, checked: boolean): TreeFormNode[] {
-    return nodes.map((node) => {
-      const next = ids.has(node.id) ? this.setNodeCheckedOnly(node, checked) : node;
-      return {
-        ...next,
-        children: next.children ? this.updateSelectionForIds(next.children, ids, checked) : next.children
-      };
-    });
-  }
-
-  private updateDescendantsSelection(nodes: TreeFormNode[], nodeId: string, checked: boolean): TreeFormNode[] {
-    return nodes.map((node) => {
-      if (node.id === nodeId) {
-        return {
-          ...node,
-          children: node.children ? this.setSubtreeSelection(node.children, checked) : node.children
-        };
-      }
-
-      return {
-        ...node,
-        children: node.children ? this.updateDescendantsSelection(node.children, nodeId, checked) : node.children
-      };
-    });
-  }
-
-  private applyPresetToNodes(nodes: TreeFormNode[], preset: TreeSelectionPreset): TreeFormNode[] {
-    return nodes.map((node) => {
-      const children = node.children ? this.applyPresetToNodes(node.children, preset) : node.children;
-      const next = { ...node, children };
-      return this.matchesSelectionPreset(next, preset)
-        ? this.applyNodeSelection(next, true, this.selectStrategy !== 'all')
-        : next;
-    });
-  }
-
-  private matchesSelectionPreset(node: TreeFormNode, preset: TreeSelectionPreset): boolean {
-    if (preset.nodeIds?.includes(node.id)) {
-      return true;
-    }
-    const match = preset.match;
-    if (!match) {
-      return false;
-    }
-    if (match.leafOnly && (node.children?.length ?? 0) > 0) {
-      return false;
-    }
-    const label = node.label.toLowerCase();
-    const code = (this.nodeCode(node) ?? '').toLowerCase();
-    return this.includesAny(label, match.labelIncludes)
-      || this.includesAny(code, match.codeIncludes)
-      || !!(node.type && match.typeIn?.includes(node.type))
-      || !!(node.status && match.statusIn?.includes(node.status))
-      || !!(node.severity && match.severityIn?.includes(node.severity));
-  }
-
-  private includesAny(value: string, needles?: string[]): boolean {
-    return !!needles?.some((needle) => value.includes(needle.toLowerCase()));
-  }
-
-  private flattenViewNodes(nodes: TreeViewNode[]): TreeViewNode[] {
-    return nodes.flatMap((node) => [node, ...this.flattenViewNodes(node.children)]);
+    return this.hasCheckboxSelection && this.canEdit() && isTreeNodeSelectable(node);
   }
 
   private expandPathToNode(nodeId: string): void {
-    const path = this.findNodePath(this.nodes, nodeId);
+    const path = findTreeNodePath(this.nodes, nodeId);
     if (!path) {
       return;
     }
     const next = new Set(this.collapsedNodeIds());
     path.slice(0, -1).forEach((id) => next.delete(id));
     this.collapsedNodeIds.set(next);
-  }
-
-  private findNodePath(nodes: TreeFormNode[], nodeId: string, path: string[] = []): string[] | null {
-    for (const node of nodes) {
-      const nextPath = [...path, node.id];
-      if (node.id === nodeId) {
-        return nextPath;
-      }
-      const childPath = this.findNodePath(node.children ?? [], nodeId, nextPath);
-      if (childPath) {
-        return childPath;
-      }
-    }
-    return null;
   }
 
   private scrollNodeIntoView(nodeId: string): void {
@@ -1054,15 +752,6 @@ export class FieldTreeRendererComponent implements OnDestroy {
     return Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('[data-tree-node-id]'));
   }
 
-  private removeFromNodes(nodes: TreeFormNode[], nodeId: string): TreeFormNode[] {
-    return nodes
-      .filter((node) => node.id !== nodeId)
-      .map((node) => ({
-        ...node,
-        children: node.children ? this.removeFromNodes(node.children, nodeId) : undefined
-      }));
-  }
-
   private canUsePicker(mode: 'add' | 'replace'): boolean {
     if (!this.canEdit()) {
       return false;
@@ -1073,216 +762,5 @@ export class FieldTreeRendererComponent implements OnDestroy {
       return false;
     }
     return mode === 'add' ? config?.allowAddNode !== false : config?.allowReplaceNode === true;
-  }
-
-  private optionToNode(option: TreePickerOption): TreeFormNode {
-    return {
-      id: crypto.randomUUID(),
-      label: option.label,
-      value: option.value,
-      subtitle: option.subtitle,
-      description: option.description,
-      icon: option.icon,
-      badges: option.badges,
-      data: {
-        ...(option.data ?? {}),
-        sourceOptionId: option.id
-      },
-      disabled: option.disabled,
-      disabledReason: option.disabledReason,
-      children: option.children?.map((child) => this.optionToNode(child)) ?? []
-    };
-  }
-
-  private addNode(nodes: TreeFormNode[], node: TreeFormNode, parentId: string | null): TreeFormNode[] {
-    if (!parentId) {
-      return [...nodes, node];
-    }
-
-    return nodes.map((current) => {
-      if (current.id === parentId) {
-        return {
-          ...current,
-          children: [...(current.children ?? []), node]
-        };
-      }
-
-      return {
-        ...current,
-        children: current.children ? this.addNode(current.children, node, parentId) : current.children
-      };
-    });
-  }
-
-  private replaceNode(nodes: TreeFormNode[], nodeId: string, replacement: TreeFormNode): TreeFormNode[] {
-    return nodes.map((node) => {
-      if (node.id === nodeId) {
-        const shouldDropChildren = this.shouldDropReplacementChildren(replacement);
-        return {
-          ...replacement,
-          children: shouldDropChildren ? replacement.children : node.children ?? replacement.children
-        };
-      }
-
-      return {
-        ...node,
-        children: node.children ? this.replaceNode(node.children, nodeId, replacement) : node.children
-      };
-    });
-  }
-
-  private moveInNodes(nodes: TreeFormNode[], nodeId: string, direction: -1 | 1): TreeFormNode[] {
-    const index = nodes.findIndex((node) => node.id === nodeId);
-    if (index >= 0) {
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= nodes.length) {
-        return nodes;
-      }
-      const next = [...nodes];
-      const [item] = next.splice(index, 1);
-      next.splice(targetIndex, 0, item);
-      return next;
-    }
-
-    return nodes.map((node) => ({
-      ...node,
-      children: node.children ? this.moveInNodes(node.children, nodeId, direction) : node.children
-    }));
-  }
-
-  private canMoveInNodes(nodes: TreeFormNode[], nodeId: string, direction: -1 | 1): boolean {
-    const index = nodes.findIndex((node) => node.id === nodeId);
-    if (index >= 0) {
-      const targetIndex = index + direction;
-      return targetIndex >= 0 && targetIndex < nodes.length;
-    }
-    return nodes.some((node) => node.children ? this.canMoveInNodes(node.children, nodeId, direction) : false);
-  }
-
-  private duplicateInNodes(nodes: TreeFormNode[], nodeId: string): TreeFormNode[] {
-    const index = nodes.findIndex((node) => node.id === nodeId);
-    if (index >= 0) {
-      const duplicate = this.cloneNode(nodes[index]);
-      const next = [...nodes];
-      next.splice(index + 1, 0, duplicate);
-      return next;
-    }
-    return nodes.map((node) => ({
-      ...node,
-      children: node.children ? this.duplicateInNodes(node.children, nodeId) : node.children
-    }));
-  }
-
-  private cloneNode(node: TreeFormNode): TreeFormNode {
-    return {
-      ...node,
-      id: crypto.randomUUID(),
-      children: node.children?.map((child) => this.cloneNode(child))
-    };
-  }
-
-  private flattenNodes(nodes: TreeFormNode[]): TreeFormNode[] {
-    return nodes.flatMap((node) => [node, ...this.flattenNodes(node.children ?? [])]);
-  }
-
-  private shouldDropReplacementChildren(replacement: TreeFormNode): boolean {
-    const behavior = this.field.fieldConfig.treeConfig?.replaceBehavior ?? 'keep-children';
-    const replacementAllowsChildren = replacement.data?.['allowChildren'] !== false;
-    if (!replacementAllowsChildren) {
-      return true;
-    }
-    return behavior === 'drop-children';
-  }
-
-  private normalizeJsonNodes(value: unknown[]): TreeFormNode[] | null {
-    const result: TreeFormNode[] = [];
-    for (const item of value) {
-      const normalized = this.normalizeJsonNode(item);
-      if (!normalized) {
-        return null;
-      }
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizeJsonNode(value: unknown): TreeFormNode | null {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return null;
-    }
-
-    const raw = value as Record<string, unknown>;
-    const label = this.nodeLabel(raw);
-    if (!label) {
-      return null;
-    }
-
-    const rawChildren = raw['children'];
-    const children = Array.isArray(rawChildren) ? this.normalizeJsonNodes(rawChildren) : [];
-    if (!children) {
-      return null;
-    }
-
-    return {
-      id: this.nonEmptyString(raw['id']) ?? crypto.randomUUID(),
-      key: this.nonEmptyString(raw['key']),
-      label,
-      value: 'value' in raw ? raw['value'] : {},
-      code: this.nonEmptyString(raw['code']),
-      path: this.nonEmptyString(raw['path']),
-      type: this.nonEmptyString(raw['type']),
-      status: this.nonEmptyString(raw['status']) as TreeFormNode['status'],
-      severity: this.nonEmptyString(raw['severity']) as TreeFormNode['severity'],
-      subtitle: this.nonEmptyString(raw['subtitle']),
-      description: this.nonEmptyString(raw['description']),
-      icon: this.nonEmptyString(raw['icon']),
-      badges: Array.isArray(raw['badges']) ? raw['badges'] as TreeFormNode['badges'] : undefined,
-      data: raw['data'] && typeof raw['data'] === 'object' && !Array.isArray(raw['data'])
-        ? raw['data'] as Record<string, unknown>
-        : undefined,
-      meta: raw['meta'] && typeof raw['meta'] === 'object' && !Array.isArray(raw['meta'])
-        ? raw['meta'] as Record<string, unknown>
-        : undefined,
-      children,
-      selectable: raw['selectable'] === false ? false : undefined,
-      checked: raw['checked'] === true,
-      indeterminate: raw['indeterminate'] === true,
-      expanded: raw['expanded'] === true,
-      loading: raw['loading'] === true,
-      hasChildren: raw['hasChildren'] === true,
-      disabled: raw['disabled'] === true,
-      disabledReason: this.nonEmptyString(raw['disabledReason']),
-      readonly: raw['readonly'] === true
-    };
-  }
-
-  private nodeLabel(value: Record<string, unknown>): string | null {
-    const explicit = this.nonEmptyString(value['label']);
-    if (explicit) {
-      return explicit;
-    }
-
-    const nodeValue = value['value'];
-    if (nodeValue && typeof nodeValue === 'object' && !Array.isArray(nodeValue)) {
-      const record = nodeValue as Record<string, unknown>;
-      return this.nonEmptyString(record['code'] ?? record['id']) ?? null;
-    }
-
-    return this.nonEmptyString(nodeValue) ?? null;
-  }
-
-  private nonEmptyString(value: unknown): string | undefined {
-    if (typeof value === 'string') {
-      const normalized = value.trim();
-      return normalized || undefined;
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
-    }
-    return undefined;
-  }
-
-  private nodeErrorPrefix(nodeId: string): string {
-    return `node:${nodeId}:`;
   }
 }

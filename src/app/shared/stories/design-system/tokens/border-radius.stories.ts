@@ -8,7 +8,7 @@ const radiusTokens = [
   { name: 'Large', class: 'rounded-lg', value: '8px' },
   { name: 'XL', class: 'rounded-xl', value: '12px' },
   { name: '2XL', class: 'rounded-2xl', value: '16px' },
-  { name: 'Full', class: 'rounded-full', value: '9999px' }
+  { name: 'Full', class: 'rounded-full', value: '9999px' },
 ];
 
 const meta: Meta = {
@@ -18,10 +18,10 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Border radius tokens. Maps to Figma corner radius values.'
-      }
-    }
-  }
+        component: 'Border radius tokens. Maps to Figma corner radius values.',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -34,7 +34,9 @@ export const RadiusScale: Story = {
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-4">Border Radius Scale</h3>
         <div class="grid grid-cols-4 gap-6">
-          ${radiusTokens.map(r => `
+          ${radiusTokens
+            .map(
+              (r) => `
             <div class="flex flex-col items-center gap-2">
               <div
                 class="${r.class}"
@@ -43,11 +45,13 @@ export const RadiusScale: Story = {
               <span class="text-sm font-medium">${r.name}</span>
               <code class="text-xs" style="color:var(--p-text-muted-color)">${r.class} (${r.value})</code>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const UsageExamples: Story = {
@@ -64,6 +68,6 @@ export const UsageExamples: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

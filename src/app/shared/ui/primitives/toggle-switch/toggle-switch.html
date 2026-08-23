@@ -1,14 +1,16 @@
 <div class="app-field" [class.app-field--disabled]="disabled">
-  <label class="inline-flex items-center gap-3 cursor-pointer" [class.cursor-not-allowed]="disabled">
+  <div class="inline-flex items-center gap-3" [class.cursor-not-allowed]="disabled">
     @if (label) {
-      <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{ label | translateContent }}</span>
+      <span class="text-sm text-[var(--app-custom-input-text)] select-none">{{
+        label | translateContent
+      }}</span>
     }
     <button
       type="button"
       role="switch"
       [id]="inputId"
       [attr.aria-checked]="!!value"
-      [attr.aria-label]="(label || '') | translateContent"
+      [attr.aria-label]="label || '' | translateContent"
       [disabled]="disabled"
       class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
       [class]="value ? 'bg-[var(--app-primary)]' : 'bg-[var(--app-input-border)]'"
@@ -21,13 +23,17 @@
         [class]="value ? 'translate-x-5' : 'translate-x-0'"
       ></span>
     </button>
-  </label>
+  </div>
 
   @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>

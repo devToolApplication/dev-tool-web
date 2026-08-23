@@ -6,7 +6,10 @@ import type { KeyValueItem } from './data-display/key-value-list/key-value-list.
 import type { TimelineItem } from './data-display/timeline/timeline.component';
 import type { TableConfig } from './patterns/table/models/table-config.model';
 import type { FormConfig, FormContext } from './patterns/form-input/models/form-config.model';
-import type { FieldGuideFieldItem, FieldGuideOptionItem } from './forms/field-guide-panel/field-guide-panel.component';
+import type {
+  FieldGuideFieldItem,
+  FieldGuideOptionItem,
+} from './forms/field-guide-panel/field-guide-panel.component';
 import type { ProgressState } from './feedback/realtime-progress-bar/realtime-progress-bar.component';
 
 const sampleJson = {
@@ -14,13 +17,13 @@ const sampleJson = {
   enabled: true,
   limits: {
     maxItems: 50,
-    timeoutMs: 3000
-  }
+    timeoutMs: 3000,
+  },
 };
 
 const meta: Meta = {
   title: 'Shared/UI/Foundation',
-  tags: ['autodocs']
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -50,8 +53,8 @@ export const FeedbackStates: Story = {
         <app-skeleton-form [rows]="3"></app-skeleton-form>
         <app-skeleton-card [rows]="3"></app-skeleton-card>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const OverlayAndLayout: Story = {
@@ -65,15 +68,27 @@ export const OverlayAndLayout: Story = {
           type: 'select',
           options: [
             { label: 'Active', value: 'active' },
-            { label: 'Paused', value: 'paused' }
-          ]
+            { label: 'Paused', value: 'paused' },
+          ],
         },
-        { key: 'archived', label: 'Archived', type: 'boolean', advanced: true }
+        { key: 'archived', label: 'Archived', type: 'boolean', advanced: true },
       ] satisfies FilterPanelField[],
       actions: [
-        { id: 'refresh', label: 'Refresh', icon: 'pi pi-refresh', placement: 'primary', variant: 'primary' },
-        { id: 'delete', label: 'Delete', icon: 'pi pi-trash', placement: 'secondary', variant: 'destructive' }
-      ] satisfies ActionToolbarAction[]
+        {
+          id: 'refresh',
+          label: 'Refresh',
+          icon: 'pi pi-refresh',
+          placement: 'primary',
+          variant: 'primary',
+        },
+        {
+          id: 'delete',
+          label: 'Delete',
+          icon: 'pi pi-trash',
+          placement: 'secondary',
+          variant: 'destructive',
+        },
+      ] satisfies ActionToolbarAction[],
     },
     template: `
       <app-page-shell
@@ -93,8 +108,8 @@ export const OverlayAndLayout: Story = {
           </div>
         </app-drawer>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
 
 export const ConfirmDialog: Story = {
@@ -107,7 +122,6 @@ export const ConfirmDialog: Story = {
           icon: 'pi pi-trash',
           variant: 'destructive',
           placement: 'primary',
-          
         },
         {
           id: 'confirm-warning',
@@ -115,17 +129,16 @@ export const ConfirmDialog: Story = {
           icon: 'pi pi-exclamation-triangle',
           variant: 'secondary',
           placement: 'secondary',
-          
-        }
-      ] satisfies ActionToolbarAction[]
+        },
+      ] satisfies ActionToolbarAction[],
     },
     template: `
       <div class="app-stack">
         <app-action-toolbar [actions]="actions"></app-action-toolbar>
         <app-confirm-dialog-host></app-confirm-dialog-host>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const DataDisplay: Story = {
@@ -136,12 +149,22 @@ export const DataDisplay: Story = {
         { label: 'Identifier', value: 'cfg-001', type: 'copyable' },
         { label: 'State', value: 'Active', type: 'badge', variant: 'success' },
         { label: 'Updated', value: new Date('2026-05-14T09:00:00Z'), type: 'datetime' },
-        { label: 'Payload', value: sampleJson, type: 'json' }
+        { label: 'Payload', value: sampleJson, type: 'json' },
       ] satisfies KeyValueItem[],
       timelineItems: [
-        { title: 'Created', description: 'Initial version saved.', variant: 'success', time: '2026-05-14 09:00' },
-        { title: 'Reviewed', description: 'Configuration reviewed.', variant: 'info', time: '2026-05-14 09:30' }
-      ] satisfies TimelineItem[]
+        {
+          title: 'Created',
+          description: 'Initial version saved.',
+          variant: 'success',
+          time: '2026-05-14 09:00',
+        },
+        {
+          title: 'Reviewed',
+          description: 'Configuration reviewed.',
+          variant: 'info',
+          time: '2026-05-14 09:30',
+        },
+      ] satisfies TimelineItem[],
     },
     template: `
       <div class="app-stack">
@@ -152,8 +175,8 @@ export const DataDisplay: Story = {
         <app-diff-viewer [before]="{ enabled: false, limit: 10 }" [after]="{ enabled: true, limit: 25 }"></app-diff-viewer>
         <app-data-timeline [items]="timelineItems"></app-data-timeline>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const TableAndForm: Story = {
@@ -164,7 +187,12 @@ export const TableAndForm: Story = {
         emptyTitle: 'No items',
         columns: [
           { field: 'name', header: 'Name', type: 'text' },
-          { field: 'state', header: 'State', type: 'badge', badgeMap: { active: 'success', paused: 'warning' } },
+          {
+            field: 'state',
+            header: 'State',
+            type: 'badge',
+            badgeMap: { active: 'success', paused: 'warning' },
+          },
           { field: 'score', header: 'Score', type: 'semantic-number', suffix: '%' },
           { field: 'payload', header: 'Payload', type: 'json' },
           {
@@ -177,16 +205,16 @@ export const TableAndForm: Story = {
                 label: 'Delete',
                 icon: 'pi pi-trash',
                 variant: 'destructive',
-                
-                onClick: () => undefined
-              }
-            ]
-          }
-        ]
+
+                onClick: () => undefined,
+              },
+            ],
+          },
+        ],
       } satisfies TableConfig,
       rows: [
         { name: 'Alpha', state: 'active', score: 12, payload: sampleJson },
-        { name: 'Beta', state: 'paused', score: -4, payload: { reason: 'manual' } }
+        { name: 'Beta', state: 'paused', score: -4, payload: { reason: 'manual' } },
       ],
       formConfig: {
         title: 'Generic form',
@@ -197,17 +225,17 @@ export const TableAndForm: Story = {
             label: 'Name',
             type: 'text',
             placeholder: 'Enter name',
-            validation: [{ type: 'required', expression: '!value', message: 'Name is required' }]
+            validation: [{ type: 'required', expression: '!value', message: 'Name is required' }],
           },
           {
             name: 'enabled',
             label: 'Enabled',
-            type: 'checkbox'
-          }
-        ]
+            type: 'checkbox',
+          },
+        ],
       } satisfies FormConfig,
       context: { user: null, mode: 'create' } satisfies FormContext,
-      initialValue: { enabled: true }
+      initialValue: { enabled: true },
     },
     template: `
       <div class="app-stack">
@@ -218,8 +246,8 @@ export const TableAndForm: Story = {
           [initialValue]="initialValue"
         ></app-config-template-form>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const AdvancedControlsAndMetrics: Story = {
@@ -231,15 +259,26 @@ export const AdvancedControlsAndMetrics: Story = {
         status: 'running',
         percent: 68,
         step: 'Syncing weights...',
-        message: 'Loaded layer 18 of 24'
+        message: 'Loaded layer 18 of 24',
       } as ProgressState,
       fields: [
-        { key: 'temperature', label: 'Temperature', description: 'Controls randomness: lower values are more deterministic.' },
-        { key: 'top_p', label: 'Top P', description: 'Nucleus sampling threshold for diverse output selection.' }
+        {
+          key: 'temperature',
+          label: 'Temperature',
+          description: 'Controls randomness: lower values are more deterministic.',
+        },
+        {
+          key: 'top_p',
+          label: 'Top P',
+          description: 'Nucleus sampling threshold for diverse output selection.',
+        },
       ] as FieldGuideFieldItem[],
       warnings: [
-        { title: 'API Limit', description: 'Exceeding 50 requests per min will trigger IP throttling.' }
-      ] as FieldGuideOptionItem[]
+        {
+          title: 'API Limit',
+          description: 'Exceeding 50 requests per min will trigger IP throttling.',
+        },
+      ] as FieldGuideOptionItem[],
     },
     template: `
       <div class="app-stack">
@@ -270,8 +309,6 @@ export const AdvancedControlsAndMetrics: Story = {
           [warnings]="warnings"
         ></app-field-guide-panel>
       </div>
-    `
-  })
+    `,
+  }),
 };
-
-

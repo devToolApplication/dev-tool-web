@@ -21,7 +21,7 @@ describe('FlowDiagramData', () => {
   it('removes selected nodes and connected edges together', () => {
     const updated = FlowDiagramData.from(definition).removeSelection(['a']);
 
-    expect(updated.nodes.map(node => node.id)).toEqual(['b']);
+    expect(updated.nodes.map((node) => node.id)).toEqual(['b']);
     expect(updated.edges).toEqual([]);
   });
 
@@ -29,7 +29,7 @@ describe('FlowDiagramData', () => {
     const result = FlowDiagramData.from(definition).duplicateSelection(['a', 'b']);
 
     expect(result.duplicatedIds).toEqual(['a-copy', 'b-copy']);
-    expect(result.definition.nodes.map(node => node.id)).toEqual(['a', 'b', 'a-copy', 'b-copy']);
+    expect(result.definition.nodes.map((node) => node.id)).toEqual(['a', 'b', 'a-copy', 'b-copy']);
     expect(result.definition.edges.at(-1)).toMatchObject({
       source: { nodeId: 'a-copy', portId: 'out' },
       target: { nodeId: 'b-copy', portId: 'in' },

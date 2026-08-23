@@ -17,7 +17,7 @@ import { PageHeaderComponent } from './page-header.component';
     >
       <button page-actions type="button">Create</button>
     </app-page-header>
-  `
+  `,
 })
 class PageHeaderTestHostComponent {
   breadcrumb = [{ label: 'Admin', routerLink: '/' }, { label: 'Current' }];
@@ -25,7 +25,7 @@ class PageHeaderTestHostComponent {
 
 @NgModule({
   declarations: [PageHeaderTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class PageHeaderTestHostModule {}
 
@@ -36,7 +36,7 @@ describe('PageHeaderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, PageHeaderTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(PageHeaderComponent);

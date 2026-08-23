@@ -18,12 +18,12 @@ const sd = new StyleDictionary({
           destination: '_variables.css',
           format: 'css/variables',
           options: {
-            outputReferences: true
-          }
-        }
-      ]
-    }
-  }
+            outputReferences: true,
+          },
+        },
+      ],
+    },
+  },
 });
 
 async function build() {

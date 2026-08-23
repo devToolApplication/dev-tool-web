@@ -4,7 +4,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   selector: 'app-sticky-form-actions',
   standalone: false,
   templateUrl: './sticky-form-actions.html',
-  styleUrl: './sticky-form-actions.css'
+  styleUrl: './sticky-form-actions.css',
 })
 export class StickyFormActionsComponent {
   @Input() showSubmit = true;

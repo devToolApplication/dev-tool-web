@@ -6,7 +6,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './toggle-button.html',
   styleUrl: './toggle-button.css',
-  providers: [provideValueAccessor(() => ToggleButton)]
+  providers: [provideValueAccessor(() => ToggleButton)],
 })
 export class ToggleButton extends BaseInput<boolean> {
   @Input() onLabel = 'on';

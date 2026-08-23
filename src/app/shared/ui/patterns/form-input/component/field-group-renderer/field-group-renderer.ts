@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import {
+import type {
   ArrayFieldState,
   FieldState,
   GroupFieldState,
   GridWidth,
-  TreeFieldState
+  TreeFieldState,
 } from '../../models/form-config.model';
 import { getColClass } from '../../utils/form.utils';
 
@@ -12,10 +12,9 @@ import { getColClass } from '../../utils/form.utils';
   selector: 'app-field-group-renderer',
   standalone: false,
   templateUrl: './field-group-renderer.html',
-  styleUrl: './field-group-renderer.css'
+  styleUrl: './field-group-renderer.css',
 })
 export class FieldGroupRenderer {
-
   @Input({ required: true })
   field!: GroupFieldState;
   @Input() submitted = false;

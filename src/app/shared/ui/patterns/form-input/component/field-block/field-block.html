@@ -8,7 +8,9 @@
             @if (required) {
               <span class="field-block__required" aria-hidden="true">*</span>
             } @else if (optional) {
-              <span class="field-block__optional">({{ 'common.optional' | translateContent }})</span>
+              <span class="field-block__optional"
+                >({{ 'common.optional' | translateContent }})</span
+              >
             }
           </label>
         </div>

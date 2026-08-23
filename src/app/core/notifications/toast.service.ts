@@ -34,7 +34,7 @@ export class ToastService {
   }
 
   dismiss(id: number): void {
-    this.messages.update(msgs => msgs.filter(m => m.id !== id));
+    this.messages.update((msgs) => msgs.filter((m) => m.id !== id));
   }
 
   private show(severity: ToastSeverity, summary: string, detail?: string): void {
@@ -49,8 +49,14 @@ export class ToastService {
     this.recentMessages.set(dedupeKey, Date.now());
     const life = 3000;
     const id = this.nextId++;
-    const msg: ToastMessage = { id, severity, summary: translatedSummary, detail: translatedDetail, life };
-    this.messages.update(msgs => [...msgs, msg]);
+    const msg: ToastMessage = {
+      id,
+      severity,
+      summary: translatedSummary,
+      detail: translatedDetail,
+      life,
+    };
+    this.messages.update((msgs) => [...msgs, msg]);
 
     setTimeout(() => this.dismiss(id), life);
   }

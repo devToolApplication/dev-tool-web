@@ -80,14 +80,14 @@ Demo `App` extends `Diagram` and owns:
 
 Demo tách controller theo responsibility:
 
-| Controller | Responsibility |
-|---|---|
-| `SystemController` | Sync data model changes to graph build. |
-| `DiagramController` | Paper/node/link interactions, pan, context menu, hover tools, file drop. |
-| `ToolbarController` | Save/load/new/test/publish toolbar actions. |
-| `KeyboardController` | Undo/redo/delete/shortcuts. |
-| `NodesController` | Node-specific mutation and provider refresh. |
-| `SelectionController` | Selection to inspector sync. |
+| Controller            | Responsibility                                                           |
+| --------------------- | ------------------------------------------------------------------------ |
+| `SystemController`    | Sync data model changes to graph build.                                  |
+| `DiagramController`   | Paper/node/link interactions, pan, context menu, hover tools, file drop. |
+| `ToolbarController`   | Save/load/new/test/publish toolbar actions.                              |
+| `KeyboardController`  | Undo/redo/delete/shortcuts.                                              |
+| `NodesController`     | Node-specific mutation and provider refresh.                             |
+| `SelectionController` | Selection to inspector sync.                                             |
 
 ### 3.3 Diagram Data And Builder
 
@@ -989,15 +989,15 @@ Exit criteria:
 
 ## 15. Risks And Mitigations
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| JointJS+ license unavailable | Cannot exact-port demo UI widgets | Use Option B core-only architecture. |
-| Core-only viewport math repeats current bugs | High | Centralize viewport controller and cover with tests before UI wiring. |
-| SVG-only nodes reduce template flexibility | Medium | Add structured renderer/schema API; keep Angular template only outside canvas. |
-| Rewrite touches shared component consumers | High | Keep `FlowDefinition` and Input/Output contracts stable. |
-| Existing dirty worktree | Medium | Do not revert unrelated files; isolate commits by file scope. |
-| Dark theme mismatch | Medium | Use existing app tokens; no cross-child CSS overrides. |
-| Rule and AI workflow needs differ | Medium | Domain adapters convert into common runtime model. |
+| Risk                                         | Impact                            | Mitigation                                                                     |
+| -------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------ |
+| JointJS+ license unavailable                 | Cannot exact-port demo UI widgets | Use Option B core-only architecture.                                           |
+| Core-only viewport math repeats current bugs | High                              | Centralize viewport controller and cover with tests before UI wiring.          |
+| SVG-only nodes reduce template flexibility   | Medium                            | Add structured renderer/schema API; keep Angular template only outside canvas. |
+| Rewrite touches shared component consumers   | High                              | Keep `FlowDefinition` and Input/Output contracts stable.                       |
+| Existing dirty worktree                      | Medium                            | Do not revert unrelated files; isolate commits by file scope.                  |
+| Dark theme mismatch                          | Medium                            | Use existing app tokens; no cross-child CSS overrides.                         |
+| Rule and AI workflow needs differ            | Medium                            | Domain adapters convert into common runtime model.                             |
 
 ---
 

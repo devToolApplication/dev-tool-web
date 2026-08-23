@@ -130,10 +130,7 @@ Vi du dang dung:
 Pattern:
 
 ```ts
-export const SAMPLE_FEATURE_COMPONENTS = [
-  SampleListComponent,
-  SampleFormComponent
-];
+export const SAMPLE_FEATURE_COMPONENTS = [SampleListComponent, SampleFormComponent];
 
 export const sampleRoutes: Routes = [
   {
@@ -141,9 +138,9 @@ export const sampleRoutes: Routes = [
     children: [
       { path: '', component: SampleListComponent },
       { path: 'create', component: SampleFormComponent },
-      { path: 'edit/:id', component: SampleFormComponent }
-    ]
-  }
+      { path: 'edit/:id', component: SampleFormComponent },
+    ],
+  },
 ];
 ```
 
@@ -239,19 +236,19 @@ export class SampleListComponent implements OnInit {
     title: 'Sample',
     filters: [
       { field: 'key', label: 'Key', placeholder: 'Search key' },
-      { field: 'category', label: 'Category', placeholder: 'Search category' }
+      { field: 'category', label: 'Category', placeholder: 'Search category' },
     ],
     filterOptions: { primaryField: 'key' },
     toolbar: {
-      new: { visible: true, label: 'New', icon: 'pi pi-plus', severity: 'success' }
+      new: { visible: true, label: 'New', icon: 'pi pi-plus', severity: 'success' },
     },
     columns: [
       { field: 'category', header: 'Category', sortable: true },
-      { field: 'key', header: 'Key', sortable: true }
+      { field: 'key', header: 'Key', sortable: true },
     ],
     pagination: true,
     rows: DEFAULT_TABLE_ROWS,
-    rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE]
+    rowsPerPageOptions: [...DEFAULT_TABLE_ROWS_PER_PAGE],
   };
 
   rows: SampleResponse[] = [];
@@ -320,11 +317,29 @@ export class SampleFormComponent implements OnInit {
 
   readonly formConfig: FormConfig = {
     fields: [
-      { type: 'text', name: 'category', label: 'Category', width: '1/2', validation: [Rules.required('Category is required')] },
-      { type: 'text', name: 'key', label: 'Key', width: '1/2', validation: [Rules.required('Key is required')] },
-      { type: 'select', name: 'status', label: 'Status', width: '1/2', options: [...SYSTEM_STATUS_OPTIONS] },
-      { type: 'textarea', name: 'description', label: 'Description', width: 'full' }
-    ]
+      {
+        type: 'text',
+        name: 'category',
+        label: 'Category',
+        width: '1/2',
+        validation: [Rules.required('Category is required')],
+      },
+      {
+        type: 'text',
+        name: 'key',
+        label: 'Key',
+        width: '1/2',
+        validation: [Rules.required('Key is required')],
+      },
+      {
+        type: 'select',
+        name: 'status',
+        label: 'Status',
+        width: '1/2',
+        options: [...SYSTEM_STATUS_OPTIONS],
+      },
+      { type: 'textarea', name: 'description', label: 'Description', width: 'full' },
+    ],
   };
 
   formInitialValue: SampleCreateDto = { ...SAMPLE_INITIAL_VALUE };
@@ -373,7 +388,7 @@ export class SampleService {
     page = 0,
     size = 10,
     sort: string[] = ['category,asc', 'key,asc'],
-    filters: Record<string, any> = {}
+    filters: Record<string, any> = {},
   ): Observable<BasePageResponse<SampleResponse>> {}
 
   getById(id: string): Observable<SampleResponse> {}

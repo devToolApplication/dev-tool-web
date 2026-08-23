@@ -11,9 +11,8 @@ export const permissionGuard: CanActivateFn = (route) => {
   const permissionService = inject(PermissionService);
   const mode = route.data?.['permissionsMode'] as 'all' | 'any' | undefined;
 
-  const hasAccess = mode === 'any'
-    ? permissionService.hasAny(permissions)
-    : permissionService.hasAll(permissions);
+  const hasAccess =
+    mode === 'any' ? permissionService.hasAny(permissions) : permissionService.hasAll(permissions);
 
   if (hasAccess) {
     return true;

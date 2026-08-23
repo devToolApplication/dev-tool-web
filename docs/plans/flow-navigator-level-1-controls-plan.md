@@ -11,6 +11,7 @@ Date: 2026-05-29
 ## Objective
 
 Add a compact minimap menu that looks and behaves like the template basics:
+
 - `+` zoom in
 - `-` zoom out
 - fit to content
@@ -21,12 +22,14 @@ This level intentionally does not implement viewport rectangle sync or drag-to-p
 ## Current Baseline
 
 `FlowNavigatorComponent`:
+
 - Inputs: `value`, `selectedId`
 - Output: `nodeSelect`
 - Fixed dimensions: `mapWidth = 300`, `mapHeight = 160`
 - Renders node boxes as buttons.
 
 `FlowBuilderComponent`:
+
 - Owns the navigator panel.
 - Already has `executeCommand('zoomIn')`, `zoomOut`, `fit`, `toggleNavigator`.
 - Shows navigator when `resolvedCapabilities.navigator && navigatorOpen()`.
@@ -70,6 +73,7 @@ Add a header row inside minimap:
 ```
 
 Visual rules:
+
 - Keep header height around 28-32px.
 - Use icon-only controls.
 - Buttons must be 24x24 or 28x28 with stable dimensions.
@@ -78,6 +82,7 @@ Visual rules:
 - Do not use text-heavy labels inside the minimap.
 
 Suggested icons:
+
 - `+` plain text symbol for zoom in.
 - `-` plain text symbol for zoom out.
 - `pi pi-arrows-alt` or CSS text `[]` for fit. If using icon class, it is only CSS class on native element, not a third-party component.
@@ -159,6 +164,7 @@ npm.cmd run build-storybook
 ```
 
 Browser checks:
+
 - Open `Shared/UI/FlowBuilder/AI Agent Workflow`.
 - Click `+`, verify canvas zooms in.
 - Click `-`, verify canvas zooms out.
@@ -186,6 +192,7 @@ await page.locator('.flow-navigator__action--close').click();
 ## Rollback
 
 Revert only:
+
 - New navigator outputs.
 - Header/actions markup and CSS.
 - Event wiring in `flow-builder.component.html`.

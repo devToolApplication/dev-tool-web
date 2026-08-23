@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 
-
 import { InputNumber } from './input-number';
 
 describe('InputNumber', () => {
@@ -13,7 +12,7 @@ describe('InputNumber', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputNumber);

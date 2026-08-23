@@ -12,7 +12,7 @@ describe('InputMulti', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputMulti);
@@ -22,20 +22,15 @@ describe('InputMulti', () => {
   it('normalizes value changes into unique string values', () => {
     const valueChange = vi.spyOn(component.valueChange, 'emit');
 
-    component.value = [
-      'alpha',
-      'beta',
-      'alpha',
-      ''
-    ];
+    component.value = ['alpha', 'beta', 'alpha', ''];
     component.ngOnChanges({
-      value: new SimpleChange(null, component.value, false)
+      value: new SimpleChange(null, component.value, false),
     });
 
     expect(component.model).toEqual(['alpha', 'beta']);
     expect(component.selectedOptions).toEqual([
       { label: 'alpha', value: 'alpha' },
-      { label: 'beta', value: 'beta' }
+      { label: 'beta', value: 'beta' },
     ]);
     expect(valueChange).not.toHaveBeenCalled();
   });
@@ -59,17 +54,15 @@ describe('InputMulti', () => {
   it('keeps selected values out of future suggestions', () => {
     component.options = [
       { label: 'Alpha', value: 'alpha' },
-      { label: 'Beta', value: 'beta' }
+      { label: 'Beta', value: 'beta' },
     ];
     component.value = ['alpha'];
     component.ngOnChanges({
-      value: new SimpleChange(null, component.value, false)
+      value: new SimpleChange(null, component.value, false),
     });
 
     component.onSearch('');
 
-    expect(component.suggestions).toEqual([
-      { label: 'Beta', value: 'beta' }
-    ]);
+    expect(component.suggestions).toEqual([{ label: 'Beta', value: 'beta' }]);
   });
 });

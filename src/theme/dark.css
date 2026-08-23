@@ -15,6 +15,10 @@
   --app-table-header-bg: rgba(17, 24, 57, 0.7);
   --app-table-cell-bg: rgba(13, 19, 46, 0.5);
   --app-table-row-hover-bg: rgba(18, 26, 62, 0.64);
+  --app-table-frozen-bg: var(--app-surface-overlay);
+  --app-table-frozen-header-bg: color-mix(in srgb, var(--app-text) 6%, var(--app-surface-overlay));
+  --app-table-frozen-hover-bg: color-mix(in srgb, var(--app-primary) 14%, var(--app-surface-overlay));
+  --app-table-frozen-selected-bg: color-mix(in srgb, var(--app-primary) 22%, var(--app-surface-overlay));
   --app-card-highlight:
     radial-gradient(220px 90px at 0% 0%, rgba(122, 119, 255, 0.16), transparent 70%),
     radial-gradient(280px 110px at 100% 100%, rgba(179, 125, 255, 0.1), transparent 72%);

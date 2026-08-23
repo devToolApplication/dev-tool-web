@@ -12,8 +12,8 @@ const meta: Meta<InputNumber> = {
     max: 100,
     step: 1,
     disabled: false,
-    showClear: false
-  }
+    showClear: false,
+  },
 };
 
 export default meta;
@@ -31,8 +31,8 @@ export const Currency: Story = {
     min: 0,
     max: 1000000,
     minFractionDigits: 2,
-    maxFractionDigits: 2
-  }
+    maxFractionDigits: 2,
+  },
 };
 
 export const WithMinMax: Story = {
@@ -41,14 +41,14 @@ export const WithMinMax: Story = {
     min: 0,
     max: 100,
     value: 50,
-    suffix: '%'
-  }
+    suffix: '%',
+  },
 };
 
 export const WithStep: Story = {
   args: {
     label: 'Stepped Quantity',
     step: 5,
-    value: 20
-  }
+    value: 20,
+  },
 };

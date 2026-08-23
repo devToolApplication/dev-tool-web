@@ -11,7 +11,7 @@ describe('CopyableTextComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(CopyableTextComponent);
@@ -23,7 +23,9 @@ describe('CopyableTextComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('record-123');
-    expect(fixture.nativeElement.querySelector('.copyable-text')?.getAttribute('title')).toBe('record-123');
+    expect(fixture.nativeElement.querySelector('.copyable-text')?.getAttribute('title')).toBe(
+      'record-123',
+    );
   });
 
   it('shortens long values without changing the copied value', () => {
@@ -40,7 +42,7 @@ describe('CopyableTextComponent', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText }
+      value: { writeText },
     });
     component.value = 'copy-value';
 
@@ -54,11 +56,11 @@ describe('CopyableTextComponent', () => {
     const execCommand = vi.fn().mockReturnValue(true);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: undefined
+      value: undefined,
     });
     Object.defineProperty(document, 'execCommand', {
       configurable: true,
-      value: execCommand
+      value: execCommand,
     });
     component.value = 'fallback-value';
 
@@ -78,7 +80,7 @@ describe('CopyableTextComponent', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText }
+      value: { writeText },
     });
     component.value = 'secret-value';
     component.secret = true;

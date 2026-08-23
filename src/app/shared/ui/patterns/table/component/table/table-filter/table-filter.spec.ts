@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { SharedModule } from '@shared/shared.module';
-import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { TableFilterComponent } from './table-filter';
 
 describe('TableFilterComponent', () => {
@@ -12,16 +12,21 @@ describe('TableFilterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: [provideHttpClient(), provideNoopAnimations()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableFilterComponent);
     component = fixture.componentInstance;
-    component.options = { enableUrlSync: false, primaryField: 'keyword' };
+    component.options = { primaryField: 'keyword' };
     component.fields = [
       { field: 'keyword', label: 'Keyword', type: 'text' },
       { field: 'amount', label: 'Amount', type: 'number-range' },
-      { field: 'owner', label: 'Owner', type: 'autocomplete', options: [{ label: 'Alice', value: 'alice' }] }
+      {
+        field: 'owner',
+        label: 'Owner',
+        type: 'autocomplete',
+        options: [{ label: 'Alice', value: 'alice' }],
+      },
     ];
     fixture.detectChanges();
   });
@@ -40,14 +45,14 @@ describe('TableFilterComponent', () => {
     vi.useRealTimers();
   });
 
-  it('does not emit an initial empty search when the URL only represents default filters', async () => {
+  it('does not emit an initial empty search for default controlled values', async () => {
     fixture.destroy();
     fixture = TestBed.createComponent(TableFilterComponent);
     component = fixture.componentInstance;
-    component.options = { enableUrlSync: false, primaryField: 'keyword' };
+    component.options = { primaryField: 'keyword' };
     component.fields = [
       { field: 'keyword', label: 'Keyword', type: 'text' },
-      { field: 'category', label: 'Category', type: 'text' }
+      { field: 'category', label: 'Category', type: 'text' },
     ];
     const search = vi.spyOn(component.search, 'emit');
 
@@ -60,38 +65,50 @@ describe('TableFilterComponent', () => {
 
   it('applies and resets number-range and autocomplete filters without duplicate search events', () => {
     const search = vi.spyOn(component.search, 'emit');
+    const valueChange = vi.spyOn(component.valueChange, 'emit');
     const reset = vi.spyOn(component.reset, 'emit');
 
     component.onFieldChange(component.fields[1], { start: '10', end: '20' });
     component.onFieldChange(component.fields[2], 'alice');
     component.onApplyAdvanced();
 
-    expect(search).toHaveBeenCalledWith({ amountFrom: 10, amountTo: 20, owner: 'alice' });
+    expect(search).toHaveBeenCalledWith({ amount: { start: 10, end: 20 }, owner: 'alice' });
+    expect(valueChange).toHaveBeenCalledWith({
+      amount: { start: 10, end: 20 },
+      owner: 'alice',
+    });
     expect(component.activeFilterCount()).toBe(2);
 
     search.mockClear();
+    valueChange.mockClear();
     component.onReset();
 
     expect(reset).toHaveBeenCalledOnce();
+    expect(valueChange).toHaveBeenCalledWith({});
     expect(search).not.toHaveBeenCalled();
     expect(component.activeFilterCount()).toBe(0);
   });
 
-  it('syncs number-range filters to from/to query params', () => {
-    const router = TestBed.inject(Router);
-    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    component.options = { enableUrlSync: true, primaryField: 'keyword' };
+  it('accepts controlled filter values without router providers', () => {
+    component.fields = [
+      ...component.fields,
+      { field: 'enabled', label: 'Enabled', type: 'boolean' },
+    ];
+    component.value = { keyword: 'alpha', amount: { start: 0, end: 20 }, enabled: true };
 
-    component.onFieldChange(component.fields[1], { start: '0', end: '20' });
-    component.onApplyAdvanced();
+    component.ngOnChanges({
+      value: {
+        currentValue: component.value,
+        previousValue: {},
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
 
-    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({
-      queryParams: expect.objectContaining({
-        amountFrom: 0,
-        amountTo: 20
-      }),
-      queryParamsHandling: 'merge'
-    }));
+    expect(component.searchValue()).toBe('alpha');
+    expect(component.valueOf(component.fields[1])).toEqual({ start: 0, end: 20 });
+    expect(component.valueOf(component.fields[3])).toBe(true);
+    expect(component.activeFilterCount()).toBe(3);
   });
 
   it('blocks invalid range filters and renders inline validation errors', () => {
@@ -104,17 +121,17 @@ describe('TableFilterComponent', () => {
 
     expect(search).not.toHaveBeenCalled();
     expect(component.validationErrors()).toEqual([
-      { field: 'amount', message: 'shared.filter.numberRangeInvalid' }
+      { field: 'amount', message: 'shared.filter.numberRangeInvalid' },
     ]);
     expect(component.fieldErrors(component.fields[1]).map((error) => error.message)).toEqual([
-      'shared.filter.numberRangeInvalid'
+      'shared.filter.numberRangeInvalid',
     ]);
 
     component.onFieldChange(component.fields[1], { start: '10', end: '20' });
     component.onApplyAdvanced();
 
     expect(component.validationErrors()).toEqual([]);
-    expect(search).toHaveBeenCalledWith({ amountFrom: 10, amountTo: 20 });
+    expect(search).toHaveBeenCalledWith({ amount: { start: 10, end: 20 } });
   });
 
   it('renders active filter chips and removes an individual filter', () => {

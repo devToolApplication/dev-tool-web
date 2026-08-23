@@ -8,8 +8,8 @@ const meta: Meta<AlertComponent> = {
     variant: 'info',
     title: 'alert.title.info',
     message: 'This is a sample alert message detailing some system events.',
-    dismissible: false
-  }
+    dismissible: false,
+  },
 };
 
 export default meta;
@@ -22,30 +22,30 @@ export const Success: Story = {
   args: {
     variant: 'success',
     title: 'alert.title.success',
-    message: 'Transaction has been committed successfully.'
-  }
+    message: 'Transaction has been committed successfully.',
+  },
 };
 
 export const Warning: Story = {
   args: {
     variant: 'warning',
     title: 'alert.title.warning',
-    message: 'System cache storage usage is above 85% threshold.'
-  }
+    message: 'System cache storage usage is above 85% threshold.',
+  },
 };
 
 export const Danger: Story = {
   args: {
     variant: 'danger',
     title: 'alert.title.danger',
-    message: 'Failed connection to node api-gateway-01. Host is unreachable.'
-  }
+    message: 'Failed connection to node api-gateway-01. Host is unreachable.',
+  },
 };
 
 export const Dismissible: Story = {
   args: {
-    dismissible: true
-  }
+    dismissible: true,
+  },
 };
 
 export const WithAction: Story = {
@@ -53,8 +53,8 @@ export const WithAction: Story = {
     variant: 'info',
     title: 'Updates Available',
     message: 'New firmware packages are ready to be installed.',
-    actionLabel: 'common.upgrade'
-  }
+    actionLabel: 'common.upgrade',
+  },
 };
 
 export const VariantMatrix: Story = {
@@ -99,6 +99,6 @@ export const VariantMatrix: Story = {
           </tbody>
         </table>
       </div>
-    `
-  })
+    `,
+  }),
 };

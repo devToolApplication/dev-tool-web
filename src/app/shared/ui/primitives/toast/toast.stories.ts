@@ -4,6 +4,16 @@ import { ToastComponent } from './toast';
 import { ToastService } from '@core/notifications/toast.service';
 import { I18nService } from '@core/i18n/i18n.service';
 
+type ToastStoryWindow = Window & {
+  __toastService?: ToastService;
+};
+
+type ToastStoryI18n = Pick<I18nService, 't'>;
+
+function storyWindow(): ToastStoryWindow {
+  return window as ToastStoryWindow;
+}
+
 const meta: Meta<ToastComponent> = {
   title: 'Shared/Components/Feedback/Toast',
   component: ToastComponent,
@@ -11,9 +21,12 @@ const meta: Meta<ToastComponent> = {
     applicationConfig({
       providers: [
         ToastService,
-        { provide: I18nService, useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') } }
-      ]
-    })
+        {
+          provide: I18nService,
+          useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') },
+        },
+      ],
+    }),
   ],
   render: (args) => ({
     props: args,
@@ -26,8 +39,8 @@ const meta: Meta<ToastComponent> = {
         </div>
         <app-toast></app-toast>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -38,14 +51,14 @@ export const Default: Story = {
   render: (args) => ({
     props: {
       ...args,
-      showSuccess: function() {
-        const service = (window as any).__toastService;
+      showSuccess: function () {
+        const service = storyWindow().__toastService;
         if (service) service.success('Success', 'Sync process completed successfully.');
       },
-      showError: function() {
-        const service = (window as any).__toastService;
+      showError: function () {
+        const service = storyWindow().__toastService;
         if (service) service.error('Connection Failure', 'Loss of database endpoint heartbeat.');
-      }
+      },
     },
     template: `
       <div>
@@ -56,7 +69,7 @@ export const Default: Story = {
         </div>
         <app-toast></app-toast>
       </div>
-    `
+    `,
   }),
   decorators: [
     applicationConfig({
@@ -64,16 +77,19 @@ export const Default: Story = {
         {
           provide: ToastService,
           useFactory: () => {
-            const i18n = { t: (key: unknown) => (typeof key === 'string' ? key : '') };
-            const service = new ToastService(i18n as any);
-            (window as any).__toastService = service;
+            const i18n: ToastStoryI18n = {
+              t: (key: unknown) => (typeof key === 'string' ? key : ''),
+            };
+            const service = new ToastService(i18n as I18nService);
+            storyWindow().__toastService = service;
             return service;
-          }
+          },
         },
-        { provide: I18nService, useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') } }
-      ]
-    })
-  ]
+        {
+          provide: I18nService,
+          useValue: { t: (key: unknown) => (typeof key === 'string' ? key : '') },
+        },
+      ],
+    }),
+  ],
 };
-
-

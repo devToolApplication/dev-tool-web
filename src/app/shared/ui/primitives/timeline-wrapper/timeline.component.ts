@@ -1,4 +1,5 @@
-import { Component, Input, TemplateRef } from '@angular/core';
+import type { TemplateRef } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 type TimelineAlign = 'left' | 'right' | 'top' | 'bottom';
 type TimelineLayout = 'vertical' | 'horizontal';
@@ -6,7 +7,7 @@ type TimelineLayout = 'vertical' | 'horizontal';
 @Component({
   selector: 'app-timeline',
   standalone: false,
-  templateUrl: './timeline.component.html'
+  templateUrl: './timeline.component.html',
 })
 /**
  * @deprecated Use shared/ui/data-display/timeline for new timelines.

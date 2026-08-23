@@ -10,9 +10,9 @@ const sampleJson = {
     maxRetries: 3,
     timeoutSeconds: 30,
     notificationEmail: 'admin@company.com',
-    secretToken: 'shhh-this-is-a-secret-api-token'
+    secretToken: 'shhh-this-is-a-secret-api-token',
   },
-  tags: ['production', 'critical', 'billing']
+  tags: ['production', 'critical', 'billing'],
 };
 
 const meta: Meta<JsonViewerComponent> = {
@@ -25,8 +25,8 @@ const meta: Meta<JsonViewerComponent> = {
     showRawToggle: true,
     showSearch: true,
     copyLabel: 'copy',
-    maskSecrets: false
-  }
+    maskSecrets: false,
+  },
 };
 
 export default meta;
@@ -37,20 +37,20 @@ export const Default: Story = {};
 
 export const Collapsed: Story = {
   args: {
-    collapsed: true
-  }
+    collapsed: true,
+  },
 };
 
 export const MaskSecrets: Story = {
   args: {
-    maskSecrets: true
-  }
+    maskSecrets: true,
+  },
 };
 
 export const HideSearch: Story = {
   args: {
-    showSearch: false
-  }
+    showSearch: false,
+  },
 };
 
 export const RawModeDefault: Story = {
@@ -58,9 +58,9 @@ export const RawModeDefault: Story = {
     props: args,
     template: `
       <app-json-viewer [value]="value" [showRawToggle]="showRawToggle"></app-json-viewer>
-    `
+    `,
   }),
   args: {
-    value: JSON.stringify(sampleJson, null, 2)
-  }
+    value: JSON.stringify(sampleJson, null, 2),
+  },
 };

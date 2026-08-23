@@ -1,6 +1,10 @@
 <div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
   @if (label) {
-    <label [attr.for]="inputId" class="mb-2 block text-sm font-semibold text-[var(--app-text-soft)]">{{ label | translateContent }}</label>
+    <label
+      [attr.for]="inputId"
+      class="mb-2 block text-sm font-semibold text-[var(--app-text-soft)]"
+      >{{ label | translateContent }}</label
+    >
   }
 
   <div class="relative">
@@ -21,16 +25,22 @@
         <option [value]="node.key" [disabled]="!node.selectable">{{ node.label }}</option>
       }
     </select>
-    <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]">
+    <span
+      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]"
+    >
       <i class="pi pi-chevron-down text-xs"></i>
     </span>
   </div>
 
   @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>

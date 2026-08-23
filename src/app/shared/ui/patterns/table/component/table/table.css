@@ -61,27 +61,31 @@
 .app-table-cell--frozen {
   position: sticky;
   z-index: 2;
-  background: var(--app-table-cell-bg);
+  background-color: var(--app-table-frozen-bg) !important;
   background-clip: padding-box;
 }
 
 thead .app-table-cell--frozen {
   z-index: 3;
-  background: var(--app-table-header-bg);
+  background-color: var(--app-table-frozen-header-bg) !important;
 }
 
 tbody tr:hover .app-table-cell--frozen {
-  background: var(--app-table-row-hover-bg);
+  background-color: var(--app-table-frozen-hover-bg) !important;
+}
+
+tbody tr.is-selected .app-table-cell--frozen {
+  background-color: var(--app-table-frozen-selected-bg) !important;
 }
 
 .app-table-cell--frozen-left {
   border-right: 1px solid var(--app-border-soft);
-  box-shadow: 0.75rem 0 1rem -1rem var(--app-border-strong);
+  box-shadow: 4px 0 8px -2px var(--app-border-strong);
 }
 
 .app-table-cell--frozen-right {
   border-left: 1px solid var(--app-border-soft);
-  box-shadow: -0.75rem 0 1rem -1rem var(--app-border-strong);
+  box-shadow: -4px 0 8px -2px var(--app-border-strong);
 }
 
 :host {

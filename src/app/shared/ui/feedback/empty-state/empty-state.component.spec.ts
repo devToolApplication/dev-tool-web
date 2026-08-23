@@ -12,13 +12,13 @@ import { EmptyStateComponent } from './empty-state.component';
     <app-empty-state title="Empty title" description="Empty description">
       <span class="projected-content">Projected help</span>
     </app-empty-state>
-  `
+  `,
 })
 class EmptyStateTestHostComponent {}
 
 @NgModule({
   declarations: [EmptyStateTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class EmptyStateTestHostModule {}
 
@@ -29,7 +29,7 @@ describe('EmptyStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, EmptyStateTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(EmptyStateComponent);

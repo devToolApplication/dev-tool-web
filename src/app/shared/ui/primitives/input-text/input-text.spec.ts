@@ -11,7 +11,7 @@ describe('InputText', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FormsModule, SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputText);

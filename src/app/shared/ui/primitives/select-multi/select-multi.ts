@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, Input, inject } from '@angular/core';
-import { SelectOption } from '../select/select';
+import type { SelectOption } from '../select/select';
 import { BaseInput, provideValueAccessor } from '../base-input';
 
 @Component({
@@ -7,7 +7,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './select-multi.html',
   styleUrl: './select-multi.css',
-  providers: [provideValueAccessor(() => SelectMulti)]
+  providers: [provideValueAccessor(() => SelectMulti)],
 })
 export class SelectMulti extends BaseInput<Array<string | number>> {
   @Input() options: SelectOption[] = [];
@@ -26,8 +26,8 @@ export class SelectMulti extends BaseInput<Array<string | number>> {
 
   get selectedLabels(): string[] {
     if (!this.value || !Array.isArray(this.value)) return [];
-    return this.value.map(v => {
-      const opt = this.options.find(o => o.value === v);
+    return this.value.map((v) => {
+      const opt = this.options.find((o) => o.value === v);
       return opt?.label ?? String(v);
     });
   }
@@ -47,17 +47,28 @@ export class SelectMulti extends BaseInput<Array<string | number>> {
     this.onChange(current);
   }
 
-  private readonly host = inject(ElementRef);
+  toggleDropdown(): void {
+    if (this.disabled) {
+      return;
+    }
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   @HostListener('document:click', ['$event.target'])
   onClickOutside(target: EventTarget | null): void {
-    if (this.dropdownOpen && target instanceof HTMLElement && !this.host.nativeElement.contains(target)) {
+    if (
+      this.dropdownOpen &&
+      target instanceof HTMLElement &&
+      !this.host.nativeElement.contains(target)
+    ) {
       this.dropdownOpen = false;
     }
   }
 
   removeItem(label: string): void {
-    const opt = this.options.find(o => o.label === label);
+    const opt = this.options.find((o) => o.label === label);
     if (opt) this.toggleOption(opt.value);
   }
 }

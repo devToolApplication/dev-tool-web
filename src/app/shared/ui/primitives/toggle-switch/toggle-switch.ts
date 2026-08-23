@@ -6,7 +6,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './toggle-switch.html',
   styleUrl: './toggle-switch.css',
-  providers: [provideValueAccessor(() => ToggleSwitch)]
+  providers: [provideValueAccessor(() => ToggleSwitch)],
 })
 export class ToggleSwitch extends BaseInput<boolean> {
   constructor() {

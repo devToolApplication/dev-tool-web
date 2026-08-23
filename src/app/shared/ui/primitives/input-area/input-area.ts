@@ -1,11 +1,14 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
+import type { AfterViewInit, ElementRef, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
+import type { EditorState as CodeMirrorEditorState, Extension } from '@codemirror/state';
+import type { EditorView as CodeMirrorEditorView } from '@codemirror/view';
 import { BaseInput, provideValueAccessor } from '../base-input';
 
 type CodeMirrorModules = {
-  EditorState: typeof import('@codemirror/state').EditorState;
-  EditorView: typeof import('@codemirror/view').EditorView;
-  basicSetup: typeof import('codemirror').basicSetup;
-  json: typeof import('@codemirror/lang-json').json;
+  EditorState: typeof CodeMirrorEditorState;
+  EditorView: typeof CodeMirrorEditorView;
+  basicSetup: Extension;
+  json: () => Extension;
 };
 
 type JsonEditorInstance = {
@@ -19,7 +22,7 @@ type JsonEditorInstance = {
   standalone: false,
   templateUrl: './input-area.html',
   styleUrl: './input-area.css',
-  providers: [provideValueAccessor(() => InputArea)]
+  providers: [provideValueAccessor(() => InputArea)],
 })
 export class InputArea extends BaseInput<string> implements AfterViewInit, OnChanges, OnDestroy {
   @Input() rows = 5;
@@ -40,14 +43,14 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
   }
 
   ngAfterViewInit(): void {
-    this.initializeInlineJsonEditor();
+    this.queueInlineJsonEditor();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['contentType'] && !changes['contentType'].firstChange) {
       this.destroyInlineJsonEditor();
       this.destroyDialogJsonEditor();
-      queueMicrotask(() => this.initializeInlineJsonEditor());
+      queueMicrotask(() => this.queueInlineJsonEditor());
       return;
     }
 
@@ -56,9 +59,9 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
       this.destroyInlineJsonEditor();
       this.destroyDialogJsonEditor();
       queueMicrotask(() => {
-        this.initializeInlineJsonEditor();
+        this.queueInlineJsonEditor();
         if (reopenDialog) {
-          this.initializeDialogJsonEditor();
+          this.queueDialogJsonEditor();
         }
       });
       return;
@@ -81,7 +84,7 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
       return;
     }
     this.zoomVisible = true;
-    queueMicrotask(() => this.initializeDialogJsonEditor());
+    queueMicrotask(() => this.queueDialogJsonEditor());
   }
 
   closeZoom(): void {
@@ -109,22 +112,45 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
   }
 
   private async initializeInlineJsonEditor(): Promise<void> {
-    if (this.contentType !== 'json' || !this.inlineJsonHost?.nativeElement || this.inlineJsonEditor) {
+    if (
+      this.contentType !== 'json' ||
+      !this.inlineJsonHost?.nativeElement ||
+      this.inlineJsonEditor
+    ) {
       return;
     }
     this.inlineJsonEditor = await this.createJsonEditor(this.inlineJsonHost.nativeElement, false);
     this.setEditorValue(this.inlineJsonEditor, this.value ?? '');
   }
 
+  private queueInlineJsonEditor(): void {
+    void this.initializeInlineJsonEditor().catch(() => undefined);
+  }
+
   private async initializeDialogJsonEditor(): Promise<void> {
-    if (this.contentType !== 'json' || !this.zoomVisible || !this.dialogJsonContainer?.nativeElement || this.dialogJsonEditor) {
+    if (
+      this.contentType !== 'json' ||
+      !this.zoomVisible ||
+      !this.dialogJsonContainer?.nativeElement ||
+      this.dialogJsonEditor
+    ) {
       return;
     }
-    this.dialogJsonEditor = await this.createJsonEditor(this.dialogJsonContainer.nativeElement, true);
+    this.dialogJsonEditor = await this.createJsonEditor(
+      this.dialogJsonContainer.nativeElement,
+      true,
+    );
     this.setEditorValue(this.dialogJsonEditor, this.value ?? '');
   }
 
-  private async createJsonEditor(container: HTMLDivElement, expanded: boolean): Promise<JsonEditorInstance> {
+  private queueDialogJsonEditor(): void {
+    void this.initializeDialogJsonEditor().catch(() => undefined);
+  }
+
+  private async createJsonEditor(
+    container: HTMLDivElement,
+    expanded: boolean,
+  ): Promise<JsonEditorInstance> {
     const { EditorState, EditorView, basicSetup, json } = await this.loadCodeMirrorModules();
     const editable = !this.disabled && !this.readonly;
 
@@ -139,7 +165,7 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
           EditorView.lineWrapping,
           EditorView.contentAttributes.of({
             'aria-label': this.label || this.placeholder || 'JSON editor',
-            title: this.label || this.placeholder || 'JSON editor'
+            title: this.label || this.placeholder || 'JSON editor',
           }),
           EditorState.readOnly.of(!editable),
           EditorView.editable.of(editable),
@@ -151,12 +177,12 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
           }),
           EditorView.theme({
             '&': {
-              height: '100%'
-            }
-          })
-        ]
+              height: '100%',
+            },
+          }),
+        ],
       }),
-      parent: container
+      parent: container,
     });
 
     return {
@@ -170,10 +196,10 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
           changes: {
             from: 0,
             to: view.state.doc.length,
-            insert: text
-          }
+            insert: text,
+          },
         });
-      }
+      },
     };
   }
 
@@ -230,14 +256,14 @@ export class InputArea extends BaseInput<string> implements AfterViewInit, OnCha
       import('@codemirror/state'),
       import('@codemirror/view'),
       import('codemirror'),
-      import('@codemirror/lang-json')
+      import('@codemirror/lang-json'),
     ]);
 
     return {
       EditorState: stateModule.EditorState,
       EditorView: viewModule.EditorView,
       basicSetup: codeMirrorModule.basicSetup,
-      json: jsonModule.json
+      json: jsonModule.json,
     };
   }
 

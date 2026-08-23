@@ -4,28 +4,23 @@ import {
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
-  HttpRequest
+  HttpRequest,
 } from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
 import { KeycloakService } from '../auth/keycloak.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-
   constructor(private readonly keycloak: KeycloakService) {}
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.keycloak?.token;
 
     if (token) {
       req = req.clone({
         setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
     }
 
@@ -36,7 +31,7 @@ export class AuthInterceptor implements HttpInterceptor {
         }
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 }

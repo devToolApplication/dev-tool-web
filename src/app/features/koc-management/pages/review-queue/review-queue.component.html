@@ -1,0 +1,39 @@
+﻿<app-koc-page-frame title="koc.reviews.title" subtitle="koc.reviews.subtitle">
+  <app-section-panel title="koc.reviews.sectionTitle" subtitle="koc.reviewQueue.sectionSubtitle">
+    <app-alert
+      variant="info"
+      title="koc.reviewQueue.businessOnlyTitle"
+      message="koc.reviewQueue.businessOnlyDescription"
+    ></app-alert>
+
+    @if (loading()) {
+      <app-loading-skeleton type="list" [rows]="6"></app-loading-skeleton>
+    } @else if (error()) {
+      <app-error-state
+        title="koc.reviewQueue.error.title"
+        [message]="error() ?? 'koc.reviewQueue.error.loadFailed'"
+        retryLabel="retry"
+        (retry)="loadReviews()"
+      ></app-error-state>
+    } @else if (reviews().length === 0) {
+      <app-empty-state
+        title="koc.reviewQueue.empty.title"
+        description="koc.reviewQueue.empty.description"
+      ></app-empty-state>
+    } @else {
+      <div class="review-queue__list" role="list">
+        @for (item of reviews(); track item.reviewId) {
+          <button type="button" class="review-queue__item" role="listitem" (click)="openReview(item)">
+            <span>
+              <strong>{{ reviewReasonLabel(item.reason) | translateContent }}</strong>
+              <small>{{ item.candidateId }} / {{ item.campaignId }}</small>
+            </span>
+            <app-koc-status-badge [status]="item.status" size="sm"></app-koc-status-badge>
+            <span class="review-queue__meta">{{ item.updatedAt || ('notAvailable' | translateContent) }}</span>
+          </button>
+        }
+      </div>
+      <p class="review-queue__count">{{ 'koc.reviewQueue.total' | translateContent }}: {{ totalRecords() }}</p>
+    }
+  </app-section-panel>
+</app-koc-page-frame>

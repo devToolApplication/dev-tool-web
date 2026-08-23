@@ -7,7 +7,7 @@ const meta: Meta<TooltipComponent> = {
   args: {
     text: 'This is a helpful tooltip message',
     position: 'top',
-    autoHide: true
+    autoHide: true,
   },
   render: (args) => ({
     props: args,
@@ -17,8 +17,8 @@ const meta: Meta<TooltipComponent> = {
           <app-button label="Hover over me!"></app-button>
         </app-tooltip>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -29,18 +29,18 @@ export const Top: Story = {};
 
 export const Bottom: Story = {
   args: {
-    position: 'bottom'
-  }
+    position: 'bottom',
+  },
 };
 
 export const Left: Story = {
   args: {
-    position: 'left'
-  }
+    position: 'left',
+  },
 };
 
 export const Right: Story = {
   args: {
-    position: 'right'
-  }
+    position: 'right',
+  },
 };

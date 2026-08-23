@@ -51,7 +51,10 @@
   color: var(--app-text);
   text-align: left;
   cursor: grab;
-  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
 }
 
 .flow-palette__item:hover,

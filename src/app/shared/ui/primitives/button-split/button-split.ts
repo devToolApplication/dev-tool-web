@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import type { UiRouterLink } from '../../types/router-link.model';
 
 export interface AppMenuItem {
   label?: string;
@@ -6,7 +7,7 @@ export interface AppMenuItem {
   disabled?: boolean;
   visible?: boolean;
   separator?: boolean;
-  routerLink?: string | any[];
+  routerLink?: UiRouterLink;
   items?: AppMenuItem[];
   command?: (event?: unknown) => void;
 }
@@ -15,7 +16,7 @@ export interface AppMenuItem {
   selector: 'app-button-split',
   standalone: false,
   templateUrl: './button-split.html',
-  styleUrl: './button-split.css'
+  styleUrl: './button-split.css',
 })
 export class ButtonSplit {
   @Input() label = 'actions';

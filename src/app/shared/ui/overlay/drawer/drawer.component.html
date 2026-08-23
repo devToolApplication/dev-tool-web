@@ -1,5 +1,5 @@
-@if (open) {
-  <div #overlay class="app-drawer" [class.app-drawer--open]="open" [class]="'app-drawer--' + side">
+<ng-template #drawerTemplate>
+  <div class="app-drawer app-drawer--open" [class]="'app-drawer--' + side">
     <button
       type="button"
       class="app-drawer__backdrop"
@@ -13,8 +13,10 @@
       [class]="'app-drawer__panel--' + size + ' app-drawer__panel--' + side"
       role="dialog"
       aria-modal="true"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
       tabindex="-1"
-      [attr.aria-label]="(title || 'shared.drawer.title') | translateContent"
+      [attr.aria-label]="title || 'shared.drawer.title' | translateContent"
     >
       <header class="app-drawer__header">
         <div class="app-drawer__heading">
@@ -61,5 +63,4 @@
       </footer>
     </div>
   </div>
-}
-
+</ng-template>

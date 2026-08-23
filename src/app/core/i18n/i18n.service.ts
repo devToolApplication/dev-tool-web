@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import commonTranslations from '../i18n/common/common.i18n.json';
 import errorsTranslations from '../i18n/features/errors.i18n.json';
+import kocManagementTranslations from '../i18n/features/koc-management.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
 import serviceManagementTranslations from '../i18n/features/service-management.i18n.json';
 import workflowStudioTranslations from '../i18n/features/workflow-studio.i18n.json';
@@ -16,20 +17,24 @@ const TRANSLATIONS: TranslationMap = {
     ...layoutTranslations.vi,
     ...errorsTranslations.vi,
     ...serviceManagementTranslations.vi,
-    ...workflowStudioTranslations.vi
+    ...workflowStudioTranslations.vi,
+    ...kocManagementTranslations.vi,
   },
   en: {
     ...commonTranslations.en,
     ...layoutTranslations.en,
     ...errorsTranslations.en,
     ...serviceManagementTranslations.en,
-    ...workflowStudioTranslations.en
-  }
+    ...workflowStudioTranslations.en,
+    ...kocManagementTranslations.en,
+  },
 };
 
 @Injectable({ providedIn: 'root' })
 export class I18nService {
-  readonly language = signal<AppLanguage>((localStorage.getItem(STORAGE_KEY) as AppLanguage) ?? 'vi');
+  readonly language = signal<AppLanguage>(
+    (localStorage.getItem(STORAGE_KEY) as AppLanguage) ?? 'vi',
+  );
 
   setLanguage(language: AppLanguage): void {
     this.language.set(language);

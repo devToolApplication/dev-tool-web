@@ -1,11 +1,12 @@
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
-import { FormResolvedSection } from '../../models/form-config.model';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
+import type { FormResolvedSection } from '../../models/form-config.model';
 
 @Component({
   selector: 'app-form-section-card',
   standalone: false,
   templateUrl: './form-section-card.html',
-  styleUrl: './form-section-card.css'
+  styleUrl: './form-section-card.css',
 })
 export class FormSectionCardComponent implements OnChanges {
   @Input({ required: true }) section!: FormResolvedSection;

@@ -1,0 +1,59 @@
+﻿<app-koc-page-frame
+  title="koc.configuration.screeningTemplates.title"
+  subtitle="koc.configuration.screeningTemplates.subtitle"
+>
+  <app-section-panel
+    title="koc.configuration.screeningTemplates.sectionTitle"
+    subtitle="koc.configuration.screeningTemplates.subtitle"
+  >
+    @if (loading()) {
+      <app-loading-skeleton type="list" [rows]="5"></app-loading-skeleton>
+    } @else if (error()) {
+      <app-error-state
+        title="koc.screeningTemplates.error.title"
+        [message]="error() ?? 'koc.screeningTemplates.error.loadFailed'"
+        retryLabel="retry"
+        (retry)="loadTemplates()"
+      ></app-error-state>
+    } @else if (templates().length === 0) {
+      <app-empty-state
+        title="koc.screeningTemplates.empty.title"
+        description="koc.screeningTemplates.empty.description"
+      ></app-empty-state>
+    } @else {
+      <div class="screening-template-list__rows" role="list" [attr.aria-label]="'koc.configuration.screeningTemplates.sectionTitle' | translateContent">
+        @for (template of templates(); track template.templateId) {
+          <div class="screening-template-list__row" role="listitem">
+            <div class="screening-template-list__identity">
+              <strong>{{ template.name }}</strong>
+              <small>{{ template.templateId }}</small>
+            </div>
+
+            <div class="screening-template-list__description">
+              <span>{{ template.description || ('notAvailable' | translateContent) }}</span>
+            </div>
+
+            <div class="screening-template-list__rules">
+              <span class="screening-template-list__label">{{ 'koc.screeningTemplates.column.rules' | translateContent }}</span>
+              <strong>{{ template.ruleCount }}</strong>
+            </div>
+
+            <div class="screening-template-list__status">
+              <app-koc-status-badge [status]="template.active ? 'ACTIVE' : 'DISABLED'" size="sm"></app-koc-status-badge>
+            </div>
+
+            <div class="screening-template-list__actions">
+              <app-button
+                size="sm"
+                variant="secondary"
+                icon="pi pi-play"
+                [label]="'koc.screeningTemplates.action.useInCampaign'"
+                (buttonClick)="useTemplate(template)"
+              ></app-button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </app-section-panel>
+</app-koc-page-frame>

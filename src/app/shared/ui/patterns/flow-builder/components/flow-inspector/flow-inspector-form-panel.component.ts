@@ -1,11 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import type {
+  FormConfig,
+  FormContext,
+} from '@shared/ui/patterns/form-input/models/form-config.model';
 import type { FlowNode } from '../../models';
+import type { FlowInspectorFormChange } from './flow-inspector-form.utils';
 import {
   compactFlowInspectorFormConfig,
   extractFlowInspectorFieldPaths,
   flowInspectorFieldSignature,
-  FlowInspectorFormChange,
   flowNodeToInspectorFormValue,
   resolveFlowInspectorFormContext,
 } from './flow-inspector-form.utils';

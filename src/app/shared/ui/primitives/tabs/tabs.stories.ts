@@ -10,9 +10,9 @@ const meta: Meta<TabsComponent> = {
     tabs: [
       { label: 'general', value: 'general' },
       { label: 'settings', value: 'settings' },
-      { label: 'metadata', value: 'metadata' }
-    ]
-  }
+      { label: 'metadata', value: 'metadata' },
+    ],
+  },
 };
 
 export default meta;
@@ -26,7 +26,7 @@ export const DisabledItem: Story = {
     tabs: [
       { label: 'general', value: 'general' },
       { label: 'settings', value: 'settings', disabled: true },
-      { label: 'metadata', value: 'metadata' }
-    ]
-  }
+      { label: 'metadata', value: 'metadata' },
+    ],
+  },
 };

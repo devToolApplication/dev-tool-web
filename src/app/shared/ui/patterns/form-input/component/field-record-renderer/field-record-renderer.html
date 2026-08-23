@@ -1,14 +1,15 @@
 <div class="record-field" [class.record-field--disabled]="field.disabled()">
   <div class="record-field__header">
-    <span class="record-field__label">{{ (field.label || 'record') | translateContent }}</span>
+    <span class="record-field__label">{{ field.label || 'record' | translateContent }}</span>
     <app-button
       type="button"
       variant="secondary"
       size="sm"
       icon="pi pi-plus"
-      [label]="(recordConfig?.addButtonLabel || 'addRow') | translateContent"
+      [label]="recordConfig?.addButtonLabel || 'addRow' | translateContent"
       [disabled]="field.disabled()"
-      (buttonClick)="onRecordAdd()">
+      (buttonClick)="onRecordAdd()"
+    >
     </app-button>
   </div>
 
@@ -21,8 +22,8 @@
   } @else {
     <div class="record-field__table">
       <div class="record-field__table-head">
-        <span>{{ (recordConfig?.keyLabel || 'key') | translateContent }}</span>
-        <span>{{ (recordConfig?.valueLabel || 'value') | translateContent }}</span>
+        <span>{{ recordConfig?.keyLabel || 'key' | translateContent }}</span>
+        <span>{{ recordConfig?.valueLabel || 'value' | translateContent }}</span>
         <span></span>
       </div>
 
@@ -32,13 +33,15 @@
             [placeholder]="recordConfig?.keyLabel || 'key'"
             [value]="entry.key"
             [disabled]="field.disabled()"
-            (valueChange)="onRecordKeyChange(i, $any($event))">
+            (valueChange)="onRecordKeyChange(i, $event)"
+          >
           </app-input-text>
           <app-input-text
             [placeholder]="recordConfig?.valueLabel || 'value'"
             [value]="entry.value"
             [disabled]="field.disabled()"
-            (valueChange)="onRecordValueChange(i, $any($event))">
+            (valueChange)="onRecordValueChange(i, $event)"
+          >
           </app-input-text>
           <app-button
             type="button"
@@ -47,7 +50,8 @@
             icon="pi pi-trash"
             [ariaLabel]="'delete'"
             [disabled]="field.disabled()"
-            (buttonClick)="onRecordRemove(i)">
+            (buttonClick)="onRecordRemove(i)"
+          >
           </app-button>
         </div>
       }

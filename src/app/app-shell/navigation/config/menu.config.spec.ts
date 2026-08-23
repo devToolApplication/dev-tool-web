@@ -12,6 +12,7 @@ describe('APP_LAYOUT_MENU', () => {
         '/ai-agent-mcrs/secrets',
         '/ai-agent-mcrs/configs',
         '/ai-agent-mcrs/workflows',
+        '/ai-agent-mcrs/koc',
         '/job-service/secrets',
         '/job-service/configs',
         '/job-service/jobs',

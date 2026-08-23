@@ -13,7 +13,7 @@ const meta: Meta<DrawerComponent> = {
     closeOnBackdrop: true,
     closeOnEsc: true,
     loading: false,
-    empty: false
+    empty: false,
   },
   render: (args) => ({
     props: args,
@@ -45,8 +45,8 @@ const meta: Meta<DrawerComponent> = {
           </div>
         </app-drawer>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -57,32 +57,31 @@ export const Default: Story = {};
 
 export const LeftSide: Story = {
   args: {
-    side: 'left'
-  }
+    side: 'left',
+  },
 };
 
 export const LargeSize: Story = {
   args: {
-    size: 'lg'
-  }
+    size: 'lg',
+  },
 };
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };
 
 export const ErrorState: Story = {
   args: {
-    error: 'Failed to retrieve drawer options.'
-  }
+    error: 'Failed to retrieve drawer options.',
+  },
 };
 
 export const Empty: Story = {
   args: {
     empty: true,
-    emptyDescription: 'No drawer metadata to show.'
-  }
+    emptyDescription: 'No drawer metadata to show.',
+  },
 };
-

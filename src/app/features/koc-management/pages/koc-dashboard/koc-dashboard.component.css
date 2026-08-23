@@ -1,0 +1,55 @@
+﻿.koc-dashboard {
+  display: grid;
+  gap: var(--app-space-4);
+}
+
+.koc-dashboard__metrics {
+  display: grid;
+  gap: var(--app-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.koc-dashboard__grid {
+  display: grid;
+  gap: var(--app-space-4);
+  grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+}
+
+.koc-dashboard__progress-list,
+.koc-dashboard__health-list,
+.koc-dashboard__attention-list {
+  display: grid;
+  gap: var(--app-space-2);
+}
+
+.koc-dashboard__progress-item,
+.koc-dashboard__health-item,
+.koc-dashboard__attention-item {
+  align-items: center;
+  background: var(--app-surface-soft);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-md);
+  display: flex;
+  gap: var(--app-space-2);
+  justify-content: space-between;
+  padding: var(--app-space-3);
+}
+
+.koc-dashboard__health-item > div,
+.koc-dashboard__attention-item > div {
+  display: grid;
+  gap: var(--app-space-1);
+}
+
+.koc-dashboard__progress-item span,
+.koc-dashboard__health-item span,
+.koc-dashboard__attention-item span {
+  color: var(--app-text-muted);
+  font-size: var(--app-font-size-sm);
+}
+
+@media (max-width: 64rem) {
+  .koc-dashboard__grid {
+    grid-template-columns: 1fr;
+  }
+}

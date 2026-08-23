@@ -7,14 +7,14 @@ const sampleItems: KeyValueItem[] = [
   { label: 'CPU Usage', value: 87.5, type: 'percent', suffix: '%' },
   { label: 'Status', value: 'online', type: 'badge', variant: 'success' },
   { label: 'Created At', value: new Date(2026, 4, 12, 14, 30), type: 'datetime' },
-  { label: 'Cost Per Month', value: 450.00, type: 'currency', currencyCode: 'USD' },
+  { label: 'Cost Per Month', value: 450.0, type: 'currency', currencyCode: 'USD' },
   { label: 'Is Managed', value: true, type: 'boolean' },
   { label: 'Extra Info', value: null, type: 'text', emptyValue: 'N/A' },
   {
     label: 'Config details',
     value: { ip: '192.168.1.1', OS: 'Ubuntu 24.04 LTS', cores: 8 },
-    type: 'json'
-  }
+    type: 'json',
+  },
 ];
 
 const meta: Meta<KeyValueListComponent> = {
@@ -23,8 +23,8 @@ const meta: Meta<KeyValueListComponent> = {
   args: {
     items: sampleItems,
     layout: 'two-column',
-    emptyValue: '-'
-  }
+    emptyValue: '-',
+  },
 };
 
 export default meta;
@@ -35,6 +35,6 @@ export const Default: Story = {};
 
 export const OneColumn: Story = {
   args: {
-    layout: 'one-column'
-  }
+    layout: 'one-column',
+  },
 };

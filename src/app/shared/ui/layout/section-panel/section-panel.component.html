@@ -34,7 +34,11 @@
       @if (loading) {
         <app-loading-skeleton type="detail" [rows]="4"></app-loading-skeleton>
       } @else if (error) {
-        <app-error-state [message]="error" retryLabel="retry" (retry)="retry.emit()"></app-error-state>
+        <app-error-state
+          [message]="error"
+          retryLabel="retry"
+          (retry)="retry.emit()"
+        ></app-error-state>
       } @else if (empty) {
         <app-empty-state [title]="emptyTitle" [description]="emptyDescription"></app-empty-state>
       } @else {

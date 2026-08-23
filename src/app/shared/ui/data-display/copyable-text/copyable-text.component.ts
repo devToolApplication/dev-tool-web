@@ -4,7 +4,7 @@ import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
   selector: 'app-copyable-text',
   standalone: false,
   templateUrl: './copyable-text.component.html',
-  styleUrl: './copyable-text.component.css'
+  styleUrl: './copyable-text.component.css',
 })
 export class CopyableTextComponent {
   @Input() value: unknown = '';

@@ -4,5 +4,5 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 export const errorRoutes: Routes = [
   { path: '403', component: ForbiddenComponent },
-  { path: '404', component: NotFoundComponent }
+  { path: '404', component: NotFoundComponent },
 ];

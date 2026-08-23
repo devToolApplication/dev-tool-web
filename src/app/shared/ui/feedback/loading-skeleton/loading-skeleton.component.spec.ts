@@ -12,13 +12,13 @@ import { LoadingSkeletonComponent, LoadingSkeletonType } from './loading-skeleto
     <app-skeleton-table [rows]="2" [columns]="3"></app-skeleton-table>
     <app-skeleton-form [rows]="2"></app-skeleton-form>
     <app-skeleton-card [rows]="2"></app-skeleton-card>
-  `
+  `,
 })
 class SkeletonWrapperTestHostComponent {}
 
 @NgModule({
   declarations: [SkeletonWrapperTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class SkeletonWrapperTestHostModule {}
 
@@ -29,7 +29,7 @@ describe('LoadingSkeletonComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, SkeletonWrapperTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoadingSkeletonComponent);
@@ -68,9 +68,15 @@ describe('LoadingSkeletonComponent', () => {
     const hostFixture = TestBed.createComponent(SkeletonWrapperTestHostComponent);
     hostFixture.detectChanges();
 
-    expect(hostFixture.nativeElement.querySelector('app-skeleton-table .loading-skeleton--table')).toBeTruthy();
-    expect(hostFixture.nativeElement.querySelector('app-skeleton-form .loading-skeleton--form')).toBeTruthy();
-    expect(hostFixture.nativeElement.querySelector('app-skeleton-card .loading-skeleton--card')).toBeTruthy();
+    expect(
+      hostFixture.nativeElement.querySelector('app-skeleton-table .loading-skeleton--table'),
+    ).toBeTruthy();
+    expect(
+      hostFixture.nativeElement.querySelector('app-skeleton-form .loading-skeleton--form'),
+    ).toBeTruthy();
+    expect(
+      hostFixture.nativeElement.querySelector('app-skeleton-card .loading-skeleton--card'),
+    ).toBeTruthy();
   });
 
   function render(inputs: Partial<LoadingSkeletonComponent>): void {

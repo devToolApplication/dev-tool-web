@@ -11,8 +11,8 @@ const meta: Meta<InputText> = {
     readonly: false,
     required: false,
     invalid: false,
-    helpText: ''
-  }
+    helpText: '',
+  },
 };
 
 export default meta;
@@ -23,29 +23,29 @@ export const Default: Story = {};
 
 export const WithHelpText: Story = {
   args: {
-    helpText: 'Username must be unique and alphanumeric.'
-  }
+    helpText: 'Username must be unique and alphanumeric.',
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: 'john_doe'
-  }
+    value: 'john_doe',
+  },
 };
 
 export const Invalid: Story = {
   args: {
     invalid: true,
-    errorMessage: 'Username is already taken.'
-  }
+    errorMessage: 'Username is already taken.',
+  },
 };
 
 export const Readonly: Story = {
   args: {
     readonly: true,
-    value: 'john_doe_readonly'
-  }
+    value: 'john_doe_readonly',
+  },
 };
 
 export const Anatomy: Story = {
@@ -90,6 +90,6 @@ export const Anatomy: Story = {
           </tbody>
         </table>
       </div>
-    `
-  })
+    `,
+  }),
 };

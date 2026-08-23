@@ -4,7 +4,6 @@ import { KeycloakService } from './keycloak.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-
   constructor(private keycloak: KeycloakService) {}
 
   canActivate(): boolean {

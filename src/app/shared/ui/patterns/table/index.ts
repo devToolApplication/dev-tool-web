@@ -1,7 +1,14 @@
-export { BasePagedList } from './component/table/base-paged-list';
 export { TableComponent } from './component/table/table';
 export type {
   TableAction,
+  TableBulkAction,
+  TableCellTemplateContext,
   TableColumn,
-  TableConfig
+  TableConfig,
+  TableDensity,
+  TableExportRequest,
+  TableFilterField,
+  TableFilterValue,
+  TableRowKey,
+  TableRowLink,
 } from './models/table-config.model';

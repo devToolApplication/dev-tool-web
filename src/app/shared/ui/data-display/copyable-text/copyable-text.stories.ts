@@ -11,8 +11,8 @@ const meta: Meta<CopyableTextComponent> = {
     showCopy: true,
     allowCopy: true,
     secret: false,
-    emptyValue: '-'
-  }
+    emptyValue: '-',
+  },
 };
 
 export default meta;
@@ -24,25 +24,25 @@ export const Default: Story = {};
 export const Shortened: Story = {
   args: {
     shorten: true,
-    maxLength: 16
-  }
+    maxLength: 16,
+  },
 };
 
 export const SecretText: Story = {
   args: {
     secret: true,
-    value: 'my-super-secret-password-or-token-value'
-  }
+    value: 'my-super-secret-password-or-token-value',
+  },
 };
 
 export const HiddenCopyButton: Story = {
   args: {
-    showCopy: false
-  }
+    showCopy: false,
+  },
 };
 
 export const Empty: Story = {
   args: {
-    value: null
-  }
+    value: null,
+  },
 };

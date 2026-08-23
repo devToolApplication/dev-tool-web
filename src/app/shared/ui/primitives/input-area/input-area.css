@@ -97,7 +97,11 @@
 }
 
 :host ::ng-deep .input-area__json-editor .cm-gutters {
-  background: color-mix(in srgb, var(--app-custom-input-bg, var(--app-input-bg)) 92%, var(--app-text) 8%);
+  background: color-mix(
+    in srgb,
+    var(--app-custom-input-bg, var(--app-input-bg)) 92%,
+    var(--app-text) 8%
+  );
   border-right: 1px solid var(--app-input-border);
   color: var(--app-text-muted);
 }

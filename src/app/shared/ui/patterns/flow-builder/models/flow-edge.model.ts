@@ -1,4 +1,4 @@
-import { FlowStatus, FlowValidationIssue } from './flow-common.model';
+import type { FlowStatus, FlowValidationIssue } from './flow-common.model';
 
 export interface FlowEndpoint {
   nodeId: string;

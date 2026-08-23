@@ -6,9 +6,9 @@ const beforeObj = {
   active: true,
   settings: {
     maxUsers: 10,
-    allowedOrigins: ['http://localhost:3000']
+    allowedOrigins: ['http://localhost:3000'],
   },
-  roles: ['admin', 'member']
+  roles: ['admin', 'member'],
 };
 
 const afterObj = {
@@ -16,9 +16,9 @@ const afterObj = {
   active: false,
   settings: {
     maxUsers: 25,
-    allowedOrigins: ['http://localhost:3000', 'https://app.company.com']
+    allowedOrigins: ['http://localhost:3000', 'https://app.company.com'],
   },
-  roles: ['admin', 'member', 'editor']
+  roles: ['admin', 'member', 'editor'],
 };
 
 const meta: Meta<DiffViewerComponent> = {
@@ -27,8 +27,8 @@ const meta: Meta<DiffViewerComponent> = {
   args: {
     before: beforeObj,
     after: afterObj,
-    emptyTitle: 'shared.empty.title'
-  }
+    emptyTitle: 'shared.empty.title',
+  },
 };
 
 export default meta;
@@ -43,18 +43,18 @@ export const AddedOnly: Story = {
     after: {
       newService: {
         enabled: true,
-        host: 'api.service.local'
-      }
-    }
-  }
+        host: 'api.service.local',
+      },
+    },
+  },
 };
 
 export const RemovedOnly: Story = {
   args: {
     before: {
       legacyField: 'obsolete',
-      deprecatedSecret: 'keep-it-secret'
+      deprecatedSecret: 'keep-it-secret',
     },
-    after: null
-  }
+    after: null,
+  },
 };

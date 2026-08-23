@@ -9,8 +9,8 @@ const meta: Meta<Password> = {
     placeholder: 'Enter secure password',
     feedback: true,
     toggleMask: true,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -21,13 +21,13 @@ export const Default: Story = {};
 
 export const NoFeedback: Story = {
   args: {
-    feedback: false
-  }
+    feedback: false,
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: 'secret_value'
-  }
+    value: 'secret_value',
+  },
 };

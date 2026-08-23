@@ -33,6 +33,6 @@ function createSection(id: string): FormResolvedSection {
     errorCount: 0,
     warningCount: 0,
     completed: false,
-    active: false
+    active: false,
   };
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { BadgeVariant } from '../badge/badge.component';
+import type { BadgeVariant } from '../badge/badge.component';
 
 export interface StatusListItem {
   title: string;
@@ -15,7 +15,7 @@ export interface StatusListItem {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './status-list.component.html',
-  styleUrl: './status-list.component.css'
+  styleUrl: './status-list.component.css',
 })
 export class StatusListComponent {
   @Input() items: StatusListItem[] = [];

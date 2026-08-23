@@ -19,21 +19,24 @@ export class KeycloakService {
     this.keycloak = new Keycloak({
       url: environment.keycloak.url,
       realm: environment.keycloak.realm,
-      clientId: environment.keycloak.clientId
+      clientId: environment.keycloak.clientId,
     });
 
-    return this.zone.runOutsideAngular(() =>
-      this.keycloak.init({
-        onLoad: 'login-required',
-        checkLoginIframe: false
+    return this.zone
+      .runOutsideAngular(() =>
+        this.keycloak.init({
+          onLoad: 'login-required',
+          checkLoginIframe: false,
+        }),
+      )
+      .then((authenticated) => {
+        this.initialized = authenticated;
+        return authenticated;
       })
-    ).then((authenticated) => {
-      this.initialized = authenticated;
-      return authenticated;
-    }).catch((error) => {
-      this.initialized = false;
-      throw error;
-    });
+      .catch((error) => {
+        this.initialized = false;
+        throw error;
+      });
   }
 
   get token(): string | undefined {
@@ -49,7 +52,7 @@ export class KeycloakService {
       return {
         preferred_username: 'dev-user',
         name: 'Dev User',
-        realm_access: { roles: ['ADMIN'] }
+        realm_access: { roles: ['ADMIN'] },
       };
     }
 

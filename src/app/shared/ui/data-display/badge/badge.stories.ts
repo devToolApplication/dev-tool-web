@@ -8,8 +8,8 @@ const meta: Meta<BadgeComponent> = {
     label: 'status.active',
     variant: 'default',
     size: 'md',
-    pulse: false
-  }
+    pulse: false,
+  },
 };
 
 export default meta;
@@ -30,32 +30,32 @@ export const AllVariants: Story = {
         <app-badge label="Danger" variant="danger"></app-badge>
         <app-badge label="Muted" variant="muted"></app-badge>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const WithIcon: Story = {
   args: {
     label: 'status.pending',
     variant: 'warning',
-    icon: 'pi pi-clock'
-  }
+    icon: 'pi pi-clock',
+  },
 };
 
 export const SmallSize: Story = {
   args: {
     label: 'status.new',
     variant: 'info',
-    size: 'sm'
-  }
+    size: 'sm',
+  },
 };
 
 export const Pulsing: Story = {
   args: {
     label: 'status.online',
     variant: 'success',
-    pulse: true
-  }
+    pulse: true,
+  },
 };
 
 export const WithTooltip: Story = {
@@ -63,8 +63,8 @@ export const WithTooltip: Story = {
     label: 'status.locked',
     variant: 'danger',
     icon: 'pi pi-lock',
-    tooltip: 'This item is locked'
-  }
+    tooltip: 'This item is locked',
+  },
 };
 
 export const SizeVariantMatrix: Story = {
@@ -128,6 +128,6 @@ export const SizeVariantMatrix: Story = {
           </tbody>
         </table>
       </div>
-    `
-  })
+    `,
+  }),
 };

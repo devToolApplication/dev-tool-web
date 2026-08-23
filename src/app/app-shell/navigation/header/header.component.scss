@@ -7,8 +7,6 @@
   --p-avatar-background: color-mix(in srgb, var(--app-primary) 14%, var(--app-transparent));
   --p-avatar-color: var(--app-primary);
   --p-tieredmenu-min-width: 13rem;
-  --p-breadcrumb-background: var(--app-transparent);
-  --p-breadcrumb-padding: 0;
 }
 
 .header-toolbar {
@@ -93,22 +91,6 @@
   font-size: 0.68rem;
 }
 
-:host ::ng-deep .p-breadcrumb-list {
-  flex-wrap: nowrap;
-  min-width: 0;
-}
-
-:host ::ng-deep .p-breadcrumb-item,
-:host ::ng-deep .p-breadcrumb-item-link {
-  min-width: 0;
-}
-
-:host ::ng-deep .p-breadcrumb-item-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 :host ::ng-deep .sidebar-toggle-button {
   width: 1.85rem;
   height: 1.85rem;
@@ -123,10 +105,6 @@
   .header-toolbar {
     min-height: 52px;
     padding-inline: 0.6rem;
-  }
-
-  :host ::ng-deep .p-breadcrumb {
-    display: none;
   }
 
   .user-copy,

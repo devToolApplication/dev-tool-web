@@ -8,13 +8,13 @@
   color: var(--app-text-muted);
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -52,7 +52,9 @@ input[type="number"] {
   color: var(--app-text-muted);
   cursor: pointer;
   font-size: 0.65rem;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
 
 .input-number-controls button:hover:not(:disabled) {

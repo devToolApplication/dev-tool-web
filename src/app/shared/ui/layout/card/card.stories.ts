@@ -9,7 +9,7 @@ const meta: Meta<CardComponent> = {
     padding: 'md',
     surface: 'default',
     interactive: false,
-    fullHeight: false
+    fullHeight: false,
   },
   render: (args) => ({
     props: args,
@@ -17,8 +17,8 @@ const meta: Meta<CardComponent> = {
       <app-card [padding]="padding" [surface]="surface" [interactive]="interactive" [fullHeight]="fullHeight">
         <div class="app-text">{{ 'content' | translateContent }}</div>
       </app-card>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -29,12 +29,12 @@ export const Default: Story = {};
 
 export const Strong: Story = {
   args: {
-    surface: 'strong'
-  }
+    surface: 'strong',
+  },
 };
 
 export const Interactive: Story = {
   args: {
-    interactive: true
-  }
+    interactive: true,
+  },
 };

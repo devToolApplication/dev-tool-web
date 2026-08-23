@@ -13,6 +13,7 @@
 ### Task 1: Add architecture aliases
 
 **Files:**
+
 - Modify: `tsconfig.json`
 
 - [ ] Add `baseUrl: "./src"` and `paths` for `@app/*`, `@core/*`, `@shared/*`, `@features/*`.
@@ -21,6 +22,7 @@
 ### Task 2: Move app composition
 
 **Files:**
+
 - Move: `src/app/app.routes.ts` to `src/app/app-routing/app-routing.module.ts`
 - Move: `src/app/app.component.*` to `src/app/app-shell/app.component.*`
 - Move: `src/app/shared/layout/base` to `src/app/app-shell/layouts/base`
@@ -40,6 +42,7 @@
 ### Task 3: Move shared primitives and patterns
 
 **Files:**
+
 - Move: `src/app/shared/component` to `src/app/shared/ui/primitives`
 - Move: `src/app/shared/pipe` to `src/app/shared/pipes`
 - Move: `src/app/shared/ui/base-crud-page` to `src/app/shared/ui/patterns/base-crud-page`
@@ -60,6 +63,7 @@
 ### Task 4: Move feature/domain code
 
 **Files:**
+
 - Move: `src/app/features/error/forbidden` to `src/app/features/error/pages/forbidden`
 - Move: `src/app/features/error/not-found` to `src/app/features/error/pages/not-found`
 - Move: `src/app/features/error/error-routing.module.ts` to `src/app/features/error/error.routes.ts`
@@ -74,6 +78,7 @@
 ### Task 5: Move core infrastructure
 
 **Files:**
+
 - Move: `src/app/core/constants/system.constants.ts` to `src/app/core/config/system.constants.ts`
 - Move: `src/app/core/models/base-response.model.ts` to `src/app/core/http/base-response.model.ts`
 - Move: `src/app/core/ui-services/loading.service.*` to `src/app/core/loading`
@@ -89,6 +94,7 @@
 ### Task 6: Clean stale imports and verify
 
 **Files:**
+
 - Modify: all affected imports under `src/app`
 
 - [ ] Search for stale `shared/component`, `shared/layout`, `shared/pipe`, `shared/ui/base-crud-page`, `shared/ui/form-input`, `core/ui-services`.

@@ -11,20 +11,20 @@ const sampleMenuItems = [
         icon: 'pi pi-fw pi-plus',
         items: [
           { label: 'Bookmark', icon: 'pi pi-fw pi-bookmark' },
-          { label: 'Video', icon: 'pi pi-fw pi-video' }
-        ]
+          { label: 'Video', icon: 'pi pi-fw pi-video' },
+        ],
       },
-      { label: 'Delete', icon: 'pi pi-fw pi-trash' }
-    ]
+      { label: 'Delete', icon: 'pi pi-fw pi-trash' },
+    ],
   },
   {
     label: 'Edit',
     icon: 'pi pi-fw pi-pencil',
     items: [
       { label: 'Left', icon: 'pi pi-fw pi-align-left' },
-      { label: 'Right', icon: 'pi pi-fw pi-align-right' }
-    ]
-  }
+      { label: 'Right', icon: 'pi pi-fw pi-align-right' },
+    ],
+  },
 ];
 
 const meta: Meta<PanelMenuComponent> = {
@@ -32,8 +32,8 @@ const meta: Meta<PanelMenuComponent> = {
   component: PanelMenuComponent,
   args: {
     model: sampleMenuItems,
-    multiple: true
-  }
+    multiple: true,
+  },
 };
 
 export default meta;

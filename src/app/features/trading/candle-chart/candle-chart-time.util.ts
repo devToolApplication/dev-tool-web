@@ -102,7 +102,10 @@ export class CandleChartTimeUtil {
     }
 
     const sortTime = this.toUnixSeconds(value, 0);
-    return this.resolveBoundaryTime(sortTime, timeContext.candles, boundary) ?? (sortTime as UTCTimestamp);
+    return (
+      this.resolveBoundaryTime(sortTime, timeContext.candles, boundary) ??
+      (sortTime as UTCTimestamp)
+    );
   }
 
   timeByIndex(index: number | undefined, timeContext: TimeNormalizationContext): Time | null {
@@ -143,7 +146,8 @@ export class CandleChartTimeUtil {
     }
 
     const ceilIndex = this.findFirstCandleIndexAtOrAfter(sortTime, candles);
-    const floorIndex = ceilIndex >= candles.length ? candles.length - 1 : Math.max(ceilIndex - 1, 0);
+    const floorIndex =
+      ceilIndex >= candles.length ? candles.length - 1 : Math.max(ceilIndex - 1, 0);
 
     if (boundary === 'ceil') {
       return candles[Math.min(ceilIndex, candles.length - 1)].time;

@@ -1,19 +1,21 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import {
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import type { ValueDisplayType } from '@shared/ui/data-display/value-display/value-display.component';
+import type { SelectValue } from '@shared/ui/primitives/select/select';
+import type {
   AutoCompleteFieldConfig,
   FieldState,
   InputMultiFieldConfig,
   NumberFieldConfig,
   SelectFieldConfig,
-  TextFieldConfig
+  TextFieldConfig,
 } from '../../models/form-config.model';
-
 
 @Component({
   selector: 'app-field-renderer',
   standalone: false,
   templateUrl: './field-renderer.html',
-  styleUrl: './field-renderer.css'
+  styleUrl: './field-renderer.css',
 })
 export class FieldRenderer implements OnChanges {
   @Input({ required: true })
@@ -46,7 +48,11 @@ export class FieldRenderer implements OnChanges {
       this.autoCompleteConfig = undefined;
       this.selectConfig = undefined;
       this.textConfig = undefined;
-    } else if (this.field?.type === 'select' || this.field?.type === 'select-multi' || this.field?.type === 'multi-select') {
+    } else if (
+      this.field?.type === 'select' ||
+      this.field?.type === 'select-multi' ||
+      this.field?.type === 'multi-select'
+    ) {
       this.numberConfig = undefined;
       this.inputMultiConfig = undefined;
       this.autoCompleteConfig = undefined;
@@ -68,7 +74,9 @@ export class FieldRenderer implements OnChanges {
   }
 
   get showInvalid() {
-    return !this.field.focusing() && (this.field.touched() || this.submitted) && !!this.field.errors();
+    return (
+      !this.field.focusing() && (this.field.touched() || this.submitted) && !!this.field.errors()
+    );
   }
 
   get firstErrorMessage(): string | undefined {
@@ -84,8 +92,31 @@ export class FieldRenderer implements OnChanges {
   }
 
   get helpText(): string | undefined {
-    const config = this.field?.fieldConfig as { helpText?: string; description?: string } | undefined;
-    return config?.helpText || config?.description;
+    const config = this.field?.fieldConfig;
+    return config?.ui?.helpText || config?.helpText;
+  }
+
+  get descriptionText(): string | undefined {
+    const config = this.field?.fieldConfig;
+    return config?.ui?.description || config?.description;
+  }
+
+  get fieldControlId(): string {
+    const path = this.field?.path || this.field?.name || 'field';
+    return `form-field-${path.replace(/[^A-Za-z0-9_-]+/g, '-')}`;
+  }
+
+  get fieldDescribedBy(): string | null {
+    const parts: string[] = [];
+    if (this.descriptionText) {
+      parts.push(`${this.fieldControlId}-description`);
+    }
+    if (this.showInvalid && this.firstErrorMessage) {
+      parts.push(`${this.fieldControlId}-error`);
+    } else if (this.helpText) {
+      parts.push(`${this.fieldControlId}-hint`);
+    }
+    return parts.length > 0 ? parts.join(' ') : null;
   }
 
   get resolvedNumberMode(): 'decimal' | 'currency' | undefined {
@@ -123,7 +154,135 @@ export class FieldRenderer implements OnChanges {
     return this.textConfig?.maxRows ?? 5;
   }
 
-  onChangeValue(value: any) {
+  get textValue(): string | null {
+    const value = this.field.value();
+    return value == null ? null : String(value);
+  }
+
+  get numberValue(): number | null {
+    const value = this.field.value();
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  get selectValue(): SelectValue {
+    const value = this.field.value();
+    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+      ? value
+      : null;
+  }
+
+  get radioValue(): string | number | null {
+    const value = this.field.value();
+    return typeof value === 'string' || typeof value === 'number' ? value : null;
+  }
+
+  get booleanValue(): boolean | null {
+    const value = this.field.value();
+    return typeof value === 'boolean' ? value : null;
+  }
+
+  get dateValue(): Date | Date[] | null {
+    const value = this.field.value();
+    if (value instanceof Date || value === null) {
+      return value;
+    }
+    if (Array.isArray(value) && value.every((item) => item instanceof Date || item === null)) {
+      return value as Date[];
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+    return null;
+  }
+
+  get multiSelectValue(): Array<string | number> {
+    const value = this.field.value();
+    return Array.isArray(value)
+      ? value.filter(
+          (item): item is string | number => typeof item === 'string' || typeof item === 'number',
+        )
+      : [];
+  }
+
+  get inputMultiValue(): string[] {
+    const value = this.field.value();
+    return Array.isArray(value) ? value.map((item) => String(item ?? '')).filter(Boolean) : [];
+  }
+
+  get autoCompleteValue(): string | null {
+    return this.textValue;
+  }
+
+  get colorValue(): string | null {
+    return this.textValue;
+  }
+
+  get readonlyType(): ValueDisplayType {
+    const configuredType = this.field.fieldConfig.ui?.readonlyType;
+    if (configuredType) {
+      return configuredType;
+    }
+
+    switch (this.field.type) {
+      case 'number':
+      case 'decimal':
+        return 'number';
+      case 'currency':
+        return 'currency';
+      case 'percent':
+        return 'percent';
+      case 'date':
+        return 'date';
+      case 'datetime':
+        return 'datetime';
+      case 'checkbox':
+      case 'boolean':
+        return 'boolean';
+      case 'json':
+        return 'json';
+      default:
+        return 'text';
+    }
+  }
+
+  get readonlyValue(): unknown {
+    if (this.field.type === 'select' || this.field.type === 'radio') {
+      return this.optionLabelForValue(this.field.value()) ?? this.field.value();
+    }
+
+    if (this.field.type === 'select-multi' || this.field.type === 'multi-select') {
+      const value = this.field.value();
+      if (!Array.isArray(value)) {
+        return value;
+      }
+      return value.map((item) => this.optionLabelForValue(item) ?? String(item)).join(', ');
+    }
+
+    if (this.field.type === 'input-multi' || this.field.type === 'tags') {
+      return this.inputMultiValue.join(', ');
+    }
+
+    return this.field.value();
+  }
+
+  get readonlyCurrencyCode(): string {
+    return this.numberConfig?.currency ?? 'USD';
+  }
+
+  get readonlyPrefix(): string {
+    return this.field.fieldConfig.ui?.prefix ?? this.numberConfig?.prefix ?? '';
+  }
+
+  get readonlySuffix(): string {
+    return this.field.fieldConfig.ui?.suffix ?? this.resolvedNumberSuffix ?? '';
+  }
+
+  get usesFieldShell(): boolean {
+    return !['record', 'json', 'code'].includes(this.field.type);
+  }
+
+  onChangeValue(value: unknown): void {
     this.field.setValue(value);
   }
 
@@ -155,5 +314,7 @@ export class FieldRenderer implements OnChanges {
     return type === 'text' || type === 'textarea' || type === 'json' || type === 'code';
   }
 
+  private optionLabelForValue(value: unknown): string | undefined {
+    return this.field.options().find((option) => option.value === value)?.label;
+  }
 }
-

@@ -6,8 +6,8 @@ const meta: Meta<ProgressSpinnerComponent> = {
   component: ProgressSpinnerComponent,
   args: {
     strokeWidth: '4',
-    ariaLabel: 'loading'
-  }
+    ariaLabel: 'loading',
+  },
 };
 
 export default meta;
@@ -18,6 +18,6 @@ export const Default: Story = {};
 
 export const CustomStroke: Story = {
   args: {
-    strokeWidth: '2'
-  }
+    strokeWidth: '2',
+  },
 };

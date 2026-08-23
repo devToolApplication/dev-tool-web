@@ -1,4 +1,4 @@
-import { EnvironmentProviders, Provider } from '@angular/core';
+import type { EnvironmentProviders, Provider } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, withHashLocation } from '@angular/router';
@@ -8,11 +8,7 @@ export function provideSharedTesting(): Array<Provider | EnvironmentProviders> {
   installResizeObserverMock();
   installRangeGeometryMock();
 
-  return [
-    provideHttpClient(),
-    provideNoopAnimations(),
-    provideRouter([], withHashLocation())
-  ];
+  return [provideHttpClient(), provideNoopAnimations(), provideRouter([], withHashLocation())];
 }
 
 function installRangeGeometryMock(): void {
@@ -32,8 +28,8 @@ function installRangeGeometryMock(): void {
     value: () => ({
       length: 0,
       item: () => null,
-      [Symbol.iterator]: function* iterator() {}
-    })
+      [Symbol.iterator]: function* iterator() {},
+    }),
   });
 
   Object.defineProperty(rangePrototype, 'getBoundingClientRect', {
@@ -47,8 +43,8 @@ function installRangeGeometryMock(): void {
       width: 0,
       x: 0,
       y: 0,
-      toJSON: () => ({})
-    })
+      toJSON: () => ({}),
+    }),
   });
 }
 
@@ -65,12 +61,12 @@ function installResizeObserverMock(): void {
 
   Object.defineProperty(window, 'ResizeObserver', {
     writable: true,
-    value: ResizeObserverMock
+    value: ResizeObserverMock,
   });
 
   Object.defineProperty(globalThis, 'ResizeObserver', {
     writable: true,
-    value: ResizeObserverMock
+    value: ResizeObserverMock,
   });
 }
 
@@ -89,7 +85,7 @@ function installMatchMediaMock(): void {
       removeListener: () => undefined,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
-      dispatchEvent: () => false
-    })
+      dispatchEvent: () => false,
+    }),
   });
 }

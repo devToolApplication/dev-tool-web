@@ -6,11 +6,10 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './check-box.html',
   styleUrl: './check-box.css',
-  providers: [provideValueAccessor(() => CheckBox)]
+  providers: [provideValueAccessor(() => CheckBox)],
 })
-export class CheckBox extends BaseInput<boolean>{
+export class CheckBox extends BaseInput<boolean> {
   @Input() indeterminate = false;
   @Input() hideLabel = false;
   @Input() ariaLabel?: string;
 }
-

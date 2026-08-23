@@ -11,7 +11,7 @@ describe('PanelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(PanelComponent);
@@ -25,10 +25,10 @@ describe('PanelComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.app-panel-title')?.textContent).toContain(
-      'shared.panel.title'
+      'shared.panel.title',
     );
     expect(fixture.nativeElement.querySelector('.app-panel-description')?.textContent).toContain(
-      'shared.panel.description'
+      'shared.panel.description',
     );
   });
 });

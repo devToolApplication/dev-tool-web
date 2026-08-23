@@ -66,11 +66,15 @@ describe('flow inspector form utils', () => {
       data: { operator: 'GT', params: { lookback: 1 } },
     };
 
-    const patch = createFlowInspectorNodePatch(node, {
-      operator: 'LTE',
-      params: { lookback: 5 },
-      node: { label: 'New label', disabled: true },
-    }, ['operator', 'params.lookback', 'node.label', 'node.disabled']);
+    const patch = createFlowInspectorNodePatch(
+      node,
+      {
+        operator: 'LTE',
+        params: { lookback: 5 },
+        node: { label: 'New label', disabled: true },
+      },
+      ['operator', 'params.lookback', 'node.label', 'node.disabled'],
+    );
 
     expect(patch).toEqual({
       label: 'New label',
@@ -90,9 +94,13 @@ describe('flow inspector form utils', () => {
       data: { operands: [{ type: 'constant', value: 1 }] },
     };
 
-    const patch = createFlowInspectorNodePatch(node, {
-      operands: [{ type: 'constant', value: 2 }],
-    }, ['operands.0.value']);
+    const patch = createFlowInspectorNodePatch(
+      node,
+      {
+        operands: [{ type: 'constant', value: 2 }],
+      },
+      ['operands.0.value'],
+    );
 
     expect(patch.data).toEqual({
       operands: [{ type: 'constant', value: 2 }],
@@ -110,7 +118,9 @@ describe('flow inspector form utils', () => {
       data: { operator: 'GT' },
     };
 
-    expect(flowInspectorFieldSignature(fromForm, paths)).toBe(flowInspectorFieldSignature(fromNode, paths));
+    expect(flowInspectorFieldSignature(fromForm, paths)).toBe(
+      flowInspectorFieldSignature(fromNode, paths),
+    );
   });
 
   it('forces view mode when the flow inspector is readonly', () => {

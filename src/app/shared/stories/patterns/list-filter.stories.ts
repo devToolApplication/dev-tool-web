@@ -13,8 +13,8 @@ const filters: FilterPanelField[] = [
       { label: 'All', value: '' },
       { label: 'Running', value: 'running' },
       { label: 'Stopped', value: 'stopped' },
-      { label: 'Failed', value: 'failed' }
-    ]
+      { label: 'Failed', value: 'failed' },
+    ],
   },
   {
     key: 'environment',
@@ -23,10 +23,10 @@ const filters: FilterPanelField[] = [
     options: [
       { label: 'All', value: '' },
       { label: 'Production', value: 'prod' },
-      { label: 'Staging', value: 'staging' }
-    ]
+      { label: 'Staging', value: 'staging' },
+    ],
   },
-  { key: 'showInactive', label: 'Show inactive', type: 'boolean', advanced: true }
+  { key: 'showInactive', label: 'Show inactive', type: 'boolean', advanced: true },
 ];
 
 const tableConfig: TableConfig = {
@@ -34,19 +34,59 @@ const tableConfig: TableConfig = {
   emptyTitle: 'No jobs match your filters',
   columns: [
     { field: 'name', header: 'Job Name', type: 'text' },
-    { field: 'state', header: 'State', type: 'badge', badgeMap: { running: 'success', stopped: 'muted', failed: 'danger' } },
-    { field: 'environment', header: 'Env', type: 'badge', badgeMap: { prod: 'info', staging: 'warning' } },
+    {
+      field: 'state',
+      header: 'State',
+      type: 'badge',
+      badgeMap: { running: 'success', stopped: 'muted', failed: 'danger' },
+    },
+    {
+      field: 'environment',
+      header: 'Env',
+      type: 'badge',
+      badgeMap: { prod: 'info', staging: 'warning' },
+    },
     { field: 'lastRun', header: 'Last Run', type: 'text' },
-    { field: 'duration', header: 'Duration', type: 'text' }
-  ]
+    { field: 'duration', header: 'Duration', type: 'text' },
+  ],
 };
 
 const rows = [
-  { name: 'Data Sync Pipeline', state: 'running', environment: 'prod', lastRun: '2 min ago', duration: '4m 12s' },
-  { name: 'Report Generator', state: 'running', environment: 'prod', lastRun: '15 min ago', duration: '1m 03s' },
-  { name: 'Cache Warmer', state: 'stopped', environment: 'staging', lastRun: '2h ago', duration: '0m 45s' },
-  { name: 'Email Dispatcher', state: 'failed', environment: 'prod', lastRun: '30 min ago', duration: '0m 02s' },
-  { name: 'Backup Scheduler', state: 'stopped', environment: 'staging', lastRun: '1d ago', duration: '12m 30s' }
+  {
+    name: 'Data Sync Pipeline',
+    state: 'running',
+    environment: 'prod',
+    lastRun: '2 min ago',
+    duration: '4m 12s',
+  },
+  {
+    name: 'Report Generator',
+    state: 'running',
+    environment: 'prod',
+    lastRun: '15 min ago',
+    duration: '1m 03s',
+  },
+  {
+    name: 'Cache Warmer',
+    state: 'stopped',
+    environment: 'staging',
+    lastRun: '2h ago',
+    duration: '0m 45s',
+  },
+  {
+    name: 'Email Dispatcher',
+    state: 'failed',
+    environment: 'prod',
+    lastRun: '30 min ago',
+    duration: '0m 02s',
+  },
+  {
+    name: 'Backup Scheduler',
+    state: 'stopped',
+    environment: 'staging',
+    lastRun: '1d ago',
+    duration: '12m 30s',
+  },
 ];
 
 const meta: Meta = {
@@ -60,10 +100,10 @@ const meta: Meta = {
 List with filters pattern: FilterPanel + Table + Pagination + Empty/Loading states.
 A lighter variant of CRUD page without create/delete actions — used for monitoring and read-heavy views.
 Figma: map as a page-level frame with filter bar and data table.
-        `
-      }
-    }
-  }
+        `,
+      },
+    },
+  },
 };
 
 export default meta;
@@ -80,8 +120,8 @@ export const WithData: Story = {
         </app-section-panel>
         <app-table [config]="tableConfig" [data]="rows"></app-table>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
 
 export const Empty: Story = {
@@ -94,8 +134,8 @@ export const Empty: Story = {
         </app-section-panel>
         <app-table [config]="tableConfig" [data]="[]"></app-table>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
 
 export const Loading: Story = {
@@ -107,6 +147,6 @@ export const Loading: Story = {
           <app-filter-panel [filters]="filters"></app-filter-panel>
         </app-section-panel>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };

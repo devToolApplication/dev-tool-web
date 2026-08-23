@@ -6,18 +6,23 @@
       <header class="field-tree__header">
         <div>
           <h3>
-            {{ (field.label || 'general') | translateContent }}
+            {{ field.label || 'general' | translateContent }}
             @if (field.required()) {
               <span class="field-tree__required" aria-hidden="true">*</span>
             }
           </h3>
           @if (field.fieldConfig.description || field.fieldConfig.helpText) {
-            <p>{{ (field.fieldConfig.description || field.fieldConfig.helpText) | translateContent }}</p>
+            <p>
+              {{ field.fieldConfig.description || field.fieldConfig.helpText | translateContent }}
+            </p>
           }
         </div>
         @if (canEdit()) {
           <div class="field-tree__header-actions">
-            @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
+            @if (
+              field.fieldConfig.treeConfig?.allowAddNode !== false &&
+              field.fieldConfig.pickerOptions?.length
+            ) {
               <app-button
                 size="sm"
                 variant="primary"
@@ -58,7 +63,11 @@
       </header>
 
       @if (showToolbar && nodes.length > 0) {
-        <div class="field-tree__toolbar" role="region" [attr.aria-label]="'shared.tree.tools' | translateContent">
+        <div
+          class="field-tree__toolbar"
+          role="region"
+          [attr.aria-label]="'shared.tree.tools' | translateContent"
+        >
           @if (searchable) {
             <app-input-text
               class="field-tree__search"
@@ -71,7 +80,11 @@
           }
 
           @if (showFilterTabs) {
-            <div class="field-tree__filters" role="tablist" [attr.aria-label]="'filters' | translateContent">
+            <div
+              class="field-tree__filters"
+              role="tablist"
+              [attr.aria-label]="'filters' | translateContent"
+            >
               <app-button
                 size="sm"
                 [variant]="treeFilterMode() === 'all' ? 'primary' : 'secondary'"
@@ -132,7 +145,11 @@
           </div>
 
           @if (hasCheckboxSelection && selectionPresetItems.length > 0) {
-            <div class="field-tree__presets" role="group" [attr.aria-label]="(labels.presetTitle ?? 'shared.tree.presets') | translateContent">
+            <div
+              class="field-tree__presets"
+              role="group"
+              [attr.aria-label]="labels.presetTitle ?? 'shared.tree.presets' | translateContent"
+            >
               @for (preset of selectionPresetItems; track preset.id) {
                 <app-button
                   size="sm"
@@ -162,7 +179,11 @@
         <app-empty-state
           [title]="labels.emptyTitle ?? 'shared.tree.emptyTitle'"
           [description]="labels.emptyDescription ?? 'shared.tree.emptyDescription'"
-          [primaryActionLabel]="canEdit() && field.fieldConfig.pickerOptions?.length ? (labels.addNode ?? 'add') : undefined"
+          [primaryActionLabel]="
+            canEdit() && field.fieldConfig.pickerOptions?.length
+              ? (labels.addNode ?? 'add')
+              : undefined
+          "
           (primaryAction)="openAddPicker()"
         ></app-empty-state>
       } @else {
@@ -171,13 +192,27 @@
             @if (visibleNodes.length === 0) {
               <app-empty-state
                 variant="search"
-                [title]="treeFilterMode() === 'selected' ? (labels.selectedEmptyTitle ?? 'shared.tree.selectedEmptyTitle') : (labels.searchEmptyTitle ?? 'shared.tree.searchEmptyTitle')"
-                [description]="treeFilterMode() === 'selected' ? (labels.selectedEmptyDescription ?? 'shared.tree.selectedEmptyDescription') : (labels.searchEmptyDescription ?? 'shared.tree.searchEmptyDescription')"
-                [primaryActionLabel]="treeQuery() ? (labels.clearSearch ?? 'shared.tree.clearSearch') : undefined"
+                [title]="
+                  treeFilterMode() === 'selected'
+                    ? (labels.selectedEmptyTitle ?? 'shared.tree.selectedEmptyTitle')
+                    : (labels.searchEmptyTitle ?? 'shared.tree.searchEmptyTitle')
+                "
+                [description]="
+                  treeFilterMode() === 'selected'
+                    ? (labels.selectedEmptyDescription ?? 'shared.tree.selectedEmptyDescription')
+                    : (labels.searchEmptyDescription ?? 'shared.tree.searchEmptyDescription')
+                "
+                [primaryActionLabel]="
+                  treeQuery() ? (labels.clearSearch ?? 'shared.tree.clearSearch') : undefined
+                "
                 (primaryAction)="clearTreeSearch()"
               ></app-empty-state>
             } @else {
-              <ul class="field-tree__nodes" role="tree" [attr.aria-label]="(field.label || 'general') | translateContent">
+              <ul
+                class="field-tree__nodes"
+                role="tree"
+                [attr.aria-label]="field.label || 'general' | translateContent"
+              >
                 @for (view of visibleNodes; track view.node.id) {
                   <ng-container
                     [ngTemplateOutlet]="nodeTemplate"
@@ -192,8 +227,15 @@
             <aside class="field-tree__selected-panel" aria-live="polite">
               <header class="field-tree__selected-header">
                 <div>
-                  <h4>{{ (labels.selectedPanelTitle ?? 'shared.tree.selectedItems') | translateContent }}</h4>
-                  <span>{{ selected.length }} {{ 'shared.tree.itemsSelected' | translateContent }}</span>
+                  <h4>
+                    {{
+                      labels.selectedPanelTitle ?? 'shared.tree.selectedItems' | translateContent
+                    }}
+                  </h4>
+                  <span
+                    >{{ selected.length }}
+                    {{ 'shared.tree.itemsSelected' | translateContent }}</span
+                  >
                 </div>
                 <app-button
                   size="sm"
@@ -258,7 +300,7 @@
 
       @if (field.errors(); as errors) {
         <div class="field-tree__errors" role="alert">
-          @for (message of (errors | keyvalue); track message.key) {
+          @for (message of errors | keyvalue; track message.key) {
             <p>{{ message.value | translateContent }}</p>
           }
         </div>
@@ -307,41 +349,40 @@
       }
     </section>
   } @else {
-  <app-fieldset
-    [legend]="field.label || 'general'"
-    class="w-full">
-
-    <div class="grid grid-cols-12 gap-4">
-      @for (f of field.children; track $index) {
-        @if (isArrayField(f)) {
-          <app-field-array-renderer
-            class="w-full h-full"
-            [ngClass]="getCol(f.width)"
-            [field]="f"
-            [submitted]="submitted"
-            [readonlyMode]="readonlyMode">
-          </app-field-array-renderer>
-        } @else if (isTreeField(f)) {
-          <app-field-tree-renderer
-            class="w-full h-full"
-            [ngClass]="getCol(f.width)"
-            [field]="f"
-            [submitted]="submitted"
-            [readonlyMode]="readonlyMode">
-          </app-field-tree-renderer>
-        } @else {
-          <app-field-renderer
-            class="w-full h-full"
-            [ngClass]="getCol(f.width)"
-            [field]="f"
-            [submitted]="submitted"
-            [readonlyMode]="readonlyMode">
-          </app-field-renderer>
+    <app-fieldset [legend]="field.label || 'general'" class="w-full">
+      <div class="grid grid-cols-12 gap-4">
+        @for (f of field.children; track $index) {
+          @if (isArrayField(f)) {
+            <app-field-array-renderer
+              class="w-full h-full"
+              [ngClass]="getCol(f.width)"
+              [field]="f"
+              [submitted]="submitted"
+              [readonlyMode]="readonlyMode"
+            >
+            </app-field-array-renderer>
+          } @else if (isTreeField(f)) {
+            <app-field-tree-renderer
+              class="w-full h-full"
+              [ngClass]="getCol(f.width)"
+              [field]="f"
+              [submitted]="submitted"
+              [readonlyMode]="readonlyMode"
+            >
+            </app-field-tree-renderer>
+          } @else {
+            <app-field-renderer
+              class="w-full h-full"
+              [ngClass]="getCol(f.width)"
+              [field]="f"
+              [submitted]="submitted"
+              [readonlyMode]="readonlyMode"
+            >
+            </app-field-renderer>
+          }
         }
-      }
-    </div>
-
-  </app-fieldset>
+      </div>
+    </app-fieldset>
   }
 }
 
@@ -410,7 +451,9 @@
         </div>
       }
       @if (node.loading) {
-        <span class="field-tree__node-loading" role="status">{{ 'loading' | translateContent }}</span>
+        <span class="field-tree__node-loading" role="status">{{
+          'loading' | translateContent
+        }}</span>
       }
       @if (canEdit()) {
         <app-button
@@ -420,7 +463,10 @@
           [label]="labels.view ?? 'shared.tree.view'"
           (buttonClick)="viewNode(node)"
         ></app-button>
-        @if (field.fieldConfig.treeConfig?.allowAddNode !== false && field.fieldConfig.pickerOptions?.length) {
+        @if (
+          field.fieldConfig.treeConfig?.allowAddNode !== false &&
+          field.fieldConfig.pickerOptions?.length
+        ) {
           <app-button
             size="sm"
             variant="primary"
@@ -482,7 +528,11 @@
     @if (pickerLoading) {
       <app-loading-skeleton type="list" [rows]="4"></app-loading-skeleton>
     } @else if (pickerError) {
-      <app-error-state [message]="pickerError" [compact]="true" (retry)="pickerRetry.emit()"></app-error-state>
+      <app-error-state
+        [message]="pickerError"
+        [compact]="true"
+        (retry)="pickerRetry.emit()"
+      ></app-error-state>
     } @else if (pickerOptions.length === 0) {
       <app-empty-state title="shared.tree.noPickerOptions"></app-empty-state>
     } @else {
@@ -498,7 +548,7 @@
                 (valueChange)="togglePickerOption(option, $event)"
               ></app-check-box>
               @if (option.subtitle || option.description) {
-                <small>{{ (option.subtitle || option.description) | translateContent }}</small>
+                <small>{{ option.subtitle || option.description | translateContent }}</small>
               }
             </div>
           } @else {
@@ -580,7 +630,10 @@
           (buttonClick)="addGroup(node.id); actionNode.set(null)"
         ></app-button>
       }
-      @if (field.fieldConfig.treeConfig?.allowReplaceNode === true && field.fieldConfig.pickerOptions?.length) {
+      @if (
+        field.fieldConfig.treeConfig?.allowReplaceNode === true &&
+        field.fieldConfig.pickerOptions?.length
+      ) {
         <app-button
           variant="primary"
           icon="pi pi-sync"
@@ -630,7 +683,3 @@
 >
   <app-json-viewer [value]="detailNode()"></app-json-viewer>
 </app-drawer>
-
-
-
-

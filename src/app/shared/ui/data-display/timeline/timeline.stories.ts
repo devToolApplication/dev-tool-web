@@ -8,7 +8,7 @@ const sampleItems: TimelineItem[] = [
     description: 'The workflow definition was created and initialized.',
     time: new Date(2026, 4, 27, 9, 0, 0),
     icon: 'pi pi-plus',
-    variant: 'info'
+    variant: 'info',
   },
   {
     id: 2,
@@ -16,7 +16,7 @@ const sampleItems: TimelineItem[] = [
     description: 'Automatic system verification passed successfully.',
     time: new Date(2026, 4, 27, 9, 5, 0),
     icon: 'pi pi-check',
-    variant: 'success'
+    variant: 'success',
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ const sampleItems: TimelineItem[] = [
     time: new Date(2026, 4, 27, 9, 10, 0),
     icon: 'pi pi-exclamation-triangle',
     variant: 'danger',
-    actionLabel: 'common.retry'
+    actionLabel: 'common.retry',
   },
   {
     id: 4,
@@ -33,8 +33,8 @@ const sampleItems: TimelineItem[] = [
     description: 'System successfully rolled back and stabilized.',
     time: new Date(2026, 4, 27, 9, 15, 0),
     icon: 'pi pi-refresh',
-    variant: 'muted'
-  }
+    variant: 'muted',
+  },
 ];
 
 const meta: Meta<TimelineComponent> = {
@@ -44,8 +44,8 @@ const meta: Meta<TimelineComponent> = {
     items: sampleItems,
     loading: false,
     emptyTitle: 'shared.empty.title',
-    timestampFormat: 'dd/MM/yyyy HH:mm:ss'
-  }
+    timestampFormat: 'dd/MM/yyyy HH:mm:ss',
+  },
 };
 
 export default meta;
@@ -56,18 +56,18 @@ export const Default: Story = {};
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };
 
 export const ErrorState: Story = {
   args: {
-    error: 'Failed to retrieve timeline events.'
-  }
+    error: 'Failed to retrieve timeline events.',
+  },
 };
 
 export const Empty: Story = {
   args: {
-    items: []
-  }
+    items: [],
+  },
 };

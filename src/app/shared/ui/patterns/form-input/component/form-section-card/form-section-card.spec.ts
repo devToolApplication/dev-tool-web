@@ -40,6 +40,6 @@ function createSection(overrides: Partial<FormResolvedSection> = {}): FormResolv
     warningCount: 0,
     completed: false,
     active: false,
-    ...overrides
+    ...overrides,
   };
 }

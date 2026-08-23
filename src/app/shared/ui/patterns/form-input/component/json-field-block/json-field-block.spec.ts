@@ -6,7 +6,10 @@ describe('JsonFieldBlockComponent', () => {
 
   beforeEach(() => {
     component = new JsonFieldBlockComponent();
-    component.field = createFieldState({ type: 'json', name: 'payload', label: 'Payload' }, '{"a":1}');
+    component.field = createFieldState(
+      { type: 'json', name: 'payload', label: 'Payload' },
+      '{"a":1}',
+    );
   });
 
   it('formats valid JSON and marks the field touched', () => {

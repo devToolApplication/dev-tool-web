@@ -7,32 +7,37 @@ type CardSurface = 'default' | 'strong';
   selector: 'app-card',
   standalone: false,
   template: `<ng-content></ng-content>`,
-  styles: [`
-    :host {
-      display: block;
-      min-width: 0;
-      border: 1px solid var(--app-border);
-      border-radius: 0.5rem;
-      background: var(--app-card-surface);
-      box-shadow: var(--app-shadow-sm);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
+  styles: [
+    `
+      :host {
+        display: block;
+        min-width: 0;
+        border: 1px solid var(--app-border);
+        border-radius: 0.5rem;
+        background: var(--app-card-surface);
+        box-shadow: var(--app-shadow-sm);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
 
-    :host(.app-card--strong) {
-      background: var(--app-card-surface-strong);
-    }
+      :host(.app-card--strong) {
+        background: var(--app-card-surface-strong);
+      }
 
-    :host(.app-card--interactive) {
-      transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
-    }
+      :host(.app-card--interactive) {
+        transition:
+          box-shadow 160ms ease,
+          border-color 160ms ease,
+          transform 160ms ease;
+      }
 
-    :host(.app-card--interactive:hover) {
-      border-color: var(--app-border-strong);
-      box-shadow: var(--app-shadow-md);
-      transform: translateY(-1px);
-    }
-  `]
+      :host(.app-card--interactive:hover) {
+        border-color: var(--app-border-strong);
+        box-shadow: var(--app-shadow-md);
+        transform: translateY(-1px);
+      }
+    `,
+  ],
 })
 export class CardComponent {
   @Input() padding: CardPadding = 'md';

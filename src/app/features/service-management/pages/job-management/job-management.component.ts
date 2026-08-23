@@ -1,13 +1,20 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { I18nService } from '@core/i18n/i18n.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
-import type { TableAction } from '@shared/ui/patterns/table/models/table-config.model';
+import type { TableAction, TableDensity, TableExportRequest } from '@shared/ui/patterns/table';
 import {
   buildJobManagementScreen,
   filterJobs,
   jobDetailItems,
 } from '../../model/service-management.config';
 import type { JobRecord } from '../../model/service-management.model';
+import {
+  exportTableRequestAsCsv,
+  readTableViewState,
+  type ServiceManagementTableViewState,
+  writeTableViewState,
+} from '../../utils/table-view-state';
 
 @Component({
   selector: 'app-job-management',
@@ -18,11 +25,17 @@ import type { JobRecord } from '../../model/service-management.model';
 export class JobManagementComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly i18nService = inject(I18nService);
+  private readonly tableStateKey = 'service-management.job-service.jobs.table';
+  private readonly tableExportFileName = 'service-management-jobs.csv';
 
   readonly screen = buildJobManagementScreen();
   readonly filterValues = signal<Record<string, unknown>>({});
   readonly selectedJob = signal<JobRecord | null>(null);
   readonly drawerOpen = signal(false);
+  readonly tableViewState = signal<ServiceManagementTableViewState>(
+    readTableViewState(this.tableStateKey, this.screen.table),
+  );
   readonly jobs = computed(() => filterJobs(this.screen.jobs, this.filterValues()));
   readonly selectedJobDetails = computed(() => {
     const job = this.selectedJob();
@@ -48,7 +61,7 @@ export class JobManagementComponent {
     this.drawerOpen.set(true);
   }
 
-  onTableAction(event: { action: TableAction; row: JobRecord }): void {
+  onTableAction(event: { action: TableAction<JobRecord>; row: JobRecord }): void {
     switch (event.action.id) {
       case 'view':
         this.openDetail(event.row);
@@ -59,6 +72,20 @@ export class JobManagementComponent {
       default:
         break;
     }
+  }
+
+  onTableColumnVisibilityChange(columnVisibility: string[]): void {
+    this.updateTableViewState({ columnVisibility });
+  }
+
+  onTableDensityChange(density: TableDensity): void {
+    this.updateTableViewState({ density });
+  }
+
+  onTableExport(request: TableExportRequest<JobRecord>): void {
+    exportTableRequestAsCsv(request, this.screen.table, this.tableExportFileName, {
+      formatHeader: (header) => this.i18nService.t(header),
+    });
   }
 
   editSelectedJob(): void {
@@ -72,5 +99,11 @@ export class JobManagementComponent {
 
   closeDrawer(): void {
     this.drawerOpen.set(false);
+  }
+
+  private updateTableViewState(patch: Partial<ServiceManagementTableViewState>): void {
+    const nextState = { ...this.tableViewState(), ...patch };
+    this.tableViewState.set(nextState);
+    writeTableViewState(this.tableStateKey, nextState);
   }
 }

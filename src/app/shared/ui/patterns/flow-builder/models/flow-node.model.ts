@@ -1,5 +1,5 @@
-import { FlowPoint, FlowSize, FlowStatus, FlowValidationIssue } from './flow-common.model';
-import { FlowPort } from './flow-port.model';
+import type { FlowPoint, FlowSize, FlowStatus, FlowValidationIssue } from './flow-common.model';
+import type { FlowPort } from './flow-port.model';
 
 export interface FlowNode {
   id: string;

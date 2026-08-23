@@ -10,7 +10,14 @@ const meta: Meta<CandleChartHeaderComponent> = {
   decorators: [moduleMetadata({ imports: [CommonModule] })],
   args: {
     chartTitle: 'XAUUSD - M15 - REPLAY',
-    candle: { time: '2024-05-17T09:45:00Z', open: 2341.2, high: 2345.7, low: 2338.1, close: 2343.5, volume: 12400 },
+    candle: {
+      time: '2024-05-17T09:45:00Z',
+      open: 2341.2,
+      high: 2345.7,
+      low: 2338.1,
+      close: 2343.5,
+      volume: 12400,
+    },
     change: 2.3,
     changePercent: 0.1,
     tone: 'up',

@@ -4,7 +4,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
   {
     label: 'layout.menu.aiAgentMcrs',
     icon: 'pi pi-microchip-ai',
-    groupColor: 'var(--app-primary)',
     items: [
       {
         label: 'layout.menu.aiAgentMcrsSecrets',
@@ -21,12 +20,16 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-sitemap',
         routerLink: '/ai-agent-mcrs/workflows',
       },
+      {
+        label: 'layout.menu.kocManagement',
+        icon: 'pi pi-users',
+        routerLink: '/ai-agent-mcrs/koc',
+      },
     ],
   },
   {
     label: 'layout.menu.jobService',
     icon: 'pi pi-briefcase',
-    groupColor: 'var(--app-chart-success)',
     items: [
       {
         label: 'layout.menu.jobServiceSecrets',

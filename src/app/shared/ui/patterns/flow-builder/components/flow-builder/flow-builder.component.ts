@@ -1,3 +1,4 @@
+import type { OnChanges, QueryList, SimpleChanges } from '@angular/core';
 import {
   Component,
   ContentChildren,
@@ -6,16 +7,11 @@ import {
   HostListener,
   inject,
   Input,
-  OnChanges,
   Output,
-  QueryList,
-  SimpleChanges,
   ViewChild,
   signal,
 } from '@angular/core';
-import {
-  DEFAULT_FLOW_CAPABILITIES,
-  EMPTY_FLOW_SELECTION,
+import type {
   FlowDefinition,
   FlowNodeTypeDefinition,
   FlowEdgeTypeDefinition,
@@ -37,16 +33,20 @@ import {
   FlowContextMenuEvent,
   FlowSelection,
   FlowSelectionItem,
+  FlowViewportSnapshot,
 } from '../../models';
+import { DEFAULT_FLOW_CAPABILITIES, EMPTY_FLOW_SELECTION } from '../../models';
 import { FlowCanvasComponent } from '../flow-canvas/flow-canvas.component';
 import { FlowInspectorTemplateDirective } from '../../directives/flow-template.directives';
 import { FlowDiagramData } from '../../core/flow-diagram-data';
 import { FlowHistory } from '../../core/flow-history';
-import { areFlowDefinitionsEqual, cloneFlowDefinition, cloneFlowValue } from '../../core/flow-serialization';
 import {
-  createFlowInspectorNodePatch,
-  FlowInspectorFormChange,
-} from '../flow-inspector/flow-inspector-form.utils';
+  areFlowDefinitionsEqual,
+  cloneFlowDefinition,
+  cloneFlowValue,
+} from '../../core/flow-serialization';
+import type { FlowInspectorFormChange } from '../flow-inspector/flow-inspector-form.utils';
+import { createFlowInspectorNodePatch } from '../flow-inspector/flow-inspector-form.utils';
 
 type InspectorSelectValue = string | number | boolean | null;
 type ActiveFlowContextMenu = FlowContextMenuEvent & { localX: number; localY: number };
@@ -59,10 +59,10 @@ type ActiveFlowContextMenu = FlowContextMenuEvent & { localX: number; localY: nu
 })
 export class FlowBuilderComponent implements OnChanges {
   @ViewChild(FlowCanvasComponent) canvas!: FlowCanvasComponent;
-  @ViewChild('importInput') importInput?: ElementRef<HTMLInputElement>;
-  @ContentChildren(FlowInspectorTemplateDirective) inspectorTemplates!: QueryList<FlowInspectorTemplateDirective>;
+  @ContentChildren(FlowInspectorTemplateDirective)
+  inspectorTemplates!: QueryList<FlowInspectorTemplateDirective>;
 
-  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly history = new FlowHistory();
 
   @Input() value: FlowDefinition | null = null;
@@ -92,12 +92,14 @@ export class FlowBuilderComponent implements OnChanges {
   @Output() readonly validationChange = new EventEmitter<FlowValidationIssue[]>();
   @Output() readonly selectionChange = new EventEmitter<FlowSelection>();
   @Output() readonly contextMenu = new EventEmitter<FlowContextMenuEvent>();
-  @Output() readonly viewportChange = new EventEmitter<import('../../models').FlowViewportSnapshot>();
+  @Output() readonly viewportChange = new EventEmitter<FlowViewportSnapshot>();
+  @Output() readonly exportRequested = new EventEmitter<FlowDefinition>();
+  @Output() readonly importRequested = new EventEmitter<void>();
 
   readonly inspectorOpen = signal(true);
   readonly navigatorOpen = signal(true);
   readonly fullscreen = signal(false);
-  readonly viewport = signal<import('../../models').FlowViewportSnapshot | null>(null);
+  readonly viewport = signal<FlowViewportSnapshot | null>(null);
   readonly contextMenuState = signal<ActiveFlowContextMenu | null>(null);
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -131,7 +133,8 @@ export class FlowBuilderComponent implements OnChanges {
     return this.edgeTypes ?? [];
   }
 
-  get resolvedCapabilities(): Required<Omit<FlowCapabilities, 'commands'>> & Pick<FlowCapabilities, 'commands'> {
+  get resolvedCapabilities(): Required<Omit<FlowCapabilities, 'commands'>> &
+    Pick<FlowCapabilities, 'commands'> {
     return {
       ...DEFAULT_FLOW_CAPABILITIES,
       ...(this.resolvedToolbar.capabilities ?? {}),
@@ -145,31 +148,31 @@ export class FlowBuilderComponent implements OnChanges {
 
   get selectedIds(): string[] {
     if (this.selection?.items?.length) {
-      return this.selection.items.map(item => item.id);
+      return this.selection.items.map((item) => item.id);
     }
     return this.selectedId ? [this.selectedId] : [];
   }
 
   get selectedNode(): FlowNode | null {
     if (!this.selectedId || !this.value) return null;
-    return this.value.nodes.find(n => n.id === this.selectedId) ?? null;
+    return this.value.nodes.find((n) => n.id === this.selectedId) ?? null;
   }
 
   get selectedEdge(): FlowEdge | null {
     if (!this.selectedId || !this.value) return null;
-    return this.value.edges.find(e => e.id === this.selectedId) ?? null;
+    return this.value.edges.find((e) => e.id === this.selectedId) ?? null;
   }
 
   get selectedNodeType(): FlowNodeTypeDefinition | null {
     const node = this.selectedNode;
     if (!node) return null;
-    return this.resolvedNodeTypes.find(type => type.type === node.type) ?? null;
+    return this.resolvedNodeTypes.find((type) => type.type === node.type) ?? null;
   }
 
   get inspectorTemplate(): FlowInspectorTemplateDirective | null {
     const node = this.selectedNode;
     if (!node) return null;
-    return this.inspectorTemplates?.find(t => t.type === node.type) ?? null;
+    return this.inspectorTemplates?.find((t) => t.type === node.type) ?? null;
   }
 
   get hasInspectorSchema(): boolean {
@@ -200,9 +203,17 @@ export class FlowBuilderComponent implements OnChanges {
 
     switch (cmd) {
       case 'undo':
-        return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.history && this.history.canUndo();
+        return (
+          this.resolvedMode === 'edit' &&
+          !!this.resolvedCapabilities.history &&
+          this.history.canUndo()
+        );
       case 'redo':
-        return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.history && this.history.canRedo();
+        return (
+          this.resolvedMode === 'edit' &&
+          !!this.resolvedCapabilities.history &&
+          this.history.canRedo()
+        );
       case 'autoLayout':
         return !!this.resolvedCapabilities.autoLayout;
       case 'toggleNavigator':
@@ -212,9 +223,17 @@ export class FlowBuilderComponent implements OnChanges {
       case 'fullscreen':
         return !!this.resolvedCapabilities.fullscreen;
       case 'deleteSelection':
-        return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.deleteSelection && this.selectedIds.length > 0;
+        return (
+          this.resolvedMode === 'edit' &&
+          !!this.resolvedCapabilities.deleteSelection &&
+          this.selectedIds.length > 0
+        );
       case 'duplicateSelection':
-        return this.resolvedMode === 'edit' && !!this.resolvedCapabilities.duplicateSelection && this.selectedIds.length > 0;
+        return (
+          this.resolvedMode === 'edit' &&
+          !!this.resolvedCapabilities.duplicateSelection &&
+          this.selectedIds.length > 0
+        );
       case 'exportJson':
       case 'importJson':
         return !!this.resolvedCapabilities.importExport;
@@ -254,11 +273,11 @@ export class FlowBuilderComponent implements OnChanges {
   onNodeClick(nodeId: string): void {
     this.closeContextMenu();
     this.selectSingle({ id: nodeId, kind: 'node' });
-    const node = this.value?.nodes.find(n => n.id === nodeId);
+    const node = this.value?.nodes.find((n) => n.id === nodeId);
     if (node) this.nodeClick.emit(node);
   }
 
-  onViewportChange(snapshot: import('../../models').FlowViewportSnapshot): void {
+  onViewportChange(snapshot: FlowViewportSnapshot): void {
     this.viewport.set(snapshot);
     this.viewportChange.emit(snapshot);
   }
@@ -270,7 +289,7 @@ export class FlowBuilderComponent implements OnChanges {
   onEdgeClick(edgeId: string): void {
     this.closeContextMenu();
     this.selectSingle({ id: edgeId, kind: 'edge' });
-    const edge = this.value?.edges.find(e => e.id === edgeId);
+    const edge = this.value?.edges.find((e) => e.id === edgeId);
     if (edge) this.edgeClick.emit(edge);
   }
 
@@ -305,11 +324,14 @@ export class FlowBuilderComponent implements OnChanges {
 
   onNodeMove(event: { nodeId: string; x: number; y: number }): void {
     if (!this.value) return;
-    const node = this.value.nodes.find(n => n.id === event.nodeId);
+    const node = this.value.nodes.find((n) => n.id === event.nodeId);
     if (!node) return;
     const updatedNode: FlowNode = { ...node, position: { x: event.x, y: event.y } };
     this.nodeChange.emit({ type: 'move', node: updatedNode, previousNode: node });
-    const updated = FlowDiagramData.from(this.value).moveNode(event.nodeId, { x: event.x, y: event.y });
+    const updated = FlowDiagramData.from(this.value).moveNode(event.nodeId, {
+      x: event.x,
+      y: event.y,
+    });
     this.emitDefinition(updated);
   }
 
@@ -356,10 +378,10 @@ export class FlowBuilderComponent implements OnChanges {
         this.canvas?.engineInstance?.fitContent();
         break;
       case 'toggleNavigator':
-        this.navigatorOpen.update(v => !v);
+        this.navigatorOpen.update((v) => !v);
         break;
       case 'toggleInspector':
-        this.inspectorOpen.update(v => !v);
+        this.inspectorOpen.update((v) => !v);
         break;
       case 'fullscreen':
         this.toggleFullscreen();
@@ -369,10 +391,10 @@ export class FlowBuilderComponent implements OnChanges {
         commandEmitted = true;
         break;
       case 'exportJson':
-        this.exportJson();
+        this.requestExport();
         break;
       case 'importJson':
-        this.importInput?.nativeElement.click();
+        this.importRequested.emit();
         break;
       case 'deleteSelection':
         this.deleteSelection();
@@ -387,29 +409,6 @@ export class FlowBuilderComponent implements OnChanges {
     }
   }
 
-  onImportFile(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0);
-    input.value = '';
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result ?? '')) as FlowDefinition;
-        const normalized = this.normalizeImportedDefinition(parsed);
-        this.clearSelection();
-        this.emitDefinition(normalized, { command: 'importJson', payload: { fileName: file.name } });
-      } catch (error) {
-        this.validationChange.emit([{
-          message: error instanceof Error ? error.message : 'Invalid flow JSON',
-          severity: 'error',
-        }]);
-      }
-    };
-    reader.readAsText(file);
-  }
-
   onInspectorFieldChange(field: FlowInspectorField, value: unknown): void {
     if (!this.value || !this.selectedNode || this.resolvedMode !== 'edit' || field.readonly) {
       return;
@@ -421,7 +420,7 @@ export class FlowBuilderComponent implements OnChanges {
     const updated = FlowDiagramData.from(this.value).updateNode(node.id, patch);
     this.nodeChange.emit({
       type: 'update',
-      node: updated.nodes.find(item => item.id === node.id) ?? node,
+      node: updated.nodes.find((item) => item.id === node.id) ?? node,
       previousNode: node,
     });
     this.emitDefinition(updated);
@@ -440,7 +439,7 @@ export class FlowBuilderComponent implements OnChanges {
     const updated = FlowDiagramData.from(this.value).updateNode(node.id, patch);
     this.nodeChange.emit({
       type: 'update',
-      node: updated.nodes.find(item => item.id === node.id) ?? node,
+      node: updated.nodes.find((item) => item.id === node.id) ?? node,
       previousNode: node,
     });
     this.emitDefinition(updated);
@@ -472,8 +471,10 @@ export class FlowBuilderComponent implements OnChanges {
     return this.inspectorFieldValue(field) === true;
   }
 
-  inspectorFieldOptions(field: FlowInspectorField): Array<{ label: string; value: InspectorSelectValue }> {
-    return (field.options ?? []).map(option => ({
+  inspectorFieldOptions(
+    field: FlowInspectorField,
+  ): Array<{ label: string; value: InspectorSelectValue }> {
+    return (field.options ?? []).map((option) => ({
       label: option.label,
       value: this.toSelectValue(option.value),
     }));
@@ -504,9 +505,14 @@ export class FlowBuilderComponent implements OnChanges {
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     if (this.resolvedMode !== 'edit') return;
-    if (!this.host.nativeElement.contains(document.activeElement) && document.activeElement !== document.body) return;
+    if (
+      !this.host.nativeElement.contains(document.activeElement) &&
+      document.activeElement !== document.body
+    )
+      return;
     const target = event.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')
+      return;
 
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
       event.preventDefault();
@@ -538,6 +544,21 @@ export class FlowBuilderComponent implements OnChanges {
 
   closeContextMenu(): void {
     this.contextMenuState.set(null);
+  }
+
+  applyImportedDefinition(definition: FlowDefinition): void {
+    try {
+      const normalized = this.normalizeImportedDefinition(definition);
+      this.clearSelection();
+      this.emitDefinition(normalized, { command: 'importJson' });
+    } catch (error) {
+      this.validationChange.emit([
+        {
+          message: error instanceof Error ? error.message : 'Invalid flow JSON',
+          severity: 'error',
+        },
+      ]);
+    }
   }
 
   private selectSingle(item: FlowSelectionItem): void {
@@ -582,13 +603,16 @@ export class FlowBuilderComponent implements OnChanges {
     if (!this.value || this.selectedIds.length === 0) return;
     const result = FlowDiagramData.from(this.value).duplicateSelection(this.selectedIds);
     if (result.duplicatedIds.length === 0) return;
-    this.emitDefinition(result.definition, { command: 'duplicateSelection', payload: result.duplicatedIds });
+    this.emitDefinition(result.definition, {
+      command: 'duplicateSelection',
+      payload: result.duplicatedIds,
+    });
     this.selectSingle({ id: result.duplicatedIds[0], kind: 'node' });
   }
 
   private addNodeFromType(nodeType: string, centerX: number, centerY: number): void {
     if (!this.value || this.resolvedMode !== 'edit') return;
-    const typeDef = this.resolvedNodeTypes.find(type => type.type === nodeType);
+    const typeDef = this.resolvedNodeTypes.find((type) => type.type === nodeType);
     if (!typeDef) return;
 
     const size = typeDef.defaultSize ?? { width: 200, height: 70 };
@@ -620,12 +644,12 @@ export class FlowBuilderComponent implements OnChanges {
     }
     return this.canvas.engineInstance.clientToLocalPoint(
       rect.left + rect.width / 2,
-      rect.top + rect.height / 2
+      rect.top + rect.height / 2,
     );
   }
 
   private createNodeId(nodeType: string): string {
-    const existingIds = new Set(this.value?.nodes.map(node => node.id) ?? []);
+    const existingIds = new Set(this.value?.nodes.map((node) => node.id) ?? []);
     let index = existingIds.size + 1;
     let candidate = `${nodeType}-${Date.now().toString(36)}`;
     while (existingIds.has(candidate)) {
@@ -637,7 +661,8 @@ export class FlowBuilderComponent implements OnChanges {
 
   private resolveDefaultData(typeDef: FlowNodeTypeDefinition): Record<string, unknown> {
     if (!typeDef.defaultData) return {};
-    const value = typeof typeDef.defaultData === 'function' ? typeDef.defaultData() : typeDef.defaultData;
+    const value =
+      typeof typeDef.defaultData === 'function' ? typeDef.defaultData() : typeDef.defaultData;
     return cloneFlowValue(value);
   }
 
@@ -646,20 +671,20 @@ export class FlowBuilderComponent implements OnChanges {
     const rect = this.host.nativeElement.getBoundingClientRect();
     const menuWidth = 176;
     const menuHeight = event.targetType === 'blank' ? 112 : 148;
-    const localX = Math.min(Math.max(event.x - rect.left, 8), Math.max(rect.width - menuWidth - 8, 8));
-    const localY = Math.min(Math.max(event.y - rect.top, 8), Math.max(rect.height - menuHeight - 8, 8));
+    const localX = Math.min(
+      Math.max(event.x - rect.left, 8),
+      Math.max(rect.width - menuWidth - 8, 8),
+    );
+    const localY = Math.min(
+      Math.max(event.y - rect.top, 8),
+      Math.max(rect.height - menuHeight - 8, 8),
+    );
     this.contextMenuState.set({ ...event, localX, localY });
   }
 
-  private exportJson(): void {
-    if (!this.value || typeof window === 'undefined') return;
-    const blob = new Blob([JSON.stringify(this.value, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `${this.value.name || this.value.id || 'flow'}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  private requestExport(): void {
+    if (!this.value) return;
+    this.exportRequested.emit(cloneFlowDefinition(this.value));
   }
 
   private toggleFullscreen(): void {
@@ -740,12 +765,16 @@ export class FlowBuilderComponent implements OnChanges {
     }, source);
   }
 
-  private writePath(source: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+  private writePath(
+    source: Record<string, unknown>,
+    path: string,
+    value: unknown,
+  ): Record<string, unknown> {
     const segments = path.split('.').filter(Boolean);
     if (segments.length === 0) return source;
     const result = cloneFlowValue(source);
     let cursor: Record<string, unknown> = result;
-    segments.slice(0, -1).forEach(segment => {
+    segments.slice(0, -1).forEach((segment) => {
       const existing = cursor[segment];
       if (!existing || typeof existing !== 'object' || Array.isArray(existing)) {
         cursor[segment] = {};

@@ -10,7 +10,7 @@ const meta: Meta<PageShellComponent> = {
     layout: 'default',
     loading: false,
     empty: false,
-    emptyTitle: 'shared.empty.title'
+    emptyTitle: 'shared.empty.title',
   },
   render: (args) => ({
     props: args,
@@ -44,8 +44,8 @@ const meta: Meta<PageShellComponent> = {
           <p>This is the main content area of the page shell component.</p>
         </div>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -59,9 +59,9 @@ export const WithBreadcrumb: Story = {
     breadcrumb: [
       { label: 'nav.home', routerLink: '/' },
       { label: 'nav.settings', routerLink: '/settings' },
-      { label: 'nav.profile' }
-    ]
-  }
+      { label: 'nav.profile' },
+    ],
+  },
 };
 
 export const WithStatus: Story = {
@@ -69,39 +69,38 @@ export const WithStatus: Story = {
     status: {
       label: 'status.active',
       variant: 'success',
-      icon: 'pi pi-check-circle'
-    }
-  }
+      icon: 'pi pi-check-circle',
+    },
+  },
 };
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };
 
 export const Error: Story = {
   args: {
-    error: 'Failed to load page data. Please check your network connection.'
-  }
+    error: 'Failed to load page data. Please check your network connection.',
+  },
 };
 
 export const Empty: Story = {
   args: {
     empty: true,
-    emptyDescription: 'No items were found in this collection.'
-  }
+    emptyDescription: 'No items were found in this collection.',
+  },
 };
 
 export const WideLayout: Story = {
   args: {
-    layout: 'wide'
-  }
+    layout: 'wide',
+  },
 };
 
 export const FullLayout: Story = {
   args: {
-    layout: 'full'
-  }
+    layout: 'full',
+  },
 };
-

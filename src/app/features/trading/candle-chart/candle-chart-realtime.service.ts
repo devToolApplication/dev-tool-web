@@ -24,7 +24,10 @@ export class CandleChartRealtimeService {
   private config: RealtimeConfig | null = null;
   private callbacks: CandleChartRealtimeCallbacks | null = null;
 
-  connect(config: RealtimeConfig | null | undefined, callbacks: CandleChartRealtimeCallbacks): void {
+  connect(
+    config: RealtimeConfig | null | undefined,
+    callbacks: CandleChartRealtimeCallbacks,
+  ): void {
     this.disconnect();
     this.config = config ?? null;
     this.callbacks = callbacks;

@@ -1,5 +1,5 @@
-import { Observable } from 'rxjs';
-import { ValidationRule } from '../../form-input/models/form-config.model';
+import type { Observable } from 'rxjs';
+import type { ValidationRule } from '../../validation/validation.model';
 
 export type TableBadgeVariant = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
 export type TableDensity = 'compact' | 'comfortable' | 'spacious';
@@ -36,36 +36,53 @@ export type TableActionSeverity =
   | null;
 
 export type TableExportScope = 'current-page' | 'external';
+export type TableFilterValue = Record<string, unknown>;
+export type TableRowLink = string | readonly unknown[];
+export type TableRowKey = string | number | boolean | null | undefined;
 
-export interface TableAction {
+export interface TableExportRequest<TRow = unknown> {
+  scope: TableExportScope;
+  filters: TableFilterValue;
+  sortField: string | null;
+  sortOrder: 1 | -1 | 0;
+  visibleColumns: string[];
+  rows: TRow[];
+}
+
+export interface TableCellTemplateContext<TRow = unknown> {
+  $implicit: TRow;
+  row: TRow;
+  value: unknown;
+  column: TableColumn<TRow>;
+}
+
+export interface TableAction<TRow = unknown> {
   label: string;
   id?: string;
   icon?: string;
   tooltip?: string;
-  tooltipFn?: (rowData: any) => string;
+  tooltipFn?: (rowData: TRow) => string;
   showLabel?: boolean;
   text?: boolean;
   styleClass?: string;
   severity?: TableActionSeverity;
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
   placement?: 'primary' | 'more';
-  permissions?: readonly string[];
-    visible?: (rowData: any) => boolean;
-  disabled?: (rowData: any) => boolean;
-    onClick: (rowData: any) => void;
+  visible?: (rowData: TRow) => boolean;
+  disabled?: (rowData: TRow) => boolean;
+  onClick: (rowData: TRow) => void;
 }
 
-export interface TableBulkAction {
+export interface TableBulkAction<TRow = unknown> {
   id: string;
   label: string;
   icon?: string;
   tooltip?: string;
   severity?: TableActionSeverity;
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'default' | 'warning' | 'danger';
-  permissions?: readonly string[];
-    visible?: boolean;
+  visible?: boolean;
   disabled?: boolean;
-    onClick?: (rows: any[]) => void;
+  onClick?: (rows: TRow[]) => void;
 }
 
 export type TableFilterType =
@@ -85,7 +102,7 @@ export interface TableFilterOption {
 }
 
 export interface TableFilterContext {
-  values: Record<string, any>;
+  values: TableFilterValue;
   field: TableFilterField;
 }
 
@@ -107,11 +124,8 @@ export interface TableFilterField {
   emptyMessage?: string;
   hidden?: boolean;
   quick?: boolean;
-  defaultValue?: any;
+  defaultValue?: unknown;
   dependsOn?: string[];
-  queryParam?: string;
-  queryParamStart?: string;
-  queryParamEnd?: string;
   rules?: {
     visible?: string;
     disabled?: string;
@@ -121,7 +135,6 @@ export interface TableFilterField {
 
 export interface TableFilterOptions {
   primaryField?: string;
-  enableUrlSync?: boolean;
   drawerTitle?: string;
   applyLabel?: string;
   resetLabel?: string;
@@ -129,7 +142,7 @@ export interface TableFilterOptions {
   cancelLabel?: string;
 }
 
-export interface TableColumn {
+export interface TableColumn<TRow = unknown> {
   field: string;
   header: string;
   type?: TableColumnType;
@@ -146,13 +159,16 @@ export interface TableColumn {
   align?: 'left' | 'center' | 'right';
   frozen?: boolean;
   alignFrozen?: 'left' | 'right';
-  actions?: TableAction[];
-  link?: string | ((rowData: any) => string | any[]);
-  tooltip?: boolean | ((rowData: any) => string);
-  valueGetter?: (rowData: any) => unknown;
-  formatter?: (rowData: any, value: unknown) => string | number | null | undefined;
+  actions?: TableAction<TRow>[];
+  link?: TableRowLink | ((rowData: TRow) => TableRowLink);
+  tooltip?: boolean | ((rowData: TRow) => string);
+  valueGetter?: (rowData: TRow) => unknown;
+  formatter?: (rowData: TRow, value: unknown) => string | number | null | undefined;
   badgeMap?: Record<string, TableBadgeVariant>;
-  semanticFn?: (rowData: any, value: unknown) => 'positive' | 'negative' | 'neutral' | 'info' | 'warning' | 'danger';
+  semanticFn?: (
+    rowData: TRow,
+    value: unknown,
+  ) => 'positive' | 'negative' | 'neutral' | 'info' | 'warning' | 'danger';
   maxVisibleTags?: number;
   jsonDisplayMode?: 'button' | 'inline-preview';
   customTemplateKey?: string;
@@ -164,8 +180,8 @@ export interface TableSelectionConfig {
   selectAllScopeLabel?: string;
 }
 
-export interface TableConfig {
-  columns: TableColumn[];
+export interface TableConfig<TRow = unknown> {
+  columns: TableColumn<TRow>[];
   title?: string;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -174,19 +190,18 @@ export interface TableConfig {
   errorTitle?: string;
   filters?: TableFilterField[];
   filterOptions?: TableFilterOptions;
-  toolbar?: TableToolbarConfig;
+  toolbar?: TableToolbarConfig<TRow>;
   density?: TableDensity;
   pagination?: boolean;
   rowClickable?: boolean;
-  rowKey?: string | ((rowData: any) => string | number | boolean | null | undefined);
-  dataKey?: string | ((rowData: any) => string | number | boolean | null | undefined);
+  rowKey?: string | ((rowData: TRow) => TableRowKey);
+  dataKey?: string | ((rowData: TRow) => TableRowKey);
   selection?: TableSelectionConfig;
   rows?: number;
   rowsPerPageOptions?: number[];
   scrollable?: boolean;
   scrollHeight?: string;
   minWidth?: string;
-  stateKey?: string;
 }
 
 export interface TableToolbarButtonConfig {
@@ -228,7 +243,7 @@ export interface TableToolbarExportConfig extends TableToolbarButtonConfig {
   currentData?: boolean;
 }
 
-export interface TableToolbarConfig {
+export interface TableToolbarConfig<TRow = unknown> {
   new?: TableToolbarButtonConfig;
   delete?: TableToolbarButtonConfig;
   refresh?: TableToolbarButtonConfig;
@@ -237,10 +252,5 @@ export interface TableToolbarConfig {
   density?: TableToolbarDensityConfig;
   import?: TableToolbarImportConfig;
   export?: TableToolbarExportConfig;
-  bulkActions?: TableBulkAction[];
+  bulkActions?: TableBulkAction<TRow>[];
 }
-
-
-
-
-

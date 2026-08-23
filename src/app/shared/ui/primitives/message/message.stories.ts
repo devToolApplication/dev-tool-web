@@ -8,8 +8,8 @@ const meta: Meta<MessageComponent> = {
     text: 'This is an inline informational message.',
     severity: 'info',
     size: 'small',
-    variant: 'simple'
-  }
+    variant: 'simple',
+  },
 };
 
 export default meta;
@@ -21,34 +21,34 @@ export const Info: Story = {};
 export const Success: Story = {
   args: {
     severity: 'success',
-    text: 'Operation completed successfully.'
-  }
+    text: 'Operation completed successfully.',
+  },
 };
 
 export const Warning: Story = {
   args: {
     severity: 'warn',
-    text: 'Please review warning details.'
-  }
+    text: 'Please review warning details.',
+  },
 };
 
 export const ErrorSeverity: Story = {
   args: {
     severity: 'error',
-    text: 'An error occurred during indexing.'
-  }
+    text: 'An error occurred during indexing.',
+  },
 };
 
 export const Outlined: Story = {
   args: {
     variant: 'outlined',
-    severity: 'success'
-  }
+    severity: 'success',
+  },
 };
 
 export const Large: Story = {
   args: {
     size: 'large',
-    severity: 'info'
-  }
+    severity: 'info',
+  },
 };

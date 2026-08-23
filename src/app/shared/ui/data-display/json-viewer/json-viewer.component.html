@@ -2,7 +2,11 @@
   <header class="json-viewer__toolbar">
     <div class="json-viewer__status">
       @if (invalid) {
-        <app-badge label="shared.json.invalid" variant="danger" icon="pi pi-exclamation-triangle"></app-badge>
+        <app-badge
+          label="shared.json.invalid"
+          variant="danger"
+          icon="pi pi-exclamation-triangle"
+        ></app-badge>
       } @else {
         <app-badge label="JSON" variant="muted" icon="pi pi-code"></app-badge>
       }
@@ -75,7 +79,9 @@
               </div>
             }
           } @else {
-            <small class="json-viewer__no-match">{{ 'shared.json.searchNoMatches' | translateContent }}</small>
+            <small class="json-viewer__no-match">{{
+              'shared.json.searchNoMatches' | translateContent
+            }}</small>
           }
         </div>
       }
@@ -83,4 +89,3 @@
     <pre class="json-viewer__body">{{ filteredDisplayValue }}</pre>
   }
 </section>
-

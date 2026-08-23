@@ -1,5 +1,5 @@
-import { WritableSignal } from '@angular/core';
-import {
+import type { WritableSignal } from '@angular/core';
+import type {
   ArrayFieldConfig,
   ArrayFieldState,
   ArrayState,
@@ -7,9 +7,9 @@ import {
   FieldState,
   FormContext,
   FormCustomValidator,
-  TreeFieldConfig
+  TreeFieldConfig,
 } from '../models/form-config.model';
-import { ExpressionEngine } from './expression.engine';
+import type { ExpressionEngine } from './expression.engine';
 import { createArrayFieldState } from './array-field-state';
 import { createArrayState } from './array-state';
 import { createFieldGroupState } from './create-field-group-state';
@@ -25,14 +25,32 @@ export function createNestedFieldState<TFormModel extends object>(
   arrays: Record<string, ArrayState>,
   groupName?: string,
   treeTemplate?: TreeFieldConfig,
-  validators: Record<string, FormCustomValidator> = {}
+  validators: Record<string, FormCustomValidator> = {},
 ): FieldState | ArrayFieldState {
   if (config.type === 'group') {
-    return createFieldGroupState(path, config, modelSignal, contextSignal, expr, arrays, treeTemplate, validators);
+    return createFieldGroupState(
+      path,
+      config,
+      modelSignal,
+      contextSignal,
+      expr,
+      arrays,
+      treeTemplate,
+      validators,
+    );
   }
 
   if (config.type === 'tree') {
-    return createFieldTreeState(path, config, modelSignal, contextSignal, expr, arrays, treeTemplate, validators);
+    return createFieldTreeState(
+      path,
+      config,
+      modelSignal,
+      contextSignal,
+      expr,
+      arrays,
+      treeTemplate,
+      validators,
+    );
   }
 
   if (config.type === 'array') {
@@ -47,7 +65,7 @@ export function createNestedFieldState<TFormModel extends object>(
       arrayState,
       arrays,
       treeTemplate,
-      validators
+      validators,
     );
   }
 

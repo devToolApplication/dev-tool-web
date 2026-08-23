@@ -9,10 +9,6 @@
     ></app-button>
 
     <div class="page-context">
-      <app-breadcrumb
-        [home]="homeItem | translateContent"
-        [items]="breadcrumbItems | translateContent"
-      ></app-breadcrumb>
       <h1>{{ pageTitle() | translateContent }}</h1>
     </div>
   </div>
@@ -43,4 +39,3 @@
     ></app-tiered-menu>
   </div>
 </app-toolbar>
-

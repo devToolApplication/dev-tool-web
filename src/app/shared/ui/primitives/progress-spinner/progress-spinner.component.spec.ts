@@ -11,7 +11,7 @@ describe('ProgressSpinnerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProgressSpinnerComponent);
@@ -24,7 +24,8 @@ describe('ProgressSpinnerComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const progressbar: HTMLElement | null = fixture.nativeElement.querySelector('[role="progressbar"]');
+    const progressbar: HTMLElement | null =
+      fixture.nativeElement.querySelector('[role="progressbar"]');
     expect(progressbar?.getAttribute('aria-label')).toBe('shared.loading');
     expect(progressbar?.getAttribute('title')).toBe('shared.loading');
   });

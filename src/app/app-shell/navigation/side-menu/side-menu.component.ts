@@ -1,4 +1,15 @@
-import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -28,10 +39,19 @@ export interface AppMenuItem {
   selector: 'app-side-menu',
   standalone: false,
   templateUrl: './side-menu.component.html',
-  styleUrls: ['./side-menu.component.scss']
+  styleUrls: ['./side-menu.component.scss'],
 })
 export class SideMenuComponent implements OnInit {
-  @Input() items: AppMenuItem[] = [];
+  private _items: AppMenuItem[] = [];
+  @Input()
+  get items(): AppMenuItem[] {
+    return this._items;
+  }
+  set items(val: AppMenuItem[]) {
+    this._items = val ?? [];
+    this.syncInitialExpanded();
+  }
+
   @Input() collapsed = false;
   @Output() navigate = new EventEmitter<void>();
 
@@ -50,30 +70,50 @@ export class SideMenuComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly currentUrl = signal('');
   readonly appVersion = 'v0.0.0';
-  readonly environmentLabel = environment.production ? 'layout.environment.production' : 'layout.environment.development';
+  readonly environmentLabel = environment.production
+    ? 'layout.environment.production'
+    : 'layout.environment.development';
 
   private readonly expandedStorageKey = 'dev-tool.sidebarOpenGroups';
-  private readonly defaultExpandedPaths = new Set<string>();
 
   constructor(
     private readonly router: Router,
     private readonly destroyRef: DestroyRef,
-    private readonly permissionService: PermissionService
+    private readonly permissionService: PermissionService,
   ) {
     this.currentUrl.set(this.normalizeUrl(this.router.url));
   }
 
   ngOnInit(): void {
-    this.expandedState.set(this.readExpandedState());
+    this.syncInitialExpanded();
 
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => {
-        this.currentUrl.set(this.normalizeUrl((event as NavigationEnd).urlAfterRedirects));
+        const url = this.normalizeUrl((event as NavigationEnd).urlAfterRedirects);
+        this.currentUrl.set(url);
+        this.autoExpandActiveBranches();
       });
+  }
+
+  private syncInitialExpanded(): void {
+    const saved = this.readExpandedState();
+    const activePaths = this.findActiveParentPaths(this.items, 'root');
+    for (const p of activePaths) {
+      saved.add(p);
+    }
+    // If no state saved in localStorage yet, expand root level groups by default
+    if (typeof localStorage !== 'undefined' && !localStorage.getItem(this.expandedStorageKey)) {
+      for (const item of this.items) {
+        if (item.items?.length) {
+          saved.add(`root/${item.label || 'item'}`);
+        }
+      }
+    }
+    this.expandedState.set(saved);
   }
 
   isExpanded(path: string): boolean {
@@ -93,6 +133,44 @@ export class SideMenuComponent implements OnInit {
       this.storeExpandedState(next);
       return next;
     });
+  }
+
+  autoExpandActiveBranches(): void {
+    const activePaths = this.findActiveParentPaths(this.items, 'root');
+    if (activePaths.length === 0) {
+      return;
+    }
+    this.expandedState.update((current) => {
+      const next = new Set(current);
+      for (const p of activePaths) {
+        next.add(p);
+      }
+      this.storeExpandedState(next);
+      return next;
+    });
+  }
+
+  private findActiveParentPaths(items: AppMenuItem[], parentPath: string): string[] {
+    const paths: string[] = [];
+    for (const item of items) {
+      const itemPath = `${parentPath}/${item.label || 'item'}`;
+      if (item.items?.length) {
+        const childActive = item.items.some((child) => this.isItemOrDescendantActive(child));
+        if (childActive) {
+          paths.push(itemPath);
+          paths.push(...this.findActiveParentPaths(item.items, itemPath));
+        }
+      }
+    }
+    return paths;
+  }
+
+  private isItemOrDescendantActive(item: AppMenuItem): boolean {
+    const itemUrl = this.itemUrl(item);
+    if (itemUrl && this.isRoutePrefix(itemUrl, this.currentUrl())) {
+      return true;
+    }
+    return item.items?.some((child) => this.isItemOrDescendantActive(child)) ?? false;
   }
 
   onSearchChange(value: string | null): void {
@@ -129,7 +207,9 @@ export class SideMenuComponent implements OnInit {
     }
 
     const root = event.currentTarget as HTMLElement;
-    const focusableItems = Array.from(root.querySelectorAll<HTMLElement>('.menu-link:not([disabled])'));
+    const focusableItems = Array.from(
+      root.querySelectorAll<HTMLElement>('.menu-link:not([disabled])'),
+    );
 
     if (!focusableItems.length) {
       return;
@@ -157,7 +237,11 @@ export class SideMenuComponent implements OnInit {
     return this.itemUrl(item) || item.label || String(index);
   }
 
-  private filterMenuItems(items: AppMenuItem[], parentPath: string, includeDescendants: boolean): AppMenuItem[] {
+  private filterMenuItems(
+    items: AppMenuItem[],
+    parentPath: string,
+    includeDescendants: boolean,
+  ): AppMenuItem[] {
     return items.reduce<AppMenuItem[]>((visibleItems, item) => {
       const itemPath = `${parentPath}/${item.label || 'item'}`;
 
@@ -176,7 +260,7 @@ export class SideMenuComponent implements OnInit {
 
       visibleItems.push({
         ...item,
-        items: item.items?.length ? childItems ?? [] : undefined
+        items: item.items?.length ? (childItems ?? []) : undefined,
       });
 
       return visibleItems;
@@ -222,7 +306,10 @@ export class SideMenuComponent implements OnInit {
   }
 
   private normalizeUrl(url: string): string {
-    const cleanUrl = String(url ?? '').split('?')[0].split('#')[0].trim();
+    const cleanUrl = String(url ?? '')
+      .split('?')[0]
+      .split('#')[0]
+      .trim();
 
     if (!cleanUrl) {
       return '';
@@ -237,13 +324,13 @@ export class SideMenuComponent implements OnInit {
 
   private readExpandedState(): Set<string> {
     if (typeof localStorage === 'undefined') {
-      return new Set(this.defaultExpandedPaths);
+      return new Set();
     }
 
     const storedValue = localStorage.getItem(this.expandedStorageKey);
 
     if (!storedValue) {
-      return new Set(this.defaultExpandedPaths);
+      return new Set();
     }
 
     try {
@@ -253,10 +340,10 @@ export class SideMenuComponent implements OnInit {
         return new Set(parsedValue.filter((item): item is string => typeof item === 'string'));
       }
     } catch {
-      return new Set(this.defaultExpandedPaths);
+      return new Set();
     }
 
-    return new Set(this.defaultExpandedPaths);
+    return new Set();
   }
 
   private storeExpandedState(paths: Set<string>): void {

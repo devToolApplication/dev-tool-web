@@ -7,8 +7,8 @@ const meta: Meta<AvatarComponent> = {
   args: {
     label: 'AB',
     size: 'normal',
-    shape: 'circle'
-  }
+    shape: 'circle',
+  },
 };
 
 export default meta;
@@ -20,15 +20,15 @@ export const Label: Story = {};
 export const Icon: Story = {
   args: {
     label: undefined,
-    icon: 'pi pi-user'
-  }
+    icon: 'pi pi-user',
+  },
 };
 
 export const Image: Story = {
   args: {
     label: undefined,
-    image: 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'
-  }
+    image: 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png',
+  },
 };
 
 export const Sizes: Story = {
@@ -40,7 +40,6 @@ export const Sizes: Story = {
         <app-avatar label="MD" size="lg"></app-avatar>
         <app-avatar label="LG" size="xlarge"></app-avatar>
       </div>
-    `
-  })
+    `,
+  }),
 };
-

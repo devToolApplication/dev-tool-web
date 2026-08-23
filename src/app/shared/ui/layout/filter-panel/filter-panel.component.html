@@ -38,9 +38,27 @@
     @if (dirty) {
       <span class="filter-panel__dirty">{{ 'shared.filter.dirty' | translateContent }}</span>
     }
-    <app-button size="sm" variant="primary" icon="pi pi-check" label="apply" (buttonClick)="onApply()"></app-button>
-    <app-button size="sm" variant="ghost" icon="pi pi-refresh" label="reset" (buttonClick)="onReset()"></app-button>
-    <app-button size="sm" variant="ghost" icon="pi pi-filter-slash" label="clear" (buttonClick)="clear()"></app-button>
+    <app-button
+      size="sm"
+      variant="primary"
+      icon="pi pi-check"
+      label="apply"
+      (buttonClick)="onApply()"
+    ></app-button>
+    <app-button
+      size="sm"
+      variant="ghost"
+      icon="pi pi-refresh"
+      label="reset"
+      (buttonClick)="onReset()"
+    ></app-button>
+    <app-button
+      size="sm"
+      variant="ghost"
+      icon="pi pi-filter-slash"
+      label="clear"
+      (buttonClick)="clear()"
+    ></app-button>
   </div>
 </section>
 
@@ -73,7 +91,10 @@
         size="small"
         [label]="field.label"
         [placeholder]="field.placeholder"
-        [options]="[{ label: 'yes', value: true }, { label: 'no', value: false }]"
+        [options]="[
+          { label: 'yes', value: true },
+          { label: 'no', value: false },
+        ]"
         [value]="selectValue(field.key)"
         [showClear]="true"
         (valueChange)="setValue(field.key, $event)"
@@ -91,12 +112,16 @@
     @case ('number-range') {
       <div class="filter-panel__range">
         <app-input-number
-          [label]="(field.label | translateContent) + ' - ' + ('shared.filter.min' | translateContent)"
+          [label]="
+            (field.label | translateContent) + ' - ' + ('shared.filter.min' | translateContent)
+          "
           [value]="numberRangeValue(field.key, 'from')"
           (valueChange)="setRangeValue(field.key, 'from', $event)"
         ></app-input-number>
         <app-input-number
-          [label]="(field.label | translateContent) + ' - ' + ('shared.filter.max' | translateContent)"
+          [label]="
+            (field.label | translateContent) + ' - ' + ('shared.filter.max' | translateContent)
+          "
           [value]="numberRangeValue(field.key, 'to')"
           (valueChange)="setRangeValue(field.key, 'to', $event)"
         ></app-input-number>
@@ -134,12 +159,12 @@
       retryLabel="retry"
       (retry)="retryOptions.emit(field)"
     ></app-error-state>
-  } @else if ((field.options?.length ?? 0) === 0 && (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')) {
-    <small class="filter-panel__empty">{{ (field.emptyMessage ?? 'noDataFound') | translateContent }}</small>
+  } @else if (
+    (field.options?.length ?? 0) === 0 &&
+    (field.type === 'select' || field.type === 'multi-select' || field.type === 'autocomplete')
+  ) {
+    <small class="filter-panel__empty">{{
+      field.emptyMessage ?? 'noDataFound' | translateContent
+    }}</small>
   }
 </ng-template>
-
-
-
-
-

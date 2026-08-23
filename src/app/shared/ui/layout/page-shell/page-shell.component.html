@@ -28,10 +28,7 @@
         (retry)="retry.emit()"
       ></app-error-state>
     } @else if (empty) {
-      <app-empty-state
-        [title]="emptyTitle"
-        [description]="emptyDescription"
-      ></app-empty-state>
+      <app-empty-state [title]="emptyTitle" [description]="emptyDescription"></app-empty-state>
     } @else {
       <ng-content></ng-content>
     }

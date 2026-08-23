@@ -7,18 +7,18 @@ const formConfig: FormConfig = {
     {
       id: 'general',
       title: 'shared.form.section.general',
-      description: 'Core identity and state.'
+      description: 'Core identity and state.',
     },
     {
       id: 'workflow',
       title: 'Workflow settings',
-      description: 'Ownership, channels, and operator notes.'
+      description: 'Ownership, channels, and operator notes.',
     },
     {
       id: 'advanced',
       title: 'shared.form.advancedJson',
-      description: 'Structured metadata, endpoints, and nested limits.'
-    }
+      description: 'Structured metadata, endpoints, and nested limits.',
+    },
   ],
   fields: [
     {
@@ -31,9 +31,9 @@ const formConfig: FormConfig = {
       validation: [
         {
           expression: 'value == null || String(value).trim() === ""',
-          message: 'Workflow name is required'
-        }
-      ]
+          message: 'Workflow name is required',
+        },
+      ],
     },
     {
       type: 'number',
@@ -48,9 +48,9 @@ const formConfig: FormConfig = {
       validation: [
         {
           expression: 'value == null || value <= 0',
-          message: 'Budget must be greater than 0'
-        }
-      ]
+          message: 'Budget must be greater than 0',
+        },
+      ],
     },
     {
       type: 'select',
@@ -63,8 +63,8 @@ const formConfig: FormConfig = {
       options: [
         { label: 'Draft', value: 'draft' },
         { label: 'Active', value: 'active' },
-        { label: 'Paused', value: 'paused' }
-      ]
+        { label: 'Paused', value: 'paused' },
+      ],
     },
     {
       type: 'radio',
@@ -74,15 +74,15 @@ const formConfig: FormConfig = {
       width: '1/3',
       options: [
         { label: 'Internal', value: 'internal' },
-        { label: 'External', value: 'external' }
-      ]
+        { label: 'External', value: 'external' },
+      ],
     },
     {
       type: 'checkbox',
       name: 'enabled',
       label: 'Enabled',
       sectionId: 'general',
-      width: '1/3'
+      width: '1/3',
     },
     {
       type: 'select-multi',
@@ -94,8 +94,8 @@ const formConfig: FormConfig = {
       options: [
         { label: 'Email', value: 'email' },
         { label: 'Slack', value: 'slack' },
-        { label: 'Webhook', value: 'webhook' }
-      ]
+        { label: 'Webhook', value: 'webhook' },
+      ],
     },
     {
       type: 'input-multi',
@@ -107,15 +107,15 @@ const formConfig: FormConfig = {
       options: [
         { label: 'PRD', value: 'PRD' },
         { label: 'OPS', value: 'OPS' },
-        { label: 'QA', value: 'QA' }
-      ]
+        { label: 'QA', value: 'QA' },
+      ],
     },
     {
       type: 'date',
       name: 'startDate',
       label: 'Start date',
       sectionId: 'workflow',
-      width: '1/2'
+      width: '1/2',
     },
     {
       type: 'auto-complete',
@@ -127,8 +127,8 @@ const formConfig: FormConfig = {
       options: [
         { label: 'Nguyen An', value: 'Nguyen An' },
         { label: 'Tran Binh', value: 'Tran Binh' },
-        { label: 'Le Chi', value: 'Le Chi' }
-      ]
+        { label: 'Le Chi', value: 'Le Chi' },
+      ],
     },
     {
       type: 'textarea',
@@ -138,7 +138,7 @@ const formConfig: FormConfig = {
       placeholder: 'Describe the workflow',
       width: 'full',
       rows: 4,
-      showZoomButton: true
+      showZoomButton: true,
     },
     {
       type: 'textarea',
@@ -150,7 +150,7 @@ const formConfig: FormConfig = {
       rows: 6,
       showZoomButton: true,
       contentType: 'json',
-      jsonValidationMessage: 'JSON must be valid'
+      jsonValidationMessage: 'JSON must be valid',
     },
     {
       type: 'record',
@@ -160,13 +160,13 @@ const formConfig: FormConfig = {
       width: 'full',
       keyLabel: 'Key',
       valueLabel: 'Value',
-      addButtonLabel: 'Add metadata'
+      addButtonLabel: 'Add metadata',
     },
     {
       type: 'tree',
-      name: 'permissions',
-      label: 'Permission tree',
-      description: 'Search, review, and bulk-select operational permissions.',
+      name: 'approvalTree',
+      label: 'Approval tree',
+      description: 'Search, review, and bulk-select workflow approval nodes.',
       sectionId: 'advanced',
       width: 'full',
       treeConfig: {
@@ -187,28 +187,17 @@ const formConfig: FormConfig = {
             label: 'View only',
             icon: 'pi pi-eye',
             clearBeforeApply: true,
-            match: { codeIncludes: ['view'], leafOnly: true }
+            match: { codeIncludes: ['view'], leafOnly: true },
           },
           {
             id: 'editor',
             label: 'Editor',
             icon: 'pi pi-pencil',
             clearBeforeApply: true,
-            match: { codeIncludes: ['view', 'create', 'update'], leafOnly: true }
-          }
-        ]
-      }
-    },
-    {
-      type: 'secret-metadata',
-      name: 'secretMetadata',
-      label: 'secretMetadata',
-      sectionId: 'advanced',
-      width: 'full',
-      options: [
-        { label: 'Keycloak client secret', value: 'secret-keycloak-client' },
-        { label: 'Basic auth password', value: 'secret-basic-password' }
-      ]
+            match: { codeIncludes: ['view', 'create', 'update'], leafOnly: true },
+          },
+        ],
+      },
     },
     {
       type: 'group',
@@ -223,7 +212,7 @@ const formConfig: FormConfig = {
           label: 'Max items',
           width: '1/2',
           minFractionDigits: 0,
-          maxFractionDigits: 0
+          maxFractionDigits: 0,
         },
         {
           type: 'select',
@@ -234,10 +223,10 @@ const formConfig: FormConfig = {
           options: [
             { label: 'Low', value: 'low' },
             { label: 'Medium', value: 'medium' },
-            { label: 'High', value: 'high' }
-          ]
-        }
-      ]
+            { label: 'High', value: 'high' },
+          ],
+        },
+      ],
     },
     {
       type: 'array',
@@ -250,25 +239,25 @@ const formConfig: FormConfig = {
           type: 'text',
           name: 'name',
           label: 'Name',
-          width: '1/2'
+          width: '1/2',
         },
         {
           type: 'text',
           name: 'url',
           label: 'URL',
-          width: '1/2'
-        }
-      ]
-    }
-  ]
+          width: '1/2',
+        },
+      ],
+    },
+  ],
 };
 
 const context: FormContext = {
   user: {
     id: 'storybook-user',
-    name: 'Storybook'
+    name: 'Storybook',
   },
-  mode: 'edit'
+  mode: 'edit',
 };
 
 const initialValue = {
@@ -285,9 +274,9 @@ const initialValue = {
   jsonConfig: '{\n  "priority": "medium",\n  "batchSize": 100\n}',
   metadata: {
     exchange: 'binance',
-    account: 'paper'
+    account: 'paper',
   },
-  permissions: [
+  approvalTree: [
     {
       id: 'system',
       key: 'system',
@@ -302,11 +291,38 @@ const initialValue = {
           code: 'SYS_USER',
           type: 'resource',
           children: [
-            { id: 'system-user-view', key: 'system-user-view', label: 'View', code: 'USER_VIEW', type: 'action', checked: true },
-            { id: 'system-user-create', key: 'system-user-create', label: 'Create', code: 'USER_CREATE', type: 'action', checked: true },
-            { id: 'system-user-update', key: 'system-user-update', label: 'Update', code: 'USER_UPDATE', type: 'action' },
-            { id: 'system-user-delete', key: 'system-user-delete', label: 'Delete', code: 'USER_DELETE', type: 'action', severity: 'danger' }
-          ]
+            {
+              id: 'system-user-view',
+              key: 'system-user-view',
+              label: 'View',
+              code: 'USER_VIEW',
+              type: 'action',
+              checked: true,
+            },
+            {
+              id: 'system-user-create',
+              key: 'system-user-create',
+              label: 'Create',
+              code: 'USER_CREATE',
+              type: 'action',
+              checked: true,
+            },
+            {
+              id: 'system-user-update',
+              key: 'system-user-update',
+              label: 'Update',
+              code: 'USER_UPDATE',
+              type: 'action',
+            },
+            {
+              id: 'system-user-delete',
+              key: 'system-user-delete',
+              label: 'Delete',
+              code: 'USER_DELETE',
+              type: 'action',
+              severity: 'danger',
+            },
+          ],
         },
         {
           id: 'system-role',
@@ -315,11 +331,25 @@ const initialValue = {
           code: 'SYS_ROLE',
           type: 'resource',
           children: [
-            { id: 'system-role-view', key: 'system-role-view', label: 'View', code: 'ROLE_VIEW', type: 'action', checked: true },
-            { id: 'system-role-admin', key: 'system-role-admin', label: 'Admin', code: 'ROLE_ADMIN', type: 'action', severity: 'critical' }
-          ]
-        }
-      ]
+            {
+              id: 'system-role-view',
+              key: 'system-role-view',
+              label: 'View',
+              code: 'ROLE_VIEW',
+              type: 'action',
+              checked: true,
+            },
+            {
+              id: 'system-role-admin',
+              key: 'system-role-admin',
+              label: 'Admin',
+              code: 'ROLE_ADMIN',
+              type: 'action',
+              severity: 'critical',
+            },
+          ],
+        },
+      ],
     },
     {
       id: 'storage',
@@ -335,57 +365,45 @@ const initialValue = {
           code: 'STORAGE_FILE',
           type: 'resource',
           children: [
-            { id: 'storage-file-view', key: 'storage-file-view', label: 'View', code: 'FILE_VIEW', type: 'action', checked: true },
-            { id: 'storage-file-delete', key: 'storage-file-delete', label: 'Delete', code: 'FILE_DELETE', type: 'action', severity: 'danger' }
-          ]
-        }
-      ]
-    }
-  ],
-  secretMetadata: [
-    {
-      key: 'X-Trace-Source',
-      type: 'RAW_TEXT',
-      value: 'storybook'
+            {
+              id: 'storage-file-view',
+              key: 'storage-file-view',
+              label: 'View',
+              code: 'FILE_VIEW',
+              type: 'action',
+              checked: true,
+            },
+            {
+              id: 'storage-file-delete',
+              key: 'storage-file-delete',
+              label: 'Delete',
+              code: 'FILE_DELETE',
+              type: 'action',
+              severity: 'danger',
+            },
+          ],
+        },
+      ],
     },
-    {
-      key: 'Authorization',
-      type: 'BASIC_AUTH',
-      config: {
-        username: 'service-user',
-        passwordSecretId: 'secret-basic-password'
-      }
-    },
-    {
-      key: 'Authorization',
-      type: 'KEYCLOAK_AUTH',
-      config: {
-        tokenUrl: 'https://auth.example.com/realms/demo/protocol/openid-connect/token',
-        clientId: 'demo-client',
-        clientSecretId: 'secret-keycloak-client',
-        grantType: 'CLIENT_CREDENTIALS',
-        scope: 'openid profile'
-      }
-    }
   ],
   limits: {
     maxItems: 8,
-    profile: 'medium'
+    profile: 'medium',
   },
   endpoints: [
     {
       name: 'price-feed',
-      url: 'https://api.example.com/prices'
-    }
-  ]
+      url: 'https://api.example.com/prices',
+    },
+  ],
 };
 
 const meta: Meta<FormInput> = {
   title: 'Shared/UI/Form Input',
   component: FormInput,
   parameters: {
-    layout: 'padded'
-  }
+    layout: 'padded',
+  },
 };
 
 export default meta;
@@ -397,15 +415,15 @@ export const Default: Story = {
     config: formConfig,
     context,
     initialValue,
-    
-    submitting: false
+
+    submitting: false,
   },
   render: (args) => ({
     props: {
       ...args,
       currentModel: JSON.stringify(initialValue, null, 2),
       submittedModel: 'Submit the form to see payload',
-      format: (value: unknown) => JSON.stringify(value, null, 2)
+      format: (value: unknown) => JSON.stringify(value, null, 2),
     },
     template: `
       <div class="grid max-w-7xl grid-cols-12 gap-6 p-4">
@@ -433,8 +451,8 @@ export const Default: Story = {
           </div>
         </aside>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const Submitting: Story = {
@@ -442,10 +460,10 @@ export const Submitting: Story = {
     config: formConfig,
     context,
     initialValue,
-    
-    submitting: true
+
+    submitting: true,
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const WithErrors: Story = {
@@ -456,15 +474,13 @@ export const WithErrors: Story = {
       ...initialValue,
       name: '',
       budget: 0,
-      jsonConfig: '{ invalid'
+      jsonConfig: '{ invalid',
     },
-    
+
     submitting: false,
-    apiFieldErrors: {
-      status: 'Status is required for active workflows'
-    }
+    externalErrors: [{ fieldPath: 'status', message: 'Status is required for active workflows' }],
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const Loading: Story = {
@@ -472,10 +488,10 @@ export const Loading: Story = {
     config: formConfig,
     context,
     initialValue,
-    
-    loading: true
+
+    loading: true,
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const ReadonlyDetail: Story = {
@@ -483,11 +499,9 @@ export const ReadonlyDetail: Story = {
     config: formConfig,
     context: {
       ...context,
-      mode: 'view'
+      mode: 'view',
     },
     initialValue,
-    
   },
-  render: Default.render
+  render: Default.render,
 };
-

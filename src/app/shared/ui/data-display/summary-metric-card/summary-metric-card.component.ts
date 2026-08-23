@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { BadgeVariant } from '../badge/badge.component';
+import type { BadgeVariant } from '../badge/badge.component';
+import type { UiRouterLink } from '../../types/router-link.model';
 
 @Component({
   selector: 'app-summary-metric-card',
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summary-metric-card.component.html',
-  styleUrl: './summary-metric-card.component.css'
+  styleUrl: './summary-metric-card.component.css',
 })
 export class SummaryMetricCardComponent {
   @Input({ required: true }) label = '';
@@ -18,7 +19,7 @@ export class SummaryMetricCardComponent {
   @Input() error?: string | null;
   @Input() trend?: string | number | null;
   @Input() trendVariant: BadgeVariant = 'default';
-  @Input() routerLink?: string | any[];
+  @Input() routerLink?: UiRouterLink;
   @Input() queryParams?: Record<string, unknown>;
 
   get displayValue(): string | number {

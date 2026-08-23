@@ -12,7 +12,7 @@ describe('ValidationSummaryComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(ValidationSummaryComponent);
@@ -28,7 +28,7 @@ describe('ValidationSummaryComponent', () => {
   it('renders error and warning counts with translated messages', () => {
     component.items = [
       { fieldPath: 'name', label: 'Name', message: 'Name is required' },
-      { fieldPath: 'limit', label: 'Limit', message: 'Limit is high', severity: 'warning' }
+      { fieldPath: 'limit', label: 'Limit', message: 'Limit is high', severity: 'warning' },
     ];
 
     fixture.detectChanges();
@@ -45,7 +45,7 @@ describe('ValidationSummaryComponent', () => {
     const item: ValidationSummaryItem = {
       fieldPath: 'name',
       label: 'Name',
-      message: 'Name is required'
+      message: 'Name is required',
     };
     const itemClick = vi.fn();
     component.items = [item];

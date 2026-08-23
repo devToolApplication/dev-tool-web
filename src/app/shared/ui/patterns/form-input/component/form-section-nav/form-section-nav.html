@@ -10,7 +10,9 @@
         class="form-section-nav__item"
         [class.form-section-nav__item--active]="section.active"
         [class.form-section-nav__item--error]="section.errorCount > 0"
-        [class.form-section-nav__item--warning]="section.warningCount > 0 && section.errorCount === 0"
+        [class.form-section-nav__item--warning]="
+          section.warningCount > 0 && section.errorCount === 0
+        "
         [class.form-section-nav__item--complete]="section.completed"
         [disabled]="section.disabled"
         [attr.aria-current]="section.active ? 'step' : null"

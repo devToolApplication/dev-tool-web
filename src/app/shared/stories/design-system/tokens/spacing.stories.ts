@@ -10,7 +10,7 @@ const spacingScale = [
   { token: '2rem', px: '32px', class: 'p-8' },
   { token: '2.5rem', px: '40px', class: 'p-10' },
   { token: '3rem', px: '48px', class: 'p-12' },
-  { token: '4rem', px: '64px', class: 'p-16' }
+  { token: '4rem', px: '64px', class: 'p-16' },
 ];
 
 const meta: Meta = {
@@ -20,10 +20,10 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Spacing scale based on 4px grid. Maps to Figma auto-layout spacing values.'
-      }
-    }
-  }
+        component: 'Spacing scale based on 4px grid. Maps to Figma auto-layout spacing values.',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -36,17 +36,21 @@ export const Scale: Story = {
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-4">Spacing Scale (4px grid)</h3>
         <div class="flex flex-col gap-3">
-          ${spacingScale.map(s => `
+          ${spacingScale
+            .map(
+              (s) => `
             <div class="flex items-center gap-4">
               <code class="text-xs" style="min-width:80px;color:var(--p-text-muted-color)">${s.class}</code>
               <div style="width:${s.token};height:24px;background:var(--p-primary-500);border-radius:4px"></div>
               <span class="text-xs" style="color:var(--p-text-muted-color)">${s.token} (${s.px})</span>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const GapDemo: Story = {
@@ -89,6 +93,6 @@ export const GapDemo: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

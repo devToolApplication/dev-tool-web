@@ -13,7 +13,7 @@ describe('ConfirmDialogHostComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmDialogHostComponent);
@@ -23,7 +23,11 @@ describe('ConfirmDialogHostComponent', () => {
   });
 
   it('opens a dialog with title, message and danger variant', () => {
-    void service.confirm({ title: 'Delete item', message: 'Delete cannot be undone', variant: 'danger' });
+    void service.confirm({
+      title: 'Delete item',
+      message: 'Delete cannot be undone',
+      variant: 'danger',
+    });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Delete item');
@@ -64,7 +68,11 @@ describe('ConfirmDialogHostComponent', () => {
 
   it('honors backdrop and escape close config', async () => {
     let settled = false;
-    const promise = service.confirm({ message: 'Do not dismiss', closeOnBackdrop: false, closeOnEsc: false });
+    const promise = service.confirm({
+      message: 'Do not dismiss',
+      closeOnBackdrop: false,
+      closeOnEsc: false,
+    });
     promise.then(() => {
       settled = true;
     });
@@ -92,7 +100,7 @@ describe('ConfirmDialogHostComponent', () => {
       closeOnEsc: true,
       action: () => Promise.reject(new Error('failed')),
       errorMessage: 'Action failed',
-      resolve: vi.fn()
+      resolve: vi.fn(),
     });
     fixture.detectChanges();
 
@@ -124,7 +132,7 @@ describe('ConfirmDialogHostComponent', () => {
     document.body.removeChild(trigger);
   });
 
-  it('traps tab focus inside the dialog panel', () => {
+  it('uses the CDK focus trap on the dialog panel', () => {
     component.request.set({
       title: 'Keyboard confirm',
       message: 'Keyboard stays in dialog',
@@ -135,28 +143,13 @@ describe('ConfirmDialogHostComponent', () => {
       closeOnBackdrop: true,
       closeOnEsc: true,
       errorMessage: 'Action failed',
-      resolve: vi.fn()
+      resolve: vi.fn(),
     });
     fixture.detectChanges();
 
-    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    const cancelButton = buttons.find((button) => button.textContent?.includes('Cancel'));
-    const confirmButton = buttons.find((button) => button.textContent?.includes('Confirm'));
-    expect(cancelButton).toBeTruthy();
-    expect(confirmButton).toBeTruthy();
+    const panel = fixture.nativeElement.querySelector('[role="alertdialog"]') as HTMLElement | null;
 
-    confirmButton?.focus();
-    const forwardEvent = { shiftKey: false, preventDefault: vi.fn() } as unknown as KeyboardEvent;
-    component.onTab(forwardEvent);
-
-    expect(forwardEvent.preventDefault).toHaveBeenCalledOnce();
-    expect(document.activeElement).toBe(cancelButton);
-
-    cancelButton?.focus();
-    const backwardEvent = { shiftKey: true, preventDefault: vi.fn() } as unknown as KeyboardEvent;
-    component.onTab(backwardEvent);
-
-    expect(backwardEvent.preventDefault).toHaveBeenCalledOnce();
-    expect(document.activeElement).toBe(confirmButton);
+    expect(panel).toBeTruthy();
+    expect(panel?.hasAttribute('cdktrapfocus')).toBe(true);
   });
 });

@@ -1,4 +1,8 @@
-<div class="app-input-text-wrap" [class.app-input-text-wrap--invalid]="invalid" [class.app-input-text-wrap--disabled]="disabled">
+<div
+  class="app-input-text-wrap"
+  [class.app-input-text-wrap--invalid]="invalid"
+  [class.app-input-text-wrap--disabled]="disabled"
+>
   @if (iconClass) {
     <span class="app-input-icon" aria-hidden="true">
       <i [class]="iconClass"></i>
@@ -14,8 +18,7 @@
     [readOnly]="readonly"
     [required]="required"
     [attr.autofocus]="autofocus ? true : null"
-    [attr.placeholder]="(placeholder || null) | translateContent"
-    
+    [attr.placeholder]="placeholder || null | translateContent"
     [attr.aria-invalid]="invalid || null"
     [attr.aria-describedby]="describedBy || null"
     [attr.autocomplete]="autocomplete"
@@ -27,4 +30,3 @@
     (focus)="onFocus()"
   />
 </div>
-

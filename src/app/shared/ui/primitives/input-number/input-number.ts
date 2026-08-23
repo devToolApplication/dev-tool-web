@@ -6,7 +6,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './input-number.html',
   styleUrl: './input-number.css',
-  providers: [provideValueAccessor(() => InputNumber)]
+  providers: [provideValueAccessor(() => InputNumber)],
 })
 export class InputNumber extends BaseInput<number> {
   /* ========= Specific ========= */

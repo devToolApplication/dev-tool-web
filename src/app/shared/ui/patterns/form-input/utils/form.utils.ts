@@ -1,38 +1,44 @@
-import { BaseFieldConfig, GridWidth } from "../models/form-config.model";
+import type { BaseFieldConfig, GridWidth } from '../models/form-config.model';
 import type { ExpressionEngine } from './expression.engine';
 
-export function getByPath(obj: any, path: string) {
-  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+export function getByPath(obj: unknown, path: string): unknown {
+  return path.split('.').reduce<unknown>((acc, key) => {
+    if (!acc || typeof acc !== 'object') {
+      return undefined;
+    }
+    return (acc as Record<string, unknown>)[key];
+  }, obj);
 }
 
-export function updateByPath(obj: any, path: string, value: any) {
-
+export function updateByPath<TModel extends object>(
+  obj: TModel,
+  path: string,
+  value: unknown,
+): TModel {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
 
-  const newObj = Array.isArray(obj)
-    ? [...obj]
-    : { ...obj };
+  const newObj = Array.isArray(obj) ? Array.from(obj as readonly unknown[]) : { ...obj };
 
-  let current: any = newObj;
+  let current = newObj as Record<string, unknown>;
 
   keys.forEach((key, index) => {
-
     const nextKey = keys[index + 1];
 
     const isNextIndex = !isNaN(Number(nextKey));
 
-    if (Array.isArray(current[key])) {
-      current[key] = [...current[key]];
-    } else if (typeof current[key] === 'object' && current[key] !== null) {
-      current[key] = { ...current[key] };
+    const currentValue = current[key];
+    if (Array.isArray(currentValue)) {
+      current[key] = Array.from(currentValue as readonly unknown[]);
+    } else if (typeof currentValue === 'object' && currentValue !== null) {
+      current[key] = { ...(currentValue as Record<string, unknown>) };
     } else if (isNextIndex) {
       current[key] = [];
     } else {
       current[key] = {};
     }
 
-    current = current[key];
+    current = current[key] as Record<string, unknown>;
   });
 
   if (Array.isArray(current)) {
@@ -41,7 +47,7 @@ export function updateByPath(obj: any, path: string, value: any) {
     current[lastKey] = value;
   }
 
-  return newObj;
+  return newObj as TModel;
 }
 
 export function getColClass(width?: GridWidth): string {
@@ -50,7 +56,7 @@ export function getColClass(width?: GridWidth): string {
     '1/3': 'col-span-12 md:col-span-4',
     '1/4': 'col-span-12 md:col-span-3',
     '1/6': 'col-span-12 md:col-span-2',
-    'full': 'col-span-12'
+    full: 'col-span-12',
   };
 
   return map[width ?? 'full'];
@@ -67,7 +73,7 @@ export function resolveDisabledExpression(config: BaseFieldConfig): string | und
 export function isRequiredByConfig(
   config: BaseFieldConfig,
   expr: ExpressionEngine,
-  ctx: { model: unknown; context: unknown; value?: unknown }
+  ctx: { model: unknown; context: unknown; value?: unknown },
 ): boolean {
   if (config.required === true || config.validation?.some((rule) => rule.type === 'required')) {
     return true;

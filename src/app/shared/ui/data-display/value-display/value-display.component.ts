@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { BadgeVariant } from '../badge/badge.component';
+import type { BadgeVariant } from '../badge/badge.component';
 
 export type ValueDisplayType =
   | 'text'
@@ -17,7 +17,7 @@ export type ValueDisplayType =
   selector: 'app-value-display',
   standalone: false,
   templateUrl: './value-display.component.html',
-  styleUrl: './value-display.component.css'
+  styleUrl: './value-display.component.css',
 })
 export class ValueDisplayComponent {
   @Input() value: unknown;

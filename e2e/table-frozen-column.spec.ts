@@ -11,7 +11,9 @@ test.describe('Shared table frozen columns', () => {
     await page.waitForSelector('.app-table-scroller', { timeout: 30000 });
   });
 
-  test('keeps the configured action column visible while scrolling horizontally', async ({ page }) => {
+  test('keeps the configured action column visible while scrolling horizontally', async ({
+    page,
+  }) => {
     const scroller = page.locator('.app-table-scroller').first();
     const actionHeader = page.locator('thead .app-table-cell--frozen-right').first();
     const actionCell = page.locator('tbody .app-table-cell--frozen-right').first();
@@ -34,9 +36,13 @@ test.describe('Shared table frozen columns', () => {
     expect(scrollerBox).not.toBeNull();
     expect(headerBox).not.toBeNull();
     expect(cellBox).not.toBeNull();
-    expect(headerBox!.x + headerBox!.width).toBeLessThanOrEqual(scrollerBox!.x + scrollerBox!.width + 2);
+    expect(headerBox!.x + headerBox!.width).toBeLessThanOrEqual(
+      scrollerBox!.x + scrollerBox!.width + 2,
+    );
     expect(headerBox!.x).toBeGreaterThanOrEqual(scrollerBox!.x - 2);
-    expect(cellBox!.x + cellBox!.width).toBeLessThanOrEqual(scrollerBox!.x + scrollerBox!.width + 2);
+    expect(cellBox!.x + cellBox!.width).toBeLessThanOrEqual(
+      scrollerBox!.x + scrollerBox!.width + 2,
+    );
     expect(cellBox!.x).toBeGreaterThanOrEqual(scrollerBox!.x - 2);
   });
 

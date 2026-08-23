@@ -101,7 +101,10 @@ const SERVICE_RESOURCES: ServiceResourceRecord[] = [
     version: 'v4',
     maskedValue: 'kc••••client',
     tags: ['keycloak', 'oauth'],
-    payload: { grantType: 'client_credentials', tokenUrl: '/realms/dev/protocol/openid-connect/token' },
+    payload: {
+      grantType: 'client_credentials',
+      tokenUrl: '/realms/dev/protocol/openid-connect/token',
+    },
   },
   {
     id: 'ai-secret-crawl-staging',
@@ -413,7 +416,10 @@ export function buildServiceResourceListScreen(
   resourceKind: ServiceResourceKind,
 ): ServiceResourceListScreen {
   const service = SERVICE_PROFILES[serviceId];
-  const resourceLabel = resourceKind === 'secret' ? 'serviceManagement.resource.secret' : 'serviceManagement.resource.config';
+  const resourceLabel =
+    resourceKind === 'secret'
+      ? 'serviceManagement.resource.secret'
+      : 'serviceManagement.resource.config';
   const basePath = `/${service.routeSegment}/${RESOURCE_SEGMENTS[resourceKind]}`;
   const serviceKey = serviceId === 'ai-agent-mcrs' ? 'aiAgent' : 'job';
   const resourceKey = resourceKind === 'secret' ? 'secret' : 'config';
@@ -423,15 +429,14 @@ export function buildServiceResourceListScreen(
     resourceKind,
     title: `serviceManagement.${serviceKey}.${resourceKey}.title`,
     description: `serviceManagement.${serviceKey}.${resourceKey}.description`,
-    breadcrumb: [
-      { label: service.name },
-      { label: resourceLabel, routerLink: basePath },
-    ],
+    breadcrumb: [{ label: service.name }, { label: resourceLabel, routerLink: basePath }],
     basePath,
     actions: buildListActions(),
     filters: buildResourceFilters(resourceKind),
     table: buildResourceTable(resourceKind),
-    records: SERVICE_RESOURCES.filter((record) => record.serviceId === serviceId && record.kind === resourceKind),
+    records: SERVICE_RESOURCES.filter(
+      (record) => record.serviceId === serviceId && record.kind === resourceKind,
+    ),
   };
 }
 
@@ -445,7 +450,9 @@ export function buildServiceResourceFormScreen(
   const record = recordId ? listScreen.records.find((item) => item.id === recordId) : undefined;
   const resourceKey = resourceKind === 'secret' ? 'secret' : 'config';
   const serviceKey = serviceId === 'ai-agent-mcrs' ? 'aiAgent' : 'job';
-  const model = record ? resourceToFormModel(record) : defaultResourceModel(serviceId, resourceKind);
+  const model = record
+    ? resourceToFormModel(record)
+    : defaultResourceModel(serviceId, resourceKind);
   const title = `serviceManagement.${serviceKey}.${resourceKey}.${mode === 'create' ? 'createTitle' : 'editTitle'}`;
 
   return {
@@ -485,7 +492,10 @@ export function buildJobManagementScreen(): JobManagementScreen {
 
 export function buildJobFormScreen(mode: ServiceFormMode, jobId?: string): JobFormScreen {
   const job = jobId ? JOBS.find((item) => item.id === jobId) : undefined;
-  const title = mode === 'create' ? 'serviceManagement.jobManagement.createTitle' : 'serviceManagement.jobManagement.editTitle';
+  const title =
+    mode === 'create'
+      ? 'serviceManagement.jobManagement.createTitle'
+      : 'serviceManagement.jobManagement.editTitle';
 
   return {
     mode,
@@ -514,7 +524,15 @@ export function filterServiceResources(
   return records.filter((record) => {
     const matchesKeyword =
       !keyword ||
-      [record.name, record.key, record.owner, record.description, record.endpoint, record.type, ...record.tags]
+      [
+        record.name,
+        record.key,
+        record.owner,
+        record.description,
+        record.endpoint,
+        record.type,
+        ...record.tags,
+      ]
         .filter((value): value is string => typeof value === 'string')
         .some((value) => value.toLowerCase().includes(keyword));
     const matchesEnvironment = !environment || record.environment === environment;
@@ -525,7 +543,10 @@ export function filterServiceResources(
   });
 }
 
-export function filterJobs(jobs: readonly JobRecord[], filters: Record<string, unknown>): JobRecord[] {
+export function filterJobs(
+  jobs: readonly JobRecord[],
+  filters: Record<string, unknown>,
+): JobRecord[] {
   const keyword = normalizedText(filters['keyword']);
   const environment = filters['environment'];
   const status = filters['status'];
@@ -534,8 +555,15 @@ export function filterJobs(jobs: readonly JobRecord[], filters: Record<string, u
   return jobs.filter((job) => {
     const matchesKeyword =
       !keyword ||
-      [job.name, job.id, job.owner, job.description, job.handler, job.configRef, job.secretRef]
-        .some((value) => value.toLowerCase().includes(keyword));
+      [
+        job.name,
+        job.id,
+        job.owner,
+        job.description,
+        job.handler,
+        job.configRef,
+        job.secretRef,
+      ].some((value) => value.toLowerCase().includes(keyword));
     const matchesEnvironment = !environment || job.environment === environment;
     const matchesStatus = !status || job.status === status;
     const matchesOwner = !owner || job.owner.toLowerCase().includes(owner);
@@ -548,14 +576,29 @@ export function resourceDetailItems(record: ServiceResourceRecord): KeyValueItem
   return [
     { label: 'serviceManagement.field.name', value: record.name },
     { label: 'serviceManagement.field.key', value: record.key, copyable: true },
-    { label: 'serviceManagement.field.environment', value: record.environmentLabel, type: 'badge', variant: environmentVariant(record.environment) },
-    { label: 'serviceManagement.field.status', value: record.statusLabel, type: 'badge', variant: resourceStatusVariant(record.status) },
+    {
+      label: 'serviceManagement.field.environment',
+      value: record.environmentLabel,
+      type: 'badge',
+      variant: environmentVariant(record.environment),
+    },
+    {
+      label: 'serviceManagement.field.status',
+      value: record.statusLabel,
+      type: 'badge',
+      variant: resourceStatusVariant(record.status),
+    },
     { label: 'serviceManagement.field.type', value: record.typeLabel },
     { label: 'serviceManagement.field.owner', value: record.owner },
     { label: 'serviceManagement.field.version', value: record.version },
     { label: 'serviceManagement.field.updatedAt', value: record.updatedAt, type: 'datetime' },
     { label: 'serviceManagement.field.endpoint', value: record.endpoint },
-    { label: 'serviceManagement.field.timeoutMs', value: record.timeoutMs, type: 'number', suffix: ' ms' },
+    {
+      label: 'serviceManagement.field.timeoutMs',
+      value: record.timeoutMs,
+      type: 'number',
+      suffix: ' ms',
+    },
     { label: 'serviceManagement.field.retryCount', value: record.retryCount, type: 'number' },
   ];
 }
@@ -563,8 +606,18 @@ export function resourceDetailItems(record: ServiceResourceRecord): KeyValueItem
 export function jobDetailItems(job: JobRecord): KeyValueItem[] {
   return [
     { label: 'serviceManagement.field.name', value: job.name },
-    { label: 'serviceManagement.field.environment', value: job.environmentLabel, type: 'badge', variant: environmentVariant(job.environment) },
-    { label: 'serviceManagement.field.status', value: job.statusLabel, type: 'badge', variant: jobStatusVariant(job.status) },
+    {
+      label: 'serviceManagement.field.environment',
+      value: job.environmentLabel,
+      type: 'badge',
+      variant: environmentVariant(job.environment),
+    },
+    {
+      label: 'serviceManagement.field.status',
+      value: job.statusLabel,
+      type: 'badge',
+      variant: jobStatusVariant(job.status),
+    },
     { label: 'serviceManagement.field.owner', value: job.owner },
     { label: 'serviceManagement.field.schedule', value: job.schedule, copyable: true },
     { label: 'serviceManagement.field.timezone', value: job.timezone },
@@ -574,7 +627,12 @@ export function jobDetailItems(job: JobRecord): KeyValueItem[] {
     { label: 'serviceManagement.field.lastRunAt', value: job.lastRunAt, type: 'datetime' },
     { label: 'serviceManagement.field.nextRunAt', value: job.nextRunAt, type: 'datetime' },
     { label: 'serviceManagement.field.successRate', value: job.successRate / 100, type: 'percent' },
-    { label: 'serviceManagement.field.duration', value: job.durationMs, type: 'number', suffix: ' ms' },
+    {
+      label: 'serviceManagement.field.duration',
+      value: job.durationMs,
+      type: 'number',
+      suffix: ' ms',
+    },
   ];
 }
 
@@ -583,7 +641,10 @@ export function findServiceResource(
   resourceKind: ServiceResourceKind,
   recordId: string,
 ): ServiceResourceRecord | undefined {
-  return SERVICE_RESOURCES.find((record) => record.serviceId === serviceId && record.kind === resourceKind && record.id === recordId);
+  return SERVICE_RESOURCES.find(
+    (record) =>
+      record.serviceId === serviceId && record.kind === resourceKind && record.id === recordId,
+  );
 }
 
 export function findJob(jobId: string): JobRecord | undefined {
@@ -592,11 +653,22 @@ export function findJob(jobId: string): JobRecord | undefined {
 
 function buildListActions(createLabel = 'create'): ActionToolbarAction[] {
   return [
-    { id: 'create', label: createLabel, icon: 'pi pi-plus', placement: 'primary', variant: 'primary' },
-    { id: 'refresh', label: 'refresh', icon: 'pi pi-refresh', placement: 'secondary', variant: 'ghost' },
+    {
+      id: 'create',
+      label: createLabel,
+      icon: 'pi pi-plus',
+      placement: 'primary',
+      variant: 'primary',
+    },
+    {
+      id: 'refresh',
+      label: 'refresh',
+      icon: 'pi pi-refresh',
+      placement: 'secondary',
+      variant: 'ghost',
+    },
   ];
 }
-
 
 function buildResourceFilters(resourceKind: ServiceResourceKind): FilterPanelField[] {
   return [
@@ -604,9 +676,10 @@ function buildResourceFilters(resourceKind: ServiceResourceKind): FilterPanelFie
       key: 'keyword',
       label: 'serviceManagement.filter.keyword',
       type: 'text',
-      placeholder: resourceKind === 'secret'
-        ? 'serviceManagement.filter.secretKeywordPlaceholder'
-        : 'serviceManagement.filter.configKeywordPlaceholder',
+      placeholder:
+        resourceKind === 'secret'
+          ? 'serviceManagement.filter.secretKeywordPlaceholder'
+          : 'serviceManagement.filter.configKeywordPlaceholder',
     },
     {
       key: 'environment',
@@ -660,19 +733,27 @@ function buildJobFilters(): FilterPanelField[] {
   ];
 }
 
-function buildResourceTable(resourceKind: ServiceResourceKind): TableConfig {
+function buildResourceTable(resourceKind: ServiceResourceKind): TableConfig<ServiceResourceRecord> {
   const actions = buildResourceRowActions();
 
   return {
-    title: resourceKind === 'secret' ? 'serviceManagement.table.secrets' : 'serviceManagement.table.configs',
+    title:
+      resourceKind === 'secret'
+        ? 'serviceManagement.table.secrets'
+        : 'serviceManagement.table.configs',
     rowClickable: true,
     pagination: true,
     rows: 10,
-    stateKey: `service-management-${resourceKind}`,
     emptyTitle: 'serviceManagement.empty.title',
     emptyDescription: 'serviceManagement.empty.description',
     columns: [
-      { field: 'name', header: 'serviceManagement.field.name', type: 'text', minWidth: '14rem', sortable: true },
+      {
+        field: 'name',
+        header: 'serviceManagement.field.name',
+        type: 'text',
+        minWidth: '14rem',
+        sortable: true,
+      },
       { field: 'key', header: 'serviceManagement.field.key', type: 'copyable', minWidth: '13rem' },
       {
         field: 'environmentLabel',
@@ -697,9 +778,20 @@ function buildResourceTable(resourceKind: ServiceResourceKind): TableConfig {
         },
         width: '9rem',
       },
-      { field: 'typeLabel', header: 'serviceManagement.field.type', type: 'text', minWidth: '9rem' },
+      {
+        field: 'typeLabel',
+        header: 'serviceManagement.field.type',
+        type: 'text',
+        minWidth: '9rem',
+      },
       { field: 'owner', header: 'serviceManagement.field.owner', type: 'text', minWidth: '8rem' },
-      { field: 'updatedAt', header: 'serviceManagement.field.updatedAt', type: 'datetime', width: '11rem', sortable: true },
+      {
+        field: 'updatedAt',
+        header: 'serviceManagement.field.updatedAt',
+        type: 'datetime',
+        width: '11rem',
+        sortable: true,
+      },
       {
         field: 'actions',
         header: 'actions',
@@ -714,17 +806,22 @@ function buildResourceTable(resourceKind: ServiceResourceKind): TableConfig {
   };
 }
 
-function buildJobTable(): TableConfig {
+function buildJobTable(): TableConfig<JobRecord> {
   return {
     title: 'serviceManagement.jobManagement.tableTitle',
     rowClickable: true,
     pagination: true,
     rows: 10,
-    stateKey: 'service-management-jobs',
     emptyTitle: 'serviceManagement.empty.jobsTitle',
     emptyDescription: 'serviceManagement.empty.jobsDescription',
     columns: [
-      { field: 'name', header: 'serviceManagement.field.name', type: 'text', minWidth: '15rem', sortable: true },
+      {
+        field: 'name',
+        header: 'serviceManagement.field.name',
+        type: 'text',
+        minWidth: '15rem',
+        sortable: true,
+      },
       {
         field: 'statusLabel',
         header: 'serviceManagement.field.status',
@@ -748,11 +845,37 @@ function buildJobTable(): TableConfig {
         },
         width: '8rem',
       },
-      { field: 'schedule', header: 'serviceManagement.field.schedule', type: 'copyable', minWidth: '9rem' },
-      { field: 'lastRunAt', header: 'serviceManagement.field.lastRunAt', type: 'datetime', width: '11rem' },
-      { field: 'nextRunAt', header: 'serviceManagement.field.nextRunAt', type: 'datetime', width: '11rem' },
-      { field: 'successRate', header: 'serviceManagement.field.successRate', type: 'percent', format: '1.0-1', width: '8rem' },
-      { field: 'durationMs', header: 'serviceManagement.field.duration', type: 'duration', width: '8rem' },
+      {
+        field: 'schedule',
+        header: 'serviceManagement.field.schedule',
+        type: 'copyable',
+        minWidth: '9rem',
+      },
+      {
+        field: 'lastRunAt',
+        header: 'serviceManagement.field.lastRunAt',
+        type: 'datetime',
+        width: '11rem',
+      },
+      {
+        field: 'nextRunAt',
+        header: 'serviceManagement.field.nextRunAt',
+        type: 'datetime',
+        width: '11rem',
+      },
+      {
+        field: 'successRate',
+        header: 'serviceManagement.field.successRate',
+        type: 'percent',
+        format: '1.0-1',
+        width: '8rem',
+      },
+      {
+        field: 'durationMs',
+        header: 'serviceManagement.field.duration',
+        type: 'duration',
+        width: '8rem',
+      },
       {
         field: 'actions',
         header: 'actions',
@@ -767,19 +890,32 @@ function buildJobTable(): TableConfig {
   };
 }
 
-function buildResourceRowActions(): TableAction[] {
+function buildResourceRowActions(): TableAction<ServiceResourceRecord>[] {
   return [
     { id: 'view', label: 'view', icon: 'pi pi-eye', variant: 'ghost', onClick: () => undefined },
     { id: 'edit', label: 'edit', icon: 'pi pi-pencil', variant: 'ghost', onClick: () => undefined },
-    { id: 'rotate', label: 'serviceManagement.action.rotate', icon: 'pi pi-sync', variant: 'ghost', visible: (row) => row.kind === 'secret', onClick: () => undefined },
+    {
+      id: 'rotate',
+      label: 'serviceManagement.action.rotate',
+      icon: 'pi pi-sync',
+      variant: 'ghost',
+      visible: (row) => row.kind === 'secret',
+      onClick: () => undefined,
+    },
   ];
 }
 
-function buildJobRowActions(): TableAction[] {
+function buildJobRowActions(): TableAction<JobRecord>[] {
   return [
     { id: 'view', label: 'view', icon: 'pi pi-eye', variant: 'ghost', onClick: () => undefined },
     { id: 'edit', label: 'edit', icon: 'pi pi-pencil', variant: 'ghost', onClick: () => undefined },
-    { id: 'run-now', label: 'serviceManagement.action.runNow', icon: 'pi pi-play', variant: 'ghost', onClick: () => undefined },
+    {
+      id: 'run-now',
+      label: 'serviceManagement.action.runNow',
+      icon: 'pi pi-play',
+      variant: 'ghost',
+      onClick: () => undefined,
+    },
     {
       id: 'pause',
       label: 'serviceManagement.action.pause',
@@ -812,13 +948,30 @@ function buildSecretFormConfig(): FormConfig {
     sections: [
       { id: 'general', title: 'serviceManagement.form.section.general', icon: 'pi pi-info-circle' },
       { id: 'secret', title: 'serviceManagement.form.section.secret', icon: 'pi pi-lock' },
-      { id: 'metadata', title: 'serviceManagement.form.section.metadata', icon: 'pi pi-tags', collapsible: true },
+      {
+        id: 'metadata',
+        title: 'serviceManagement.form.section.metadata',
+        icon: 'pi pi-tags',
+        collapsible: true,
+      },
     ],
     fields: [
       textField('name', 'serviceManagement.field.name', 'general', true),
       textField('key', 'serviceManagement.field.key', 'general', true),
-      selectField('environment', 'serviceManagement.field.environment', 'general', ENVIRONMENT_OPTIONS, true),
-      selectField('status', 'serviceManagement.field.status', 'general', RESOURCE_STATUS_OPTIONS, true),
+      selectField(
+        'environment',
+        'serviceManagement.field.environment',
+        'general',
+        ENVIRONMENT_OPTIONS,
+        true,
+      ),
+      selectField(
+        'status',
+        'serviceManagement.field.status',
+        'general',
+        RESOURCE_STATUS_OPTIONS,
+        true,
+      ),
       textField('owner', 'serviceManagement.field.owner', 'general', true),
       {
         name: 'description',
@@ -883,13 +1036,30 @@ function buildConfigFormConfig(): FormConfig {
     sections: [
       { id: 'general', title: 'serviceManagement.form.section.general', icon: 'pi pi-info-circle' },
       { id: 'runtime', title: 'serviceManagement.form.section.runtime', icon: 'pi pi-server' },
-      { id: 'payload', title: 'serviceManagement.form.section.payload', icon: 'pi pi-code', collapsible: true },
+      {
+        id: 'payload',
+        title: 'serviceManagement.form.section.payload',
+        icon: 'pi pi-code',
+        collapsible: true,
+      },
     ],
     fields: [
       textField('name', 'serviceManagement.field.name', 'general', true),
       textField('key', 'serviceManagement.field.key', 'general', true),
-      selectField('environment', 'serviceManagement.field.environment', 'general', ENVIRONMENT_OPTIONS, true),
-      selectField('status', 'serviceManagement.field.status', 'general', RESOURCE_STATUS_OPTIONS, true),
+      selectField(
+        'environment',
+        'serviceManagement.field.environment',
+        'general',
+        ENVIRONMENT_OPTIONS,
+        true,
+      ),
+      selectField(
+        'status',
+        'serviceManagement.field.status',
+        'general',
+        RESOURCE_STATUS_OPTIONS,
+        true,
+      ),
       textField('owner', 'serviceManagement.field.owner', 'general', true),
       {
         name: 'description',
@@ -933,7 +1103,6 @@ function buildConfigFormConfig(): FormConfig {
   };
 }
 
-
 function buildJobFormConfig(): FormConfig {
   return {
     title: 'serviceManagement.jobManagement.formTitle',
@@ -946,8 +1115,16 @@ function buildJobFormConfig(): FormConfig {
     },
     sections: [
       { id: 'general', title: 'serviceManagement.form.section.general', icon: 'pi pi-info-circle' },
-      { id: 'schedule', title: 'serviceManagement.form.section.schedule', icon: 'pi pi-calendar-clock' },
-      { id: 'execution', title: 'serviceManagement.form.section.execution', icon: 'pi pi-play-circle' },
+      {
+        id: 'schedule',
+        title: 'serviceManagement.form.section.schedule',
+        icon: 'pi pi-calendar-clock',
+      },
+      {
+        id: 'execution',
+        title: 'serviceManagement.form.section.execution',
+        icon: 'pi pi-play-circle',
+      },
     ],
     fields: [
       textField('name', 'serviceManagement.field.name', 'general', true),
@@ -959,10 +1136,21 @@ function buildJobFormConfig(): FormConfig {
         rows: 3,
         placeholder: 'serviceManagement.form.descriptionPlaceholder',
       },
-      selectField('environment', 'serviceManagement.field.environment', 'general', ENVIRONMENT_OPTIONS, true),
+      selectField(
+        'environment',
+        'serviceManagement.field.environment',
+        'general',
+        ENVIRONMENT_OPTIONS,
+        true,
+      ),
       selectField('status', 'serviceManagement.field.status', 'general', JOB_STATUS_OPTIONS, true),
       textField('owner', 'serviceManagement.field.owner', 'general', true),
-      { name: 'enabled', label: 'serviceManagement.field.enabled', type: 'boolean', sectionId: 'general' },
+      {
+        name: 'enabled',
+        label: 'serviceManagement.field.enabled',
+        type: 'boolean',
+        sectionId: 'general',
+      },
       textField('schedule', 'serviceManagement.field.schedule', 'schedule', true),
       textField('timezone', 'serviceManagement.field.timezone', 'schedule', true),
       numberField('timeoutMs', 'serviceManagement.field.timeoutMs', 'schedule'),
@@ -990,7 +1178,9 @@ function textField(name: string, label: string, sectionId: string, required: boo
     type: 'text' as const,
     sectionId,
     required,
-    validation: required ? [{ type: 'required' as const, message: 'shared.validation.required' }] : undefined,
+    validation: required
+      ? [{ type: 'required' as const, message: 'shared.validation.required' }]
+      : undefined,
   };
 }
 
@@ -1009,7 +1199,9 @@ function selectField(
     options,
     required,
     showClear: !required,
-    validation: required ? [{ type: 'required' as const, message: 'shared.validation.required' }] : undefined,
+    validation: required
+      ? [{ type: 'required' as const, message: 'shared.validation.required' }]
+      : undefined,
   };
 }
 
@@ -1022,7 +1214,10 @@ function numberField(name: string, label: string, sectionId: string) {
   };
 }
 
-function defaultResourceModel(serviceId: ManagedServiceId, resourceKind: ServiceResourceKind): Record<string, unknown> {
+function defaultResourceModel(
+  serviceId: ManagedServiceId,
+  resourceKind: ServiceResourceKind,
+): Record<string, unknown> {
   return {
     serviceId,
     kind: resourceKind,
@@ -1073,9 +1268,24 @@ function buildJobMetrics(jobs: readonly JobRecord[]): ServiceMetric[] {
 
   return [
     { label: 'serviceManagement.jobManagement.metric.total', value: jobs.length },
-    { label: 'serviceManagement.jobManagement.metric.running', value: running, trend: '+1', trendVariant: 'success' },
-    { label: 'serviceManagement.jobManagement.metric.failed', value: failed, trend: paused ? `${paused} paused` : undefined, trendVariant: failed ? 'danger' : 'muted' },
-    { label: 'serviceManagement.jobManagement.metric.successRate', value: `${avgSuccess.toFixed(1)}%`, trend: '24h', trendVariant: 'info' },
+    {
+      label: 'serviceManagement.jobManagement.metric.running',
+      value: running,
+      trend: '+1',
+      trendVariant: 'success',
+    },
+    {
+      label: 'serviceManagement.jobManagement.metric.failed',
+      value: failed,
+      trend: paused ? `${paused} paused` : undefined,
+      trendVariant: failed ? 'danger' : 'muted',
+    },
+    {
+      label: 'serviceManagement.jobManagement.metric.successRate',
+      value: `${avgSuccess.toFixed(1)}%`,
+      trend: '24h',
+      trendVariant: 'info',
+    },
   ];
 }
 
@@ -1120,6 +1330,7 @@ function jobStatusVariant(status: JobStatus) {
 }
 
 function normalizedText(value: unknown): string {
-  return String(value ?? '').trim().toLowerCase();
+  return String(value ?? '')
+    .trim()
+    .toLowerCase();
 }
-

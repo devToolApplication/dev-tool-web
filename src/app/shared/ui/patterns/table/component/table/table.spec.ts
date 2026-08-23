@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
@@ -18,7 +17,7 @@ describe('TableComponent', () => {
     pagination: false,
     columns: [
       { field: 'name', header: 'Name', type: 'text' },
-      { field: 'status', header: 'Status', type: 'badge', badgeMap: { ACTIVE: 'success' } }
+      { field: 'status', header: 'Status', type: 'badge', badgeMap: { ACTIVE: 'success' } },
     ],
     emptyTitle: 'No rows',
     emptyDescription: 'Nothing matched',
@@ -28,23 +27,21 @@ describe('TableComponent', () => {
       refresh: { visible: true },
       columnVisibility: { visible: true },
       density: { visible: true },
-      bulkActions: []
-    }
+      bulkActions: [],
+    },
   };
 
   beforeEach(async () => {
     confirmDialogService = {
-      confirm: vi.fn().mockResolvedValue(true)
+      confirm: vi.fn().mockResolvedValue(true),
     };
-    
-    localStorage.clear();
 
     await TestBed.configureTestingModule({
       imports: [SharedModule],
       providers: [
         ...provideSharedTesting(),
         { provide: ConfirmDialogService, useValue: confirmDialogService },
-              ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableComponent);
@@ -66,7 +63,9 @@ describe('TableComponent', () => {
     component.retry.subscribe(retry);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.error-state')?.textContent).toContain('Load failed');
+    expect(fixture.nativeElement.querySelector('.error-state')?.textContent).toContain(
+      'Load failed',
+    );
     fixture.debugElement.query(By.css('app-error-state')).componentInstance.retry.emit();
 
     expect(retry).toHaveBeenCalled();
@@ -103,41 +102,39 @@ describe('TableComponent', () => {
     expect(rowClick).toHaveBeenCalledWith({ id: 'row-1' });
   });
 
-  it('downloads current page CSV without emitting external export', () => {
+  it('emits export request without browser download side effects', () => {
     const exportSpy = vi.fn();
-    const anchor = document.createElement('a');
-    const clickSpy = vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
-    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:table-export');
-    const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    const originalCreateElement = document.createElement.bind(document);
-    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation(((tagName: string, options?: ElementCreationOptions) => {
-      if (tagName.toLowerCase() === 'a') {
-        return anchor;
-      }
-      return originalCreateElement(tagName, options);
-    }) as typeof document.createElement);
     component.config = {
       ...baseConfig,
       toolbar: {
         export: {
           visible: true,
           scope: 'current-page',
-          fileName: 'items'
-        }
-      }
+          fileName: 'items',
+        },
+      },
     };
     component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
-    component.export.subscribe(exportSpy);
+    component.ngOnChanges({
+      config: {
+        currentValue: component.config,
+        previousValue: baseConfig,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    component.exportRequested.subscribe(exportSpy);
 
     component.onExport();
 
-    expect(clickSpy).toHaveBeenCalled();
-    expect(anchor.download).toBe('items.csv');
-    expect(exportSpy).not.toHaveBeenCalled();
-
-    createElementSpy.mockRestore();
-    createObjectUrlSpy.mockRestore();
-    revokeObjectUrlSpy.mockRestore();
+    expect(exportSpy).toHaveBeenCalledWith({
+      scope: 'current-page',
+      filters: {},
+      sortField: null,
+      sortOrder: 0,
+      visibleColumns: ['name', 'status'],
+      rows: component.data,
+    });
   });
 
   it('emits export context for page-owned filtered exports', () => {
@@ -147,9 +144,9 @@ describe('TableComponent', () => {
       toolbar: {
         export: {
           visible: true,
-          scope: 'external'
-        }
-      }
+          scope: 'external',
+        },
+      },
     };
     component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
     component.sortField = 'name';
@@ -159,10 +156,10 @@ describe('TableComponent', () => {
         currentValue: component.config,
         previousValue: baseConfig,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
-    component.export.subscribe(exportSpy);
+    component.exportRequested.subscribe(exportSpy);
 
     component.onSearch({ status: 'ACTIVE' });
     component.onExport();
@@ -173,7 +170,7 @@ describe('TableComponent', () => {
       sortField: 'name',
       sortOrder: 1,
       visibleColumns: ['name', 'status'],
-      rows: component.data
+      rows: component.data,
     });
   });
 
@@ -189,8 +186,8 @@ describe('TableComponent', () => {
       selection: { mode: 'multiple' },
       columns: [
         { field: 'id', header: 'ID', hideable: false },
-        { field: 'name', header: 'Name' }
-      ]
+        { field: 'name', header: 'Name' },
+      ],
     };
     component.data = [{ id: 1 }, { id: 2 }];
     component.ngOnChanges({
@@ -198,8 +195,8 @@ describe('TableComponent', () => {
         currentValue: component.config,
         previousValue: baseConfig,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
 
     component.onColumnFieldsChange(['name']);
@@ -212,64 +209,76 @@ describe('TableComponent', () => {
     expect(selection).toHaveBeenCalledWith(component.data);
   });
 
-  it('persists column visibility and density when stateKey is configured', () => {
+  it('emits column visibility and density for page-owned persistence', () => {
+    const columns = vi.fn();
+    const density = vi.fn();
+    component.columnVisibilityChange.subscribe(columns);
+    component.densityChange.subscribe(density);
     component.config = {
       ...baseConfig,
-      stateKey: 'table-spec',
       columns: [
         { field: 'id', header: 'ID', hideable: false },
         { field: 'name', header: 'Name' },
-        { field: 'status', header: 'Status' }
-      ]
+        { field: 'status', header: 'Status' },
+      ],
     };
     component.ngOnChanges({
       config: {
         currentValue: component.config,
         previousValue: baseConfig,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
 
     component.onColumnFieldsChange(['status']);
     component.onDensityChange('compact');
 
-    const persistedState = JSON.parse(localStorage.getItem('dev-tool.table.table-spec') ?? '{}');
-    expect(persistedState).toEqual({ columns: ['status'], density: 'compact' });
+    expect(columns).toHaveBeenCalledWith(['status']);
+    expect(density).toHaveBeenCalledWith('compact');
+  });
 
-    fixture.destroy();
-    fixture = TestBed.createComponent(TableComponent);
-    component = fixture.componentInstance;
+  it('uses page-owned density and column visibility inputs when provided', () => {
     component.config = {
       ...baseConfig,
-      stateKey: 'table-spec',
       columns: [
         { field: 'id', header: 'ID', hideable: false },
         { field: 'name', header: 'Name' },
-        { field: 'status', header: 'Status' }
-      ]
+        { field: 'status', header: 'Status' },
+      ],
     };
+    component.columnVisibility = ['status'];
+    component.densityValue = 'compact';
+
     component.ngOnChanges({
       config: {
         currentValue: component.config,
+        previousValue: baseConfig,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+      columnVisibility: {
+        currentValue: component.columnVisibility,
         previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true
-      }
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+      densityValue: {
+        currentValue: component.densityValue,
+        previousValue: null,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
     });
 
     expect(component.selectedColumnFields()).toEqual(['status']);
+    expect(component.visibleColumns.map((column) => column.field)).toEqual(['id', 'status']);
     expect(component.density()).toBe('compact');
   });
 
   it('applies frozen column styles and keeps non-hideable actions visible from config', () => {
-    localStorage.setItem(
-      'dev-tool.table.frozen-actions',
-      JSON.stringify({ columns: ['name'], density: 'compact' })
-    );
     component.config = {
       ...baseConfig,
-      stateKey: 'frozen-actions',
       minWidth: '90rem',
       columns: [
         { field: 'name', header: 'Name', minWidth: '16rem' },
@@ -282,9 +291,9 @@ describe('TableComponent', () => {
           frozen: true,
           alignFrozen: 'right',
           hideable: false,
-          actions: [{ label: 'View', onClick: vi.fn() }]
-        }
-      ]
+          actions: [{ label: 'View', onClick: vi.fn() }],
+        },
+      ],
     };
     component.data = [{ name: 'Alpha', status: 'ACTIVE' }];
     component.ngOnChanges({
@@ -292,19 +301,27 @@ describe('TableComponent', () => {
         currentValue: component.config,
         previousValue: baseConfig,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
 
     fixture.detectChanges();
 
-    expect(component.selectedColumnFields()).toEqual(['name']);
-    expect(component.visibleColumns.map((column) => column.field)).toEqual(['name', 'actions']);
+    expect(component.selectedColumnFields()).toEqual(['name', 'status']);
+    expect(component.visibleColumns.map((column) => column.field)).toEqual([
+      'name',
+      'status',
+      'actions',
+    ]);
     expect(component.columnOptions.map((option) => option.value)).toEqual(['name', 'status']);
     expect(fixture.nativeElement.querySelector('table')?.style.minWidth).toBe('90rem');
 
-    const actionHeader = fixture.nativeElement.querySelector('thead th.app-table-cell--frozen-right') as HTMLElement;
-    const actionCell = fixture.nativeElement.querySelector('tbody td.app-table-cell--frozen-right') as HTMLElement;
+    const actionHeader = fixture.nativeElement.querySelector(
+      'thead th.app-table-cell--frozen-right',
+    ) as HTMLElement;
+    const actionCell = fixture.nativeElement.querySelector(
+      'tbody td.app-table-cell--frozen-right',
+    ) as HTMLElement;
 
     expect(actionHeader).toBeTruthy();
     expect(actionCell).toBeTruthy();
@@ -321,13 +338,17 @@ describe('TableComponent', () => {
     component.config = {
       ...baseConfig,
       emptyFilteredTitle: 'Filtered empty',
-      emptyFilteredDescription: 'Adjust filters'
+      emptyFilteredDescription: 'Adjust filters',
     };
     component.onSearch({ keyword: 'alpha' });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.empty-state')?.textContent).toContain('Filtered empty');
-    expect(fixture.nativeElement.querySelector('.empty-state')?.textContent).toContain('Adjust filters');
+    expect(fixture.nativeElement.querySelector('.empty-state')?.textContent).toContain(
+      'Filtered empty',
+    );
+    expect(fixture.nativeElement.querySelector('.empty-state')?.textContent).toContain(
+      'Adjust filters',
+    );
   });
 
   it('confirms dangerous bulk actions before emitting selected rows', async () => {
@@ -337,14 +358,14 @@ describe('TableComponent', () => {
       id: 'delete',
       label: 'Delete',
       variant: 'danger',
-      
-      onClick: actionClick
+
+      onClick: actionClick,
     };
     const rows = [{ id: 1 }];
     component.config = {
       ...baseConfig,
       selection: { mode: 'multiple' },
-      toolbar: { bulkActions: [action] }
+      toolbar: { bulkActions: [action] },
     };
     component.selectedRows.set(rows);
     component.selectedRowKeys.set(['1']);
@@ -362,7 +383,7 @@ describe('TableComponent', () => {
     const action = {
       id: 'view',
       label: 'View',
-      onClick: vi.fn()
+      onClick: vi.fn(),
     };
     const actionClick = vi.fn();
     component.actionClick.subscribe(actionClick);
@@ -380,7 +401,7 @@ describe('TableComponent', () => {
       id: 'delete',
       label: 'Delete',
       variant: 'danger',
-      onClick: actionClick
+      onClick: actionClick,
     };
     const rows = [{ id: 1 }];
     component.selectedRows.set(rows);
@@ -394,11 +415,11 @@ describe('TableComponent', () => {
     expect(bulkAction).toHaveBeenCalledWith({ action, rows });
   });
 
-    it('handles toolbar buttons and bulk actions visibility and state', () => {
+  it('handles toolbar buttons and bulk actions visibility and state', () => {
     const action: TableBulkAction = {
       id: 'export-selected',
       label: 'Export selected',
-      onClick: vi.fn()
+      onClick: vi.fn(),
     };
     component.config = {
       ...baseConfig,
@@ -406,8 +427,8 @@ describe('TableComponent', () => {
       toolbar: {
         new: { visible: true },
         delete: { visible: false },
-        bulkActions: [action]
-      }
+        bulkActions: [action],
+      },
     };
     component.selectedRows.set([{ id: 1 }]);
 
@@ -429,10 +450,3 @@ describe('TableComponent', () => {
     fixture.detectChanges();
   }
 });
-
-
-
-
-
-
-

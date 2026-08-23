@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AppMenuItem } from '../button-split/button-split';
+import type { AppMenuItem } from '../button-split/button-split';
 
 @Component({
   selector: 'app-panel-menu',
   standalone: false,
   templateUrl: './panel-menu.html',
-  styleUrl: './panel-menu.css'
+  styleUrl: './panel-menu.css',
 })
 export class PanelMenuComponent {
   @Input() model: AppMenuItem[] = [];

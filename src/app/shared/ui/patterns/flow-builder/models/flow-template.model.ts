@@ -1,15 +1,24 @@
-import { FlowNode } from './flow-node.model';
-import { FlowSize } from './flow-common.model';
-import { FlowPortDefinition } from './flow-port.model';
+import type { FlowNode } from './flow-node.model';
+import type { FlowSize } from './flow-common.model';
+import type { FlowPortDefinition } from './flow-port.model';
 import type { FormConfig } from '../../form-input/models/form-config.model';
 
 export type FlowNodeShape = 'rectangle' | 'diamond' | 'capsule' | 'note' | 'placeholder' | 'custom';
 
-export type FlowNodeTone = 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'neutral';
+export type FlowNodeTone =
+  | 'primary'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'muted'
+  | 'neutral';
 
 export type FlowNodeLabelResolver = (node: FlowNode) => string;
 export type FlowNodeIconResolver = (node: FlowNode) => string;
-export type FlowNodeBadgeResolver = (node: FlowNode) => { label: string; tone?: FlowNodeTone } | null;
+export type FlowNodeBadgeResolver = (
+  node: FlowNode,
+) => { label: string; tone?: FlowNodeTone } | null;
 export type FlowNodeDefaultDataFactory = () => Record<string, unknown>;
 
 export interface FlowNodeTypeDefinition {

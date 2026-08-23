@@ -4,7 +4,7 @@ import { Select } from './select';
 const sampleOptions = [
   { label: 'Active', value: 'active' },
   { label: 'Paused', value: 'paused' },
-  { label: 'Draft', value: 'draft', disabled: true }
+  { label: 'Draft', value: 'draft', disabled: true },
 ];
 
 const sampleGroupedOptions = [
@@ -12,16 +12,16 @@ const sampleGroupedOptions = [
     label: 'Deployment States',
     items: [
       { label: 'Running', value: 'running' },
-      { label: 'Pending', value: 'pending' }
-    ]
+      { label: 'Pending', value: 'pending' },
+    ],
   },
   {
     label: 'Terminal States',
     items: [
       { label: 'Succeeded', value: 'succeeded' },
-      { label: 'Failed', value: 'failed' }
-    ]
-  }
+      { label: 'Failed', value: 'failed' },
+    ],
+  },
 ];
 
 const meta: Meta<Select> = {
@@ -34,8 +34,8 @@ const meta: Meta<Select> = {
     group: false,
     loading: false,
     showClear: false,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -47,22 +47,22 @@ export const Default: Story = {};
 export const WithClear: Story = {
   args: {
     showClear: true,
-    value: 'active'
-  }
+    value: 'active',
+  },
 };
 
 export const Grouped: Story = {
   args: {
     group: true,
     options: sampleGroupedOptions,
-    placeholder: 'Choose state'
-  }
+    placeholder: 'Choose state',
+  },
 };
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };
 
 export const VariantMatrix: Story = {
@@ -71,24 +71,24 @@ export const VariantMatrix: Story = {
       options: [
         { label: 'Active', value: 'active' },
         { label: 'Paused', value: 'paused' },
-        { label: 'Draft', value: 'draft', disabled: true }
+        { label: 'Draft', value: 'draft', disabled: true },
       ],
       groupedOptions: [
         {
           label: 'Deployment States',
           items: [
             { label: 'Running', value: 'running' },
-            { label: 'Pending', value: 'pending' }
-          ]
+            { label: 'Pending', value: 'pending' },
+          ],
         },
         {
           label: 'Terminal States',
           items: [
             { label: 'Succeeded', value: 'succeeded' },
-            { label: 'Failed', value: 'failed' }
-          ]
-        }
-      ]
+            { label: 'Failed', value: 'failed' },
+          ],
+        },
+      ],
     },
     template: `
       <div class="p-4">
@@ -130,6 +130,6 @@ export const VariantMatrix: Story = {
           </tbody>
         </table>
       </div>
-    `
-  })
+    `,
+  }),
 };

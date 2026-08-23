@@ -10,7 +10,7 @@ export interface AppTabItem {
   selector: 'app-tabs',
   standalone: false,
   templateUrl: './tabs.component.html',
-  styleUrl: './tabs.component.css'
+  styleUrl: './tabs.component.css',
 })
 export class TabsComponent {
   @Input() tabs: AppTabItem[] = [];

@@ -11,7 +11,7 @@ describe('FilterPanelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(FilterPanelComponent);
@@ -21,7 +21,13 @@ describe('FilterPanelComponent', () => {
   it('renders simple filters and keeps advanced filters collapsed by default', () => {
     component.filters = [
       { key: 'q', label: 'Search', type: 'text' },
-      { key: 'state', label: 'State', type: 'select', advanced: true, options: [{ label: 'Ready', value: 'READY' }] }
+      {
+        key: 'state',
+        label: 'State',
+        type: 'select',
+        advanced: true,
+        options: [{ label: 'Ready', value: 'READY' }],
+      },
     ];
     component.advancedCollapsed = true;
     component.ngOnChanges({
@@ -29,8 +35,8 @@ describe('FilterPanelComponent', () => {
         currentValue: true,
         previousValue: false,
         firstChange: true,
-        isFirstChange: () => true
-      }
+        isFirstChange: () => true,
+      },
     });
     fixture.detectChanges();
 
@@ -64,7 +70,7 @@ describe('FilterPanelComponent', () => {
     component.filters = [
       { key: 'loading', label: 'Loading', type: 'select', loading: true },
       { key: 'empty', label: 'Empty', type: 'select', options: [], emptyMessage: 'No options' },
-      { key: 'error', label: 'Error', type: 'select', error: 'Option failed' }
+      { key: 'error', label: 'Error', type: 'select', error: 'Option failed' },
     ];
     fixture.detectChanges();
 

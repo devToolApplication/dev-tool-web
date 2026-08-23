@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanDeactivateFn } from '@angular/router';
+import type { CanDeactivateFn } from '@angular/router';
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 
 export interface UnsavedChangesAware {
@@ -16,12 +16,11 @@ export const unsavedChangesGuard: CanDeactivateFn<UnsavedChangesAware> = async (
     return await component.confirmDiscardChanges();
   }
 
-  const confirmDialogService = inject(ConfirmDialogService);
-  return await confirmDialogService.confirm({
+  return await inject(ConfirmDialogService).confirm({
     title: 'confirm',
     message: 'shared.form.confirmLeave',
     confirmText: 'yes',
     cancelText: 'cancel',
-    variant: 'warning'
+    variant: 'warning',
   });
 };

@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { AppMenuItem } from '../button-split/button-split';
+import type { AppMenuItem } from '../button-split/button-split';
 
 @Component({
   selector: 'app-tiered-menu',
   standalone: false,
   templateUrl: './tiered-menu.html',
-  styleUrl: './tiered-menu.css'
+  styleUrl: './tiered-menu.css',
 })
 export class TieredMenuComponent {
   @Input() id?: string;

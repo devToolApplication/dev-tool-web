@@ -1,13 +1,26 @@
-<div class="flex items-center justify-between gap-4 rounded-lg border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-2 text-sm">
+<div
+  class="flex items-center justify-between gap-4 rounded-lg border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-2 text-sm"
+>
   <span class="text-[var(--app-text-muted)]">
-    {{ first + 1 }}–{{ first + rows > totalRecords ? totalRecords : first + rows }} / {{ totalRecords }}
+    {{ first + 1 }}–{{ first + rows > totalRecords ? totalRecords : first + rows }} /
+    {{ totalRecords }}
   </span>
 
   <div class="flex items-center gap-1">
-    <button type="button" class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40" [disabled]="currentPage === 0" (click)="goToPage(0)">
+    <button
+      type="button"
+      class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40"
+      [disabled]="currentPage === 0"
+      (click)="goToPage(0)"
+    >
       <i class="pi pi-angle-double-left text-xs"></i>
     </button>
-    <button type="button" class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">
+    <button
+      type="button"
+      class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40"
+      [disabled]="currentPage === 0"
+      (click)="goToPage(currentPage - 1)"
+    >
       <i class="pi pi-angle-left text-xs"></i>
     </button>
 
@@ -15,17 +28,31 @@
       <button
         type="button"
         class="rounded-md px-2.5 py-1 font-medium transition-all duration-150"
-        [class]="p === currentPage
-          ? 'bg-[var(--app-primary)] text-white shadow-[0_0_14px_rgba(122,119,255,0.2)]'
-          : 'text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)]'"
+        [class]="
+          p === currentPage
+            ? 'bg-[var(--app-primary)] text-white shadow-[0_0_14px_rgba(122,119,255,0.2)]'
+            : 'text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)]'
+        "
         (click)="goToPage(p)"
-      >{{ p + 1 }}</button>
+      >
+        {{ p + 1 }}
+      </button>
     }
 
-    <button type="button" class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40" [disabled]="currentPage >= pageCount - 1" (click)="goToPage(currentPage + 1)">
+    <button
+      type="button"
+      class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40"
+      [disabled]="currentPage >= pageCount - 1"
+      (click)="goToPage(currentPage + 1)"
+    >
       <i class="pi pi-angle-right text-xs"></i>
     </button>
-    <button type="button" class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40" [disabled]="currentPage >= pageCount - 1" (click)="goToPage(pageCount - 1)">
+    <button
+      type="button"
+      class="rounded-md px-2 py-1 text-[var(--app-text-soft)] hover:bg-[var(--app-chart-primary-fill)] disabled:opacity-40"
+      [disabled]="currentPage >= pageCount - 1"
+      (click)="goToPage(pageCount - 1)"
+    >
       <i class="pi pi-angle-double-right text-xs"></i>
     </button>
   </div>

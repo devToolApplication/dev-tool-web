@@ -24,14 +24,17 @@ export class CandleChartReplayService {
     }
 
     onStep({ index: currentIndex, status: 'PLAYING' });
-    this.timerId = window.setInterval(() => {
-      const nextIndex = this.resolveNextIndex(currentIndex, length, config);
-      currentIndex = nextIndex.index;
-      onStep(nextIndex);
-      if (nextIndex.status === 'ENDED') {
-        this.pause();
-      }
-    }, Math.max(50, Number(config?.speedMs ?? 650)));
+    this.timerId = window.setInterval(
+      () => {
+        const nextIndex = this.resolveNextIndex(currentIndex, length, config);
+        currentIndex = nextIndex.index;
+        onStep(nextIndex);
+        if (nextIndex.status === 'ENDED') {
+          this.pause();
+        }
+      },
+      Math.max(50, Number(config?.speedMs ?? 650)),
+    );
   }
 
   pause(): void {
@@ -49,7 +52,11 @@ export class CandleChartReplayService {
     return { index: Math.max(0, currentIndex - 1), status: length > 0 ? 'PAUSED' : 'IDLE' };
   }
 
-  next(currentIndex: number, length: number, config: ReplayConfig | null | undefined): CandleChartReplayStep {
+  next(
+    currentIndex: number,
+    length: number,
+    config: ReplayConfig | null | undefined,
+  ): CandleChartReplayStep {
     return this.resolveNextIndex(currentIndex, length, config, true);
   }
 

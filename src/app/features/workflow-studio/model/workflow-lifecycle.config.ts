@@ -3,6 +3,7 @@ import type { TableAction, TableConfig } from '@shared/ui/patterns/table/models/
 import {
   WorkflowDefinition,
   WorkflowDetail,
+  WorkflowRun,
   WorkflowVersion,
 } from './workflow-studio.model';
 
@@ -112,13 +113,12 @@ export function buildWorkflowBuilderActions(
   ];
 }
 
-export function buildWorkflowListTable(): TableConfig {
+export function buildWorkflowListTable(): TableConfig<WorkflowDefinition> {
   return {
     title: 'workflowStudio.lifecycle.tableTitle',
     rowClickable: true,
     pagination: true,
     rows: 20,
-    stateKey: 'workflow-studio-workflows',
     emptyTitle: 'workflowStudio.lifecycle.emptyTitle',
     emptyDescription: 'workflowStudio.lifecycle.emptyDescription',
     toolbar: {
@@ -154,7 +154,7 @@ export function buildWorkflowListTable(): TableConfig {
         header: 'workflowStudio.lifecycle.version',
         type: 'text',
         width: '10rem',
-        formatter: versionCell,
+        formatter: (row: WorkflowDefinition) => versionCell(row),
       },
       { field: 'description', header: 'workflowStudio.lifecycle.description', type: 'text', minWidth: '18rem' },
       {
@@ -171,13 +171,12 @@ export function buildWorkflowListTable(): TableConfig {
   };
 }
 
-export function buildWorkflowRunListTable(): TableConfig {
+export function buildWorkflowRunListTable(): TableConfig<WorkflowRun> {
   return {
     title: 'workflowStudio.lifecycle.runTableTitle',
     rowClickable: true,
     pagination: true,
     rows: 20,
-    stateKey: 'workflow-studio-runs',
     emptyTitle: 'workflowStudio.lifecycle.runEmptyTitle',
     emptyDescription: 'workflowStudio.lifecycle.runEmptyDescription',
     toolbar: {
@@ -252,7 +251,7 @@ export function readonlyModeForVersion(version: WorkflowVersion): boolean {
   return version.status === 'PUBLISHED';
 }
 
-function workflowRowActions(): TableAction[] {
+function workflowRowActions(): TableAction<WorkflowDefinition>[] {
   return [
     { id: 'edit', label: 'edit', icon: 'pi pi-pencil', variant: 'ghost', onClick: () => undefined },
     { id: 'run', label: 'workflowStudio.lifecycle.run', icon: 'pi pi-play', variant: 'ghost', onClick: () => undefined },
@@ -261,7 +260,7 @@ function workflowRowActions(): TableAction[] {
   ];
 }
 
-function workflowRunRowActions(): TableAction[] {
+function workflowRunRowActions(): TableAction<WorkflowRun>[] {
   return [
     { id: 'detail', label: 'view', icon: 'pi pi-eye', variant: 'ghost', onClick: () => undefined },
     { id: 'retry', label: 'workflowStudio.lifecycle.retryRun', icon: 'pi pi-refresh', variant: 'ghost', onClick: () => undefined },

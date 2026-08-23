@@ -8,7 +8,7 @@ const meta: Meta<PanelComponent> = {
   args: {
     title: 'fieldOptions',
     description: 'demo.description',
-    surface: 'default'
+    surface: 'default',
   },
   render: (args) => ({
     props: args,
@@ -16,8 +16,8 @@ const meta: Meta<PanelComponent> = {
       <app-panel [title]="title" [description]="description" [surface]="surface">
         <div class="app-text">{{ 'content' | translateContent }}</div>
       </app-panel>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -28,6 +28,6 @@ export const Default: Story = {};
 
 export const Strong: Story = {
   args: {
-    surface: 'strong'
-  }
+    surface: 'strong',
+  },
 };

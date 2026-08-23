@@ -1,4 +1,8 @@
-import type { FormConfig, FormContext, FieldConfig } from '@shared/ui/patterns/form-input/models/form-config.model';
+import type {
+  FormConfig,
+  FormContext,
+  FieldConfig,
+} from '@shared/ui/patterns/form-input/models/form-config.model';
 import type { FlowNode } from '../../models';
 import { cloneFlowValue } from '../../core/flow-serialization';
 
@@ -50,12 +54,12 @@ export function flowNodeToInspectorFormValue(node: FlowNode): Record<string, unk
 
 export function resolveFlowInspectorFormContext(
   context: FormContext | null | undefined,
-  readonly: boolean
+  readonly: boolean,
 ): FormContext {
   return {
     user: context?.user ?? null,
     ...(context ?? {}),
-    mode: readonly ? 'view' : context?.mode ?? 'edit',
+    mode: readonly ? 'view' : (context?.mode ?? 'edit'),
   };
 }
 
@@ -66,9 +70,12 @@ export function extractFlowInspectorFieldPaths(config: FormConfig | null | undef
   return uniqueFieldPaths(extractFieldPaths(config.fields));
 }
 
-export function flowInspectorFieldSignature(value: Record<string, unknown>, fieldPaths: string[]): string {
+export function flowInspectorFieldSignature(
+  value: Record<string, unknown>,
+  fieldPaths: string[],
+): string {
   const signatureValue = fieldPaths.length
-    ? fieldPaths.map(path => [path, readPath(value, path)])
+    ? fieldPaths.map((path) => [path, readPath(value, path)])
     : value;
   return stringifyStable(signatureValue);
 }
@@ -76,7 +83,7 @@ export function flowInspectorFieldSignature(value: Record<string, unknown>, fiel
 export function createFlowInspectorNodePatch(
   node: FlowNode,
   value: Record<string, unknown>,
-  fieldPaths: string[]
+  fieldPaths: string[],
 ): Partial<FlowNode> {
   const patch: Partial<FlowNode> = {};
   let data = cloneFlowValue(node.data ?? {}) as Record<string, unknown>;
@@ -108,7 +115,7 @@ export function createFlowInspectorNodePatch(
 }
 
 function extractFieldPaths(fields: FieldConfig[], parentPath = ''): string[] {
-  return fields.flatMap(field => {
+  return fields.flatMap((field) => {
     const path = parentPath ? `${parentPath}.${field.name}` : field.name;
 
     if (field.type === 'group') {
@@ -166,7 +173,11 @@ function hasPath(source: unknown, path: string): boolean {
   return true;
 }
 
-function writePath(source: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+function writePath(
+  source: Record<string, unknown>,
+  path: string,
+  value: unknown,
+): Record<string, unknown> {
   const segments = path.split('.').filter(Boolean);
   if (!segments.length) {
     return source;
@@ -194,7 +205,11 @@ function readSegment(source: Record<string, unknown> | unknown[], segment: strin
   return (source as Record<string, unknown>)[segment];
 }
 
-function writeSegment(target: Record<string, unknown> | unknown[], segment: string, value: unknown): void {
+function writeSegment(
+  target: Record<string, unknown> | unknown[],
+  segment: string,
+  value: unknown,
+): void {
   if (Array.isArray(target) && isNumericSegment(segment)) {
     target[Number(segment)] = value;
     return;
@@ -204,7 +219,7 @@ function writeSegment(target: Record<string, unknown> | unknown[], segment: stri
 
 function cloneContainer(value: unknown, preferArray: boolean): Record<string, unknown> | unknown[] {
   if (Array.isArray(value)) {
-    return [...value];
+    return Array.from(value as readonly unknown[]);
   }
   if (value && typeof value === 'object') {
     return { ...(value as Record<string, unknown>) };
@@ -218,9 +233,11 @@ function isNumericSegment(segment: string | undefined): boolean {
 
 function stringifyStable(value: unknown): string {
   try {
-    return JSON.stringify(value, (_key, item) =>
-      typeof item === 'function' ? `[function:${item.name || 'anonymous'}]` : item
-    ) ?? '';
+    return (
+      JSON.stringify(value, (_key: string, item: unknown) =>
+        typeof item === 'function' ? `[function:${item.name || 'anonymous'}]` : item,
+      ) ?? ''
+    );
   } catch {
     return String(value ?? '');
   }

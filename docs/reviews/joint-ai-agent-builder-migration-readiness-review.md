@@ -46,27 +46,27 @@ Files:
 
 ## Demo Feature Matrix
 
-| Demo feature | Local status | Test / note |
-|---|---:|---|
-| JointJS paper with grid/background/router | Supported | Build + existing renderer/paper options. |
-| HTML/Angular node template overlay | Supported | Overlay host + Storybook connection story. |
-| Drag node on canvas | Supported | Existing overlay drag emits node move; keep in regression suite. |
-| Drag link from output port to input port | Supported | `HtmlPortConnection` Storybook play test passes. |
-| Initial fit without node jumping to corner | Supported | `SingleRuleRefInitialFit` Storybook play test passes. |
-| Mouse wheel zoom / canvas pan | Supported/partial | Existing engine logic; should add dedicated browser tests next. |
-| Minimap/navigator | Supported/partial | Custom navigator exists, not JointJS+ Navigator parity. |
-| Floating toolbar | Supported/partial | Toolbar exists; visual/command set not exact demo. |
-| Fullscreen command | Supported/partial | Command exists in toolbar flow; needs browser coverage. |
-| Import/export JSON | Supported/partial | File input now labelled; needs browser coverage. |
-| Inspector panel | Supported/partial | Schema/form panel exists; not demo provider-specific inspector. |
-| Plus menu / add from node | Supported/partial | Fixed custom source out-port resolution; needs Storybook coverage. |
-| Selection/lasso/multi-select | Missing | Demo uses JointJS+ selection behavior. |
-| Edge hover insert-node tool | Missing | Needs local implementation. |
-| Node hover tool menu | Missing/partial | Basic menu/add button only. |
-| Note resize/content edit | Missing | Shape exists, editor behavior missing. |
-| Provider registry/search dialog | Missing | Needs domain registry API and dialog. |
-| Directed graph layout parity | Missing/partial | Local layout is custom/simple, not `layout-directed-graph`. |
-| Keyboard shortcuts | Missing/partial | Needs explicit test matrix. |
+| Demo feature                               |      Local status | Test / note                                                        |
+| ------------------------------------------ | ----------------: | ------------------------------------------------------------------ |
+| JointJS paper with grid/background/router  |         Supported | Build + existing renderer/paper options.                           |
+| HTML/Angular node template overlay         |         Supported | Overlay host + Storybook connection story.                         |
+| Drag node on canvas                        |         Supported | Existing overlay drag emits node move; keep in regression suite.   |
+| Drag link from output port to input port   |         Supported | `HtmlPortConnection` Storybook play test passes.                   |
+| Initial fit without node jumping to corner |         Supported | `SingleRuleRefInitialFit` Storybook play test passes.              |
+| Mouse wheel zoom / canvas pan              | Supported/partial | Existing engine logic; should add dedicated browser tests next.    |
+| Minimap/navigator                          | Supported/partial | Custom navigator exists, not JointJS+ Navigator parity.            |
+| Floating toolbar                           | Supported/partial | Toolbar exists; visual/command set not exact demo.                 |
+| Fullscreen command                         | Supported/partial | Command exists in toolbar flow; needs browser coverage.            |
+| Import/export JSON                         | Supported/partial | File input now labelled; needs browser coverage.                   |
+| Inspector panel                            | Supported/partial | Schema/form panel exists; not demo provider-specific inspector.    |
+| Plus menu / add from node                  | Supported/partial | Fixed custom source out-port resolution; needs Storybook coverage. |
+| Selection/lasso/multi-select               |           Missing | Demo uses JointJS+ selection behavior.                             |
+| Edge hover insert-node tool                |           Missing | Needs local implementation.                                        |
+| Node hover tool menu                       |   Missing/partial | Basic menu/add button only.                                        |
+| Note resize/content edit                   |           Missing | Shape exists, editor behavior missing.                             |
+| Provider registry/search dialog            |           Missing | Needs domain registry API and dialog.                              |
+| Directed graph layout parity               |   Missing/partial | Local layout is custom/simple, not `layout-directed-graph`.        |
+| Keyboard shortcuts                         |   Missing/partial | Needs explicit test matrix.                                        |
 
 ## Tests Added / Updated
 

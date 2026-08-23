@@ -118,7 +118,7 @@ export class WorkflowListPageComponent implements OnInit {
     }
   }
 
-  onTableAction(event: { action: TableAction; row: WorkflowDefinition }): void {
+  onTableAction(event: { action: TableAction<WorkflowDefinition>; row: WorkflowDefinition }): void {
     switch (event.action.id) {
       case 'edit':
         this.openBuilder(event.row);

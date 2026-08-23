@@ -7,7 +7,7 @@ const sampleFilters: FilterPanelField[] = [
     label: 'filter.search',
     type: 'text',
     placeholder: 'filter.search.placeholder',
-    advanced: false
+    advanced: false,
   },
   {
     key: 'status',
@@ -17,9 +17,9 @@ const sampleFilters: FilterPanelField[] = [
     options: [
       { label: 'status.active', value: 'active' },
       { label: 'status.inactive', value: 'inactive' },
-      { label: 'status.pending', value: 'pending' }
+      { label: 'status.pending', value: 'pending' },
     ],
-    advanced: false
+    advanced: false,
   },
   {
     key: 'tags',
@@ -29,28 +29,28 @@ const sampleFilters: FilterPanelField[] = [
     options: [
       { label: 'QA', value: 'qa' },
       { label: 'PROD', value: 'prod' },
-      { label: 'STAGING', value: 'staging' }
+      { label: 'STAGING', value: 'staging' },
     ],
-    advanced: true
+    advanced: true,
   },
   {
     key: 'createdDate',
     label: 'filter.createdDate',
     type: 'date-range',
-    advanced: true
+    advanced: true,
   },
   {
     key: 'amount',
     label: 'filter.amount',
     type: 'number-range',
-    advanced: true
+    advanced: true,
   },
   {
     key: 'enabledOnly',
     label: 'filter.enabledOnly',
     type: 'boolean',
-    advanced: true
-  }
+    advanced: true,
+  },
 ];
 
 const meta: Meta<FilterPanelComponent> = {
@@ -61,8 +61,8 @@ const meta: Meta<FilterPanelComponent> = {
     advancedCollapsed: true,
     values: {},
     initialValues: {},
-    searchDebounceMs: 250
-  }
+    searchDebounceMs: 250,
+  },
 };
 
 export default meta;
@@ -73,8 +73,8 @@ export const Default: Story = {};
 
 export const ExpandedAdvancedFilters: Story = {
   args: {
-    advancedCollapsed: false
-  }
+    advancedCollapsed: false,
+  },
 };
 
 export const WithInitialValues: Story = {
@@ -84,13 +84,13 @@ export const WithInitialValues: Story = {
       search: 'Approval',
       status: 'active',
       enabledOnly: true,
-      amount: { from: 100, to: 500 }
+      amount: { from: 100, to: 500 },
     },
     initialValues: {
       search: '',
       status: null,
       enabledOnly: false,
-      amount: null
-    }
-  }
+      amount: null,
+    },
+  },
 };

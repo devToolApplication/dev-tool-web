@@ -1,5 +1,9 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
-import { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import type {
+  FormConfig,
+  FormContext,
+} from '@shared/ui/patterns/form-input/models/form-config.model';
 
 export interface ConfigTemplate {
   title?: string;
@@ -41,14 +45,19 @@ export interface ConfigTemplateField {
   defaultValue?: unknown;
   placeholder?: string;
   description?: string;
-  options?: Array<{ label: string; value: string | number | boolean | null; description?: string; disabled?: boolean }>;
+  options?: Array<{
+    label: string;
+    value: string | number | boolean | null;
+    description?: string;
+    disabled?: boolean;
+  }>;
 }
 
 @Component({
   selector: 'app-config-template-form',
   standalone: false,
   templateUrl: './config-template-form.component.html',
-  styleUrl: './config-template-form.component.css'
+  styleUrl: './config-template-form.component.css',
 })
 /**
  * Convenience wrapper around app-form-input for isolated template editing.
@@ -98,7 +107,7 @@ export class ConfigTemplateFormComponent implements OnChanges {
 
   applyAdvancedJson(): void {
     try {
-      const parsed = JSON.parse(this.advancedJsonText());
+      const parsed = JSON.parse(this.advancedJsonText()) as unknown;
       this.formInitialValue.set(parsed);
       this.currentValue.set(parsed);
       this.advancedJsonDraft.set(null);

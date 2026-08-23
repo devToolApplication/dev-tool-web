@@ -8,8 +8,8 @@ const meta: Meta<SummaryMetricCardComponent> = {
   args: {
     label: 'totalRecords',
     value: 128,
-    suffix: ''
-  }
+    suffix: '',
+  },
 };
 
 export default meta;
@@ -22,12 +22,12 @@ export const WithSuffix: Story = {
   args: {
     label: 'tradeBot.replay.metric.winRate',
     value: 64,
-    suffix: '%'
-  }
+    suffix: '%',
+  },
 };
 
 export const Empty: Story = {
   args: {
-    value: null
-  }
+    value: null,
+  },
 };

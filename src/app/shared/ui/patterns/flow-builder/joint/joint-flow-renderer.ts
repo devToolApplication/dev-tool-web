@@ -1,24 +1,45 @@
 import * as joint from '@joint/core';
-import { FlowNode, FlowEdge, FlowNodeTypeDefinition, FlowEdgeTypeDefinition, FlowNodeTone } from '../models';
+import type {
+  FlowNode,
+  FlowEdge,
+  FlowNodeTypeDefinition,
+  FlowEdgeTypeDefinition,
+  FlowNodeTone,
+} from '../models';
 
-const PORT_MARKUP = [{ tagName: 'circle', selector: 'portBody', attributes: { r: 5, fill: '#fff', stroke: 'var(--app-border-strong, var(--app-text-muted, #94a3b8))', 'stroke-width': 1.5 } }];
+const PORT_MARKUP = [
+  {
+    tagName: 'circle',
+    selector: 'portBody',
+    attributes: {
+      r: 5,
+      fill: '#fff',
+      stroke: 'var(--app-border-strong, var(--app-text-muted, #94a3b8))',
+      'stroke-width': 1.5,
+    },
+  },
+];
 
-const FlowCardElement = joint.dia.Element.define('flowBuilder.Card', {}, {
-  markup: [
-    { tagName: 'rect', selector: 'body' },
-    { tagName: 'circle', selector: 'iconCircle' },
-    { tagName: 'image', selector: 'icon' },
-    { tagName: 'text', selector: 'iconLabel' },
-    { tagName: 'text', selector: 'label' },
-    { tagName: 'text', selector: 'subtitle' },
-    { tagName: 'rect', selector: 'badgeBody' },
-    { tagName: 'text', selector: 'badgeText' },
-    { tagName: 'circle', selector: 'menuBody' },
-    { tagName: 'circle', selector: 'menuDot1' },
-    { tagName: 'circle', selector: 'menuDot2' },
-    { tagName: 'circle', selector: 'menuDot3' },
-  ],
-});
+const FlowCardElement = joint.dia.Element.define(
+  'flowBuilder.Card',
+  {},
+  {
+    markup: [
+      { tagName: 'rect', selector: 'body' },
+      { tagName: 'circle', selector: 'iconCircle' },
+      { tagName: 'image', selector: 'icon' },
+      { tagName: 'text', selector: 'iconLabel' },
+      { tagName: 'text', selector: 'label' },
+      { tagName: 'text', selector: 'subtitle' },
+      { tagName: 'rect', selector: 'badgeBody' },
+      { tagName: 'text', selector: 'badgeText' },
+      { tagName: 'circle', selector: 'menuBody' },
+      { tagName: 'circle', selector: 'menuDot1' },
+      { tagName: 'circle', selector: 'menuDot2' },
+      { tagName: 'circle', selector: 'menuDot3' },
+    ],
+  },
+);
 
 const IN_PORT_GROUP: joint.dia.Element.PortGroup = {
   position: { name: 'top' },
@@ -34,21 +55,34 @@ const OUT_PORT_GROUP: joint.dia.Element.PortGroup = {
 
 function toneToColor(tone?: string): string {
   switch (tone) {
-    case 'primary': return 'var(--app-primary, #7a77ff)';
-    case 'info': return 'var(--app-control-info-border, #3b82f6)';
-    case 'success': return 'var(--app-control-success-border, #22c55e)';
-    case 'warning': return 'var(--app-control-warn-border, #f97316)';
-    case 'danger': return 'var(--app-control-danger-border, #ef4444)';
-    case 'muted': return 'var(--app-text-muted, #94a3b8)';
-    default: return 'var(--app-border, #d8dee8)';
+    case 'primary':
+      return 'var(--app-primary, #7a77ff)';
+    case 'info':
+      return 'var(--app-control-info-border, #3b82f6)';
+    case 'success':
+      return 'var(--app-control-success-border, #22c55e)';
+    case 'warning':
+      return 'var(--app-control-warn-border, #f97316)';
+    case 'danger':
+      return 'var(--app-control-danger-border, #ef4444)';
+    case 'muted':
+      return 'var(--app-text-muted, #94a3b8)';
+    default:
+      return 'var(--app-border, #d8dee8)';
   }
 }
 
-function buildPorts(typeDef?: FlowNodeTypeDefinition): { groups: Record<string, joint.dia.Element.PortGroup>; items: Array<{ id: string; group: string }> } {
+function buildPorts(typeDef?: FlowNodeTypeDefinition): {
+  groups: Record<string, joint.dia.Element.PortGroup>;
+  items: Array<{ id: string; group: string }>;
+} {
   if (!typeDef?.ports?.length) {
     return {
       groups: { in: IN_PORT_GROUP, out: OUT_PORT_GROUP },
-      items: [{ id: 'in', group: 'in' }, { id: 'out', group: 'out' }],
+      items: [
+        { id: 'in', group: 'in' },
+        { id: 'out', group: 'out' },
+      ],
     };
   }
 
@@ -81,7 +115,10 @@ function resolveSubtitle(node: FlowNode, typeDef?: FlowNodeTypeDefinition): stri
   return badge != null ? String(badge) : '';
 }
 
-function resolveBadge(node: FlowNode, typeDef?: FlowNodeTypeDefinition): { label: string; tone?: FlowNodeTone } | null {
+function resolveBadge(
+  node: FlowNode,
+  typeDef?: FlowNodeTypeDefinition,
+): { label: string; tone?: FlowNodeTone } | null {
   const resolved = typeDef?.badgeResolver?.(node);
   if (resolved) return resolved;
 
@@ -116,22 +153,31 @@ function resolveIconUrl(node: FlowNode, typeDef?: FlowNodeTypeDefinition): strin
 
 function resolveIconLabel(node: FlowNode, typeDef?: FlowNodeTypeDefinition): string {
   const iconLabel = node.data?.['iconLabel'];
-  if (typeof iconLabel === 'string' && iconLabel.trim()) return iconLabel.trim().slice(0, 2).toUpperCase();
+  if (typeof iconLabel === 'string' && iconLabel.trim())
+    return iconLabel.trim().slice(0, 2).toUpperCase();
   const label = typeDef?.label ?? node.type;
   return label.slice(0, 2).toUpperCase();
 }
 
 function statusToStroke(status?: string): string | null {
   switch (status) {
-    case 'success': return 'var(--app-control-success-border, #22c55e)';
-    case 'danger': return 'var(--app-control-danger-border, #ef4444)';
-    case 'warning': return 'var(--app-control-warn-border, #f97316)';
-    case 'muted': return 'var(--app-text-muted, #94a3b8)';
-    default: return null;
+    case 'success':
+      return 'var(--app-control-success-border, #22c55e)';
+    case 'danger':
+      return 'var(--app-control-danger-border, #ef4444)';
+    case 'warning':
+      return 'var(--app-control-warn-border, #f97316)';
+    case 'muted':
+      return 'var(--app-text-muted, #94a3b8)';
+    default:
+      return null;
   }
 }
 
-export function createNodeShape(node: FlowNode, typeDef?: FlowNodeTypeDefinition): joint.dia.Element {
+export function createNodeShape(
+  node: FlowNode,
+  typeDef?: FlowNodeTypeDefinition,
+): joint.dia.Element {
   const shape = typeDef?.shape ?? 'rectangle';
   const size = node.size ?? typeDef?.defaultSize ?? { width: 200, height: 70 };
   const label = resolveLabel(node, typeDef);
@@ -416,14 +462,18 @@ export function createNodeShape(node: FlowNode, typeDef?: FlowNodeTypeDefinition
   return el;
 }
 
-export function updateNodeShape(el: joint.dia.Element, node: FlowNode, typeDef?: FlowNodeTypeDefinition): void {
+export function updateNodeShape(
+  el: joint.dia.Element,
+  node: FlowNode,
+  typeDef?: FlowNodeTypeDefinition,
+): void {
   const label = resolveLabel(node, typeDef);
   const subtitle = resolveSubtitle(node, typeDef);
   const badge = resolveBadge(node, typeDef);
   const iconUrl = resolveIconUrl(node, typeDef);
   const iconLabel = resolveIconLabel(node, typeDef);
   const strokeColor = statusToStroke(node.status) ?? toneToColor(typeDef?.tone);
-  const shape = (el.get('flowNodeShape') as string | undefined) ?? (typeDef?.shape ?? 'rectangle');
+  const shape = (el.get('flowNodeShape') as string | undefined) ?? typeDef?.shape ?? 'rectangle';
 
   if (node.size) {
     el.resize(node.size.width, node.size.height);
@@ -500,10 +550,21 @@ export function createEdgeShape(edge: FlowEdge, typeDef?: FlowEdgeTypeDefinition
         targetMarker: { type: 'path', d: 'M 10 -5 0 0 10 5 z', fill: color },
       },
     },
-    labels: edge.label ? [{
-      attrs: { text: { text: edge.label, fontSize: 10, fontFamily: 'Inter, sans-serif', fill: 'var(--app-text-muted, #94a3b8)' } },
-      position: 0.5,
-    }] : [],
+    labels: edge.label
+      ? [
+          {
+            attrs: {
+              text: {
+                text: edge.label,
+                fontSize: 10,
+                fontFamily: 'Inter, sans-serif',
+                fill: 'var(--app-text-muted, #94a3b8)',
+              },
+            },
+            position: 0.5,
+          },
+        ]
+      : [],
     router: { name: 'manhattan', args: { step: 20 } },
     connector: { name: 'rounded', args: { radius: 8 } },
   });

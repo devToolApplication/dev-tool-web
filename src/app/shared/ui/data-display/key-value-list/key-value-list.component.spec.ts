@@ -14,7 +14,7 @@ describe('KeyValueListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(KeyValueListComponent);
@@ -25,7 +25,7 @@ describe('KeyValueListComponent', () => {
     component.items = [
       { label: 'Name', value: 'Alpha' },
       { label: 'Count', value: 1234, type: 'number' },
-      { label: 'Active', value: true, type: 'boolean' }
+      { label: 'Active', value: true, type: 'boolean' },
     ];
     fixture.detectChanges();
 
@@ -38,12 +38,14 @@ describe('KeyValueListComponent', () => {
   it('renders copyable and badge item types', () => {
     component.items = [
       { label: 'ID', value: 'cfg-1', type: 'copyable' },
-      { label: 'State', value: 'READY', type: 'badge', variant: 'success' }
+      { label: 'State', value: 'READY', type: 'badge', variant: 'success' },
     ];
     fixture.detectChanges();
 
-    const copyable = fixture.debugElement.query(By.directive(CopyableTextComponent)).componentInstance as CopyableTextComponent;
-    const badge = fixture.debugElement.query(By.directive(BadgeComponent)).componentInstance as BadgeComponent;
+    const copyable = fixture.debugElement.query(By.directive(CopyableTextComponent))
+      .componentInstance as CopyableTextComponent;
+    const badge = fixture.debugElement.query(By.directive(BadgeComponent))
+      .componentInstance as BadgeComponent;
 
     expect(copyable.value).toBe('cfg-1');
     expect(badge.label).toBe('READY');
@@ -54,7 +56,7 @@ describe('KeyValueListComponent', () => {
     component.items = [
       { label: 'Date', value: '2026-05-15T00:00:00Z', type: 'date' },
       { label: 'Amount', value: 12.5, type: 'currency', currencyCode: 'USD' },
-      { label: 'Ratio', value: 0.125, type: 'percent' }
+      { label: 'Ratio', value: 0.125, type: 'percent' },
     ];
     fixture.detectChanges();
 

@@ -29,7 +29,9 @@ export interface BuildAdjacentCandleWindowInput {
   limit?: number;
 }
 
-export function buildInitialCandleWindow(input: BuildInitialCandleWindowInput): CandleWindowRequest {
+export function buildInitialCandleWindow(
+  input: BuildInitialCandleWindowInput,
+): CandleWindowRequest {
   const timeframeMs = timeframeToMs(input.timeframe);
   const bars = input.bars ?? CANDLE_CHART_WINDOW_BARS;
   const limit = input.limit ?? CANDLE_CHART_WINDOW_LIMIT;
@@ -42,7 +44,9 @@ export function buildInitialCandleWindow(input: BuildInitialCandleWindowInput): 
   return { from: from.toISOString(), to: to.toISOString(), limit };
 }
 
-export function buildAdjacentCandleWindow(input: BuildAdjacentCandleWindowInput): CandleWindowRequest | null {
+export function buildAdjacentCandleWindow(
+  input: BuildAdjacentCandleWindowInput,
+): CandleWindowRequest | null {
   const timeframeMs = timeframeToMs(input.timeframe);
   const bars = input.bars ?? CANDLE_CHART_WINDOW_BARS;
   const limit = input.limit ?? CANDLE_CHART_WINDOW_LIMIT;
@@ -68,7 +72,10 @@ export function buildAdjacentCandleWindow(input: BuildAdjacentCandleWindowInput)
   return { from: last.toISOString(), to: to.toISOString(), limit };
 }
 
-export function mergeCandlesByOpenTime<T extends { openTime?: unknown }>(current: T[], incoming: T[]): T[] {
+export function mergeCandlesByOpenTime<T extends { openTime?: unknown }>(
+  current: T[],
+  incoming: T[],
+): T[] {
   const map = new Map<string, T>();
   [...current, ...incoming].forEach((candle) => {
     const key = String(candle.openTime ?? '');
@@ -76,7 +83,9 @@ export function mergeCandlesByOpenTime<T extends { openTime?: unknown }>(current
       map.set(key, candle);
     }
   });
-  return [...map.values()].sort((left, right) => dateTime(left.openTime) - dateTime(right.openTime));
+  return [...map.values()].sort(
+    (left, right) => dateTime(left.openTime) - dateTime(right.openTime),
+  );
 }
 
 export function timeframeToMs(timeframe: string): number {

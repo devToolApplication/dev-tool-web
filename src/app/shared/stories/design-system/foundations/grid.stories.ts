@@ -5,7 +5,7 @@ const breakpoints = [
   { name: 'md', min: '768px', description: 'Tablet' },
   { name: 'lg', min: '1024px', description: 'Desktop' },
   { name: 'xl', min: '1280px', description: 'Large desktop' },
-  { name: '2xl', min: '1536px', description: 'Ultra-wide' }
+  { name: '2xl', min: '1536px', description: 'Ultra-wide' },
 ];
 
 const meta: Meta = {
@@ -15,10 +15,11 @@ const meta: Meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Responsive grid system and breakpoints. Maps to Figma frame constraints and auto-layout.'
-      }
-    }
-  }
+        component:
+          'Responsive grid system and breakpoints. Maps to Figma frame constraints and auto-layout.',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -31,7 +32,9 @@ export const Breakpoints: Story = {
       <div class="p-6">
         <h3 class="text-lg font-semibold mb-4">Responsive Breakpoints</h3>
         <div class="flex flex-col gap-3">
-          ${breakpoints.map(bp => `
+          ${breakpoints
+            .map(
+              (bp) => `
             <div class="flex items-center gap-4">
               <code class="text-sm font-medium" style="min-width:40px">${bp.name}</code>
               <div style="width:${bp.min};max-width:100%;height:32px;background:var(--p-primary-100);border:2px solid var(--p-primary-400);border-radius:4px;position:relative">
@@ -39,11 +42,13 @@ export const Breakpoints: Story = {
               </div>
               <span class="text-xs" style="color:var(--p-text-muted-color)">${bp.description}</span>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const GridColumns: Story = {
@@ -90,8 +95,8 @@ export const GridColumns: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const CommonLayouts: Story = {
@@ -124,6 +129,6 @@ export const CommonLayouts: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

@@ -5,7 +5,7 @@ const meta: Meta<ToolbarComponent> = {
   title: 'Shared/Components/Layout/Toolbar',
   component: ToolbarComponent,
   args: {
-    styleClass: ''
+    styleClass: '',
   },
   render: (args) => ({
     props: args,
@@ -19,8 +19,8 @@ const meta: Meta<ToolbarComponent> = {
           <app-button label="Export" icon="pi pi-download" variant="secondary"></app-button>
         </div>
       </app-toolbar>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -28,4 +28,3 @@ export default meta;
 type Story = StoryObj<ToolbarComponent>;
 
 export const Default: Story = {};
-

@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-toolbar',
   standalone: false,
   templateUrl: './toolbar.html',
-  styleUrl: './toolbar.css'
+  styleUrl: './toolbar.css',
 })
 export class ToolbarComponent {
   @Input() styleClass?: string;

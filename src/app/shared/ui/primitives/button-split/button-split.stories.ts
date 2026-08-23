@@ -3,7 +3,7 @@ import { ButtonSplit } from './button-split';
 
 const sampleMenuItems = [
   { label: 'Edit Workflow', icon: 'pi pi-pencil' },
-  { label: 'Delete Workflow', icon: 'pi pi-trash', severity: 'danger' }
+  { label: 'Delete Workflow', icon: 'pi pi-trash', severity: 'danger' },
 ];
 
 const meta: Meta<ButtonSplit> = {
@@ -13,8 +13,8 @@ const meta: Meta<ButtonSplit> = {
     label: 'Actions',
     icon: 'pi pi-cog',
     model: sampleMenuItems,
-    expandAriaLabel: 'Open actions menu'
-  }
+    expandAriaLabel: 'Open actions menu',
+  },
 };
 
 export default meta;

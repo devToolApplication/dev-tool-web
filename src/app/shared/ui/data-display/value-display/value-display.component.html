@@ -1,35 +1,35 @@
 @switch (type) {
   @case ('number') {
     @if (numberValue !== null) {
-      <span>{{ prefix }}{{ numberValue | number:(format ?? '1.0-3') }}{{ suffix }}</span>
+      <span>{{ prefix }}{{ numberValue | number: format ?? '1.0-3' }}{{ suffix }}</span>
     } @else {
       <span class="value-display__empty">{{ emptyValue }}</span>
     }
   }
   @case ('currency') {
     @if (numberValue !== null) {
-      <span>{{ numberValue | currency:currencyCode:'symbol':(format ?? '1.2-2') }}</span>
+      <span>{{ numberValue | currency: currencyCode : 'symbol' : format ?? '1.2-2' }}</span>
     } @else {
       <span class="value-display__empty">{{ emptyValue }}</span>
     }
   }
   @case ('percent') {
     @if (numberValue !== null) {
-      <span>{{ numberValue | percent:(format ?? '1.0-2') }}</span>
+      <span>{{ numberValue | percent: format ?? '1.0-2' }}</span>
     } @else {
       <span class="value-display__empty">{{ emptyValue }}</span>
     }
   }
   @case ('date') {
     @if (dateValue) {
-      <span>{{ dateValue | date:(format ?? 'dd/MM/yyyy') }}</span>
+      <span>{{ dateValue | date: format ?? 'dd/MM/yyyy' }}</span>
     } @else {
       <span class="value-display__empty">{{ emptyValue }}</span>
     }
   }
   @case ('datetime') {
     @if (dateValue) {
-      <span>{{ dateValue | date:(format ?? 'dd/MM/yyyy HH:mm:ss') }}</span>
+      <span>{{ dateValue | date: format ?? 'dd/MM/yyyy HH:mm:ss' }}</span>
     } @else {
       <span class="value-display__empty">{{ emptyValue }}</span>
     }
@@ -55,6 +55,8 @@
     <app-json-viewer [value]="value" [collapsed]="true"></app-json-viewer>
   }
   @default {
-    <span class="value-display__text" [attr.title]="textValue">{{ textValue | translateContent }}</span>
+    <span class="value-display__text" [attr.title]="textValue">{{
+      textValue | translateContent
+    }}</span>
   }
 }

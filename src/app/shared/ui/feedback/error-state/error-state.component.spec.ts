@@ -11,7 +11,7 @@ describe('ErrorStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(ErrorStateComponent);
@@ -61,7 +61,7 @@ describe('ErrorStateComponent', () => {
     const copied = vi.spyOn(component.copyDetail, 'emit');
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText }
+      value: { writeText },
     });
     component.detail = { requestId: 'REQ-2' };
     component.showCopyDetail = true;

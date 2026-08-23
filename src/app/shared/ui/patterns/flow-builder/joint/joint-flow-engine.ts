@@ -1,5 +1,5 @@
 import * as joint from '@joint/core';
-import {
+import type {
   FlowDefinition,
   FlowNodeTypeDefinition,
   FlowEdgeTypeDefinition,
@@ -100,14 +100,14 @@ export class JointFlowEngine {
 
   setMode(readonly: boolean): void {
     this.paper.setInteractivity(
-      readonly ? false : { elementMove: true, linkMove: true, addLinkFromMagnet: true }
+      readonly ? false : { elementMove: true, linkMove: true, addLinkFromMagnet: true },
     );
   }
 
   render(
     definition: FlowDefinition | null,
     nodeTypes: FlowNodeTypeDefinition[] = [],
-    edgeTypes: FlowEdgeTypeDefinition[] = []
+    edgeTypes: FlowEdgeTypeDefinition[] = [],
   ): void {
     if (!definition) {
       this.graph.clear();
@@ -117,8 +117,8 @@ export class JointFlowEngine {
       return;
     }
 
-    const incomingNodeIds = new Set(definition.nodes.map(n => n.id));
-    const incomingEdgeIds = new Set(definition.edges.map(e => e.id));
+    const incomingNodeIds = new Set(definition.nodes.map((n) => n.id));
+    const incomingEdgeIds = new Set(definition.edges.map((e) => e.id));
 
     // Remove stale nodes
     for (const [flowId, elId] of this.nodeMap.entries()) {
@@ -141,7 +141,7 @@ export class JointFlowEngine {
     // Add or update nodes
     for (const node of definition.nodes) {
       const existingElId = this.nodeMap.get(node.id);
-      const typeDef = nodeTypes.find(t => t.type === node.type);
+      const typeDef = nodeTypes.find((t) => t.type === node.type);
       if (existingElId) {
         const el = this.graph.getCell(existingElId);
         if (el?.isElement()) {
@@ -169,7 +169,7 @@ export class JointFlowEngine {
         const link = this.graph.getCell(existingLinkId);
         if (link?.isLink()) {
           const jLink = link as joint.dia.Link;
-          const typeDef = edgeTypes.find(t => t.type === (edge.data?.['type'] as string));
+          const typeDef = edgeTypes.find((t) => t.type === (edge.data?.['type'] as string));
           jLink.source({ id: sourceElId, port: edge.source.portId || 'out' });
           jLink.target({ id: targetElId, port: edge.target.portId || 'in' });
           if (edge.label) {
@@ -177,13 +177,13 @@ export class JointFlowEngine {
           } else {
             jLink.labels([]);
           }
-          const stroke = jLink.get('originalStroke') ?? undefined;
+          const stroke = jLink.get('originalStroke') as unknown;
           if (!stroke && typeDef?.tone) {
             jLink.set('originalStroke', jLink.attr('line/stroke'));
           }
         }
       } else {
-        const typeDef = edgeTypes.find(t => t.type === (edge.data?.['type'] as string));
+        const typeDef = edgeTypes.find((t) => t.type === (edge.data?.['type'] as string));
         const link = createEdgeShape(edge, typeDef);
         link.source({ id: sourceElId, port: edge.source.portId || 'out' });
         link.target({ id: targetElId, port: edge.target.portId || 'in' });
@@ -228,11 +228,15 @@ export class JointFlowEngine {
     const bounds = this.getContentBounds();
     if (!bounds) return;
 
-    const transform = computeFitTransform(bounds, { width, height }, {
-      padding,
-      minScale: this.minScale,
-      maxScale: 1,
-    });
+    const transform = computeFitTransform(
+      bounds,
+      { width, height },
+      {
+        padding,
+        minScale: this.minScale,
+        maxScale: 1,
+      },
+    );
 
     this.paper.scale(transform.scale, transform.scale);
     this.paper.translate(transform.tx, transform.ty);
@@ -251,7 +255,7 @@ export class JointFlowEngine {
     if (preserveCenter && hadRealDimensions) {
       const previousCenter = computeLocalCenter(
         { width: previousWidth, height: previousHeight },
-        { scale, tx: translate.tx, ty: translate.ty }
+        { scale, tx: translate.tx, ty: translate.ty },
       );
       const nextTranslate = computeTranslateForLocalCenter(previousCenter, { width, height }, scale);
       const target = this.clampTranslate(nextTranslate.tx, nextTranslate.ty);
@@ -285,26 +289,43 @@ export class JointFlowEngine {
     const translate = this.paper.translate();
     const { width: clientWidth, height: clientHeight } = this.measureViewportSize();
     const contentBounds = this.getContentBounds() ?? { minX: 0, minY: 0, width: 1, height: 1 };
-    const nodePositions: Array<{ id: string; x: number; y: number; width: number; height: number }> = [];
+    const nodePositions: Array<{
+      id: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }> = [];
     for (const [flowId, elId] of this.nodeMap.entries()) {
       const el = this.graph.getCell(elId);
       if (el?.isElement()) {
         const pos = (el as joint.dia.Element).position();
         const size = (el as joint.dia.Element).size();
-        nodePositions.push({ id: flowId, x: pos.x, y: pos.y, width: size.width, height: size.height });
+        nodePositions.push({
+          id: flowId,
+          x: pos.x,
+          y: pos.y,
+          width: size.width,
+          height: size.height,
+        });
       }
     }
-    return { scale, translateX: translate.tx, translateY: translate.ty, clientWidth, clientHeight, contentBounds, nodePositions };
+    return {
+      scale,
+      translateX: translate.tx,
+      translateY: translate.ty,
+      clientWidth,
+      clientHeight,
+      contentBounds,
+      nodePositions,
+    };
   }
 
   panToLocalCenter(centerX: number, centerY: number): void {
     if (!Number.isFinite(centerX) || !Number.isFinite(centerY)) return;
     const scale = this.paper.scale().sx;
     const { width, height } = this.measureViewportSize();
-    const target = this.clampTranslate(
-      width / 2 - centerX * scale,
-      height / 2 - centerY * scale
-    );
+    const target = this.clampTranslate(width / 2 - centerX * scale, height / 2 - centerY * scale);
     this.paper.translate(target.tx, target.ty);
     this.scheduleViewportChange();
   }
@@ -350,7 +371,7 @@ export class JointFlowEngine {
         width: parent?.clientWidth,
         height: parent?.clientHeight,
       },
-      { width: this.lastClientWidth, height: this.lastClientHeight }
+      { width: this.lastClientWidth, height: this.lastClientHeight },
     );
   }
 
@@ -372,7 +393,10 @@ export class JointFlowEngine {
     const scale = this.paper.scale().sx || 1;
     const localViewport = Math.max(clientWidth / scale, clientHeight / scale);
     const contentSpan = Math.max(bounds.width, bounds.height);
-    const margin = Math.max(80, Math.min(220, Math.min(localViewport * 0.25, contentSpan * 0.2 + 80)));
+    const margin = Math.max(
+      80,
+      Math.min(220, Math.min(localViewport * 0.25, contentSpan * 0.2 + 80)),
+    );
 
     const minTx = -scale * (bounds.minX + bounds.width + margin);
     const maxTx = clientWidth - scale * (bounds.minX - margin);
@@ -409,13 +433,19 @@ export class JointFlowEngine {
 
   clearHighlights(): void {
     for (const el of this.graph.getElements()) {
-      const origStroke = el.get('originalStroke') ?? 'var(--app-border, #d8dee8)';
-      const origWidth = el.get('originalStrokeWidth') ?? 1.5;
+      const origStrokeValue = el.get('originalStroke') as unknown;
+      const origWidthValue = el.get('originalStrokeWidth') as unknown;
+      const origStroke =
+        typeof origStrokeValue === 'string' ? origStrokeValue : 'var(--app-border, #d8dee8)';
+      const origWidth = typeof origWidthValue === 'number' ? origWidthValue : 1.5;
       el.attr('body/stroke', origStroke);
       el.attr('body/strokeWidth', origWidth);
     }
     for (const link of this.graph.getLinks()) {
-      link.attr('line/stroke', link.get('originalStroke') ?? 'var(--app-text-muted, #94a3b8)');
+      const origStrokeValue = link.get('originalStroke') as unknown;
+      const origStroke =
+        typeof origStrokeValue === 'string' ? origStrokeValue : 'var(--app-text-muted, #94a3b8)';
+      link.attr('line/stroke', origStroke);
       link.attr('line/strokeWidth', 2);
     }
   }
@@ -549,43 +579,64 @@ export class JointFlowEngine {
     const signal = this.abortController.signal;
     const surface = container.parentElement ?? container;
 
-    surface.addEventListener('wheel', (e: WheelEvent) => {
-      if (this.isWheelBlockedTarget(e.target)) return;
-      e.preventDefault();
-      const newScale = computeWheelZoomScale(this.paper.scale().sx, e.deltaY, this.minScale, this.maxScale);
-      const point = this.paper.clientToLocalPoint(e.clientX, e.clientY);
-      this.callbacks.onViewportInteraction?.();
-      this.zoomToScale(newScale, point);
-    }, { passive: false, signal });
+    surface.addEventListener(
+      'wheel',
+      (e: WheelEvent) => {
+        if (this.isWheelBlockedTarget(e.target)) return;
+        e.preventDefault();
+        const newScale = computeWheelZoomScale(
+          this.paper.scale().sx,
+          e.deltaY,
+          this.minScale,
+          this.maxScale,
+        );
+        const point = this.paper.clientToLocalPoint(e.clientX, e.clientY);
+        this.callbacks.onViewportInteraction?.();
+        this.zoomToScale(newScale, point);
+      },
+      { passive: false, signal },
+    );
 
-    surface.addEventListener('mousedown', (e: MouseEvent) => {
-      if (e.button === 1 || (e.button === 0 && this.isCanvasPanTarget(e.target))) {
-        this.startPanning(e);
-      }
-    }, { signal });
+    surface.addEventListener(
+      'mousedown',
+      (e: MouseEvent) => {
+        if (e.button === 1 || (e.button === 0 && this.isCanvasPanTarget(e.target))) {
+          this.startPanning(e);
+        }
+      },
+      { signal },
+    );
 
-    document.addEventListener('mousemove', (e: MouseEvent) => {
-      if (!this.panning) return;
-      e.preventDefault();
-      const dx = e.clientX - this.panStart.x;
-      const dy = e.clientY - this.panStart.y;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-        this.panMoved = true;
-      }
-      const nextTranslate = computePanTranslate(this.panOrigin, { dx, dy });
-      const target = this.clampTranslate(nextTranslate.tx, nextTranslate.ty);
-      this.paper.translate(target.tx, target.ty);
-      this.scheduleViewportChange();
-    }, { signal });
-
-    document.addEventListener('mouseup', () => {
-      if (this.panning) {
-        this.panning = false;
-        this.options.el.style.cursor = '';
-        surface.style.cursor = '';
+    document.addEventListener(
+      'mousemove',
+      (e: MouseEvent) => {
+        if (!this.panning) return;
+        e.preventDefault();
+        const dx = e.clientX - this.panStart.x;
+        const dy = e.clientY - this.panStart.y;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+          this.panMoved = true;
+        }
+        const nextTranslate = computePanTranslate(this.panOrigin, { dx, dy });
+        const target = this.clampTranslate(nextTranslate.tx, nextTranslate.ty);
+        this.paper.translate(target.tx, target.ty);
         this.scheduleViewportChange();
-      }
-    }, { signal });
+      },
+      { signal },
+    );
+
+    document.addEventListener(
+      'mouseup',
+      () => {
+        if (this.panning) {
+          this.panning = false;
+          this.options.el.style.cursor = '';
+          surface.style.cursor = '';
+          this.scheduleViewportChange();
+        }
+      },
+      { signal },
+    );
   }
 
   private zoomAtCenter(factor: number): void {
@@ -593,7 +644,10 @@ export class JointFlowEngine {
     const newScale = Math.min(Math.max(scale * factor, this.minScale), this.maxScale);
     const translate = this.paper.translate();
     const { width, height } = this.measureViewportSize();
-    const center = computeLocalCenter({ width, height }, { scale, tx: translate.tx, ty: translate.ty });
+    const center = computeLocalCenter(
+      { width, height },
+      { scale, tx: translate.tx, ty: translate.ty },
+    );
     this.zoomToScale(newScale, center);
   }
 
@@ -603,7 +657,7 @@ export class JointFlowEngine {
     const next = computeZoomTransformAtLocalPoint(
       { scale: currentScale, tx: translate.tx, ty: translate.ty },
       localPoint,
-      scale
+      scale,
     );
     this.paper.scale(next.scale, next.scale);
     const target = this.clampTranslate(next.tx, next.ty);
@@ -617,7 +671,11 @@ export class JointFlowEngine {
         line: {
           stroke: 'var(--app-text-muted, #94a3b8)',
           strokeWidth: 2,
-          targetMarker: { type: 'path', d: 'M 10 -5 0 0 10 5 z', fill: 'var(--app-text-muted, #94a3b8)' },
+          targetMarker: {
+            type: 'path',
+            d: 'M 10 -5 0 0 10 5 z',
+            fill: 'var(--app-text-muted, #94a3b8)',
+          },
         },
       },
       router: { name: 'manhattan', args: { step: 20 } },
@@ -641,15 +699,19 @@ export class JointFlowEngine {
 
   private isCanvasPanTarget(target: EventTarget | null): boolean {
     if (!(target instanceof Element)) return false;
-    if (target.closest([
-      '.joint-cell',
-      '[data-flow-node-no-drag]',
-      'button',
-      'input',
-      'textarea',
-      'select',
-      'a',
-    ].join(','))) {
+    if (
+      target.closest(
+        [
+          '.joint-cell',
+          '[data-flow-node-no-drag]',
+          'button',
+          'input',
+          'textarea',
+          'select',
+          'a',
+        ].join(','),
+      )
+    ) {
       return false;
     }
     return this.options.el.parentElement?.contains(target) ?? this.options.el.contains(target);
@@ -662,11 +724,13 @@ export class JointFlowEngine {
 
   private isNodeMenuTarget(target: EventTarget | null): boolean {
     if (!(target instanceof Element)) return false;
-    return !!target.closest([
-      '[joint-selector="menuBody"]',
-      '[joint-selector="menuDot1"]',
-      '[joint-selector="menuDot2"]',
-      '[joint-selector="menuDot3"]',
-    ].join(','));
+    return !!target.closest(
+      [
+        '[joint-selector="menuBody"]',
+        '[joint-selector="menuDot1"]',
+        '[joint-selector="menuDot2"]',
+        '[joint-selector="menuDot3"]',
+      ].join(','),
+    );
   }
 }

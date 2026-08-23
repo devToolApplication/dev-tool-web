@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { PortalModule } from '@angular/cdk/portal';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AvatarComponent } from './ui/primitives/avatar/avatar';
@@ -53,7 +56,6 @@ import { FormSectionCardComponent } from './ui/patterns/form-input/component/for
 import { FormSectionNavComponent } from './ui/patterns/form-input/component/form-section-nav/form-section-nav';
 import { FieldRecordRenderer } from './ui/patterns/form-input/component/field-record-renderer/field-record-renderer';
 import { FieldRenderer } from './ui/patterns/form-input/component/field-renderer/field-renderer';
-import { FieldSecretMetadataRendererComponent } from './ui/patterns/form-input/component/field-secret-metadata-renderer/field-secret-metadata-renderer';
 import { FieldTreeRendererComponent } from './ui/patterns/form-input/component/field-tree-renderer/field-tree-renderer';
 import { FormInput } from './ui/patterns/form-input/form-input';
 import { JsonFieldBlockComponent } from './ui/patterns/form-input/component/json-field-block/json-field-block';
@@ -100,7 +102,7 @@ const ACTION_COMPONENTS = [
   Button,
   RippleComponent,
   ToolbarComponent,
-  TooltipComponent
+  TooltipComponent,
 ];
 
 const INPUT_COMPONENTS = [
@@ -118,26 +120,17 @@ const INPUT_COMPONENTS = [
   RadioButton,
   SliderComponent,
   ToggleButton,
-  ToggleSwitch
+  ToggleSwitch,
 ];
 
-const SELECT_COMPONENTS = [
-  Select,
-  SelectButton,
-  SelectMulti,
-  SelectTree
-];
+const SELECT_COMPONENTS = [Select, SelectButton, SelectMulti, SelectTree];
 
-const FORM_LAYOUT_COMPONENTS = [
-  FieldsetComponent,
-  FluidComponent,
-  IconFieldComponent
-];
+const FORM_LAYOUT_COMPONENTS = [FieldsetComponent, FluidComponent, IconFieldComponent];
 
 const FORM_CONTROL_COMPONENTS = [
   ...INPUT_COMPONENTS,
   ...SELECT_COMPONENTS,
-  ...FORM_LAYOUT_COMPONENTS
+  ...FORM_LAYOUT_COMPONENTS,
 ];
 
 const NAVIGATION_COMPONENTS = [
@@ -145,7 +138,7 @@ const NAVIGATION_COMPONENTS = [
   Paginator,
   TabsComponent,
   TieredMenuComponent,
-  PanelMenuComponent
+  PanelMenuComponent,
 ];
 
 const DATA_DISPLAY_COMPONENTS = [
@@ -153,14 +146,14 @@ const DATA_DISPLAY_COMPONENTS = [
   JsonPreviewComponent,
   PanelComponent,
   Tag,
-  TimelineComponent
+  TimelineComponent,
 ];
 
 const FEEDBACK_OVERLAY_COMPONENTS = [
   BasePopupComponent,
   DialogComponent,
   ProgressSpinnerComponent,
-  ToastComponent
+  ToastComponent,
 ];
 
 const PRIMITIVE_COMPONENTS = [
@@ -168,7 +161,7 @@ const PRIMITIVE_COMPONENTS = [
   ...FORM_CONTROL_COMPONENTS,
   ...NAVIGATION_COMPONENTS,
   ...DATA_DISPLAY_COMPONENTS,
-  ...FEEDBACK_OVERLAY_COMPONENTS
+  ...FEEDBACK_OVERLAY_COMPONENTS,
 ];
 
 const PAGE_COMPONENTS = [
@@ -178,7 +171,7 @@ const PAGE_COMPONENTS = [
   SectionPanelComponent,
   FilterPanelComponent,
   ActionToolbarComponent,
-  ResponsiveGridComponent
+  ResponsiveGridComponent,
 ];
 
 const FEEDBACK_COMPONENTS = [
@@ -189,7 +182,7 @@ const FEEDBACK_COMPONENTS = [
   SkeletonFormComponent,
   SkeletonCardComponent,
   AlertComponent,
-  ErrorPageComponent
+  ErrorPageComponent,
 ];
 
 const DATA_VIEW_COMPONENTS = [
@@ -202,30 +195,27 @@ const DATA_VIEW_COMPONENTS = [
   ValueDisplayComponent,
   StatusListComponent,
   SummaryMetricCardComponent,
-  RealtimeProgressBarComponent
+  RealtimeProgressBarComponent,
 ];
 
-const OVERLAY_COMPONENTS = [
-  ConfirmDialogHostComponent,
-  DrawerComponent
-];
+const OVERLAY_COMPONENTS = [ConfirmDialogHostComponent, DrawerComponent];
 
 const FORM_EXPERIENCE_COMPONENTS = [
-    FormInput,
+  FormInput,
   ValidationSummaryComponent,
   ConfigTemplateFormComponent,
-  FieldGuidePanelComponent
+  FieldGuidePanelComponent,
 ];
 
-const UI = [
+const PUBLIC_UI_COMPONENTS = [
   ...FORM_EXPERIENCE_COMPONENTS,
   ...PAGE_COMPONENTS,
   ...FEEDBACK_COMPONENTS,
   ...DATA_VIEW_COMPONENTS,
   ...OVERLAY_COMPONENTS,
-  TableComponent
+  TableComponent,
 ];
-const UI_COMPONENT = [
+const INTERNAL_UI_COMPONENTS = [
   FormSectionNavComponent,
   FormSectionCardComponent,
   FieldBlockComponent,
@@ -235,33 +225,31 @@ const UI_COMPONENT = [
   FieldArrayRenderer,
   FieldGroupRenderer,
   FieldRecordRenderer,
-  FieldSecretMetadataRendererComponent,
   FieldTreeRendererComponent,
   TableCellComponent,
-  TableFilterComponent
+  TableFilterComponent,
 ];
-export const SHARED_PRIMITIVE_COMPONENTS = [
-  ...PRIMITIVE_COMPONENTS
-];
+export const SHARED_PRIMITIVE_COMPONENTS = [...PRIMITIVE_COMPONENTS];
 
-export const SHARED_UI_COMPONENTS = [
-  ...UI,
-  ...UI_COMPONENT
-];
+export const SHARED_UI_COMPONENTS = [...PUBLIC_UI_COMPONENTS];
+export const SHARED_INTERNAL_UI_COMPONENTS = [...INTERNAL_UI_COMPONENTS];
 
 @NgModule({
-  declarations: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE],
+  declarations: [
+    ...SHARED_PRIMITIVE_COMPONENTS,
+    ...SHARED_UI_COMPONENTS,
+    ...SHARED_INTERNAL_UI_COMPONENTS,
+    ...PIPE,
+  ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    A11yModule,
+    OverlayModule,
+    PortalModule,
   ],
-  exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE]
+  exports: [...SHARED_PRIMITIVE_COMPONENTS, ...SHARED_UI_COMPONENTS, ...PIPE],
 })
 export class SharedModule {}
-
-
-
-
-

@@ -2,7 +2,11 @@
   @if (legend) {
     <legend class="flex items-center gap-2 px-2 text-sm font-semibold text-[var(--app-text)]">
       @if (toggleable) {
-        <button type="button" class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors" (click)="collapsed = !collapsed">
+        <button
+          type="button"
+          class="text-[var(--app-text-muted)] hover:text-[var(--app-primary)] transition-colors"
+          (click)="collapsed = !collapsed"
+        >
           <i class="pi text-xs" [class]="collapsed ? 'pi-chevron-right' : 'pi-chevron-down'"></i>
         </button>
       }

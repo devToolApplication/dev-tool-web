@@ -14,7 +14,7 @@ export interface LoadingSkeletonConfig {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './loading-skeleton.component.html',
-  styleUrl: './loading-skeleton.component.css'
+  styleUrl: './loading-skeleton.component.css',
 })
 export class LoadingSkeletonComponent {
   @Input() type: LoadingSkeletonType = 'card';

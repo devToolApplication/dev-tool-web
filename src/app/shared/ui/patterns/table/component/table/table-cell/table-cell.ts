@@ -1,19 +1,20 @@
+import type { TemplateRef } from '@angular/core';
 import {
-  AfterViewChecked,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  ElementRef,
   EventEmitter,
-  HostListener,
   Input,
-  OnDestroy,
   Output,
-  TemplateRef,
-  signal
+  signal,
 } from '@angular/core';
-import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
-import { TableAction, TableBadgeVariant, TableColumn } from '../../../models/table-config.model';
+import type { ConnectedPosition } from '@angular/cdk/overlay';
+import type {
+  TableAction,
+  TableBadgeVariant,
+  TableCellTemplateContext,
+  TableColumn,
+  TableRowLink,
+} from '../../../models/table-config.model';
 import { getValueByPath } from '../../../utils/object.util';
 
 @Component({
@@ -21,49 +22,39 @@ import { getValueByPath } from '../../../utils/object.util';
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table-cell.html',
-  styleUrls: ['./table-cell.css']
+  styleUrls: ['./table-cell.css'],
 })
-export class TableCellComponent implements AfterViewChecked, OnDestroy {
-  @Input() column!: TableColumn;
-  @Input() rowData!: any;
-  @Input() customTemplates: Record<string, TemplateRef<any>> = {};
-  @Output() actionClick = new EventEmitter<{ action: TableAction; row: any }>();
+export class TableCellComponent<TRow = unknown> {
+  @Input() column!: TableColumn<TRow>;
+  @Input() rowData!: TRow;
+  @Input() customTemplates: Record<string, TemplateRef<TableCellTemplateContext<TRow>>> = {};
+  @Output() actionClick = new EventEmitter<{ action: TableAction<TRow>; row: TRow }>();
 
   readonly jsonOpen = signal(false);
   readonly actionsOpen = signal(false);
-  menuStyle: Record<string, string> = {};
-  private portaledActionsMenu: HTMLElement | null = null;
+  readonly actionMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
+  ];
 
-  constructor(
-    private readonly confirmDialogService: ConfirmDialogService,
-    private readonly elRef: ElementRef,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
-
-  ngAfterViewChecked(): void {
-    this.appendActionsMenuToBody();
+  get value(): unknown {
+    return this.column.valueGetter
+      ? this.column.valueGetter(this.rowData)
+      : getValueByPath(this.rowData, this.column.field);
   }
 
-  ngOnDestroy(): void {
-    this.removeActionsMenuFromBody();
+  get actions(): TableAction<TRow>[] {
+    return (this.column.actions ?? []).filter((action) => action.visible?.(this.rowData) ?? true);
   }
 
-  get value(): any {
-    return this.column.valueGetter ? this.column.valueGetter(this.rowData) : getValueByPath(this.rowData, this.column.field);
-  }
-
-  get actions(): TableAction[] {
-    return (this.column.actions ?? []).filter((action) => (action.visible?.(this.rowData) ?? true));
-  }
-
-  get primaryActions(): TableAction[] {
+  get primaryActions(): TableAction<TRow>[] {
     const explicitPrimary = this.actions.find((action) => action.placement === 'primary');
     const fallbackPrimary = this.actions.find((action) => action.placement !== 'more');
     const primary = explicitPrimary ?? fallbackPrimary;
     return primary ? [primary] : [];
   }
 
-  get moreActions(): TableAction[] {
+  get moreActions(): TableAction<TRow>[] {
     const primary = this.primaryActions[0];
     return this.actions.filter((action) => action !== primary);
   }
@@ -76,8 +67,10 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     return this.column.formatter?.(this.rowData, this.value);
   }
 
-  get customTemplate(): TemplateRef<any> | null {
-    return this.column.customTemplateKey ? this.customTemplates[this.column.customTemplateKey] ?? null : null;
+  get customTemplate(): TemplateRef<TableCellTemplateContext<TRow>> | null {
+    return this.column.customTemplateKey
+      ? (this.customTemplates[this.column.customTemplateKey] ?? null)
+      : null;
   }
 
   get dateValue(): Date | null {
@@ -90,33 +83,45 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
   }
 
   get semanticClass(): string {
-    const semantic = this.column.semanticFn?.(this.rowData, this.value) ?? this.defaultSemantic(this.value);
+    const semantic =
+      this.column.semanticFn?.(this.rowData, this.value) ?? this.defaultSemantic(this.value);
     return `table-cell-semantic table-cell-semantic--${semantic}`;
   }
 
-  get linkTarget(): string | any[] | null {
+  get linkTarget(): TableRowLink | null {
     if (!this.column.link) {
       return null;
     }
-    return typeof this.column.link === 'function' ? this.column.link(this.rowData) : this.column.link;
+    return typeof this.column.link === 'function'
+      ? this.column.link(this.rowData)
+      : this.column.link;
   }
 
-  isActionDisabled(action: TableAction): boolean {
-    return (action.disabled?.(this.rowData) ?? false);
+  get arrayValue(): unknown[] {
+    return Array.isArray(this.value) ? Array.from(this.value as readonly unknown[]) : [];
   }
 
-  actionTooltip(action: TableAction): string {
+  get numericValue(): string | number | null {
+    const value = this.value;
+    return typeof value === 'string' || typeof value === 'number' ? value : null;
+  }
+
+  isActionDisabled(action: TableAction<TRow>): boolean {
+    return action.disabled?.(this.rowData) ?? false;
+  }
+
+  actionTooltip(action: TableAction<TRow>): string {
     return action.tooltipFn?.(this.rowData) ?? action.tooltip ?? action.label;
   }
 
-    actionVariant(action: TableAction): 'primary' | 'secondary' | 'ghost' | 'destructive' {
+  actionVariant(action: TableAction<TRow>): 'primary' | 'secondary' | 'ghost' | 'destructive' {
     if (action.variant === 'danger' || action.severity === 'danger') return 'destructive';
     if (action.variant === 'primary' || action.severity === 'success') return 'primary';
     if (action.variant === 'ghost' || action.text) return 'ghost';
     return 'secondary';
   }
 
-  actionSeverity(action: TableAction) {
+  actionSeverity(action: TableAction<TRow>) {
     if (action.severity !== undefined) {
       return action.severity;
     }
@@ -134,7 +139,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
     }
   }
 
-  async onActionClick(action: TableAction): Promise<void> {
+  async onActionClick(action: TableAction<TRow>): Promise<void> {
     if (this.isActionDisabled(action)) {
       return;
     }
@@ -148,33 +153,10 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
       this.closeActions();
       return;
     }
-    const wrap = this.elRef.nativeElement.querySelector('.table-actions__more-wrap');
-    if (wrap) {
-      const rect = (wrap as HTMLElement).getBoundingClientRect();
-      this.menuStyle = {
-        top: `${rect.bottom + 4}px`,
-        right: `${document.documentElement.clientWidth - rect.right}px`
-      };
-    }
     this.actionsOpen.set(true);
-    this.changeDetectorRef.detectChanges();
-    this.appendActionsMenuToBody();
-  }
-
-  @HostListener('document:click', ['$event.target'])
-  onDocumentClick(target: EventTarget | null): void {
-    if (
-      this.actionsOpen() &&
-      target instanceof HTMLElement &&
-      !this.elRef.nativeElement.contains(target) &&
-      !this.menuContains(target)
-    ) {
-      this.closeActions();
-    }
   }
 
   closeActions(): void {
-    this.removeActionsMenuFromBody();
     this.actionsOpen.set(false);
   }
 
@@ -303,7 +285,7 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
         record['iso'],
         record['timestamp'],
         record['time'],
-        record['epochMillis']
+        record['epochMillis'],
       ];
 
       for (const candidate of candidates) {
@@ -320,29 +302,4 @@ export class TableCellComponent implements AfterViewChecked, OnDestroy {
   private validDateOrNull(value: Date): Date | null {
     return Number.isNaN(value.getTime()) ? null : value;
   }
-
-  
-
-  private appendActionsMenuToBody(): void {
-    const menu = this.elRef.nativeElement.querySelector('.table-actions__menu') as HTMLElement | null;
-    if (!this.actionsOpen() || !menu || menu.parentElement === document.body) {
-      return;
-    }
-    document.body.appendChild(menu);
-    this.portaledActionsMenu = menu;
-  }
-
-  private removeActionsMenuFromBody(): void {
-    const menu = this.portaledActionsMenu;
-    if (menu?.parentElement === document.body) {
-      document.body.removeChild(menu);
-    }
-    this.portaledActionsMenu = null;
-  }
-
-  private menuContains(target: HTMLElement): boolean {
-    return this.portaledActionsMenu?.contains(target) ?? false;
-  }
 }
-
-

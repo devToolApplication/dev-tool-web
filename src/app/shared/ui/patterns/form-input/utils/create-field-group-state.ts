@@ -1,32 +1,33 @@
+import type { WritableSignal } from '@angular/core';
 import { signal, computed } from '@angular/core';
-import { ExpressionEngine } from './expression.engine';
+import type { ExpressionEngine } from './expression.engine';
 import {
   isRequiredByConfig,
   resolveDisabledExpression,
-  resolveVisibleExpression
+  resolveVisibleExpression,
 } from './form.utils';
-import {
+import type {
   GroupFieldConfig,
   GroupFieldState,
   FieldState,
   ArrayFieldState,
   ArrayState,
+  FormContext,
   FormCustomValidator,
-  TreeFieldConfig
+  TreeFieldConfig,
 } from '../models/form-config.model';
 import { createNestedFieldState } from './create-nested-field-state';
 
-export function createFieldGroupState(
+export function createFieldGroupState<TFormModel extends object>(
   path: string,
   config: GroupFieldConfig,
-  modelSignal: any,
-  contextSignal: any,
+  modelSignal: WritableSignal<TFormModel>,
+  contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine,
   arrays: Record<string, ArrayState>,
   treeTemplate?: TreeFieldConfig,
-  validators: Record<string, FormCustomValidator> = {}
+  validators: Record<string, FormCustomValidator> = {},
 ): GroupFieldState {
-
   const touched = signal(false);
   const focusing = signal(false);
   const blurred = signal(false);
@@ -44,14 +45,14 @@ export function createFieldGroupState(
       arrays,
       config.name,
       treeTemplate,
-      validators
+      validators,
     );
   });
 
   const buildCtx = () => ({
     model: modelSignal(),
     context: contextSignal(),
-    value: null
+    value: null,
   });
 
   const visible = computed(() => {
@@ -74,17 +75,21 @@ export function createFieldGroupState(
       return true;
     }
 
-    return !errors() && children.every(c => c.valid());
+    return !errors() && children.every((c) => c.valid());
   });
 
   function setValue(_: unknown) {}
   function markAsTouched() {
     touched.set(true);
-    children.forEach(c => c.markAsTouched());
+    children.forEach((c) => c.markAsTouched());
   }
 
-  function markAsFocused() { focusing.set(true); }
-  function markAsBlurred() { blurred.set(true); }
+  function markAsFocused() {
+    focusing.set(true);
+  }
+  function markAsBlurred() {
+    blurred.set(true);
+  }
 
   return {
     type: 'group',
@@ -115,7 +120,6 @@ export function createFieldGroupState(
 
     markAsTouched,
     markAsFocused,
-    markAsBlurred
+    markAsBlurred,
   };
 }
-

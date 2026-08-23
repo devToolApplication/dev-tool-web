@@ -1,4 +1,5 @@
-import { signal, computed, WritableSignal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import {
   getByPath,
   isEmptyFormValue,
@@ -6,17 +7,17 @@ import {
   requiredMessage,
   resolveDisabledExpression,
   resolveVisibleExpression,
-  updateByPath
+  updateByPath,
 } from './form.utils';
-import { ExpressionEngine } from './expression.engine';
-import {
+import type { ExpressionEngine } from './expression.engine';
+import type {
   FieldConfig,
   FieldState,
   FormCustomValidator,
   FormContext,
   SelectOption,
   GroupFieldState,
-  TextFieldConfig
+  TextFieldConfig,
 } from '../models/form-config.model';
 import { formValidationHelpers } from './expression.engine';
 
@@ -27,9 +28,8 @@ export function createFieldState<TFormModel extends object>(
   contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine,
   groupName?: string,
-  validators: Record<string, FormCustomValidator> = {}
+  validators: Record<string, FormCustomValidator> = {},
 ): FieldState {
-
   const { type, name, label, width } = config;
 
   const touched = signal(false);
@@ -38,26 +38,30 @@ export function createFieldState<TFormModel extends object>(
   const blurred = signal(false);
   const externalErrors = signal<Record<string, string> | null>(null);
 
-  const value = computed(() =>
-    getByPath(modelSignal(), path)
-  );
+  const value = computed(() => getByPath(modelSignal(), path));
 
   function setValue(val: unknown): void {
-    modelSignal.update((m: TFormModel) =>
-      updateByPath(m, path, val)
-    );
+    modelSignal.update((m: TFormModel) => updateByPath(m, path, val));
     dirty.set(true);
     externalErrors.set(null);
   }
 
-  function markAsTouched() { touched.set(true); }
-  function markAsFocused() { focusing.set(true); blurred.set(false); }
-  function markAsBlurred() { focusing.set(false); blurred.set(true); }
+  function markAsTouched() {
+    touched.set(true);
+  }
+  function markAsFocused() {
+    focusing.set(true);
+    blurred.set(false);
+  }
+  function markAsBlurred() {
+    focusing.set(false);
+    blurred.set(true);
+  }
 
   const buildCtx = () => ({
     model: modelSignal(),
     context: contextSignal(),
-    value: value()
+    value: value(),
   });
 
   const visible = computed(() => {
@@ -86,15 +90,15 @@ export function createFieldState<TFormModel extends object>(
       config.type !== 'autocomplete' &&
       config.type !== 'input-multi' &&
       config.type !== 'radio' &&
-      config.type !== 'tags' &&
-      config.type !== 'secret-metadata'
-    ) return [];
+      config.type !== 'tags'
+    )
+      return [];
 
     if ('optionsExpression' in config && config.optionsExpression) {
-      return expr.evaluate(config.optionsExpression, buildCtx()) || [];
+      return normalizeSelectOptions(expr.evaluate(config.optionsExpression, buildCtx()));
     }
 
-    return (config as any).options || [];
+    return 'options' in config ? (config.options ?? []) : [];
   });
 
   const errors = computed<Record<string, string> | null>(() => {
@@ -130,7 +134,7 @@ export function createFieldState<TFormModel extends object>(
         const validationResult = validator?.(currentValue, {
           formValue: modelSignal() as Record<string, unknown>,
           fieldKey: path,
-          helpers: formValidationHelpers
+          helpers: formValidationHelpers,
         });
         if (validationResult && validationResult !== true) {
           validationResult.forEach((error, errorIndex) => {
@@ -175,12 +179,11 @@ export function createFieldState<TFormModel extends object>(
     markAsTouched,
     markAsFocused,
     markAsBlurred,
-    groupName
+    groupName,
   };
 
   if (config.type === 'group') {
-
-    const children = config.children.map(child =>
+    const children = config.children.map((child) =>
       createFieldState(
         `${path}.${child.name}`,
         child,
@@ -188,14 +191,14 @@ export function createFieldState<TFormModel extends object>(
         contextSignal,
         expr,
         config.name,
-        validators
-      )
+        validators,
+      ),
     );
 
     return {
       ...baseState,
       fieldConfig: config,
-      children
+      children,
     } as GroupFieldState;
   }
 
@@ -203,14 +206,17 @@ export function createFieldState<TFormModel extends object>(
 }
 
 function isJsonContent(config: FieldConfig): config is TextFieldConfig {
-  return config.type === 'json' || ((config.type === 'text' || config.type === 'textarea') && config.contentType === 'json');
+  return (
+    config.type === 'json' ||
+    ((config.type === 'text' || config.type === 'textarea') && config.contentType === 'json')
+  );
 }
 
 function evaluateRule(
   rule: NonNullable<FieldConfig['validation']>[number],
   value: unknown,
   ctx: { model: unknown; context: unknown; value?: unknown },
-  expr: ExpressionEngine
+  expr: ExpressionEngine,
 ): boolean {
   if (rule.type === 'expression' || rule.expression) {
     return !!expr.evaluate(rule.expression ?? 'false', ctx);
@@ -220,11 +226,19 @@ function evaluateRule(
     case 'required':
       return isEmptyValue(value);
     case 'min':
-      return value !== null && value !== undefined && value !== '' && Number(value) < Number(rule.value);
+      return (
+        value !== null && value !== undefined && value !== '' && Number(value) < Number(rule.value)
+      );
     case 'max':
-      return value !== null && value !== undefined && value !== '' && Number(value) > Number(rule.value);
+      return (
+        value !== null && value !== undefined && value !== '' && Number(value) > Number(rule.value)
+      );
     case 'regex':
-      return typeof rule.value === 'string' && !isEmptyValue(value) && !new RegExp(rule.value).test(String(value));
+      return (
+        typeof rule.value === 'string' &&
+        !isEmptyValue(value) &&
+        !new RegExp(rule.value).test(String(value))
+      );
     default:
       return false;
   }
@@ -232,4 +246,15 @@ function evaluateRule(
 
 function isEmptyValue(value: unknown): boolean {
   return isEmptyFormValue(value);
+}
+
+function normalizeSelectOptions(value: unknown): SelectOption[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (item): item is SelectOption =>
+      !!item && typeof item === 'object' && 'label' in item && 'value' in item,
+  );
 }

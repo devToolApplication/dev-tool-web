@@ -6,15 +6,15 @@ import { Breadcrumb } from './breadcrumb';
 const items: AppMenuItem[] = [
   { label: 'Admin' },
   { label: 'Workflows' },
-  { label: 'Configuration' }
+  { label: 'Configuration' },
 ];
 
 const meta: Meta<Breadcrumb> = {
   title: 'Shared/Components/Navigation/Breadcrumb',
   component: Breadcrumb,
   args: {
-    items
-  }
+    items,
+  },
 };
 
 export default meta;

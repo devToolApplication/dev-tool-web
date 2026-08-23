@@ -19,7 +19,7 @@ export interface JointFlowTransform {
 export function computeFitTransform(
   bounds: JointFlowBounds,
   viewport: JointFlowViewportSize,
-  options: { padding: number; minScale: number; maxScale: number }
+  options: { padding: number; minScale: number; maxScale: number },
 ): JointFlowTransform {
   const availableWidth = Math.max(viewport.width - options.padding * 2, 1);
   const availableHeight = Math.max(viewport.height - options.padding * 2, 1);
@@ -27,8 +27,11 @@ export function computeFitTransform(
     options.maxScale,
     Math.max(
       options.minScale,
-      Math.min(availableWidth / Math.max(bounds.width, 1), availableHeight / Math.max(bounds.height, 1))
-    )
+      Math.min(
+        availableWidth / Math.max(bounds.width, 1),
+        availableHeight / Math.max(bounds.height, 1),
+      ),
+    ),
   );
 
   return {
@@ -41,30 +44,32 @@ export function computeFitTransform(
 export function resolveViewportSize(
   primary: Partial<JointFlowViewportSize> | null | undefined,
   fallback?: Partial<JointFlowViewportSize> | null,
-  last?: Partial<JointFlowViewportSize> | null
+  last?: Partial<JointFlowViewportSize> | null,
 ): JointFlowViewportSize {
-  const width = positiveNumber(primary?.width)
-    ?? positiveNumber(fallback?.width)
-    ?? positiveNumber(last?.width)
-    ?? 1;
-  const height = positiveNumber(primary?.height)
-    ?? positiveNumber(fallback?.height)
-    ?? positiveNumber(last?.height)
-    ?? 1;
+  const width =
+    positiveNumber(primary?.width) ??
+    positiveNumber(fallback?.width) ??
+    positiveNumber(last?.width) ??
+    1;
+  const height =
+    positiveNumber(primary?.height) ??
+    positiveNumber(fallback?.height) ??
+    positiveNumber(last?.height) ??
+    1;
   return { width, height };
 }
 
 export function resolvePaperViewportSize(
   paper: Partial<JointFlowViewportSize> | null | undefined,
   parentCanvas?: Partial<JointFlowViewportSize> | null,
-  last?: Partial<JointFlowViewportSize> | null
+  last?: Partial<JointFlowViewportSize> | null,
 ): JointFlowViewportSize {
   return resolveViewportSize(parentCanvas, paper, last);
 }
 
 export function computeLocalCenter(
   viewport: JointFlowViewportSize,
-  transform: JointFlowTransform
+  transform: JointFlowTransform,
 ): { x: number; y: number } {
   return {
     x: (viewport.width / 2 - transform.tx) / transform.scale,
@@ -75,7 +80,7 @@ export function computeLocalCenter(
 export function computeTranslateForLocalCenter(
   center: { x: number; y: number },
   viewport: JointFlowViewportSize,
-  scale: number
+  scale: number,
 ): { tx: number; ty: number } {
   return {
     tx: viewport.width / 2 - center.x * scale,
@@ -87,7 +92,7 @@ export function computeWheelZoomScale(
   currentScale: number,
   deltaY: number,
   minScale: number,
-  maxScale: number
+  maxScale: number,
 ): number {
   const current = positiveNumber(currentScale) ?? 1;
   const delta = Math.pow(1.0015, -deltaY);
@@ -97,7 +102,7 @@ export function computeWheelZoomScale(
 export function computeZoomTransformAtLocalPoint(
   transform: JointFlowTransform,
   localPoint: { x: number; y: number },
-  nextScale: number
+  nextScale: number,
 ): JointFlowTransform {
   return {
     scale: nextScale,
@@ -108,7 +113,7 @@ export function computeZoomTransformAtLocalPoint(
 
 export function computePanTranslate(
   origin: { tx: number; ty: number },
-  delta: { dx: number; dy: number }
+  delta: { dx: number; dy: number },
 ): { tx: number; ty: number } {
   return {
     tx: origin.tx + delta.dx,

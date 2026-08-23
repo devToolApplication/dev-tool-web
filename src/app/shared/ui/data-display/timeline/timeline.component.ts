@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { BadgeVariant } from '../badge/badge.component';
+import type { BadgeVariant } from '../badge/badge.component';
 
 export interface TimelineItem {
   id?: string | number;
@@ -17,7 +17,7 @@ export interface TimelineItem {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './timeline.component.html',
-  styleUrl: './timeline.component.css'
+  styleUrl: './timeline.component.css',
 })
 export class TimelineComponent {
   @Input() items: TimelineItem[] = [];

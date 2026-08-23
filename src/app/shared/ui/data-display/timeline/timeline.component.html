@@ -8,14 +8,17 @@
   <ol class="app-timeline">
     @for (item of items; track item.id ?? item.title) {
       <li class="app-timeline__item">
-        <span class="app-timeline__marker" [class]="'app-timeline__marker--' + (item.variant ?? 'default')">
+        <span
+          class="app-timeline__marker"
+          [class]="'app-timeline__marker--' + (item.variant ?? 'default')"
+        >
           <i [class]="item.icon ?? 'pi pi-circle-fill'" aria-hidden="true"></i>
         </span>
         <div class="app-timeline__content">
           <div class="app-timeline__title-row">
             <strong>{{ item.title | translateContent }}</strong>
             @if (item.time) {
-              <time>{{ item.time | date:timestampFormat }}</time>
+              <time>{{ item.time | date: timestampFormat }}</time>
             }
           </div>
           @if (item.description) {
@@ -34,4 +37,3 @@
     }
   </ol>
 }
-

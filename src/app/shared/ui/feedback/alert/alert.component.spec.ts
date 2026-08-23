@@ -11,7 +11,7 @@ describe('AlertComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(AlertComponent);
@@ -28,7 +28,9 @@ describe('AlertComponent', () => {
       expect(alert.textContent).toContain(`Title ${variant}`);
       expect(alert.textContent).toContain(`Message ${variant}`);
       expect(alert.classList.contains(`app-alert--${variant}`)).toBe(true);
-      expect(alert.getAttribute('role')).toBe(variant === 'warning' || variant === 'danger' ? 'alert' : 'status');
+      expect(alert.getAttribute('role')).toBe(
+        variant === 'warning' || variant === 'danger' ? 'alert' : 'status',
+      );
     });
   });
 

@@ -1,0 +1,72 @@
+﻿<app-koc-page-frame
+  title="koc.configuration.agents.title"
+  subtitle="koc.configuration.agents.subtitle"
+>
+  <app-section-panel
+    title="koc.configuration.agents.sectionTitle"
+    subtitle="koc.configuration.agents.subtitle"
+  >
+    @if (loading()) {
+      <app-loading-skeleton type="list" [rows]="5"></app-loading-skeleton>
+    } @else if (error()) {
+      <app-error-state
+        title="koc.agentCatalog.error.title"
+        [message]="error() ?? 'koc.agentCatalog.error.loadFailed'"
+        retryLabel="retry"
+        (retry)="loadAgents()"
+      ></app-error-state>
+    } @else if (agents().length === 0) {
+      <app-empty-state
+        title="koc.agentCatalog.empty.title"
+        description="koc.agentCatalog.empty.description"
+      ></app-empty-state>
+    } @else {
+      <div class="agent-catalog__rows" role="list" [attr.aria-label]="'koc.configuration.agents.sectionTitle' | translateContent">
+        @for (agent of agents(); track agent.agentCode) {
+          <div class="agent-catalog__row" role="listitem">
+            <div class="agent-catalog__identity">
+              <strong>{{ agent.displayName }}</strong>
+              <small>{{ agent.agentCode }}</small>
+            </div>
+
+            <div class="agent-catalog__capability">
+              <span class="agent-catalog__label">{{ 'koc.agentCatalog.column.capability' | translateContent }}</span>
+              <app-badge [label]="capabilityLabel(agent.capability) | translateContent" variant="info" size="sm"></app-badge>
+            </div>
+
+            <div class="agent-catalog__providers">
+              <span class="agent-catalog__label">{{ 'koc.agentCatalog.column.providers' | translateContent }}</span>
+              <div class="agent-catalog__provider-badges">
+                @for (providerOpt of agent.supportedProviders; track providerOpt.provider) {
+                  <app-badge
+                    [label]="(providerLabel(providerOpt.provider) | translateContent) + ' (' + (providerHealthLabel(providerOpt.health) | translateContent) + ')'"
+                    [variant]="providerHealthVariant(providerOpt.health)"
+                    size="sm"
+                  ></app-badge>
+                }
+              </div>
+            </div>
+
+            <div class="agent-catalog__dependencies">
+              <span class="agent-catalog__label">{{ 'koc.agentCatalog.column.dependencies' | translateContent }}</span>
+              @if (agent.requiredDependencies.length > 0) {
+                <div class="agent-catalog__dependency-list">
+                  @for (dep of agent.requiredDependencies; track dep) {
+                    <span class="agent-catalog__dep-item">{{ dep }}</span>
+                  }
+                </div>
+              } @else {
+                <span class="agent-catalog__none">{{ 'notAvailable' | translateContent }}</span>
+              }
+            </div>
+
+            <div class="agent-catalog__health">
+              <span class="agent-catalog__label">{{ 'koc.agentCatalog.column.health' | translateContent }}</span>
+              <app-koc-status-badge [status]="agent.health" size="sm"></app-koc-status-badge>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </app-section-panel>
+</app-koc-page-frame>

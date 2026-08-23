@@ -4,7 +4,7 @@ import { ButtonSpeedDial } from './button-speed-dial';
 const sampleMenuItems = [
   { icon: 'pi pi-pencil', tooltip: 'Edit' },
   { icon: 'pi pi-trash', tooltip: 'Delete' },
-  { icon: 'pi pi-share-alt', tooltip: 'Share' }
+  { icon: 'pi pi-share-alt', tooltip: 'Share' },
 ];
 
 const meta: Meta<ButtonSpeedDial> = {
@@ -16,7 +16,7 @@ const meta: Meta<ButtonSpeedDial> = {
     type: 'linear',
     showIcon: 'pi pi-bars',
     hideIcon: 'pi pi-times',
-    ariaLabel: 'Open actions menu'
+    ariaLabel: 'Open actions menu',
   },
   render: (args) => ({
     props: args,
@@ -31,8 +31,8 @@ const meta: Meta<ButtonSpeedDial> = {
           [ariaLabel]="ariaLabel"
         ></app-button-speed-dial>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -43,12 +43,12 @@ export const Default: Story = {};
 
 export const Circle: Story = {
   args: {
-    type: 'circle'
-  }
+    type: 'circle',
+  },
 };
 
 export const Down: Story = {
   args: {
-    direction: 'down'
-  }
+    direction: 'down',
+  },
 };

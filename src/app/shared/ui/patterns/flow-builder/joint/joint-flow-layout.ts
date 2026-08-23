@@ -1,4 +1,4 @@
-import * as joint from '@joint/core';
+import type * as joint from '@joint/core';
 
 export interface TreeLayoutOptions {
   direction?: 'TB' | 'LR';
@@ -27,7 +27,7 @@ export function applyTreeLayout(graph: joint.dia.Graph, options: TreeLayoutOptio
     hasParent.add(targetId);
   }
 
-  const roots = elements.filter(el => !hasParent.has(el.id as string));
+  const roots = elements.filter((el) => !hasParent.has(el.id as string));
   if (!roots.length) return;
 
   const positions = new Map<string, { x: number; y: number }>();
@@ -43,7 +43,7 @@ export function applyTreeLayout(graph: joint.dia.Graph, options: TreeLayoutOptio
     const size = getSize(nodeId);
     const nodeExtent = isVertical ? size.width : size.height;
     const nodeDepthExtent = isVertical ? size.height : size.width;
-    const depthOffset = depth * (rankGap + nodeDepthExtent) / 1.5 + padding;
+    const depthOffset = (depth * (rankGap + nodeDepthExtent)) / 1.5 + padding;
 
     if (children.length === 0) {
       const pos = cursor;

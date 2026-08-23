@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { BadgeVariant } from '../badge/badge.component';
+import type { BadgeVariant } from '../badge/badge.component';
 
 export type KeyValueType =
   | 'text'
@@ -32,7 +32,7 @@ export interface KeyValueItem {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './key-value-list.component.html',
-  styleUrl: './key-value-list.component.css'
+  styleUrl: './key-value-list.component.css',
 })
 export class KeyValueListComponent {
   @Input() items: KeyValueItem[] = [];
@@ -49,7 +49,9 @@ export class KeyValueListComponent {
 
   dateValue(item: KeyValueItem): string | number | Date | null {
     const value = item.value;
-    return typeof value === 'string' || typeof value === 'number' || value instanceof Date ? value : null;
+    return typeof value === 'string' || typeof value === 'number' || value instanceof Date
+      ? value
+      : null;
   }
 
   numberValue(item: KeyValueItem): number | null {

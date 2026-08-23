@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-fluid',
   standalone: false,
   templateUrl: './fluid.html',
-  styleUrl: './fluid.css'
+  styleUrl: './fluid.css',
 })
 export class FluidComponent {}

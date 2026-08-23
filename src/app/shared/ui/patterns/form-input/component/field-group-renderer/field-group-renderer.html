@@ -9,11 +9,29 @@
     <div class="grid grid-cols-12 gap-4">
       @for (f of field.children; track $index) {
         @if (isArrayField(f)) {
-          <app-field-array-renderer class="w-full h-full" [ngClass]="getCol(f.width)" [field]="f" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-array-renderer>
+          <app-field-array-renderer
+            class="w-full h-full"
+            [ngClass]="getCol(f.width)"
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode"
+          ></app-field-array-renderer>
         } @else if (isTreeField(f)) {
-          <app-field-tree-renderer class="w-full h-full" [ngClass]="getCol(f.width)" [field]="f" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-tree-renderer>
+          <app-field-tree-renderer
+            class="w-full h-full"
+            [ngClass]="getCol(f.width)"
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode"
+          ></app-field-tree-renderer>
         } @else {
-          <app-field-renderer class="w-full h-full" [ngClass]="getCol(f.width)" [field]="f" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-renderer>
+          <app-field-renderer
+            class="w-full h-full"
+            [ngClass]="getCol(f.width)"
+            [field]="f"
+            [submitted]="submitted"
+            [readonlyMode]="readonlyMode"
+          ></app-field-renderer>
         }
       }
     </div>

@@ -1,4 +1,5 @@
 import { serviceManagementRoutes } from './service-management.routes';
+import { serviceManagementUnsavedChangesGuard } from './guards/service-management-unsaved-changes.guard';
 
 describe('serviceManagementRoutes', () => {
   it('registers CRUD routes for the two managed backend services', () => {
@@ -21,5 +22,16 @@ describe('serviceManagementRoutes', () => {
         'job-service/jobs/:id/edit',
       ]),
     );
+  });
+
+  it('keeps unsaved-change route policy in the service-management feature', () => {
+    const guardedRoutes = serviceManagementRoutes.filter((route) => route.canDeactivate?.length);
+
+    expect(guardedRoutes.length).toBeGreaterThan(0);
+    expect(
+      guardedRoutes.every(
+        (route) => route.canDeactivate?.[0] === serviceManagementUnsavedChangesGuard,
+      ),
+    ).toBe(true);
   });
 });

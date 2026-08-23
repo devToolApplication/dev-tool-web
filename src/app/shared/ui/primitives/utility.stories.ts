@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
-
-
-
 const meta: Meta = {
-  title: 'Shared/Components/Utility'
+  title: 'Shared/Components/Utility',
 };
 
 export default meta;
@@ -19,8 +16,8 @@ export const FluidDemo: StoryObj = {
           <app-button label="Full Width Fluid Button" class="block"></app-button>
         </app-fluid>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const RippleDemo: StoryObj = {
@@ -32,8 +29,8 @@ export const RippleDemo: StoryObj = {
           <app-ripple></app-ripple>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const IconFieldDemo: StoryObj = {
@@ -48,7 +45,6 @@ export const IconFieldDemo: StoryObj = {
           </p-iconfield>
         </app-icon-field>
       </div>
-    `
-  })
+    `,
+  }),
 };
-

@@ -1,5 +1,5 @@
-import { FlowNode } from './flow-node.model';
-import { FlowEdge } from './flow-edge.model';
+import type { FlowNode } from './flow-node.model';
+import type { FlowEdge } from './flow-edge.model';
 import type { FlowCapabilities } from './flow-capability.model';
 import type { FormContext } from '../../form-input/models/form-config.model';
 

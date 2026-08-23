@@ -8,7 +8,7 @@ export type MessageVariant = 'text' | 'outlined' | 'simple';
   selector: 'app-message',
   standalone: false,
   templateUrl: './message.html',
-  styleUrl: './message.css'
+  styleUrl: './message.css',
 })
 export class MessageComponent {
   @Input() text = '';

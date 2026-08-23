@@ -1,21 +1,13 @@
-import { Signal, WritableSignal } from '@angular/core';
+import type { Signal, WritableSignal } from '@angular/core';
+import type { ValidationRule } from '../../validation/validation.model';
 
 export type GridWidth = '1/2' | '1/3' | '1/4' | '1/6' | 'full';
 export type FormDensity = 'compact' | 'comfortable' | 'spacious';
 
-export interface FormContext {
-  user: any;
-  extra?: any;
+export interface FormContext<TUser = unknown, TExtra = unknown> {
+  user: TUser | null;
+  extra?: TExtra;
   mode?: 'create' | 'edit' | 'view';
-}
-
-export interface ValidationRule {
-  type?: 'required' | 'min' | 'max' | 'regex' | 'expression' | 'custom';
-  expression?: string;
-  value?: unknown;
-  validator?: string;
-  message: string;
-  severity?: 'error' | 'warning';
 }
 
 export interface SelectOption {
@@ -37,6 +29,10 @@ export interface FormValidationHelpers {
   treeDepth(value: unknown): number;
   hasDuplicate(value: unknown, key: string): boolean;
   hasDisabledNode(value: unknown): boolean;
+  isEmail(value: unknown): boolean;
+  matchesPattern(value: unknown, pattern: string): boolean;
+  isBeforeDate(value: unknown, date: unknown): boolean;
+  isAfterDate(value: unknown, date: unknown): boolean;
   findTreeNode(value: unknown, predicate: (node: TreeFormNode) => boolean): TreeFormNode | null;
 }
 
@@ -46,7 +42,7 @@ export type FormCustomValidator = (
     formValue: Record<string, unknown>;
     fieldKey: string;
     helpers: FormValidationHelpers;
-  }
+  },
 ) => true | FormValidationError[];
 
 export interface ArrayState {
@@ -78,7 +74,17 @@ export interface BaseFieldConfig {
 export interface FieldUiConfig {
   helpText?: string;
   description?: string;
-  readonlyType?: 'text' | 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'boolean' | 'badge' | 'copyable' | 'json';
+  readonlyType?:
+    | 'text'
+    | 'number'
+    | 'currency'
+    | 'percent'
+    | 'date'
+    | 'datetime'
+    | 'boolean'
+    | 'badge'
+    | 'copyable'
+    | 'json';
   copyable?: boolean;
   masked?: boolean;
   prefix?: string;
@@ -109,7 +115,7 @@ export interface NumberFieldConfig extends BaseFieldConfig {
 
 export interface SelectFieldConfig extends BaseFieldConfig {
   type: 'select' | 'select-multi' | 'multi-select';
-  options?: any[];
+  options?: SelectOption[];
   optionsExpression?: string;
   placeholder?: string;
   showClear?: boolean;
@@ -346,28 +352,6 @@ export interface ColorPickerFieldConfig extends BaseFieldConfig {
   format?: 'hex' | 'rgb' | 'hsb';
 }
 
-export interface SecretMetadataFieldConfig extends BaseFieldConfig {
-  type: 'secret-metadata';
-  optionsSource?: string;
-  options?: SelectOption[];
-  optionsExpression?: string;
-  typeOptions?: SelectOption[];
-  grantTypeOptions?: SelectOption[];
-  addButtonLabel?: string;
-  removeButtonLabel?: string;
-  keyPlaceholder?: string;
-  typePlaceholder?: string;
-  valuePlaceholder?: string;
-  secretPlaceholder?: string;
-  grantTypePlaceholder?: string;
-  tokenUrlPlaceholder?: string;
-  clientIdPlaceholder?: string;
-  clientSecretPlaceholder?: string;
-  usernamePlaceholder?: string;
-  passwordPlaceholder?: string;
-  scopePlaceholder?: string;
-}
-
 export type FieldConfig =
   | TextFieldConfig
   | NumberFieldConfig
@@ -382,7 +366,6 @@ export type FieldConfig =
   | TagsFieldConfig
   | InputMultiFieldConfig
   | ColorPickerFieldConfig
-  | SecretMetadataFieldConfig
   | TreeFieldConfig;
 
 export type FieldType =
@@ -410,18 +393,17 @@ export type FieldType =
   | 'tags'
   | 'input-multi'
   | 'color-picker'
-  | 'secret-metadata'
   | 'tree';
 
-export interface FieldState<TModel = unknown> {
-  fieldConfig: TModel;
+export interface FieldState<TValue = unknown, TConfig extends FieldConfig = FieldConfig> {
+  fieldConfig: TConfig;
   type: FieldType;
   name: string;
   label?: string;
   path: string;
   width?: GridWidth;
-  value: Signal<any>;
-  setValue(val: any): void;
+  value: Signal<TValue>;
+  setValue(val: TValue): void;
   touched: WritableSignal<boolean>;
   focusing: WritableSignal<boolean>;
   blurred: WritableSignal<boolean>;
@@ -440,8 +422,10 @@ export interface FieldState<TModel = unknown> {
   groupName?: string;
 }
 
-export interface ArrayFieldState<TModel = unknown>
-  extends FieldState<TModel> {
+export interface ArrayFieldState<
+  TValue = unknown[],
+  TConfig extends ArrayFieldConfig = ArrayFieldConfig,
+> extends FieldState<TValue, TConfig> {
   children: Signal<FieldState[][]>;
 }
 
@@ -508,12 +492,14 @@ export interface FormResolvedSection {
   active: boolean;
 }
 
-export interface GroupFieldState extends FieldState {
+export interface GroupFieldState extends FieldState<unknown, GroupFieldConfig> {
   fieldConfig: GroupFieldConfig;
   children: FieldState[] | ArrayFieldState[];
 }
 
-export interface TreeFieldState extends FieldState {
+export interface TreeFieldState extends FieldState<unknown, TreeFieldConfig> {
   fieldConfig: TreeFieldConfig;
   children: FieldState[] | ArrayFieldState[];
 }
+
+export type { ValidationRule };

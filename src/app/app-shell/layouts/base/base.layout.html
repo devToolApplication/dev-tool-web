@@ -12,7 +12,12 @@
     ></app-side-menu>
   </div>
 
-  <div class="layout-mask" (click)="closeSidebarOverlay()"></div>
+  <button
+    type="button"
+    class="layout-mask"
+    [attr.aria-label]="'layout.closeSidebar' | translateContent"
+    (click)="closeSidebarOverlay()"
+  ></button>
 
   <div class="content-area">
     <app-header

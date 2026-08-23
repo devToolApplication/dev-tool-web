@@ -1,0 +1,7 @@
+﻿<app-page-shell [title]="title" [subtitle]="subtitle" [status]="status ?? null" layout="wide">
+  <ng-container page-actions>
+    <ng-content select="[koc-page-actions]"></ng-content>
+  </ng-container>
+  <app-koc-navigation page-toolbar></app-koc-navigation>
+  <ng-content></ng-content>
+</app-page-shell>

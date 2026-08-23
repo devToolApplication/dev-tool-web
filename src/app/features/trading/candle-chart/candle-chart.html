@@ -34,7 +34,10 @@
     <div #chartRef class="candle-chart-canvas"></div>
 
     @if (showStateOverlay) {
-      <app-candle-chart-state-overlay [severity]="stateOverlaySeverity" [message]="stateOverlayMessage" />
+      <app-candle-chart-state-overlay
+        [severity]="stateOverlaySeverity"
+        [message]="stateOverlayMessage"
+      />
     }
 
     @if (showHeader) {
@@ -81,7 +84,9 @@
 
   @if (showReplayControls) {
     <div class="candle-chart-timeline">
-      <span class="candle-chart-timeline__index">{{ currentIndex + 1 }} / {{ totalCandles || 0 }}</span>
+      <span class="candle-chart-timeline__index"
+        >{{ currentIndex + 1 }} / {{ totalCandles || 0 }}</span
+      >
       <app-slider
         class="candle-chart-timeline__slider"
         [min]="0"
@@ -113,7 +118,9 @@
 
   @if (showDebugPanel && latestEvaluation()) {
     <div class="candle-chart-debug">
-      <div class="candle-chart-debug__title">{{ 'tradeBot.chart.debug.evaluation' | translateContent }}</div>
+      <div class="candle-chart-debug__title">
+        {{ 'tradeBot.chart.debug.evaluation' | translateContent }}
+      </div>
       <app-json-viewer [value]="latestEvaluation()" [collapsed]="true"></app-json-viewer>
     </div>
   }

@@ -7,13 +7,12 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './input-text.html',
   styleUrl: './input-text.css',
-  providers: [provideValueAccessor(() => InputText)]
+  providers: [provideValueAccessor(() => InputText)],
 })
 export class InputText extends BaseInput<string> {
   @Input() autocomplete = 'on';
   @Input() inputMode?: string;
   @Input() name?: string;
-  @Input() describedBy?: string | null;
 
   constructor() {
     super();

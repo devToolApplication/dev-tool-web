@@ -20,7 +20,12 @@ export type CandleChartOverlayType =
   | 'BOX'
   | 'POLYLINE'
   | 'LABEL';
-export type CandleChartOverlaySource = 'INDICATOR' | 'RULE' | 'STRATEGY' | 'PAPER_TRADE' | 'USER_DRAWING';
+export type CandleChartOverlaySource =
+  | 'INDICATOR'
+  | 'RULE'
+  | 'STRATEGY'
+  | 'PAPER_TRADE'
+  | 'USER_DRAWING';
 export type ChartOverlayCategory =
   | 'ENTRY'
   | 'EXIT'

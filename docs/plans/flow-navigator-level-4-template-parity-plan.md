@@ -17,6 +17,7 @@ This level assumes levels 1-3 are complete.
 ## Target Feature List
 
 Minimap should include:
+
 - Compact header/menu with plus, minus, fit, close.
 - Zoom percentage display.
 - Live viewport rectangle.
@@ -55,6 +56,7 @@ Add input to `FlowBuilderComponent`:
 ```
 
 Keep backward compatibility:
+
 - `resolvedCapabilities.navigator` still decides if feature is allowed.
 - `navigatorOpen()` still decides current open state.
 - If `navigator.visible === false`, do not render it.
@@ -82,6 +84,7 @@ Keep backward compatibility:
 Default: bottom-left.
 
 CSS classes:
+
 - `.flow-builder__navigator-panel--bottom-left`
 - `.flow-builder__navigator-panel--bottom-right`
 - `.flow-builder__navigator-panel--top-left`
@@ -92,6 +95,7 @@ Use `FlowNavigatorConfig.position`.
 ### Size
 
 Default:
+
 - width: 300
 - height: 190 with controls
 
@@ -115,7 +119,7 @@ zoomPercent: number;
 Or derive:
 
 ```ts
-Math.round(snapshot.scale * 100)
+Math.round(snapshot.scale * 100);
 ```
 
 Render as compact text:
@@ -139,6 +143,7 @@ Two possible behaviors:
    - User can reopen from the square.
 
 Recommended for template parity:
+
 - Add `collapsed` local state in `FlowBuilderComponent`.
 - Keep `navigatorOpen()` for full hidden/open.
 - Add `navigatorCollapsed = signal(false)`.
@@ -150,6 +155,7 @@ Do not add collapse until the base controls are stable.
 ### Node Tone In Minimap
 
 Minimap can use the same node `status` and type tone:
+
 - `success`, `warning`, `danger`, `primary`, `muted`.
 
 Implement helper:
@@ -159,6 +165,7 @@ nodeToneClass(node: FlowNode): string
 ```
 
 Classes:
+
 - `.flow-navigator__node--tone-primary`
 - `.flow-navigator__node--tone-success`
 - `.flow-navigator__node--tone-warning`
@@ -168,6 +175,7 @@ Classes:
 This requires passing `nodeTypes` to navigator or resolving tone in builder.
 
 Recommended:
+
 - Add `@Input() nodeTypes: FlowNodeTypeDefinition[] = []` to navigator.
 - Add `nodeTone(node)`.
 
@@ -191,6 +199,7 @@ Recommended:
 6. Update Storybook args to show controls.
 
 Acceptance:
+
 - Existing stories render with defaults.
 - Users can hide navigator with `[navigator]="{ visible: false }"`.
 
@@ -202,6 +211,7 @@ Acceptance:
 4. Ensure mobile behavior does not overlap inspector.
 
 Acceptance:
+
 - Minimap can appear bottom-right and top-right.
 - Storybook controls can demonstrate positions.
 
@@ -213,6 +223,7 @@ Acceptance:
 4. Tune CSS colors with existing tokens.
 
 Acceptance:
+
 - Zoom percent changes on zoom.
 - Selected/status nodes remain readable.
 
@@ -224,6 +235,7 @@ Acceptance:
 4. Add keyboard handling.
 
 Acceptance:
+
 - Collapse hides minimap body but leaves reopen affordance.
 - Close hides minimap entirely and toolbar can reopen.
 
@@ -236,6 +248,7 @@ Acceptance:
 5. Check high contrast against app tokens.
 
 Acceptance:
+
 - Keyboard users can use controls.
 - Screen reader labels are meaningful.
 - No text overflow in narrow viewport.
@@ -243,6 +256,7 @@ Acceptance:
 ## I18n Keys
 
 Add:
+
 - `shared.flowBuilder.navigator.title`
 - `shared.flowBuilder.navigator.zoomIn`
 - `shared.flowBuilder.navigator.zoomOut`
@@ -256,6 +270,7 @@ Add:
 ## Storybook Updates
 
 Update `FlowBuilder` stories:
+
 - `AIAgentWorkflow`: full minimap controls and viewport.
 - `EmptyCanvas`: controls visible, no viewport until content exists or viewport shows empty canvas.
 - `LargeGraph`: best story for viewport drag.
@@ -271,6 +286,7 @@ npm.cmd run build-storybook
 ```
 
 Browser checks:
+
 - Desktop 1782x900: AI Agent Workflow.
 - Desktop 1782x900: Large Graph.
 - Mobile 390x844: Empty Canvas.
@@ -286,6 +302,7 @@ Browser checks:
   - select minimap node
 
 Optional Playwright checks:
+
 - `.flow-navigator__action--zoom-in` exists.
 - `.flow-navigator__zoom` changes after zoom.
 - `.flow-navigator__viewport` moves after drag.

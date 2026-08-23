@@ -7,7 +7,7 @@ const meta: Meta<ResponsiveGridComponent> = {
   args: {
     columns: 2,
     gap: 'md',
-    align: 'stretch'
+    align: 'stretch',
   },
   render: (args) => ({
     props: args,
@@ -38,8 +38,8 @@ const meta: Meta<ResponsiveGridComponent> = {
           </div>
         </app-card>
       </app-responsive-grid>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -48,42 +48,42 @@ type Story = StoryObj<ResponsiveGridComponent>;
 
 export const TwoColumns: Story = {
   args: {
-    columns: 2
-  }
+    columns: 2,
+  },
 };
 
 export const ThreeColumns: Story = {
   args: {
-    columns: 3
-  }
+    columns: 3,
+  },
 };
 
 export const FourColumns: Story = {
   args: {
-    columns: 4
-  }
+    columns: 4,
+  },
 };
 
 export const SixColumns: Story = {
   args: {
-    columns: 6
-  }
+    columns: 6,
+  },
 };
 
 export const SmallGap: Story = {
   args: {
-    gap: 'sm'
-  }
+    gap: 'sm',
+  },
 };
 
 export const LargeGap: Story = {
   args: {
-    gap: 'lg'
-  }
+    gap: 'lg',
+  },
 };
 
 export const AlignStart: Story = {
   args: {
-    align: 'start'
-  }
+    align: 'start',
+  },
 };

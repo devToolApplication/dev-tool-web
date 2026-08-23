@@ -11,8 +11,8 @@ const meta: Meta<ToggleButton> = {
     onIcon: 'pi pi-sun',
     offIcon: 'pi pi-moon',
     value: false,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -27,13 +27,13 @@ export const CustomLabels: Story = {
     offLabel: 'Unlocked',
     onIcon: 'pi pi-lock',
     offIcon: 'pi pi-lock-open',
-    value: true
-  }
+    value: true,
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: true
-  }
+    value: true,
+  },
 };

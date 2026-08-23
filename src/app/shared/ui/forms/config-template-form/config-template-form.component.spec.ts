@@ -11,7 +11,7 @@ describe('ConfigTemplateFormComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConfigTemplateFormComponent);
@@ -22,9 +22,9 @@ describe('ConfigTemplateFormComponent', () => {
         {
           name: 'name',
           type: 'text',
-          label: 'Name'
-        }
-      ]
+          label: 'Name',
+        },
+      ],
     };
     component.context = { user: null, mode: 'edit' };
     component.initialValue = { name: 'Initial' };
@@ -56,8 +56,8 @@ describe('ConfigTemplateFormComponent', () => {
         currentValue: { name: 'Initial' },
         previousValue: undefined,
         firstChange: true,
-        isFirstChange: () => true
-      }
+        isFirstChange: () => true,
+      },
     });
 
     component.onAdvancedJsonChange('{"name":"From JSON"}');

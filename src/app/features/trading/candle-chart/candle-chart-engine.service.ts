@@ -102,7 +102,9 @@ export class CandleChartEngineService {
   private hostElement: HTMLDivElement | null = null;
   private renderStateCallback: ((state: CandleChartEngineState) => void) | null = null;
   private candleClickCallback: ((candle: ChartCandle) => void) | null = null;
-  private visibleRangeCallback: ((range: { from: number; to: number } | null, candleCount: number) => void) | null = null;
+  private visibleRangeCallback:
+    | ((range: { from: number; to: number } | null, candleCount: number) => void)
+    | null = null;
   private viewportUpdateFrame: number | null = null;
   private lastRenderStateSignature = '';
   private overlayGeometryEnabled = false;
@@ -125,7 +127,10 @@ export class CandleChartEngineService {
     input: CandleChartEngineRenderInput,
     renderStateCallback: (state: CandleChartEngineState) => void,
     candleClickCallback: (candle: ChartCandle) => void,
-    visibleRangeCallback?: (range: { from: number; to: number } | null, candleCount: number) => void,
+    visibleRangeCallback?: (
+      range: { from: number; to: number } | null,
+      candleCount: number,
+    ) => void,
   ): Promise<void> {
     this.lightweightChartsModule = await import('lightweight-charts');
     this.hostElement = hostElement;
@@ -172,7 +177,11 @@ export class CandleChartEngineService {
     const timeContext = this.timeUtil.buildTimeNormalizationContext(normalizedCandles);
     this.renderOverlays(input.overlays, timeContext, input.config, colors);
     this.applySelectedRange(input.selectedRange, input.fitContent !== false);
-    if (input.config.autoScrollToRealtime && input.config.mode === 'REALTIME' && wasNearRealtimeEdge) {
+    if (
+      input.config.autoScrollToRealtime &&
+      input.config.mode === 'REALTIME' &&
+      wasNearRealtimeEdge
+    ) {
       this.chartInstance.timeScale().scrollToRealTime();
     } else if (previousVisibleLogicalRange && input.fitContent === false) {
       this.chartInstance.timeScale().setVisibleLogicalRange(previousVisibleLogicalRange);
@@ -190,7 +199,9 @@ export class CandleChartEngineService {
       window.cancelAnimationFrame(this.viewportUpdateFrame);
       this.viewportUpdateFrame = null;
     }
-    this.chartInstance?.timeScale().unsubscribeVisibleLogicalRangeChange(this.scheduleViewportUpdate);
+    this.chartInstance
+      ?.timeScale()
+      .unsubscribeVisibleLogicalRangeChange(this.scheduleViewportUpdate);
     this.chartInstance?.unsubscribeClick(this.clickHandler);
     this.clearAllSeries();
     this.chartInstance?.remove();
@@ -273,7 +284,10 @@ export class CandleChartEngineService {
     }
   }
 
-  private createIndicatorSeries(indicator: ChartIndicator, input: CandleChartEngineRenderInput): SeriesApi {
+  private createIndicatorSeries(
+    indicator: ChartIndicator,
+    input: CandleChartEngineRenderInput,
+  ): SeriesApi {
     const isSubchart = indicator.pane === 'SUB' || indicator.pane === 'subchart';
     const color = resolveCssColor(indicator.color, '--app-chart-violet');
     const paneIndex = isSubchart ? 1 : 0;
@@ -441,7 +455,7 @@ export class CandleChartEngineService {
             lineWidth: 2,
             lineStyle: this.lightweightChartsModule!.LineStyle.Dashed,
             axisLabelVisible: config.showPriceAxisLabels,
-            title: config.showOverlayLabels ? overlay.text ?? overlay.sourceCode ?? '' : '',
+            title: config.showOverlayLabels ? (overlay.text ?? overlay.sourceCode ?? '') : '',
           }),
         );
         return;
@@ -485,7 +499,8 @@ export class CandleChartEngineService {
 
     this.activeBoxAreas = boxes;
     this.activeLines = labelLines;
-    this.overlayGeometryEnabled = config.showOverlayLabels && (boxes.length > 0 || labelLines.some((line) => !!line.name));
+    this.overlayGeometryEnabled =
+      config.showOverlayLabels && (boxes.length > 0 || labelLines.some((line) => !!line.name));
     this.markersApi = this.lightweightChartsModule.createSeriesMarkers(this.candleSeries, markers);
   }
 
@@ -565,7 +580,10 @@ export class CandleChartEngineService {
     const data = overlay.points.flatMap((point): LineData<Time>[] => {
       const time = point.index == null ? null : this.timeUtil.timeByIndex(point.index, timeContext);
       const resolvedTime =
-        time ?? (point.time == null ? null : this.timeUtil.normalizeExternalTime(point.time, timeContext, 'nearest'));
+        time ??
+        (point.time == null
+          ? null
+          : this.timeUtil.normalizeExternalTime(point.time, timeContext, 'nearest'));
       const value = this.numberValue(point.price ?? point.value);
       return resolvedTime == null || value == null ? [] : [{ time: resolvedTime, value }];
     });
@@ -593,7 +611,9 @@ export class CandleChartEngineService {
   ): Time | null {
     return (
       this.timeUtil.timeByIndex(overlay.index, timeContext) ??
-      (overlay.time == null ? null : this.timeUtil.normalizeExternalTime(overlay.time, timeContext, boundary))
+      (overlay.time == null
+        ? null
+        : this.timeUtil.normalizeExternalTime(overlay.time, timeContext, boundary))
     );
   }
 
@@ -627,7 +647,9 @@ export class CandleChartEngineService {
     }
 
     this.clearOverlayArtifacts();
-    [...this.indicatorSeries.values()].forEach((series) => this.chartInstance?.removeSeries(series));
+    [...this.indicatorSeries.values()].forEach((series) =>
+      this.chartInstance?.removeSeries(series),
+    );
     this.indicatorSeries.clear();
     if (this.volumeSeries) {
       this.chartInstance.removeSeries(this.volumeSeries);
@@ -856,10 +878,16 @@ export class CandleChartEngineService {
       ? `${latest.openTime ?? latest.time}:${latest.open}:${latest.high}:${latest.low}:${latest.close}:${latest.volume ?? ''}`
       : '';
     const areasKey = state.renderedBoxAreas
-      .map((area) => `${area.key}:${area.style['left']}:${area.style['top']}:${area.style['width']}:${area.style['height']}:${area.style['background']}:${area.style['borderColor']}`)
+      .map(
+        (area) =>
+          `${area.key}:${area.style['left']}:${area.style['top']}:${area.style['width']}:${area.style['height']}:${area.style['background']}:${area.style['borderColor']}`,
+      )
       .join('|');
     const labelsKey = state.renderedLineLabels
-      .map((label) => `${label.key}:${label.style['left']}:${label.style['top']}:${label.style['color']}`)
+      .map(
+        (label) =>
+          `${label.key}:${label.style['left']}:${label.style['top']}:${label.style['color']}`,
+      )
       .join('|');
     return `${latestKey}::${areasKey}::${labelsKey}`;
   }
@@ -876,7 +904,10 @@ export class CandleChartEngineService {
       autoSize: true,
       height: config.height,
       layout: {
-        background: { type: this.lightweightChartsModule.ColorType.Solid, color: colors.background },
+        background: {
+          type: this.lightweightChartsModule.ColorType.Solid,
+          color: colors.background,
+        },
         textColor: colors.muted,
         fontSize: 12,
         fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -964,7 +995,10 @@ export class CandleChartEngineService {
       : { time: item.time, value: Number(value) };
   }
 
-  private buildStructureKey(input: CandleChartEngineRenderInput, normalizedCandles: NormalizedCandle[]): string {
+  private buildStructureKey(
+    input: CandleChartEngineRenderInput,
+    normalizedCandles: NormalizedCandle[],
+  ): string {
     return JSON.stringify({
       showCandles: input.config.showCandles,
       showVolume: input.config.showVolume,
@@ -984,7 +1018,10 @@ export class CandleChartEngineService {
     });
   }
 
-  private buildOverlaySignature(overlays: ChartOverlay[], config: ResolvedCandleChartConfig): string {
+  private buildOverlaySignature(
+    overlays: ChartOverlay[],
+    config: ResolvedCandleChartConfig,
+  ): string {
     return JSON.stringify({
       labels: config.showOverlayLabels,
       priceLabels: config.showPriceAxisLabels,
@@ -1035,7 +1072,9 @@ export class CandleChartEngineService {
 
   private resolveIndicatorLineWidth(name: string): LineWidth {
     const normalized = name.toLowerCase();
-    return normalized.includes('middle') || normalized.includes('overbought') || normalized.includes('oversold')
+    return normalized.includes('middle') ||
+      normalized.includes('overbought') ||
+      normalized.includes('oversold')
       ? 1
       : 2;
   }
@@ -1047,7 +1086,10 @@ export class CandleChartEngineService {
       : this.lightweightChartsModule!.LineStyle.Solid;
   }
 
-  private resolveMarkerShape(shape: string | undefined, type: ChartOverlay['type']): SeriesMarker<Time>['shape'] {
+  private resolveMarkerShape(
+    shape: string | undefined,
+    type: ChartOverlay['type'],
+  ): SeriesMarker<Time>['shape'] {
     const normalized = String(shape ?? '').trim();
     if (normalized === 'arrowUp' || normalized === 'arrowDown' || normalized === 'square') {
       return normalized;
@@ -1077,4 +1119,3 @@ export class CandleChartEngineService {
     return Number.isNaN(numericValue) ? null : numericValue;
   }
 }
-

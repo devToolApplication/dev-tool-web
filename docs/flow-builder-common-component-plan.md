@@ -379,10 +379,10 @@ const nodeCatalog: FlowNodeTypeDefinition[] = [
     defaultSize: { width: 180, height: 64 },
     ports: [
       { id: 'in', group: 'in', position: 'top' },
-      { id: 'out', group: 'out', position: 'bottom' }
+      { id: 'out', group: 'out', position: 'bottom' },
     ],
-    labelResolver: (node) => String(node.data?.['operator'] ?? 'Condition')
-  }
+    labelResolver: (node) => String(node.data?.['operator'] ?? 'Condition'),
+  },
 ];
 ```
 
@@ -1934,16 +1934,16 @@ MVP is complete when:
 
 ## 24. Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Angular template inside JointJS SVG is complex | High | Use SVG config renderer by default; use HTML overlay/foreignObject only for rich templates |
-| Recreating `@joint/plus` features is large | High | Implement MVP subset first: canvas, toolbar, inspector, layout; postpone advanced minimap/context toolbar |
-| Shared component becomes Trade Bot-specific | High | Enforce adapter boundary; no Trade Bot imports in `shared/ui/flow-builder` |
-| Performance degrades with many Angular node templates | Medium | Prefer SVG rendering for large graphs; add 100-node story; consider virtualization/overlay throttling |
-| Existing tests are dirty/failing | Medium | Run build as required; document unrelated test failures explicitly |
-| UI violates shared wrapper rule | High | Use `app-*` wrappers in templates; only JointJS internals may touch JointJS directly inside wrapper code |
-| Mobile layout becomes unusable | Medium | Inspector collapses to bottom sheet; navigator hidden by default |
-| Tree/flow sync corrupts expression | High | Implement adapter round-trip tests before enabling edit mode |
+| Risk                                                  | Impact | Mitigation                                                                                                |
+| ----------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| Angular template inside JointJS SVG is complex        | High   | Use SVG config renderer by default; use HTML overlay/foreignObject only for rich templates                |
+| Recreating `@joint/plus` features is large            | High   | Implement MVP subset first: canvas, toolbar, inspector, layout; postpone advanced minimap/context toolbar |
+| Shared component becomes Trade Bot-specific           | High   | Enforce adapter boundary; no Trade Bot imports in `shared/ui/flow-builder`                                |
+| Performance degrades with many Angular node templates | Medium | Prefer SVG rendering for large graphs; add 100-node story; consider virtualization/overlay throttling     |
+| Existing tests are dirty/failing                      | Medium | Run build as required; document unrelated test failures explicitly                                        |
+| UI violates shared wrapper rule                       | High   | Use `app-*` wrappers in templates; only JointJS internals may touch JointJS directly inside wrapper code  |
+| Mobile layout becomes unusable                        | Medium | Inspector collapses to bottom sheet; navigator hidden by default                                          |
+| Tree/flow sync corrupts expression                    | High   | Implement adapter round-trip tests before enabling edit mode                                              |
 
 ## 25. Open Questions
 

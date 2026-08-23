@@ -1,4 +1,4 @@
-import { FlowDefinition } from '../models';
+import type { FlowDefinition } from '../models';
 import { areFlowDefinitionsEqual, cloneFlowDefinition } from './flow-serialization';
 
 export class FlowHistory {

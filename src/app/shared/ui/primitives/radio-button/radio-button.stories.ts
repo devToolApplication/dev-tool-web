@@ -4,7 +4,7 @@ import { RadioButton } from './radio-button';
 const sampleOptions = [
   { label: 'Email', value: 'email' },
   { label: 'Slack Chat', value: 'slack' },
-  { label: 'Webhook API', value: 'webhook' }
+  { label: 'Webhook API', value: 'webhook' },
 ];
 
 const meta: Meta<RadioButton> = {
@@ -16,8 +16,8 @@ const meta: Meta<RadioButton> = {
     value: 'email',
     labelPosition: 'left',
     optionLayout: 'horizontal',
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -28,13 +28,13 @@ export const Default: Story = {};
 
 export const Vertical: Story = {
   args: {
-    optionLayout: 'vertical'
-  }
+    optionLayout: 'vertical',
+  },
 };
 
 export const TopLabel: Story = {
   args: {
     labelPosition: 'top',
-    optionLayout: 'vertical'
-  }
+    optionLayout: 'vertical',
+  },
 };

@@ -5,15 +5,15 @@ const meta: Meta<ErrorPageComponent> = {
   title: 'Shared/UI/Feedback/ErrorPage',
   component: ErrorPageComponent,
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   args: {
     code: '404',
     title: 'errors.notFound.title',
     description: 'errors.notFound.description',
     actionLabel: 'errors.backToDashboard',
-    actionRouterLink: '/admin/overview'
-  }
+    actionRouterLink: '/admin/overview',
+  },
 };
 
 export default meta;
@@ -26,14 +26,14 @@ export const ServerError: Story = {
   args: {
     code: '500',
     title: 'errors.serverError.title',
-    description: 'errors.serverError.description'
-  }
+    description: 'errors.serverError.description',
+  },
 };
 
 export const Forbidden: Story = {
   args: {
     code: '403',
     title: 'errors.forbidden.title',
-    description: 'errors.forbidden.description'
-  }
+    description: 'errors.forbidden.description',
+  },
 };

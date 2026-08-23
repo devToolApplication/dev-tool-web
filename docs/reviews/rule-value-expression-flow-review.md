@@ -24,33 +24,33 @@ Phần `EXPRESSION` runtime đã đi đúng hướng, nhưng chưa thể coi là
 
 ### Backend
 
-| Requirement | Status | Notes |
-|---|---:|---|
-| Thêm top-level `value` vào `RuleEvaluationResult` | PASS | `RuleEvaluationResult.java:18` đã có `Object value`. |
-| Thêm `value` vào response contract | PASS | `RuleEvaluationResponse.java:18` đã có `Object value`. |
-| Trace output thêm top-level `value`, giữ `input`/`output` | PASS | `RuleTraceBuilder.java:37-44` ghi `passed`, `value`, `input`, `output`, `children`. |
-| Executor `EXPRESSION` version `v1` implements `RuleLogic` | PASS | `ExpressionRuleLogic.java:39-45`. |
-| Parse `config.ruleExpression` bằng DTO/typed classes, không xử lý Map rời rạc cho node | PASS | Jackson DTO nội bộ từ `ExpressionRuleLogic.java:437+`; `params/config` vẫn là map phụ trợ, chấp nhận được. |
-| Operand resolver hỗ trợ `indicator`, `indicatorOutput`, `priceSeries`, `ruleRef`, `constant` | PASS | `ExpressionRuleLogic.java:280-285`. |
-| Comparison/cross dùng `ruleRef.value` khi referenced rule `satisfied=true` | PASS/PARTIAL | `ruleRefValue()` dùng `childResult.isSatisfied() && childResult.getValue() != null` tại `ExpressionRuleLogic.java:329-335`. Nếu rule config không tồn tại, runtime vẫn throw `DATA_NOT_FOUND`, không convert thành false. |
-| `AND`, `OR`, `XOR`, `NOT` dùng boolean `satisfied`; `value` là true/false | PASS | `ExpressionRuleLogic.java:92-111`. |
-| Operators catalog: `CROSSOVER`, `CROSSUNDER`, `GT`, `GTE`, `LT`, `LTE`, `EQ`, `NEQ`, `BETWEEN`, `OUTSIDE` | PASS | `ExpressionRuleLogic.java:132-135`. |
-| Condition result `value = left current value` khi true, false thì `null` | PASS cho `EXPRESSION`; FAIL toàn runtime | `EXPRESSION` đúng ở `ExpressionRuleLogic.java:165`, `195`, `235`. Nhiều rule logic khác vẫn thiếu hoặc set sai `value`, xem Findings P1. |
-| Runtime cycle guard | PASS/PARTIAL | `RuleRuntimeService.java:22-28` có stack, nhưng key gồm `index` tại `RuleRuntimeService.java:50-52`, nên chỉ chặn cycle cùng index. |
-| Backend test plan | PARTIAL | Có `ExpressionRuleLogicTest`, nhưng thiếu coverage `BETWEEN/OUTSIDE`, `CROSSUNDER`, trace serialization top-level `value`, runtime cycle, và matrix đầy đủ `GTE/LT/LTE`. Backend test chưa chạy được do compile failure. |
+| Requirement                                                                                               |                                   Status | Notes                                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Thêm top-level `value` vào `RuleEvaluationResult`                                                         |                                     PASS | `RuleEvaluationResult.java:18` đã có `Object value`.                                                                                                                                                                      |
+| Thêm `value` vào response contract                                                                        |                                     PASS | `RuleEvaluationResponse.java:18` đã có `Object value`.                                                                                                                                                                    |
+| Trace output thêm top-level `value`, giữ `input`/`output`                                                 |                                     PASS | `RuleTraceBuilder.java:37-44` ghi `passed`, `value`, `input`, `output`, `children`.                                                                                                                                       |
+| Executor `EXPRESSION` version `v1` implements `RuleLogic`                                                 |                                     PASS | `ExpressionRuleLogic.java:39-45`.                                                                                                                                                                                         |
+| Parse `config.ruleExpression` bằng DTO/typed classes, không xử lý Map rời rạc cho node                    |                                     PASS | Jackson DTO nội bộ từ `ExpressionRuleLogic.java:437+`; `params/config` vẫn là map phụ trợ, chấp nhận được.                                                                                                                |
+| Operand resolver hỗ trợ `indicator`, `indicatorOutput`, `priceSeries`, `ruleRef`, `constant`              |                                     PASS | `ExpressionRuleLogic.java:280-285`.                                                                                                                                                                                       |
+| Comparison/cross dùng `ruleRef.value` khi referenced rule `satisfied=true`                                |                             PASS/PARTIAL | `ruleRefValue()` dùng `childResult.isSatisfied() && childResult.getValue() != null` tại `ExpressionRuleLogic.java:329-335`. Nếu rule config không tồn tại, runtime vẫn throw `DATA_NOT_FOUND`, không convert thành false. |
+| `AND`, `OR`, `XOR`, `NOT` dùng boolean `satisfied`; `value` là true/false                                 |                                     PASS | `ExpressionRuleLogic.java:92-111`.                                                                                                                                                                                        |
+| Operators catalog: `CROSSOVER`, `CROSSUNDER`, `GT`, `GTE`, `LT`, `LTE`, `EQ`, `NEQ`, `BETWEEN`, `OUTSIDE` |                                     PASS | `ExpressionRuleLogic.java:132-135`.                                                                                                                                                                                       |
+| Condition result `value = left current value` khi true, false thì `null`                                  | PASS cho `EXPRESSION`; FAIL toàn runtime | `EXPRESSION` đúng ở `ExpressionRuleLogic.java:165`, `195`, `235`. Nhiều rule logic khác vẫn thiếu hoặc set sai `value`, xem Findings P1.                                                                                  |
+| Runtime cycle guard                                                                                       |                             PASS/PARTIAL | `RuleRuntimeService.java:22-28` có stack, nhưng key gồm `index` tại `RuleRuntimeService.java:50-52`, nên chỉ chặn cycle cùng index.                                                                                       |
+| Backend test plan                                                                                         |                                  PARTIAL | Có `ExpressionRuleLogicTest`, nhưng thiếu coverage `BETWEEN/OUTSIDE`, `CROSSUNDER`, trace serialization top-level `value`, runtime cycle, và matrix đầy đủ `GTE/LT/LTE`. Backend test chưa chạy được do compile failure.  |
 
 ### Frontend
 
-| Requirement | Status | Notes |
-|---|---:|---|
-| Model trace nhận `value` | PASS | `RuleEvaluationTrace.value` tại `trading-system.model.ts:416`. |
-| Rule tree viewer hiển thị `value` như metadata phụ | PASS | `rule-tree-viewer.component.ts:149`, `379-385`; template hiển thị tại `rule-tree-viewer.component.html:97-99`. |
-| Rule trace flow nhận `value` | PARTIAL | Adapter đưa `value` và `badge` vào node data tại `rule-flow-trace-adapter.ts:61-78`, nhưng renderer không render `badge`, xem Findings P2. |
-| Rule config flow dùng expression thật | PASS một chiều | `ruleFlowDefinition` map từ expression tại `rule-config-form.component.ts:68`; HTML bind `[value]` tại `rule-config-form.component.html:40-48`. |
-| Flow edit cập nhật lại form/expression | FAIL | Không bind `(valueChange)` vào `<app-flow-builder>`; handler connect/delete vẫn TODO. |
-| Prefer executor `EXPRESSION` khi tạo rule mới | PASS | `defaultRuleExecutor()` ưu tiên `EXPRESSION` tại `rule-config-form.component.ts:822-824`. |
-| Common flow-builder đủ tái sử dụng | PARTIAL | Module tách riêng và có adapter domain, nhưng còn lỗi diff edge, auto-fit first render, bundle import quá rộng, thiếu specs. |
-| FE tests/build | PARTIAL | `npm run build` pass. `npm test -- --watch=false` fail vì specs cũ không khớp API component. |
+| Requirement                                        |         Status | Notes                                                                                                                                           |
+| -------------------------------------------------- | -------------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model trace nhận `value`                           |           PASS | `RuleEvaluationTrace.value` tại `trading-system.model.ts:416`.                                                                                  |
+| Rule tree viewer hiển thị `value` như metadata phụ |           PASS | `rule-tree-viewer.component.ts:149`, `379-385`; template hiển thị tại `rule-tree-viewer.component.html:97-99`.                                  |
+| Rule trace flow nhận `value`                       |        PARTIAL | Adapter đưa `value` và `badge` vào node data tại `rule-flow-trace-adapter.ts:61-78`, nhưng renderer không render `badge`, xem Findings P2.      |
+| Rule config flow dùng expression thật              | PASS một chiều | `ruleFlowDefinition` map từ expression tại `rule-config-form.component.ts:68`; HTML bind `[value]` tại `rule-config-form.component.html:40-48`. |
+| Flow edit cập nhật lại form/expression             |           FAIL | Không bind `(valueChange)` vào `<app-flow-builder>`; handler connect/delete vẫn TODO.                                                           |
+| Prefer executor `EXPRESSION` khi tạo rule mới      |           PASS | `defaultRuleExecutor()` ưu tiên `EXPRESSION` tại `rule-config-form.component.ts:822-824`.                                                       |
+| Common flow-builder đủ tái sử dụng                 |        PARTIAL | Module tách riêng và có adapter domain, nhưng còn lỗi diff edge, auto-fit first render, bundle import quá rộng, thiếu specs.                    |
+| FE tests/build                                     |        PARTIAL | `npm run build` pass. `npm test -- --watch=false` fail vì specs cũ không khớp API component.                                                    |
 
 ## Findings
 

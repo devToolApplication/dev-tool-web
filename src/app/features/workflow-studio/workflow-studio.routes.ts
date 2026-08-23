@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { unsavedChangesGuard } from '@shared/ui/patterns/form-input/unsaved-changes.guard';
+import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { WorkflowBuilderPageComponent } from './pages/workflow-builder-page.component';
 import { WorkflowListPageComponent } from './pages/workflow-list-page.component';
 import { WorkflowRunDetailPageComponent } from './pages/workflow-run-detail-page.component';
@@ -13,12 +13,12 @@ export const workflowStudioRoutes: Routes = [
   {
     path: 'ai-agent-mcrs/workflows/create',
     component: WorkflowBuilderPageComponent,
-    canDeactivate: [unsavedChangesGuard],
+    canDeactivate: [serviceManagementUnsavedChangesGuard],
   },
   {
     path: 'ai-agent-mcrs/workflows/:workflowId/edit',
     component: WorkflowBuilderPageComponent,
-    canDeactivate: [unsavedChangesGuard],
+    canDeactivate: [serviceManagementUnsavedChangesGuard],
   },
   {
     path: 'ai-agent-mcrs/workflow-runs',

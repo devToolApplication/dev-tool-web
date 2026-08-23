@@ -14,13 +14,13 @@ import { SectionPanelComponent } from './section-panel.component';
       <div class="section-body">Body content</div>
       <button section-footer type="button">Save</button>
     </app-section-panel>
-  `
+  `,
 })
 class SectionPanelTestHostComponent {}
 
 @NgModule({
   declarations: [SectionPanelTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class SectionPanelTestHostModule {}
 
@@ -31,7 +31,7 @@ describe('SectionPanelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, SectionPanelTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionPanelComponent);

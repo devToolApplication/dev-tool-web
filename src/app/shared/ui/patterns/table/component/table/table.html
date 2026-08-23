@@ -1,128 +1,130 @@
-<app-toolbar class="table-toolbar">
-  <ng-container toolbar-left>
-    @if (isButtonVisible(newButtonConfig)) {
-      <app-button
-        [size]="'sm'"
-        variant="primary"
-        [label]="newButtonConfig.label ?? 'new'"
-        [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
-        [disabled]="isButtonDisabled(newButtonConfig)"
-        [tooltip]="buttonTooltip(newButtonConfig)"
-        (buttonClick)="onCreate()"
-      />
-    }
-
-    @if (isButtonVisible(deleteButtonConfig)) {
-      <app-button
-        variant="destructive"
-        [label]="deleteButtonConfig.label ?? 'delete'"
-        [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
-        [disabled]="isButtonDisabled(deleteButtonConfig)"
-        [tooltip]="buttonTooltip(deleteButtonConfig)"
-        (buttonClick)="onDelete()"
-      />
-    }
-
-    @if (toolbarConfig.search?.visible) {
-      <div class="table-toolbar__search">
-        <app-input-text
-          [label]="toolbarConfig.search?.label ?? 'search'"
-          [placeholder]="toolbarConfig.search?.placeholder ?? 'search'"
-          [value]="quickSearchTerm()"
-          [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
-          (valueChange)="quickSearchTerm.set($event || '')"
-        ></app-input-text>
+@if (hasToolbarContent) {
+  <app-toolbar class="table-toolbar">
+    <ng-container toolbar-left>
+      @if (isButtonVisible(newButtonConfig)) {
         <app-button
-          icon="pi pi-search"
-          variant="ghost"
-          label="search"
-          [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
-          (buttonClick)="onQuickSearch()"
-        ></app-button>
-      </div>
-    }
+          [size]="'sm'"
+          variant="primary"
+          [label]="newButtonConfig.label ?? 'new'"
+          [icon]="newButtonConfig.icon ?? 'pi pi-plus'"
+          [disabled]="isButtonDisabled(newButtonConfig)"
+          [tooltip]="buttonTooltip(newButtonConfig)"
+          (buttonClick)="onCreate()"
+        />
+      }
 
-    @if (selectionEnabled && visibleBulkActions.length > 0) {
-      <div class="table-toolbar__bulk">
-        <span class="table-toolbar__bulk-count">
-          {{ ('shared.table.selectedRows' | translateContent).replace('{{count}}', selectedCount.toString()) }}
-        </span>
-        @for (action of visibleBulkActions; track action.id) {
+      @if (isButtonVisible(deleteButtonConfig)) {
+        <app-button
+          variant="destructive"
+          [label]="deleteButtonConfig.label ?? 'delete'"
+          [icon]="deleteButtonConfig.icon ?? 'pi pi-trash'"
+          [disabled]="isButtonDisabled(deleteButtonConfig)"
+          [tooltip]="buttonTooltip(deleteButtonConfig)"
+          (buttonClick)="onDelete()"
+        />
+      }
+
+      @if (toolbarConfig.search?.visible) {
+        <div class="table-toolbar__search">
+          <app-input-text
+            [label]="toolbarConfig.search?.label ?? 'search'"
+            [placeholder]="toolbarConfig.search?.placeholder ?? 'search'"
+            [value]="quickSearchTerm()"
+            [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
+            (valueChange)="quickSearchTerm.set($event || '')"
+          ></app-input-text>
           <app-button
-            size="sm"
-            [variant]="action.variant === 'danger' ? 'destructive' : 'secondary'"
-            [label]="action.label"
-            [icon]="action.icon"
-            [disabled]="selectedCount === 0 || isBulkActionDisabled(action)"
-            [tooltip]="bulkActionTooltip(action)"
-            (buttonClick)="onBulkAction(action)"
+            icon="pi pi-search"
+            variant="ghost"
+            label="search"
+            [disabled]="loading || (toolbarConfig.search?.disabled ?? false)"
+            (buttonClick)="onQuickSearch()"
           ></app-button>
-        }
-      </div>
-    }
-  </ng-container>
+        </div>
+      }
 
-  <ng-container toolbar-right>
-    @if (isButtonVisible(refreshButtonConfig)) {
-      <app-button
-        variant="secondary"
-        [label]="refreshButtonConfig.label ?? 'refresh'"
-        [icon]="refreshButtonConfig.icon ?? 'pi pi-refresh'"
-        [disabled]="loading || isButtonDisabled(refreshButtonConfig)"
-        [tooltip]="buttonTooltip(refreshButtonConfig)"
-        (buttonClick)="onRefresh()"
-      />
-    }
+      @if (selectionEnabled && visibleBulkActions.length > 0) {
+        <div class="table-toolbar__bulk">
+          <span class="table-toolbar__bulk-count">
+            {{ ('shared.table.selectedRows' | translateContent).replace('{{count}}',
+            selectedCount.toString()) }}
+          </span>
+          @for (action of visibleBulkActions; track action.id) {
+            <app-button
+              size="sm"
+              [variant]="action.variant === 'danger' ? 'destructive' : 'secondary'"
+              [label]="action.label"
+              [icon]="action.icon"
+              [disabled]="selectedCount === 0 || isBulkActionDisabled(action)"
+              [tooltip]="bulkActionTooltip(action)"
+              (buttonClick)="onBulkAction(action)"
+            ></app-button>
+          }
+        </div>
+      }
+    </ng-container>
 
-    @if (toolbarConfig.columnVisibility?.visible) {
-      <app-select-multi
-        class="table-toolbar__columns"
-        [inline]="true"
-        [options]="columnOptions"
-        [value]="selectedColumnFields()"
-        [placeholder]="toolbarConfig.columnVisibility?.placeholder ?? 'fieldOptions'"
-        [disabled]="loading"
-        (valueChange)="onColumnFieldsChange($any($event))"
-      ></app-select-multi>
-    }
+    <ng-container toolbar-right>
+      @if (isButtonVisible(refreshButtonConfig)) {
+        <app-button
+          variant="secondary"
+          [label]="refreshButtonConfig.label ?? 'refresh'"
+          [icon]="refreshButtonConfig.icon ?? 'pi pi-refresh'"
+          [disabled]="loading || isButtonDisabled(refreshButtonConfig)"
+          [tooltip]="buttonTooltip(refreshButtonConfig)"
+          (buttonClick)="onRefresh()"
+        />
+      }
 
-    @if (toolbarConfig.density?.visible) {
-      <app-select
-        [label]="toolbarConfig.density?.label ?? 'shared.table.density.label'"
-        [options]="densityOptions"
-        [value]="density()"
-        [disabled]="loading"
-        (valueChange)="onDensityChange($event)"
-      ></app-select>
-    }
+      @if (toolbarConfig.columnVisibility?.visible) {
+        <app-select-multi
+          class="table-toolbar__columns"
+          [inline]="true"
+          [options]="columnOptions"
+          [value]="selectedColumnFields()"
+          [placeholder]="toolbarConfig.columnVisibility?.placeholder ?? 'fieldOptions'"
+          [disabled]="loading"
+          (valueChange)="onColumnFieldsChange($event)"
+        ></app-select-multi>
+      }
 
-    @if (isButtonVisible(importButtonConfig)) {
-      <app-fileupload
-        mode="basic"
-        [accept]="importButtonConfig.accept ?? '*/*'"
-        [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
-        [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import'"
-        class="mr-2 inline-block"
-        [customUpload]="true"
-        [auto]="true"
-        [disabled]="isButtonDisabled(importButtonConfig)"
-        (uploadHandler)="onImport($event.files[0])"
-      ></app-fileupload>
-    }
+      @if (toolbarConfig.density?.visible) {
+        <app-select
+          [label]="toolbarConfig.density?.label ?? 'shared.table.density.label'"
+          [options]="densityOptions"
+          [value]="density()"
+          [disabled]="loading"
+          (valueChange)="onDensityChange($event)"
+        ></app-select>
+      }
 
-    @if (isButtonVisible(exportButtonConfig)) {
-      <app-button
-        variant="secondary"
-        [label]="exportButtonLabel"
-        [icon]="exportButtonIcon"
-        [disabled]="isButtonDisabled(exportButtonConfig)"
-        
-        [tooltip]="buttonTooltip(exportButtonConfig)"
-        (buttonClick)="onExport()"
-      />
-    }
-  </ng-container>
-</app-toolbar>
+      @if (isButtonVisible(importButtonConfig)) {
+        <app-fileupload
+          mode="basic"
+          [accept]="importButtonConfig.accept ?? '*/*'"
+          [maxFileSize]="importButtonConfig.maxFileSize ?? 1000000"
+          [chooseLabel]="importButtonConfig.chooseLabel ?? importButtonConfig.label ?? 'import'"
+          class="mr-2 inline-block"
+          [customUpload]="true"
+          [auto]="true"
+          [disabled]="isButtonDisabled(importButtonConfig)"
+          (uploadHandler)="onImport($event.files[0])"
+        ></app-fileupload>
+      }
+
+      @if (isButtonVisible(exportButtonConfig)) {
+        <app-button
+          variant="secondary"
+          [label]="exportButtonLabel"
+          [icon]="exportButtonIcon"
+          [disabled]="isButtonDisabled(exportButtonConfig)"
+          [tooltip]="buttonTooltip(exportButtonConfig)"
+          (buttonClick)="onExport()"
+        />
+      }
+    </ng-container>
+  </app-toolbar>
+}
 
 @if (error) {
   <app-error-state
@@ -132,111 +134,70 @@
     (retry)="retry.emit()"
   ></app-error-state>
 } @else if (loading && resolvedData.length === 0) {
-  <app-loading-skeleton type="table" [rows]="resolvedRows" [columns]="visibleColumns.length"></app-loading-skeleton>
+  <app-loading-skeleton
+    type="table"
+    [rows]="resolvedRows"
+    [columns]="visibleColumns.length"
+  ></app-loading-skeleton>
 } @else {
-<div class="app-table-wrapper rounded-2xl border border-[var(--app-border)] overflow-hidden shadow-[var(--app-shadow-md)]" [class]="tableStyleClass" [attr.aria-busy]="loading">
-  <!-- Caption -->
-  <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)]">
-    <h5 class="m-0 text-sm font-semibold text-[var(--app-text)]">{{ (config.title ?? 'dataTable') | translateContent }}</h5>
-    @if ((config.filters ?? []).length > 0) {
-      <app-table-filter
-        [fields]="config.filters ?? []"
-        [options]="config.filterOptions ?? {}"
-        [loading]="loading"
-        (search)="onSearch($event)"
-        (reset)="onResetFilter()"
-      ></app-table-filter>
-    }
-  </div>
+  <div
+    class="app-table-wrapper rounded-2xl border border-[var(--app-border)] overflow-hidden shadow-[var(--app-shadow-md)]"
+    [class]="tableStyleClass"
+    [attr.aria-busy]="loading"
+  >
+    <!-- Caption -->
+    <div
+      class="flex items-center justify-between px-4 py-3 border-b border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)]"
+    >
+      <h5 class="m-0 text-sm font-semibold text-[var(--app-text)]">
+        {{ config.title ?? 'dataTable' | translateContent }}
+      </h5>
+      @if ((config.filters ?? []).length > 0) {
+        <app-table-filter
+          [fields]="config.filters ?? []"
+          [options]="config.filterOptions ?? {}"
+          [value]="activeFilters()"
+          [loading]="loading"
+          (valueChange)="onFilterValueChange($event)"
+          (search)="onSearch($event)"
+          (reset)="onResetFilter()"
+        ></app-table-filter>
+      }
+    </div>
 
-  <!-- Table -->
-  <div class="app-table-scroller overflow-x-auto" [class.opacity-60]="loading" [style.max-height]="scrollable ? scrollHeight : null">
-    <table class="w-full text-sm" [style.min-width]="tableMinWidth">
-      <thead>
-        <tr>
-          @if (selectionEnabled) {
-            <th class="px-3 py-2.5 text-left bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] w-10">
-              @if (multipleSelection && (config.selection?.showSelectAll ?? true)) {
-                <span (click)="$event.stopPropagation()">
-                  <app-check-box
-                    label=""
-                    [value]="allCurrentRowsSelected"
-                    [disabled]="loading"
-                    (valueChange)="toggleAllCurrentRows($event)"
-                  ></app-check-box>
-                </span>
-              }
-            </th>
-          }
-          @for (col of visibleColumns; track col.field) {
-            <th
-              class="px-3 py-2.5 text-left text-xs font-semibold text-[var(--app-text-soft)] bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] whitespace-nowrap"
-              [style.width]="col.width ?? null"
-              [style.min-width]="col.minWidth ?? col.width ?? null"
-              [style.max-width]="col.maxWidth ?? null"
-              [style.text-align]="col.align ?? null"
-              [style.left]="frozenLeft(col)"
-              [style.right]="frozenRight(col)"
-              [class.app-table-cell--frozen]="col.frozen"
-              [class.app-table-cell--frozen-left]="isFrozenLeft(col)"
-              [class.app-table-cell--frozen-right]="isFrozenRight(col)"
-              [class.cursor-pointer]="col.sortable"
-              [class.select-none]="col.sortable"
-              (click)="col.sortable ? onSortColumn(col.field) : null"
-            >
-              <span class="inline-flex items-center gap-1">
-                {{ col.header | translateContent }}
-                @if (col.sortable) {
-                  <i class="pi text-[0.6rem] text-[var(--app-text-muted)]"
-                    [ngClass]="{
-                      'pi-sort-alt': sortField !== col.field,
-                      'pi-sort-amount-up-alt': sortField === col.field && sortOrder === 1,
-                      'pi-sort-amount-down': sortField === col.field && sortOrder === -1
-                    }"
-                  ></i>
-                }
-              </span>
-            </th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @if (resolvedData.length === 0 && !loading) {
+    <!-- Table -->
+    <div
+      class="app-table-scroller overflow-x-auto"
+      [class.opacity-60]="loading"
+      [style.max-height]="scrollable ? scrollHeight : null"
+    >
+      <table class="w-full text-sm" [style.min-width]="tableMinWidth">
+        <thead>
           <tr>
-            <td [attr.colspan]="visibleColumns.length + (selectionEnabled ? 1 : 0)" class="text-center py-8 bg-[var(--app-table-cell-bg)]">
-              <app-empty-state
-                [title]="resolvedEmptyTitle"
-                [description]="resolvedEmptyDescription"
-                [secondaryActionLabel]="hasActiveFilters ? 'shared.table.clearFilters' : undefined"
-                (secondaryAction)="onResetFilter()"
-              ></app-empty-state>
-            </td>
-          </tr>
-        }
-        @for (row of resolvedData; track $index) {
-          <tr
-            class="transition-colors hover:bg-[var(--app-table-row-hover-bg)] border-b border-[var(--app-border-soft)]"
-            [class.bg-[var(--app-chart-primary-fill)]]="isRowSelected(row)"
-            [class.cursor-pointer]="config.rowClickable === true"
-            [attr.tabindex]="config.rowClickable ? 0 : -1"
-            (click)="onRowClick(row)"
-            (keydown.enter)="onRowClick(row)"
-          >
             @if (selectionEnabled) {
-              <td class="px-3 py-2 bg-[var(--app-table-cell-bg)] w-10">
-                <span (click)="$event.stopPropagation()">
-                  <app-check-box
-                    label=""
-                    [value]="isRowSelected(row)"
-                    [disabled]="loading"
-                    (valueChange)="toggleRowSelection(row, $event)"
-                  ></app-check-box>
-                </span>
-              </td>
+              <th
+                class="px-3 py-2.5 text-left bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] w-10"
+              >
+                @if (multipleSelection && (config.selection?.showSelectAll ?? true)) {
+                  <span
+                    role="presentation"
+                    tabindex="-1"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()"
+                  >
+                    <app-check-box
+                      label=""
+                      [value]="allCurrentRowsSelected"
+                      [disabled]="loading"
+                      (valueChange)="toggleAllCurrentRows($event)"
+                    ></app-check-box>
+                  </span>
+                }
+              </th>
             }
             @for (col of visibleColumns; track col.field) {
-              <td
-                class="px-3 py-2 text-[var(--app-text)] bg-[var(--app-table-cell-bg)]"
+              <th
+                class="px-3 py-2.5 text-left text-xs font-semibold text-[var(--app-text-soft)] bg-[var(--app-table-header-bg)] border-b border-[var(--app-border-soft)] whitespace-nowrap"
                 [style.width]="col.width ?? null"
                 [style.min-width]="col.minWidth ?? col.width ?? null"
                 [style.max-width]="col.maxWidth ?? null"
@@ -246,38 +207,123 @@
                 [class.app-table-cell--frozen]="col.frozen"
                 [class.app-table-cell--frozen-left]="isFrozenLeft(col)"
                 [class.app-table-cell--frozen-right]="isFrozenRight(col)"
+                [class.cursor-pointer]="col.sortable"
+                [class.select-none]="col.sortable"
               >
-                <app-table-cell
-                  [column]="col"
-                  [rowData]="row"
-                  [customTemplates]="customTemplates"
-                  (actionClick)="onActionClick($event)"
-                ></app-table-cell>
-              </td>
+                @if (col.sortable) {
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1"
+                    (click)="onSortColumn(col.field)"
+                  >
+                    {{ col.header | translateContent }}
+                    <i
+                      class="pi text-[0.6rem] text-[var(--app-text-muted)]"
+                      [ngClass]="{
+                        'pi-sort-alt': sortField !== col.field,
+                        'pi-sort-amount-up-alt': sortField === col.field && sortOrder === 1,
+                        'pi-sort-amount-down': sortField === col.field && sortOrder === -1,
+                      }"
+                    ></i>
+                  </button>
+                } @else {
+                  <span class="inline-flex items-center gap-1">
+                    {{ col.header | translateContent }}
+                  </span>
+                }
+              </th>
             }
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pagination -->
-  @if (config.pagination ?? true) {
-    <div class="flex items-center justify-between px-4 py-3 border-t border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)] text-sm">
-      <span class="text-[var(--app-text-muted)]">
-        {{ (('totalRecords' | translateContent).replace('{{count}}', resolvedTotalRecords.toString())) }}
-      </span>
-      <app-paginator
-        [first]="first"
-        [rows]="resolvedRows"
-        [totalRecords]="resolvedTotalRecords"
-        [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10,20,50]"
-        (pageChange)="onPage($event)"
-      ></app-paginator>
+        </thead>
+        <tbody>
+          @if (resolvedData.length === 0 && !loading) {
+            <tr>
+              <td
+                [attr.colspan]="visibleColumns.length + (selectionEnabled ? 1 : 0)"
+                class="text-center py-8 bg-[var(--app-table-cell-bg)]"
+              >
+                <app-empty-state
+                  [title]="resolvedEmptyTitle"
+                  [description]="resolvedEmptyDescription"
+                  [secondaryActionLabel]="
+                    hasActiveFilters ? 'shared.table.clearFilters' : undefined
+                  "
+                  (secondaryAction)="onResetFilter()"
+                ></app-empty-state>
+              </td>
+            </tr>
+          }
+          @for (row of resolvedData; track $index) {
+            <tr
+              class="transition-colors hover:bg-[var(--app-table-row-hover-bg)] border-b border-[var(--app-border-soft)]"
+              [class.bg-[var(--app-chart-primary-fill)]]="isRowSelected(row)"
+              [class.is-selected]="isRowSelected(row)"
+              [class.cursor-pointer]="config.rowClickable === true"
+              [attr.tabindex]="config.rowClickable ? 0 : -1"
+              (click)="onRowClick(row)"
+              (keydown.enter)="onRowClick(row)"
+            >
+              @if (selectionEnabled) {
+                <td class="px-3 py-2 bg-[var(--app-table-cell-bg)] w-10">
+                  <span
+                    role="presentation"
+                    tabindex="-1"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()"
+                  >
+                    <app-check-box
+                      label=""
+                      [value]="isRowSelected(row)"
+                      [disabled]="loading"
+                      (valueChange)="toggleRowSelection(row, $event)"
+                    ></app-check-box>
+                  </span>
+                </td>
+              }
+              @for (col of visibleColumns; track col.field) {
+                <td
+                  class="px-3 py-2 text-[var(--app-text)] bg-[var(--app-table-cell-bg)]"
+                  [style.width]="col.width ?? null"
+                  [style.min-width]="col.minWidth ?? col.width ?? null"
+                  [style.max-width]="col.maxWidth ?? null"
+                  [style.text-align]="col.align ?? null"
+                  [style.left]="frozenLeft(col)"
+                  [style.right]="frozenRight(col)"
+                  [class.app-table-cell--frozen]="col.frozen"
+                  [class.app-table-cell--frozen-left]="isFrozenLeft(col)"
+                  [class.app-table-cell--frozen-right]="isFrozenRight(col)"
+                >
+                  <app-table-cell
+                    [column]="col"
+                    [rowData]="row"
+                    [customTemplates]="customTemplates"
+                    (actionClick)="onActionClick($event)"
+                  ></app-table-cell>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-  }
-</div>
+
+    <!-- Pagination -->
+    @if (config.pagination ?? true) {
+      <div
+        class="flex items-center justify-between px-4 py-3 border-t border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)] text-sm"
+      >
+        <span class="text-[var(--app-text-muted)]">
+          {{ (('totalRecords' | translateContent).replace('{{count}}',
+          resolvedTotalRecords.toString())) }}
+        </span>
+        <app-paginator
+          [first]="first"
+          [rows]="resolvedRows"
+          [totalRecords]="resolvedTotalRecords"
+          [rowsPerPageOptions]="config.rowsPerPageOptions ?? [10, 20, 50]"
+          (pageChange)="onPage($event)"
+        ></app-paginator>
+      </div>
+    }
+  </div>
 }
-
-
-

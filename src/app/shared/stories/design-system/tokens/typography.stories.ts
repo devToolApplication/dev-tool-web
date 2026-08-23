@@ -8,7 +8,7 @@ const typographyScale = [
   { class: 'text-xl', size: '1.25rem / 20px', weight: '600' },
   { class: 'text-2xl', size: '1.5rem / 24px', weight: '600' },
   { class: 'text-3xl', size: '1.875rem / 30px', weight: '700' },
-  { class: 'text-4xl', size: '2.25rem / 36px', weight: '700' }
+  { class: 'text-4xl', size: '2.25rem / 36px', weight: '700' },
 ];
 
 const fontWeights = [
@@ -16,7 +16,7 @@ const fontWeights = [
   { class: 'font-normal', value: '400' },
   { class: 'font-medium', value: '500' },
   { class: 'font-semibold', value: '600' },
-  { class: 'font-bold', value: '700' }
+  { class: 'font-bold', value: '700' },
 ];
 
 const meta: Meta = {
@@ -26,10 +26,10 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Typography scale and font weight tokens. Maps to Figma text styles.'
-      }
-    }
-  }
+        component: 'Typography scale and font weight tokens. Maps to Figma text styles.',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -42,16 +42,20 @@ export const FontScale: Story = {
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-4">Font Size Scale</h3>
         <div class="flex flex-col gap-4">
-          ${typographyScale.map(t => `
+          ${typographyScale
+            .map(
+              (t) => `
             <div class="flex items-baseline gap-4 border-b pb-2" style="border-color:var(--p-surface-200)">
               <span class="${t.class} font-semibold" style="min-width:200px">The quick brown fox</span>
               <code class="text-xs" style="color:var(--p-text-muted-color)">${t.class} — ${t.size}</code>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const FontWeights: Story = {
@@ -60,16 +64,20 @@ export const FontWeights: Story = {
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-4">Font Weights</h3>
         <div class="flex flex-col gap-3">
-          ${fontWeights.map(w => `
+          ${fontWeights
+            .map(
+              (w) => `
             <div class="flex items-baseline gap-4 border-b pb-2" style="border-color:var(--p-surface-200)">
               <span class="text-xl ${w.class}" style="min-width:250px">The quick brown fox</span>
               <code class="text-xs" style="color:var(--p-text-muted-color)">${w.class} (${w.value})</code>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const LineHeights: Story = {
@@ -98,6 +106,6 @@ export const LineHeights: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

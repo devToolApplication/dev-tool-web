@@ -11,16 +11,12 @@ const APP_SHELL_COMPONENTS = [
   BaseLayoutComponent,
   PageComponent,
   HeaderComponent,
-  SideMenuComponent
+  SideMenuComponent,
 ];
 
 @NgModule({
   declarations: APP_SHELL_COMPONENTS,
-  imports: [
-    CommonModule,
-    RouterModule,
-    SharedModule
-  ],
-  exports: APP_SHELL_COMPONENTS
+  imports: [CommonModule, RouterModule, SharedModule],
+  exports: APP_SHELL_COMPONENTS,
 })
 export class AppShellModule {}

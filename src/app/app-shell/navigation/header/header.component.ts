@@ -1,6 +1,15 @@
-import { Component, DestroyRef, EventEmitter, Input, NgZone, OnInit, Output, ViewChild, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Route, Router, Routes } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { KeycloakService } from '@core/auth/keycloak.service';
 import { ThemeMode, ThemeService } from '@core/theme/theme.service';
@@ -22,7 +31,7 @@ interface AppShellUserInfo {
   selector: 'app-header',
   standalone: false,
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit {
   @Input() sidebarVisible = true;
@@ -32,10 +41,6 @@ export class HeaderComponent implements OnInit {
   @Output() toggleSidebar = new EventEmitter<void>();
   @ViewChild('userMenu') userMenu!: TieredMenuComponent;
 
-  readonly homeItem: MenuItemType = {
-    icon: 'pi pi-home',
-    routerLink: '/'
-  };
   readonly userMenuId = 'app-user-menu';
   readonly pageTitle = signal('layout.brandName');
   readonly userDisplayName = signal('layout.userUnknown');
@@ -43,27 +48,25 @@ export class HeaderComponent implements OnInit {
   readonly userInitials = signal('DT');
 
   accountMenuItems: MenuItemType[] = [];
-  breadcrumbItems: MenuItemType[] = [];
 
   constructor(
     private readonly router: Router,
-    private readonly zone: NgZone,
     private readonly keycloakService: KeycloakService,
     private readonly themeService: ThemeService,
-    private readonly destroyRef: DestroyRef
+    private readonly destroyRef: DestroyRef,
   ) {}
 
   ngOnInit(): void {
     this.updateUserSummary();
     this.buildAccountMenuItems();
-    this.updateBreadcrumb();
+    this.updatePageTitle();
 
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => this.updateBreadcrumb());
+      .subscribe(() => this.updatePageTitle());
   }
 
   onToggleSidebar(): void {
@@ -87,21 +90,21 @@ export class HeaderComponent implements OnInit {
       {
         label: 'light',
         icon: 'pi pi-sun',
-        command: () => this.setThemeMode('light')
+        command: () => this.setThemeMode('light'),
       },
       {
         label: 'dark',
         icon: 'pi pi-moon',
-        command: () => this.setThemeMode('dark')
+        command: () => this.setThemeMode('dark'),
       },
       {
-        separator: true
+        separator: true,
       },
       {
         label: 'layout.logout',
         icon: 'pi pi-sign-out',
-        command: () => this.logout()
-      }
+        command: () => this.logout(),
+      },
     ];
   }
 
@@ -115,45 +118,18 @@ export class HeaderComponent implements OnInit {
     void this.keycloakService.logout();
   }
 
-  private updateBreadcrumb(): void {
+  private updatePageTitle(): void {
+    const routeTitle = this.resolveRouteTitle();
+    if (routeTitle) {
+      this.pageTitle.set(routeTitle);
+      return;
+    }
+
     const cleanUrl = this.normalizeUrl(this.router.url);
-    const segments = cleanUrl.split('/').filter(Boolean);
     const menuTrail = this.resolveMenuTrail(cleanUrl);
-    const routeBreadcrumbMap = this.resolveRouteBreadcrumbMap();
-    const lastLinkedMenuItem = [...menuTrail].reverse().find((item) => !!item.routerLink);
-    const matchedSegments = this.normalizeUrl(String(lastLinkedMenuItem?.routerLink ?? ''))
-      .split('/')
-      .filter(Boolean).length;
+    const lastItem = menuTrail.at(-1);
 
-    const breadcrumbItems = menuTrail.map((item) => ({
-      label: item.label,
-      routerLink: item.routerLink
-    }));
-
-    const extraItems = segments.slice(matchedSegments).map((segment, index) => {
-      const targetUrl = '/' + segments.slice(0, matchedSegments + index + 1).join('/');
-
-      return {
-        label: routeBreadcrumbMap.get(targetUrl) ?? this.formatSegmentLabel(segment),
-        routerLink: this.canNavigateTo(targetUrl) ? targetUrl : undefined
-      };
-    });
-
-    this.breadcrumbItems = [...breadcrumbItems, ...extraItems];
-    this.pageTitle.set(this.resolveRouteTitle() ?? this.breadcrumbItems.at(-1)?.label ?? 'layout.brandName');
-  }
-
-  private formatSegmentLabel(segment: string): string {
-    if (segment === 'create') {
-      return 'layout.route.create';
-    }
-
-    if (segment === 'edit') {
-      return 'layout.route.edit';
-    }
-
-    const normalized = segment.replace(/[-_]+/g, ' ');
-    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    this.pageTitle.set(lastItem?.label ?? 'layout.brandName');
   }
 
   private resolveMenuTrail(url: string): AppMenuItem[] {
@@ -165,7 +141,11 @@ export class HeaderComponent implements OnInit {
         const nextTrail = [...trail, item];
         const itemUrl = this.normalizeUrl(String(item.routerLink ?? ''));
 
-        if (itemUrl && this.isRoutePrefix(itemUrl, url) && itemUrl.length > bestMatchedPath.length) {
+        if (
+          itemUrl &&
+          this.isRoutePrefix(itemUrl, url) &&
+          itemUrl.length > bestMatchedPath.length
+        ) {
           bestMatch = nextTrail;
           bestMatchedPath = itemUrl;
         }
@@ -181,7 +161,10 @@ export class HeaderComponent implements OnInit {
   }
 
   private normalizeUrl(url: string): string {
-    const cleanUrl = String(url ?? '').split('?')[0].split('#')[0].trim();
+    const cleanUrl = String(url ?? '')
+      .split('?')[0]
+      .split('#')[0]
+      .trim();
     if (!cleanUrl) {
       return '';
     }
@@ -190,53 +173,6 @@ export class HeaderComponent implements OnInit {
 
   private isRoutePrefix(candidate: string, url: string): boolean {
     return url === candidate || url.startsWith(`${candidate}/`);
-  }
-
-  private canNavigateTo(url: string): boolean {
-    const segments = this.normalizeUrl(url).split('/').filter(Boolean);
-    return this.matchesRoutes(this.router.config, segments);
-  }
-
-  private matchesRoutes(routes: Routes, segments: string[]): boolean {
-    for (const route of routes) {
-      if (route.path === '**') {
-        continue;
-      }
-
-      const routeSegments = this.getRouteSegments(route);
-      if (!this.matchesPathSegments(routeSegments, segments)) {
-        continue;
-      }
-
-      const remainingSegments = segments.slice(routeSegments.length);
-
-      if (remainingSegments.length === 0) {
-        return true;
-      }
-
-      if (route.children?.length && this.matchesRoutes(route.children, remainingSegments)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private getRouteSegments(route: Route): string[] {
-    const path = route.path ?? '';
-    if (!path) {
-      return [];
-    }
-
-    return path.split('/').filter(Boolean);
-  }
-
-  private matchesPathSegments(routeSegments: string[], urlSegments: string[]): boolean {
-    if (routeSegments.length > urlSegments.length) {
-      return false;
-    }
-
-    return routeSegments.every((routeSegment, index) => routeSegment.startsWith(':') || routeSegment === urlSegments[index]);
   }
 
   private resolveRouteTitle(): string | undefined {
@@ -248,25 +184,6 @@ export class HeaderComponent implements OnInit {
 
     const title = currentRoute.data?.['title'];
     return typeof title === 'string' && title.trim() ? title : undefined;
-  }
-
-  private resolveRouteBreadcrumbMap(): Map<string, string> {
-    const labels = new Map<string, string>();
-    const segments: string[] = [];
-    let currentRoute = this.router.routerState.snapshot.root;
-
-    while (currentRoute.firstChild) {
-      currentRoute = currentRoute.firstChild;
-      const routeSegments = currentRoute.url.map((segment) => segment.path).filter(Boolean);
-      segments.push(...routeSegments);
-
-      const breadcrumb = currentRoute.data?.['breadcrumb'];
-      if (routeSegments.length > 0 && typeof breadcrumb === 'string' && breadcrumb.trim()) {
-        labels.set('/' + segments.join('/'), breadcrumb);
-      }
-    }
-
-    return labels;
   }
 
   private updateUserSummary(): void {
@@ -282,12 +199,19 @@ export class HeaderComponent implements OnInit {
   private resolveDisplayName(userInfo: AppShellUserInfo | undefined): string {
     const fullName = [userInfo?.given_name, userInfo?.family_name].filter(Boolean).join(' ').trim();
 
-    return userInfo?.name?.trim() || fullName || userInfo?.preferred_username?.trim() || 'layout.userUnknown';
+    return (
+      userInfo?.name?.trim() ||
+      fullName ||
+      userInfo?.preferred_username?.trim() ||
+      'layout.userUnknown'
+    );
   }
 
   private resolveRoleLabel(userInfo: AppShellUserInfo | undefined): string {
     const realmRoles = userInfo?.realm_access?.roles ?? [];
-    const resourceRoles = Object.values(userInfo?.resource_access ?? {}).flatMap((access) => access.roles ?? []);
+    const resourceRoles = Object.values(userInfo?.resource_access ?? {}).flatMap(
+      (access) => access.roles ?? [],
+    );
     const roles = [...realmRoles, ...resourceRoles];
 
     if (roles.some((role) => role === 'SUPER_ADMIN' || role === 'ADMIN')) {
@@ -308,9 +232,10 @@ export class HeaderComponent implements OnInit {
       return 'DT';
     }
 
-    const initials = tokens.length === 1
-      ? tokens[0].slice(0, 2)
-      : `${tokens[0][0]}${tokens[tokens.length - 1][0]}`;
+    const initials =
+      tokens.length === 1
+        ? tokens[0].slice(0, 2)
+        : `${tokens[0][0]}${tokens[tokens.length - 1][0]}`;
 
     return initials.toUpperCase();
   }

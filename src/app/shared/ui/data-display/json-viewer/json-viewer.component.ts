@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, computed, signal } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, computed, signal } from '@angular/core';
 
 interface JsonSearchResult {
   path: string;
@@ -11,7 +12,7 @@ interface JsonSearchResult {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './json-viewer.component.html',
-  styleUrl: './json-viewer.component.css'
+  styleUrl: './json-viewer.component.css',
 })
 export class JsonViewerComponent implements OnChanges {
   @Input() value: unknown = null;
@@ -44,7 +45,7 @@ export class JsonViewerComponent implements OnChanges {
       return null;
     }
     try {
-      return JSON.parse(raw);
+      return JSON.parse(raw) as unknown;
     } catch {
       return this.value;
     }
@@ -119,7 +120,9 @@ export class JsonViewerComponent implements OnChanges {
     }
 
     return this.flattenJson(this.displaySource)
-      .filter((result) => `${result.path} ${result.displayValue}`.toLowerCase().includes(normalizedQuery))
+      .filter((result) =>
+        `${result.path} ${result.displayValue}`.toLowerCase().includes(normalizedQuery),
+      )
       .slice(0, 50);
   }
 
@@ -127,13 +130,13 @@ export class JsonViewerComponent implements OnChanges {
     const current: JsonSearchResult = {
       path,
       value,
-      displayValue: this.previewValue(value)
+      displayValue: this.previewValue(value),
     };
 
     if (Array.isArray(value)) {
       return [
         current,
-        ...value.flatMap((item, index) => this.flattenJson(item, `${path}[${index}]`))
+        ...value.flatMap((item, index) => this.flattenJson(item, `${path}[${index}]`)),
       ];
     }
 
@@ -141,8 +144,8 @@ export class JsonViewerComponent implements OnChanges {
       return [
         current,
         ...Object.entries(value as Record<string, unknown>).flatMap(([key, item]) =>
-          this.flattenJson(item, this.childPath(path, key))
-        )
+          this.flattenJson(item, this.childPath(path, key)),
+        ),
       ];
     }
 
@@ -203,9 +206,12 @@ export class JsonViewerComponent implements OnChanges {
       return value;
     }
 
-    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((acc, [key, item]) => {
-      acc[key] = this.secretKeyPattern.test(key) ? '[masked]' : this.maskSecretValues(item);
-      return acc;
-    }, {});
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+      (acc, [key, item]) => {
+        acc[key] = this.secretKeyPattern.test(key) ? '[masked]' : this.maskSecretValues(item);
+        return acc;
+      },
+      {},
+    );
   }
 }

@@ -1,41 +1,36 @@
-import { signal, computed, WritableSignal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import { createArrayState } from './array-state';
 import { createArrayFieldState } from './array-field-state';
 import { ExpressionEngine } from './expression.engine';
 
-import {
+import type {
   ArrayState,
   FieldConfig,
   FieldState,
   ArrayFieldState,
   FormConfig,
-  FormContext
+  FormContext,
 } from '../models/form-config.model';
 import { createNestedFieldState } from './create-nested-field-state';
 
 export function createFormEngine<TModel extends object>(
   config: FormConfig,
   context: FormContext,
-  initialValue: TModel
+  initialValue: TModel,
 ) {
-
   const model: WritableSignal<TModel> = signal(initialValue);
   const ctxSignal: WritableSignal<FormContext> = signal(context);
   const expr = new ExpressionEngine();
 
-  const fields: (FieldState | ArrayFieldState<TModel>)[] = [];
+  const fields: FieldState[] = [];
   const arrays: Record<string, ArrayState> = {};
 
-  function process(list: FieldConfig[], parentPath = '', groupName ?: string) {
-
-    list.forEach(field => {
-
-      const path = parentPath
-        ? `${parentPath}.${field.name}`
-        : field.name;
+  function process(list: FieldConfig[], parentPath = '', groupName?: string) {
+    list.forEach((field) => {
+      const path = parentPath ? `${parentPath}.${field.name}` : field.name;
 
       if (field.type === 'array') {
-
         const arrayState = createArrayState(path, model);
         arrays[path] = arrayState;
 
@@ -49,26 +44,35 @@ export function createFormEngine<TModel extends object>(
             arrayState,
             arrays,
             undefined,
-            config.validators ?? {}
-          )
+            config.validators ?? {},
+          ),
         );
 
         return;
       }
 
-      fields.push(createNestedFieldState(path, field, model, ctxSignal, expr, arrays, groupName, undefined, config.validators ?? {}));
-
+      fields.push(
+        createNestedFieldState(
+          path,
+          field,
+          model,
+          ctxSignal,
+          expr,
+          arrays,
+          groupName,
+          undefined,
+          config.validators ?? {},
+        ),
+      );
     });
   }
 
   process(config.fields);
 
-  const valid = computed(() =>
-    fields.every(f => f.valid())
-  );
+  const valid = computed(() => fields.every((f) => f.valid()));
 
   function markAllAsTouched() {
-    fields.forEach(f => f.markAsTouched());
+    fields.forEach((f) => f.markAsTouched());
   }
 
   function reset(value: TModel) {
@@ -77,7 +81,7 @@ export function createFormEngine<TModel extends object>(
   }
 
   function patchValue(value: Partial<TModel>) {
-    model.update(m => ({ ...m, ...value }));
+    model.update((m) => ({ ...m, ...value }));
   }
 
   return {
@@ -88,7 +92,7 @@ export function createFormEngine<TModel extends object>(
     markAllAsTouched,
     reset,
     patchValue,
-    context: ctxSignal
+    context: ctxSignal,
   };
 }
 
@@ -107,6 +111,5 @@ function resetFieldState(field: FieldState | ArrayFieldState): void {
   const children = typeof rawChildren === 'function' ? rawChildren() : rawChildren;
   children.flat().forEach((child) => resetFieldState(child));
 }
-
 
 export type FormEngineInstance = ReturnType<typeof createFormEngine>;

@@ -1,10 +1,12 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { AppLanguage, I18nService } from '@core/i18n/i18n.service';
+import type { PipeTransform } from '@angular/core';
+import { Inject, Pipe } from '@angular/core';
+import type { AppLanguage } from '@core/i18n/i18n.service';
+import { I18nService } from '@core/i18n/i18n.service';
 
 @Pipe({
   name: 'translateContent',
   standalone: false,
-  pure: false
+  pure: false,
 })
 export class TranslateContentPipe implements PipeTransform {
   private readonly translatableKeys = new Set([
@@ -12,21 +14,25 @@ export class TranslateContentPipe implements PipeTransform {
     'placeholder',
     'title',
     'selectedItemsLabel',
-    'emptyMessage'
+    'emptyMessage',
   ]);
-
-  constructor(private readonly i18nService: I18nService) {}
 
   private readonly objectCache = new WeakMap<object, Map<AppLanguage, unknown>>();
 
   private readonly stringCache = new Map<AppLanguage, Map<string, string>>();
+
+  constructor(@Inject(I18nService) private readonly i18nService: I18nService) {}
 
   transform<T>(value: T): T {
     const language = this.i18nService.language();
     return this.translateValue(value, language, new WeakMap<object, unknown>()) as T;
   }
 
-  private translateValue(value: unknown, language: AppLanguage, seen: WeakMap<object, unknown>): unknown {
+  private translateValue(
+    value: unknown,
+    language: AppLanguage,
+    seen: WeakMap<object, unknown>,
+  ): unknown {
     if (value == null) {
       return value;
     }
@@ -46,7 +52,11 @@ export class TranslateContentPipe implements PipeTransform {
     return value;
   }
 
-  private translateArray(source: unknown[], language: AppLanguage, seen: WeakMap<object, unknown>): unknown[] {
+  private translateArray(
+    source: unknown[],
+    language: AppLanguage,
+    seen: WeakMap<object, unknown>,
+  ): unknown[] {
     const tracked = seen.get(source);
     if (tracked) {
       return tracked as unknown[];
@@ -66,7 +76,11 @@ export class TranslateContentPipe implements PipeTransform {
     return translated;
   }
 
-  private translateRecord(source: Record<string, unknown>, language: AppLanguage, seen: WeakMap<object, unknown>): Record<string, unknown> {
+  private translateRecord(
+    source: Record<string, unknown>,
+    language: AppLanguage,
+    seen: WeakMap<object, unknown>,
+  ): Record<string, unknown> {
     const tracked = seen.get(source);
     if (tracked) {
       return tracked as Record<string, unknown>;

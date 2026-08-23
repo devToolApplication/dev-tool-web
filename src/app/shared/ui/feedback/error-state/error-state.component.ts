@@ -19,7 +19,7 @@ const DEFAULT_ERROR_MESSAGE = 'shared.error.message';
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './error-state.component.html',
-  styleUrl: './error-state.component.css'
+  styleUrl: './error-state.component.css',
 })
 export class ErrorStateComponent {
   @Input() title = 'shared.error.title';

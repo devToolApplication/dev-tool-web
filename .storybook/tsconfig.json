@@ -7,7 +7,5 @@
     "../src/app/features/**/*.stories.ts",
     "../src/app/features/**/*.mdx"
   ],
-  "exclude": [
-    "../src/**/*.spec.ts"
-  ]
+  "exclude": ["../src/**/*.spec.ts"]
 }

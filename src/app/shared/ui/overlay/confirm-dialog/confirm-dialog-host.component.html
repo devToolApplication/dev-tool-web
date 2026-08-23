@@ -12,11 +12,17 @@
       class="confirm-dialog__panel"
       role="alertdialog"
       aria-modal="true"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
       tabindex="-1"
       [attr.aria-label]="dialog.title"
+      (keydown.escape)="onEscape()"
     >
       <header class="confirm-dialog__header">
-        <span class="confirm-dialog__icon" [class]="'confirm-dialog__icon confirm-dialog__icon--' + dialog.variant">
+        <span
+          class="confirm-dialog__icon"
+          [class]="'confirm-dialog__icon confirm-dialog__icon--' + dialog.variant"
+        >
           <i [class]="dialog.icon" aria-hidden="true"></i>
         </span>
         <div>
@@ -60,5 +66,3 @@
     </section>
   </div>
 }
-
-

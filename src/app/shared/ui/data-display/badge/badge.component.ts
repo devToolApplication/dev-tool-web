@@ -8,7 +8,7 @@ export type BadgeSize = 'sm' | 'md';
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './badge.component.html',
-  styleUrl: './badge.component.css'
+  styleUrl: './badge.component.css',
 })
 export class BadgeComponent {
   @Input() label = '';

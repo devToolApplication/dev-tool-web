@@ -41,8 +41,8 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'off',
       'no-duplicate-imports': 'off',
       'no-unreachable': 'error',
-      'eqeqeq': ['error', 'smart'],
-      'curly': 'off',
+      eqeqeq: ['error', 'smart'],
+      curly: 'off',
       '@angular-eslint/prefer-standalone': 'off',
       '@angular-eslint/prefer-inject': 'off',
       '@angular-eslint/component-class-suffix': 'off',
@@ -59,7 +59,28 @@ export default tseslint.config(
   },
   {
     files: ['src/app/shared/**/*.ts'],
+    ignores: ['src/**/*.spec.ts', 'src/**/*.stories.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+        },
+      ],
       'no-restricted-imports': [
         'error',
         {
@@ -72,6 +93,10 @@ export default tseslint.config(
               group: ['@core/auth/**', '**/core/auth/**'],
               message: 'Shared UI must not own application permission/auth policy.',
             },
+            {
+              group: ['@core/http/**', '**/core/http/**'],
+              message: 'Shared UI must not depend on application API response policy.',
+            },
           ],
         },
       ],
@@ -79,17 +104,10 @@ export default tseslint.config(
   },
   {
     files: ['src/**/*.html'],
-    extends: [
-      ...angular.configs.templateRecommended,
-      ...angular.configs.templateAccessibility,
-    ],
+    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
     rules: {
       '@angular-eslint/template/eqeqeq': 'off',
       '@angular-eslint/template/no-autofocus': 'off',
-      '@angular-eslint/template/click-events-have-key-events': 'off',
-      '@angular-eslint/template/interactive-supports-focus': 'off',
-      '@angular-eslint/template/label-has-associated-control': 'off',
-      '@angular-eslint/template/elements-content': 'off',
     },
-  }
+  },
 );

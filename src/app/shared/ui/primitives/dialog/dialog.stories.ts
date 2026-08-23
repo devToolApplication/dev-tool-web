@@ -14,7 +14,7 @@ const meta: Meta<DialogComponent> = {
     draggable: false,
     resizable: false,
     maximizable: false,
-    position: 'center'
+    position: 'center',
   },
   render: (args) => ({
     props: args,
@@ -40,8 +40,8 @@ const meta: Meta<DialogComponent> = {
           </div>
         </app-dialog>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -52,12 +52,12 @@ export const Default: Story = {};
 
 export const Maximizable: Story = {
   args: {
-    maximizable: true
-  }
+    maximizable: true,
+  },
 };
 
 export const Draggable: Story = {
   args: {
-    draggable: true
-  }
+    draggable: true,
+  },
 };

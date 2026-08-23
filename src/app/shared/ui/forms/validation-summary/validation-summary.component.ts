@@ -15,7 +15,7 @@ export interface ValidationSummaryItem {
   selector: 'app-validation-summary',
   standalone: false,
   templateUrl: './validation-summary.component.html',
-  styleUrl: './validation-summary.component.css'
+  styleUrl: './validation-summary.component.css',
 })
 export class ValidationSummaryComponent {
   @Input() items: ValidationSummaryItem[] = [];

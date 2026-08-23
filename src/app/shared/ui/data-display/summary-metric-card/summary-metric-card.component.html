@@ -7,9 +7,16 @@
       } @else if (error) {
         <app-error-state [message]="error" [compact]="true"></app-error-state>
       } @else {
-        <strong class="summary-metric-value">{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong>
+        <strong class="summary-metric-value"
+          >{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong
+        >
         @if (trendLabel) {
-          <app-badge class="summary-metric-trend" [label]="trendLabel" [variant]="trendVariant" size="sm"></app-badge>
+          <app-badge
+            class="summary-metric-trend"
+            [label]="trendLabel"
+            [variant]="trendVariant"
+            size="sm"
+          ></app-badge>
         }
       }
     </app-card>
@@ -22,9 +29,16 @@
     } @else if (error) {
       <app-error-state [message]="error" [compact]="true"></app-error-state>
     } @else {
-      <strong class="summary-metric-value">{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong>
+      <strong class="summary-metric-value"
+        >{{ prefix }}{{ displayValue | translateContent }}{{ suffix }}</strong
+      >
       @if (trendLabel) {
-        <app-badge class="summary-metric-trend" [label]="trendLabel" [variant]="trendVariant" size="sm"></app-badge>
+        <app-badge
+          class="summary-metric-trend"
+          [label]="trendLabel"
+          [variant]="trendVariant"
+          size="sm"
+        ></app-badge>
       }
     }
   </app-card>

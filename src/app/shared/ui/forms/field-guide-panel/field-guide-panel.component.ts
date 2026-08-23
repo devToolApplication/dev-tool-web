@@ -22,7 +22,7 @@ export interface FieldGuideSection {
 @Component({
   selector: 'app-field-guide-panel',
   standalone: false,
-  templateUrl: './field-guide-panel.component.html'
+  templateUrl: './field-guide-panel.component.html',
 })
 export class FieldGuidePanelComponent {
   @Input() title = 'fieldOptions';
@@ -38,7 +38,14 @@ export class FieldGuidePanelComponent {
   readonly copiedKey = signal<string | null>(null);
 
   get hasBody(): boolean {
-    return !!this.description || !!this.fields.length || !!this.selections.length || !!this.sections.length || !!this.examples.length || !!this.warnings.length;
+    return (
+      !!this.description ||
+      !!this.fields.length ||
+      !!this.selections.length ||
+      !!this.sections.length ||
+      !!this.examples.length ||
+      !!this.warnings.length
+    );
   }
 
   toggleCollapsed(): void {

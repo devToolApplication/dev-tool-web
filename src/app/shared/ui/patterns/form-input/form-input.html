@@ -1,10 +1,6 @@
 <form (ngSubmit)="onSubmit()" novalidate class="form-input">
-  @if (apiError) {
-    <app-alert
-      variant="danger"
-      [message]="apiError"
-      class="mb-4 block"
-    ></app-alert>
+  @if (formError) {
+    <app-alert variant="danger" [message]="formError" class="mb-4 block"></app-alert>
   }
 
   @if (submitted() && validationSummaryItems().length) {
@@ -26,13 +22,16 @@
     <main class="form-workspace__main">
       @for (section of renderSections(); track section.id) {
         <app-form-section-card
+          #sectionHost
           [section]="section"
           [density]="layout().density ?? 'comfortable'"
+          [attr.data-form-section-id]="section.id"
         >
           <div class="form-input__grid">
             @for (f of section.fields; track f.path) {
               @if (f.type === 'array') {
                 <app-field-array-renderer
+                  #fieldHost
                   [attr.data-field-path]="f.path"
                   class="w-full h-full"
                   [ngClass]="getCol(f.width)"
@@ -42,6 +41,7 @@
                 ></app-field-array-renderer>
               } @else if (f.type === 'group') {
                 <app-field-group-renderer
+                  #fieldHost
                   [attr.data-field-path]="f.path"
                   class="w-full h-full"
                   [ngClass]="getCol(f.width)"
@@ -51,6 +51,7 @@
                 ></app-field-group-renderer>
               } @else if (f.type === 'tree') {
                 <app-field-tree-renderer
+                  #fieldHost
                   [attr.data-field-path]="f.path"
                   class="w-full h-full"
                   [ngClass]="getCol(f.width)"
@@ -60,6 +61,7 @@
                 ></app-field-tree-renderer>
               } @else {
                 <app-field-renderer
+                  #fieldHost
                   [attr.data-field-path]="f.path"
                   class="w-full h-full"
                   [ngClass]="getCol(f.width)"
@@ -77,4 +79,3 @@
 
   <ng-content select="[form-actions]"></ng-content>
 </form>
-

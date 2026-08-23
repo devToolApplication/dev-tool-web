@@ -11,10 +11,10 @@ const meta: Meta<JsonPreviewComponent> = {
   "status": "ACTIVE",
   "count": 3,
   "items": ["alpha", "beta", "gamma"]
-}`
+}`,
     },
-    template: `<app-json-preview>{{ jsonText }}</app-json-preview>`
-  })
+    template: `<app-json-preview>{{ jsonText }}</app-json-preview>`,
+  }),
 };
 
 export default meta;

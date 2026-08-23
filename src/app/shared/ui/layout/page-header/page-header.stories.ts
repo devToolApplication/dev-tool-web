@@ -8,7 +8,7 @@ const meta: Meta<PageHeaderComponent> = {
     title: 'page.header.demo.title',
     subtitle: 'page.header.demo.subtitle',
     showBack: false,
-    backLabel: 'back'
+    backLabel: 'back',
   },
   render: (args) => ({
     props: args,
@@ -26,8 +26,8 @@ const meta: Meta<PageHeaderComponent> = {
           <app-button label="common.delete" variant="destructive" icon="pi pi-trash"></app-button>
         </div>
       </app-page-header>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -38,8 +38,8 @@ export const Default: Story = {};
 
 export const WithSubtitle: Story = {
   args: {
-    subtitle: 'This is a secondary description providing more context.'
-  }
+    subtitle: 'This is a secondary description providing more context.',
+  },
 };
 
 export const WithBreadcrumb: Story = {
@@ -47,9 +47,9 @@ export const WithBreadcrumb: Story = {
     breadcrumb: [
       { label: 'nav.home', routerLink: '/' },
       { label: 'nav.users', routerLink: '/users' },
-      { label: 'nav.details' }
-    ]
-  }
+      { label: 'nav.details' },
+    ],
+  },
 };
 
 export const WithStatus: Story = {
@@ -57,16 +57,16 @@ export const WithStatus: Story = {
     status: {
       label: 'status.pending',
       variant: 'warning',
-      icon: 'pi pi-clock'
-    }
-  }
+      icon: 'pi pi-clock',
+    },
+  },
 };
 
 export const WithBackButton: Story = {
   args: {
     showBack: true,
-    backLabel: 'common.goBack'
-  }
+    backLabel: 'common.goBack',
+  },
 };
 
 export const FullFeatured: Story = {
@@ -75,13 +75,12 @@ export const FullFeatured: Story = {
     breadcrumb: [
       { label: 'nav.home', routerLink: '/' },
       { label: 'nav.projects', routerLink: '/projects' },
-      { label: 'nav.overview' }
+      { label: 'nav.overview' },
     ],
     status: {
       label: 'status.completed',
       variant: 'success',
-      icon: 'pi pi-check'
-    }
-  }
+      icon: 'pi pi-check',
+    },
+  },
 };
-

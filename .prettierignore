@@ -1,0 +1,10 @@
+.angular/
+.tmp/
+coverage/
+dist/
+node_modules/
+storybook-static/
+
+.storybook-build-test/
+cache/
+test-results/

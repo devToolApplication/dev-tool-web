@@ -35,7 +35,9 @@
       label=""
       [icon]="fullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"
       styleClass="candle-chart-icon-button"
-      [tooltip]="fullscreen ? 'tradeBot.chart.action.exitFullscreen' : 'tradeBot.chart.action.fullscreen'"
+      [tooltip]="
+        fullscreen ? 'tradeBot.chart.action.exitFullscreen' : 'tradeBot.chart.action.fullscreen'
+      "
       (buttonClick)="fullscreenToggle.emit()"
     />
   </div>

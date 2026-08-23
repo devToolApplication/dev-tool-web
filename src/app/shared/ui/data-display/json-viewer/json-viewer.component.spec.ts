@@ -11,7 +11,7 @@ describe('JsonViewerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(JsonViewerComponent);
@@ -59,8 +59,8 @@ describe('JsonViewerComponent', () => {
         currentValue: true,
         previousValue: false,
         firstChange: true,
-        isFirstChange: () => true
-      }
+        isFirstChange: () => true,
+      },
     });
     fixture.detectChanges();
 
@@ -69,14 +69,16 @@ describe('JsonViewerComponent', () => {
     component.toggleCollapsed();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.json-viewer__body')?.textContent).toContain('cfg-1');
+    expect(fixture.nativeElement.querySelector('.json-viewer__body')?.textContent).toContain(
+      'cfg-1',
+    );
   });
 
   it('copies the displayed JSON value', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText }
+      value: { writeText },
     });
     component.value = { id: 'cfg-1' };
 
@@ -90,25 +92,27 @@ describe('JsonViewerComponent', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText }
+      value: { writeText },
     });
     component.value = {
       toolCalls: [
         {
           arguments: {
-            symbol: 'BTCUSDT'
-          }
-        }
-      ]
+            symbol: 'BTCUSDT',
+          },
+        },
+      ],
     };
     component.searchQuery.set('symbol');
     fixture.detectChanges();
 
     const result = component.searchResults().find((item) => item.path.endsWith('.symbol'));
-    expect(result).toEqual(expect.objectContaining({
-      path: '$.toolCalls[0].arguments.symbol',
-      displayValue: 'BTCUSDT'
-    }));
+    expect(result).toEqual(
+      expect.objectContaining({
+        path: '$.toolCalls[0].arguments.symbol',
+        displayValue: 'BTCUSDT',
+      }),
+    );
 
     await component.copyPath(result!);
     await component.copyValue(result!);
@@ -122,8 +126,8 @@ describe('JsonViewerComponent', () => {
       visible: 'shown',
       apiSecret: 'secret-value',
       nested: {
-        accessToken: 'token-value'
-      }
+        accessToken: 'token-value',
+      },
     };
     component.maskSecrets = true;
 

@@ -6,7 +6,10 @@
     [invalid]="showInvalid || !!localError()"
     [errorMessage]="localError() || firstErrorMessage"
   >
-    <section class="json-field-block" [class.json-field-block--invalid]="showInvalid || !!localError()">
+    <section
+      class="json-field-block"
+      [class.json-field-block--invalid]="showInvalid || !!localError()"
+    >
       <header class="json-field-block__toolbar">
         <app-badge
           [label]="contentType === 'json' ? 'JSON' : 'code'"
@@ -60,7 +63,7 @@
         [label]="field.label"
         [required]="field.required()"
         [placeholder]="textConfig?.placeholder"
-        [value]="field.value()"
+        [value]="textValue"
         [disabled]="field.disabled()"
         [rows]="rows"
         [maxRows]="maxRows"

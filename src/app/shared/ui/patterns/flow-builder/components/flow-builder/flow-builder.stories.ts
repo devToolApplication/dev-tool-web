@@ -66,7 +66,8 @@ const ruleNodeTypes: FlowNodeTypeDefinition[] = [
     allowConnectTo: true,
     allowDelete: true,
     allowMove: true,
-    labelResolver: (node) => node.data?.['ruleCode'] ? `Rule: ${node.data['ruleCode']}` : 'Rule: ?',
+    labelResolver: (node) =>
+      node.data?.['ruleCode'] ? `Rule: ${node.data['ruleCode']}` : 'Rule: ?',
   },
   {
     type: 'rule-not',
@@ -108,13 +109,43 @@ const ruleFlowDefinition: FlowDefinition = {
     { id: 'e2', source: { nodeId: 'g1', portId: 'out' }, target: { nodeId: 'c2', portId: 'in' } },
     { id: 'e3', source: { nodeId: 'g1', portId: 'out' }, target: { nodeId: 'r1', portId: 'in' } },
     { id: 'e4', source: { nodeId: 'g1', portId: 'out' }, target: { nodeId: 'n1', portId: 'in' } },
-    { id: 'e5', source: { nodeId: 'c1', portId: 'out' }, target: { nodeId: 'o1', portId: 'in' }, data: { kind: 'operand' } },
-    { id: 'e6', source: { nodeId: 'c1', portId: 'out' }, target: { nodeId: 'o2', portId: 'in' }, data: { kind: 'operand' } },
-    { id: 'e7', source: { nodeId: 'c2', portId: 'out' }, target: { nodeId: 'o3', portId: 'in' }, data: { kind: 'operand' } },
-    { id: 'e8', source: { nodeId: 'c2', portId: 'out' }, target: { nodeId: 'o4', portId: 'in' }, data: { kind: 'operand' } },
+    {
+      id: 'e5',
+      source: { nodeId: 'c1', portId: 'out' },
+      target: { nodeId: 'o1', portId: 'in' },
+      data: { kind: 'operand' },
+    },
+    {
+      id: 'e6',
+      source: { nodeId: 'c1', portId: 'out' },
+      target: { nodeId: 'o2', portId: 'in' },
+      data: { kind: 'operand' },
+    },
+    {
+      id: 'e7',
+      source: { nodeId: 'c2', portId: 'out' },
+      target: { nodeId: 'o3', portId: 'in' },
+      data: { kind: 'operand' },
+    },
+    {
+      id: 'e8',
+      source: { nodeId: 'c2', portId: 'out' },
+      target: { nodeId: 'o4', portId: 'in' },
+      data: { kind: 'operand' },
+    },
     { id: 'e9', source: { nodeId: 'n1', portId: 'out' }, target: { nodeId: 'c3', portId: 'in' } },
-    { id: 'e10', source: { nodeId: 'c3', portId: 'out' }, target: { nodeId: 'o5', portId: 'in' }, data: { kind: 'operand' } },
-    { id: 'e11', source: { nodeId: 'c3', portId: 'out' }, target: { nodeId: 'o6', portId: 'in' }, data: { kind: 'operand' } },
+    {
+      id: 'e10',
+      source: { nodeId: 'c3', portId: 'out' },
+      target: { nodeId: 'o5', portId: 'in' },
+      data: { kind: 'operand' },
+    },
+    {
+      id: 'e11',
+      source: { nodeId: 'c3', portId: 'out' },
+      target: { nodeId: 'o6', portId: 'in' },
+      data: { kind: 'operand' },
+    },
   ],
 };
 
@@ -130,7 +161,7 @@ const ruleSvgNodeTypes: FlowNodeTypeDefinition[] = [
     allowConnectTo: true,
     allowDelete: true,
     allowMove: true,
-    labelResolver: (node) => node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?',
+    labelResolver: (node) => (node.data?.['ruleCode'] ? String(node.data['ruleCode']) : 'Rule: ?'),
     subtitleResolver: () => 'Referenced rule value',
     badgeResolver: () => ({ label: 'REF', tone: 'primary' }),
   },
@@ -209,11 +240,14 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
     label: 'Trigger',
     shape: 'rectangle',
     defaultSize: { width: 220, height: 60 },
-    defaultData: { triggerType: 'New Message Received', description: 'Slack channel', tone: 'success', statusLabel: 'event' },
+    defaultData: {
+      triggerType: 'New Message Received',
+      description: 'Slack channel',
+      tone: 'success',
+      statusLabel: 'event',
+    },
     tone: 'success',
-    ports: [
-      { id: 'out', group: 'out', position: 'bottom' },
-    ],
+    ports: [{ id: 'out', group: 'out', position: 'bottom' }],
     allowConnectFrom: true,
     allowConnectTo: false,
     allowDelete: false,
@@ -247,11 +281,16 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
           title: 'Configuration',
           fields: [
             { key: 'name', label: 'Agent Name', type: 'text' },
-            { key: 'model', label: 'Model', type: 'select', options: [
-              { label: 'Claude Opus 4', value: 'claude-opus-4' },
-              { label: 'Claude Sonnet 4', value: 'claude-sonnet-4' },
-              { label: 'GPT-4o', value: 'gpt-4o' },
-            ]},
+            {
+              key: 'model',
+              label: 'Model',
+              type: 'select',
+              options: [
+                { label: 'Claude Opus 4', value: 'claude-opus-4' },
+                { label: 'Claude Sonnet 4', value: 'claude-sonnet-4' },
+                { label: 'GPT-4o', value: 'gpt-4o' },
+              ],
+            },
             { key: 'prompt', label: 'System Prompt', type: 'textarea' },
             { key: 'temperature', label: 'Temperature', type: 'number' },
           ],
@@ -284,12 +323,17 @@ const agentNodeTypes: FlowNodeTypeDefinition[] = [
           title: 'Configuration',
           fields: [
             { key: 'actionName', label: 'Action Name', type: 'text' },
-            { key: 'app', label: 'Application', type: 'select', options: [
-              { label: 'Slack', value: 'slack' },
-              { label: 'Email', value: 'email' },
-              { label: 'HTTP', value: 'http' },
-              { label: 'Database', value: 'database' },
-            ]},
+            {
+              key: 'app',
+              label: 'Application',
+              type: 'select',
+              options: [
+                { label: 'Slack', value: 'slack' },
+                { label: 'Email', value: 'email' },
+                { label: 'HTTP', value: 'http' },
+                { label: 'Database', value: 'database' },
+              ],
+            },
             { key: 'config', label: 'Config JSON', type: 'json' },
           ],
         },
@@ -347,22 +391,103 @@ const agentFlowDefinition: FlowDefinition = {
   id: 'agent-workflow-demo',
   version: 1,
   nodes: [
-    { id: 'trigger-1', type: 'trigger', label: 'New Message', data: { triggerType: 'New Message Received', description: 'Slack #support channel', tone: 'success', statusLabel: 'event' } },
-    { id: 'agent-1', type: 'agent', label: 'Classify Intent', data: { name: 'Classify Intent', model: 'claude-sonnet-4', prompt: 'Classify the user message into: bug_report, feature_request, question, other', tone: 'primary' } },
-    { id: 'cond-1', type: 'condition', label: 'Is Bug?', data: { condition: 'intent === "bug_report"' } },
-    { id: 'agent-2', type: 'agent', label: 'Draft Response', data: { name: 'Draft Response', model: 'claude-opus-4', prompt: 'Draft a helpful response to the user question', tone: 'primary' } },
-    { id: 'action-1', type: 'action', label: 'Create Jira Ticket', data: { actionName: 'Create Jira Ticket', app: 'Jira', tone: 'info' } },
-    { id: 'action-2', type: 'action', label: 'Send Reply', data: { actionName: 'Send Slack Reply', app: 'Slack', tone: 'info' } },
-    { id: 'action-3', type: 'action', label: 'Send Reply', data: { actionName: 'Send Slack Reply', app: 'Slack', tone: 'info' } },
-    { id: 'note-1', type: 'note', label: 'Note', data: { text: 'Auto-triage support messages\nand route to appropriate handler' } },
+    {
+      id: 'trigger-1',
+      type: 'trigger',
+      label: 'New Message',
+      data: {
+        triggerType: 'New Message Received',
+        description: 'Slack #support channel',
+        tone: 'success',
+        statusLabel: 'event',
+      },
+    },
+    {
+      id: 'agent-1',
+      type: 'agent',
+      label: 'Classify Intent',
+      data: {
+        name: 'Classify Intent',
+        model: 'claude-sonnet-4',
+        prompt: 'Classify the user message into: bug_report, feature_request, question, other',
+        tone: 'primary',
+      },
+    },
+    {
+      id: 'cond-1',
+      type: 'condition',
+      label: 'Is Bug?',
+      data: { condition: 'intent === "bug_report"' },
+    },
+    {
+      id: 'agent-2',
+      type: 'agent',
+      label: 'Draft Response',
+      data: {
+        name: 'Draft Response',
+        model: 'claude-opus-4',
+        prompt: 'Draft a helpful response to the user question',
+        tone: 'primary',
+      },
+    },
+    {
+      id: 'action-1',
+      type: 'action',
+      label: 'Create Jira Ticket',
+      data: { actionName: 'Create Jira Ticket', app: 'Jira', tone: 'info' },
+    },
+    {
+      id: 'action-2',
+      type: 'action',
+      label: 'Send Reply',
+      data: { actionName: 'Send Slack Reply', app: 'Slack', tone: 'info' },
+    },
+    {
+      id: 'action-3',
+      type: 'action',
+      label: 'Send Reply',
+      data: { actionName: 'Send Slack Reply', app: 'Slack', tone: 'info' },
+    },
+    {
+      id: 'note-1',
+      type: 'note',
+      label: 'Note',
+      data: { text: 'Auto-triage support messages\nand route to appropriate handler' },
+    },
   ],
   edges: [
-    { id: 'e1', source: { nodeId: 'trigger-1', portId: 'out' }, target: { nodeId: 'agent-1', portId: 'in' } },
-    { id: 'e2', source: { nodeId: 'agent-1', portId: 'out-success' }, target: { nodeId: 'cond-1', portId: 'in' } },
-    { id: 'e3', source: { nodeId: 'cond-1', portId: 'out-true' }, target: { nodeId: 'action-1', portId: 'in' }, label: 'Yes' },
-    { id: 'e4', source: { nodeId: 'cond-1', portId: 'out-false' }, target: { nodeId: 'agent-2', portId: 'in' }, label: 'No' },
-    { id: 'e5', source: { nodeId: 'action-1', portId: 'out' }, target: { nodeId: 'action-2', portId: 'in' } },
-    { id: 'e6', source: { nodeId: 'agent-2', portId: 'out-success' }, target: { nodeId: 'action-3', portId: 'in' } },
+    {
+      id: 'e1',
+      source: { nodeId: 'trigger-1', portId: 'out' },
+      target: { nodeId: 'agent-1', portId: 'in' },
+    },
+    {
+      id: 'e2',
+      source: { nodeId: 'agent-1', portId: 'out-success' },
+      target: { nodeId: 'cond-1', portId: 'in' },
+    },
+    {
+      id: 'e3',
+      source: { nodeId: 'cond-1', portId: 'out-true' },
+      target: { nodeId: 'action-1', portId: 'in' },
+      label: 'Yes',
+    },
+    {
+      id: 'e4',
+      source: { nodeId: 'cond-1', portId: 'out-false' },
+      target: { nodeId: 'agent-2', portId: 'in' },
+      label: 'No',
+    },
+    {
+      id: 'e5',
+      source: { nodeId: 'action-1', portId: 'out' },
+      target: { nodeId: 'action-2', portId: 'in' },
+    },
+    {
+      id: 'e6',
+      source: { nodeId: 'agent-2', portId: 'out-success' },
+      target: { nodeId: 'action-3', portId: 'in' },
+    },
   ],
 };
 
@@ -570,19 +695,69 @@ export const RuleTrace: Story = {
       version: 1,
       readonly: true,
       nodes: [
-        { id: 't1', type: 'rule-group', label: 'AND', data: { operator: 'AND', badge: 'true' }, status: 'success' },
-        { id: 't2', type: 'rule-condition', label: 'CROSSOVER', data: { operator: 'CROSSOVER', badge: '142.5' }, status: 'success' },
-        { id: 't3', type: 'rule-condition', label: 'GT', data: { operator: 'GT', badge: '72.3' }, status: 'success' },
-        { id: 't4', type: 'rule-ref', label: 'Rule: VOL_FILTER', data: { ruleCode: 'VOL_FILTER', badge: 'true' }, status: 'success' },
+        {
+          id: 't1',
+          type: 'rule-group',
+          label: 'AND',
+          data: { operator: 'AND', badge: 'true' },
+          status: 'success',
+        },
+        {
+          id: 't2',
+          type: 'rule-condition',
+          label: 'CROSSOVER',
+          data: { operator: 'CROSSOVER', badge: '142.5' },
+          status: 'success',
+        },
+        {
+          id: 't3',
+          type: 'rule-condition',
+          label: 'GT',
+          data: { operator: 'GT', badge: '72.3' },
+          status: 'success',
+        },
+        {
+          id: 't4',
+          type: 'rule-ref',
+          label: 'Rule: VOL_FILTER',
+          data: { ruleCode: 'VOL_FILTER', badge: 'true' },
+          status: 'success',
+        },
         { id: 't5', type: 'rule-not', label: 'NOT', data: { badge: 'true' }, status: 'success' },
-        { id: 't6', type: 'rule-condition', label: 'LT', data: { operator: 'LT', badge: null }, status: 'danger' },
+        {
+          id: 't6',
+          type: 'rule-condition',
+          label: 'LT',
+          data: { operator: 'LT', badge: null },
+          status: 'danger',
+        },
       ],
       edges: [
-        { id: 'te1', source: { nodeId: 't1', portId: 'out' }, target: { nodeId: 't2', portId: 'in' } },
-        { id: 'te2', source: { nodeId: 't1', portId: 'out' }, target: { nodeId: 't3', portId: 'in' } },
-        { id: 'te3', source: { nodeId: 't1', portId: 'out' }, target: { nodeId: 't4', portId: 'in' } },
-        { id: 'te4', source: { nodeId: 't1', portId: 'out' }, target: { nodeId: 't5', portId: 'in' } },
-        { id: 'te5', source: { nodeId: 't5', portId: 'out' }, target: { nodeId: 't6', portId: 'in' } },
+        {
+          id: 'te1',
+          source: { nodeId: 't1', portId: 'out' },
+          target: { nodeId: 't2', portId: 'in' },
+        },
+        {
+          id: 'te2',
+          source: { nodeId: 't1', portId: 'out' },
+          target: { nodeId: 't3', portId: 'in' },
+        },
+        {
+          id: 'te3',
+          source: { nodeId: 't1', portId: 'out' },
+          target: { nodeId: 't4', portId: 'in' },
+        },
+        {
+          id: 'te4',
+          source: { nodeId: 't1', portId: 'out' },
+          target: { nodeId: 't5', portId: 'in' },
+        },
+        {
+          id: 'te5',
+          source: { nodeId: 't5', portId: 'out' },
+          target: { nodeId: 't6', portId: 'in' },
+        },
       ],
     } as FlowDefinition,
     nodeTypes: ruleNodeTypes,
@@ -637,18 +812,41 @@ function generateLargeGraph(count: number): FlowDefinition {
     const ops = ['GT', 'LT', 'CROSSOVER', 'CROSSUNDER', 'GTE', 'LTE', 'EQ', 'NEQ'];
 
     nodes.push(
-      { id: cId, type: 'rule-condition', label: ops[i % ops.length], data: { operator: ops[i % ops.length] } },
+      {
+        id: cId,
+        type: 'rule-condition',
+        label: ops[i % ops.length],
+        data: { operator: ops[i % ops.length] },
+      },
       { id: o1, type: 'rule-operand', label: `IND_${i}`, data: { label: `IND_${i}` } },
-      { id: o2, type: 'rule-operand', label: `${(i + 1) * 10}`, data: { label: `${(i + 1) * 10}` } },
+      {
+        id: o2,
+        type: 'rule-operand',
+        label: `${(i + 1) * 10}`,
+        data: { label: `${(i + 1) * 10}` },
+      },
     );
 
     edges.push(
-      { id: `e-root-${cId}`, source: { nodeId: 'root', portId: 'out' }, target: { nodeId: cId, portId: 'in' } },
-      { id: `e-${cId}-${o1}`, source: { nodeId: cId, portId: 'out' }, target: { nodeId: o1, portId: 'in' }, data: { kind: 'operand' } },
-      { id: `e-${cId}-${o2}`, source: { nodeId: cId, portId: 'out' }, target: { nodeId: o2, portId: 'in' }, data: { kind: 'operand' } },
+      {
+        id: `e-root-${cId}`,
+        source: { nodeId: 'root', portId: 'out' },
+        target: { nodeId: cId, portId: 'in' },
+      },
+      {
+        id: `e-${cId}-${o1}`,
+        source: { nodeId: cId, portId: 'out' },
+        target: { nodeId: o1, portId: 'in' },
+        data: { kind: 'operand' },
+      },
+      {
+        id: `e-${cId}-${o2}`,
+        source: { nodeId: cId, portId: 'out' },
+        target: { nodeId: o2, portId: 'in' },
+        data: { kind: 'operand' },
+      },
     );
   }
 
   return { id: 'large-flow', version: 1, nodes, edges };
 }
-

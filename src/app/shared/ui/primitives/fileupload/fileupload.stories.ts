@@ -11,8 +11,8 @@ const meta: Meta<Fileupload> = {
     cancelLabel: 'Cancel',
     multiple: false,
     customUpload: true,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -23,13 +23,13 @@ export const Basic: Story = {};
 
 export const Advanced: Story = {
   args: {
-    mode: 'advanced'
-  }
+    mode: 'advanced',
+  },
 };
 
 export const Multiple: Story = {
   args: {
     mode: 'advanced',
-    multiple: true
-  }
+    multiple: true,
+  },
 };

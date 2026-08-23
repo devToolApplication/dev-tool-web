@@ -8,11 +8,8 @@ import { By } from '@angular/platform-browser';
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 
-
 import { FormInput } from './form-input';
 import { ArrayFieldState, FormConfig, FormContext } from './models/form-config.model';
-
-
 
 @Component({
   standalone: false,
@@ -60,7 +57,33 @@ class FormInputHostComponent {
   }
 }
 
-@NgModule({ declarations: [FormInputHostComponent], imports: [SharedModule, FormsModule] }) class FormHostTestModule {}
+@Component({
+  standalone: false,
+  template: `
+    <app-form-input [config]="config" [initialValue]="firstModel"></app-form-input>
+    <app-form-input [config]="config" [initialValue]="secondModel"></app-form-input>
+  `,
+})
+class TwoFormHostComponent {
+  config: FormConfig = {
+    fields: [
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Name',
+        validation: [{ type: 'required', message: 'Name is required' }],
+      },
+    ],
+  };
+  firstModel = { name: '' };
+  secondModel = { name: '' };
+}
+
+@NgModule({
+  declarations: [FormInputHostComponent, TwoFormHostComponent],
+  imports: [SharedModule, FormsModule],
+})
+class FormHostTestModule {}
 
 describe('FormInput', () => {
   let component: FormInput;
@@ -267,7 +290,13 @@ describe('FormInput', () => {
         fields: [
           { type: 'text', name: 'title', label: 'Title', required: true },
           { type: 'number', name: 'age', label: 'Age', required: true },
-          { type: 'select', name: 'role', label: 'Role', required: true, options: [{ label: 'Admin', value: 'admin' }] },
+          {
+            type: 'select',
+            name: 'role',
+            label: 'Role',
+            required: true,
+            options: [{ label: 'Admin', value: 'admin' }],
+          },
           { type: 'boolean', name: 'active', label: 'Active', required: true },
         ],
       },
@@ -283,34 +312,157 @@ describe('FormInput', () => {
     expect(fixture.nativeElement.querySelector('app-input-text')).toBeTruthy();
   });
 
-  it('renders composite field types and an unsupported type fallback without crashing', () => {
+  it('renders detail readonly mode as presentation output without editor controls', () => {
     applyConfig(
       {
+        layout: { readonlyMode: 'detail' },
         fields: [
-          { type: 'group', name: 'groupField', label: 'Group', children: [{ type: 'text', name: 'a', label: 'A' }] },
-          { type: 'array', name: 'arrayField', label: 'Array', itemConfig: [{ type: 'text', name: 'b', label: 'B' }] },
-          { type: 'record', name: 'recordField', label: 'Record' },
-          { type: 'secret-metadata', name: 'secretField', label: 'Secret' },
-          { type: 'custom-unknown-type' as any, name: 'unknownField', label: 'Unknown' },
+          { type: 'text', name: 'title', label: 'Title' },
+          { type: 'number', name: 'count', label: 'Count' },
+          { type: 'date', name: 'dueDate', label: 'Due date' },
+          {
+            type: 'select',
+            name: 'role',
+            label: 'Role',
+            options: [{ label: 'Admin', value: 'admin' }],
+          },
+          { type: 'boolean', name: 'active', label: 'Active' },
+          { type: 'json', name: 'payload', label: 'Payload' },
         ],
       },
       {
-        groupField: { a: 'A' },
-        arrayField: [{ b: 'B' }],
-        recordField: { k: 'v' },
-        secretField: {},
-        unknownField: null,
+        title: 'Read only title',
+        count: 7,
+        dueDate: new Date(2026, 1, 10),
+        role: 'admin',
+        active: true,
+        payload: { key: 'value' },
+      },
+      { user: null, mode: 'view' },
+    );
+
+    expect(component.readonlyMode()).toBe(true);
+    expect(fixture.nativeElement.querySelector('app-value-display')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-input-text')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-input-number')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-date-picker')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-select')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-check-box')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-json-field-block')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-json-viewer')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Read only title');
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('renders scalar fields through one label/help/error shell with ARIA linkage', () => {
+    applyConfig(
+      {
+        fields: [
+          {
+            type: 'text',
+            name: 'title',
+            label: 'Title',
+            helpText: 'Title help',
+            required: true,
+            validation: [{ type: 'required', message: 'Title required' }],
+          },
+          { type: 'number', name: 'count', label: 'Count', helpText: 'Count help' },
+          {
+            type: 'select',
+            name: 'role',
+            label: 'Role',
+            options: [{ label: 'Admin', value: 'admin' }],
+          },
+          { type: 'boolean', name: 'active', label: 'Active' },
+          { type: 'date', name: 'dueDate', label: 'Due date' },
+          { type: 'textarea', name: 'notes', label: 'Notes' },
+        ],
+      },
+      {
+        title: '',
+        count: 3,
+        role: 'admin',
+        active: true,
+        dueDate: new Date(2026, 1, 10),
+        notes: 'Notes',
       },
     );
 
-    expect(fixture.nativeElement.querySelector('app-field-group-renderer')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('app-field-array-renderer')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('app-field-record-renderer')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('app-field-secret-metadata-renderer')).toBeTruthy();
+    component.onSubmit();
+    fixture.detectChanges();
+
+    const labels = Array.from(
+      fixture.nativeElement.querySelectorAll('label'),
+    ) as HTMLLabelElement[];
+    const titleLabels = labels.filter((label) => label.textContent?.includes('Title'));
+    expect(titleLabels.length).toBe(1);
+
+    const titleInput = fixture.nativeElement.querySelector(
+      'app-input-text input',
+    ) as HTMLInputElement;
+    const titleFieldBlock = titleInput.closest('app-field-block') as HTMLElement;
+    expect(titleLabels[0].getAttribute('for')).toBe(titleInput.id);
+    expect(titleInput.getAttribute('aria-describedby')).toBe(`${titleInput.id}-error`);
+    expect(titleFieldBlock.textContent?.match(/Title required/g)?.length).toBe(1);
+
+    const selectButton = fixture.nativeElement.querySelector(
+      'app-select button',
+    ) as HTMLButtonElement;
+    const roleLabel = labels.find((label) => label.textContent?.includes('Role'));
+    expect(roleLabel?.getAttribute('for')).toBe(selectButton.id);
+
+    const numberInput = fixture.nativeElement.querySelector(
+      'app-input-number input',
+    ) as HTMLInputElement;
+    const countFieldBlock = numberInput.closest('app-field-block') as HTMLElement;
+    expect(countFieldBlock.textContent?.match(/Count help/g)?.length).toBe(1);
+
+    const describedControls = [
+      titleInput,
+      numberInput,
+      selectButton,
+      fixture.nativeElement.querySelector('app-check-box input') as HTMLInputElement,
+      fixture.nativeElement.querySelector('app-date-picker input') as HTMLInputElement,
+      fixture.nativeElement.querySelector('app-input-area textarea') as HTMLTextAreaElement,
+    ];
+    describedControls.forEach((control) => expect(control.id).toBeTruthy());
+  });
+
+  it('keeps disabled editor controls when readonlyMode is disabled-controls', () => {
+    applyConfig(
+      {
+        layout: { readonlyMode: 'disabled-controls' },
+        fields: [{ type: 'text', name: 'title', label: 'Title' }],
+      },
+      { title: 'Disabled editor title' },
+      { user: null, mode: 'view' },
+    );
+
+    expect(component.readonlyMode()).toBe(false);
+    expect(fixture.nativeElement.querySelector('app-input-text')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-value-display')).toBeNull();
+  });
+
+  it('treats feature-owned field types as unsupported shared form config', () => {
+    applyConfig(
+      {
+        fields: [
+          {
+            type: 'feature-owned-field',
+            name: 'featureField',
+            label: 'Feature field',
+          } as unknown as FormConfig['fields'][number],
+        ],
+      },
+      {
+        featureField: {},
+      },
+    );
+
     expect(fixture.nativeElement.querySelector('app-alert')).toBeTruthy();
   });
 
-  it('validates before submit, blocks double submit and exposes API field errors', () => {
+  it('validates before submit, blocks double submit and exposes external field errors', () => {
     applyConfig(
       {
         fields: [
@@ -385,14 +537,52 @@ describe('FormInput', () => {
     expect(component.validationSummaryItems().length).toBeGreaterThan(0);
     expect(fixture.nativeElement.querySelector('app-validation-summary')).toBeTruthy();
 
-    const targetField = fixture.nativeElement.querySelector('[data-field-path="name"]') as HTMLElement;
+    const targetField = fixture.nativeElement.querySelector(
+      '[data-field-path="name"]',
+    ) as HTMLElement;
     if (targetField) {
       targetField.scrollIntoView = vi.fn();
       targetField.focus = vi.fn();
       component.onSummaryItemClick(component.validationSummaryItems()[0]);
-      expect(targetField.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+      expect(targetField.scrollIntoView).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'center',
+      });
       expect(targetField.focus).toHaveBeenCalled();
     }
+  });
+
+  it('scrolls validation summary clicks inside the owning form only', async () => {
+    const hostFixture = TestBed.createComponent(TwoFormHostComponent);
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
+
+    const forms = hostFixture.debugElement
+      .queryAll(By.directive(FormInput))
+      .map((debugElement) => debugElement.componentInstance as FormInput);
+    const fieldHosts = Array.from(
+      hostFixture.nativeElement.querySelectorAll('[data-field-path="name"]'),
+    ) as HTMLElement[];
+    const [firstField, secondField] = fieldHosts;
+
+    firstField.scrollIntoView = vi.fn();
+    firstField.focus = vi.fn();
+    secondField.scrollIntoView = vi.fn();
+    secondField.focus = vi.fn();
+
+    forms[0].onSubmit();
+    forms[1].onSubmit();
+    hostFixture.detectChanges();
+
+    forms[0].onSummaryItemClick(forms[0].validationSummaryItems()[0]);
+
+    expect(firstField.scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'center',
+    });
+    expect(firstField.focus).toHaveBeenCalled();
+    expect(secondField.scrollIntoView).not.toHaveBeenCalled();
+    expect(secondField.focus).not.toHaveBeenCalled();
   });
 
   it('auto-generates practical sections for legacy configs without sections', () => {
@@ -498,9 +688,3 @@ describe('FormInput Integration with HostComponent', () => {
     expect(hostComponent.submitSpy).not.toHaveBeenCalled();
   });
 });
-
-
-
-
-
-

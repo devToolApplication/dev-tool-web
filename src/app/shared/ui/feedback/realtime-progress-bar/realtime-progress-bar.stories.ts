@@ -16,9 +16,9 @@ const meta: Meta<RealtimeProgressBarComponent> = {
       current: 420,
       total: 1000,
       step: 'VALIDATING',
-      message: 'Import running'
-    } satisfies ProgressState
-  }
+      message: 'Import running',
+    } satisfies ProgressState,
+  },
 };
 
 export default meta;
@@ -36,9 +36,9 @@ export const Queued: Story = {
       step: 'WAITING',
       message: 'Waiting for an available worker',
       current: 0,
-      total: 1000
-    } satisfies ProgressState
-  }
+      total: 1000,
+    } satisfies ProgressState,
+  },
 };
 
 export const RunningIndeterminate: Story = {
@@ -49,9 +49,9 @@ export const RunningIndeterminate: Story = {
       status: 'running',
       step: 'STREAMING',
       message: 'Receiving progress updates',
-      cancellable: true
-    } satisfies ProgressState
-  }
+      cancellable: true,
+    } satisfies ProgressState,
+  },
 };
 
 export const Completed: Story = {
@@ -62,9 +62,9 @@ export const Completed: Story = {
       status: 'completed',
       percent: 100,
       step: 'COMPLETED',
-      message: 'Dataset sync completed'
-    } satisfies ProgressState
-  }
+      message: 'Dataset sync completed',
+    } satisfies ProgressState,
+  },
 };
 
 export const Failed: Story = {
@@ -77,9 +77,9 @@ export const Failed: Story = {
       current: 640,
       total: 1000,
       step: 'APPLYING',
-      errorMessage: 'Worker returned an error while applying the policy'
-    } satisfies ProgressState
-  }
+      errorMessage: 'Worker returned an error while applying the policy',
+    } satisfies ProgressState,
+  },
 };
 
 export const Cancelled: Story = {
@@ -90,7 +90,7 @@ export const Cancelled: Story = {
       status: 'cancelled',
       percent: 100,
       step: 'CANCELLED',
-      message: 'Import was cancelled'
-    } satisfies ProgressState
-  }
+      message: 'Import was cancelled',
+    } satisfies ProgressState,
+  },
 };

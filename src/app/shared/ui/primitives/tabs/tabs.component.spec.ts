@@ -11,7 +11,7 @@ describe('TabsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(TabsComponent);
@@ -22,12 +22,14 @@ describe('TabsComponent', () => {
     const valueChange = vi.spyOn(component.valueChange, 'emit');
     component.tabs = [
       { label: 'First', value: 'first' },
-      { label: 'Second', value: 'second' }
+      { label: 'Second', value: 'second' },
     ];
     component.value = 'first';
 
     fixture.detectChanges();
-    const buttons = fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '[role="tab"]',
+    ) as NodeListOf<HTMLButtonElement>;
     buttons[1].click();
 
     expect(buttons.length).toBe(2);

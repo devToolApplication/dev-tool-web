@@ -11,7 +11,7 @@ export interface AppPaginatorState {
   selector: 'app-paginator',
   standalone: false,
   templateUrl: './paginator.html',
-  styleUrl: './paginator.css'
+  styleUrl: './paginator.css',
 })
 export class Paginator {
   @Input() first = 0;
@@ -49,6 +49,11 @@ export class Paginator {
   }
 
   private emit(): void {
-    this.pageChange.emit({ first: this.first, rows: this.rows, page: this.currentPage, pageCount: this.pageCount });
+    this.pageChange.emit({
+      first: this.first,
+      rows: this.rows,
+      page: this.currentPage,
+      pageCount: this.pageCount,
+    });
   }
 }

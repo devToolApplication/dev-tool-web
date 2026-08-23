@@ -29,7 +29,7 @@ describe('FieldRecordRenderer', () => {
       valid: signal(true),
       markAsTouched: () => undefined,
       markAsFocused: () => undefined,
-      markAsBlurred: () => undefined
+      markAsBlurred: () => undefined,
     };
   };
 
@@ -47,7 +47,7 @@ describe('FieldRecordRenderer', () => {
 
     expect(component.field.value()).toEqual({
       language: 'TypeScript',
-      key_2: ''
+      key_2: '',
     });
   });
 

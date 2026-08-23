@@ -11,7 +11,7 @@ export interface DiffViewerRow {
   selector: 'app-diff-viewer',
   standalone: false,
   templateUrl: './diff-viewer.component.html',
-  styleUrl: './diff-viewer.component.css'
+  styleUrl: './diff-viewer.component.css',
 })
 export class DiffViewerComponent {
   @Input() before: unknown = null;
@@ -21,7 +21,9 @@ export class DiffViewerComponent {
   get rows(): DiffViewerRow[] {
     const beforeRecord = this.flatten(this.before, '', new WeakSet<object>());
     const afterRecord = this.flatten(this.after, '', new WeakSet<object>());
-    const keys = Array.from(new Set([...Object.keys(beforeRecord), ...Object.keys(afterRecord)])).sort();
+    const keys = Array.from(
+      new Set([...Object.keys(beforeRecord), ...Object.keys(afterRecord)]),
+    ).sort();
 
     return keys.map((key) => {
       const beforeValue = beforeRecord[key];
@@ -35,7 +37,13 @@ export class DiffViewerComponent {
         key,
         before: beforeValue,
         after: afterValue,
-        state: !hasBefore ? 'added' : !hasAfter ? 'removed' : beforeText !== afterText ? 'changed' : 'same'
+        state: !hasBefore
+          ? 'added'
+          : !hasAfter
+            ? 'removed'
+            : beforeText !== afterText
+              ? 'changed'
+              : 'same',
       };
     });
   }
@@ -81,18 +89,24 @@ export class DiffViewerComponent {
     seen.add(value);
 
     if (Array.isArray(value)) {
-      return value.reduce<Record<string, unknown>>((acc, item, index) => ({
-        ...acc,
-        ...this.flatten(item, `${prefix}[${index}]`, seen)
-      }), {});
+      return value.reduce<Record<string, unknown>>(
+        (acc, item, index) => ({
+          ...acc,
+          ...this.flatten(item, `${prefix}[${index}]`, seen),
+        }),
+        {},
+      );
     }
 
-    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((acc, [key, child]) => {
-      const nextPrefix = prefix ? `${prefix}.${key}` : key;
-      if (child && typeof child === 'object') {
-        return { ...acc, ...this.flatten(child, nextPrefix, seen) };
-      }
-      return { ...acc, [nextPrefix]: child };
-    }, {});
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+      (acc, [key, child]) => {
+        const nextPrefix = prefix ? `${prefix}.${key}` : key;
+        if (child && typeof child === 'object') {
+          return { ...acc, ...this.flatten(child, nextPrefix, seen) };
+        }
+        return { ...acc, [nextPrefix]: child };
+      },
+      {},
+    );
   }
 }

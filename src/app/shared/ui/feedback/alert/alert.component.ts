@@ -6,7 +6,7 @@ export type AlertVariant = 'info' | 'success' | 'warning' | 'danger';
   selector: 'app-alert',
   standalone: false,
   templateUrl: './alert.component.html',
-  styleUrl: './alert.component.css'
+  styleUrl: './alert.component.css',
 })
 export class AlertComponent {
   @Input() variant: AlertVariant = 'info';
@@ -26,7 +26,9 @@ export class AlertComponent {
   }
 
   get role(): 'alert' | 'status' {
-    return this.resolvedVariant === 'danger' || this.resolvedVariant === 'warning' ? 'alert' : 'status';
+    return this.resolvedVariant === 'danger' || this.resolvedVariant === 'warning'
+      ? 'alert'
+      : 'status';
   }
 
   get resolvedIcon(): string {

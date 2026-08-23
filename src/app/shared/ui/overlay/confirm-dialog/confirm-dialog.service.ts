@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Inject, Injectable } from '@angular/core';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { I18nService } from '@core/i18n/i18n.service';
 
 export type ConfirmDialogVariant = 'default' | 'warning' | 'danger' | 'info';
@@ -46,7 +47,7 @@ export class ConfirmDialogService {
 
   readonly requests$: Observable<ConfirmDialogRequest> = this.requestSubject.asObservable();
 
-  constructor(private readonly i18nService: I18nService) {}
+  constructor(@Inject(I18nService) private readonly i18nService: I18nService) {}
 
   confirm(options: ConfirmDialogConfig): Promise<boolean> {
     return new Promise((resolve) => {
@@ -63,25 +64,25 @@ export class ConfirmDialogService {
   private openRequest(
     options: ConfirmDialogConfig,
     resolve?: (confirmed: boolean) => void,
-    resolveResult?: (result: ConfirmDialogResult) => void
+    resolveResult?: (result: ConfirmDialogResult) => void,
   ): void {
-      const variant = options.variant ?? 'danger';
+    const variant = options.variant ?? 'danger';
 
-      this.requestSubject.next({
-        title: this.i18nService.t(options.title ?? options.header ?? 'confirm'),
-        message: this.i18nService.t(options.message ?? 'shared.confirm.message'),
-        confirmText: this.i18nService.t(options.confirmText ?? options.acceptLabel ?? 'yes'),
-        cancelText: this.i18nService.t(options.cancelText ?? options.rejectLabel ?? 'no'),
-        icon: options.icon ?? this.iconForVariant(variant),
-        variant,
-        closeOnBackdrop: options.closeOnBackdrop ?? true,
-        closeOnEsc: options.closeOnEsc ?? true,
-        requireText: options.requireText ? this.i18nService.t(options.requireText) : undefined,
-        action: options.action,
-        errorMessage: this.i18nService.t(options.errorMessage ?? 'shared.confirm.actionFailed'),
-        resolve: resolve ?? (() => undefined),
-        resolveResult
-      });
+    this.requestSubject.next({
+      title: this.i18nService.t(options.title ?? options.header ?? 'confirm'),
+      message: this.i18nService.t(options.message ?? 'shared.confirm.message'),
+      confirmText: this.i18nService.t(options.confirmText ?? options.acceptLabel ?? 'yes'),
+      cancelText: this.i18nService.t(options.cancelText ?? options.rejectLabel ?? 'no'),
+      icon: options.icon ?? this.iconForVariant(variant),
+      variant,
+      closeOnBackdrop: options.closeOnBackdrop ?? true,
+      closeOnEsc: options.closeOnEsc ?? true,
+      requireText: options.requireText ? this.i18nService.t(options.requireText) : undefined,
+      action: options.action,
+      errorMessage: this.i18nService.t(options.errorMessage ?? 'shared.confirm.actionFailed'),
+      resolve: resolve ?? (() => undefined),
+      resolveResult,
+    });
   }
 
   private iconForVariant(variant: ConfirmDialogVariant): string {

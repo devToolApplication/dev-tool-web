@@ -17,11 +17,13 @@ This level does not make the viewport draggable yet.
 ## User Experience
 
 The minimap should show:
+
 - Flow nodes as small boxes.
 - A viewport rectangle showing the current canvas visible area.
 - Rectangle updates when user pans, zooms, auto-layouts, fits, or resizes canvas.
 
 The viewport rectangle should be subtle:
+
 - Border: `--app-primary`
 - Fill: transparent or low-opacity primary fill
 - Pointer cursor remains default in level 2
@@ -29,6 +31,7 @@ The viewport rectangle should be subtle:
 ## Required Engine Data
 
 `JointFlowEngine` must expose:
+
 - Current paper scale.
 - Current paper translation.
 - Current container size.
@@ -53,6 +56,7 @@ export interface FlowViewportSnapshot {
 ```
 
 Better location:
+
 - `src/app/shared/ui/flow-builder/models/flow-command.model.ts` if considered UI event.
 - Or a new `flow-viewport.model.ts` under `models`.
 
@@ -79,6 +83,7 @@ The navigator already calculates bounds from nodes. Use the same minimap coordin
 The visible local paper area can be derived from the inverse transform:
 
 Given:
+
 - client viewport size: `clientWidth`, `clientHeight`
 - scale: `s`
 - translation: `tx`, `ty`
@@ -97,7 +102,7 @@ Then map local bounds to minimap:
 ```ts
 const scale = Math.min(
   (mapWidth - padding * 2) / navigatorBounds.width,
-  (bodyHeight - padding * 2) / navigatorBounds.height
+  (bodyHeight - padding * 2) / navigatorBounds.height,
 );
 
 left = padding + (visibleLeft - bounds.minX) * scale;
@@ -186,7 +191,7 @@ get navigationBounds(): NavigatorBounds {
    - Add div:
      ```html
      @if (viewportStyle(); as style) {
-       <div class="flow-navigator__viewport" [ngStyle]="style"></div>
+     <div class="flow-navigator__viewport" [ngStyle]="style"></div>
      }
      ```
    - Put viewport above grid and below node boxes or above node boxes depending on visual.
@@ -220,6 +225,7 @@ npm.cmd run build-storybook
 ```
 
 Manual browser checks:
+
 - Open AI Agent Workflow story.
 - Pan blank canvas.
 - Zoom with minimap `+` and toolbar zoom.
@@ -228,6 +234,7 @@ Manual browser checks:
 - Confirm rectangle moves and resizes.
 
 Optional Playwright checks:
+
 - Assert `.flow-navigator__viewport` exists.
 - Read its bounding rect before and after zoom.
 - Ensure width/height changes after zoom.
@@ -244,6 +251,7 @@ Optional Playwright checks:
 ## Rollback
 
 Remove:
+
 - `FlowViewportSnapshot` model.
 - Engine viewport snapshot/callback.
 - Canvas/Builder viewport outputs.

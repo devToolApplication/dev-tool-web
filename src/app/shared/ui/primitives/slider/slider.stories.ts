@@ -7,8 +7,8 @@ const meta: Meta<SliderComponent> = {
   args: {
     min: 0,
     max: 100,
-    value: 50
-  }
+    value: 50,
+  },
 };
 
 export default meta;
@@ -21,6 +21,6 @@ export const CustomRange: Story = {
   args: {
     min: 0,
     max: 1000,
-    value: 250
-  }
+    value: 250,
+  },
 };

@@ -1,13 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 
-import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
+import type {
+  FormConfig,
+  FormContext,
+} from '@shared/ui/patterns/form-input/models/form-config.model';
 
 const formConfig: FormConfig = {
   title: 'Create Configuration',
   description: 'Fill in the details below to create a new configuration entry.',
   sections: [
     { id: 'basic', title: 'Basic Information' },
-    { id: 'advanced', title: 'Advanced Settings', collapsible: true }
+    { id: 'advanced', title: 'Advanced Settings', collapsible: true },
   ],
   fields: [
     {
@@ -16,33 +19,33 @@ const formConfig: FormConfig = {
       type: 'text',
       sectionId: 'basic',
       placeholder: 'Enter configuration name',
-      validation: [{ type: 'required', expression: '!value', message: 'Name is required' }]
+      validation: [{ type: 'required', expression: '!value', message: 'Name is required' }],
     },
     {
       name: 'description',
       label: 'Description',
       type: 'textarea',
       sectionId: 'basic',
-      placeholder: 'Describe the purpose of this configuration'
+      placeholder: 'Describe the purpose of this configuration',
     },
     {
       name: 'enabled',
       label: 'Enabled',
       type: 'checkbox',
-      sectionId: 'basic'
+      sectionId: 'basic',
     },
     {
       name: 'timeout',
       label: 'Timeout (ms)',
       type: 'number',
       sectionId: 'advanced',
-      validation: [{ type: 'min', expression: 'value < 100', message: 'Minimum 100ms' }]
+      validation: [{ type: 'min', expression: 'value < 100', message: 'Minimum 100ms' }],
     },
     {
       name: 'retryCount',
       label: 'Retry Count',
       type: 'number',
-      sectionId: 'advanced'
+      sectionId: 'advanced',
     },
     {
       name: 'environment',
@@ -52,10 +55,10 @@ const formConfig: FormConfig = {
       options: [
         { label: 'Production', value: 'prod' },
         { label: 'Staging', value: 'staging' },
-        { label: 'Development', value: 'dev' }
-      ]
-    }
-  ]
+        { label: 'Development', value: 'dev' },
+      ],
+    },
+  ],
 };
 
 const meta: Meta = {
@@ -68,10 +71,10 @@ const meta: Meta = {
         component: `
 Form page pattern: PageShell + ConfigTemplateForm with sections, validation, and sticky actions.
 Used for create/edit flows. Figma: map as a page-level frame with form sections.
-        `
-      }
-    }
-  }
+        `,
+      },
+    },
+  },
 };
 
 export default meta;
@@ -83,7 +86,7 @@ export const CreateMode: Story = {
     props: {
       formConfig,
       context: { user: null, mode: 'create' } satisfies FormContext,
-      initialValue: { enabled: true }
+      initialValue: { enabled: true },
     },
     template: `
       <app-page-shell title="Create Configuration" subtitle="Add a new configuration entry">
@@ -97,8 +100,8 @@ export const CreateMode: Story = {
           [initialValue]="initialValue"
         ></app-config-template-form>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
 
 export const EditMode: Story = {
@@ -106,7 +109,14 @@ export const EditMode: Story = {
     props: {
       formConfig,
       context: { user: null, mode: 'edit' } satisfies FormContext,
-      initialValue: { name: 'Production Config', description: 'Main production settings', enabled: true, timeout: 5000, retryCount: 3, environment: 'prod' }
+      initialValue: {
+        name: 'Production Config',
+        description: 'Main production settings',
+        enabled: true,
+        timeout: 5000,
+        retryCount: 3,
+        environment: 'prod',
+      },
     },
     template: `
       <app-page-shell
@@ -124,7 +134,6 @@ export const EditMode: Story = {
           [initialValue]="initialValue"
         ></app-config-template-form>
       </app-page-shell>
-    `
-  })
+    `,
+  }),
 };
-

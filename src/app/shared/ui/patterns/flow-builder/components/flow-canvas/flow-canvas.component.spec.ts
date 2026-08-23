@@ -9,10 +9,12 @@ describe('FlowCanvasComponent', () => {
 
   beforeEach(() => {
     frames = [];
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback: FrameRequestCallback) => {
-      frames.push(callback);
-      return frames.length;
-    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
+      (callback: FrameRequestCallback) => {
+        frames.push(callback);
+        return frames.length;
+      },
+    );
     vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id: number) => {
       frames[id - 1] = () => undefined;
     });
@@ -100,20 +102,23 @@ describe('FlowCanvasComponent', () => {
 
   it('does not publish the pre-fit viewport that would render the first node in the corner', () => {
     const emitted: ReturnType<FakeFlowEngine['getViewportSnapshot']>[] = [];
-    component.viewportChange.subscribe(snapshot => emitted.push(snapshot));
+    component.viewportChange.subscribe((snapshot) => emitted.push(snapshot));
     component.value = singleNodeFlow('r1');
 
     component.ngOnChanges({ value: new SimpleChange(null, component.value, true) });
-    (component as unknown as { handleViewportChange: (snapshot: ReturnType<FakeFlowEngine['getViewportSnapshot']>) => void })
-      .handleViewportChange({
-        scale: 1,
-        translateX: 0,
-        translateY: 0,
-        clientWidth: 580,
-        clientHeight: 520,
-        contentBounds: { minX: 0, minY: 0, width: 220, height: 72 },
-        nodePositions: [{ id: 'r1', x: 0, y: 0, width: 220, height: 72 }],
-      });
+    (
+      component as unknown as {
+        handleViewportChange: (snapshot: ReturnType<FakeFlowEngine['getViewportSnapshot']>) => void;
+      }
+    ).handleViewportChange({
+      scale: 1,
+      translateX: 0,
+      translateY: 0,
+      clientWidth: 580,
+      clientHeight: 520,
+      contentBounds: { minX: 0, minY: 0, width: 220, height: 72 },
+      nodePositions: [{ id: 'r1', x: 0, y: 0, width: 220, height: 72 }],
+    });
 
     expect(component.viewportSnapshot).toBeNull();
     expect(emitted).toEqual([]);

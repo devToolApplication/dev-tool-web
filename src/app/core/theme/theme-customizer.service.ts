@@ -39,7 +39,7 @@ const DEFAULT_STATE: ThemeCustomState = {
     selectText: 'var(--app-text)',
     inputBackground: 'var(--app-input-bg)',
     inputText: 'var(--app-text)',
-    appText: 'var(--app-text)'
+    appText: 'var(--app-text)',
   },
   dark: {
     primary: '#60a5fa',
@@ -51,8 +51,8 @@ const DEFAULT_STATE: ThemeCustomState = {
     selectText: 'var(--app-text)',
     inputBackground: 'var(--app-input-bg)',
     inputText: 'var(--app-text)',
-    appText: 'var(--app-text)'
-  }
+    appText: 'var(--app-text)',
+  },
 };
 
 const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
@@ -66,7 +66,7 @@ const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
     selectText: '--app-custom-light-select-text',
     inputBackground: '--app-custom-light-input-bg',
     inputText: '--app-custom-light-input-text',
-    appText: '--app-custom-light-text'
+    appText: '--app-custom-light-text',
   },
   dark: {
     primary: '--app-custom-dark-primary',
@@ -78,8 +78,8 @@ const CSS_VAR_MAP: Record<ThemeMode, Record<ThemeCustomToken, string>> = {
     selectText: '--app-custom-dark-select-text',
     inputBackground: '--app-custom-dark-input-bg',
     inputText: '--app-custom-dark-input-text',
-    appText: '--app-custom-dark-text'
-  }
+    appText: '--app-custom-dark-text',
+  },
 };
 
 const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
@@ -87,62 +87,62 @@ const OPTIONS: Record<ThemeCustomToken, ThemeCustomOption[]> = {
     { label: 'blue', value: '#2563eb' },
     { label: 'cyan', value: '#0891b2' },
     { label: 'violet', value: '#7c3aed' },
-    { label: 'green', value: '#059669' }
+    { label: 'green', value: '#059669' },
   ],
   surface: [
     { label: 'white', value: '#ffffff' },
     { label: 'slate50', value: '#f8fafc' },
     { label: 'cardSurface', value: 'var(--app-card-surface)' },
-    { label: 'surfaceSoft', value: 'var(--app-surface-soft)' }
+    { label: 'surfaceSoft', value: 'var(--app-surface-soft)' },
   ],
   border: [
     { label: 'slateBorder', value: '#d8dee8' },
     { label: 'slateSoft', value: '#e2e8f0' },
     { label: 'appBorder', value: 'var(--app-border)' },
-    { label: 'appBorderSoft', value: 'var(--app-border-soft)' }
+    { label: 'appBorderSoft', value: 'var(--app-border-soft)' },
   ],
   successText: [
     { label: 'green', value: '#047857' },
     { label: 'emerald', value: '#059669' },
     { label: 'chartSuccess', value: 'var(--app-chart-success)' },
-    { label: 'successText', value: 'var(--app-control-success-text)' }
+    { label: 'successText', value: 'var(--app-control-success-text)' },
   ],
   dangerText: [
     { label: 'rose', value: '#be123c' },
     { label: 'red', value: '#dc2626' },
     { label: 'chartDanger', value: 'var(--app-chart-danger)' },
-    { label: 'dangerText', value: 'var(--app-control-danger-text)' }
+    { label: 'dangerText', value: 'var(--app-control-danger-text)' },
   ],
   selectBackground: [
     { label: 'cardSurface', value: 'var(--app-card-surface)' },
     { label: 'surface', value: 'var(--app-surface)' },
     { label: 'surfaceSoft', value: 'var(--app-surface-soft)' },
-    { label: 'inputBg', value: 'var(--app-custom-input-bg)' }
+    { label: 'inputBg', value: 'var(--app-custom-input-bg)' },
   ],
   selectText: [
     { label: 'text', value: 'var(--app-text)' },
     { label: 'textSoft', value: 'var(--app-text-soft)' },
     { label: 'inputText', value: 'var(--app-custom-input-text)' },
-    { label: 'textMuted', value: 'var(--app-text-muted)' }
+    { label: 'textMuted', value: 'var(--app-text-muted)' },
   ],
   inputBackground: [
     { label: 'inputBg', value: 'var(--app-custom-input-bg)' },
     { label: 'surface', value: 'var(--app-surface)' },
     { label: 'surfaceSoft', value: 'var(--app-surface-soft)' },
-    { label: 'cardSurface', value: 'var(--app-card-surface)' }
+    { label: 'cardSurface', value: 'var(--app-card-surface)' },
   ],
   inputText: [
     { label: 'inputText', value: 'var(--app-custom-input-text)' },
     { label: 'text', value: 'var(--app-text)' },
     { label: 'textSoft', value: 'var(--app-text-soft)' },
-    { label: 'textMuted', value: 'var(--app-text-muted)' }
+    { label: 'textMuted', value: 'var(--app-text-muted)' },
   ],
   appText: [
     { label: 'text', value: 'var(--app-text)' },
     { label: 'textSoft', value: 'var(--app-text-soft)' },
     { label: 'textMuted', value: 'var(--app-text-muted)' },
-    { label: 'primary', value: 'var(--app-primary)' }
-  ]
+    { label: 'primary', value: 'var(--app-primary)' },
+  ],
 };
 
 @Injectable({ providedIn: 'root' })
@@ -172,8 +172,8 @@ export class ThemeCustomizerService {
       ...this.state,
       [mode]: {
         ...this.state[mode],
-        [token]: value
-      }
+        [token]: value,
+      },
     };
     this.apply();
     this.save();
@@ -213,7 +213,7 @@ export class ThemeCustomizerService {
           selectText: parsed.light?.selectText ?? DEFAULT_STATE.light.selectText,
           inputBackground: parsed.light?.inputBackground ?? DEFAULT_STATE.light.inputBackground,
           inputText: parsed.light?.inputText ?? DEFAULT_STATE.light.inputText,
-          appText: parsed.light?.appText ?? DEFAULT_STATE.light.appText
+          appText: parsed.light?.appText ?? DEFAULT_STATE.light.appText,
         },
         dark: {
           primary: parsed.dark?.primary ?? DEFAULT_STATE.dark.primary,
@@ -225,8 +225,8 @@ export class ThemeCustomizerService {
           selectText: parsed.dark?.selectText ?? DEFAULT_STATE.dark.selectText,
           inputBackground: parsed.dark?.inputBackground ?? DEFAULT_STATE.dark.inputBackground,
           inputText: parsed.dark?.inputText ?? DEFAULT_STATE.dark.inputText,
-          appText: parsed.dark?.appText ?? DEFAULT_STATE.dark.appText
-        }
+          appText: parsed.dark?.appText ?? DEFAULT_STATE.dark.appText,
+        },
       };
     } catch {
       this.state = this.cloneDefaultState();
@@ -236,7 +236,7 @@ export class ThemeCustomizerService {
   private cloneDefaultState(): ThemeCustomState {
     return {
       light: { ...DEFAULT_STATE.light },
-      dark: { ...DEFAULT_STATE.dark }
+      dark: { ...DEFAULT_STATE.dark },
     };
   }
 

@@ -7,7 +7,7 @@ spec:
   containers:
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
-      command: ["/busybox/sh", "-c"]
+      command: ['/busybox/sh', '-c']
       args:
         - sleep 3600
       tty: true
@@ -19,7 +19,7 @@ spec:
 
     - name: kubectl
       image: lamld2510/kubectl
-      command: ["/bin/sh", "-c"]
+      command: ['/bin/sh', '-c']
       args:
         - sleep infinity
       tty: true
@@ -31,7 +31,7 @@ spec:
 
     - name: node
       image: node:20-alpine
-      command: ["/bin/sh", "-c"]
+      command: ['/bin/sh', '-c']
       args:
         - sleep infinity
       tty: true
@@ -42,8 +42,8 @@ spec:
           mountPath: /root/.npm
       resources:
         requests:
-          cpu: "1000m"
-          memory: "2Gi"
+          cpu: '1000m'
+          memory: '2Gi'
 
   volumes:
     - name: docker-config

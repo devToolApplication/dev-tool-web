@@ -4,7 +4,7 @@ import { SelectButton } from './select-button';
 const sampleOptions = [
   { label: 'Day', value: 'day' },
   { label: 'Week', value: 'week' },
-  { label: 'Month', value: 'month' }
+  { label: 'Month', value: 'month' },
 ];
 
 const meta: Meta<SelectButton> = {
@@ -15,8 +15,8 @@ const meta: Meta<SelectButton> = {
     value: 'week',
     multiple: false,
     allowEmpty: true,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -30,16 +30,16 @@ export const Multiple: Story = {
     props: {
       ...args,
       multiple: true,
-      value: ['day', 'week']
+      value: ['day', 'week'],
     },
     template: `
       <app-select-button [options]="options" [multiple]="true" [allowEmpty]="allowEmpty" [value]="value"></app-select-button>
-    `
-  })
+    `,
+  }),
 };
 
 export const Disabled: Story = {
   args: {
-    disabled: true
-  }
+    disabled: true,
+  },
 };

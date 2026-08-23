@@ -24,26 +24,25 @@
     </div>
   }
 
-  <nav class="menu-list app-scrollbar" [attr.aria-label]="'layout.sidebar' | translateContent" (keydown)="onMenuKeydown($event)">
+  <nav
+    class="menu-list app-scrollbar"
+    tabindex="0"
+    [attr.aria-label]="'layout.sidebar' | translateContent"
+    (keydown)="onMenuKeydown($event)"
+  >
     @let groups = visibleGroups();
 
     @if (groups.length) {
-      @for (group of groups; track trackMenuItem($index, group)) {
-        <section
-          class="menu-group"
-          [class.menu-group--active]="isItemActive(group)"
-          [style.--group-color]="group.groupColor || null"
-        >
-          <p class="menu-group-title">{{ group.label | translateContent }}</p>
-
-          @if (group.items?.length) {
-            <ng-container
-              [ngTemplateOutlet]="menuItemsTemplate"
-              [ngTemplateOutletContext]="{ items: group.items, parentPath: 'root/' + (group.label || 'group') }"
-            ></ng-container>
-          }
-        </section>
-      }
+      <div class="menu-sections">
+        <ng-container
+          [ngTemplateOutlet]="menuItemsTemplate"
+          [ngTemplateOutletContext]="{
+            items: groups,
+            parentPath: 'root',
+            level: 0
+          }"
+        ></ng-container>
+      </div>
     } @else {
       <app-empty-state
         class="menu-empty-state"
@@ -66,50 +65,75 @@
   </footer>
 </aside>
 
-<ng-template #menuItemsTemplate let-items="items" let-parentPath="parentPath">
+<ng-template #menuItemsTemplate let-items="items" let-parentPath="parentPath" let-level="level">
   @for (item of items; track trackMenuItem($index, item)) {
     @let itemPath = parentPath + '/' + (item.label || 'item');
+    @let hasChildren = (item.items?.length ?? 0) > 0;
+    @let expanded = isExpanded(itemPath);
+    @let active = isItemActive(item);
 
-    <div class="menu-item-shell" [class.menu-item-shell--active]="isItemActive(item)">
-      @if (item.items?.length) {
+    <div
+      class="menu-node"
+      [class.menu-node--root]="level === 0"
+      [class.menu-node--nested]="level > 0"
+      [class.menu-node--active]="active"
+      [class.menu-node--expanded]="expanded"
+      [style.--menu-level]="level"
+    >
+      @if (hasChildren) {
         <button
           type="button"
-          class="menu-link menu-link-parent"
-          [class.active]="isItemActive(item)"
-          [class.expanded]="isExpanded(itemPath)"
-          [disabled]="!item.items.length"
-          [attr.aria-expanded]="isExpanded(itemPath)"
+          class="menu-link menu-link--parent"
+          [class.active]="active"
+          [class.expanded]="expanded"
+          [attr.aria-expanded]="expanded"
           [attr.title]="collapsed ? (item.label | translateContent) : null"
-          (click)="item.items.length && toggle(itemPath)"
+          (click)="toggle(itemPath)"
         >
-          <i class="menu-icon" [ngClass]="item.icon || 'pi pi-circle'"></i>
-          <span class="menu-label">{{ item.label | translateContent }}</span>
-          @if (item.items.length) {
-            <i class="pi submenu-toggle" [class.pi-chevron-down]="isExpanded(itemPath)" [class.pi-chevron-right]="!isExpanded(itemPath)"></i>
+          @if (item.icon) {
+            <i class="menu-icon" [ngClass]="item.icon"></i>
+          } @else if (level > 0) {
+            <span class="menu-bullet" aria-hidden="true"></span>
           }
+          <span class="menu-label">{{ item.label | translateContent }}</span>
+
+          <i
+            class="pi menu-chevron"
+            [class.pi-chevron-down]="expanded"
+            [class.pi-chevron-right]="!expanded"
+            aria-hidden="true"
+          ></i>
         </button>
 
-        @if (isExpanded(itemPath) || collapsed) {
-          <div class="submenu-wrap">
+        @if (expanded || collapsed) {
+          <div class="submenu-container" role="group">
             <ng-container
               [ngTemplateOutlet]="menuItemsTemplate"
-              [ngTemplateOutletContext]="{ items: item.items, parentPath: itemPath }"
+              [ngTemplateOutletContext]="{
+                items: item.items,
+                parentPath: itemPath,
+                level: level + 1
+              }"
             ></ng-container>
           </div>
         }
       } @else {
         <a
           pRipple
-          class="menu-link"
-          [class.active]="isItemActive(item)"
+          class="menu-link menu-link--leaf"
+          [class.active]="active"
           [routerLink]="item.routerLink"
           routerLinkActive="active"
           #routeActive="routerLinkActive"
-          [attr.aria-current]="routeActive.isActive || isItemActive(item) ? 'page' : null"
+          [attr.aria-current]="routeActive.isActive || active ? 'page' : null"
           [attr.title]="collapsed ? (item.label | translateContent) : null"
           (click)="onNavigate()"
         >
-          <i class="menu-icon" [ngClass]="item.icon || 'pi pi-circle'"></i>
+          @if (item.icon) {
+            <i class="menu-icon" [ngClass]="item.icon"></i>
+          } @else if (level > 0) {
+            <span class="menu-bullet" aria-hidden="true"></span>
+          }
           <span class="menu-label">{{ item.label | translateContent }}</span>
 
           @if (item.badge) {
@@ -120,5 +144,3 @@
     </div>
   }
 </ng-template>
-
-

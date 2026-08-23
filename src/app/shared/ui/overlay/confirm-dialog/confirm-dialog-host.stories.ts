@@ -4,6 +4,14 @@ import { ConfirmDialogHostComponent } from './confirm-dialog-host.component';
 import { ConfirmDialogService } from './confirm-dialog.service';
 import { I18nService } from '@core/i18n/i18n.service';
 
+type ConfirmDialogStoryWindow = Window & {
+  confirmDialogServiceInstance?: ConfirmDialogService;
+};
+
+function storyWindow(): ConfirmDialogStoryWindow {
+  return window as ConfirmDialogStoryWindow;
+}
+
 const meta: Meta<ConfirmDialogHostComponent> = {
   title: 'Shared/UI/Overlay/ConfirmDialogHost',
   component: ConfirmDialogHostComponent,
@@ -14,11 +22,11 @@ const meta: Meta<ConfirmDialogHostComponent> = {
         {
           provide: I18nService,
           useValue: {
-            t: (key: string) => key
-          }
-        }
-      ]
-    })
+            t: (key: string) => key,
+          },
+        },
+      ],
+    }),
   ],
   render: (args) => ({
     props: args,
@@ -32,8 +40,8 @@ const meta: Meta<ConfirmDialogHostComponent> = {
 
         <app-confirm-dialog-host></app-confirm-dialog-host>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -44,32 +52,33 @@ export const Default: Story = {
   render: (args) => ({
     props: {
       ...args,
-      triggerDanger: function() {
-        const service = (window as any).confirmDialogServiceInstance;
+      triggerDanger: function () {
+        const service = storyWindow().confirmDialogServiceInstance;
         if (service) {
           service.confirm({
             title: 'Delete Workflow?',
-            message: 'Are you sure you want to permanently delete this workflow? This action cannot be undone.',
+            message:
+              'Are you sure you want to permanently delete this workflow? This action cannot be undone.',
             variant: 'danger',
             confirmText: 'Delete',
-            cancelText: 'Cancel'
+            cancelText: 'Cancel',
           });
         }
       },
-      triggerWarning: function() {
-        const service = (window as any).confirmDialogServiceInstance;
+      triggerWarning: function () {
+        const service = storyWindow().confirmDialogServiceInstance;
         if (service) {
           service.confirm({
             title: 'Deactivate Node?',
             message: 'Deactivating this node will pause all processing schedules.',
             variant: 'warning',
             confirmText: 'Pause Node',
-            cancelText: 'Keep Active'
+            cancelText: 'Keep Active',
           });
         }
       },
-      triggerRequiredText: function() {
-        const service = (window as any).confirmDialogServiceInstance;
+      triggerRequiredText: function () {
+        const service = storyWindow().confirmDialogServiceInstance;
         if (service) {
           service.confirm({
             title: 'Force Purge Data?',
@@ -77,10 +86,10 @@ export const Default: Story = {
             variant: 'danger',
             requireText: 'PURGE',
             confirmText: 'Purge All',
-            cancelText: 'Abort'
+            cancelText: 'Abort',
           });
         }
-      }
+      },
     },
     template: `
       <div>
@@ -92,13 +101,13 @@ export const Default: Story = {
 
         <app-confirm-dialog-host></app-confirm-dialog-host>
       </div>
-    `
+    `,
   }),
   decorators: [
     (storyFn) => {
       const story = storyFn();
       // Expose service globally so render callbacks can access it easily in this isolated Storybook environment
-      
+
       return story;
     },
     applicationConfig({
@@ -107,15 +116,12 @@ export const Default: Story = {
           provide: ConfirmDialogService,
           useFactory: (i18n: I18nService) => {
             const service = new ConfirmDialogService(i18n);
-            (window as any).confirmDialogServiceInstance = service;
+            storyWindow().confirmDialogServiceInstance = service;
             return service;
           },
-          deps: [I18nService]
-        }
-      ]
-    })
-  ]
+          deps: [I18nService],
+        },
+      ],
+    }),
+  ],
 };
-
-
-

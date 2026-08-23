@@ -2,6 +2,8 @@ import { Component, forwardRef, Input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BaseInput } from '../base-input';
 
+export type DatePickerValue = Date | Array<Date | null> | null;
+
 @Component({
   selector: 'app-date-picker',
   standalone: false,
@@ -11,11 +13,11 @@ import { BaseInput } from '../base-input';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => DatePicker),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class DatePicker extends BaseInput<Date | Date[] | null> {
+export class DatePicker extends BaseInput<DatePickerValue> {
   @Input() showIcon = true;
   @Input() dateFormat = 'dd/mm/yy';
   @Input() showTime = false;
@@ -54,14 +56,14 @@ export class DatePicker extends BaseInput<Date | Date[] | null> {
     const current = Array.isArray(this.value) ? this.value : [null, null];
     const from = value ? new Date(value) : null;
     if (from && isNaN(from.getTime())) return;
-    this.onChange([from, current[1] ?? null] as any);
+    this.onChange([from, current[1] ?? null]);
   }
 
   onRangeToInput(value: string): void {
     const current = Array.isArray(this.value) ? this.value : [null, null];
     const to = value ? new Date(value) : null;
     if (to && isNaN(to.getTime())) return;
-    this.onChange([current[0] ?? null, to] as any);
+    this.onChange([current[0] ?? null, to]);
   }
 
   onDateInput(value: string): void {

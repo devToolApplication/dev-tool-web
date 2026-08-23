@@ -3,11 +3,27 @@ import type { Meta, StoryObj } from '@storybook/angular';
 const shadowLevels = [
   { name: 'None', class: 'shadow-none', css: 'none' },
   { name: 'Small', class: 'shadow-sm', css: '0 1px 2px 0 rgb(0 0 0 / 0.05)' },
-  { name: 'Default', class: 'shadow', css: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)' },
-  { name: 'Medium', class: 'shadow-md', css: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' },
-  { name: 'Large', class: 'shadow-lg', css: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' },
-  { name: 'XL', class: 'shadow-xl', css: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' },
-  { name: '2XL', class: 'shadow-2xl', css: '0 25px 50px -12px rgb(0 0 0 / 0.25)' }
+  {
+    name: 'Default',
+    class: 'shadow',
+    css: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+  },
+  {
+    name: 'Medium',
+    class: 'shadow-md',
+    css: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  },
+  {
+    name: 'Large',
+    class: 'shadow-lg',
+    css: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+  },
+  {
+    name: 'XL',
+    class: 'shadow-xl',
+    css: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+  },
+  { name: '2XL', class: 'shadow-2xl', css: '0 25px 50px -12px rgb(0 0 0 / 0.25)' },
 ];
 
 const meta: Meta = {
@@ -17,10 +33,10 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Elevation shadow tokens. Maps to Figma effect styles (drop shadow).'
-      }
-    }
-  }
+        component: 'Elevation shadow tokens. Maps to Figma effect styles (drop shadow).',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -33,7 +49,9 @@ export const ElevationLevels: Story = {
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-4">Shadow / Elevation Scale</h3>
         <div class="grid grid-cols-4 gap-6">
-          ${shadowLevels.map(s => `
+          ${shadowLevels
+            .map(
+              (s) => `
             <div class="flex flex-col items-center gap-2">
               <div
                 class="${s.class}"
@@ -42,11 +60,13 @@ export const ElevationLevels: Story = {
               <span class="text-sm font-medium">${s.name}</span>
               <code class="text-xs" style="color:var(--p-text-muted-color)">${s.class}</code>
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const CardElevation: Story = {
@@ -69,6 +89,6 @@ export const CardElevation: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

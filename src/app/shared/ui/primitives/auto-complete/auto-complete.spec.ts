@@ -11,7 +11,7 @@ describe('AutoComplete', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(AutoComplete);
@@ -21,7 +21,7 @@ describe('AutoComplete', () => {
   it('creates suggestions from configured options and a free typed value', () => {
     component.options = [
       { label: 'Alpha', value: 'alpha' },
-      { label: 'Beta', value: 'beta' }
+      { label: 'Beta', value: 'beta' },
     ];
 
     component.onSearch('alp');

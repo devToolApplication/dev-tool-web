@@ -12,7 +12,10 @@ import { CandleChartHeaderComponent } from './components/candle-chart-header/can
 import { CandleChartReplayControlsComponent } from './components/candle-chart-replay-controls/candle-chart-replay-controls.component';
 import { CandleChartStateOverlayComponent } from './components/candle-chart-state-overlay/candle-chart-state-overlay.component';
 import { CandleChartToolbarComponent } from './components/candle-chart-toolbar/candle-chart-toolbar.component';
-import { CandleChartEngineService, type CandleChartEngineRenderInput } from './candle-chart-engine.service';
+import {
+  CandleChartEngineService,
+  type CandleChartEngineRenderInput,
+} from './candle-chart-engine.service';
 import { CandleChartLegacyAdapter } from './candle-chart-legacy-adapter.service';
 import { CandleChartRealtimeService } from './candle-chart-realtime.service';
 import { CandleChartReplayService } from './candle-chart-replay.service';
@@ -298,11 +301,13 @@ describe('CandleChartRealtimeService', () => {
     const realtime = new CandleChartRealtimeService();
 
     expect(
-      realtime.parseMessage(JSON.stringify({ type: 'CANDLE', candle: { time: 1, open: 1, high: 2, low: 1, close: 2 } }))
-        .type,
+      realtime.parseMessage(
+        JSON.stringify({ type: 'CANDLE', candle: { time: 1, open: 1, high: 2, low: 1, close: 2 } }),
+      ).type,
     ).toBe('CANDLE');
-    expect(realtime.parseMessage(JSON.stringify({ type: 'OVERLAY', overlays: [{ type: 'MARKER' }] })).type).toBe(
-      'OVERLAY',
-    );
+    expect(
+      realtime.parseMessage(JSON.stringify({ type: 'OVERLAY', overlays: [{ type: 'MARKER' }] }))
+        .type,
+    ).toBe('OVERLAY');
   });
 });

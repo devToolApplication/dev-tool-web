@@ -1,11 +1,11 @@
-import {
+import type {
   ArrayFieldState,
   FieldState,
   FormConfig,
   FormResolvedSection,
   FormSectionConfig,
   GroupFieldState,
-  TreeFieldState
+  TreeFieldState,
 } from '../models/form-config.model';
 
 export type FormRenderableField = FieldState | ArrayFieldState | GroupFieldState | TreeFieldState;
@@ -24,7 +24,7 @@ export function buildFormSections(
   options: {
     activeSectionId?: string | null;
     submitted: boolean;
-  }
+  },
 ): FormRenderSection[] {
   const visibleFields = fields.filter((field) => field.visible());
   const explicitSections = (config.sections ?? [])
@@ -41,7 +41,7 @@ export function buildFormSections(
       warningCount: 0,
       completed: false,
       active: options.activeSectionId === section.id,
-      fields: []
+      fields: [],
     });
   });
 
@@ -62,12 +62,16 @@ export function buildFormSections(
   }
 
   const sections = Array.from(sectionMap.values())
-    .filter((section) => section.fields.length > 0 || explicitSections.some((item) => item.id === section.id))
+    .filter(
+      (section) =>
+        section.fields.length > 0 || explicitSections.some((item) => item.id === section.id),
+    )
     .sort((a, b) => a.order - b.order);
 
-  const activeId = options.activeSectionId && sections.some((section) => section.id === options.activeSectionId)
-    ? options.activeSectionId
-    : sections[0]?.id;
+  const activeId =
+    options.activeSectionId && sections.some((section) => section.id === options.activeSectionId)
+      ? options.activeSectionId
+      : sections[0]?.id;
 
   return sections.map((section) => {
     const sectionFields = flattenFormFields(section.fields);
@@ -82,12 +86,14 @@ export function buildFormSections(
       completed:
         visibleSectionFields.length > 0 &&
         visibleSectionFields.every((field) => !field.errors() && field.valid()),
-      active: section.id === activeId
+      active: section.id === activeId,
     };
   });
 }
 
-export function flattenFormFields(fields: FormRenderableField[] | FormRenderableField[][]): FieldState[] {
+export function flattenFormFields(
+  fields: FormRenderableField[] | FormRenderableField[][],
+): FieldState[] {
   return fields.flatMap((field) => {
     if (Array.isArray(field)) {
       return flattenFormFields(field);
@@ -104,7 +110,7 @@ export function findFirstInvalidField(fields: FormRenderableField[]): FieldState
 
 export function fieldErrorEntries(
   field: FieldState,
-  submitted: boolean
+  submitted: boolean,
 ): Array<{ key: string; message: string; severity: 'error' | 'warning' }> {
   const errors = field.errors();
   if (!field.visible() || !errors) {
@@ -114,17 +120,17 @@ export function fieldErrorEntries(
   const exposeTouchedErrors = submitted || field.touched();
 
   return Object.entries(errors)
-    .filter(([key]) => exposeTouchedErrors || key.startsWith('api-'))
+    .filter(([key]) => exposeTouchedErrors || key.startsWith('external-'))
     .map(([key, message]) => ({
       key,
       message,
-      severity: key.startsWith('warning') ? 'warning' : 'error'
+      severity: key.startsWith('warning') ? 'warning' : 'error',
     }));
 }
 
 function countVisibleErrors(
   fields: FieldState[],
-  submitted: boolean
+  submitted: boolean,
 ): { errors: number; warnings: number } {
   return fields.reduce(
     (acc, field) => {
@@ -137,14 +143,14 @@ function countVisibleErrors(
       });
       return acc;
     },
-    { errors: 0, warnings: 0 }
+    { errors: 0, warnings: 0 },
   );
 }
 
 function resolveFieldSectionId(
   field: FormRenderableField,
   sectionMap: Map<string, FormRenderSection>,
-  useAutoSections: boolean
+  useAutoSections: boolean,
 ): string {
   const sectionId = (field.fieldConfig as { sectionId?: string }).sectionId;
   if (sectionId && sectionMap.has(sectionId)) {
@@ -161,7 +167,7 @@ function resolveFieldSectionId(
   }
   return sectionMap.has(GENERAL_SECTION_ID) || sectionMap.size === 0
     ? GENERAL_SECTION_ID
-    : sectionMap.keys().next().value ?? GENERAL_SECTION_ID;
+    : (sectionMap.keys().next().value ?? GENERAL_SECTION_ID);
 }
 
 function buildAutoSections(fields: FormRenderableField[]): FormRenderSection[] {
@@ -170,7 +176,9 @@ function buildAutoSections(fields: FormRenderableField[]): FormRenderSection[] {
   }
 
   const hasDetails = fields.some((field) => field.type === 'textarea');
-  const hasConfiguration = fields.some((field) => autoSectionIdForField(field) === CONFIGURATION_SECTION_ID);
+  const hasConfiguration = fields.some(
+    (field) => autoSectionIdForField(field) === CONFIGURATION_SECTION_ID,
+  );
   const hasGeneral = fields.some((field) => autoSectionIdForField(field) === GENERAL_SECTION_ID);
   const sections: FormRenderSection[] = [];
 
@@ -180,13 +188,13 @@ function buildAutoSections(fields: FormRenderableField[]): FormRenderSection[] {
   if (hasDetails) {
     sections.push({
       ...createGeneratedSection(DETAILS_SECTION_ID, sections.length),
-      title: 'shared.form.section.details'
+      title: 'shared.form.section.details',
     });
   }
   if (hasConfiguration) {
     sections.push({
       ...createGeneratedSection(CONFIGURATION_SECTION_ID, sections.length),
-      title: 'shared.form.section.configuration'
+      title: 'shared.form.section.configuration',
     });
   }
 
@@ -200,7 +208,6 @@ function autoSectionIdForField(field: FormRenderableField): string {
     case 'json':
     case 'code':
     case 'record':
-    case 'secret-metadata':
     case 'group':
     case 'array':
     case 'tree':
@@ -225,7 +232,7 @@ function normalizeSection(section: FormSectionConfig, index: number): FormResolv
     errorCount: 0,
     warningCount: 0,
     completed: false,
-    active: false
+    active: false,
   };
 }
 
@@ -244,7 +251,7 @@ function createGeneratedSection(id: string, order: number): FormRenderSection {
     warningCount: 0,
     completed: false,
     active: false,
-    fields: []
+    fields: [],
   };
 }
 

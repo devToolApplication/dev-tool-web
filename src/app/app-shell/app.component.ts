@@ -6,12 +6,12 @@ import { ThemeService } from '@core/theme/theme.service';
   selector: 'app-root',
   standalone: false,
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent {
   constructor(
     private readonly themeService: ThemeService,
-    private readonly loadingService: LoadingService
+    private readonly loadingService: LoadingService,
   ) {
     void this.themeService;
   }
@@ -19,5 +19,4 @@ export class AppComponent {
   get isLoading(): boolean {
     return this.loadingService.isLoading();
   }
-
 }

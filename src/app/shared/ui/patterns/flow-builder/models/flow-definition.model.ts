@@ -1,6 +1,6 @@
-import { FlowNode } from './flow-node.model';
-import { FlowEdge } from './flow-edge.model';
-import { FlowViewportState } from './flow-common.model';
+import type { FlowNode } from './flow-node.model';
+import type { FlowEdge } from './flow-edge.model';
+import type { FlowViewportState } from './flow-common.model';
 
 export interface FlowDefinition {
   id: string;

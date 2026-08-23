@@ -100,7 +100,7 @@ export class WorkflowRunListPageComponent implements OnInit {
     }
   }
 
-  onTableAction(event: { action: TableAction; row: WorkflowRun }): void {
+  onTableAction(event: { action: TableAction<WorkflowRun>; row: WorkflowRun }): void {
     switch (event.action.id) {
       case 'detail':
         this.openRun(event.row);

@@ -1,16 +1,6 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  Output,
-  SimpleChanges,
-  ViewChild,
-} from '@angular/core';
-import {
+import type { AfterViewInit, ElementRef, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import type {
   FlowDefinition,
   FlowNodeTypeDefinition,
   FlowEdgeTypeDefinition,
@@ -28,7 +18,12 @@ import { FLOW_NODE_DRAG_TYPE } from '../flow-palette/flow-palette.component';
   selector: 'app-flow-canvas',
   standalone: false,
   template: `
-    <div #canvasContainer class="flow-canvas" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+    <div
+      #canvasContainer
+      class="flow-canvas"
+      (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)"
+    >
       <div #paperContainer class="flow-canvas__paper"></div>
     </div>
   `,
@@ -94,7 +89,13 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.resizeObserver = new ResizeObserver(() => {
       this.engine.resizeToContainer(this.firstRenderDone);
       const hasExplicitViewport = !!this.value?.viewport;
-      if (this.fitOnLoad && (this.value?.nodes?.length ?? 0) > 0 && !hasExplicitViewport && !this.firstRenderDone && !this.userInteracted) {
+      if (
+        this.fitOnLoad &&
+        (this.value?.nodes?.length ?? 0) > 0 &&
+        !hasExplicitViewport &&
+        !this.firstRenderDone &&
+        !this.userInteracted
+      ) {
         this.scheduleInitialFitContent();
       }
     });
@@ -138,8 +139,8 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   onDrop(event: DragEvent): void {
     if (this.mode !== 'edit') return;
-    const nodeType = event.dataTransfer?.getData(FLOW_NODE_DRAG_TYPE)
-      || event.dataTransfer?.getData('text/plain');
+    const nodeType =
+      event.dataTransfer?.getData(FLOW_NODE_DRAG_TYPE) || event.dataTransfer?.getData('text/plain');
     if (!nodeType) return;
     event.preventDefault();
     this.userInteracted = true;
@@ -154,12 +155,13 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
     const hasNodes = (this.value?.nodes?.length ?? 0) > 0;
     const graphStructureKey = this.graphStructureKey(this.value);
     const structureChanged = graphStructureKey !== this.lastGraphStructureKey;
-    const hasUnpositionedNodes = (this.value?.nodes ?? []).some(node => !node.position);
+    const hasUnpositionedNodes = (this.value?.nodes ?? []).some((node) => !node.position);
     const hasExplicitViewport = !!this.value?.viewport;
     const viewportKey = this.viewportKey(this.value?.viewport);
-    const shouldAutoPlace = hasNodes
-      && !this.userInteracted
-      && (!this.firstRenderDone || (structureChanged && hasUnpositionedNodes));
+    const shouldAutoPlace =
+      hasNodes &&
+      !this.userInteracted &&
+      (!this.firstRenderDone || (structureChanged && hasUnpositionedNodes));
     this.lastGraphStructureKey = graphStructureKey;
 
     if (hasExplicitViewport && viewportKey !== this.lastAppliedViewportKey) {
@@ -201,9 +203,12 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   private graphStructureKey(value: FlowDefinition | null): string {
     if (!value) return '';
-    const nodes = value.nodes.map(node => `${node.id}:${node.type}`).join('|');
+    const nodes = value.nodes.map((node) => `${node.id}:${node.type}`).join('|');
     const edges = value.edges
-      .map(edge => `${edge.id}:${edge.source.nodeId}:${edge.source.portId ?? ''}->${edge.target.nodeId}:${edge.target.portId ?? ''}`)
+      .map(
+        (edge) =>
+          `${edge.id}:${edge.source.nodeId}:${edge.source.portId ?? ''}->${edge.target.nodeId}:${edge.target.portId ?? ''}`,
+      )
       .join('|');
     return `${nodes}::${edges}`;
   }
@@ -247,7 +252,10 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
 
         this.engine.resizeToContainer();
         const snapshot = this.engine.getViewportSnapshot();
-        if ((snapshot.clientWidth < 16 || snapshot.clientHeight < 16) && this.initialFitAttempts < 12) {
+        if (
+          (snapshot.clientWidth < 16 || snapshot.clientHeight < 16) &&
+          this.initialFitAttempts < 12
+        ) {
           this.initialFitAttempts += 1;
           this.scheduleInitialFitContent();
           return;
@@ -268,9 +276,9 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.engine.clearHighlights();
       return;
     }
-    if (this.value?.nodes.some(n => n.id === this.selectedId)) {
+    if (this.value?.nodes.some((n) => n.id === this.selectedId)) {
       this.engine.highlightNode(this.selectedId);
-    } else if (this.value?.edges.some(e => e.id === this.selectedId)) {
+    } else if (this.value?.edges.some((e) => e.id === this.selectedId)) {
       this.engine.highlightEdge(this.selectedId);
     } else {
       this.engine.clearHighlights();

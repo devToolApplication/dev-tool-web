@@ -1,10 +1,10 @@
+import type { OnChanges } from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
   HostListener,
   Input,
-  OnChanges,
   Output,
   signal,
 } from '@angular/core';
@@ -72,9 +72,7 @@ export class ActionToolbarComponent implements OnChanges {
 
   private filterActions(placement: ActionToolbarAction['placement']): ActionToolbarAction[] {
     return this.actions.filter(
-      (action) =>
-        (action.visible ?? true) &&
-        (action.placement ?? 'secondary') === placement
+      (action) => (action.visible ?? true) && (action.placement ?? 'secondary') === placement,
     );
   }
 }

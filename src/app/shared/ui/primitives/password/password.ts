@@ -6,7 +6,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './password.html',
   styleUrl: './password.css',
-  providers: [provideValueAccessor(() => Password)]
+  providers: [provideValueAccessor(() => Password)],
 })
 export class Password extends BaseInput<string> {
   @Input() feedback = true;

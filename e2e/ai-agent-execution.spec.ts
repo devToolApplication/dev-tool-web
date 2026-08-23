@@ -8,7 +8,6 @@ async function navigateToPage(page: Page) {
 }
 
 test.describe('AI Agent Execution Page', () => {
-
   test.describe('Layout & Render', () => {
     test('should render page shell with title', async ({ page }) => {
       await navigateToPage(page);

@@ -1,4 +1,9 @@
-<section class="empty-state" [class]="'empty-state--' + variant + ' empty-state--' + size + ' empty-state--' + align" role="status" aria-live="polite">
+<section
+  class="empty-state"
+  [class]="'empty-state--' + variant + ' empty-state--' + size + ' empty-state--' + align"
+  role="status"
+  aria-live="polite"
+>
   <div class="empty-state__icon" aria-hidden="true">
     <i [class]="resolvedIcon"></i>
   </div>
@@ -33,4 +38,3 @@
     </div>
   }
 </section>
-

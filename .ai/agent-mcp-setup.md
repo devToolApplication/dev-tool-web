@@ -1,10 +1,12 @@
 # Shared MCP config for dev-tool-web
 
 This repo uses the same MCP server pair for Claude, Codex, Gravity, Gemini, and the entire `D:\Code` workspace:
+
 - `codegraph` for workspace-wide code intelligence
 - `basic-memory` for shared project memory
 
 Canonical repo manifest:
+
 - [`.ai/shared-mcp.manifest.json`](./shared-mcp.manifest.json)
 
 ## Scope
@@ -16,6 +18,7 @@ Canonical repo manifest:
 ## Claude
 
 Repo-local config already exists at:
+
 - [`.claude/mcp.json`](../.claude/mcp.json)
 
 User-level Claude MCP config should contain:
@@ -40,6 +43,7 @@ User-level Claude MCP config should contain:
 ## Codex
 
 Added to user config:
+
 - `C:\Users\Hello\.codex\config.toml`
 
 Snippet:
@@ -102,6 +106,7 @@ mcp_servers:
 ## Gemini
 
 Added to user config:
+
 - `C:\Users\Hello\.gemini\config\mcp_config.json`
 
 Snippet:

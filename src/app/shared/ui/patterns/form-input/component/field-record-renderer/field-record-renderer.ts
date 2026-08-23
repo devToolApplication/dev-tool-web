@@ -1,5 +1,5 @@
-import { AfterViewChecked, Component, ElementRef, Input } from '@angular/core';
-import { FieldState, RecordFieldConfig } from '../../models/form-config.model';
+import { Component, Input } from '@angular/core';
+import type { FieldState, RecordFieldConfig } from '../../models/form-config.model';
 
 type RecordEntry = { key: string; value: string };
 
@@ -7,22 +7,11 @@ type RecordEntry = { key: string; value: string };
   selector: 'app-field-record-renderer',
   standalone: false,
   templateUrl: './field-record-renderer.html',
-  styleUrl: './field-record-renderer.css'
+  styleUrl: './field-record-renderer.css',
 })
-export class FieldRecordRenderer implements AfterViewChecked {
+export class FieldRecordRenderer {
   @Input({ required: true })
   field!: FieldState;
-
-  constructor(private readonly host?: ElementRef<HTMLElement>) {}
-
-  ngAfterViewChecked(): void {
-    this.host?.nativeElement
-      .querySelectorAll<HTMLElement>('.p-fieldset-content-container[role="region"]')
-      .forEach((container) => {
-        container.removeAttribute('role');
-        container.removeAttribute('aria-labelledby');
-      });
-  }
 
   get recordConfig(): RecordFieldConfig | undefined {
     return this.field.type === 'record' ? (this.field.fieldConfig as RecordFieldConfig) : undefined;
@@ -36,7 +25,7 @@ export class FieldRecordRenderer implements AfterViewChecked {
 
     return Object.entries(value as Record<string, unknown>).map(([key, item]) => ({
       key,
-      value: String(item ?? '')
+      value: String(item ?? ''),
     }));
   }
 
@@ -51,15 +40,15 @@ export class FieldRecordRenderer implements AfterViewChecked {
     this.field.setValue(this.entriesToRecord(entries));
   }
 
-  onRecordKeyChange(index: number, key: string): void {
+  onRecordKeyChange(index: number, key: string | null): void {
     const entries = this.recordEntries;
-    entries[index] = { ...entries[index], key };
+    entries[index] = { ...entries[index], key: key ?? '' };
     this.field.setValue(this.entriesToRecord(entries));
   }
 
-  onRecordValueChange(index: number, value: string): void {
+  onRecordValueChange(index: number, value: string | null): void {
     const entries = this.recordEntries;
-    entries[index] = { ...entries[index], value };
+    entries[index] = { ...entries[index], value: value ?? '' };
     this.field.setValue(this.entriesToRecord(entries));
   }
 
@@ -69,10 +58,13 @@ export class FieldRecordRenderer implements AfterViewChecked {
       return {};
     }
 
-    return Object.entries(value as Record<string, unknown>).reduce<Record<string, string>>((acc, [key, item]) => {
-      acc[key] = String(item ?? '');
-      return acc;
-    }, {});
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, string>>(
+      (acc, [key, item]) => {
+        acc[key] = String(item ?? '');
+        return acc;
+      },
+      {},
+    );
   }
 
   private entriesToRecord(entries: RecordEntry[]): Record<string, string> {

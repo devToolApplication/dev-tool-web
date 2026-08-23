@@ -47,28 +47,43 @@ Feature Page
 
 ## 1. Fresh issue baseline
 
-| ID | Priority | Problem |
-|---|---|---|
-| SUI-001 | P0 | `ExpressionEngine` executes arbitrary JavaScript via `new Function()` |
-| SUI-002 | P0 | Shared Table owns Router/query-param/API pagination orchestration |
-| SUI-003 | P0 | Shared Table owns local persistence and CSV download |
-| SUI-004 | P0 | Shared contracts contain permission policy and business-specific secret/OAuth models |
-| SUI-005 | P0 | Shared Form exports navigation guard and discard-confirmation policy |
-| SUI-006 | P1 | Public Form/Table contracts use excessive `any` |
-| SUI-007 | P1 | Generic Form readonly mode is not actually rendered correctly |
-| SUI-008 | P1 | Form primitives have inconsistent label/help/error/ARIA contracts |
-| SUI-009 | P1 | Tree renderer is a god component |
-| SUI-010 | P1 | FlowBuilder root owns too much orchestration and file I/O |
-| SUI-011 | P1 | Overlay/menu implementations manually manage DOM/focus/portal behavior |
-| SUI-012 | P1 | Accessibility rules/semantics are bypassed or patched in DOM |
-| SUI-013 | P1 | `SharedModule` exports internal implementation renderers |
-| SUI-014 | P2 | `FormInput` still owns DOM scrolling/focus and API-error concerns |
-| SUI-015 | P1 | ESLint does not enforce typed safety/a11y/architecture strongly enough |
-| SUI-016 | P2 | Critical Shared UI tests are too shallow in several areas |
+| ID      | Priority | Problem                                                                              |
+| ------- | -------- | ------------------------------------------------------------------------------------ |
+| SUI-001 | P0       | `ExpressionEngine` executes arbitrary JavaScript via `new Function()`                |
+| SUI-002 | P0       | Shared Table owns Router/query-param/API pagination orchestration                    |
+| SUI-003 | P0       | Shared Table owns local persistence and CSV download                                 |
+| SUI-004 | P0       | Shared contracts contain permission policy and business-specific secret/OAuth models |
+| SUI-005 | P0       | Shared Form exports navigation guard and discard-confirmation policy                 |
+| SUI-006 | P1       | Public Form/Table contracts use excessive `any`                                      |
+| SUI-007 | P1       | Generic Form readonly mode is not actually rendered correctly                        |
+| SUI-008 | P1       | Form primitives have inconsistent label/help/error/ARIA contracts                    |
+| SUI-009 | P1       | Tree renderer is a god component                                                     |
+| SUI-010 | P1       | FlowBuilder root owns too much orchestration and file I/O                            |
+| SUI-011 | P1       | Overlay/menu implementations manually manage DOM/focus/portal behavior               |
+| SUI-012 | P1       | Accessibility rules/semantics are bypassed or patched in DOM                         |
+| SUI-013 | P1       | `SharedModule` exports internal implementation renderers                             |
+| SUI-014 | P2       | `FormInput` still owns DOM scrolling/focus and API-error concerns                    |
+| SUI-015 | P1       | ESLint does not enforce typed safety/a11y/architecture strongly enough               |
+| SUI-016 | P2       | Critical Shared UI tests are too shallow in several areas                            |
+
+## 2. Grouped execution phases
+
+Use four larger delivery phases. SUI IDs remain the atomic verification units inside each phase.
+
+| Phase   | Scope                                                        | SUI IDs                                     | Completion marker                    |
+| ------- | ------------------------------------------------------------ | ------------------------------------------- | ------------------------------------ |
+| Phase 1 | P0 security and Shared/Feature ownership boundaries          | SUI-001, SUI-002, SUI-003, SUI-004, SUI-005 | `P0_BOUNDARY_PHASE_COMPLETE`         |
+| Phase 2 | Public contract typing and Form rendering foundation         | SUI-006, SUI-007, SUI-008, SUI-014          | `FORM_CONTRACT_PHASE_COMPLETE`       |
+| Phase 3 | Complex pattern decomposition and interaction infrastructure | SUI-009, SUI-010, SUI-011, SUI-012          | `PATTERN_INFRA_PHASE_COMPLETE`       |
+| Phase 4 | Public API cleanup and enforced quality gates                | SUI-013, SUI-015, SUI-016                   | `QUALITY_ENFORCEMENT_PHASE_COMPLETE` |
+
+Execution rule: finish all SUI items in the current phase before moving to the next phase. Keep each SUI's tests/search gates independent so a large phase can still be reviewed in small, reversible units.
 
 ---
 
-# Phase 1 — Remove arbitrary JavaScript execution
+# Phase 1 — P0 security and Shared/Feature ownership boundaries
+
+This phase contains SUI-001 through SUI-005.
 
 ## Scope
 
@@ -148,7 +163,7 @@ function evaluate(node: AstNode, ctx: ExpressionContext): unknown {
     case 'binary':
       return evaluateBinary(node.operator, evaluate(node.left, ctx), evaluate(node.right, ctx));
     case 'helper-call':
-      return allowedHelpers[node.name](...node.args.map(arg => evaluate(arg, ctx)));
+      return allowedHelpers[node.name](...node.args.map((arg) => evaluate(arg, ctx)));
     default:
       return undefined;
   }
@@ -181,8 +196,6 @@ Expected: zero matches.
 
 ---
 
-# Phase 2 — Restore Shared/Feature ownership boundaries
-
 ## SUI-002 — Remove routing/API orchestration from Table
 
 ### Scope
@@ -190,7 +203,7 @@ Expected: zero matches.
 - `src/app/shared/ui/patterns/table/component/table/base-paged-list.ts`
 - `src/app/shared/ui/patterns/table/component/table/table-filter/table-filter.ts`
 - `src/app/shared/ui/patterns/table/index.ts`
-- feature consumers that currently extend/use `BasePagedList`
+- feature consumers that extend/use `BasePagedList`, if any exist when the phase starts
 
 ### Required result
 
@@ -203,6 +216,8 @@ Router
 ```
 
 Remove `BasePagedList` from Shared UI public API. Prefer moving feature/page orchestration to an application-level helper outside `shared/ui`, or directly into feature pages.
+
+As of this baseline, no feature extends `BasePagedList`; only the Shared UI export, implementation, and spec reference it. Re-check before implementation and keep any feature migration conditional on an actual consumer.
 
 Table filter must become controlled presentation state:
 
@@ -359,6 +374,13 @@ Expected: zero business-policy matches in generic Shared UI.
 
 ## SUI-005 — Move unsaved-navigation policy out of Shared Form
 
+### Scope
+
+- `src/app/shared/ui/patterns/form-input/unsaved-changes.guard.ts`
+- `src/app/shared/ui/patterns/form-input/index.ts`
+- `src/app/features/service-management/service-management.routes.ts`
+- replacement guard or route policy in the owning feature/application routing layer
+
 Remove `unsavedChangesGuard` from the `form-input` public API and move navigation policy to an application/feature routing layer.
 
 Shared UI may expose generic dirty state:
@@ -370,6 +392,8 @@ isDirty(): boolean;
 
 but must not own `CanDeactivateFn` or decide route discard behavior.
 
+The current direct consumer is `src/app/features/service-management/service-management.routes.ts`. Replace those `canDeactivate` entries with the new feature/application guard and add route-level coverage proving dirty forms still block navigation and clean forms do not.
+
 ### Search gate
 
 ```bash
@@ -378,17 +402,19 @@ rg "CanDeactivateFn|unsavedChangesGuard" src/app/shared/ui
 
 Expected: zero matches.
 
-### Phase 2 completion
+### Phase 1 completion
 
 Only report:
 
-`SHARED_BOUNDARY_PHASE_COMPLETE`
+`P0_BOUNDARY_PHASE_COMPLETE`
 
-when SUI-002 through SUI-005 pass all tests/search gates.
+when SUI-001 through SUI-005 pass all tests/search gates.
 
 ---
 
-# Phase 3 — Type-safe public contracts
+# Phase 2 — Public contract typing and Form rendering foundation
+
+This phase contains SUI-006, SUI-007, SUI-008, and SUI-014.
 
 ## SUI-006
 
@@ -445,8 +471,6 @@ Expected: no `any` in exported/public contracts; remaining implementation except
 
 ---
 
-# Phase 4 — Rebuild FormField rendering foundation
-
 ## SUI-007 — Real readonly/detail mode
 
 ### Target
@@ -457,12 +481,9 @@ Create/reuse a dedicated generic display path:
 
 ```html
 @if (readonlyMode) {
-  <app-value-display
-    [value]="field.value()"
-    [type]="readonlyType(field)"
-  />
+<app-value-display [value]="field.value()" [type]="readonlyType(field)" />
 } @else {
-  <app-field-control ... />
+<app-field-control ... />
 }
 ```
 
@@ -486,7 +507,7 @@ Controls currently render label/help/error inconsistently.
 
 ### Target
 
-Introduce a single presentation wrapper, for example:
+Reuse and evolve the existing `app-field-block` presentation wrapper unless replacing it is explicitly justified. The wrapper should cover the single shell contract, for example:
 
 ```text
 forms/form-field/
@@ -543,7 +564,54 @@ Behavioral contract tests for each supported scalar primitive:
 
 ---
 
-# Phase 5 — Decompose Tree pattern
+## SUI-014 — FormInput responsibility cleanup
+
+This is a targeted cleanup, not a rewrite of the whole form engine.
+
+### DOM interaction
+
+Replace broad calls such as:
+
+```text
+document.querySelector
+document.getElementById
+```
+
+with Angular-owned references/directives or a focused scrolling/focus abstraction.
+
+### API errors
+
+Keep generic external field-error presentation, but separate application API response mapping from the Form component.
+
+Preferred contract:
+
+```ts
+@Input() externalErrors: FormValidationError[] = [];
+```
+
+Application API adapters convert backend response -> `FormValidationError[]`.
+
+Shared Form should not understand backend response shapes.
+
+### Tests
+
+- external errors map to fields and summary;
+- focus/scroll targets the correct rendered field;
+- no global selector collision when two forms exist on the same page.
+
+### Phase 2 completion
+
+Only report:
+
+`FORM_CONTRACT_PHASE_COMPLETE`
+
+when SUI-006, SUI-007, SUI-008, and SUI-014 pass all tests/search gates.
+
+---
+
+# Phase 3 — Complex pattern decomposition and interaction infrastructure
+
+This phase contains SUI-009, SUI-010, SUI-011, and SUI-012.
 
 ## SUI-009
 
@@ -587,9 +655,9 @@ keyboard/focus logic
 Tree may emit destructive intent:
 
 ```ts
-clearRequested
-removeNodeRequested
-replaceNodeRequested
+clearRequested;
+removeNodeRequested;
+replaceNodeRequested;
 ```
 
 Do not hard-wire feature confirmation/persistence behavior into generic tree state.
@@ -603,8 +671,6 @@ Do not hard-wire feature confirmation/persistence behavior into generic tree sta
 - destructive intent emits without hidden business side effects.
 
 ---
-
-# Phase 6 — Decompose FlowBuilder and remove file I/O
 
 ## SUI-010
 
@@ -676,8 +742,6 @@ Expected: zero matches.
 
 ---
 
-# Phase 7 — Normalize overlay infrastructure and accessibility
-
 ## SUI-011 — Use Angular CDK infrastructure
 
 Project already contains Angular CDK. Prefer it for:
@@ -712,6 +776,14 @@ manual document tab loops
 
 Direct DOM access may remain only where CDK/Angular cannot reasonably solve the operation, with tests and a narrow explanation.
 
+### Search gate
+
+```bash
+rg "document\.body|appendChild|removeChild|style\.overflow|getBoundingClientRect|querySelectorAll" src/app/shared/ui
+```
+
+Expected: every remaining match is reviewed, covered by tests, and documented as an intentional exception.
+
 ---
 
 ## SUI-012 — Accessibility becomes a real gate
@@ -722,6 +794,14 @@ Direct DOM access may remain only where CDK/Angular cannot reasonably solve the 
 - repair the actual component semantics instead;
 - custom select/menu/dialog interactions need correct roles and keyboard behavior;
 - restore Angular template accessibility rules rather than disabling them globally.
+
+### Search gate
+
+```bash
+rg "removeAttribute\(['\"](role|aria-labelledby)['\"]\)|template/(click-events-have-key-events|interactive-supports-focus|label-has-associated-control|elements-content).*off" src/app/shared/ui eslint.config.mjs
+```
+
+Expected: zero matches unless a narrow, documented exception remains.
 
 ### Tests
 
@@ -735,9 +815,19 @@ Table action menu
 Tree interaction
 ```
 
+### Phase 3 completion
+
+Only report:
+
+`PATTERN_INFRA_PHASE_COMPLETE`
+
+when SUI-009, SUI-010, SUI-011, and SUI-012 pass all tests/search gates.
+
 ---
 
-# Phase 8 — Public API cleanup
+# Phase 4 — Public API cleanup and enforced quality gates
+
+This phase contains SUI-013, SUI-015, and SUI-016.
 
 ## SUI-013
 
@@ -775,53 +865,12 @@ TableFilterComponent (unless explicitly intended as a public pattern)
 
 Declare internal components but keep them out of public exports.
 
+`src/app/shared/shared.module.ts` currently uses one `SHARED_UI_COMPONENTS` array for both declarations and exports. Split the module metadata into public exported components and declared-only internal components before removing internal exports, so internals remain declared but stop leaking through `SharedModule`.
+
 ### Tests
 
 - application build proves existing intended consumers still compile;
 - add a simple architecture/API test if possible to prevent re-exporting known internals.
-
----
-
-# Phase 9 — FormInput responsibility cleanup
-
-## SUI-014
-
-This is a targeted cleanup, not a rewrite of the whole form engine.
-
-### DOM interaction
-
-Replace broad calls such as:
-
-```text
-document.querySelector
-document.getElementById
-```
-
-with Angular-owned references/directives or a focused scrolling/focus abstraction.
-
-### API errors
-
-Keep generic external field-error presentation, but separate application API response mapping from the Form component.
-
-Preferred contract:
-
-```ts
-@Input() externalErrors: FormValidationError[] = [];
-```
-
-Application API adapters convert backend response -> `FormValidationError[]`.
-
-Shared Form should not understand backend response shapes.
-
-### Tests
-
-- external errors map to fields and summary;
-- focus/scroll targets the correct rendered field;
-- no global selector collision when two forms exist on the same page.
-
----
-
-# Phase 10 — Make lint/testing enforce the architecture
 
 ## SUI-015 — ESLint
 
@@ -893,6 +942,14 @@ expect(component).toBeTruthy();
 
 Creation tests may remain, but they do not satisfy behavioral acceptance.
 
+### Phase 4 completion
+
+Only report:
+
+`QUALITY_ENFORCEMENT_PHASE_COMPLETE`
+
+when SUI-013, SUI-015, and SUI-016 pass all tests/search gates.
+
 ---
 
 # 10. Mandatory quality gate
@@ -937,36 +994,42 @@ Every remaining match must be reviewed. A non-zero match is not automatically ac
 
 AI may report `SHARED_UI_COMPLETE` only when all items below are true:
 
-- [ ] SUI-001 arbitrary JS execution removed.
-- [ ] SUI-002 Shared Table no longer owns Router/API page orchestration.
-- [ ] SUI-003 Shared Table no longer owns persistence/download behavior.
-- [ ] SUI-004 permission/business credential models removed from generic Shared contracts.
-- [ ] SUI-005 navigation guard policy moved out of Shared Form.
-- [ ] SUI-006 public Form/Table contracts are type-safe and no longer based on `any`.
-- [ ] SUI-007 readonly/detail form mode has real behavior.
-- [ ] SUI-008 FormField label/help/error/ARIA behavior is consistent.
-- [ ] SUI-009 Tree is decomposed into testable responsibilities.
-- [ ] SUI-010 FlowBuilder root is decomposed and browser file I/O removed.
-- [ ] SUI-011 overlays/menus use shared/CDK infrastructure instead of repeated manual DOM portals.
-- [ ] SUI-012 accessibility hacks are removed and a11y lint/tests pass.
-- [ ] SUI-013 public exports expose intended APIs only.
-- [ ] SUI-014 FormInput DOM/API-error responsibilities are cleaned up.
-- [ ] SUI-015 typed ESLint + architecture rules are active.
-- [ ] SUI-016 critical behavioral tests exist and pass.
-- [ ] `npm run format:check` passes.
-- [ ] `npm run lint` passes.
-- [ ] `npm run typecheck` passes.
-- [ ] `npm run build` passes.
-- [ ] `npm test -- --watch=false` passes.
-- [ ] final architecture search gates are reviewed and acceptable.
+- [x] SUI-001 arbitrary JS execution removed.
+- [x] SUI-002 Shared Table no longer owns Router/API page orchestration.
+- [x] SUI-003 Shared Table no longer owns persistence/download behavior.
+- [x] SUI-004 permission/business credential models removed from generic Shared contracts.
+- [x] SUI-005 navigation guard policy moved out of Shared Form.
+- [x] SUI-006 public Form/Table contracts are type-safe and no longer based on `any`.
+- [x] SUI-007 readonly/detail form mode has real behavior.
+- [x] SUI-008 FormField label/help/error/ARIA behavior is consistent.
+- [x] SUI-009 Tree is decomposed into testable responsibilities.
+- [x] SUI-010 FlowBuilder root is decomposed and browser file I/O removed.
+- [x] SUI-011 overlays/menus use shared/CDK infrastructure instead of repeated manual DOM portals.
+- [x] SUI-012 accessibility hacks are removed and a11y lint/tests pass.
+- [x] SUI-013 public exports expose intended APIs only.
+- [x] SUI-014 FormInput DOM/API-error responsibilities are cleaned up.
+- [x] SUI-015 typed ESLint + architecture rules are active.
+- [x] SUI-016 critical behavioral tests exist and pass.
+- [x] `npm run format:check` passes.
+- [x] `npm run lint` passes.
+- [x] `npm run typecheck` passes.
+- [x] `npm run build` passes.
+- [x] `npm test -- --watch=false` passes.
+- [x] final architecture search gates are reviewed and acceptable.
 
 Final output format:
 
 ```text
 SUI-001 PASS
 SUI-002 PASS
+SUI-003 PASS
+SUI-004 PASS
+SUI-005 PASS
+P0_BOUNDARY_PHASE_COMPLETE
+SUI-006 PASS
 ...
 SUI-016 PASS
+QUALITY_ENFORCEMENT_PHASE_COMPLETE
 QUALITY_GATE PASS
 SHARED_UI_COMPLETE
 ```

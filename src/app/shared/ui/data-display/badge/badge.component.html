@@ -1,7 +1,7 @@
 <span
   class="app-badge"
   [class]="'app-badge--' + resolvedVariant + ' app-badge--' + size"
-  [attr.title]="(tooltip || label || null) | translateContent"
+  [attr.title]="tooltip || label || null | translateContent"
 >
   @if (pulse) {
     <span class="status-dot status-dot--active" aria-hidden="true"></span>

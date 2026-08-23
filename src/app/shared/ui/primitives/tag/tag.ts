@@ -6,7 +6,7 @@ export type TagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' |
   selector: 'app-tag',
   standalone: false,
   templateUrl: './tag.html',
-  styleUrl: './tag.css'
+  styleUrl: './tag.css',
 })
 export class Tag {
   @Input() value: string | null | undefined = '';

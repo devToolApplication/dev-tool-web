@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import {
+import type {
   ArrayFieldState,
   FieldState,
   GridWidth,
   GroupFieldState,
-  TreeFieldState
+  TreeFieldState,
 } from '../../models/form-config.model';
 import { getColClass } from '../../utils/form.utils';
 
@@ -12,12 +12,11 @@ import { getColClass } from '../../utils/form.utils';
   selector: 'app-field-array-renderer',
   standalone: false,
   templateUrl: './field-array-renderer.html',
-  styleUrl: './field-array-renderer.css'
+  styleUrl: './field-array-renderer.css',
 })
 export class FieldArrayRenderer {
-
   @Input({ required: true })
-  field!: ArrayFieldState;
+  field!: ArrayFieldState<unknown[]>;
   @Input() submitted = false;
   @Input() readonlyMode = false;
 
@@ -42,10 +41,10 @@ export class FieldArrayRenderer {
   }
 
   getCol(width?: GridWidth): string {
-    return getColClass(width)
+    return getColClass(width);
   }
 
-  isArrayField(field: FieldState | ArrayFieldState): field is ArrayFieldState {
+  isArrayField(field: FieldState | ArrayFieldState): field is ArrayFieldState<unknown[]> {
     return field.type === 'array';
   }
 

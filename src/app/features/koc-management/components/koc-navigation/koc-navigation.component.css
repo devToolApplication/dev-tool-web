@@ -1,0 +1,27 @@
+﻿.koc-navigation {
+  display: flex;
+  gap: var(--app-space-2);
+  overflow-x: auto;
+  padding-bottom: var(--app-space-1);
+}
+
+.koc-navigation__link {
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: var(--app-font-size-sm);
+  gap: var(--app-space-2);
+  min-height: var(--app-control-height-md);
+  padding: var(--app-space-2) var(--app-space-3);
+  text-decoration: none;
+}
+
+.koc-navigation__link:hover,
+.koc-navigation__link--active {
+  background: var(--app-surface-soft);
+  border-color: var(--app-primary);
+  color: var(--app-text);
+}

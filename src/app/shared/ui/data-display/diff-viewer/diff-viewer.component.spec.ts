@@ -13,7 +13,7 @@ describe('DiffViewerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(DiffViewerComponent);
@@ -25,9 +25,15 @@ describe('DiffViewerComponent', () => {
     component.after = { added: true, changed: 2 };
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.diff-viewer__row--added')?.textContent).toContain('added');
-    expect(fixture.nativeElement.querySelector('.diff-viewer__row--removed')?.textContent).toContain('removed');
-    expect(fixture.nativeElement.querySelector('.diff-viewer__row--changed')?.textContent).toContain('changed');
+    expect(fixture.nativeElement.querySelector('.diff-viewer__row--added')?.textContent).toContain(
+      'added',
+    );
+    expect(
+      fixture.nativeElement.querySelector('.diff-viewer__row--removed')?.textContent,
+    ).toContain('removed');
+    expect(
+      fixture.nativeElement.querySelector('.diff-viewer__row--changed')?.textContent,
+    ).toContain('changed');
   });
 
   it('shows an empty state for an empty diff', () => {

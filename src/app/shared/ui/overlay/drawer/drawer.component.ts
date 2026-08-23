@@ -1,16 +1,23 @@
-import {
-  AfterViewChecked,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
+import type {
+  AfterViewInit,
   OnChanges,
   OnDestroy,
-  Output,
   SimpleChanges,
-  ViewChild
+  TemplateRef,
 } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
+import { Overlay } from '@angular/cdk/overlay';
+import type { OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
+import type { Subscription } from 'rxjs';
 
 export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type DrawerSide = 'left' | 'right';
@@ -33,11 +40,13 @@ export interface DrawerConfig {
   selector: 'app-drawer',
   standalone: false,
   templateUrl: './drawer.component.html',
-  styleUrl: './drawer.component.css'
+  styleUrl: './drawer.component.css',
 })
-export class DrawerComponent implements OnChanges, OnDestroy, AfterViewChecked {
-  @ViewChild('overlay') overlay?: ElementRef<HTMLElement>;
-  @ViewChild('panel') panel?: ElementRef<HTMLElement>;
+export class DrawerComponent implements OnChanges, OnDestroy, AfterViewInit {
+  private readonly overlayService = inject(Overlay);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+
+  @ViewChild('drawerTemplate') drawerTemplate?: TemplateRef<unknown>;
 
   @Input() open = false;
   @Input() title?: string;
@@ -55,62 +64,33 @@ export class DrawerComponent implements OnChanges, OnDestroy, AfterViewChecked {
   @Output() openChange = new EventEmitter<boolean>();
   @Output() closed = new EventEmitter<void>();
   @Output() retry = new EventEmitter<void>();
-  private triggerElement: HTMLElement | null = null;
 
-  ngAfterViewChecked(): void {
-    this.appendOverlayToBody();
+  private triggerElement: HTMLElement | null = null;
+  private overlayRef?: OverlayRef;
+  private overlayKeydownSubscription?: Subscription;
+  private viewReady = false;
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.syncOverlay();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']) {
-      this.syncBodyScroll();
       if (this.open) {
-        this.triggerElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-        setTimeout(() => this.focusInitialElement());
+        this.triggerElement =
+          document.activeElement instanceof HTMLElement ? document.activeElement : null;
       } else {
-        this.removeBodyOverlay();
+        this.detachOverlay();
         this.restoreFocus();
       }
+      this.syncOverlay();
     }
   }
 
   ngOnDestroy(): void {
-    document.body.style.overflow = '';
-    this.removeBodyOverlay();
-  }
-
-  @HostListener('document:keydown.escape')
-  onEsc(): void {
-    if (this.open && this.closeOnEsc && !this.loading) {
-      this.close();
-    }
-  }
-
-  @HostListener('document:keydown.tab', ['$event'])
-  onTab(event: Event): void {
-    if (!this.open) {
-      return;
-    }
-
-    const keyboardEvent = event as KeyboardEvent;
-    const focusable = this.focusableElements();
-    if (!focusable.length) {
-      keyboardEvent.preventDefault();
-      this.panel?.nativeElement.focus();
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement;
-
-    if (keyboardEvent.shiftKey && active === first) {
-      keyboardEvent.preventDefault();
-      last.focus();
-    } else if (!keyboardEvent.shiftKey && active === last) {
-      keyboardEvent.preventDefault();
-      first.focus();
-    }
+    this.overlayKeydownSubscription?.unsubscribe();
+    this.overlayRef?.dispose();
   }
 
   close(): void {
@@ -121,8 +101,7 @@ export class DrawerComponent implements OnChanges, OnDestroy, AfterViewChecked {
     this.open = false;
     this.openChange.emit(false);
     this.closed.emit();
-    this.syncBodyScroll();
-    this.removeBodyOverlay();
+    this.detachOverlay();
     this.restoreFocus();
   }
 
@@ -132,45 +111,47 @@ export class DrawerComponent implements OnChanges, OnDestroy, AfterViewChecked {
     }
   }
 
-  private syncBodyScroll(): void {
-    document.body.style.overflow = this.open ? 'hidden' : '';
-  }
-
-  private appendOverlayToBody(): void {
-    const overlay = this.overlay?.nativeElement;
-    if (!this.open || !overlay || overlay.parentElement === document.body) {
+  private syncOverlay(): void {
+    if (!this.viewReady || !this.drawerTemplate) {
       return;
     }
-    document.body.appendChild(overlay);
-  }
 
-  private removeBodyOverlay(): void {
-    const overlay = this.overlay?.nativeElement;
-    if (overlay?.parentElement === document.body) {
-      document.body.removeChild(overlay);
+    if (!this.open) {
+      this.detachOverlay();
+      return;
+    }
+
+    const overlayRef = this.ensureOverlay();
+    if (!overlayRef.hasAttached()) {
+      overlayRef.attach(new TemplatePortal(this.drawerTemplate, this.viewContainerRef));
     }
   }
 
-  private focusInitialElement(): void {
-    const focusable = this.focusableElements();
-    (focusable[0] ?? this.panel?.nativeElement)?.focus();
+  private ensureOverlay(): OverlayRef {
+    if (this.overlayRef) {
+      return this.overlayRef;
+    }
+
+    this.overlayRef = this.overlayService.create({
+      positionStrategy: this.overlayService.position().global().top('0').left('0'),
+      scrollStrategy: this.overlayService.scrollStrategies.block(),
+      hasBackdrop: false,
+    });
+    this.overlayKeydownSubscription = this.overlayRef.keydownEvents().subscribe((event) => {
+      if (event.key === 'Escape' && this.closeOnEsc && !this.loading) {
+        event.preventDefault();
+        this.close();
+      }
+    });
+    return this.overlayRef;
+  }
+
+  private detachOverlay(): void {
+    this.overlayRef?.detach();
   }
 
   private restoreFocus(): void {
     this.triggerElement?.focus();
     this.triggerElement = null;
-  }
-
-  private focusableElements(): HTMLElement[] {
-    const panel = this.panel?.nativeElement;
-    if (!panel) {
-      return [];
-    }
-
-    return Array.from(
-      panel.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter((element) => !element.hasAttribute('disabled') && element.offsetParent !== null);
   }
 }

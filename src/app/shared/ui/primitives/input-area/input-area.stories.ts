@@ -12,8 +12,8 @@ const meta: Meta<InputArea> = {
     maxRows: 8,
     showZoomButton: false,
     contentType: 'text',
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -27,13 +27,14 @@ export const JsonMode: Story = {
     label: 'JSON Configuration',
     placeholder: '{\n  "key": "value"\n}',
     value: '{\n  "server": "localhost",\n  "port": 8080,\n  "enabled": true\n}',
-    contentType: 'json'
-  }
+    contentType: 'json',
+  },
 };
 
 export const WithZoom: Story = {
   args: {
     showZoomButton: true,
-    value: 'Some long text that might benefit from a zoom modal to edit comfortably in full screen.'
-  }
+    value:
+      'Some long text that might benefit from a zoom modal to edit comfortably in full screen.',
+  },
 };

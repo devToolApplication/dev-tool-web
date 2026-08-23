@@ -10,19 +10,19 @@ import { ServiceManagementModule } from './service-management/service-management
 import { serviceManagementRoutes } from './service-management/service-management.routes';
 import { WorkflowStudioModule } from './workflow-studio/workflow-studio.module';
 import { workflowStudioRoutes } from './workflow-studio/workflow-studio.routes';
+import { KocManagementModule } from './koc-management/koc-management.module';
+import { kocManagementRoutes } from './koc-management/koc-management.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...serviceManagementRoutes,
   ...workflowStudioRoutes,
+  ...kocManagementRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'ai-agent-mcrs/secrets' },
   { path: '**', redirectTo: '404' },
 ];
 
-const FEATURE_COMPONENTS = [
-  ForbiddenComponent,
-  NotFoundComponent,
-];
+const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
 
 @NgModule({
   declarations: [...FEATURE_COMPONENTS],
@@ -32,6 +32,7 @@ const FEATURE_COMPONENTS = [
     SharedModule,
     ServiceManagementModule,
     WorkflowStudioModule,
+    KocManagementModule,
   ],
 })
 export class AppFeatureModule {}

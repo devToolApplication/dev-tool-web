@@ -5,20 +5,24 @@ import { TimelineComponent } from './timeline.component';
 const value = [
   { time: '09:30', title: 'Request created', detail: 'A new workflow request was submitted.' },
   { time: '10:15', title: 'Review completed', detail: 'The request was approved by a reviewer.' },
-  { time: '11:45', title: 'Notification sent', detail: 'Subscribers were notified about the update.' }
+  {
+    time: '11:45',
+    title: 'Notification sent',
+    detail: 'Subscribers were notified about the update.',
+  },
 ];
 
 const meta: Meta<TimelineComponent> = {
   title: 'Shared/Components/Data Display/Timeline',
   component: TimelineComponent,
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   args: {
     value,
     align: 'left',
-    layout: 'vertical'
-  }
+    layout: 'vertical',
+  },
 };
 
 export default meta;
@@ -54,6 +58,6 @@ export const Default: Story = {
           [contentTemplate]="content"
         ></app-timeline>
       </div>
-    `
-  })
+    `,
+  }),
 };

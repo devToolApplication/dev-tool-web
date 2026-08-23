@@ -13,7 +13,10 @@ import type {
 
 @Injectable({ providedIn: 'root' })
 export class CandleChartOverlayMapper {
-  indicatorsFromOverlayRecord(overlays: Record<string, unknown>, candles: ChartCandle[]): ChartIndicator[] {
+  indicatorsFromOverlayRecord(
+    overlays: Record<string, unknown>,
+    candles: ChartCandle[],
+  ): ChartIndicator[] {
     return Object.entries(overlays).flatMap(([code, value]) => {
       if (!Array.isArray(value)) {
         return [];
@@ -26,7 +29,12 @@ export class CandleChartOverlayMapper {
         }
         const index = Number(item['index']);
         const numericValue = Number(item['value']);
-        if (!Number.isNaN(index) && !Number.isNaN(numericValue) && index >= 0 && index < values.length) {
+        if (
+          !Number.isNaN(index) &&
+          !Number.isNaN(numericValue) &&
+          index >= 0 &&
+          index < values.length
+        ) {
           values[index] = numericValue;
         }
       });
@@ -54,7 +62,9 @@ export class CandleChartOverlayMapper {
       return [];
     }
 
-    const explicit = Array.isArray(result['overlays']) ? (result['overlays'] as ChartOverlay[]) : [];
+    const explicit = Array.isArray(result['overlays'])
+      ? (result['overlays'] as ChartOverlay[])
+      : [];
     const strategy = this.resolveStrategySignal(result);
     if (!strategy || strategy['entry'] !== true) {
       return explicit;
@@ -66,8 +76,7 @@ export class CandleChartOverlayMapper {
     const stopLoss = this.numberValue(strategy['stopLoss']);
     const takeProfit = this.numberValue(strategy['takeProfit']);
     const side = String(strategy['side'] ?? '').toUpperCase();
-    const signalColor =
-      side === 'SELL' ? 'var(--app-chart-danger)' : 'var(--app-chart-success)';
+    const signalColor = side === 'SELL' ? 'var(--app-chart-danger)' : 'var(--app-chart-success)';
 
     const generated: ChartOverlay[] = [];
     if (entryPrice != null) {
@@ -129,7 +138,12 @@ export class CandleChartOverlayMapper {
     if (this.isRecord(result['strategy'])) {
       return result['strategy'] as Record<string, unknown>;
     }
-    if ('entry' in result || 'entryPrice' in result || 'stopLoss' in result || 'takeProfit' in result) {
+    if (
+      'entry' in result ||
+      'entryPrice' in result ||
+      'stopLoss' in result ||
+      'takeProfit' in result
+    ) {
       return result;
     }
     return null;
@@ -164,7 +178,10 @@ export class CandleChartOverlayMapper {
     color: string;
   } {
     const normalized = code.toLowerCase();
-    if (normalized.includes('macd') && (normalized.includes('hist') || normalized.includes('bar'))) {
+    if (
+      normalized.includes('macd') &&
+      (normalized.includes('hist') || normalized.includes('bar'))
+    ) {
       return { pane: 'SUB', type: 'HISTOGRAM', color: 'var(--app-chart-warning)' };
     }
     if (normalized.includes('macd')) {
@@ -180,7 +197,13 @@ export class CandleChartOverlayMapper {
     if (normalized.includes('atr')) {
       return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-warning)' };
     }
-    if (normalized.includes('stoch') || normalized.includes('cci') || normalized.includes('adx') || normalized.includes('obv') || normalized.includes('mfi')) {
+    if (
+      normalized.includes('stoch') ||
+      normalized.includes('cci') ||
+      normalized.includes('adx') ||
+      normalized.includes('obv') ||
+      normalized.includes('mfi')
+    ) {
       return { pane: 'SUB', type: 'LINE', color: 'var(--app-chart-info)' };
     }
     if (normalized.includes('bb') || normalized.includes('bollinger')) {

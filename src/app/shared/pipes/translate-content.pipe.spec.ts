@@ -21,7 +21,7 @@ describe('TranslateContentPipe', () => {
   it('should translate select option labels only once for same object reference', () => {
     const options = [
       { label: 'option.one', value: 1 },
-      { label: 'option.two', value: 2 }
+      { label: 'option.two', value: 2 },
     ];
 
     const first = pipe.transform(options);

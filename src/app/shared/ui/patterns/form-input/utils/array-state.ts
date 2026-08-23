@@ -1,48 +1,44 @@
-import { WritableSignal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
 import { updateByPath, getByPath } from './form.utils';
 
 export function createArrayState<TModel extends object>(
   path: string,
-  modelSignal: WritableSignal<TModel>
+  modelSignal: WritableSignal<TModel>,
 ) {
-
-  function addItem(initialValue: any = {}) {
-
-    modelSignal.update(m => {
-
+  function addItem(initialValue: unknown = {}) {
+    modelSignal.update((m) => {
       const arr = getByPath(m, path);
-      const safeArray = Array.isArray(arr) ? arr : [];
+      const safeArray = Array.isArray(arr) ? Array.from(arr as readonly unknown[]) : [];
 
-      return updateByPath(
-        m,
-        path,
-        [...safeArray, initialValue]
-      );
+      return updateByPath(m, path, [...safeArray, initialValue]);
     });
   }
 
   function removeItem(index: number) {
-
-    modelSignal.update(m => {
-
+    modelSignal.update((m) => {
       const arr = getByPath(m, path);
-      const safeArray = Array.isArray(arr) ? arr : [];
+      const safeArray = Array.isArray(arr) ? Array.from(arr as readonly unknown[]) : [];
 
       return updateByPath(
         m,
         path,
-        safeArray.filter((_, i) => i !== index)
+        safeArray.filter((_, i) => i !== index),
       );
     });
   }
 
   function moveItem(index: number, direction: -1 | 1) {
-    modelSignal.update(m => {
+    modelSignal.update((m) => {
       const arr = getByPath(m, path);
-      const safeArray = Array.isArray(arr) ? [...arr] : [];
+      const safeArray = Array.isArray(arr) ? Array.from(arr as readonly unknown[]) : [];
       const targetIndex = index + direction;
 
-      if (index < 0 || index >= safeArray.length || targetIndex < 0 || targetIndex >= safeArray.length) {
+      if (
+        index < 0 ||
+        index >= safeArray.length ||
+        targetIndex < 0 ||
+        targetIndex >= safeArray.length
+      ) {
         return m;
       }
 
@@ -56,6 +52,6 @@ export function createArrayState<TModel extends object>(
   return {
     addItem,
     removeItem,
-    moveItem
+    moveItem,
   };
 }

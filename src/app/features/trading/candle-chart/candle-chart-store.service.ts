@@ -66,9 +66,15 @@ export class CandleChartStoreService {
 
   appendRealtimeCandle(candle: ChartCandle): number {
     const nextCandles = [...this.candles()];
-    const existingIndex = nextCandles.findIndex((item) => String(item.time) === String(candle.time));
+    const existingIndex = nextCandles.findIndex(
+      (item) => String(item.time) === String(candle.time),
+    );
     if (existingIndex >= 0) {
-      nextCandles[existingIndex] = { ...nextCandles[existingIndex], ...candle, index: existingIndex };
+      nextCandles[existingIndex] = {
+        ...nextCandles[existingIndex],
+        ...candle,
+        index: existingIndex,
+      };
       this.candles.set(nextCandles);
       this.currentIndex.set(existingIndex);
       return existingIndex;

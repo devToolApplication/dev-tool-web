@@ -1,10 +1,10 @@
 <aside
   class="flow-palette"
   [style.width]="config.width || null"
-  [attr.aria-label]="(config.title || 'shared.flowBuilder.palette.title') | translateContent"
+  [attr.aria-label]="config.title || 'shared.flowBuilder.palette.title' | translateContent"
 >
   <div class="flow-palette__header">
-    <span>{{ (config.title || 'shared.flowBuilder.palette.title') | translateContent }}</span>
+    <span>{{ config.title || 'shared.flowBuilder.palette.title' | translateContent }}</span>
   </div>
 
   <div class="flow-palette__items">
@@ -13,7 +13,7 @@
         type="button"
         class="flow-palette__item"
         draggable="true"
-        [attr.title]="(type.description || type.label) | translateContent"
+        [attr.title]="type.description || type.label | translateContent"
         (dragstart)="onDragStart($event, type)"
         (dblclick)="nodeTypeAdd.emit(type.type)"
       >

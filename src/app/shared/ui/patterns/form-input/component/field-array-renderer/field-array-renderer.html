@@ -2,7 +2,7 @@
   <div class="col-span-12">
     <div class="array-field" [class.array-field--disabled]="field.disabled()">
       <div class="array-field__header">
-        <h4 class="array-field__title">{{ (field.label || 'general') | translateContent }}</h4>
+        <h4 class="array-field__title">{{ field.label || 'general' | translateContent }}</h4>
         <app-button
           type="button"
           variant="secondary"
@@ -61,13 +61,37 @@
             <div class="grid grid-cols-12 gap-4">
               @for (child of field.children()[i]; track child.path) {
                 @if (isArrayField(child)) {
-                  <app-field-array-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-array-renderer>
+                  <app-field-array-renderer
+                    class="w-full h-full"
+                    [ngClass]="getCol(child.width)"
+                    [field]="child"
+                    [submitted]="submitted"
+                    [readonlyMode]="readonlyMode"
+                  ></app-field-array-renderer>
                 } @else if (isGroupField(child)) {
-                  <app-field-group-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-group-renderer>
+                  <app-field-group-renderer
+                    class="w-full h-full"
+                    [ngClass]="getCol(child.width)"
+                    [field]="child"
+                    [submitted]="submitted"
+                    [readonlyMode]="readonlyMode"
+                  ></app-field-group-renderer>
                 } @else if (isTreeField(child)) {
-                  <app-field-tree-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-tree-renderer>
+                  <app-field-tree-renderer
+                    class="w-full h-full"
+                    [ngClass]="getCol(child.width)"
+                    [field]="child"
+                    [submitted]="submitted"
+                    [readonlyMode]="readonlyMode"
+                  ></app-field-tree-renderer>
                 } @else {
-                  <app-field-renderer class="w-full h-full" [ngClass]="getCol(child.width)" [field]="child" [submitted]="submitted" [readonlyMode]="readonlyMode"></app-field-renderer>
+                  <app-field-renderer
+                    class="w-full h-full"
+                    [ngClass]="getCol(child.width)"
+                    [field]="child"
+                    [submitted]="submitted"
+                    [readonlyMode]="readonlyMode"
+                  ></app-field-renderer>
                 }
               }
             </div>

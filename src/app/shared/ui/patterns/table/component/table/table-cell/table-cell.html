@@ -1,31 +1,38 @@
 @switch (column.type ?? 'text') {
-
   @case ('text') {
-    <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{ formattedValue ?? value }}</span>
+    <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{
+      formattedValue ?? value
+    }}</span>
   }
 
   @case ('number') {
-    @if (column.prefix) { <span class="table-cell-suffix">{{ column.prefix }}</span> }{{ value | number:(column.format ?? '1.0-3') }}@if (column.suffix) { <span class="table-cell-suffix">{{ column.suffix }}</span> }
+    @if (column.prefix) {
+      <span class="table-cell-suffix">{{ column.prefix }}</span>
+    }
+    {{ numericValue | number: column.format ?? '1.0-3' }}
+    @if (column.suffix) {
+      <span class="table-cell-suffix">{{ column.suffix }}</span>
+    }
   }
 
   @case ('semantic-number') {
-    <span [class]="semanticClass">{{ value | number:(column.format ?? '1.2-2') }}</span>
+    <span [class]="semanticClass">{{ numericValue | number: column.format ?? '1.2-2' }}</span>
   }
 
   @case ('percent') {
-    {{ value | number:(column.format ?? '1.0-2') }}<span class="table-cell-suffix">%</span>
+    {{ numericValue | number: column.format ?? '1.0-2' }}<span class="table-cell-suffix">%</span>
   }
 
   @case ('date') {
-    {{ dateValue | date:(column.format ?? 'dd/MM/yyyy') }}
+    {{ dateValue | date: column.format ?? 'dd/MM/yyyy' }}
   }
 
   @case ('datetime') {
-    {{ dateValue | date:(column.format ?? 'dd/MM/yyyy HH:mm:ss') }}
+    {{ dateValue | date: column.format ?? 'dd/MM/yyyy HH:mm:ss' }}
   }
 
   @case ('currency') {
-    {{ value | currency:(column.currencyCode ?? 'VND') }}
+    {{ numericValue | currency: column.currencyCode ?? 'VND' }}
   }
 
   @case ('boolean') {
@@ -88,13 +95,17 @@
   }
 
   @case ('array') {
-    @if (value?.length) {
+    @if (arrayValue.length) {
       <div class="table-tag-list">
-        @for (item of value.slice(0, column.maxVisibleTags ?? 3); track item) {
+        @for (item of arrayValue.slice(0, column.maxVisibleTags ?? 3); track item) {
           <app-badge [label]="item == null ? '' : '' + item" variant="muted" size="sm"></app-badge>
         }
-        @if (value.length > (column.maxVisibleTags ?? 3)) {
-          <app-badge [label]="'+' + (value.length - (column.maxVisibleTags ?? 3))" variant="default" size="sm"></app-badge>
+        @if (arrayValue.length > (column.maxVisibleTags ?? 3)) {
+          <app-badge
+            [label]="'+' + (arrayValue.length - (column.maxVisibleTags ?? 3))"
+            variant="default"
+            size="sm"
+          ></app-badge>
         }
       </div>
     } @else {
@@ -103,13 +114,17 @@
   }
 
   @case ('tag-list') {
-    @if (value?.length) {
+    @if (arrayValue.length) {
       <div class="table-tag-list">
-        @for (item of value.slice(0, column.maxVisibleTags ?? 3); track item) {
+        @for (item of arrayValue.slice(0, column.maxVisibleTags ?? 3); track item) {
           <app-badge [label]="item == null ? '' : '' + item" variant="muted" size="sm"></app-badge>
         }
-        @if (value.length > (column.maxVisibleTags ?? 3)) {
-          <app-badge [label]="'+' + (value.length - (column.maxVisibleTags ?? 3))" variant="default" size="sm"></app-badge>
+        @if (arrayValue.length > (column.maxVisibleTags ?? 3)) {
+          <app-badge
+            [label]="'+' + (arrayValue.length - (column.maxVisibleTags ?? 3))"
+            variant="default"
+            size="sm"
+          ></app-badge>
         }
       </div>
     } @else {
@@ -118,14 +133,19 @@
   }
 
   @case ('actions') {
-    <div class="table-actions" (click)="$event.stopPropagation()" (keydown.escape)="closeActions()">
+    <div
+      class="table-actions"
+      role="presentation"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="closeActions()"
+    >
       @for (action of primaryActions; track action.id ?? action.label ?? action.icon) {
         <app-button
           [label]="action.showLabel === false ? '' : action.label"
           [icon]="action.icon"
           [tooltip]="actionTooltip(action)"
           [variant]="actionVariant(action)"
-          
           [styleClass]="action.styleClass"
           [disabled]="isActionDisabled(action)"
           (buttonClick)="onActionClick(action)"
@@ -133,7 +153,7 @@
       }
 
       @if (hasMoreActions) {
-        <div class="table-actions__more-wrap">
+        <div class="table-actions__more-wrap" cdkOverlayOrigin #moreTrigger="cdkOverlayOrigin">
           <app-button
             icon="pi pi-ellipsis-h"
             label=""
@@ -142,8 +162,25 @@
             variant="ghost"
             (buttonClick)="toggleActions()"
           ></app-button>
-          @if (actionsOpen()) {
-            <div #actionsMenu class="table-actions__menu" role="menu" [ngStyle]="menuStyle" (click)="$event.stopPropagation()">
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="moreTrigger"
+            [cdkConnectedOverlayOpen]="actionsOpen()"
+            [cdkConnectedOverlayPositions]="actionMenuPositions"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+            (backdropClick)="closeActions()"
+            (detach)="closeActions()"
+          >
+            <div
+              #actionsMenu
+              class="table-actions__menu"
+              role="menu"
+              tabindex="-1"
+              (click)="$event.stopPropagation()"
+              (keydown.escape)="closeActions(); $event.stopPropagation()"
+              (keydown)="$event.stopPropagation()"
+            >
               @for (action of moreActions; track action.id ?? action.label ?? action.icon) {
                 <app-button
                   class="table-actions__menu-item"
@@ -151,14 +188,13 @@
                   [icon]="action.icon"
                   [tooltip]="actionTooltip(action)"
                   [variant]="actionVariant(action)"
-                  
                   [styleClass]="action.styleClass"
                   [disabled]="isActionDisabled(action)"
                   (buttonClick)="onActionClick(action)"
                 ></app-button>
               }
             </div>
-          }
+          </ng-template>
         </div>
       }
     </div>
@@ -185,10 +221,17 @@
     @if (customTemplate) {
       <ng-container
         [ngTemplateOutlet]="customTemplate"
-        [ngTemplateOutletContext]="{ $implicit: rowData, row: rowData, value: value, column: column }"
+        [ngTemplateOutletContext]="{
+          $implicit: rowData,
+          row: rowData,
+          value: value,
+          column: column,
+        }"
       ></ng-container>
     } @else {
-      <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{ formattedValue ?? value }}</span>
+      <span class="table-cell-truncate" [attr.title]="formattedValue ?? value">{{
+        formattedValue ?? value
+      }}</span>
     }
   }
 
@@ -207,7 +250,4 @@
   @default {
     {{ value }}
   }
-
 }
-
-

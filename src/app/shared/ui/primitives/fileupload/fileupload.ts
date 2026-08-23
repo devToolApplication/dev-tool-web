@@ -14,7 +14,7 @@ export interface AppFileUploadHandlerEvent {
   selector: 'app-fileupload',
   standalone: false,
   templateUrl: './fileupload.html',
-  styleUrl: './fileupload.css'
+  styleUrl: './fileupload.css',
 })
 export class Fileupload {
   @Input() mode: 'basic' | 'advanced' = 'basic';
@@ -36,9 +36,13 @@ export class Fileupload {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     const files = Array.from(input.files);
-    const filtered = this.maxFileSize ? files.filter(f => f.size <= this.maxFileSize!) : files;
+    const filtered = this.maxFileSize ? files.filter((f) => f.size <= this.maxFileSize!) : files;
     this.selectedFiles = this.multiple ? [...this.selectedFiles, ...filtered] : filtered;
-    this.fileSelect.emit({ originalEvent: event, files: filtered, currentFiles: this.selectedFiles });
+    this.fileSelect.emit({
+      originalEvent: event,
+      files: filtered,
+      currentFiles: this.selectedFiles,
+    });
     if (this.auto && this.customUpload) {
       this.upload();
     }

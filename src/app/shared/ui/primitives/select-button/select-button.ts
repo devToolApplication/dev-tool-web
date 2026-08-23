@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
-import { SelectOption, SelectValue } from '../select/select';
+import type { SelectOption, SelectValue } from '../select/select';
 
 @Component({
   selector: 'app-select-button',
   standalone: false,
   templateUrl: './select-button.html',
   styleUrl: './select-button.css',
-  providers: [provideValueAccessor(() => SelectButton)]
+  providers: [provideValueAccessor(() => SelectButton)],
 })
 export class SelectButton extends BaseInput<string | number | boolean> {
   @Input() options: SelectOption[] = [];
@@ -26,7 +26,9 @@ export class SelectButton extends BaseInput<string | number | boolean> {
   selectOption(val: SelectValue): void {
     if (this.disabled) return;
     if (this.multiple) {
-      const current = Array.isArray(this.value) ? [...(this.value as unknown as SelectValue[])] : [];
+      const current = Array.isArray(this.value)
+        ? [...(this.value as unknown as SelectValue[])]
+        : [];
       const idx = current.indexOf(val);
       if (idx >= 0) {
         if (this.allowEmpty || current.length > 1) current.splice(idx, 1);

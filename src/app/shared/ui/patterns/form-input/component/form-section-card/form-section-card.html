@@ -21,7 +21,9 @@
 
       <div class="form-section-card__meta">
         @if (section.optional) {
-          <span class="text-xs text-[var(--app-text-muted)]">({{ 'common.optional' | translateContent }})</span>
+          <span class="text-xs text-[var(--app-text-muted)]"
+            >({{ 'common.optional' | translateContent }})</span
+          >
         }
         @if (section.collapsible) {
           <app-button

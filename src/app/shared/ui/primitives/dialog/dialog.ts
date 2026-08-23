@@ -1,12 +1,21 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-type DialogPosition = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'topleft' | 'topright' | 'bottomleft' | 'bottomright';
+type DialogPosition =
+  | 'center'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'topleft'
+  | 'topright'
+  | 'bottomleft'
+  | 'bottomright';
 
 @Component({
   selector: 'app-dialog',
   standalone: false,
   templateUrl: './dialog.html',
-  styleUrl: './dialog.css'
+  styleUrl: './dialog.css',
 })
 export class DialogComponent {
   @Input() visible = false;

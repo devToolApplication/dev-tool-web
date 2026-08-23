@@ -4,7 +4,6 @@ import { SharedModule } from '@shared/shared.module';
 import { createGroupFieldState } from '@shared/testing/field-state.stub';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 
-
 import { FieldGroupRenderer } from './field-group-renderer';
 
 describe('FieldRenderer', () => {
@@ -14,7 +13,7 @@ describe('FieldRenderer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldGroupRenderer);

@@ -1,18 +1,66 @@
 <div class="flow-navigator" [style.width.px]="mapWidth" [style.height.px]="mapHeight">
   <div class="flow-navigator__header">
-    <span class="flow-navigator__title">{{ 'shared.flowBuilder.navigator.title' | translateContent }}</span>
+    <span class="flow-navigator__title">{{
+      'shared.flowBuilder.navigator.title' | translateContent
+    }}</span>
     <div class="flow-navigator__actions">
-      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.zoomIn' | translateContent" [attr.title]="'shared.flowBuilder.navigator.zoomIn' | translateContent" (click)="zoomIn.emit()">+</button>
-      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.zoomOut' | translateContent" [attr.title]="'shared.flowBuilder.navigator.zoomOut' | translateContent" (click)="zoomOut.emit()">-</button>
-      <button type="button" class="flow-navigator__action" [attr.aria-label]="'shared.flowBuilder.navigator.fit' | translateContent" [attr.title]="'shared.flowBuilder.navigator.fit' | translateContent" (click)="fit.emit()"><i class="pi pi-arrows-alt"></i></button>
-      <button type="button" class="flow-navigator__action flow-navigator__action--close" [attr.aria-label]="'shared.flowBuilder.navigator.close' | translateContent" [attr.title]="'shared.flowBuilder.navigator.close' | translateContent" (click)="close.emit()"><i class="pi pi-times"></i></button>
+      <button
+        type="button"
+        class="flow-navigator__action"
+        [attr.aria-label]="'shared.flowBuilder.navigator.zoomIn' | translateContent"
+        [attr.title]="'shared.flowBuilder.navigator.zoomIn' | translateContent"
+        (click)="zoomIn.emit()"
+      >
+        +
+      </button>
+      <button
+        type="button"
+        class="flow-navigator__action"
+        [attr.aria-label]="'shared.flowBuilder.navigator.zoomOut' | translateContent"
+        [attr.title]="'shared.flowBuilder.navigator.zoomOut' | translateContent"
+        (click)="zoomOut.emit()"
+      >
+        -
+      </button>
+      <button
+        type="button"
+        class="flow-navigator__action"
+        [attr.aria-label]="'shared.flowBuilder.navigator.fit' | translateContent"
+        [attr.title]="'shared.flowBuilder.navigator.fit' | translateContent"
+        (click)="fit.emit()"
+      >
+        <i class="pi pi-arrows-alt"></i>
+      </button>
+      <button
+        type="button"
+        class="flow-navigator__action flow-navigator__action--close"
+        [attr.aria-label]="'shared.flowBuilder.navigator.close' | translateContent"
+        [attr.title]="'shared.flowBuilder.navigator.close' | translateContent"
+        (click)="close.emit()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
     </div>
   </div>
 
-  <div #body class="flow-navigator__body" [style.height.px]="bodyHeight" (click)="onBodyClick($event)">
+  <div
+    #body
+    class="flow-navigator__body"
+    role="button"
+    tabindex="0"
+    [style.height.px]="bodyHeight"
+    (click)="onBodyClick($event)"
+    (keydown.enter)="onBodyKeydown($event)"
+    (keydown.space)="onBodyKeydown($event)"
+  >
     <div class="flow-navigator__grid" aria-hidden="true"></div>
 
-    <svg class="flow-navigator__edges" [attr.width]="mapWidth" [attr.height]="bodyHeight" aria-hidden="true">
+    <svg
+      class="flow-navigator__edges"
+      [attr.width]="mapWidth"
+      [attr.height]="bodyHeight"
+      aria-hidden="true"
+    >
       @for (line of edgeLines; track $index) {
         <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" />
       }

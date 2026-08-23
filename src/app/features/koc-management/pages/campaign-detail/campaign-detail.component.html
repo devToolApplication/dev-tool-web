@@ -1,0 +1,225 @@
+<app-koc-page-frame title="koc.campaigns.detail.title" subtitle="koc.campaigns.detail.subtitle">
+  <ng-container koc-page-actions>
+    <app-button
+      type="button"
+      variant="secondary"
+      icon="pi pi-users"
+      label="koc.campaignDetail.action.candidates"
+      (buttonClick)="openCandidates()"
+    ></app-button>
+    <app-button
+      type="button"
+      icon="pi pi-pencil"
+      label="koc.campaigns.action.edit"
+      [disabled]="!canEdit()"
+      (buttonClick)="editCampaign()"
+    ></app-button>
+  </ng-container>
+
+  @if (loading()) {
+    <app-loading-skeleton type="detail" [rows]="8"></app-loading-skeleton>
+  } @else if (error()) {
+    <app-error-state
+      title="koc.campaignDetail.error.title"
+      [message]="error() ?? 'koc.campaignDetail.error.loadFailed'"
+      retryLabel="retry"
+      (retry)="loadCampaignRuntime()"
+    ></app-error-state>
+  } @else if (campaign(); as campaign) {
+    <section class="campaign-detail">
+      <app-section-panel>
+        <div class="campaign-detail__header">
+          <div>
+            <p class="campaign-detail__eyebrow">{{ campaign.code }}</p>
+            <h2>{{ campaign.name }}</h2>
+            <p>
+              {{ 'koc.campaignDetail.version' | translateContent }}
+              {{ campaign.version }}
+            </p>
+          </div>
+          <div class="campaign-detail__header-status">
+            <app-koc-status-badge [status]="campaign.status"></app-koc-status-badge>
+            <strong>{{ campaign.counters.accepted }} / {{ campaign.acceptedTarget }}</strong>
+            <span>{{ 'koc.campaignDetail.acceptedTarget' | translateContent }}</span>
+          </div>
+        </div>
+        <div class="campaign-detail__progress" aria-hidden="true">
+          <span [style.width.%]="progressPercent()"></span>
+        </div>
+      </app-section-panel>
+
+      <nav class="campaign-detail__tabs" role="tablist" [attr.aria-label]="'koc.campaignDetail.tabs' | translateContent">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            [id]="'campaign-detail-tab-' + tab.id"
+            role="tab"
+            [class.campaign-detail__tab--active]="activeTab() === tab.id"
+            [attr.aria-selected]="activeTab() === tab.id"
+            [attr.aria-controls]="tabPanelId(tab.id)"
+            [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+            (click)="setTab(tab.id)"
+          >
+            {{ tab.label | translateContent }}
+          </button>
+        }
+      </nav>
+
+      <div
+        class="campaign-detail__tabpanel"
+        role="tabpanel"
+        [id]="tabPanelId(activeTab())"
+        [attr.aria-labelledby]="'campaign-detail-tab-' + activeTab()"
+      >
+        @switch (activeTab()) {
+          @case ('overview') {
+            <div class="campaign-detail__grid">
+              <app-section-panel title="koc.campaignDetail.overview.metricsTitle">
+                <div class="campaign-detail__metrics">
+                  @for (item of funnelItems(); track item.key) {
+                    <button type="button" class="campaign-detail__metric" (click)="openFunnelFilter(item.key)">
+                      <span>{{ item.label | translateContent }}</span>
+                      <strong>{{ item.value }}</strong>
+                    </button>
+                  }
+                </div>
+              </app-section-panel>
+
+              <app-section-panel
+                title="koc.campaignDetail.rejections.title"
+                [empty]="topRejectionReasons().length === 0"
+                emptyTitle="koc.campaignDetail.rejections.emptyTitle"
+                emptyDescription="koc.campaignDetail.rejections.emptyDescription"
+              >
+                <div class="campaign-detail__reasons">
+                  @for (reason of topRejectionReasons(); track reason.reason) {
+                    <button type="button" (click)="openRejectionReason(reason.reason)">
+                      <span>{{ reason.reason }}</span>
+                      <strong>{{ reason.count }}</strong>
+                    </button>
+                  }
+                </div>
+              </app-section-panel>
+            </div>
+
+            <app-section-panel title="koc.campaignDetail.funnel.title" subtitle="koc.campaignDetail.funnel.subtitle">
+              <div class="campaign-detail__funnel">
+                @for (item of funnelItems(); track item.key) {
+                  <button type="button" class="campaign-detail__funnel-row" (click)="openFunnelFilter(item.key)">
+                    <span>{{ item.label | translateContent }}</span>
+                    <div class="campaign-detail__funnel-track" aria-hidden="true">
+                      <span [style.width.%]="item.percent"></span>
+                    </div>
+                    <strong>{{ item.value }}</strong>
+                  </button>
+                }
+              </div>
+            </app-section-panel>
+          }
+
+          @case ('discovery') {
+            <app-section-panel title="koc.campaignDetail.discovery.title" subtitle="koc.campaignDetail.discovery.subtitle">
+              <div class="campaign-detail__table" role="table">
+                <div class="campaign-detail__table-header" role="row">
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.strategy' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.runs' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.found' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.new' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.duplicate' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.yield' | translateContent }}</span>
+                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.status' | translateContent }}</span>
+                </div>
+                @for (strategy of strategies(); track strategy.strategyId) {
+                  <div class="campaign-detail__table-row" role="row">
+                    <span role="cell">
+                      <strong>{{ strategy.name }}</strong>
+                      @if (isLowYield(strategy)) {
+                        <app-badge
+                          label="koc.campaignDetail.discovery.lowYield"
+                          variant="warning"
+                          size="sm"
+                          icon="pi pi-exclamation-triangle"
+                        ></app-badge>
+                      }
+                    </span>
+                    <span role="cell">{{ strategy.runs }}</span>
+                    <span role="cell">{{ strategy.found }}</span>
+                    <span role="cell">{{ strategy.newCandidates }}</span>
+                    <span role="cell">{{ strategy.duplicateCandidates }}</span>
+                    <span role="cell">{{ formatYield(strategy.yieldRate) }}</span>
+                    <span role="cell"><app-koc-status-badge [status]="strategy.status" size="sm"></app-koc-status-badge></span>
+                  </div>
+                }
+              </div>
+            </app-section-panel>
+          }
+
+          @case ('candidates') {
+            <app-section-panel
+              title="koc.campaignDetail.candidates.title"
+              subtitle="koc.campaignDetail.candidates.subtitle"
+              [empty]="candidates().length === 0"
+              emptyTitle="koc.campaignDetail.candidates.emptyTitle"
+              emptyDescription="koc.campaignDetail.candidates.emptyDescription"
+            >
+              <div class="campaign-detail__candidate-list">
+                @for (candidate of candidates(); track candidate.candidateId) {
+                  <button type="button" class="campaign-detail__candidate" (click)="openCandidate(candidate)">
+                    <span>
+                      <strong>{{ candidate.displayName }}</strong>
+                      <small>{{ candidate.reason || ('notAvailable' | translateContent) }}</small>
+                    </span>
+                    <app-koc-status-badge [status]="candidate.decision" size="sm"></app-koc-status-badge>
+                  </button>
+                }
+              </div>
+            </app-section-panel>
+          }
+
+          @case ('rules') {
+            <app-section-panel
+              title="koc.campaignDetail.rules.title"
+              subtitle="koc.campaignDetail.rules.subtitle"
+              [empty]="(campaign.screeningRules ?? []).length === 0"
+              emptyTitle="koc.campaignDetail.rules.emptyTitle"
+              emptyDescription="koc.campaignDetail.rules.emptyDescription"
+            >
+              <div class="campaign-detail__rule-list">
+                @for (rule of campaign.screeningRules ?? []; track rule.ruleId ?? rule.name) {
+                  <div class="campaign-detail__rule">
+                    <app-badge
+                      [label]="rule.kind === 'AI' ? 'koc.rule.kind.ai' : 'koc.rule.kind.code'"
+                      [variant]="rule.kind === 'AI' ? 'info' : 'muted'"
+                      size="sm"
+                    ></app-badge>
+                    <span>{{ rule.name | translateContent }}</span>
+                    <small>{{ 'koc.campaignWizard.screening.infrastructureWait' | translateContent }}</small>
+                  </div>
+                }
+              </div>
+            </app-section-panel>
+          }
+
+          @case ('activity') {
+            <app-section-panel title="koc.campaignDetail.activity.title" subtitle="koc.campaignDetail.activity.subtitle">
+              <dl class="campaign-detail__activity">
+                <div>
+                  <dt>{{ 'koc.campaignDetail.activity.created' | translateContent }}</dt>
+                  <dd>{{ campaign.createdAt || ('notAvailable' | translateContent) }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'koc.campaignDetail.activity.updated' | translateContent }}</dt>
+                  <dd>{{ campaign.updatedAt || ('notAvailable' | translateContent) }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'koc.campaignDetail.activity.lastActivity' | translateContent }}</dt>
+                  <dd>{{ campaign.lastActivityAt || ('notAvailable' | translateContent) }}</dd>
+                </div>
+              </dl>
+            </app-section-panel>
+          }
+        }
+      </div>
+    </section>
+  }
+</app-koc-page-frame>

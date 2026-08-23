@@ -6,7 +6,7 @@ import { BaseInput, provideValueAccessor } from '../base-input';
   standalone: false,
   templateUrl: './color-picker.html',
   styleUrl: './color-picker.css',
-  providers: [provideValueAccessor(() => ColorPicker)]
+  providers: [provideValueAccessor(() => ColorPicker)],
 })
 export class ColorPicker extends BaseInput<string> {
   @Input() format: 'hex' | 'rgb' | 'hsb' = 'hex';

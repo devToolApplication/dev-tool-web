@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedModule } from '@shared/shared.module';
 import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 
-
 import { DatePicker } from './date-picker';
 
 describe('DatePicker', () => {
@@ -13,7 +12,7 @@ describe('DatePicker', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(DatePicker);

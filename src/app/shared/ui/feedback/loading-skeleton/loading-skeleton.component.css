@@ -26,7 +26,12 @@
 .loading-skeleton--animated .loading-skeleton__field,
 .loading-skeleton--animated .loading-skeleton__title,
 .loading-skeleton--animated .loading-skeleton__avatar {
-  background: linear-gradient(90deg, var(--skeleton-base), var(--skeleton-highlight), var(--skeleton-base));
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base),
+    var(--skeleton-highlight),
+    var(--skeleton-base)
+  );
   background-size: 220% 100%;
   animation: app-skeleton-pulse 1.3s ease-in-out infinite;
 }

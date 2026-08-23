@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import type { OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+} from '@angular/core';
 import { from, isObservable, of, Subject, takeUntil } from 'rxjs';
-import { TableFilterField, TableFilterOption, TableFilterOptions } from '../../../models/table-config.model';
+import type {
+  TableFilterField,
+  TableFilterOption,
+  TableFilterOptions,
+  TableFilterValue,
+} from '../../../models/table-config.model';
 import { ExpressionEngine } from '@shared/ui/patterns/form-input/utils/expression.engine';
 
 interface TableFilterChip {
@@ -15,74 +27,43 @@ interface TableFilterValidationError {
   message: string;
 }
 
+type PrimitiveSelectValue = string | number | boolean | null;
+
 @Component({
   selector: 'app-table-filter',
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table-filter.html',
-  styleUrls: ['./table-filter.css']
+  styleUrls: ['./table-filter.css'],
 })
-export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
+export class TableFilterComponent implements OnChanges, OnDestroy {
   @Input() fields: TableFilterField[] = [];
   @Input() options: TableFilterOptions = {};
+  @Input() value: TableFilterValue = {};
   @Input() loading = false;
   @Input() searchDebounceMs = 250;
 
-  @Output() search = new EventEmitter<Record<string, any>>();
+  @Output() valueChange = new EventEmitter<TableFilterValue>();
+  @Output() search = new EventEmitter<TableFilterValue>();
   @Output() reset = new EventEmitter<void>();
 
   readonly searchValue = signal('');
-  readonly draftValues = signal<Record<string, any>>({});
-  readonly appliedValues = signal<Record<string, any>>({});
+  readonly draftValues = signal<TableFilterValue>({});
+  readonly appliedValues = signal<TableFilterValue>({});
   readonly drawerOpen = signal(false);
-  readonly optionState = signal<Record<string, { options: TableFilterOption[]; loading: boolean; error: string | null }>>({});
+  readonly optionState = signal<
+    Record<string, { options: TableFilterOption[]; loading: boolean; error: string | null }>
+  >({});
   readonly validationErrors = signal<TableFilterValidationError[]>([]);
 
   private readonly destroy$ = new Subject<void>();
   private readonly expressionEngine = new ExpressionEngine();
   private readonly optionLoadVersion = new Map<string, number>();
   private searchTimer?: ReturnType<typeof setTimeout>;
-  private initialized = false;
-
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute
-  ) {}
-
-  ngOnInit(): void {
-    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const initialValues = this.buildInitialValues(params);
-      this.draftValues.set(initialValues);
-      this.appliedValues.set(this.cloneValue(initialValues));
-      this.searchValue.set(this.getPrimaryFieldValue(initialValues));
-      this.loadDynamicOptions(initialValues);
-
-      if (!this.initialized) {
-        this.initialized = true;
-        if (this.hasAnyFilterValue(initialValues)) {
-          queueMicrotask(() => this.emitSearch(this.appliedValues()));
-        }
-      }
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes['fields'] || changes['options']) && this.initialized) {
-      const currentApplied = this.appliedValues();
-      const nextValues = this.fields.reduce<Record<string, any>>((acc, field) => {
-        if (Object.prototype.hasOwnProperty.call(currentApplied, field.field)) {
-          acc[field.field] = this.cloneValue(currentApplied[field.field]);
-          return acc;
-        }
-
-        acc[field.field] = this.getDefaultValue(field);
-        return acc;
-      }, {});
-
-      this.draftValues.set(this.cloneValue(nextValues));
-      this.appliedValues.set(nextValues);
-      this.searchValue.set(this.getPrimaryFieldValue(nextValues));
-      this.loadDynamicOptions(nextValues);
+    if (changes['fields'] || changes['options'] || changes['value']) {
+      this.syncControlledValue();
     }
   }
 
@@ -104,7 +85,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
     this.draftValues.update((current) => ({
       ...current,
-      [primaryField.field]: nextValue
+      [primaryField.field]: nextValue,
     }));
     this.scheduleSearch();
   }
@@ -124,9 +105,8 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     this.appliedValues.set(nextApplied);
     this.draftValues.update((current) => ({
       ...current,
-      ...(primaryField ? { [primaryField.field]: this.normalizedSearchValue } : {})
+      ...(primaryField ? { [primaryField.field]: this.normalizedSearchValue } : {}),
     }));
-    this.syncQueryParams(nextApplied);
     this.emitSearch(nextApplied);
   }
 
@@ -166,7 +146,6 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
     this.appliedValues.set(nextApplied);
     this.searchValue.set(this.getPrimaryFieldValue(nextApplied));
-    this.syncQueryParams(nextApplied);
     this.emitSearch(nextApplied);
     this.drawerOpen.set(false);
   }
@@ -178,16 +157,16 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     this.draftValues.set(defaults);
     this.appliedValues.set(this.cloneValue(defaults));
     this.searchValue.set(this.getPrimaryFieldValue(defaults));
-    this.syncQueryParams(defaults);
+    this.emitValueChange(defaults);
     this.reset.emit();
     this.drawerOpen.set(false);
   }
 
-  onFieldChange(field: TableFilterField, value: any): void {
+  onFieldChange(field: TableFilterField, value: unknown): void {
     const normalizedValue = this.normalizeFieldValue(field, value);
     const nextValues = {
       ...this.draftValues(),
-      [field.field]: normalizedValue
+      [field.field]: normalizedValue,
     };
     this.fields
       .filter((candidate) => candidate.dependsOn?.includes(field.field))
@@ -205,8 +184,53 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     this.loadDynamicOptions(nextValues);
   }
 
-  valueOf(field: TableFilterField): any {
+  valueOf(field: TableFilterField): unknown {
     return this.draftValues()[field.field];
+  }
+
+  selectValueOf(field: TableFilterField): PrimitiveSelectValue {
+    const value = this.valueOf(field);
+    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+      ? value
+      : null;
+  }
+
+  multiValueOf(field: TableFilterField): Array<string | number> | null {
+    const value = this.valueOf(field);
+    return Array.isArray(value)
+      ? value.filter(
+          (item): item is string | number => typeof item === 'string' || typeof item === 'number',
+        )
+      : [];
+  }
+
+  textValueOf(field: TableFilterField): string | null {
+    const value = this.valueOf(field);
+    return value == null ? null : String(value);
+  }
+
+  dateValueOf(field: TableFilterField): Date | Date[] | null {
+    return this.toDatePickerValue(this.valueOf(field));
+  }
+
+  dateRangeStartValue(field: TableFilterField): Date | Date[] | null {
+    return this.toDatePickerValue(this.asRangeValue(this.valueOf(field)).start);
+  }
+
+  dateRangeEndValue(field: TableFilterField): Date | Date[] | null {
+    return this.toDatePickerValue(this.asRangeValue(this.valueOf(field)).end);
+  }
+
+  numberRangeStartValue(field: TableFilterField): number | null {
+    return this.toNumberValue(this.asRangeValue(this.valueOf(field)).start);
+  }
+
+  numberRangeEndValue(field: TableFilterField): number | null {
+    return this.toNumberValue(this.asRangeValue(this.valueOf(field)).end);
+  }
+
+  onRangeFieldChange(field: TableFilterField, key: 'start' | 'end', value: unknown): void {
+    this.onFieldChange(field, { ...this.asRangeValue(this.valueOf(field)), [key]: value });
   }
 
   optionsOf(field: TableFilterField): TableFilterOption[] {
@@ -219,7 +243,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
       const evaluated = this.expressionEngine.evaluate(field.optionsExpression, {
         model: this.draftValues(),
         context: { values: this.draftValues(), field },
-        value: this.valueOf(field)
+        value: this.valueOf(field),
       });
       if (Array.isArray(evaluated)) {
         return evaluated as TableFilterOption[];
@@ -233,7 +257,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     if (field.type === 'boolean') {
       return [
         { label: 'yes', value: true },
-        { label: 'no', value: false }
+        { label: 'no', value: false },
       ];
     }
 
@@ -244,6 +268,10 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return this.fields.filter((field) => this.isFieldVisible(field));
   }
 
+  filterFieldId(field: TableFilterField): string {
+    return `table-filter-${field.field.replace(/[^A-Za-z0-9_-]+/g, '-')}`;
+  }
+
   isFieldVisible(field: TableFilterField): boolean {
     if (field.hidden) {
       return false;
@@ -252,8 +280,14 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isFieldDisabled(field: TableFilterField): boolean {
-    const missingDependency = (field.dependsOn ?? []).some((dependency) => !this.hasValue(this.draftValues()[dependency]));
-    return missingDependency || this.optionState()[field.field]?.loading === true || this.evaluateRule(field.rules?.disabled, field, false) === true;
+    const missingDependency = (field.dependsOn ?? []).some(
+      (dependency) => !this.hasValue(this.draftValues()[dependency]),
+    );
+    return (
+      missingDependency ||
+      this.optionState()[field.field]?.loading === true ||
+      this.evaluateRule(field.rules?.disabled, field, false) === true
+    );
   }
 
   optionLoading(field: TableFilterField): boolean {
@@ -289,7 +323,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
       chips.push({
         field,
         label: field.label,
-        valueLabel: this.formatChipValue(field, value)
+        valueLabel: this.formatChipValue(field, value),
       });
 
       return chips;
@@ -299,14 +333,15 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
   removeFilter(field: TableFilterField): void {
     const nextValues = {
       ...this.appliedValues(),
-      [field.field]: this.getDefaultValue(field)
+      [field.field]: this.getDefaultValue(field),
     };
 
     this.appliedValues.set(nextValues);
     this.draftValues.set(this.cloneValue(nextValues));
-    this.validationErrors.set(this.validationErrors().filter((error) => error.field !== field.field));
+    this.validationErrors.set(
+      this.validationErrors().filter((error) => error.field !== field.field),
+    );
     this.searchValue.set(this.getPrimaryFieldValue(nextValues));
-    this.syncQueryParams(nextValues);
     this.emitSearch(nextValues);
   }
 
@@ -327,40 +362,57 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return this.searchValue().trim();
   }
 
-  private buildInitialValues(params: ParamMap): Record<string, any> {
-    const defaults = this.buildDefaultValues();
-
-    return this.fields.reduce<Record<string, any>>((acc, field) => {
-      if (field.type === 'date-range' || field.type === 'number-range') {
-        const startKey = field.queryParamStart ?? `${field.field}From`;
-        const endKey = field.queryParamEnd ?? `${field.field}To`;
-        acc[field.field] = {
-          start: this.parseRangeQueryValue(field, params.get(startKey)),
-          end: this.parseRangeQueryValue(field, params.get(endKey))
-        };
-        return acc;
-      }
-
-      const queryKey = field.queryParam ?? field.field;
-      const raw = params.get(queryKey);
-      if (raw == null) {
-        acc[field.field] = defaults[field.field];
-        return acc;
-      }
-
-      acc[field.field] = this.parseQueryValue(field, raw);
-      return acc;
-    }, { ...defaults });
+  private syncControlledValue(): void {
+    const nextValues = this.buildValuesFromInput(this.value ?? {});
+    this.draftValues.set(this.cloneValue(nextValues));
+    this.appliedValues.set(this.cloneValue(nextValues));
+    this.searchValue.set(this.getPrimaryFieldValue(nextValues));
+    this.loadDynamicOptions(nextValues);
   }
 
-  private buildDefaultValues(): Record<string, any> {
-    return this.fields.reduce<Record<string, any>>((acc, field) => {
+  private buildValuesFromInput(input: TableFilterValue): TableFilterValue {
+    const defaults = this.buildDefaultValues();
+
+    return this.fields.reduce<TableFilterValue>(
+      (acc, field) => {
+        if (field.type === 'date-range' || field.type === 'number-range') {
+          const fieldValue = input[field.field];
+          const rangeValue = this.asRangeValue(fieldValue);
+          const defaultRange = this.asRangeValue(defaults[field.field]);
+          acc[field.field] = {
+            start: this.parseRangeInputValue(
+              field,
+              this.inputValueOrDefault(rangeValue, 'start', defaultRange.start),
+            ),
+            end: this.parseRangeInputValue(
+              field,
+              this.inputValueOrDefault(rangeValue, 'end', defaultRange.end),
+            ),
+          };
+          return acc;
+        }
+
+        const raw = input[field.field];
+        if (raw === undefined) {
+          acc[field.field] = defaults[field.field];
+          return acc;
+        }
+
+        acc[field.field] = this.parseInputValue(field, raw);
+        return acc;
+      },
+      { ...defaults },
+    );
+  }
+
+  private buildDefaultValues(): TableFilterValue {
+    return this.fields.reduce<TableFilterValue>((acc, field) => {
       acc[field.field] = this.getDefaultValue(field);
       return acc;
     }, {});
   }
 
-  private getDefaultValue(field: TableFilterField): any {
+  private getDefaultValue(field: TableFilterField): unknown {
     if (field.defaultValue !== undefined) {
       return this.cloneValue(field.defaultValue);
     }
@@ -376,40 +428,41 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  private getPrimaryFieldValue(values: Record<string, any>): string {
+  private getPrimaryFieldValue(values: TableFilterValue): string {
     const primaryField = this.primaryFieldConfig;
     const value = primaryField ? values[primaryField.field] : '';
     return String(value ?? '');
   }
 
-  private normalizeFieldValue(field: TableFilterField, value: any): any {
+  private normalizeFieldValue(field: TableFilterField, value: unknown): unknown {
     if (field.type === 'multi-select') {
       return Array.isArray(value) ? value : [];
     }
 
     if (field.type === 'date-range') {
       return {
-        start: value?.start ?? '',
-        end: value?.end ?? ''
+        start: this.asRangeValue(value).start ?? '',
+        end: this.asRangeValue(value).end ?? '',
       };
     }
 
     if (field.type === 'number-range') {
       return {
-        start: this.parseNumberValue(value?.start),
-        end: this.parseNumberValue(value?.end)
+        start: this.parseNumberValue(this.asRangeValue(value).start),
+        end: this.parseNumberValue(this.asRangeValue(value).end),
       };
     }
 
     return value;
   }
 
-  private parseQueryValue(field: TableFilterField, raw: string): any {
+  private parseInputValue(field: TableFilterField, raw: unknown): unknown {
     if (field.type === 'multi-select') {
-      return raw.split(',').filter(Boolean);
+      return Array.isArray(raw) ? raw : String(raw).split(',').filter(Boolean);
     }
 
     if (field.type === 'boolean') {
+      if (typeof raw === 'boolean') return raw;
       if (raw === 'true') return true;
       if (raw === 'false') return false;
       return null;
@@ -418,44 +471,17 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return raw;
   }
 
-  private syncQueryParams(values: Record<string, any>): void {
-    if (!this.enableUrlSync) {
-      return;
-    }
-
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: this.serializeToQueryParams(values),
-      queryParamsHandling: 'merge'
-    });
+  private emitSearch(values: TableFilterValue): void {
+    const payload = this.normalizePayload(values);
+    this.valueChange.emit(payload);
+    this.search.emit(payload);
   }
 
-  private serializeToQueryParams(values: Record<string, any>): Record<string, any> {
-    return this.fields.reduce<Record<string, any>>((acc, field) => {
-      const value = values[field.field];
-
-      if (field.type === 'date-range' || field.type === 'number-range') {
-        acc[field.queryParamStart ?? `${field.field}From`] = this.hasValue(value?.start) ? value.start : null;
-        acc[field.queryParamEnd ?? `${field.field}To`] = this.hasValue(value?.end) ? value.end : null;
-        return acc;
-      }
-
-      const queryKey = field.queryParam ?? field.field;
-      if (Array.isArray(value)) {
-        acc[queryKey] = value.length ? value.join(',') : null;
-        return acc;
-      }
-
-      acc[queryKey] = this.hasValue(value) ? value : null;
-      return acc;
-    }, {});
+  private emitValueChange(values: TableFilterValue): void {
+    this.valueChange.emit(this.normalizePayload(values));
   }
 
-  private emitSearch(values: Record<string, any>): void {
-    this.search.emit(this.normalizePayload(values));
-  }
-
-  private validateValues(values: Record<string, any>): boolean {
+  private validateValues(values: TableFilterValue): boolean {
     const errors = this.fields
       .filter((field) => this.isFieldVisible(field))
       .flatMap((field) => this.validateField(field, values));
@@ -463,19 +489,33 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return errors.length === 0;
   }
 
-  private validateField(field: TableFilterField, values: Record<string, any>): TableFilterValidationError[] {
+  private validateField(
+    field: TableFilterField,
+    values: TableFilterValue,
+  ): TableFilterValidationError[] {
     const value = values[field.field];
     const errors: TableFilterValidationError[] = [];
 
-    if (field.type === 'date-range' && this.hasValue(value?.start) && this.hasValue(value?.end)) {
-      const start = new Date(value.start).getTime();
-      const end = new Date(value.end).getTime();
+    const rangeValue = this.asRangeValue(value);
+
+    if (
+      field.type === 'date-range' &&
+      this.hasValue(rangeValue.start) &&
+      this.hasValue(rangeValue.end)
+    ) {
+      const start = new Date(String(rangeValue.start)).getTime();
+      const end = new Date(String(rangeValue.end)).getTime();
       if (Number.isFinite(start) && Number.isFinite(end) && start > end) {
         errors.push({ field: field.field, message: 'shared.filter.dateRangeInvalid' });
       }
     }
 
-    if (field.type === 'number-range' && this.hasValue(value?.start) && this.hasValue(value?.end) && Number(value.start) > Number(value.end)) {
+    if (
+      field.type === 'number-range' &&
+      this.hasValue(rangeValue.start) &&
+      this.hasValue(rangeValue.end) &&
+      Number(rangeValue.start) > Number(rangeValue.end)
+    ) {
       errors.push({ field: field.field, message: 'shared.filter.numberRangeInvalid' });
     }
 
@@ -491,8 +531,8 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
   private isValidationRuleFailed(
     rule: NonNullable<TableFilterField['validation']>[number],
     field: TableFilterField,
-    value: any,
-    values: Record<string, any>
+    value: unknown,
+    values: TableFilterValue,
   ): boolean {
     if (rule.type === 'required') {
       return !this.hasValue(value);
@@ -522,7 +562,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
       const result = this.expressionEngine.evaluate(rule.expression, {
         model: values,
         context: { values, field },
-        value
+        value,
       });
       return result === true;
     } catch {
@@ -530,16 +570,21 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  private normalizePayload(values: Record<string, any>): Record<string, any> {
-    return this.fields.reduce<Record<string, any>>((acc, field) => {
+  private normalizePayload(values: TableFilterValue): TableFilterValue {
+    return this.fields.reduce<TableFilterValue>((acc, field) => {
       const value = values[field.field];
 
       if (field.type === 'date-range' || field.type === 'number-range') {
-        if (this.hasValue(value?.start)) {
-          acc[field.queryParamStart ?? `${field.field}From`] = value.start;
+        const rangeValueInput = this.asRangeValue(value);
+        const rangeValue: Record<string, unknown> = {};
+        if (this.hasValue(rangeValueInput.start)) {
+          rangeValue['start'] = rangeValueInput.start;
         }
-        if (this.hasValue(value?.end)) {
-          acc[field.queryParamEnd ?? `${field.field}To`] = value.end;
+        if (this.hasValue(rangeValueInput.end)) {
+          rangeValue['end'] = rangeValueInput.end;
+        }
+        if (this.hasValue(rangeValue)) {
+          acc[field.field] = rangeValue;
         }
         return acc;
       }
@@ -558,7 +603,7 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     }, {});
   }
 
-  private hasValue(value: any): boolean {
+  private hasValue(value: unknown): boolean {
     if (Array.isArray(value)) {
       return value.length > 0;
     }
@@ -570,11 +615,13 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return value !== null && value !== undefined && value !== '';
   }
 
-  private hasAnyFilterValue(values: Record<string, any>): boolean {
-    return Object.values(values).some((value) => this.hasValue(value));
+  private asRangeValue(value: unknown): { start?: unknown; end?: unknown } {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as { start?: unknown; end?: unknown })
+      : {};
   }
 
-  private formatChipValue(field: TableFilterField, value: any): string {
+  private formatChipValue(field: TableFilterField, value: unknown): string {
     if (Array.isArray(value)) {
       return value.map((item) => this.optionLabelFor(field, item)).join(', ');
     }
@@ -589,8 +636,9 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (field.type === 'date-range' || field.type === 'number-range') {
-      const start = this.formatPrimitiveValue(value?.start);
-      const end = this.formatPrimitiveValue(value?.end);
+      const rangeValue = this.asRangeValue(value);
+      const start = this.formatPrimitiveValue(rangeValue.start);
+      const end = this.formatPrimitiveValue(rangeValue.end);
 
       return [start, end].filter(Boolean).join(' - ');
     }
@@ -598,12 +646,12 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return this.optionLabelFor(field, value);
   }
 
-  private optionLabelFor(field: TableFilterField, value: any): string {
+  private optionLabelFor(field: TableFilterField, value: unknown): string {
     const option = this.optionsOf(field).find((item) => item.value === value);
     return option?.label ?? this.formatPrimitiveValue(value);
   }
 
-  private formatPrimitiveValue(value: any): string {
+  private formatPrimitiveValue(value: unknown): string {
     if (value == null) {
       return '';
     }
@@ -615,18 +663,32 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return String(value);
   }
 
-  private get enableUrlSync(): boolean {
-    return this.options.enableUrlSync !== false;
+  private toDatePickerValue(value: unknown): Date | Date[] | null {
+    if (value instanceof Date || value === null) {
+      return value;
+    }
+    if (Array.isArray(value) && value.every((item) => item instanceof Date || item === null)) {
+      return value as Date[];
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+    return null;
   }
 
-  private loadDynamicOptions(values: Record<string, any>, targetField?: TableFilterField): void {
+  private toNumberValue(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private loadDynamicOptions(values: TableFilterValue, targetField?: TableFilterField): void {
     const fields = targetField ? [targetField] : this.fields;
     fields
       .filter((field) => !!field.optionsLoader)
       .forEach((field) => this.loadOptionsForField(field, values));
   }
 
-  private loadOptionsForField(field: TableFilterField, values: Record<string, any>): void {
+  private loadOptionsForField(field: TableFilterField, values: TableFilterValue): void {
     if (!field.optionsLoader) {
       return;
     }
@@ -637,17 +699,29 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
 
     const version = (this.optionLoadVersion.get(field.field) ?? 0) + 1;
     this.optionLoadVersion.set(field.field, version);
-    this.setOptionState(field.field, { options: this.optionsOf(field), loading: true, error: null });
+    this.setOptionState(field.field, {
+      options: this.optionsOf(field),
+      loading: true,
+      error: null,
+    });
 
     let result;
     try {
       result = field.optionsLoader({ values, field });
     } catch {
-      this.setOptionState(field.field, { options: [], loading: false, error: 'shared.filter.optionsLoadFailed' });
+      this.setOptionState(field.field, {
+        options: [],
+        loading: false,
+        error: 'shared.filter.optionsLoadFailed',
+      });
       return;
     }
 
-    const result$ = isObservable(result) ? result : result instanceof Promise ? from(result) : of(result);
+    const result$ = isObservable(result)
+      ? result
+      : result instanceof Promise
+        ? from(result)
+        : of(result);
     result$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (options) => {
         if (this.optionLoadVersion.get(field.field) !== version) {
@@ -659,23 +733,34 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
         if (this.optionLoadVersion.get(field.field) !== version) {
           return;
         }
-        this.setOptionState(field.field, { options: [], loading: false, error: 'shared.filter.optionsLoadFailed' });
-      }
+        this.setOptionState(field.field, {
+          options: [],
+          loading: false,
+          error: 'shared.filter.optionsLoadFailed',
+        });
+      },
     });
   }
 
-  private setOptionState(field: string, state: { options: TableFilterOption[]; loading: boolean; error: string | null }): void {
+  private setOptionState(
+    field: string,
+    state: { options: TableFilterOption[]; loading: boolean; error: string | null },
+  ): void {
     this.optionState.update((current) => ({ ...current, [field]: state }));
   }
 
-  private evaluateRule(expression: string | undefined, field: TableFilterField, fallback: boolean): boolean {
+  private evaluateRule(
+    expression: string | undefined,
+    field: TableFilterField,
+    fallback: boolean,
+  ): boolean {
     if (!expression) {
       return fallback;
     }
     const result = this.expressionEngine.evaluate(expression, {
       model: this.draftValues(),
       context: { values: this.draftValues(), field },
-      value: this.valueOf(field)
+      value: this.valueOf(field),
     });
     return typeof result === 'boolean' ? result : fallback;
   }
@@ -701,15 +786,23 @@ export class TableFilterComponent implements OnInit, OnChanges, OnDestroy {
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  private parseRangeQueryValue(field: TableFilterField, value: string | null): string | number {
+  private parseRangeInputValue(field: TableFilterField, value: unknown): string | number | null {
     if (value == null) {
-      return '';
+      return null;
     }
 
-    return field.type === 'number-range' ? this.parseNumberValue(value) ?? '' : value;
+    return field.type === 'number-range' ? this.parseNumberValue(value) : String(value);
+  }
+
+  private inputValueOrDefault(
+    value: Record<string, unknown>,
+    key: string,
+    fallback: unknown,
+  ): unknown {
+    return Object.prototype.hasOwnProperty.call(value, key) ? value[key] : fallback;
   }
 
   private cloneValue<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value));
+    return JSON.parse(JSON.stringify(value)) as T;
   }
 }

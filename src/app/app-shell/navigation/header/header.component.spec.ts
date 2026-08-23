@@ -17,14 +17,14 @@ describe('HeaderComponent', () => {
       userInfo: {
         name: 'An Nguyen',
         realm_access: {
-          roles: ['default-roles-develop_tool_realm', 'ADMIN']
-        }
+          roles: ['default-roles-develop_tool_realm', 'ADMIN'],
+        },
       },
-      logout: vi.fn()
+      logout: vi.fn(),
     };
     themeService = {
       themeMode: 'light',
-      setThemeMode: vi.fn()
+      setThemeMode: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -32,8 +32,8 @@ describe('HeaderComponent', () => {
       providers: [
         ...provideSharedTesting(),
         { provide: KeycloakService, useValue: keycloakService },
-        { provide: ThemeService, useValue: themeService }
-      ]
+        { provide: ThemeService, useValue: themeService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HeaderComponent);
@@ -45,7 +45,8 @@ describe('HeaderComponent', () => {
 
     const text = fixture.nativeElement.textContent;
     const host: HTMLElement = fixture.nativeElement;
-    const userMenuButton: HTMLButtonElement = fixture.nativeElement.querySelector('.user-menu-button');
+    const userMenuButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.user-menu-button');
 
     expect(text).toContain('An Nguyen');
     expect(component.userRoleLabel()).toBe('layout.roleAdmin');
@@ -66,7 +67,8 @@ describe('HeaderComponent', () => {
   it('opens the account submenu with theme switches and logout', () => {
     fixture.detectChanges();
 
-    const userMenuButton: HTMLButtonElement = fixture.nativeElement.querySelector('.user-menu-button');
+    const userMenuButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.user-menu-button');
     userMenuButton.click();
     fixture.detectChanges();
 
@@ -76,7 +78,7 @@ describe('HeaderComponent', () => {
     expect(component.accountMenuItems.map((item) => item.label).filter(Boolean)).toEqual([
       'light',
       'dark',
-      'layout.logout'
+      'layout.logout',
     ]);
     expect(userMenuButton.getAttribute('aria-expanded')).toBe('true');
     expect(component.userMenu.visible).toBe(true);

@@ -23,7 +23,12 @@ describe('service management screen config', () => {
   });
 
   it('builds create/edit form screens with FormConfig owned by the feature', () => {
-    const form = buildServiceResourceFormScreen('job-service', 'config', 'edit', 'job-config-runtime');
+    const form = buildServiceResourceFormScreen(
+      'job-service',
+      'config',
+      'edit',
+      'job-config-runtime',
+    );
 
     expect(form.title).toBe('serviceManagement.job.config.editTitle');
     expect(form.formConfig.sections?.length).toBeGreaterThan(1);

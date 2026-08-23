@@ -5,7 +5,7 @@ import { provideSharedTesting } from '@shared/testing/shared-test.providers';
 
 @Pipe({
   name: 'translateContent',
-  standalone: false
+  standalone: false,
 })
 class TranslateContentPipeStub implements PipeTransform {
   transform(value: unknown): string {
@@ -18,7 +18,7 @@ describe('AppComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [AppComponent, TranslateContentPipeStub],
       providers: provideSharedTesting(),
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
   });
 

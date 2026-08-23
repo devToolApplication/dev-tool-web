@@ -24,29 +24,29 @@ describe('FieldTreeRendererComponent', () => {
           label: 'Child',
           code: 'CHILD_VIEW',
           value: { code: 'CHILD' },
-          checked: true
+          checked: true,
         },
         {
           id: 'node-1-2',
           label: 'Update',
           code: 'CHILD_UPDATE',
-          value: { code: 'UPDATE' }
-        }
-      ]
-    }
+          value: { code: 'UPDATE' },
+        },
+      ],
+    },
   ];
 
   beforeEach(async () => {
     confirmDialogService = {
-      confirm: vi.fn().mockResolvedValue(true)
+      confirm: vi.fn().mockResolvedValue(true),
     };
 
     await TestBed.configureTestingModule({
       imports: [SharedModule],
       providers: [
         ...provideSharedTesting(),
-        { provide: ConfirmDialogService, useValue: confirmDialogService }
-      ]
+        { provide: ConfirmDialogService, useValue: confirmDialogService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldTreeRendererComponent);
@@ -74,9 +74,9 @@ describe('FieldTreeRendererComponent', () => {
       {
         id: 'picker-1',
         label: 'Beta',
-        value: { code: 'BETA' }
+        value: { code: 'BETA' },
       },
-      true
+      true,
     );
 
     component.addSelectedOptions();
@@ -91,7 +91,7 @@ describe('FieldTreeRendererComponent', () => {
       id: 'picker-disabled',
       label: 'Disabled',
       value: { code: 'DISABLED' },
-      disabled: true
+      disabled: true,
     };
 
     component.openAddPicker();
@@ -125,7 +125,11 @@ describe('FieldTreeRendererComponent', () => {
 
     component.toggleNodeSelection(component.nodes[0], true);
 
-    expect(component.selectedItems.map((item) => item.node.id)).toEqual(['node-1', 'node-1-1', 'node-1-2']);
+    expect(component.selectedItems.map((item) => item.node.id)).toEqual([
+      'node-1',
+      'node-1-1',
+      'node-1-2',
+    ]);
     expect(component.nodeSelectionState(component.nodes[0]).checked).toBe(true);
 
     component.clearSelection();
@@ -152,14 +156,14 @@ describe('FieldTreeRendererComponent', () => {
     await component.removeNode('node-1-1');
 
     expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'shared.tree.confirmRemove', variant: 'danger' })
+      expect.objectContaining({ message: 'shared.tree.confirmRemove', variant: 'danger' }),
     );
     expect(component.nodes[0].children?.map((node) => node.id)).toEqual(['node-1-2']);
 
     await component.clear();
 
     expect(confirmDialogService.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'shared.tree.confirmClear', variant: 'danger' })
+      expect.objectContaining({ message: 'shared.tree.confirmClear', variant: 'danger' }),
     );
     expect(component.nodes).toEqual([]);
   });
@@ -169,7 +173,7 @@ describe('FieldTreeRendererComponent', () => {
     component.selectOption({
       id: 'picker-replace',
       label: 'Gamma',
-      value: { code: 'GAMMA' }
+      value: { code: 'GAMMA' },
     });
 
     expect(component.nodes[0].label).toBe('Gamma');
@@ -195,11 +199,13 @@ describe('FieldTreeRendererComponent', () => {
     component.selectOption({
       id: 'picker-1',
       label: 'Beta',
-      value: { code: 'BETA' }
+      value: { code: 'BETA' },
     });
     await component.removeNode('node-1-1');
     await component.clear();
-    component.onAdvancedJsonChange('[{"id":"node-json","label":"From JSON","value":{"code":"JSON"}}]');
+    component.onAdvancedJsonChange(
+      '[{"id":"node-json","label":"From JSON","value":{"code":"JSON"}}]',
+    );
     component.applyAdvancedJson();
 
     expect(JSON.stringify(component.nodes)).toBe(originalTree);
@@ -216,7 +222,9 @@ describe('FieldTreeRendererComponent', () => {
   });
 
   it('validates editable advanced JSON before applying it', () => {
-    component.onAdvancedJsonChange('[{"id":"node-json","label":"From JSON","value":{"code":"JSON"}}]');
+    component.onAdvancedJsonChange(
+      '[{"id":"node-json","label":"From JSON","value":{"code":"JSON"}}]',
+    );
     component.applyAdvancedJson();
 
     expect(component.nodes[0]).toMatchObject({
@@ -226,7 +234,7 @@ describe('FieldTreeRendererComponent', () => {
       children: [],
       checked: false,
       disabled: false,
-      readonly: false
+      readonly: false,
     });
     expect(component.advancedJsonError()).toBeNull();
 
@@ -271,8 +279,8 @@ describe('FieldTreeRendererComponent', () => {
             {
               id: 'child-actions',
               label: 'Child actions',
-              match: { codeIncludes: ['view'], leafOnly: true }
-            }
+              match: { codeIncludes: ['view'], leafOnly: true },
+            },
           ],
           allowAddNode: true,
           allowRemoveNode: true,
@@ -280,21 +288,21 @@ describe('FieldTreeRendererComponent', () => {
           allowMoveNode: true,
           picker: {
             enabled: true,
-            multiSelect: true
+            multiSelect: true,
           },
           advancedJson: {
             enabled: true,
             editable: true,
-            collapsedByDefault: true
-          }
+            collapsedByDefault: true,
+          },
         },
         pickerOptions: [
           {
             id: 'picker-1',
             label: 'Beta',
-            value: { code: 'BETA' }
-          }
-        ]
+            value: { code: 'BETA' },
+          },
+        ],
       },
       children: [],
       width: 'full',
@@ -316,7 +324,7 @@ describe('FieldTreeRendererComponent', () => {
       valid: signal(false),
       markAsTouched: () => touched.set(true),
       markAsFocused: () => undefined,
-      markAsBlurred: () => undefined
+      markAsBlurred: () => undefined,
     };
   }
 });

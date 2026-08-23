@@ -12,8 +12,8 @@ const meta: Meta<DatePicker> = {
     showTime: false,
     hourFormat: '24',
     selectionMode: 'single',
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -26,14 +26,14 @@ export const WithTime: Story = {
   args: {
     label: 'Start Date & Time',
     showTime: true,
-    dateFormat: 'dd/mm/yy'
-  }
+    dateFormat: 'dd/mm/yy',
+  },
 };
 
 export const RangeSelection: Story = {
   args: {
     label: 'Duration Range',
     selectionMode: 'range',
-    placeholder: 'Choose range'
-  }
+    placeholder: 'Choose range',
+  },
 };

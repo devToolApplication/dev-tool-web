@@ -15,9 +15,14 @@ const sampleTreeData: TreeNodeOption[] = [
         data: 'Work Folder',
         icon: 'pi pi-fw pi-cog',
         children: [
-          { key: '0-0-0', label: 'Expenses.doc', icon: 'pi pi-fw pi-file', data: 'Expenses Document' },
-          { key: '0-0-1', label: 'Resume.doc', icon: 'pi pi-fw pi-file', data: 'Resume Document' }
-        ]
+          {
+            key: '0-0-0',
+            label: 'Expenses.doc',
+            icon: 'pi pi-fw pi-file',
+            data: 'Expenses Document',
+          },
+          { key: '0-0-1', label: 'Resume.doc', icon: 'pi pi-fw pi-file', data: 'Resume Document' },
+        ],
       },
       {
         key: '0-1',
@@ -25,10 +30,10 @@ const sampleTreeData: TreeNodeOption[] = [
         data: 'Home Folder',
         icon: 'pi pi-fw pi-home',
         children: [
-          { key: '0-1-0', label: 'Invoices.txt', icon: 'pi pi-fw pi-file', data: 'Invoices Text' }
-        ]
-      }
-    ]
+          { key: '0-1-0', label: 'Invoices.txt', icon: 'pi pi-fw pi-file', data: 'Invoices Text' },
+        ],
+      },
+    ],
   },
   {
     key: '1',
@@ -37,9 +42,9 @@ const sampleTreeData: TreeNodeOption[] = [
     icon: 'pi pi-fw pi-image',
     children: [
       { key: '1-0', label: 'barcelona.jpg', icon: 'pi pi-fw pi-image', data: 'Barcelona Picture' },
-      { key: '1-1', label: 'logo.png', icon: 'pi pi-fw pi-image', data: 'Logo Image' }
-    ]
-  }
+      { key: '1-1', label: 'logo.png', icon: 'pi pi-fw pi-image', data: 'Logo Image' },
+    ],
+  },
 ];
 
 const meta: Meta<SelectTree> = {
@@ -50,8 +55,8 @@ const meta: Meta<SelectTree> = {
     options: sampleTreeData,
     selectionMode: 'single',
     filter: false,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -62,18 +67,18 @@ export const Default: Story = {};
 
 export const Multiple: Story = {
   args: {
-    selectionMode: 'multiple'
-  }
+    selectionMode: 'multiple',
+  },
 };
 
 export const Checkbox: Story = {
   args: {
-    selectionMode: 'checkbox'
-  }
+    selectionMode: 'checkbox',
+  },
 };
 
 export const WithFilter: Story = {
   args: {
-    filter: true
-  }
+    filter: true,
+  },
 };

@@ -35,9 +35,14 @@ export class ServiceResourceFormComponent {
   readonly context: FormContext = { user: null, mode: this.routeData.mode };
 
   model = this.screen.model;
+  private hasDirtyForm = false;
 
   onValueChange(value: unknown): void {
     this.model = (value ?? {}) as Record<string, unknown>;
+  }
+
+  onDirtyChange(isDirty: boolean): void {
+    this.hasDirtyForm = isDirty;
   }
 
   onCancel(): void {
@@ -45,8 +50,13 @@ export class ServiceResourceFormComponent {
   }
 
   onSubmit(): void {
+    this.hasDirtyForm = false;
     this.toastService.success(this.screen.mode === 'create' ? 'createSuccess' : 'updateSuccess');
     void this.navigateBack();
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.hasDirtyForm;
   }
 
   private async navigateBack(): Promise<void> {

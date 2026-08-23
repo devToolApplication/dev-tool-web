@@ -16,7 +16,7 @@ export interface EmptyStateConfig {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './empty-state.component.html',
-  styleUrl: './empty-state.component.css'
+  styleUrl: './empty-state.component.css',
 })
 export class EmptyStateComponent {
   @Input() title = 'shared.empty.title';

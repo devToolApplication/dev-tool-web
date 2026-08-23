@@ -1,5 +1,13 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { FlowDefinition, FlowEdge, FlowNode, FlowNodeTone, FlowNodeTypeDefinition, FlowViewportSnapshot } from '../../models';
+import type { ElementRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import type {
+  FlowDefinition,
+  FlowEdge,
+  FlowNode,
+  FlowNodeTone,
+  FlowNodeTypeDefinition,
+  FlowViewportSnapshot,
+} from '../../models';
 
 interface NavigatorBounds {
   minX: number;
@@ -58,10 +66,10 @@ export class FlowNavigatorComponent {
     const allNodes = this.value?.nodes ?? [];
     const positions = this.viewport?.nodePositions;
     if (positions?.length) {
-      const positionedIds = new Set(positions.map(p => p.id));
-      return allNodes.filter(n => positionedIds.has(n.id));
+      const positionedIds = new Set(positions.map((p) => p.id));
+      return allNodes.filter((n) => positionedIds.has(n.id));
     }
-    return allNodes.filter(node => !!node.position);
+    return allNodes.filter((node) => !!node.position);
   }
 
   get bounds(): NavigatorBounds {
@@ -104,10 +112,10 @@ export class FlowNavigatorComponent {
       return { minX: 0, minY: 0, width: 800, height: 600 };
     }
 
-    const minX = Math.min(...boxes.map(b => b.left));
-    const minY = Math.min(...boxes.map(b => b.top));
-    const maxX = Math.max(...boxes.map(b => b.right));
-    const maxY = Math.max(...boxes.map(b => b.bottom));
+    const minX = Math.min(...boxes.map((b) => b.left));
+    const minY = Math.min(...boxes.map((b) => b.top));
+    const maxX = Math.max(...boxes.map((b) => b.right));
+    const maxY = Math.max(...boxes.map((b) => b.bottom));
 
     const rawWidth = maxX - minX;
     const rawHeight = maxY - minY;
@@ -125,7 +133,7 @@ export class FlowNavigatorComponent {
     const b = this.bounds;
     return Math.min(
       (this.mapWidth - this.padding * 2) / b.width,
-      (this.bodyHeight - this.padding * 2) / b.height
+      (this.bodyHeight - this.padding * 2) / b.height,
     );
   }
 
@@ -159,7 +167,11 @@ export class FlowNavigatorComponent {
     const typeDef = this.nodeType(node);
     return {
       'flow-navigator__node--selected': node.id === this.selectedId,
-      'flow-navigator__node--condition': typeDef?.shape === 'diamond' || node.type === 'condition' || node.type === 'rule-condition' || node.type === 'rule-group',
+      'flow-navigator__node--condition':
+        typeDef?.shape === 'diamond' ||
+        node.type === 'condition' ||
+        node.type === 'rule-condition' ||
+        node.type === 'rule-group',
       [`flow-navigator__node--tone-${tone}`]: true,
     };
   }
@@ -176,7 +188,7 @@ export class FlowNavigatorComponent {
 
   private nodeMinimapRect(node: FlowNode): NavigatorRect | null {
     const positions = this.viewport?.nodePositions;
-    const np = positions?.find(p => p.id === node.id);
+    const np = positions?.find((p) => p.id === node.id);
     const position = np ? { x: np.x, y: np.y } : node.position;
     if (!position) {
       return null;
@@ -244,16 +256,16 @@ export class FlowNavigatorComponent {
   private getNodeCenter(
     nodeId: string,
     port: 'top' | 'bottom',
-    positions?: Array<{ id: string; x: number; y: number; width: number; height: number }> | null
+    positions?: Array<{ id: string; x: number; y: number; width: number; height: number }> | null,
   ): { x: number; y: number } | null {
-    const np = positions?.find(p => p.id === nodeId);
+    const np = positions?.find((p) => p.id === nodeId);
     if (np) {
       return {
         x: np.x + np.width / 2,
         y: port === 'bottom' ? np.y + np.height : np.y,
       };
     }
-    const node = this.nodes.find(n => n.id === nodeId);
+    const node = this.nodes.find((n) => n.id === nodeId);
     if (!node?.position) return null;
     const pos = node.position;
     const size = node.size ?? { width: 180, height: 64 };
@@ -281,8 +293,18 @@ export class FlowNavigatorComponent {
 
   onBodyClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    if (target.closest('.flow-navigator__node') || target.closest('.flow-navigator__viewport')) return;
+    if (target.closest('.flow-navigator__node') || target.closest('.flow-navigator__viewport'))
+      return;
     this.emitPanFromMouseEvent(event);
+  }
+
+  onBodyKeydown(event: Event): void {
+    if (!(event instanceof KeyboardEvent)) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('.flow-navigator__node') || target.closest('.flow-navigator__viewport'))
+      return;
+    event.preventDefault();
+    this.emitPanFromCoords(this.mapWidth / 2, this.headerHeight + this.bodyHeight / 2);
   }
 
   private emitPanFromEvent(event: PointerEvent): void {
@@ -335,16 +357,30 @@ export class FlowNavigatorComponent {
   }
 
   private nodeType(node: FlowNode): FlowNodeTypeDefinition | undefined {
-    return this.nodeTypes.find(type => type.type === node.type);
+    return this.nodeTypes.find((type) => type.type === node.type);
   }
 
   private nodeTone(node: FlowNode): FlowNodeTone {
-    const statusTone = node.status && node.status !== 'default' && node.status !== 'selected' ? node.status : null;
+    const statusTone =
+      node.status && node.status !== 'default' && node.status !== 'selected' ? node.status : null;
     const typeTone = this.nodeType(node)?.tone;
-    if (statusTone === 'success' || statusTone === 'warning' || statusTone === 'danger' || statusTone === 'muted') {
+    if (
+      statusTone === 'success' ||
+      statusTone === 'warning' ||
+      statusTone === 'danger' ||
+      statusTone === 'muted'
+    ) {
       return statusTone;
     }
-    if (typeTone === 'primary' || typeTone === 'info' || typeTone === 'success' || typeTone === 'warning' || typeTone === 'danger' || typeTone === 'muted' || typeTone === 'neutral') {
+    if (
+      typeTone === 'primary' ||
+      typeTone === 'info' ||
+      typeTone === 'success' ||
+      typeTone === 'warning' ||
+      typeTone === 'danger' ||
+      typeTone === 'muted' ||
+      typeTone === 'neutral'
+    ) {
       return typeTone;
     }
     return 'muted';

@@ -1,0 +1,43 @@
+﻿<app-koc-page-frame
+  title="koc.campaigns.title"
+  subtitle="koc.campaigns.subtitle"
+>
+  <ng-container koc-page-actions>
+    <app-button
+      label="koc.campaigns.action.new"
+      icon="pi pi-plus"
+      (buttonClick)="onCreateCampaign()"
+    ></app-button>
+  </ng-container>
+
+  <app-section-panel
+    title="koc.campaigns.sectionTitle"
+    subtitle="koc.campaigns.sectionSubtitle"
+  >
+    <div section-actions class="koc-campaign-list__status-filter">
+      <app-select
+        label="koc.campaigns.filter.status"
+        [options]="statusOptions"
+        [value]="query().status ?? null"
+        (valueChange)="onStatusFilter($event)"
+      ></app-select>
+    </div>
+
+    <app-table
+      [config]="tableConfig"
+      [data]="campaigns()"
+      [loading]="loading()"
+      [error]="error()"
+      [totalRecords]="totalRecords()"
+      [currentPage]="currentPage()"
+      [rows]="rows()"
+      (create)="onCreateCampaign()"
+      (search)="onSearch($event)"
+      (pageChange)="onPageChange($event)"
+      (refresh)="loadCampaigns()"
+      (retry)="loadCampaigns()"
+      (rowClick)="openCampaign($event)"
+      (actionClick)="onTableAction($event)"
+    ></app-table>
+  </app-section-panel>
+</app-koc-page-frame>

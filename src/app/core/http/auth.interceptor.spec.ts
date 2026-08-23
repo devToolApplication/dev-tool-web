@@ -1,4 +1,9 @@
-import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -16,7 +21,7 @@ describe('AuthInterceptor', () => {
   beforeEach(() => {
     keycloakService = {
       token: 'access-token',
-      handleUnauthorized: vi.fn()
+      handleUnauthorized: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -24,8 +29,8 @@ describe('AuthInterceptor', () => {
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: KeycloakService, useValue: keycloakService },
-        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
-      ]
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+      ],
     });
 
     http = TestBed.inject(HttpClient);
@@ -46,7 +51,7 @@ describe('AuthInterceptor', () => {
 
   it('logs out when an API returns 401', () => {
     http.get('/api/items').subscribe({
-      error: () => undefined
+      error: () => undefined,
     });
 
     const request = httpMock.expectOne('/api/items');

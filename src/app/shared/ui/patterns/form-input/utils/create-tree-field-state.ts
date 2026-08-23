@@ -1,5 +1,6 @@
+import type { WritableSignal } from '@angular/core';
 import { computed, signal } from '@angular/core';
-import { ExpressionEngine } from './expression.engine';
+import type { ExpressionEngine } from './expression.engine';
 import {
   getByPath,
   isEmptyFormValue,
@@ -7,15 +8,16 @@ import {
   requiredMessage,
   resolveDisabledExpression,
   resolveVisibleExpression,
-  updateByPath
+  updateByPath,
 } from './form.utils';
-import {
+import type {
   ArrayFieldState,
   ArrayState,
   FieldState,
+  FormContext,
   FormCustomValidator,
   TreeFieldConfig,
-  TreeFieldState
+  TreeFieldState,
 } from '../models/form-config.model';
 import { createNestedFieldState } from './create-nested-field-state';
 import { formValidationHelpers } from './expression.engine';
@@ -23,18 +25,18 @@ import { formValidationHelpers } from './expression.engine';
 export function createFieldTreeState<TFormModel extends object>(
   path: string,
   config: TreeFieldConfig,
-  modelSignal: any,
-  contextSignal: any,
+  modelSignal: WritableSignal<TFormModel>,
+  contextSignal: WritableSignal<FormContext>,
   expr: ExpressionEngine,
   arrays: Record<string, ArrayState>,
   treeTemplate?: TreeFieldConfig,
-  validators: Record<string, FormCustomValidator> = {}
+  validators: Record<string, FormCustomValidator> = {},
 ): TreeFieldState {
   const resolvedConfig: TreeFieldConfig = config.children?.length
     ? config
     : {
         ...config,
-        children: treeTemplate?.children ?? []
+        children: treeTemplate?.children ?? [],
       };
 
   const touched = signal(false);
@@ -50,24 +52,25 @@ export function createFieldTreeState<TFormModel extends object>(
     externalErrors.set(null);
   }
 
-  const children: Array<FieldState | ArrayFieldState> = (resolvedConfig.children ?? []).map((child) =>
-    createNestedFieldState(
-      `${path}.${child.name}`,
-      child,
-      modelSignal,
-      contextSignal,
-      expr,
-      arrays,
-      resolvedConfig.name,
-      resolvedConfig,
-      validators
-    )
+  const children: Array<FieldState | ArrayFieldState> = (resolvedConfig.children ?? []).map(
+    (child) =>
+      createNestedFieldState(
+        `${path}.${child.name}`,
+        child,
+        modelSignal,
+        contextSignal,
+        expr,
+        arrays,
+        resolvedConfig.name,
+        resolvedConfig,
+        validators,
+      ),
   );
 
   const buildCtx = () => ({
     model: modelSignal(),
     context: contextSignal(),
-    value: value()
+    value: value(),
   });
 
   const visible = computed(() => {
@@ -85,7 +88,9 @@ export function createFieldTreeState<TFormModel extends object>(
     return !!expr.evaluate(expression, buildCtx());
   });
 
-  const required = computed(() => visible() && isRequiredByConfig(resolvedConfig, expr, buildCtx()));
+  const required = computed(
+    () => visible() && isRequiredByConfig(resolvedConfig, expr, buildCtx()),
+  );
 
   const errors = computed<Record<string, string> | null>(() => {
     if (!visible()) {
@@ -107,7 +112,7 @@ export function createFieldTreeState<TFormModel extends object>(
         const validationResult = validator?.(value(), {
           formValue: modelSignal() as Record<string, unknown>,
           fieldKey: path,
-          helpers: formValidationHelpers
+          helpers: formValidationHelpers,
         });
         if (validationResult && validationResult !== true) {
           validationResult.forEach((error, errorIndex) => {
@@ -166,7 +171,7 @@ export function createFieldTreeState<TFormModel extends object>(
     },
     markAsBlurred() {
       blurred.set(true);
-    }
+    },
   };
 }
 
@@ -174,7 +179,7 @@ function evaluateTreeRule(
   rule: NonNullable<TreeFieldConfig['validation']>[number],
   value: unknown,
   ctx: { model: unknown; context: unknown; value?: unknown },
-  expr: ExpressionEngine
+  expr: ExpressionEngine,
 ): boolean {
   if (rule.type === 'expression' || rule.expression) {
     return !!expr.evaluate(rule.expression ?? 'false', ctx);
@@ -188,7 +193,9 @@ function evaluateTreeRule(
     case 'max':
       return formValidationHelpers.countTreeNodes(value) > Number(rule.value);
     case 'regex':
-      return typeof rule.value === 'string' && !new RegExp(rule.value).test(JSON.stringify(value ?? []));
+      return (
+        typeof rule.value === 'string' && !new RegExp(rule.value).test(JSON.stringify(value ?? []))
+      );
     default:
       return false;
   }

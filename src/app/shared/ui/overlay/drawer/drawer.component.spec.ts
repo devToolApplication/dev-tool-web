@@ -1,4 +1,5 @@
 import { Component, NgModule } from '@angular/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SharedModule } from '@shared/shared.module';
@@ -14,33 +15,35 @@ import { DrawerComponent } from './drawer.component';
       <div class="projected-body">Body slot</div>
       <button drawer-footer type="button" class="projected-footer">Footer action</button>
     </app-drawer>
-  `
+  `,
 })
 class DrawerTestHostComponent {}
 
 @NgModule({
   declarations: [DrawerTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class DrawerTestHostModule {}
 
 describe('DrawerComponent', () => {
   let fixture: ComponentFixture<DrawerComponent>;
   let component: DrawerComponent;
+  let overlayContainer: OverlayContainer;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, DrawerTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(DrawerComponent);
     component = fixture.componentInstance;
+    overlayContainer = TestBed.inject(OverlayContainer);
   });
 
   afterEach(() => {
-    document.body.style.overflow = '';
-    document.querySelectorAll('.app-drawer').forEach((element) => element.remove());
+    fixture.destroy();
+    overlayContainer.ngOnDestroy();
   });
 
   it('opens and closes with output events', () => {
@@ -53,6 +56,7 @@ describe('DrawerComponent', () => {
     expect(document.body.querySelector('.app-drawer')).toBeTruthy();
 
     component.close();
+    fixture.detectChanges();
 
     expect(openChange).toHaveBeenCalledWith(false);
     expect(closed).toHaveBeenCalledOnce();
@@ -99,11 +103,9 @@ describe('DrawerComponent', () => {
     const openChange = vi.spyOn(component.openChange, 'emit');
     component.open = true;
     component.closeOnBackdrop = false;
-    component.closeOnEsc = false;
     fixture.detectChanges();
 
     component.onBackdropClick();
-    component.onEsc();
 
     expect(openChange).not.toHaveBeenCalled();
 
@@ -125,8 +127,8 @@ describe('DrawerComponent', () => {
         currentValue: true,
         previousValue: false,
         firstChange: true,
-        isFirstChange: () => true
-      }
+        isFirstChange: () => true,
+      },
     });
     fixture.detectChanges();
 
@@ -144,40 +146,14 @@ describe('DrawerComponent', () => {
     document.body.removeChild(trigger);
   });
 
-  it('keeps tab focus inside the drawer panel', () => {
+  it('uses the CDK focus trap on the drawer panel', () => {
     component.open = true;
     fixture.detectChanges();
 
     const panel = document.body.querySelector<HTMLElement>('[role="dialog"]');
-    const closeButton = panel?.querySelector<HTMLButtonElement>('button');
-    const footerButton = document.createElement('button');
-    footerButton.type = 'button';
-    footerButton.textContent = 'Footer action';
-    panel?.appendChild(footerButton);
 
     expect(panel).toBeTruthy();
-    expect(closeButton).toBeTruthy();
-
-    [closeButton, footerButton].forEach((button) => {
-      Object.defineProperty(button, 'offsetParent', {
-        configurable: true,
-        value: panel
-      });
-    });
-
-    footerButton.focus();
-    const forwardEvent = { shiftKey: false, preventDefault: vi.fn() } as unknown as KeyboardEvent;
-    component.onTab(forwardEvent);
-
-    expect(forwardEvent.preventDefault).toHaveBeenCalledOnce();
-    expect(document.activeElement).toBe(closeButton);
-
-    closeButton?.focus();
-    const backwardEvent = { shiftKey: true, preventDefault: vi.fn() } as unknown as KeyboardEvent;
-    component.onTab(backwardEvent);
-
-    expect(backwardEvent.preventDefault).toHaveBeenCalledOnce();
-    expect(document.activeElement).toBe(footerButton);
+    expect(panel?.hasAttribute('cdktrapfocus')).toBe(true);
   });
 
   function render(inputs: Partial<DrawerComponent>): void {

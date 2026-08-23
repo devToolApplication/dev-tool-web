@@ -1,11 +1,13 @@
-import { Directive, EventEmitter, forwardRef, Input, Output, Provider } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { Provider } from '@angular/core';
+import { Directive, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import type { ControlValueAccessor } from '@angular/forms';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export function provideValueAccessor(component: () => unknown): Provider {
   return {
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(component),
-    multi: true
+    multi: true,
   };
 }
 
@@ -24,6 +26,7 @@ export abstract class BaseInput<T> implements ControlValueAccessor {
   @Input() invalid = false;
   @Input() helpText?: string;
   @Input() errorMessage?: string;
+  @Input() describedBy?: string | null;
 
   @Output() valueChange = new EventEmitter<T | null>();
   @Output() blur = new EventEmitter<void>();
@@ -68,4 +71,3 @@ export abstract class BaseInput<T> implements ControlValueAccessor {
     this.select.emit();
   }
 }
-

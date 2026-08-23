@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, signal } from '@angular/core';
+import type { OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import type { DatePickerValue } from '../../primitives/date-picker/date-picker';
 
 export type FilterPanelType =
   | 'text'
@@ -36,7 +38,7 @@ export interface FilterPanelConfig {
   selector: 'app-filter-panel',
   standalone: false,
   templateUrl: './filter-panel.component.html',
-  styleUrl: './filter-panel.component.css'
+  styleUrl: './filter-panel.component.css',
 })
 export class FilterPanelComponent implements OnChanges, OnDestroy {
   @Input() filters: FilterPanelField[] = [];
@@ -113,13 +115,20 @@ export class FilterPanelComponent implements OnChanges, OnDestroy {
 
   selectValue(key: string): string | number | boolean | null {
     const value = this.values[key];
-    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null ? value : null;
+    return typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean' ||
+      value === null
+      ? value
+      : null;
   }
 
   multiValue(key: string): Array<string | number> {
     const value = this.values[key];
     return Array.isArray(value)
-      ? value.filter((item): item is string | number => typeof item === 'string' || typeof item === 'number')
+      ? value.filter(
+          (item): item is string | number => typeof item === 'string' || typeof item === 'number',
+        )
       : [];
   }
 
@@ -150,21 +159,27 @@ export class FilterPanelComponent implements OnChanges, OnDestroy {
       return null;
     }
     const edgeValue = value[edge];
-    return typeof edgeValue === 'number' ? edgeValue : edgeValue == null || edgeValue === '' ? null : Number(edgeValue);
+    return typeof edgeValue === 'number'
+      ? edgeValue
+      : edgeValue == null || edgeValue === ''
+        ? null
+        : Number(edgeValue);
   }
 
   setRangeValue(key: string, edge: 'from' | 'to', value: unknown): void {
     const current = this.values[key];
-    const next: Partial<Record<'from' | 'to', unknown>> = this.isRangeValue(current) ? { ...current } : {};
+    const next: Partial<Record<'from' | 'to', unknown>> = this.isRangeValue(current)
+      ? { ...current }
+      : {};
     next[edge] = value;
     this.setValue(key, next);
   }
 
-  setDateRangeValue(key: string, value: Date | Date[] | null): void {
+  setDateRangeValue(key: string, value: DatePickerValue): void {
     const range = Array.isArray(value) ? value : [];
     this.setValue(key, {
       from: range[0] ?? null,
-      to: range[1] ?? null
+      to: range[1] ?? null,
     });
   }
 

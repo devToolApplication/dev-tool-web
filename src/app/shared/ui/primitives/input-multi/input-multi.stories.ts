@@ -5,7 +5,7 @@ const sampleOptions = [
   { label: 'PRD', value: 'PRD' },
   { label: 'OPS', value: 'OPS' },
   { label: 'QA', value: 'QA' },
-  { label: 'DEV', value: 'DEV' }
+  { label: 'DEV', value: 'DEV' },
 ];
 
 const meta: Meta<InputMulti> = {
@@ -16,8 +16,8 @@ const meta: Meta<InputMulti> = {
     placeholder: 'Type tag and press Enter',
     options: sampleOptions,
     value: [],
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -28,13 +28,13 @@ export const Default: Story = {};
 
 export const WithOptions: Story = {
   args: {
-    value: ['PRD', 'OPS']
-  }
+    value: ['PRD', 'OPS'],
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: ['QA', 'DEV']
-  }
+    value: ['QA', 'DEV'],
+  },
 };

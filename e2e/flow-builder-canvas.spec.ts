@@ -23,8 +23,10 @@ async function navigateToRuleCreate(page: Page) {
 }
 
 async function addNodeFromPalette(page: Page, nodeType: string) {
-  const paletteItem = page.locator('.flow-palette__item').filter({ hasText: new RegExp(nodeType, 'i') });
-  if (await paletteItem.count() > 0) {
+  const paletteItem = page
+    .locator('.flow-palette__item')
+    .filter({ hasText: new RegExp(nodeType, 'i') });
+  if ((await paletteItem.count()) > 0) {
     await paletteItem.first().dblclick();
     await page.waitForTimeout(800);
   }
@@ -170,7 +172,11 @@ test.describe('Flow Builder Canvas — Toolbar', () => {
   });
 
   test('zoom in button works', async ({ page }) => {
-    const zoomInBtn = page.locator('.flow-builder__toolbar app-button[tooltip*="zoomIn"], .flow-builder__toolbar button[aria-label*="zoom"]').first();
+    const zoomInBtn = page
+      .locator(
+        '.flow-builder__toolbar app-button[tooltip*="zoomIn"], .flow-builder__toolbar button[aria-label*="zoom"]',
+      )
+      .first();
     if (await zoomInBtn.isVisible()) {
       await zoomInBtn.click();
       await page.waitForTimeout(300);
@@ -180,7 +186,11 @@ test.describe('Flow Builder Canvas — Toolbar', () => {
   });
 
   test('zoom out button works', async ({ page }) => {
-    const zoomOutBtn = page.locator('.flow-builder__toolbar app-button[tooltip*="zoomOut"], .flow-builder__toolbar button[aria-label*="zoom"]').nth(1);
+    const zoomOutBtn = page
+      .locator(
+        '.flow-builder__toolbar app-button[tooltip*="zoomOut"], .flow-builder__toolbar button[aria-label*="zoom"]',
+      )
+      .nth(1);
     if (await zoomOutBtn.isVisible()) {
       await zoomOutBtn.click();
       await page.waitForTimeout(300);
@@ -189,7 +199,11 @@ test.describe('Flow Builder Canvas — Toolbar', () => {
   });
 
   test('fit button resets view', async ({ page }) => {
-    const fitBtn = page.locator('.flow-builder__toolbar app-button[tooltip*="fit"], .flow-builder__toolbar button[aria-label*="fit"]').first();
+    const fitBtn = page
+      .locator(
+        '.flow-builder__toolbar app-button[tooltip*="fit"], .flow-builder__toolbar button[aria-label*="fit"]',
+      )
+      .first();
     if (await fitBtn.isVisible()) {
       await fitBtn.click();
       await page.waitForTimeout(300);
@@ -201,7 +215,11 @@ test.describe('Flow Builder Canvas — Toolbar', () => {
     await addNodeFromPalette(page, 'group');
     await page.waitForTimeout(800);
 
-    const layoutBtn = page.locator('.flow-builder__toolbar app-button[tooltip*="autoLayout"], .flow-builder__toolbar button[aria-label*="layout"]').first();
+    const layoutBtn = page
+      .locator(
+        '.flow-builder__toolbar app-button[tooltip*="autoLayout"], .flow-builder__toolbar button[aria-label*="layout"]',
+      )
+      .first();
     if (await layoutBtn.isVisible()) {
       await layoutBtn.click();
       await page.waitForTimeout(500);
@@ -218,8 +236,12 @@ test.describe('Flow Builder Canvas — Toolbar', () => {
       await node.click();
       await page.waitForTimeout(300);
 
-      const deleteBtn = page.locator('.flow-builder__toolbar app-button[tooltip*="delete"], .flow-builder__toolbar button[aria-label*="delete"]').first();
-      if (await deleteBtn.isVisible() && await deleteBtn.isEnabled()) {
+      const deleteBtn = page
+        .locator(
+          '.flow-builder__toolbar app-button[tooltip*="delete"], .flow-builder__toolbar button[aria-label*="delete"]',
+        )
+        .first();
+      if ((await deleteBtn.isVisible()) && (await deleteBtn.isEnabled())) {
         const beforeCount = await getCanvasNodeCount(page);
         await deleteBtn.click();
         await page.waitForTimeout(500);

@@ -1,4 +1,9 @@
-import { PermissionService, APP_ROLE_PERMISSIONS, DEVELOPER_GROUP_ROLES, AppRole } from './permission.service';
+import {
+  PermissionService,
+  APP_ROLE_PERMISSIONS,
+  DEVELOPER_GROUP_ROLES,
+  AppRole,
+} from './permission.service';
 import { KeycloakService } from './keycloak.service';
 import { environment } from '../../../enviroment/environment';
 
@@ -11,7 +16,7 @@ describe('PermissionService', () => {
     (environment as any).dangerouslySkipPermissions = false;
     localStorage.removeItem('dangerously-skip-permissions');
     keycloakService = {
-      hasRole: vi.fn().mockReturnValue(false)
+      hasRole: vi.fn().mockReturnValue(false),
     };
     service = new PermissionService(keycloakService as unknown as KeycloakService);
   });
@@ -72,10 +77,10 @@ describe('PermissionService', () => {
     Object.defineProperty(window, 'location', {
       value: {
         search: '?dangerously-skip-permissions',
-        href: 'http://localhost/?dangerously-skip-permissions'
+        href: 'http://localhost/?dangerously-skip-permissions',
       },
       writable: true,
-      configurable: true
+      configurable: true,
     });
 
     expect(service.has('AI_AGENT_CONFIG_WRITE')).toBe(true);
@@ -84,7 +89,7 @@ describe('PermissionService', () => {
     Object.defineProperty(window, 'location', {
       value: originalLocation,
       writable: true,
-      configurable: true
+      configurable: true,
     });
   });
 

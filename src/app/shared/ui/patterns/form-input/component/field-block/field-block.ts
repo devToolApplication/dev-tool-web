@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './field-block.html',
-  styleUrl: './field-block.css'
+  styleUrl: './field-block.css',
 })
 export class FieldBlockComponent {
   @Input() label?: string;

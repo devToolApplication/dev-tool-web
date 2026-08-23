@@ -7,7 +7,7 @@ const sampleItems: StatusListItem[] = [
     description: 'Main PostgreSQL database cluster connection pool status.',
     status: 'status.healthy',
     statusVariant: 'success',
-    value: '98% uptime'
+    value: '98% uptime',
   },
   {
     title: 'status.list.item.api',
@@ -15,21 +15,21 @@ const sampleItems: StatusListItem[] = [
     status: 'status.slow',
     statusVariant: 'warning',
     timestamp: new Date().toISOString(),
-    value: '1.2s avg response'
+    value: '1.2s avg response',
   },
   {
     title: 'status.list.item.auth',
     description: 'OAuth2 authorization identity and token validation server.',
     status: 'status.offline',
     statusVariant: 'danger',
-    value: 'ERR_TIMEOUT'
+    value: 'ERR_TIMEOUT',
   },
   {
     title: 'status.list.item.cache',
     description: 'Redis session state and data indexing cache.',
     status: 'status.inactive',
-    statusVariant: 'muted'
-  }
+    statusVariant: 'muted',
+  },
 ];
 
 const meta: Meta<StatusListComponent> = {
@@ -37,8 +37,8 @@ const meta: Meta<StatusListComponent> = {
   component: StatusListComponent,
   args: {
     items: sampleItems,
-    density: 'compact'
-  }
+    density: 'compact',
+  },
 };
 
 export default meta;
@@ -49,6 +49,6 @@ export const Default: Story = {};
 
 export const ComfortableDensity: Story = {
   args: {
-    density: 'comfortable'
-  }
+    density: 'comfortable',
+  },
 };

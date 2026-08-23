@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormResolvedSection } from '../../models/form-config.model';
+import type { FormResolvedSection } from '../../models/form-config.model';
 
 @Component({
   selector: 'app-form-section-nav',
   standalone: false,
   templateUrl: './form-section-nav.html',
-  styleUrl: './form-section-nav.css'
+  styleUrl: './form-section-nav.css',
 })
 export class FormSectionNavComponent {
   @Input() sections: FormResolvedSection[] = [];

@@ -1,7 +1,10 @@
 <div class="app-field" [class.app-field--invalid]="invalid" [class.app-field--disabled]="disabled">
   <div class="relative input-number-wrap">
     @if (iconClass) {
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]" aria-hidden="true">
+      <span
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)]"
+        aria-hidden="true"
+      >
         <i [class]="iconClass"></i>
       </span>
     }
@@ -14,11 +17,12 @@
       [readOnly]="readonly"
       [required]="required"
       [attr.autofocus]="autofocus ? true : null"
-      [attr.placeholder]="(placeholder || null) | translateContent"
+      [attr.placeholder]="placeholder || null | translateContent"
       [attr.min]="min"
       [attr.max]="max"
       [attr.step]="step"
       [attr.aria-invalid]="invalid || null"
+      [attr.aria-describedby]="describedBy || null"
       autocomplete="off"
       class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] placeholder-transparent outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
       [class.pl-9]="iconClass"
@@ -31,20 +35,38 @@
         [attr.for]="inputId"
         class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--app-text-muted)] transition-all duration-150 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-[var(--app-accent-violet)] peer-focus:bg-[var(--app-custom-input-bg)] peer-focus:px-1 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[var(--app-custom-input-bg)] peer-[:not(:placeholder-shown)]:px-1"
         [class.left-9]="iconClass"
-      >{{ label | translateContent }}</label>
+        >{{ label | translateContent }}</label
+      >
     }
     @if (suffix) {
-      <span class="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ suffix }}</span>
+      <span
+        class="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]"
+        >{{ suffix }}</span
+      >
     }
     @if (prefix) {
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{ prefix }}</span>
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--app-text-muted)]">{{
+        prefix
+      }}</span>
     }
     @if (!readonly && !disabled) {
       <div class="input-number-controls">
-        <button type="button" tabindex="-1" aria-label="Increase" [disabled]="max != null && (value ?? 0) >= max" (click)="increment()">
+        <button
+          type="button"
+          tabindex="-1"
+          aria-label="Increase"
+          [disabled]="max != null && (value ?? 0) >= max"
+          (click)="increment()"
+        >
           <i class="pi pi-chevron-up"></i>
         </button>
-        <button type="button" tabindex="-1" aria-label="Decrease" [disabled]="min != null && (value ?? 0) <= min" (click)="decrement()">
+        <button
+          type="button"
+          tabindex="-1"
+          aria-label="Decrease"
+          [disabled]="min != null && (value ?? 0) <= min"
+          (click)="decrement()"
+        >
           <i class="pi pi-chevron-down"></i>
         </button>
       </div>
@@ -52,11 +74,14 @@
   </div>
 
   @if (helpText) {
-    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{ helpText | translateContent }}</small>
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
   }
 
   @if (invalid && errorMessage) {
-    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{ errorMessage | translateContent }}</small>
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>
-

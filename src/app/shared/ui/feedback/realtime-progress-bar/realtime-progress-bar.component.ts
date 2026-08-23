@@ -33,7 +33,7 @@ type LegacyProgressState = {
   selector: 'app-realtime-progress-bar',
   standalone: false,
   templateUrl: './realtime-progress-bar.component.html',
-  styleUrl: './realtime-progress-bar.component.css'
+  styleUrl: './realtime-progress-bar.component.css',
 })
 export class RealtimeProgressBarComponent {
   @Input() state?: ProgressState | LegacyProgressState | null;
@@ -60,7 +60,7 @@ export class RealtimeProgressBarComponent {
       step: current.step ?? legacy.step,
       message: current.message ?? legacy.message,
       errorMessage: current.errorMessage ?? legacy.errorMessage,
-      cancellable: current.cancellable
+      cancellable: current.cancellable,
     };
   }
 
@@ -75,10 +75,17 @@ export class RealtimeProgressBarComponent {
 
   canCancel(): boolean {
     const state = this.normalized();
-    return this.showCancel && !!state && (state.cancellable ?? true) && !['completed', 'failed', 'cancelled'].includes(state.status);
+    return (
+      this.showCancel &&
+      !!state &&
+      (state.cancellable ?? true) &&
+      !['completed', 'failed', 'cancelled'].includes(state.status)
+    );
   }
 
-  statusVariant(status: ProgressStatus): 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted' {
+  statusVariant(
+    status: ProgressStatus,
+  ): 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted' {
     switch (status) {
       case 'queued':
         return 'info';

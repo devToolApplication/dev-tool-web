@@ -10,8 +10,8 @@ const meta: Meta<ErrorStateComponent> = {
     errorCode: 'ERR_TIMEOUT',
     variant: 'danger',
     compact: false,
-    showCopyDetail: false
-  }
+    showCopyDetail: false,
+  },
 };
 
 export default meta;
@@ -27,38 +27,38 @@ export const WithDetail: Story = {
       status: 400,
       url: '/api/v1/workflows',
       error: 'Invalid syntax for field "timeoutSeconds". Must be between 5 and 3600.',
-      timestamp: '2026-05-27T13:48:00.000Z'
+      timestamp: '2026-05-27T13:48:00.000Z',
     },
-    showCopyDetail: true
-  }
+    showCopyDetail: true,
+  },
 };
 
 export const Compact: Story = {
   args: {
     compact: true,
-    message: 'Something went wrong.'
-  }
+    message: 'Something went wrong.',
+  },
 };
 
 export const WarningVariant: Story = {
   args: {
     variant: 'warning',
     title: 'Configuration warning',
-    message: 'This workflow is active but has no associated active endpoints.'
-  }
+    message: 'This workflow is active but has no associated active endpoints.',
+  },
 };
 
 export const InfoVariant: Story = {
   args: {
     variant: 'info',
     title: 'No connection established',
-    message: 'Please pair your device or connect to a local cluster daemon first.'
-  }
+    message: 'Please pair your device or connect to a local cluster daemon first.',
+  },
 };
 
 export const WithRetry: Story = {
   args: {
     retryLabel: 'common.retry',
-    message: 'Lost connection to database stream. Keep trying?'
-  }
+    message: 'Lost connection to database stream. Keep trying?',
+  },
 };

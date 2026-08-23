@@ -4,7 +4,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   selector: 'app-slider',
   standalone: false,
   templateUrl: './slider.html',
-  styleUrl: './slider.css'
+  styleUrl: './slider.css',
 })
 export class SliderComponent {
   @Input() min = 0;

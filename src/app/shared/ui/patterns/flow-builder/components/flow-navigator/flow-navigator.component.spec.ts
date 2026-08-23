@@ -61,7 +61,7 @@ describe('FlowNavigatorComponent', () => {
         shape: 'rectangle',
         defaultSize: { width: 150, height: 78 },
         ports: [],
-        labelResolver: node => String(node.data?.['operator'] ?? 'GROUP'),
+        labelResolver: (node) => String(node.data?.['operator'] ?? 'GROUP'),
       } as FlowNodeTypeDefinition,
     ];
 
@@ -72,7 +72,11 @@ describe('FlowNavigatorComponent', () => {
     const component = new FlowNavigatorComponent();
     const nodeBounds = { minX: 0, minY: 0, width: 220, height: 72 };
     const viewportSize = { width: 580, height: 520 };
-    const transform = computeFitTransform(nodeBounds, viewportSize, { padding: 40, minScale: 0.3, maxScale: 1 });
+    const transform = computeFitTransform(nodeBounds, viewportSize, {
+      padding: 40,
+      minScale: 0.3,
+      maxScale: 1,
+    });
     component.value = singleRuleRefFlow();
     component.viewport = {
       scale: transform.scale,
@@ -118,12 +122,24 @@ function smallFlow(): FlowDefinition {
     id: 'flow',
     version: 1,
     nodes: [
-      { id: 'g1', type: 'rule-group', label: 'Group', data: { operator: 'AND' }, size: { width: 150, height: 78 }, position: { x: 0, y: 0 } },
-      { id: 'c1', type: 'rule-condition', label: 'GT', data: { operator: 'GT' }, size: { width: 210, height: 96 }, position: { x: 60, y: 180 } },
+      {
+        id: 'g1',
+        type: 'rule-group',
+        label: 'Group',
+        data: { operator: 'AND' },
+        size: { width: 150, height: 78 },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'c1',
+        type: 'rule-condition',
+        label: 'GT',
+        data: { operator: 'GT' },
+        size: { width: 210, height: 96 },
+        position: { x: 60, y: 180 },
+      },
     ],
-    edges: [
-      { id: 'e1', source: { nodeId: 'g1' }, target: { nodeId: 'c1' } },
-    ],
+    edges: [{ id: 'e1', source: { nodeId: 'g1' }, target: { nodeId: 'c1' } }],
   };
 }
 

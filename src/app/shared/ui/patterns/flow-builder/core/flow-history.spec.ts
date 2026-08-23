@@ -19,9 +19,9 @@ describe('FlowHistory', () => {
     });
 
     expect(history.canUndo()).toBe(true);
-    expect(history.undo()?.nodes.map(node => node.id)).toEqual(['a']);
+    expect(history.undo()?.nodes.map((node) => node.id)).toEqual(['a']);
     expect(history.canRedo()).toBe(true);
-    expect(history.redo()?.nodes.map(node => node.id)).toEqual(['a', 'b']);
+    expect(history.redo()?.nodes.map((node) => node.id)).toEqual(['a', 'b']);
   });
 
   it('does not create duplicate history entries for equal snapshots', () => {

@@ -19,7 +19,7 @@ const meta: Meta<BasePopupComponent> = {
     confirmLabel: 'submit',
     cancelLabel: 'cancel',
     showDefaultCancel: true,
-    showDefaultConfirm: true
+    showDefaultConfirm: true,
   },
   render: (args) => ({
     props: args,
@@ -47,8 +47,8 @@ const meta: Meta<BasePopupComponent> = {
           <p>This is projected dialog body content.</p>
         </app-base-popup>
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -60,26 +60,26 @@ export const Default: Story = {};
 export const Small: Story = {
   args: {
     size: 'sm',
-    header: 'Small Popup'
-  }
+    header: 'Small Popup',
+  },
 };
 
 export const Large: Story = {
   args: {
     size: 'lg',
-    header: 'Large Popup'
-  }
+    header: 'Large Popup',
+  },
 };
 
 export const ExtraLarge: Story = {
   args: {
     size: 'xl',
-    header: 'Extra Large Popup'
-  }
+    header: 'Extra Large Popup',
+  },
 };
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };

@@ -13,7 +13,7 @@ const rows = [
     tags: ['approval', 'email'],
     budget: 125000,
     createdAt: new Date(2026, 3, 20),
-    details: { priority: 'high', retries: 2 }
+    details: { priority: 'high', retries: 2 },
   },
   {
     id: 'CFG-002',
@@ -24,7 +24,7 @@ const rows = [
     tags: ['billing', 'sync'],
     budget: 85000,
     createdAt: new Date(2026, 3, 22),
-    details: { priority: 'medium', retries: 1 }
+    details: { priority: 'medium', retries: 1 },
   },
   {
     id: 'CFG-003',
@@ -35,13 +35,12 @@ const rows = [
     tags: ['archive', 'batch'],
     budget: 150000,
     createdAt: new Date(2026, 3, 25),
-    details: { priority: 'low', retries: 3 }
-  }
+    details: { priority: 'low', retries: 3 },
+  },
 ];
 
 const tableConfig: TableConfig = {
   title: 'Workflow Configurations',
-  stateKey: 'storybook-workflow-configurations',
   emptyFilteredTitle: 'No workflows match the filters',
   emptyFilteredDescription: 'Change the keyword or clear the active filters.',
   rows: 5,
@@ -53,33 +52,30 @@ const tableConfig: TableConfig = {
       visible: true,
       label: 'New',
       icon: 'pi pi-plus',
-      
     },
     delete: {
       visible: true,
       label: 'Delete',
       icon: 'pi pi-trash',
-      
-      disabled: true
+
+      disabled: true,
     },
     export: {
       visible: true,
       label: 'Export',
       icon: 'pi pi-download',
-      
-    }
+    },
   },
   filterOptions: {
     primaryField: 'name',
-    enableUrlSync: false,
-    drawerTitle: 'Advanced Filters'
+    drawerTitle: 'Advanced Filters',
   },
   filters: [
     {
       field: 'name',
       label: 'Name',
       placeholder: 'Search by name',
-      type: 'text'
+      type: 'text',
     },
     {
       field: 'status',
@@ -89,19 +85,19 @@ const tableConfig: TableConfig = {
       options: [
         { label: 'Draft', value: 'draft' },
         { label: 'Active', value: 'active' },
-        { label: 'Paused', value: 'paused' }
-      ]
+        { label: 'Paused', value: 'paused' },
+      ],
     },
     {
       field: 'enabled',
       label: 'Enabled',
-      type: 'boolean'
+      type: 'boolean',
     },
     {
       field: 'createdAt',
       label: 'Created at',
-      type: 'date-range'
-    }
+      type: 'date-range',
+    },
   ],
   columns: [
     { field: 'id', header: 'ID', sortable: true, width: '9rem' },
@@ -115,7 +111,7 @@ const tableConfig: TableConfig = {
       header: 'Budget',
       type: 'currency',
       currencyCode: 'USD',
-      minWidth: '11rem'
+      minWidth: '11rem',
     },
     { field: 'createdAt', header: 'Created', type: 'date', minWidth: '10rem' },
     { field: 'details', header: 'Details', type: 'group', minWidth: '16rem' },
@@ -131,27 +127,27 @@ const tableConfig: TableConfig = {
         {
           label: 'Edit',
           icon: 'pi pi-pencil',
-          
-          onClick: (rowData: { id: string }) => void rowData.id
+
+          onClick: () => undefined,
         },
         {
           label: 'Delete',
           icon: 'pi pi-trash',
-          
-          disabled: (rowData: { status: string }) => rowData.status === 'active',
-          onClick: (rowData: { id: string }) => void rowData.id
-        }
-      ]
-    }
-  ]
+
+          disabled: () => false,
+          onClick: () => undefined,
+        },
+      ],
+    },
+  ],
 };
 
 const meta: Meta<TableComponent> = {
   title: 'Shared/UI/Table',
   component: TableComponent,
   parameters: {
-    layout: 'padded'
-  }
+    layout: 'padded',
+  },
 };
 
 export default meta;
@@ -162,13 +158,13 @@ export const Default: Story = {
   args: {
     config: tableConfig,
     data: rows,
-    rows: 5
+    rows: 5,
   },
   render: (args) => ({
     props: {
       ...args,
       lastEvent: 'Search and toolbar events will appear here',
-      format: (value: unknown) => JSON.stringify(value)
+      format: (value: unknown) => JSON.stringify(value),
     },
     template: `
       <div class="flex flex-col gap-4 p-4">
@@ -183,12 +179,12 @@ export const Default: Story = {
           (resetFilter)="lastEvent = 'Filters reset'"
           (create)="lastEvent = 'Create clicked'"
           (delete)="lastEvent = 'Delete clicked'"
-          (export)="lastEvent = 'Export clicked'"
+          (exportRequested)="lastEvent = 'Export: ' + format($event)"
           (pageChange)="lastEvent = 'Page: ' + format($event)"
         ></app-table>
         <p class="m-0 text-sm app-text-muted">{{ lastEvent }}</p>
       </div>
-    `
+    `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -196,7 +192,7 @@ export const Default: Story = {
     await expect(canvas.getByText('Approval Flow')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: /new/i }));
     await expect(canvas.getByText('Create clicked')).toBeInTheDocument();
-  }
+  },
 };
 
 export const Loading: Story = {
@@ -204,18 +200,18 @@ export const Loading: Story = {
     config: tableConfig,
     data: rows,
     rows: 5,
-    loading: true
+    loading: true,
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const Empty: Story = {
   args: {
     config: tableConfig,
     data: [],
-    rows: 5
+    rows: 5,
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const Error: Story = {
@@ -223,9 +219,9 @@ export const Error: Story = {
     config: tableConfig,
     data: [],
     rows: 5,
-    error: 'loadError'
+    error: 'loadError',
   },
-  render: Default.render
+  render: Default.render,
 };
 
 export const SelectionAndControls: Story = {
@@ -243,21 +239,20 @@ export const SelectionAndControls: Story = {
             id: 'archive',
             label: 'Archive',
             icon: 'pi pi-folder',
-            onClick: (selectedRows: unknown[]) => void selectedRows.length
+            onClick: (selectedRows: unknown[]) => void selectedRows.length,
           },
           {
             id: 'delete',
             label: 'Delete',
             icon: 'pi pi-trash',
             variant: 'danger',
-            onClick: (selectedRows: unknown[]) => void selectedRows.length
-          }
-        ]
-      }
+            onClick: (selectedRows: unknown[]) => void selectedRows.length,
+          },
+        ],
+      },
     },
     data: rows,
-    rows: 5
+    rows: 5,
   },
-  render: Default.render
+  render: Default.render,
 };
-

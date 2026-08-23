@@ -3,28 +3,93 @@ import type { Meta, StoryObj } from '@storybook/angular';
 const iconCategories = [
   {
     title: 'Navigation',
-    icons: ['pi-home', 'pi-arrow-left', 'pi-arrow-right', 'pi-chevron-down', 'pi-chevron-up', 'pi-chevron-left', 'pi-chevron-right', 'pi-bars', 'pi-ellipsis-v', 'pi-external-link']
+    icons: [
+      'pi-home',
+      'pi-arrow-left',
+      'pi-arrow-right',
+      'pi-chevron-down',
+      'pi-chevron-up',
+      'pi-chevron-left',
+      'pi-chevron-right',
+      'pi-bars',
+      'pi-ellipsis-v',
+      'pi-external-link',
+    ],
   },
   {
     title: 'Actions',
-    icons: ['pi-plus', 'pi-minus', 'pi-pencil', 'pi-trash', 'pi-check', 'pi-times', 'pi-refresh', 'pi-download', 'pi-upload', 'pi-copy', 'pi-save', 'pi-undo']
+    icons: [
+      'pi-plus',
+      'pi-minus',
+      'pi-pencil',
+      'pi-trash',
+      'pi-check',
+      'pi-times',
+      'pi-refresh',
+      'pi-download',
+      'pi-upload',
+      'pi-copy',
+      'pi-save',
+      'pi-undo',
+    ],
   },
   {
     title: 'Status & Feedback',
-    icons: ['pi-check-circle', 'pi-times-circle', 'pi-exclamation-triangle', 'pi-info-circle', 'pi-question-circle', 'pi-ban', 'pi-spinner', 'pi-sync']
+    icons: [
+      'pi-check-circle',
+      'pi-times-circle',
+      'pi-exclamation-triangle',
+      'pi-info-circle',
+      'pi-question-circle',
+      'pi-ban',
+      'pi-spinner',
+      'pi-sync',
+    ],
   },
   {
     title: 'Objects',
-    icons: ['pi-file', 'pi-folder', 'pi-image', 'pi-calendar', 'pi-clock', 'pi-cog', 'pi-user', 'pi-users', 'pi-envelope', 'pi-bell', 'pi-search', 'pi-filter', 'pi-sort-alt']
+    icons: [
+      'pi-file',
+      'pi-folder',
+      'pi-image',
+      'pi-calendar',
+      'pi-clock',
+      'pi-cog',
+      'pi-user',
+      'pi-users',
+      'pi-envelope',
+      'pi-bell',
+      'pi-search',
+      'pi-filter',
+      'pi-sort-alt',
+    ],
   },
   {
     title: 'Data & Charts',
-    icons: ['pi-chart-bar', 'pi-chart-line', 'pi-chart-pie', 'pi-database', 'pi-server', 'pi-cloud', 'pi-bolt', 'pi-code']
+    icons: [
+      'pi-chart-bar',
+      'pi-chart-line',
+      'pi-chart-pie',
+      'pi-database',
+      'pi-server',
+      'pi-cloud',
+      'pi-bolt',
+      'pi-code',
+    ],
   },
   {
     title: 'Communication',
-    icons: ['pi-comment', 'pi-comments', 'pi-send', 'pi-phone', 'pi-video', 'pi-link', 'pi-share-alt', 'pi-globe']
-  }
+    icons: [
+      'pi-comment',
+      'pi-comments',
+      'pi-send',
+      'pi-phone',
+      'pi-video',
+      'pi-link',
+      'pi-share-alt',
+      'pi-globe',
+    ],
+  },
 ];
 
 const meta: Meta = {
@@ -34,10 +99,11 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'PrimeIcons catalog organized by category. Use class "pi pi-{name}" in templates. Maps to Figma icon library.'
-      }
-    }
-  }
+        component:
+          'PrimeIcons catalog organized by category. Use class "pi pi-{name}" in templates. Maps to Figma icon library.',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -48,22 +114,30 @@ export const IconCatalog: Story = {
   render: () => ({
     template: `
       <div class="p-4">
-        ${iconCategories.map(cat => `
+        ${iconCategories
+          .map(
+            (cat) => `
           <div class="mb-6">
             <h3 class="text-lg font-semibold mb-3">${cat.title}</h3>
             <div class="grid grid-cols-8 gap-4">
-              ${cat.icons.map(icon => `
+              ${cat.icons
+                .map(
+                  (icon) => `
                 <div class="flex flex-col items-center gap-2 p-2 rounded-lg" style="border:1px solid var(--p-surface-200)">
                   <i class="pi ${icon}" style="font-size:1.25rem;color:var(--p-text-color)"></i>
                   <span class="text-xs text-center" style="color:var(--p-text-muted-color)">${icon.replace('pi-', '')}</span>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </div>
-    `
-  })
+    `,
+  }),
 };
 
 export const IconSizes: Story = {
@@ -98,6 +172,6 @@ export const IconSizes: Story = {
           </div>
         </div>
       </div>
-    `
-  })
+    `,
+  }),
 };

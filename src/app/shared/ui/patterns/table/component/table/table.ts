@@ -1,18 +1,30 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TemplateRef, signal } from '@angular/core';
-import { I18nService } from '@core/i18n/i18n.service';
+import type { OnChanges, SimpleChanges, TemplateRef } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+  signal,
+} from '@angular/core';
+import { I18nService } from '@core/i18n/i18n.service';
+import type {
   TableAction,
   TableBulkAction,
+  TableCellTemplateContext,
   TableColumn,
   TableConfig,
   TableDensity,
+  TableExportRequest,
   TableExportScope,
+  TableFilterValue,
   TableToolbarButtonConfig,
   TableToolbarConfig,
   TableToolbarExportConfig,
-  TableToolbarImportConfig
+  TableToolbarImportConfig,
 } from '../../models/table-config.model';
-import { SelectOption } from '@shared/ui/primitives/select/select';
+import type { SelectOption } from '@shared/ui/primitives/select/select';
 
 import { getValueByPath } from '../../utils/object.util';
 
@@ -27,32 +39,18 @@ export interface TableSortChangeEvent {
   order?: 1 | -1 | 0;
 }
 
-export interface TableExportEvent {
-  scope: TableExportScope;
-  filters: Record<string, any>;
-  sortField: string | null;
-  sortOrder: 1 | -1 | 0;
-  visibleColumns: string[];
-  rows: any[];
-}
-
-export interface TableCellTemplateContext {
-  $implicit: any;
-  row: any;
-  value: unknown;
-  column: unknown;
-}
-
 @Component({
   selector: 'app-table',
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table.html',
-  styleUrls: ['./table.css']
+  styleUrls: ['./table.css'],
 })
-export class TableComponent implements OnChanges {
-  @Input() config!: TableConfig;
-  @Input() data: any[] = [];
+export class TableComponent<TRow = unknown> implements OnChanges {
+  private readonly i18nService = inject(I18nService);
+
+  @Input() config!: TableConfig<TRow>;
+  @Input() data: TRow[] = [];
   @Input() loading = false;
   @Input() error: string | null = null;
   @Input() totalRecords: number | null = null;
@@ -60,49 +58,54 @@ export class TableComponent implements OnChanges {
   @Input() rows = 10;
   @Input() sortField: string | null = null;
   @Input() sortOrder: 1 | -1 | 0 = 0;
-  @Input() customTemplates: Record<string, TemplateRef<TableCellTemplateContext>> = {};
+  @Input() customTemplates: Record<string, TemplateRef<TableCellTemplateContext<TRow>>> = {};
+  @Input() columnVisibility: string[] | null = null;
+  @Input() densityValue: TableDensity | null = null;
 
-  @Output() search = new EventEmitter<Record<string, any>>();
+  @Output() search = new EventEmitter<TableFilterValue>();
   @Output() resetFilter = new EventEmitter<void>();
   @Output() create = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
-  @Output() export = new EventEmitter<TableExportEvent>();
+  @Output() exportRequested = new EventEmitter<TableExportRequest<TRow>>();
   @Output() import = new EventEmitter<File>();
   @Output() pageChange = new EventEmitter<TablePageChangeEvent>();
   @Output() retry = new EventEmitter<void>();
   @Output() refresh = new EventEmitter<void>();
   @Output() densityChange = new EventEmitter<TableDensity>();
   @Output() columnVisibilityChange = new EventEmitter<string[]>();
-  @Output() rowClick = new EventEmitter<any>();
-  @Output() actionClick = new EventEmitter<{ action: TableAction; row: any }>();
+  @Output() rowClick = new EventEmitter<TRow>();
+  @Output() actionClick = new EventEmitter<{ action: TableAction<TRow>; row: TRow }>();
   @Output() sortChange = new EventEmitter<TableSortChangeEvent>();
-  @Output() selectionChange = new EventEmitter<any[]>();
-  @Output() bulkAction = new EventEmitter<{ action: TableBulkAction; rows: any[] }>();
+  @Output() selectionChange = new EventEmitter<TRow[]>();
+  @Output() bulkAction = new EventEmitter<{ action: TableBulkAction<TRow>; rows: TRow[] }>();
 
   readonly quickSearchTerm = signal('');
   readonly selectedColumnFields = signal<string[]>([]);
   readonly density = signal<TableDensity>('comfortable');
-  readonly selectedRows = signal<any[]>([]);
+  readonly selectedRows = signal<TRow[]>([]);
   readonly selectedRowKeys = signal<string[]>([]);
   readonly activeFilterCount = signal(0);
-  readonly activeFilters = signal<Record<string, any>>({});
-  private readonly selectedRowCache = new Map<string, any>();
+  readonly activeFilters = signal<TableFilterValue>({});
+  private readonly selectedRowCache = new Map<string, TRow>();
 
   readonly densityOptions: SelectOption[] = [
     { label: 'shared.table.density.compact', value: 'compact' },
     { label: 'shared.table.density.comfortable', value: 'comfortable' },
-    { label: 'shared.table.density.spacious', value: 'spacious' }
+    { label: 'shared.table.density.spacious', value: 'spacious' },
   ];
-
-  constructor(
-    private readonly i18nService: I18nService,
-  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['config'] && this.config) {
-      const persistedState = this.readPersistedState();
-      this.selectedColumnFields.set(persistedState?.columns ?? this.defaultColumnFields());
-      this.density.set(persistedState?.density ?? this.config.density ?? 'comfortable');
+      this.selectedColumnFields.set(this.columnVisibility ?? this.defaultColumnFields());
+      this.density.set(this.densityValue ?? this.config.density ?? 'comfortable');
+    }
+
+    if (changes['columnVisibility'] && this.columnVisibility) {
+      this.selectedColumnFields.set(this.columnVisibility);
+    }
+
+    if (changes['densityValue'] && this.densityValue) {
+      this.density.set(this.densityValue);
     }
 
     if (changes['data'] || changes['pageResponse']) {
@@ -110,7 +113,7 @@ export class TableComponent implements OnChanges {
     }
   }
 
-  get toolbarConfig(): TableToolbarConfig {
+  get toolbarConfig(): TableToolbarConfig<TRow> {
     return this.config.toolbar ?? {};
   }
 
@@ -131,11 +134,19 @@ export class TableComponent implements OnChanges {
   }
 
   get exportScope(): TableExportScope {
-    return this.exportButtonConfig.scope ?? (this.exportButtonConfig.currentData ? 'current-page' : 'external');
+    return (
+      this.exportButtonConfig.scope ??
+      (this.exportButtonConfig.currentData ? 'current-page' : 'external')
+    );
   }
 
   get exportButtonLabel(): string {
-    return this.exportButtonConfig.label ?? (this.exportScope === 'current-page' ? 'shared.table.exportCurrentPage' : 'shared.table.exportFiltered');
+    return (
+      this.exportButtonConfig.label ??
+      (this.exportScope === 'current-page'
+        ? 'shared.table.exportCurrentPage'
+        : 'shared.table.exportFiltered')
+    );
   }
 
   get exportButtonIcon(): string {
@@ -146,21 +157,41 @@ export class TableComponent implements OnChanges {
     return this.toolbarConfig.refresh ?? {};
   }
 
+  get hasToolbarContent(): boolean {
+    return (
+      this.isButtonVisible(this.newButtonConfig) ||
+      this.isButtonVisible(this.deleteButtonConfig) ||
+      this.toolbarConfig.search?.visible === true ||
+      (this.selectionEnabled && this.visibleBulkActions.length > 0) ||
+      this.isButtonVisible(this.refreshButtonConfig) ||
+      this.toolbarConfig.columnVisibility?.visible === true ||
+      this.toolbarConfig.density?.visible === true ||
+      this.isButtonVisible(this.importButtonConfig) ||
+      this.isButtonVisible(this.exportButtonConfig)
+    );
+  }
+
   get scrollable(): boolean {
     return this.config.scrollable ?? true;
   }
 
-  get resolvedRows(): number { return this.rows || this.config.rows || 10; }
+  get resolvedRows(): number {
+    return this.rows || this.config.rows || 10;
+  }
 
-  get resolvedTotalRecords(): number { return this.totalRecords ?? this.data.length; }
+  get resolvedTotalRecords(): number {
+    return this.totalRecords ?? this.data.length;
+  }
 
   get first(): number {
     return this.resolvedCurrentPage * this.resolvedRows;
   }
 
-  get resolvedCurrentPage(): number { return this.currentPage; }
+  get resolvedCurrentPage(): number {
+    return this.currentPage;
+  }
 
-  get resolvedData(): any[] {
+  get resolvedData(): TRow[] {
     return this.data;
   }
 
@@ -189,8 +220,8 @@ export class TableComponent implements OnChanges {
     return this.selectedRowKeys().length;
   }
 
-  get visibleBulkActions(): TableBulkAction[] {
-    return (this.toolbarConfig.bulkActions ?? []).filter((action) => (action.visible ?? true));
+  get visibleBulkActions(): TableBulkAction<TRow>[] {
+    return (this.toolbarConfig.bulkActions ?? []).filter((action) => action.visible ?? true);
   }
 
   get hasActiveFilters(): boolean {
@@ -223,7 +254,7 @@ export class TableComponent implements OnChanges {
       .filter((column) => column.visible !== false && column.hideable !== false)
       .map((column) => ({
         label: this.i18nService.t(column.header),
-        value: column.field
+        value: column.field,
       }));
   }
 
@@ -250,31 +281,41 @@ export class TableComponent implements OnChanges {
     return this.config.minWidth ?? '64rem';
   }
 
-  isFrozenLeft(column: TableColumn): boolean {
+  isFrozenLeft(column: TableColumn<TRow>): boolean {
     return column.frozen === true && this.frozenAlign(column) === 'left';
   }
 
-  isFrozenRight(column: TableColumn): boolean {
+  isFrozenRight(column: TableColumn<TRow>): boolean {
     return column.frozen === true && this.frozenAlign(column) === 'right';
   }
 
-  frozenLeft(column: TableColumn): string | null {
+  frozenLeft(column: TableColumn<TRow>): string | null {
     return this.isFrozenLeft(column) ? this.frozenOffset(column, 'left') : null;
   }
 
-  frozenRight(column: TableColumn): string | null {
+  frozenRight(column: TableColumn<TRow>): string | null {
     return this.isFrozenRight(column) ? this.frozenOffset(column, 'right') : null;
   }
 
-  isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean { return buttonConfig?.visible === true; }
+  isButtonVisible(buttonConfig?: TableToolbarButtonConfig): boolean {
+    return buttonConfig?.visible === true;
+  }
 
-  isButtonDisabled(buttonConfig?: TableToolbarButtonConfig): boolean { return buttonConfig?.disabled ?? false; }
+  isButtonDisabled(buttonConfig?: TableToolbarButtonConfig): boolean {
+    return buttonConfig?.disabled ?? false;
+  }
 
-  buttonTooltip(buttonConfig?: TableToolbarButtonConfig): string | undefined { return buttonConfig?.tooltip; }
+  buttonTooltip(buttonConfig?: TableToolbarButtonConfig): string | undefined {
+    return buttonConfig?.tooltip;
+  }
 
-  isBulkActionDisabled(action: TableBulkAction): boolean { return action.disabled === true; }
+  isBulkActionDisabled(action: TableBulkAction<TRow>): boolean {
+    return action.disabled === true;
+  }
 
-  bulkActionTooltip(action: TableBulkAction): string | undefined { return action.tooltip; }
+  bulkActionTooltip(action: TableBulkAction<TRow>): string | undefined {
+    return action.tooltip;
+  }
 
   onCreate(): void {
     this.create.emit();
@@ -285,19 +326,18 @@ export class TableComponent implements OnChanges {
   }
 
   onExport(): void {
-    if (this.exportScope === 'current-page') {
-      this.downloadCsv();
-      return;
-    }
-
-    this.export.emit({
+    const request: TableExportRequest<TRow> = {
       scope: this.exportScope,
       filters: this.activeFilters(),
       sortField: this.sortField,
       sortOrder: this.sortOrder,
-      visibleColumns: this.visibleColumns.filter((column) => column.type !== 'actions').map((column) => column.field),
-      rows: this.resolvedData
-    });
+      visibleColumns: this.visibleColumns
+        .filter((column) => column.type !== 'actions')
+        .map((column) => column.field),
+      rows: this.resolvedData,
+    };
+
+    this.exportRequested.emit(request);
   }
 
   onRefresh(): void {
@@ -320,14 +360,14 @@ export class TableComponent implements OnChanges {
     this.pageChange.emit({
       page,
       rows,
-      first
+      first,
     });
   }
 
   onSort(event: { field?: string; order?: 1 | -1 | 0 }): void {
     this.sortChange.emit({
       field: event.field,
-      order: event.order
+      order: event.order,
     });
   }
 
@@ -344,13 +384,17 @@ export class TableComponent implements OnChanges {
     this.onSort({ field: this.sortField ?? undefined, order: this.sortOrder });
   }
 
-  onSearch(filters: Record<string, any>): void {
+  onSearch(filters: TableFilterValue): void {
     if (this.loading) {
       return;
     }
+    this.onFilterValueChange(filters);
+    this.search.emit(filters);
+  }
+
+  onFilterValueChange(filters: TableFilterValue): void {
     this.activeFilters.set({ ...filters });
     this.activeFilterCount.set(this.countActiveFilters(filters));
-    this.search.emit(filters);
   }
 
   onQuickSearch(): void {
@@ -365,10 +409,9 @@ export class TableComponent implements OnChanges {
     this.resetFilter.emit();
   }
 
-  onColumnFieldsChange(fields: string[] | null): void {
-    const nextFields = fields ?? [];
+  onColumnFieldsChange(fields: Array<string | number> | null): void {
+    const nextFields = (fields ?? []).filter((field): field is string => typeof field === 'string');
     this.selectedColumnFields.set(nextFields);
-    this.persistState();
     this.columnVisibilityChange.emit(nextFields);
   }
 
@@ -377,21 +420,20 @@ export class TableComponent implements OnChanges {
       return;
     }
     this.density.set(value);
-    this.persistState();
     this.densityChange.emit(value);
   }
 
-  onRowClick(row: any): void {
+  onRowClick(row: TRow): void {
     if (this.config.rowClickable) {
       this.rowClick.emit(row);
     }
   }
 
-  isRowSelected(row: any): boolean {
+  isRowSelected(row: TRow): boolean {
     return this.selectedRowKeys().includes(this.rowKey(row));
   }
 
-  toggleRowSelection(row: any, selected: boolean | null): void {
+  toggleRowSelection(row: TRow, selected: boolean | null): void {
     if (!this.selectionEnabled) {
       return;
     }
@@ -443,7 +485,7 @@ export class TableComponent implements OnChanges {
     this.selectionChange.emit(this.selectedRows());
   }
 
-  async onBulkAction(action: TableBulkAction): Promise<void> {
+  async onBulkAction(action: TableBulkAction<TRow>): Promise<void> {
     if (this.isBulkActionDisabled(action) || this.selectedCount === 0) {
       return;
     }
@@ -453,51 +495,9 @@ export class TableComponent implements OnChanges {
     this.bulkAction.emit({ action, rows });
   }
 
-  onActionClick(event: { action: TableAction; row: any }): void {
+  onActionClick(event: { action: TableAction<TRow>; row: TRow }): void {
     event.action.onClick?.(event.row);
     this.actionClick.emit(event);
-  }
-
-  private downloadCsv(): void {
-    const columns = this.visibleColumns.filter((column) => column.type !== 'actions');
-    const header = columns.map((column) => this.escapeCsv(this.i18nService.t(column.header))).join(',');
-    const lines = this.resolvedData.map((row) =>
-      columns
-        .map((column) => {
-          const value = column.valueGetter ? column.valueGetter(row) : getValueByPath(row, column.field);
-          return this.escapeCsv(this.formatCsvValue(value));
-        })
-        .join(',')
-    );
-    const blob = new Blob([[header, ...lines].join('\n')], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.exportButtonConfig.fileName ?? 'table-export'}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
-
-  private escapeCsv(value: string): string {
-    const escaped = value.replaceAll('"', '""');
-    return /[",\r\n]/.test(escaped) ? `"${escaped}"` : escaped;
-  }
-
-  private formatCsvValue(value: unknown): string {
-    if (value == null) {
-      return '';
-    }
-    if (value instanceof Date) {
-      return value.toISOString();
-    }
-    if (typeof value === 'object') {
-      try {
-        return JSON.stringify(value);
-      } catch {
-        return String(value);
-      }
-    }
-    return String(value);
   }
 
   private defaultColumnFields(): string[] {
@@ -506,11 +506,11 @@ export class TableComponent implements OnChanges {
       .map((column) => column.field);
   }
 
-  private frozenAlign(column: TableColumn): 'left' | 'right' {
+  private frozenAlign(column: TableColumn<TRow>): 'left' | 'right' {
     return column.alignFrozen ?? 'left';
   }
 
-  private frozenOffset(column: TableColumn, align: 'left' | 'right'): string {
+  private frozenOffset(column: TableColumn<TRow>, align: 'left' | 'right'): string {
     const columnIndex = this.visibleColumns.indexOf(column);
     if (columnIndex < 0) {
       return '0';
@@ -532,7 +532,7 @@ export class TableComponent implements OnChanges {
     return sizes.length === 1 ? sizes[0] : `calc(${sizes.join(' + ')})`;
   }
 
-  private countActiveFilters(filters: Record<string, any>): number {
+  private countActiveFilters(filters: TableFilterValue): number {
     return Object.values(filters).filter((value) => this.hasFilterValue(value)).length;
   }
 
@@ -548,60 +548,16 @@ export class TableComponent implements OnChanges {
     return value !== null && value !== undefined && value !== '';
   }
 
-  private readPersistedState(): { columns?: string[]; density?: TableDensity } | null {
-    if (!this.config.stateKey || typeof localStorage === 'undefined') {
-      return null;
-    }
-
-    const rawValue = localStorage.getItem(this.storageKey);
-    if (!rawValue) {
-      return null;
-    }
-
-    try {
-      const parsedValue = JSON.parse(rawValue) as { columns?: unknown; density?: unknown };
-      const columns = Array.isArray(parsedValue.columns)
-        ? parsedValue.columns.filter((field): field is string => typeof field === 'string')
-        : undefined;
-      const density = this.isTableDensity(parsedValue.density) ? parsedValue.density : undefined;
-
-      return { columns, density };
-    } catch {
-      return null;
-    }
-  }
-
-  private persistState(): void {
-    if (!this.config.stateKey || typeof localStorage === 'undefined') {
-      return;
-    }
-
-    localStorage.setItem(
-      this.storageKey,
-      JSON.stringify({
-        columns: this.selectedColumnFields(),
-        density: this.density()
-      })
-    );
-  }
-
-  private get storageKey(): string {
-    return `dev-tool.table.${this.config.stateKey}`;
-  }
-
-  private isTableDensity(value: unknown): value is TableDensity {
-    return value === 'compact' || value === 'comfortable' || value === 'spacious';
-  }
-
-
-  private rowKey(row: any): string {
+  private rowKey(row: TRow): string {
     const configuredKey = this.config.rowKey ?? this.config.dataKey;
     const rawKey =
       typeof configuredKey === 'function'
         ? configuredKey(row)
         : configuredKey
           ? getValueByPath(row, configuredKey)
-          : row?.id ?? row?._id ?? row?.uuid;
+          : (getValueByPath(row, 'id') ??
+            getValueByPath(row, '_id') ??
+            getValueByPath(row, 'uuid'));
     if (rawKey !== undefined && rawKey !== null && rawKey !== '') {
       return String(rawKey);
     }
@@ -613,10 +569,7 @@ export class TableComponent implements OnChanges {
     this.selectedRows.set(
       this.selectedRowKeys()
         .map((key) => this.selectedRowCache.get(key))
-        .filter((row) => row !== undefined)
+        .filter((row) => row !== undefined),
     );
   }
 }
-
-
-

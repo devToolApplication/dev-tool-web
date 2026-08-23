@@ -8,8 +8,8 @@ const meta: Meta<LoadingSkeletonComponent> = {
     type: 'card',
     rows: 4,
     columns: 4,
-    animated: true
-  }
+    animated: true,
+  },
 };
 
 export default meta;
@@ -18,61 +18,61 @@ type Story = StoryObj<LoadingSkeletonComponent>;
 
 export const Card: Story = {
   args: {
-    type: 'card'
-  }
+    type: 'card',
+  },
 };
 
 export const Table: Story = {
   args: {
-    type: 'table'
-  }
+    type: 'table',
+  },
 };
 
 export const Form: Story = {
   args: {
-    type: 'form'
-  }
+    type: 'form',
+  },
 };
 
 export const Detail: Story = {
   args: {
-    type: 'detail'
-  }
+    type: 'detail',
+  },
 };
 
 export const List: Story = {
   args: {
-    type: 'list'
-  }
+    type: 'list',
+  },
 };
 
 export const SkeletonTable: Story = {
   render: (args) => ({
     props: args,
-    template: `<app-skeleton-table [rows]="rows" [columns]="columns"></app-skeleton-table>`
+    template: `<app-skeleton-table [rows]="rows" [columns]="columns"></app-skeleton-table>`,
   }),
   args: {
     rows: 3,
-    columns: 4
-  }
+    columns: 4,
+  },
 };
 
 export const SkeletonForm: Story = {
   render: (args) => ({
     props: args,
-    template: `<app-skeleton-form [rows]="rows"></app-skeleton-form>`
+    template: `<app-skeleton-form [rows]="rows"></app-skeleton-form>`,
   }),
   args: {
-    rows: 3
-  }
+    rows: 3,
+  },
 };
 
 export const SkeletonCard: Story = {
   render: (args) => ({
     props: args,
-    template: `<app-skeleton-card [rows]="rows"></app-skeleton-card>`
+    template: `<app-skeleton-card [rows]="rows"></app-skeleton-card>`,
   }),
   args: {
-    rows: 3
-  }
+    rows: 3,
+  },
 };

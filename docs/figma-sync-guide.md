@@ -9,6 +9,7 @@ permalink: dev-tool-web/docs/figma-sync-guide
 ## Overview
 
 Pipeline 2 chiều giữa Figma và codebase:
+
 - **Figma → Code:** Designer thay đổi tokens trong Figma → push JSON → CI generate CSS → auto-commit
 - **Code → Figma:** Storybook deploy lên Chromatic → Figma plugin hiển thị live components
 
@@ -75,9 +76,9 @@ export const Default: Story = {
   parameters: {
     design: {
       type: 'figma',
-      url: 'https://www.figma.com/file/YOUR_FILE_ID/Design?node-id=XX:YY'
-    }
-  }
+      url: 'https://www.figma.com/file/YOUR_FILE_ID/Design?node-id=XX:YY',
+    },
+  },
 };
 ```
 
@@ -125,15 +126,16 @@ tokens/ change → GitHub Actions → Style Dictionary build → commit CSS → 
 Workflow file: `.github/workflows/tokens-sync.yml`
 
 Secrets cần set trong GitHub repo:
+
 - `CHROMATIC_PROJECT_TOKEN` — lấy từ Chromatic project settings
 
 ---
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Tokens Studio không pull được | Kiểm tra PAT có scope `repo`, branch name đúng |
-| Build tokens fail | Kiểm tra JSON syntax, references phải match token path |
-| Chromatic không publish | Kiểm tra `CHROMATIC_PROJECT_TOKEN` secret |
-| Storybook Connect không thấy stories | Đảm bảo Chromatic đã publish thành công |
+| Issue                                | Solution                                               |
+| ------------------------------------ | ------------------------------------------------------ |
+| Tokens Studio không pull được        | Kiểm tra PAT có scope `repo`, branch name đúng         |
+| Build tokens fail                    | Kiểm tra JSON syntax, references phải match token path |
+| Chromatic không publish              | Kiểm tra `CHROMATIC_PROJECT_TOKEN` secret              |
+| Storybook Connect không thấy stories | Đảm bảo Chromatic đã publish thành công                |

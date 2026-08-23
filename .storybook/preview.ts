@@ -24,7 +24,7 @@ const customViewports = {
   desktop: {
     name: 'Desktop 1440px',
     styles: { width: '1440px', height: '900px' },
-  }
+  },
 };
 
 const preview: Preview = {
@@ -38,11 +38,11 @@ const preview: Preview = {
         icon: 'circlehollow',
         items: [
           { value: 'light', icon: 'circlehollow', title: 'Light' },
-          { value: 'dark', icon: 'circle', title: 'Dark' }
+          { value: 'dark', icon: 'circle', title: 'Dark' },
         ],
-        dynamicTitle: true
-      }
-    }
+        dynamicTitle: true,
+      },
+    },
   },
   decorators: [
     (storyFn, context) => {
@@ -63,17 +63,17 @@ const preview: Preview = {
       providers: [
         provideHttpClient(),
         provideNoopAnimations(),
-        provideRouter([], withHashLocation())
-      ]
+        provideRouter([], withHashLocation()),
+      ],
     }),
     moduleMetadata({
-      imports: [SharedModule]
-    })
+      imports: [SharedModule],
+    }),
   ],
   parameters: {
     layout: 'padded',
     viewport: {
-      viewports: customViewports
+      viewports: customViewports,
     },
     a11y: {
       test: 'error',
@@ -81,29 +81,28 @@ const preview: Preview = {
         rules: [
           {
             id: 'color-contrast',
-            enabled: true
-          }
-        ]
-      }
+            enabled: true,
+          },
+        ],
+      },
     },
     controls: {
       matchers: {
         color: /(background|color)$/i,
-        date: /Date$/i
+        date: /Date$/i,
       },
-      expanded: true
+      expanded: true,
     },
     docs: {
       source: {
         type: 'dynamic',
-        excludeDecorators: true
+        excludeDecorators: true,
       },
       toc: {
-        title: 'On this page'
-      }
-    }
-  }
+        title: 'On this page',
+      },
+    },
+  },
 };
 
 export default preview;
-

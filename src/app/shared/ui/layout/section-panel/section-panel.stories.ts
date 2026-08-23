@@ -12,7 +12,7 @@ const meta: Meta<SectionPanelComponent> = {
     loading: false,
     empty: false,
     variant: 'default',
-    density: 'comfortable'
+    density: 'comfortable',
   },
   render: (args) => ({
     props: args,
@@ -42,8 +42,8 @@ const meta: Meta<SectionPanelComponent> = {
           <span class="text-xs text-muted-color">Last updated: Just now</span>
         </div>
       </app-section-panel>
-    `
-  })
+    `,
+  }),
 };
 
 export default meta;
@@ -54,57 +54,56 @@ export const Default: Story = {};
 
 export const Collapsible: Story = {
   args: {
-    collapsible: true
-  }
+    collapsible: true,
+  },
 };
 
 export const Collapsed: Story = {
   args: {
     collapsible: true,
-    collapsed: true
-  }
+    collapsed: true,
+  },
 };
 
 export const Loading: Story = {
   args: {
-    loading: true
-  }
+    loading: true,
+  },
 };
 
 export const ErrorState: Story = {
   args: {
-    error: 'Failed to fetch section records.'
-  }
+    error: 'Failed to fetch section records.',
+  },
 };
 
 export const EmptyState: Story = {
   args: {
     empty: true,
-    emptyDescription: 'No items in this section'
-  }
+    emptyDescription: 'No items in this section',
+  },
 };
 
 export const MutedVariant: Story = {
   args: {
-    variant: 'muted'
-  }
+    variant: 'muted',
+  },
 };
 
 export const WarningVariant: Story = {
   args: {
-    variant: 'warning'
-  }
+    variant: 'warning',
+  },
 };
 
 export const DangerVariant: Story = {
   args: {
-    variant: 'danger'
-  }
+    variant: 'danger',
+  },
 };
 
 export const CompactDensity: Story = {
   args: {
-    density: 'compact'
-  }
+    density: 'compact',
+  },
 };
-

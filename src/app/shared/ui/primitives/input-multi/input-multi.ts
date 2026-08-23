@@ -1,13 +1,14 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
-import { SelectOption } from '../select/select';
+import type { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-input-multi',
   standalone: false,
   templateUrl: './input-multi.html',
   styleUrl: './input-multi.css',
-  providers: [provideValueAccessor(() => InputMulti)]
+  providers: [provideValueAccessor(() => InputMulti)],
 })
 export class InputMulti extends BaseInput<string[]> implements OnChanges {
   @Input() options: SelectOption[] = [];
@@ -39,7 +40,9 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
   }
 
   override onBlur(): void {
-    setTimeout(() => { this.suggestionsOpen = false; }, 150);
+    setTimeout(() => {
+      this.suggestionsOpen = false;
+    }, 150);
     this.commitCurrentQuery();
     super.onBlur();
   }
@@ -92,7 +95,9 @@ export class InputMulti extends BaseInput<string[]> implements OnChanges {
     const available = this.options
       .map((option) => this.toOption(String(option.value ?? option.label ?? '').trim()))
       .filter((option) => option.value)
-      .filter((option, index, items) => items.findIndex((item) => item.value === option.value) === index)
+      .filter(
+        (option, index, items) => items.findIndex((item) => item.value === option.value) === index,
+      )
       .filter((option) => !this.model.includes(String(option.value)))
       .filter((option) => !keyword || option.label.toLowerCase().includes(keyword));
 

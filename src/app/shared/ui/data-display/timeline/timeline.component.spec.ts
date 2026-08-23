@@ -11,7 +11,7 @@ describe('TimelineComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(TimelineComponent);
@@ -26,8 +26,8 @@ describe('TimelineComponent', () => {
         title: 'Created',
         description: 'Created detail',
         time: '2026-05-15T00:00:00Z',
-        variant: 'success'
-      }
+        variant: 'success',
+      },
     ];
     fixture.detectChanges();
 

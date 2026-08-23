@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FlowNodeTypeDefinition, FlowPaletteConfig } from '../../models';
+import type { FlowNodeTypeDefinition, FlowPaletteConfig } from '../../models';
 
 export const FLOW_NODE_DRAG_TYPE = 'application/x-flow-node-type';
 
@@ -17,7 +17,7 @@ export class FlowPaletteComponent {
 
   get visibleNodeTypes(): FlowNodeTypeDefinition[] {
     const allowed = this.config.allowedTypes?.length ? new Set(this.config.allowedTypes) : null;
-    return this.nodeTypes.filter(type => !allowed || allowed.has(type.type));
+    return this.nodeTypes.filter((type) => !allowed || allowed.has(type.type));
   }
 
   onDragStart(event: DragEvent, type: FlowNodeTypeDefinition): void {

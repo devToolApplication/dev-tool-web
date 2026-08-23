@@ -1,11 +1,12 @@
 import { expect, test, Page } from '@playwright/test';
 
-const STORY_URL = 'http://127.0.0.1:6006/iframe.html?id=features-system-management-ai-agent-workflow-canvas--canvas&viewMode=story';
+const STORY_URL =
+  'http://127.0.0.1:6006/iframe.html?id=features-system-management-ai-agent-workflow-canvas--canvas&viewMode=story';
 
 async function openCanvasStory(page: Page) {
   const browserErrors: string[] = [];
-  page.on('pageerror', error => browserErrors.push(error.message));
-  page.on('console', message => {
+  page.on('pageerror', (error) => browserErrors.push(error.message));
+  page.on('console', (message) => {
     if (message.type() === 'error') {
       browserErrors.push(message.text());
     }
@@ -16,27 +17,32 @@ async function openCanvasStory(page: Page) {
   try {
     await page.waitForSelector('.joint-element', { timeout: 30000 });
   } catch (error) {
-    throw new Error(`JointJS nodes did not render. Browser errors: ${browserErrors.join(' | ') || 'none'}`);
+    throw new Error(
+      `JointJS nodes did not render. Browser errors: ${browserErrors.join(' | ') || 'none'}`,
+    );
   }
 }
 
 async function portCenterForNodeText(page: Page, text: string, port: string) {
-  return page.evaluate(({ text, port }) => {
-    const elements = Array.from(document.querySelectorAll<SVGGElement>('.joint-element'));
-    const element = elements.find(item => item.textContent?.includes(text));
-    if (!element) {
-      throw new Error(`Node with text "${text}" not found`);
-    }
-    const portElement = element.querySelector<SVGElement>(`[port="${port}"]`);
-    if (!portElement) {
-      throw new Error(`Port "${port}" not found on "${text}"`);
-    }
-    const rect = portElement.getBoundingClientRect();
-    return {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    };
-  }, { text, port });
+  return page.evaluate(
+    ({ text, port }) => {
+      const elements = Array.from(document.querySelectorAll<SVGGElement>('.joint-element'));
+      const element = elements.find((item) => item.textContent?.includes(text));
+      if (!element) {
+        throw new Error(`Node with text "${text}" not found`);
+      }
+      const portElement = element.querySelector<SVGElement>(`[port="${port}"]`);
+      if (!portElement) {
+        throw new Error(`Port "${port}" not found on "${text}"`);
+      }
+      const rect = portElement.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    },
+    { text, port },
+  );
 }
 
 async function clickFirstLink(page: Page) {
@@ -57,7 +63,9 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await openCanvasStory(page);
   });
 
-  test('renders required workflow builder controls and demo-style canvas sections', async ({ page }) => {
+  test('renders required workflow builder controls and demo-style canvas sections', async ({
+    page,
+  }) => {
     await expect(page.locator('.workflow-builder-header')).toContainText('Support Triage Workflow');
     await expect(page.locator('.flow-builder__toolbar')).toBeVisible();
     await expect(page.locator('.flow-builder__palette')).toBeVisible();
@@ -71,7 +79,9 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeVisible();
   });
 
-  test('adds a node from palette and persists drag movement on the JointJS canvas', async ({ page }) => {
+  test('adds a node from palette and persists drag movement on the JointJS canvas', async ({
+    page,
+  }) => {
     const beforeCount = await page.locator('.joint-element').count();
     await page.locator('.flow-palette__item').filter({ hasText: 'AI Agent' }).dblclick();
     await expect(page.locator('.joint-element')).toHaveCount(beforeCount + 1);
@@ -80,14 +90,23 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     const beforeBox = await node.boundingBox();
     expect(beforeBox).not.toBeNull();
 
-    await page.mouse.move(beforeBox!.x + beforeBox!.width / 2, beforeBox!.y + beforeBox!.height / 2);
+    await page.mouse.move(
+      beforeBox!.x + beforeBox!.width / 2,
+      beforeBox!.y + beforeBox!.height / 2,
+    );
     await page.mouse.down();
-    await page.mouse.move(beforeBox!.x + beforeBox!.width / 2 + 90, beforeBox!.y + beforeBox!.height / 2 + 40, { steps: 10 });
+    await page.mouse.move(
+      beforeBox!.x + beforeBox!.width / 2 + 90,
+      beforeBox!.y + beforeBox!.height / 2 + 40,
+      { steps: 10 },
+    );
     await page.mouse.up();
 
     const afterBox = await node.boundingBox();
     expect(afterBox).not.toBeNull();
-    expect(Math.abs(afterBox!.x - beforeBox!.x) + Math.abs(afterBox!.y - beforeBox!.y)).toBeGreaterThan(20);
+    expect(
+      Math.abs(afterBox!.x - beforeBox!.x) + Math.abs(afterBox!.y - beforeBox!.y),
+    ).toBeGreaterThan(20);
   });
 
   test('creates a new wire by dragging from an output port to an input port', async ({ page }) => {
@@ -103,7 +122,9 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await expect(page.locator('.joint-link')).toHaveCount(beforeCount + 1);
   });
 
-  test('selects an edge and edits its label and condition in the workflow edge panel', async ({ page }) => {
+  test('selects an edge and edits its label and condition in the workflow edge panel', async ({
+    page,
+  }) => {
     await clickFirstLink(page);
     await expect(page.locator('.workflow-edge-panel')).toBeVisible();
 
@@ -126,10 +147,12 @@ test.describe('AI Agent Workflow Canvas Story', () => {
 
     await page.mouse.move(box!.x + box!.width - 120, box!.y + box!.height - 100);
     await page.mouse.wheel(0, -180);
-    await expect.poll(async () => {
-      const next = await firstNode.boundingBox();
-      return Math.round((next?.width ?? 0) * 10);
-    }).not.toBe(Math.round(nodeBox!.width * 10));
+    await expect
+      .poll(async () => {
+        const next = await firstNode.boundingBox();
+        return Math.round((next?.width ?? 0) * 10);
+      })
+      .not.toBe(Math.round(nodeBox!.width * 10));
 
     const beforePanBox = await firstNode.boundingBox();
     expect(beforePanBox).not.toBeNull();
@@ -137,10 +160,12 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await page.mouse.down();
     await page.mouse.move(box!.x + box!.width - 20, box!.y + 130, { steps: 8 });
     await page.mouse.up();
-    await expect.poll(async () => {
-      const next = await firstNode.boundingBox();
-      return `${Math.round(next?.x ?? 0)}:${Math.round(next?.y ?? 0)}`;
-    }).not.toBe(`${Math.round(beforePanBox!.x)}:${Math.round(beforePanBox!.y)}`);
+    await expect
+      .poll(async () => {
+        const next = await firstNode.boundingBox();
+        return `${Math.round(next?.x ?? 0)}:${Math.round(next?.y ?? 0)}`;
+      })
+      .not.toBe(`${Math.round(beforePanBox!.x)}:${Math.round(beforePanBox!.y)}`);
   });
 
   test('navigator controls remain usable and can be reopened from toolbar', async ({ page }) => {

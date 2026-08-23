@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-json-preview',
   standalone: false,
   templateUrl: './json-preview.component.html',
-  styleUrl: './json-preview.component.css'
+  styleUrl: './json-preview.component.css',
 })
 /**
  * @deprecated Use shared/ui/data-display/json-viewer for new JSON display.

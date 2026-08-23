@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseInput, provideValueAccessor } from '../base-input';
-import { SelectOption } from '../select/select';
+import type { SelectOption } from '../select/select';
 
 @Component({
   selector: 'app-auto-complete',
   standalone: false,
   templateUrl: './auto-complete.html',
   styleUrl: './auto-complete.css',
-  providers: [provideValueAccessor(() => AutoComplete)]
+  providers: [provideValueAccessor(() => AutoComplete)],
 })
 export class AutoComplete extends BaseInput<string> {
   @Input() options: SelectOption[] = [];
@@ -47,7 +47,9 @@ export class AutoComplete extends BaseInput<string> {
   }
 
   override onBlur(): void {
-    setTimeout(() => { this.dropdownOpen = false; }, 150);
+    setTimeout(() => {
+      this.dropdownOpen = false;
+    }, 150);
     super.onBlur();
   }
 }

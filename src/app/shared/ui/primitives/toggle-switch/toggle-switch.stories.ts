@@ -7,8 +7,8 @@ const meta: Meta<ToggleSwitch> = {
   args: {
     label: 'Enable notifications',
     value: false,
-    disabled: false
-  }
+    disabled: false,
+  },
 };
 
 export default meta;
@@ -19,13 +19,13 @@ export const Default: Story = {};
 
 export const On: Story = {
   args: {
-    value: true
-  }
+    value: true,
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: true
-  }
+    value: true,
+  },
 };

@@ -15,7 +15,7 @@ import { PageShellComponent } from './page-shell.component';
       <div page-toolbar>Toolbar slot</div>
       <div class="projected-content">Content slot</div>
     </app-page-shell>
-  `
+  `,
 })
 class PageShellTestHostComponent {
   breadcrumb = [{ label: 'Admin', routerLink: '/' }, { label: 'Orders' }];
@@ -23,7 +23,7 @@ class PageShellTestHostComponent {
 
 @NgModule({
   declarations: [PageShellTestHostComponent],
-  imports: [SharedModule]
+  imports: [SharedModule],
 })
 class PageShellTestHostModule {}
 
@@ -34,7 +34,7 @@ describe('PageShellComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, PageShellTestHostModule],
-      providers: provideSharedTesting()
+      providers: provideSharedTesting(),
     }).compileComponents();
 
     fixture = TestBed.createComponent(PageShellComponent);

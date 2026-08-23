@@ -48,7 +48,9 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-primary) 8%, var(--app-surface-soft));
   color: var(--app-text);
-  transition: border-color 140ms ease, background 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .filter-chip:hover {

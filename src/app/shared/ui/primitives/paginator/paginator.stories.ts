@@ -8,8 +8,8 @@ const meta: Meta<Paginator> = {
     first: 0,
     rows: 10,
     totalRecords: 120,
-    rowsPerPageOptions: [5, 10, 20]
-  }
+    rowsPerPageOptions: [5, 10, 20],
+  },
 };
 
 export default meta;
@@ -23,6 +23,6 @@ export const CustomRows: Story = {
     first: 20,
     rows: 20,
     totalRecords: 500,
-    rowsPerPageOptions: [10, 20, 50, 100]
-  }
+    rowsPerPageOptions: [10, 20, 50, 100],
+  },
 };

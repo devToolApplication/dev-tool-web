@@ -15,7 +15,10 @@ import {
 } from '@angular/core';
 import { from, isObservable, of, Subscription } from 'rxjs';
 
-import { CandleChartEngineService, type CandleChartEngineRenderInput } from './candle-chart-engine.service';
+import {
+  CandleChartEngineService,
+  type CandleChartEngineRenderInput,
+} from './candle-chart-engine.service';
 import { CandleChartLegacyAdapter } from './candle-chart-legacy-adapter.service';
 import type {
   CandleChartBarChangedEvent,
@@ -46,7 +49,10 @@ import type {
 } from './candle-chart.models';
 import { CandleChartOverlayMapper } from './candle-chart-overlay.mapper';
 import { CandleChartRealtimeService } from './candle-chart-realtime.service';
-import { CandleChartReplayService, type CandleChartReplayStep } from './candle-chart-replay.service';
+import {
+  CandleChartReplayService,
+  type CandleChartReplayStep,
+} from './candle-chart-replay.service';
 import { CandleChartStoreService } from './candle-chart-store.service';
 import { CandleChartTimeUtil } from './candle-chart-time.util';
 
@@ -87,8 +93,12 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   @Output() readonly barChanged = new EventEmitter<CandleChartBarChangedEvent>();
   @Output() readonly candleSelected = new EventEmitter<ChartCandle>();
-  @Output() readonly ruleEvaluated = new EventEmitter<CandleChartRuleEvaluation | Record<string, unknown>>();
-  @Output() readonly strategySignal = new EventEmitter<CandleChartStrategySignal | Record<string, unknown>>();
+  @Output() readonly ruleEvaluated = new EventEmitter<
+    CandleChartRuleEvaluation | Record<string, unknown>
+  >();
+  @Output() readonly strategySignal = new EventEmitter<
+    CandleChartStrategySignal | Record<string, unknown>
+  >();
   @Output() readonly replayStatusChanged = new EventEmitter<CandleChartReplayStatusEvent>();
   @Output() readonly replayCommand = new EventEmitter<CandleChartReplayCommand>();
   @Output() readonly error = new EventEmitter<CandleChartErrorEvent>();
@@ -150,7 +160,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   private forceSetDataOnNextRender = false;
   private forceFitContentOnNextRender = true;
   private lastRangeBoundaryKey = '';
-  private readonly lastRangeBoundaryEmitAt: Record<CandleChartRangeBoundaryEvent['direction'], number> = {
+  private readonly lastRangeBoundaryEmitAt: Record<
+    CandleChartRangeBoundaryEvent['direction'],
+    number
+  > = {
     PAST: 0,
     FUTURE: 0,
   };
@@ -195,7 +208,11 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   get chartTitle(): string {
     const config = this.resolvedConfig();
-    return [this.symbol ?? config.symbol, this.timeframe ?? config.timeframe ?? config.interval, config.exchange]
+    return [
+      this.symbol ?? config.symbol,
+      this.timeframe ?? config.timeframe ?? config.interval,
+      config.exchange,
+    ]
       .filter(Boolean)
       .join(' - ');
   }
@@ -275,14 +292,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
     const inputChanged = Boolean(
       changes['candles'] ||
-        changes['data'] ||
-        changes['replayConfig'] ||
-        changes['config'] ||
-        changes['mode'] ||
-        changes['symbol'] ||
-        changes['timeframe'] ||
-        changes['indicators'] ||
-        changes['overlays'],
+      changes['data'] ||
+      changes['replayConfig'] ||
+      changes['config'] ||
+      changes['mode'] ||
+      changes['symbol'] ||
+      changes['timeframe'] ||
+      changes['indicators'] ||
+      changes['overlays'],
     );
     if (inputChanged) {
       const resetIndex = Boolean(changes['candles'] || changes['data'] || changes['replayConfig']);
@@ -378,7 +395,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   rangeButtonClass(range: CandleChartRange): string {
-    return ['candle-chart-range-button', this.selectedRange() === range ? 'candle-chart-range-button--active' : '']
+    return [
+      'candle-chart-range-button',
+      this.selectedRange() === range ? 'candle-chart-range-button--active' : '',
+    ]
       .filter(Boolean)
       .join(' ');
   }
@@ -386,11 +406,31 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   legendItems(): Array<{ label: string; value: number; color: string }> {
     const overlays = this.store.overlays();
     return [
-      { label: 'tradeBot.chart.overlay.indicators', value: this.store.indicators().length, color: 'var(--app-finance-chart-crosshair)' },
-      { label: 'tradeBot.chart.overlay.entries', value: this.countOverlaysByCategory(overlays, 'ENTRY'), color: 'var(--app-chart-candle-up)' },
-      { label: 'tradeBot.chart.overlay.exits', value: this.countOverlaysByCategory(overlays, 'EXIT'), color: 'var(--app-chart-candle-down)' },
-      { label: 'tradeBot.chart.overlay.stopLoss', value: this.countOverlaysByCategory(overlays, 'STOP_LOSS'), color: 'var(--app-chart-candle-down)' },
-      { label: 'tradeBot.chart.overlay.takeProfit', value: this.countOverlaysByCategory(overlays, 'TAKE_PROFIT'), color: 'var(--app-chart-candle-up)' },
+      {
+        label: 'tradeBot.chart.overlay.indicators',
+        value: this.store.indicators().length,
+        color: 'var(--app-finance-chart-crosshair)',
+      },
+      {
+        label: 'tradeBot.chart.overlay.entries',
+        value: this.countOverlaysByCategory(overlays, 'ENTRY'),
+        color: 'var(--app-chart-candle-up)',
+      },
+      {
+        label: 'tradeBot.chart.overlay.exits',
+        value: this.countOverlaysByCategory(overlays, 'EXIT'),
+        color: 'var(--app-chart-candle-down)',
+      },
+      {
+        label: 'tradeBot.chart.overlay.stopLoss',
+        value: this.countOverlaysByCategory(overlays, 'STOP_LOSS'),
+        color: 'var(--app-chart-candle-down)',
+      },
+      {
+        label: 'tradeBot.chart.overlay.takeProfit',
+        value: this.countOverlaysByCategory(overlays, 'TAKE_PROFIT'),
+        color: 'var(--app-chart-candle-up)',
+      },
     ].filter((item) => item.value > 0);
   }
 
@@ -402,8 +442,11 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       this.emitReplayCommand('PLAY', { index: this.currentIndex, speedMs: this.store.speedMs() });
       return;
     }
-    this.replayService.play(this.currentIndex, this.totalCandles, this.currentReplayConfig(), (step) =>
-      this.applyReplayStep(step),
+    this.replayService.play(
+      this.currentIndex,
+      this.totalCandles,
+      this.currentReplayConfig(),
+      (step) => this.applyReplayStep(step),
     );
   }
 
@@ -437,11 +480,16 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
 
   replayNext(): void {
     if (this.controlledReplay) {
-      this.emitReplayCommand('NEXT', { index: Math.min(Math.max(this.totalCandles - 1, 0), this.currentIndex + 1) });
+      this.emitReplayCommand('NEXT', {
+        index: Math.min(Math.max(this.totalCandles - 1, 0), this.currentIndex + 1),
+      });
       return;
     }
     this.replayService.pause();
-    this.applyReplayStep(this.replayService.next(this.currentIndex, this.totalCandles, this.currentReplayConfig()), true);
+    this.applyReplayStep(
+      this.replayService.next(this.currentIndex, this.totalCandles, this.currentReplayConfig()),
+      true,
+    );
   }
 
   replayLast(): void {
@@ -483,7 +531,12 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       this.engine.initialize(
         this.chartRef.nativeElement,
         input,
-        (state) => this.applyRenderState(state.latestCandle, state.renderedBoxAreas, state.renderedLineLabels),
+        (state) =>
+          this.applyRenderState(
+            state.latestCandle,
+            state.renderedBoxAreas,
+            state.renderedLineLabels,
+          ),
         (candle) => this.selectCandle(candle),
         (range, candleCount) => this.handleVisibleRangeChange(range, candleCount),
       ),
@@ -521,7 +574,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     const candles = this.resolveInputCandles();
     const indicators = this.resolveInputIndicators();
     const overlays = this.resolveAllOverlays();
-    this.store.configure(mode, candles, indicators, overlays, this.currentReplayConfig(), resetIndex);
+    this.store.configure(
+      mode,
+      candles,
+      indicators,
+      overlays,
+      this.currentReplayConfig(),
+      resetIndex,
+    );
   }
 
   private renderStore(): void {
@@ -546,7 +606,8 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
       config: this.resolvedConfig(),
       selectedRange: this.selectedRange(),
       forceSetData: this.forceSetDataOnNextRender,
-      fitContent: !this.resolvedConfig().preserveViewportOnDataUpdate || this.forceFitContentOnNextRender,
+      fitContent:
+        !this.resolvedConfig().preserveViewportOnDataUpdate || this.forceFitContentOnNextRender,
     };
   }
 
@@ -584,7 +645,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.changeDetectorRef.markForCheck();
   }
 
-  private emitReplayCommand(type: CandleChartReplayCommandType, payload: Omit<CandleChartReplayCommand, 'type'> = {}): void {
+  private emitReplayCommand(
+    type: CandleChartReplayCommandType,
+    payload: Omit<CandleChartReplayCommand, 'type'> = {},
+  ): void {
     this.replayCommand.emit({ type, ...payload });
   }
 
@@ -785,9 +849,11 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private resolveAllOverlays(): ChartOverlay[] {
-    return [...this.resolveInputOverlays(), ...this.realtimeOverlayBuffer, ...this.evaluationOverlays].filter((overlay) =>
-      this.overlayAllowed(overlay),
-    );
+    return [
+      ...this.resolveInputOverlays(),
+      ...this.realtimeOverlayBuffer,
+      ...this.evaluationOverlays,
+    ].filter((overlay) => this.overlayAllowed(overlay));
   }
 
   private overlayAllowed(overlay: ChartOverlay): boolean {
@@ -817,7 +883,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     return true;
   }
 
-  private countOverlaysByCategory(overlays: ChartOverlay[], category: ChartOverlayCategory): number {
+  private countOverlaysByCategory(
+    overlays: ChartOverlay[],
+    category: ChartOverlayCategory,
+  ): number {
     return overlays.filter((overlay) => this.resolveOverlayCategory(overlay) === category).length;
   }
 
@@ -859,7 +928,14 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private overlayMatches(overlay: ChartOverlay, tokens: string[]): boolean {
-    const text = [overlay.id, overlay.text, overlay.source, overlay.sourceCode, overlay.type, overlay.shape]
+    const text = [
+      overlay.id,
+      overlay.text,
+      overlay.source,
+      overlay.sourceCode,
+      overlay.type,
+      overlay.shape,
+    ]
       .filter(Boolean)
       .join(' ')
       .toUpperCase();
@@ -893,7 +969,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     this.error.emit({ message, detail });
   }
 
-  private handleVisibleRangeChange(range: { from: number; to: number } | null, candleCount: number): void {
+  private handleVisibleRangeChange(
+    range: { from: number; to: number } | null,
+    candleCount: number,
+  ): void {
     const config = this.resolvedConfig();
     if (!config.lazyLoadOnPan || !range || candleCount <= 0) {
       return;
@@ -917,7 +996,10 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     firstCandle: ChartCandle | null,
     lastCandle: ChartCandle | null,
   ): void {
-    const edgeTime = direction === 'PAST' ? firstCandle?.openTime ?? firstCandle?.time : lastCandle?.openTime ?? lastCandle?.time;
+    const edgeTime =
+      direction === 'PAST'
+        ? (firstCandle?.openTime ?? firstCandle?.time)
+        : (lastCandle?.openTime ?? lastCandle?.time);
     const key = `${direction}:${edgeTime ?? 'none'}`;
     if (key === this.lastRangeBoundaryKey) {
       return;
@@ -932,7 +1014,9 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private readonly onResize = (): void => {
-    this.ngZone.runOutsideAngular(() => this.engine.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight));
+    this.ngZone.runOutsideAngular(() =>
+      this.engine.resize(this.chartRef.nativeElement.clientWidth, this.chartHeight),
+    );
   };
 
   private observeThemeChanges(): void {
@@ -982,4 +1066,3 @@ export class CandleChart implements AfterViewInit, OnChanges, OnDestroy {
     };
   }
 }
-

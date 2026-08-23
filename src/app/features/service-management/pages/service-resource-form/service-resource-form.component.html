@@ -16,20 +16,19 @@
     [initialValue]="model"
     (formSubmit)="onSubmit()"
     (valueChange)="onValueChange($event)"
+    (dirtyChange)="onDirtyChange($event)"
   >
-    <div form-actions class="mt-4 flex items-center justify-end gap-2 border-t border-[var(--app-border)] pt-4">
+    <div
+      form-actions
+      class="mt-4 flex items-center justify-end gap-2 border-t border-[var(--app-border)] pt-4"
+    >
       <app-button
         type="button"
         variant="secondary"
         label="cancel"
         (buttonClick)="onCancel()"
       ></app-button>
-      <app-button
-        type="submit"
-        variant="primary"
-        label="save"
-      ></app-button>
+      <app-button type="submit" variant="primary" label="save"></app-button>
     </div>
   </app-form-input>
 </app-page-shell>
-

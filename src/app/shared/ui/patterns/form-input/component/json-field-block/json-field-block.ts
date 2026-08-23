@@ -1,12 +1,12 @@
 import { Component, Input, ViewChild, signal } from '@angular/core';
-import { InputArea } from '@shared/ui/primitives/input-area/input-area';
-import { FieldState, TextFieldConfig } from '../../models/form-config.model';
+import type { InputArea } from '@shared/ui/primitives/input-area/input-area';
+import type { FieldState, TextFieldConfig } from '../../models/form-config.model';
 
 @Component({
   selector: 'app-json-field-block',
   standalone: false,
   templateUrl: './json-field-block.html',
-  styleUrl: './json-field-block.css'
+  styleUrl: './json-field-block.css',
 })
 export class JsonFieldBlockComponent {
   @Input({ required: true }) field!: FieldState;
@@ -20,7 +20,9 @@ export class JsonFieldBlockComponent {
   readonly copied = signal(false);
 
   get showInvalid(): boolean {
-    return !this.field.focusing() && (this.field.touched() || this.submitted) && !!this.field.errors();
+    return (
+      !this.field.focusing() && (this.field.touched() || this.submitted) && !!this.field.errors()
+    );
   }
 
   get firstErrorMessage(): string | undefined {
@@ -29,7 +31,9 @@ export class JsonFieldBlockComponent {
   }
 
   get helpText(): string | undefined {
-    const config = this.field?.fieldConfig as { helpText?: string; description?: string } | undefined;
+    const config = this.field?.fieldConfig as
+      | { helpText?: string; description?: string }
+      | undefined;
     return config?.helpText || config?.description;
   }
 
@@ -50,6 +54,11 @@ export class JsonFieldBlockComponent {
 
   get canValidateJson(): boolean {
     return this.contentType === 'json';
+  }
+
+  get textValue(): string | null {
+    const value = this.field.value();
+    return value == null ? null : String(value);
   }
 
   onFocus(): void {

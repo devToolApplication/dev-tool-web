@@ -9,8 +9,8 @@ const meta: Meta<CheckBox> = {
     value: false,
     indeterminate: false,
     disabled: false,
-    hideLabel: false
-  }
+    hideLabel: false,
+  },
 };
 
 export default meta;
@@ -21,26 +21,26 @@ export const Default: Story = {};
 
 export const Checked: Story = {
   args: {
-    value: true
-  }
+    value: true,
+  },
 };
 
 export const Indeterminate: Story = {
   args: {
-    indeterminate: true
-  }
+    indeterminate: true,
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    value: true
-  }
+    value: true,
+  },
 };
 
 export const HiddenLabel: Story = {
   args: {
     hideLabel: true,
-    ariaLabel: 'Toggle terms acceptance'
-  }
+    ariaLabel: 'Toggle terms acceptance',
+  },
 };
