@@ -19,6 +19,7 @@ import {
   FlowContextMenuEvent,
   FlowNodeDropEvent,
   FlowViewportSnapshot,
+  FlowViewportState,
 } from '../../models';
 import { JointFlowEngine } from '../../joint/joint-flow-engine';
 import { FLOW_NODE_DRAG_TYPE } from '../flow-palette/flow-palette.component';
@@ -62,6 +63,7 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
   private scheduledFit = 0;
   private initialFitAttempts = 0;
   private lastGraphStructureKey = '';
+  private lastAppliedViewportKey = '';
   private initialViewportPending = false;
   private pendingViewportSnapshot: FlowViewportSnapshot | null = null;
   viewportSnapshot: FlowViewportSnapshot | null = null;
@@ -91,7 +93,8 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.initialized = true;
     this.resizeObserver = new ResizeObserver(() => {
       this.engine.resizeToContainer(this.firstRenderDone);
-      if (this.fitOnLoad && (this.value?.nodes?.length ?? 0) > 0 && !this.firstRenderDone && !this.userInteracted) {
+      const hasExplicitViewport = !!this.value?.viewport;
+      if (this.fitOnLoad && (this.value?.nodes?.length ?? 0) > 0 && !hasExplicitViewport && !this.firstRenderDone && !this.userInteracted) {
         this.scheduleInitialFitContent();
       }
     });
@@ -152,28 +155,48 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
     const graphStructureKey = this.graphStructureKey(this.value);
     const structureChanged = graphStructureKey !== this.lastGraphStructureKey;
     const hasUnpositionedNodes = (this.value?.nodes ?? []).some(node => !node.position);
+    const hasExplicitViewport = !!this.value?.viewport;
+    const viewportKey = this.viewportKey(this.value?.viewport);
     const shouldAutoPlace = hasNodes
       && !this.userInteracted
       && (!this.firstRenderDone || (structureChanged && hasUnpositionedNodes));
     this.lastGraphStructureKey = graphStructureKey;
-    this.initialViewportPending = this.fitOnLoad && shouldAutoPlace;
-    if (this.initialViewportPending) {
+
+    if (hasExplicitViewport && viewportKey !== this.lastAppliedViewportKey) {
+      this.lastAppliedViewportKey = viewportKey;
+      this.initialViewportPending = false;
       this.pendingViewportSnapshot = null;
-      this.viewportSnapshot = null;
-    }
+      this.engine.applyViewportState(this.value!.viewport!);
+      this.viewportSnapshot = this.engine.getViewportSnapshot();
+      this.firstRenderDone = true;
+    } else if (!hasExplicitViewport) {
+      this.lastAppliedViewportKey = '';
+      this.initialViewportPending = this.fitOnLoad && shouldAutoPlace;
+      if (this.initialViewportPending) {
+        this.pendingViewportSnapshot = null;
+        this.viewportSnapshot = null;
+      }
 
-    if (this.autoLayout && shouldAutoPlace) {
-      this.engine.autoLayout();
-    }
+      if (this.autoLayout && shouldAutoPlace) {
+        this.engine.autoLayout();
+      }
 
-    if (this.fitOnLoad && shouldAutoPlace) {
-      this.firstRenderDone = false;
-      this.scheduleInitialFitContent();
+      if (this.fitOnLoad && shouldAutoPlace) {
+        this.firstRenderDone = false;
+        this.scheduleInitialFitContent();
+      } else if (hasNodes) {
+        this.firstRenderDone = true;
+      }
     } else if (hasNodes) {
       this.firstRenderDone = true;
     }
 
     this.syncSelection();
+  }
+
+  private viewportKey(viewport: FlowViewportState | undefined): string {
+    if (!viewport) return '';
+    return `${viewport.x}:${viewport.y}:${viewport.zoom}`;
   }
 
   private graphStructureKey(value: FlowDefinition | null): string {
@@ -253,5 +276,4 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.engine.clearHighlights();
     }
   }
-
 }

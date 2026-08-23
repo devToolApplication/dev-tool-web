@@ -1,0 +1,47 @@
+@let node = selectedNode();
+
+@if (node) {
+  @switch (node.type) {
+    @case ('AI_GATE') {
+      <app-ai-gate-inspector
+        [node]="asAiGateNode(node)"
+        [readonly]="readonlyMode()"
+        (nodePatch)="applyNodePatch($event)"
+      ></app-ai-gate-inspector>
+    }
+    @case ('CODE_GATE') {
+      <app-code-gate-inspector
+        [node]="asCodeGateNode(node)"
+        [readonly]="readonlyMode()"
+        (nodePatch)="applyNodePatch($event)"
+      ></app-code-gate-inspector>
+    }
+    @case ('LOGIC') {
+      <app-logic-inspector
+        [node]="asLogicNode(node)"
+        [readonly]="readonlyMode()"
+        (nodePatch)="applyNodePatch($event)"
+      ></app-logic-inspector>
+    }
+    @case ('START') {
+      <app-start-inspector
+        [node]="asStartNode(node)"
+        [readonly]="readonlyMode()"
+      ></app-start-inspector>
+    }
+    @case ('END') {
+      <app-end-inspector
+        [node]="asEndNode(node)"
+        [readonly]="readonlyMode()"
+      ></app-end-inspector>
+    }
+  }
+} @else {
+  <app-empty-state
+    size="compact"
+    align="start"
+    title="workflowStudio.inspector.emptyTitle"
+    description="workflowStudio.inspector.emptyDescription"
+    icon="pi pi-sliders-h"
+  ></app-empty-state>
+}

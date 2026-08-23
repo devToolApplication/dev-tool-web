@@ -1,0 +1,49 @@
+<app-page-shell
+  title="workflowStudio.lifecycle.runsTitle"
+  subtitle="workflowStudio.lifecycle.runsDescription"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.menu.aiAgentMcrs' },
+    { label: 'workflowStudio.lifecycle.workflows', routerLink: '/ai-agent-mcrs/workflows' },
+    { label: 'workflowStudio.lifecycle.runs', routerLink: '/ai-agent-mcrs/workflow-runs' }
+  ]"
+  [loading]="loading()"
+  [error]="error()"
+  (retry)="loadRuns(currentPage(), rows())"
+>
+  <div class="workflow-run-list__filters" aria-label="Workflow run filters">
+    <div class="workflow-run-list__status-filter">
+      <label [attr.for]="statusFilterId">
+        {{ 'workflowStudio.lifecycle.status' | translateContent }}
+      </label>
+      <app-select
+        [inputId]="statusFilterId"
+        placeholder="workflowStudio.runtime.status.all"
+        [options]="statusOptions"
+        [value]="statusFilter()"
+        [showClear]="true"
+        (valueChange)="setStatusFilter($event)"
+      ></app-select>
+    </div>
+
+    @if (workflowIdFilter()) {
+      <div class="workflow-run-list__workflow-filter">
+        <span>{{ 'workflowStudio.runtime.workflowFilter' | translateContent }}</span>
+        <strong>{{ workflowIdFilter() }}</strong>
+      </div>
+    }
+  </div>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="runs()"
+    [loading]="loading()"
+    [totalRecords]="totalRecords()"
+    [currentPage]="currentPage()"
+    [rows]="rows()"
+    (rowClick)="openRun($event)"
+    (actionClick)="onTableAction($event)"
+    (refresh)="loadRuns(currentPage(), rows())"
+    (pageChange)="loadRuns($event.page, $event.rows)"
+  ></app-table>
+</app-page-shell>

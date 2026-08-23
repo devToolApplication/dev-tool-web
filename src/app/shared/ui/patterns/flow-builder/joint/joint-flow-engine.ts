@@ -6,6 +6,7 @@ import {
   FlowConnectEvent,
   FlowContextMenuEvent,
   FlowViewportSnapshot,
+  FlowViewportState,
 } from '../models';
 import { FLOW_PAPER_OPTIONS } from './joint-flow-paper-options';
 import { createNodeShape, createEdgeShape, updateNodeShape } from './joint-flow-renderer';
@@ -201,6 +202,21 @@ export class JointFlowEngine {
     this.scheduleViewportChange();
   }
 
+  applyViewportState(viewport: FlowViewportState): void {
+    if (!viewport || typeof viewport !== 'object') return;
+    const targetZoom = Number(viewport.zoom);
+    if (!Number.isFinite(targetZoom) || targetZoom <= 0) return;
+
+    const scale = Math.min(Math.max(targetZoom, this.minScale), this.maxScale);
+    this.paper.scale(scale, scale);
+
+    const tx = Number.isFinite(viewport.x) ? Number(viewport.x) : 0;
+    const ty = Number.isFinite(viewport.y) ? Number(viewport.y) : 0;
+    const target = this.clampTranslate(tx, ty);
+    this.paper.translate(target.tx, target.ty);
+    this.scheduleViewportChange();
+  }
+
   fitContent(padding = 40): void {
     const { width, height } = this.syncDimensionsFromElement();
     if (this.graph.getCells().length === 0) {
@@ -229,13 +245,14 @@ export class JointFlowEngine {
     const previousHeight = this.lastClientHeight || previousSize.height;
     const scale = this.paper.scale().sx || 1;
     const translate = this.paper.translate();
-    const previousCenter = computeLocalCenter(
-      { width: previousWidth, height: previousHeight },
-      { scale, tx: translate.tx, ty: translate.ty }
-    );
     const { width, height } = this.syncDimensionsFromElement();
+    const hadRealDimensions = previousWidth > 16 && previousHeight > 16;
 
-    if (preserveCenter) {
+    if (preserveCenter && hadRealDimensions) {
+      const previousCenter = computeLocalCenter(
+        { width: previousWidth, height: previousHeight },
+        { scale, tx: translate.tx, ty: translate.ty }
+      );
       const nextTranslate = computeTranslateForLocalCenter(previousCenter, { width, height }, scale);
       const target = this.clampTranslate(nextTranslate.tx, nextTranslate.ty);
       this.paper.translate(target.tx, target.ty);
@@ -347,12 +364,12 @@ export class JointFlowEngine {
 
   private clampTranslate(tx: number, ty: number): { tx: number; ty: number } {
     const bounds = this.getContentBounds();
-    if (!bounds) {
-      return { tx: 0, ty: 0 };
+    const { width: clientWidth, height: clientHeight } = this.measureViewportSize();
+    if (!bounds || clientWidth <= 16 || clientHeight <= 16) {
+      return { tx, ty };
     }
 
     const scale = this.paper.scale().sx || 1;
-    const { width: clientWidth, height: clientHeight } = this.measureViewportSize();
     const localViewport = Math.max(clientWidth / scale, clientHeight / scale);
     const contentSpan = Math.max(bounds.width, bounds.height);
     const margin = Math.max(80, Math.min(220, Math.min(localViewport * 0.25, contentSpan * 0.2 + 80)));

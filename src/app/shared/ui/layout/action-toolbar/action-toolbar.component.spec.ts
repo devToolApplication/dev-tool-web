@@ -59,4 +59,17 @@ describe('ActionToolbarComponent', () => {
     expect(emit).toHaveBeenCalledWith(moreAction);
     expect(component.moreOpen()).toBe(false);
   });
+
+  it('renders stable test ids from action ids', () => {
+    component.actions = [
+      { id: 'save-draft', label: 'Save draft', placement: 'primary' },
+      { id: 'validate', label: 'Validate', placement: 'more' },
+    ];
+    component.ngOnChanges();
+    component.toggleMore();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="action-toolbar-save-draft"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="action-toolbar-validate"]')).toBeTruthy();
+  });
 });

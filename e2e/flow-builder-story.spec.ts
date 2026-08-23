@@ -60,7 +60,7 @@ test.describe('Flow Builder Story Regression', () => {
       return Math.round(box?.width ?? 0);
     }).toBe(1);
 
-    await page.locator('app-button[tooltip="shared.flowBuilder.toolbar.fit"] button').click();
+    await page.locator('[data-testid="flow-builder-command-fit"] button').click();
 
     await expect.poll(async () => {
       const box = await page.locator('.flow-canvas__paper').boundingBox();

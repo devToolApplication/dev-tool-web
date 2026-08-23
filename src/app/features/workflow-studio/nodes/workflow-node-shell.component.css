@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.workflow-node-shell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--app-spacing-3, 12px);
+  min-width: 180px;
+  min-height: 64px;
+  padding: var(--app-spacing-3, 12px);
+  border: 1px solid var(--app-border, #d8dee8);
+  border-radius: var(--app-radius-md, 8px);
+  background: var(--app-card-surface, #fff);
+  color: var(--app-text, #1e293b);
+}
+
+.workflow-node-shell--selected {
+  border-color: var(--app-primary, #7a77ff);
+  box-shadow: 0 0 0 2px var(--app-focus-ring, rgba(122, 119, 255, 0.22));
+}
+
+.workflow-node-shell--warning {
+  border-color: var(--app-control-warn-border, #f97316);
+}
+
+.workflow-node-shell--error {
+  border-color: var(--app-control-danger-border, #ef4444);
+}
+
+.workflow-node-shell__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-chart-primary-fill, #eef2ff);
+  color: var(--app-primary, #7a77ff);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.workflow-node-shell__content {
+  min-width: 0;
+}
+
+.workflow-node-shell__content h3,
+.workflow-node-shell__content p {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-node-shell__content h3 {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.workflow-node-shell__content p {
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.75rem;
+}
+
+.workflow-node-shell__ports {
+  display: grid;
+  gap: 6px;
+}
+
+.workflow-node-shell__port {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--app-border-strong, #94a3b8);
+  border-radius: 50%;
+  background: var(--app-card-surface, #fff);
+}

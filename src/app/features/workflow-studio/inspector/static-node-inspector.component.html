@@ -1,0 +1,17 @@
+<section class="static-node-inspector" aria-labelledby="workflow-static-node-title">
+  <h3 id="workflow-static-node-title">{{ 'workflowStudio.inspector.staticTitle' | translateContent }}</h3>
+  <dl>
+    <div>
+      <dt>{{ 'workflowStudio.inspector.nodeId' | translateContent }}</dt>
+      <dd>{{ node.id }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'workflowStudio.inspector.type' | translateContent }}</dt>
+      <dd>{{ node.type }}</dd>
+    </div>
+  </dl>
+  <app-alert
+    variant="info"
+    message="workflowStudio.inspector.noSupportedConfig"
+  ></app-alert>
+</section>

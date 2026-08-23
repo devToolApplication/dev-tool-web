@@ -1,0 +1,163 @@
+<app-page-shell
+  [title]="store.workflow()?.definition?.name ?? 'workflowStudio.lifecycle.builderTitle'"
+  subtitle="workflowStudio.lifecycle.builderDescription"
+  layout="full"
+  [breadcrumb]="[
+    { label: 'layout.menu.aiAgentMcrs' },
+    { label: 'workflowStudio.lifecycle.workflows', routerLink: '/ai-agent-mcrs/workflows' },
+    { label: store.workflow()?.definition?.id ? 'layout.route.edit' : 'layout.route.create' }
+  ]"
+  [loading]="loading()"
+  [error]="error()"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="actions()"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <div class="workflow-builder">
+    <aside class="workflow-builder__meta" aria-label="Workflow metadata">
+      <app-section-panel title="workflowStudio.lifecycle.details" density="compact">
+        <div class="workflow-builder__fields">
+          <app-input-text
+            label="workflowStudio.lifecycle.workflow"
+            [value]="store.workflow()?.definition?.name ?? ''"
+            [readonly]="readonlyMode()"
+            (valueChange)="updateName($event)"
+          ></app-input-text>
+          <app-input-area
+            label="workflowStudio.lifecycle.description"
+            [value]="store.workflow()?.definition?.description ?? ''"
+            [readonly]="readonlyMode()"
+            [rows]="4"
+            [maxRows]="8"
+            (valueChange)="updateDescription($event)"
+          ></app-input-area>
+          <app-input-number
+            label="workflowStudio.lifecycle.maxParallel"
+            [value]="activeRuntime()?.maxParallel ?? null"
+            [min]="1"
+            [readonly]="readonlyMode()"
+            (valueChange)="updateMaxParallel($event)"
+          ></app-input-number>
+        </div>
+      </app-section-panel>
+
+      @if (statusMessage()) {
+        <app-alert
+          variant="success"
+          [message]="statusMessage()!"
+        ></app-alert>
+      }
+
+      @if (store.dirty()) {
+        <app-badge
+          label="workflowStudio.productivity.unsavedChanges"
+          variant="warning"
+        ></app-badge>
+      }
+    </aside>
+
+    <section class="workflow-builder__canvas" aria-label="Workflow canvas">
+      <div class="workflow-builder__canvas-toolbar" aria-label="Workflow canvas controls">
+        <app-button
+          icon="pi pi-sitemap"
+          variant="ghost"
+          size="sm"
+          [iconOnly]="true"
+          tooltip="workflowStudio.productivity.autoLayout"
+          [disabled]="readonlyMode()"
+          (buttonClick)="applyAutoLayout()"
+        ></app-button>
+        <app-button
+          icon="pi pi-window-maximize"
+          variant="ghost"
+          size="sm"
+          [iconOnly]="true"
+          tooltip="workflowStudio.productivity.fitView"
+          (buttonClick)="fitView()"
+        ></app-button>
+        <app-button
+          icon="pi pi-search-plus"
+          variant="ghost"
+          size="sm"
+          [iconOnly]="true"
+          tooltip="workflowStudio.productivity.zoomIn"
+          (buttonClick)="zoomIn()"
+        ></app-button>
+        <app-button
+          icon="pi pi-search-minus"
+          variant="ghost"
+          size="sm"
+          [iconOnly]="true"
+          tooltip="workflowStudio.productivity.zoomOut"
+          (buttonClick)="zoomOut()"
+        ></app-button>
+        <app-button
+          icon="pi pi-refresh"
+          variant="ghost"
+          size="sm"
+          [iconOnly]="true"
+          tooltip="workflowStudio.productivity.resetView"
+          (buttonClick)="resetView()"
+        ></app-button>
+      </div>
+      <app-workflow-canvas
+        [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
+        [workflowName]="store.workflow()?.definition?.name ?? undefined"
+        [graph]="store.graph()"
+        [positions]="store.positions()"
+        [viewport]="store.viewport()"
+        [mode]="store.mode()"
+        [selectedId]="selectedId()"
+        [validationIssues]="store.validationIssues()"
+        (nodeSelected)="store.selectNode($event)"
+        (edgeSelected)="store.selectEdge($event)"
+        (nodeAdded)="addNode($event)"
+        (nodeMoved)="moveNode($event)"
+        (connected)="store.connect($event)"
+        (viewportChange)="store.setViewport($event)"
+      ></app-workflow-canvas>
+    </section>
+
+    <aside class="workflow-builder__inspector" aria-label="Workflow inspector">
+      <app-workflow-node-inspector></app-workflow-node-inspector>
+    </aside>
+  </div>
+
+  <app-workflow-problems-panel
+    [issues]="store.validationIssues()"
+  ></app-workflow-problems-panel>
+</app-page-shell>
+
+<app-drawer
+  [open]="versionsOpen()"
+  title="workflowStudio.lifecycle.versions"
+  size="md"
+  (closed)="closeVersions()"
+>
+  <div class="workflow-versions">
+    @for (version of store.workflow()?.versions ?? []; track version.id) {
+      <button
+        type="button"
+        class="workflow-versions__item"
+        [class.workflow-versions__item--selected]="version.id === selectedVersionId()"
+        (click)="selectVersion(version.id)"
+      >
+        <span>{{ versionLabel(version) }}</span>
+        @if (version.status === 'PUBLISHED') {
+          <app-badge label="workflowStudio.lifecycle.readonly" variant="muted"></app-badge>
+        }
+      </button>
+    }
+  </div>
+</app-drawer>
+
+<app-workflow-run-dialog
+  [open]="runDialogOpen()"
+  [loading]="running()"
+  [workflowName]="store.workflow()?.definition?.name ?? ''"
+  (closed)="closeRunDialog()"
+  (runRequested)="startRun($event)"
+></app-workflow-run-dialog>

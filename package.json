@@ -15,6 +15,7 @@
     "build-storybook": "ng run dev-tool-web:build-storybook",
     "test-storybook": "test-storybook --url http://127.0.0.1:6006",
     "test-storybook:ci": "start-server-and-test storybook:ci http://127.0.0.1:6006 test-storybook",
+    "e2e": "playwright test",
     "chromatic": "chromatic --build-script-name build-storybook --zip",
     "publish-storybook": "chromatic --build-script-name build-storybook --zip --exit-zero-on-changes",
     "codegraph:index": "codegraph index ..",

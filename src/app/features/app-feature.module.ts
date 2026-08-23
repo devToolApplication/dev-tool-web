@@ -8,9 +8,12 @@ import { NotFoundComponent } from './error/pages/not-found/not-found.component';
 import { errorRoutes } from './error/error.routes';
 import { ServiceManagementModule } from './service-management/service-management.module';
 import { serviceManagementRoutes } from './service-management/service-management.routes';
+import { WorkflowStudioModule } from './workflow-studio/workflow-studio.module';
+import { workflowStudioRoutes } from './workflow-studio/workflow-studio.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...serviceManagementRoutes,
+  ...workflowStudioRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'ai-agent-mcrs/secrets' },
   { path: '**', redirectTo: '404' },
@@ -28,6 +31,7 @@ const FEATURE_COMPONENTS = [
     RouterModule.forChild(FEATURE_ROUTES),
     SharedModule,
     ServiceManagementModule,
+    WorkflowStudioModule,
   ],
 })
 export class AppFeatureModule {}

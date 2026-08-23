@@ -1,0 +1,25 @@
+<article
+  class="workflow-node-shell"
+  [class.workflow-node-shell--selected]="view.selected"
+  [class.workflow-node-shell--warning]="view.validationSeverity === 'warning'"
+  [class.workflow-node-shell--error]="view.validationSeverity === 'error'"
+  [attr.data-testid]="'workflow-node-' + view.type"
+  [attr.data-node-id]="view.id"
+  [attr.data-node-type]="view.type"
+  [attr.data-runtime-status]="view.runtimeStatus || null"
+>
+  <div class="workflow-node-shell__icon" aria-hidden="true">{{ view.iconLabel }}</div>
+  <div class="workflow-node-shell__content">
+    <h3>{{ view.title }}</h3>
+    <p>{{ view.subtitle }}</p>
+  </div>
+  <div class="workflow-node-shell__ports" aria-hidden="true">
+    @for (port of view.ports; track port.id) {
+      <span
+        class="workflow-node-shell__port"
+        [class.workflow-node-shell__port--in]="port.direction === 'in'"
+        [class.workflow-node-shell__port--out]="port.direction === 'out'"
+      ></span>
+    }
+  </div>
+</article>

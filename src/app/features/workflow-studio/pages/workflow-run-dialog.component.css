@@ -1,0 +1,10 @@
+.workflow-run-dialog {
+  display: grid;
+  gap: var(--app-spacing-4, 1rem);
+}
+
+.workflow-run-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--app-spacing-2, 0.5rem);
+}

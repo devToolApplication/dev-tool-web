@@ -3,6 +3,7 @@ import commonTranslations from '../i18n/common/common.i18n.json';
 import errorsTranslations from '../i18n/features/errors.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
 import serviceManagementTranslations from '../i18n/features/service-management.i18n.json';
+import workflowStudioTranslations from '../i18n/features/workflow-studio.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
 type TranslationMap = Record<AppLanguage, Record<string, string>>;
@@ -14,13 +15,15 @@ const TRANSLATIONS: TranslationMap = {
     ...commonTranslations.vi,
     ...layoutTranslations.vi,
     ...errorsTranslations.vi,
-    ...serviceManagementTranslations.vi
+    ...serviceManagementTranslations.vi,
+    ...workflowStudioTranslations.vi
   },
   en: {
     ...commonTranslations.en,
     ...layoutTranslations.en,
     ...errorsTranslations.en,
-    ...serviceManagementTranslations.en
+    ...serviceManagementTranslations.en,
+    ...workflowStudioTranslations.en
   }
 };
 

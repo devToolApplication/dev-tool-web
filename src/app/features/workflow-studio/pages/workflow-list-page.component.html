@@ -1,0 +1,39 @@
+<app-page-shell
+  title="workflowStudio.lifecycle.listTitle"
+  subtitle="workflowStudio.lifecycle.listDescription"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.menu.aiAgentMcrs' },
+    { label: 'workflowStudio.lifecycle.workflows', routerLink: '/ai-agent-mcrs/workflows' }
+  ]"
+  [loading]="loading()"
+  [error]="error()"
+  (retry)="loadWorkflows(currentPage(), rows())"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="actions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="workflows()"
+    [loading]="loading()"
+    [totalRecords]="totalRecords()"
+    [currentPage]="currentPage()"
+    [rows]="rows()"
+    (rowClick)="openBuilder($event)"
+    (actionClick)="onTableAction($event)"
+    (refresh)="loadWorkflows(currentPage(), rows())"
+    (pageChange)="loadWorkflows($event.page, $event.rows)"
+  ></app-table>
+</app-page-shell>
+
+<app-workflow-run-dialog
+  [open]="runDialogOpen()"
+  [loading]="running()"
+  [workflowName]="selectedWorkflow()?.name ?? ''"
+  (closed)="closeRunDialog()"
+  (runRequested)="startRun($event)"
+></app-workflow-run-dialog>

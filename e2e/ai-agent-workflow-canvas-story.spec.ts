@@ -66,7 +66,7 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await expect(page.getByText('Classify Intent')).toBeVisible();
     await expect(page.getByText('Bug Report?')).toBeVisible();
     await expect(page.locator('.flow-palette__item')).toHaveCount(5);
-    await expect(page.locator('app-button[tooltip="shared.flowBuilder.toolbar.fullscreen"]')).toBeVisible();
+    await expect(page.locator('[data-testid="flow-builder-command-fullscreen"]')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Validate', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeVisible();
   });
@@ -148,7 +148,7 @@ test.describe('AI Agent Workflow Canvas Story', () => {
     await page.locator('.flow-navigator__action--close').click();
     await expect(page.locator('.flow-navigator')).not.toBeVisible();
 
-    await page.locator('app-button[tooltip="shared.flowBuilder.toolbar.navigator"]').click();
+    await page.locator('[data-testid="flow-builder-command-toggle-navigator"] button').click();
     await expect(page.locator('.flow-navigator')).toBeVisible();
     await expect(page.locator('.flow-navigator__viewport')).toBeVisible();
   });

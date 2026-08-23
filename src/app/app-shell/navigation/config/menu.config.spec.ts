@@ -11,6 +11,7 @@ describe('APP_LAYOUT_MENU', () => {
       expect.arrayContaining([
         '/ai-agent-mcrs/secrets',
         '/ai-agent-mcrs/configs',
+        '/ai-agent-mcrs/workflows',
         '/job-service/secrets',
         '/job-service/configs',
         '/job-service/jobs',

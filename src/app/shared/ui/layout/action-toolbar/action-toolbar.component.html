@@ -1,6 +1,7 @@
 <div class="action-toolbar">
   @for (action of primaryActions; track action.id) {
     <app-button
+      [attr.data-testid]="'action-toolbar-' + action.id"
       size="sm"
       [label]="action.label"
       [icon]="action.icon"
@@ -14,6 +15,7 @@
 
   @for (action of secondaryActions; track action.id) {
     <app-button
+      [attr.data-testid]="'action-toolbar-' + action.id"
       size="sm"
       [label]="action.label"
       [icon]="action.icon"
@@ -41,6 +43,7 @@
         <div class="action-toolbar__menu" role="menu">
           @for (action of moreActions; track action.id) {
             <app-button
+              [attr.data-testid]="'action-toolbar-' + action.id"
               class="action-toolbar__menu-item"
               size="sm"
               [label]="action.label"

@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.static-node-inspector {
+  display: grid;
+  gap: var(--app-spacing-4, 1rem);
+}
+
+.static-node-inspector h3 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: var(--app-font-size-lg, 1.125rem);
+  font-weight: 600;
+}
+
+.static-node-inspector dl {
+  display: grid;
+  gap: var(--app-spacing-3, 0.75rem);
+  margin: 0;
+}
+
+.static-node-inspector dl > div {
+  display: grid;
+  gap: var(--app-spacing-1, 0.25rem);
+}
+
+.static-node-inspector dt {
+  color: var(--app-text-muted);
+  font-size: var(--app-font-size-xs, 0.75rem);
+}
+
+.static-node-inspector dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--app-text);
+  font-size: var(--app-font-size-sm, 0.875rem);
+  font-weight: 600;
+}

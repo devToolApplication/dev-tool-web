@@ -1,0 +1,138 @@
+<app-page-shell
+  [title]="run()?.id ?? 'workflowStudio.lifecycle.runDetailTitle'"
+  subtitle="workflowStudio.lifecycle.runDetailDescription"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.menu.aiAgentMcrs' },
+    { label: 'workflowStudio.lifecycle.runs', routerLink: '/ai-agent-mcrs/workflow-runs' },
+    { label: run()?.id ?? 'workflowStudio.lifecycle.runDetailTitle' }
+  ]"
+  [loading]="loading()"
+  [error]="error()"
+  (retry)="run()?.id ? loadRun(run()!.id) : undefined"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="actions()"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  @if (run(); as item) {
+    <div class="workflow-run-detail">
+      <app-section-panel title="workflowStudio.lifecycle.runOverview" density="compact">
+        <dl class="workflow-run-detail__grid">
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.status' | translateContent }}</dt>
+            <dd>{{ item.status }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.workflow' | translateContent }}</dt>
+            <dd>{{ item.workflowDefinitionId }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.version' | translateContent }}</dt>
+            <dd>{{ item.workflowVersionId }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.outcome' | translateContent }}</dt>
+            <dd>{{ item.finalOutcome ?? '-' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.startedAt' | translateContent }}</dt>
+            <dd>{{ item.startedAt ?? '-' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.lifecycle.completedAt' | translateContent }}</dt>
+            <dd>{{ item.completedAt ?? '-' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'workflowStudio.runtime.polling' | translateContent }}</dt>
+            <dd>{{ (polling() ? 'workflowStudio.runtime.pollingActive' : 'workflowStudio.runtime.pollingStopped') | translateContent }}</dd>
+          </div>
+        </dl>
+      </app-section-panel>
+
+      <div class="workflow-run-detail__workspace">
+        <section class="workflow-run-detail__canvas" aria-label="Workflow runtime canvas">
+          @if (runtimeGraph(); as graph) {
+            <app-workflow-canvas
+              [workflowId]="item.workflowDefinitionId"
+              [workflowName]="workflowDetail()?.definition?.name ?? undefined"
+              [graph]="graph"
+              [positions]="runtimePositions()"
+              [viewport]="runtimeViewport()"
+              mode="runtime"
+              [selectedId]="selectedNodeId()"
+              [runtimeStatus]="runtimeStatus()"
+              (nodeSelected)="onNodeSelected($event)"
+            ></app-workflow-canvas>
+          } @else {
+            <app-alert
+              variant="warning"
+              message="workflowStudio.runtime.workflowDefinitionMissing"
+            ></app-alert>
+          }
+        </section>
+
+        <aside class="workflow-run-detail__inspector" aria-label="Workflow runtime inspector">
+          <app-section-panel title="workflowStudio.runtime.inspectorTitle" density="compact">
+            @if (selectedNodeExecution(); as execution) {
+              <dl class="workflow-run-detail__grid workflow-run-detail__grid--compact">
+                <div>
+                  <dt>{{ 'workflowStudio.inspector.nodeId' | translateContent }}</dt>
+                  <dd>{{ execution.nodeId }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'workflowStudio.lifecycle.status' | translateContent }}</dt>
+                  <dd>{{ execution.executionStatus }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'workflowStudio.lifecycle.outcome' | translateContent }}</dt>
+                  <dd>{{ execution.outcome ?? '-' }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'workflowStudio.runtime.attempt' | translateContent }}</dt>
+                  <dd>{{ execution.attempt ?? '-' }}</dd>
+                </div>
+              </dl>
+            } @else {
+              <app-alert
+                variant="info"
+                message="workflowStudio.runtime.noNodeSelected"
+              ></app-alert>
+            }
+
+            <app-tabs
+              [tabs]="runtimeTabs"
+              [value]="selectedRuntimeTab()"
+              (valueChange)="setRuntimeTab($event)"
+            ></app-tabs>
+
+            <div class="workflow-run-detail__tab-panel">
+              @switch (selectedRuntimeTab()) {
+                @case ('overview') {
+                  <app-json-viewer [value]="inspectorExecution()" [collapsed]="true"></app-json-viewer>
+                }
+                @case ('input') {
+                  <app-json-viewer [value]="inspectorInput()" [collapsed]="true"></app-json-viewer>
+                }
+                @case ('output') {
+                  <app-json-viewer [value]="inspectorOutput()" [collapsed]="true"></app-json-viewer>
+                }
+                @case ('evidence') {
+                  <app-json-viewer [value]="inspectorEvidence()" [collapsed]="true"></app-json-viewer>
+                }
+                @case ('execution') {
+                  <app-json-viewer [value]="selectedNodeExecution() ?? item.nodes" [collapsed]="true"></app-json-viewer>
+                }
+                @case ('error') {
+                  <app-json-viewer [value]="inspectorError()" [collapsed]="true"></app-json-viewer>
+                }
+              }
+            </div>
+          </app-section-panel>
+        </aside>
+      </div>
+    </div>
+  }
+</app-page-shell>

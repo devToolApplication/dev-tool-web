@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.workflow-run-detail {
+  display: grid;
+  gap: var(--app-spacing-4, 1rem);
+}
+
+.workflow-run-detail__workspace {
+  display: grid;
+  gap: var(--app-spacing-4, 1rem);
+  min-height: 36rem;
+}
+
+.workflow-run-detail__canvas {
+  min-width: 0;
+  min-height: 32rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md, 0.5rem);
+  overflow: hidden;
+  background: var(--app-surface);
+}
+
+.workflow-run-detail__inspector {
+  min-width: 0;
+}
+
+.workflow-run-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--app-spacing-3, 0.75rem);
+  margin: 0;
+}
+
+.workflow-run-detail__grid div {
+  min-width: 0;
+}
+
+.workflow-run-detail__grid dt {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}
+
+.workflow-run-detail__grid dd {
+  margin: 0.25rem 0 0;
+  color: var(--app-text);
+  overflow-wrap: anywhere;
+}
+
+.workflow-run-detail__grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  margin-bottom: var(--app-spacing-3, 0.75rem);
+}
+
+.workflow-run-detail__tab-panel {
+  margin-top: var(--app-spacing-3, 0.75rem);
+  min-width: 0;
+}
+
+@media (min-width: 72rem) {
+  .workflow-run-detail__workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem);
+  }
+}

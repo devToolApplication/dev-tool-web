@@ -129,6 +129,38 @@ describe('FlowCanvasComponent', () => {
     expect(emitted).toHaveLength(1);
   });
 
+  it('applies an explicit viewport on render and does not fit content even when fitOnLoad is true', () => {
+    component.value = {
+      ...singleNodeFlow('r1'),
+      viewport: { x: 120, y: 240, zoom: 1.5 },
+    };
+
+    component.ngOnChanges({ value: new SimpleChange(null, component.value, true) });
+    flushFrames(2);
+
+    expect(engine.applyViewportState).toHaveBeenCalledWith({ x: 120, y: 240, zoom: 1.5 });
+    expect(engine.fitContent).not.toHaveBeenCalled();
+  });
+
+  it('re-applies an updated explicit viewport when value changes', () => {
+    component.value = {
+      ...singleNodeFlow('r1'),
+      viewport: { x: 50, y: 60, zoom: 0.8 },
+    };
+    component.ngOnChanges({ value: new SimpleChange(null, component.value, true) });
+    flushFrames(2);
+
+    component.value = {
+      ...singleNodeFlow('r1'),
+      viewport: { x: 200, y: 300, zoom: 1.2 },
+    };
+    component.ngOnChanges({ value: new SimpleChange(null, component.value, false) });
+    flushFrames(2);
+
+    expect(engine.applyViewportState).toHaveBeenLastCalledWith({ x: 200, y: 300, zoom: 1.2 });
+    expect(engine.fitContent).not.toHaveBeenCalled();
+  });
+
   function flushFrames(count: number): void {
     for (let i = 0; i < count; i += 1) {
       const frame = frames.shift();
@@ -142,6 +174,7 @@ class FakeFlowEngine {
   render = vi.fn();
   autoLayout = vi.fn();
   fitContent = vi.fn();
+  applyViewportState = vi.fn();
   clearHighlights = vi.fn();
   highlightNode = vi.fn();
   highlightEdge = vi.fn();
@@ -163,6 +196,7 @@ class FakeFlowEngine {
     this.render.mockClear();
     this.autoLayout.mockClear();
     this.fitContent.mockClear();
+    this.applyViewportState.mockClear();
     this.clearHighlights.mockClear();
     this.highlightNode.mockClear();
     this.highlightEdge.mockClear();

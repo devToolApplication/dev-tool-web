@@ -16,50 +16,50 @@
   @if (resolvedToolbar.visible !== false && resolvedMode === 'edit') {
     <div class="flow-builder__toolbar">
       @if (isCommandVisible('undo')) {
-        <app-button icon="pi pi-undo" variant="ghost" [disabled]="!isCommandEnabled('undo')" tooltip="shared.flowBuilder.toolbar.undo" (buttonClick)="executeCommand('undo')"></app-button>
+        <app-button data-testid="flow-builder-command-undo" icon="pi pi-undo" variant="ghost" [disabled]="!isCommandEnabled('undo')" tooltip="shared.flowBuilder.toolbar.undo" (buttonClick)="executeCommand('undo')"></app-button>
       }
       @if (isCommandVisible('redo')) {
-        <app-button icon="pi pi-refresh" variant="ghost" [disabled]="!isCommandEnabled('redo')" tooltip="shared.flowBuilder.toolbar.redo" (buttonClick)="executeCommand('redo')"></app-button>
+        <app-button data-testid="flow-builder-command-redo" icon="pi pi-refresh" variant="ghost" [disabled]="!isCommandEnabled('redo')" tooltip="shared.flowBuilder.toolbar.redo" (buttonClick)="executeCommand('redo')"></app-button>
       }
       <span class="flow-builder__toolbar-separator"></span>
       @if (isCommandVisible('fit')) {
-        <app-button icon="pi pi-arrows-alt" variant="ghost" [disabled]="!isCommandEnabled('fit')" tooltip="shared.flowBuilder.toolbar.fit" (buttonClick)="executeCommand('fit')"></app-button>
+        <app-button data-testid="flow-builder-command-fit" icon="pi pi-arrows-alt" variant="ghost" [disabled]="!isCommandEnabled('fit')" tooltip="shared.flowBuilder.toolbar.fit" (buttonClick)="executeCommand('fit')"></app-button>
       }
       @if (isCommandVisible('zoomIn')) {
-        <app-button icon="pi pi-search-plus" variant="ghost" [disabled]="!isCommandEnabled('zoomIn')" tooltip="shared.flowBuilder.toolbar.zoomIn" (buttonClick)="executeCommand('zoomIn')"></app-button>
+        <app-button data-testid="flow-builder-command-zoom-in" icon="pi pi-search-plus" variant="ghost" [disabled]="!isCommandEnabled('zoomIn')" tooltip="shared.flowBuilder.toolbar.zoomIn" (buttonClick)="executeCommand('zoomIn')"></app-button>
       }
       @if (isCommandVisible('zoomOut')) {
-        <app-button icon="pi pi-search-minus" variant="ghost" [disabled]="!isCommandEnabled('zoomOut')" tooltip="shared.flowBuilder.toolbar.zoomOut" (buttonClick)="executeCommand('zoomOut')"></app-button>
+        <app-button data-testid="flow-builder-command-zoom-out" icon="pi pi-search-minus" variant="ghost" [disabled]="!isCommandEnabled('zoomOut')" tooltip="shared.flowBuilder.toolbar.zoomOut" (buttonClick)="executeCommand('zoomOut')"></app-button>
       }
       @if (isCommandVisible('resetZoom')) {
-        <app-button icon="pi pi-sync" variant="ghost" [disabled]="!isCommandEnabled('resetZoom')" tooltip="shared.flowBuilder.toolbar.resetZoom" (buttonClick)="executeCommand('resetZoom')"></app-button>
+        <app-button data-testid="flow-builder-command-reset-zoom" icon="pi pi-sync" variant="ghost" [disabled]="!isCommandEnabled('resetZoom')" tooltip="shared.flowBuilder.toolbar.resetZoom" (buttonClick)="executeCommand('resetZoom')"></app-button>
       }
       <span class="flow-builder__toolbar-separator"></span>
       @if (isCommandVisible('autoLayout')) {
-        <app-button icon="pi pi-sitemap" variant="ghost" [disabled]="!isCommandEnabled('autoLayout')" tooltip="shared.flowBuilder.toolbar.autoLayout" (buttonClick)="executeCommand('autoLayout')"></app-button>
+        <app-button data-testid="flow-builder-command-auto-layout" icon="pi pi-sitemap" variant="ghost" [disabled]="!isCommandEnabled('autoLayout')" tooltip="shared.flowBuilder.toolbar.autoLayout" (buttonClick)="executeCommand('autoLayout')"></app-button>
       }
       @if (isCommandVisible('toggleNavigator')) {
-        <app-button icon="pi pi-map" variant="ghost" [disabled]="!isCommandEnabled('toggleNavigator')" tooltip="shared.flowBuilder.toolbar.navigator" (buttonClick)="executeCommand('toggleNavigator')"></app-button>
+        <app-button data-testid="flow-builder-command-toggle-navigator" icon="pi pi-map" variant="ghost" [disabled]="!isCommandEnabled('toggleNavigator')" tooltip="shared.flowBuilder.toolbar.navigator" (buttonClick)="executeCommand('toggleNavigator')"></app-button>
       }
       @if (isCommandVisible('toggleInspector')) {
-        <app-button icon="pi pi-window-maximize" variant="ghost" [disabled]="!isCommandEnabled('toggleInspector')" tooltip="shared.flowBuilder.toolbar.inspector" (buttonClick)="executeCommand('toggleInspector')"></app-button>
+        <app-button data-testid="flow-builder-command-toggle-inspector" icon="pi pi-window-maximize" variant="ghost" [disabled]="!isCommandEnabled('toggleInspector')" tooltip="shared.flowBuilder.toolbar.inspector" (buttonClick)="executeCommand('toggleInspector')"></app-button>
       }
       @if (isCommandVisible('fullscreen')) {
-        <app-button icon="pi pi-expand" variant="ghost" [disabled]="!isCommandEnabled('fullscreen')" tooltip="shared.flowBuilder.toolbar.fullscreen" (buttonClick)="executeCommand('fullscreen')"></app-button>
+        <app-button data-testid="flow-builder-command-fullscreen" icon="pi pi-expand" variant="ghost" [disabled]="!isCommandEnabled('fullscreen')" tooltip="shared.flowBuilder.toolbar.fullscreen" (buttonClick)="executeCommand('fullscreen')"></app-button>
       }
       <span class="flow-builder__toolbar-separator"></span>
       @if (isCommandVisible('duplicateSelection')) {
-        <app-button icon="pi pi-clone" variant="ghost" [disabled]="!isCommandEnabled('duplicateSelection')" tooltip="shared.flowBuilder.toolbar.duplicate" (buttonClick)="executeCommand('duplicateSelection')"></app-button>
+        <app-button data-testid="flow-builder-command-duplicate-selection" icon="pi pi-clone" variant="ghost" [disabled]="!isCommandEnabled('duplicateSelection')" tooltip="shared.flowBuilder.toolbar.duplicate" (buttonClick)="executeCommand('duplicateSelection')"></app-button>
       }
       @if (isCommandVisible('deleteSelection')) {
-        <app-button icon="pi pi-trash" variant="destructive" [disabled]="!isCommandEnabled('deleteSelection')" tooltip="shared.flowBuilder.toolbar.delete" (buttonClick)="executeCommand('deleteSelection')"></app-button>
+        <app-button data-testid="flow-builder-command-delete-selection" icon="pi pi-trash" variant="destructive" [disabled]="!isCommandEnabled('deleteSelection')" tooltip="shared.flowBuilder.toolbar.delete" (buttonClick)="executeCommand('deleteSelection')"></app-button>
       }
       <span class="flow-builder__toolbar-separator"></span>
       @if (isCommandVisible('exportJson')) {
-        <app-button icon="pi pi-download" variant="ghost" [disabled]="!isCommandEnabled('exportJson')" tooltip="shared.flowBuilder.toolbar.export" (buttonClick)="executeCommand('exportJson')"></app-button>
+        <app-button data-testid="flow-builder-command-export-json" icon="pi pi-download" variant="ghost" [disabled]="!isCommandEnabled('exportJson')" tooltip="shared.flowBuilder.toolbar.export" (buttonClick)="executeCommand('exportJson')"></app-button>
       }
       @if (isCommandVisible('importJson')) {
-        <app-button icon="pi pi-upload" variant="ghost" [disabled]="!isCommandEnabled('importJson')" tooltip="shared.flowBuilder.toolbar.import" (buttonClick)="executeCommand('importJson')"></app-button>
+        <app-button data-testid="flow-builder-command-import-json" icon="pi pi-upload" variant="ghost" [disabled]="!isCommandEnabled('importJson')" tooltip="shared.flowBuilder.toolbar.import" (buttonClick)="executeCommand('importJson')"></app-button>
       }
       <ng-content select="[flowToolbarExtra]"></ng-content>
     </div>

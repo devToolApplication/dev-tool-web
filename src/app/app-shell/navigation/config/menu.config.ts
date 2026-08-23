@@ -16,6 +16,11 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-sliders-h',
         routerLink: '/ai-agent-mcrs/configs',
       },
+      {
+        label: 'layout.menu.workflowStudio',
+        icon: 'pi pi-sitemap',
+        routerLink: '/ai-agent-mcrs/workflows',
+      },
     ],
   },
   {

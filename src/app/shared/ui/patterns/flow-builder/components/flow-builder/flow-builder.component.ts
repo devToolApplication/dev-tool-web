@@ -92,6 +92,7 @@ export class FlowBuilderComponent implements OnChanges {
   @Output() readonly validationChange = new EventEmitter<FlowValidationIssue[]>();
   @Output() readonly selectionChange = new EventEmitter<FlowSelection>();
   @Output() readonly contextMenu = new EventEmitter<FlowContextMenuEvent>();
+  @Output() readonly viewportChange = new EventEmitter<import('../../models').FlowViewportSnapshot>();
 
   readonly inspectorOpen = signal(true);
   readonly navigatorOpen = signal(true);
@@ -259,6 +260,7 @@ export class FlowBuilderComponent implements OnChanges {
 
   onViewportChange(snapshot: import('../../models').FlowViewportSnapshot): void {
     this.viewport.set(snapshot);
+    this.viewportChange.emit(snapshot);
   }
 
   onNavigatorViewportPan(event: { centerX: number; centerY: number }): void {

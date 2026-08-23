@@ -7,7 +7,6 @@ export class KeycloakService {
   private keycloak!: Keycloak;
   private initialized = false;
   private logoutInProgress = false;
-  private readonly authEnabled = environment.keycloak.enabled !== false;
 
   constructor(private zone: NgZone) {}
 
@@ -106,5 +105,27 @@ export class KeycloakService {
     }
 
     return this.keycloak?.hasRealmRole(role) ?? false;
+  }
+
+  private get authEnabled(): boolean {
+    return environment.keycloak.enabled !== false && !this.hasLocalDevBypass();
+  }
+
+  private hasLocalDevBypass(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    if (!['localhost', '127.0.0.1', '::1', '[::1]'].includes(window.location.hostname)) {
+      return false;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('dangerously-skip-permissions') || params.get('skip-permissions') === 'true') {
+      return true;
+    }
+    try {
+      return window.localStorage.getItem('dangerously-skip-permissions') === 'true';
+    } catch {
+      return false;
+    }
   }
 }

@@ -1,0 +1,37 @@
+<app-drawer
+  [open]="open"
+  title="workflowStudio.lifecycle.runWorkflow"
+  [subtitle]="workflowName"
+  size="lg"
+  [loading]="loading"
+  (closed)="close()"
+>
+  <div class="workflow-run-dialog">
+    <app-input-area
+      label="workflowStudio.lifecycle.runInput"
+      contentType="json"
+      [showZoomButton]="true"
+      [rows]="12"
+      [maxRows]="18"
+      [value]="inputText()"
+      [invalid]="!!error()"
+      [errorMessage]="error() ?? undefined"
+      (valueChange)="onInputChange($event)"
+    ></app-input-area>
+  </div>
+
+  <div drawer-footer class="workflow-run-dialog__footer">
+    <app-button
+      label="cancel"
+      variant="secondary"
+      [disabled]="loading"
+      (buttonClick)="close()"
+    ></app-button>
+    <app-button
+      label="workflowStudio.lifecycle.run"
+      icon="pi pi-play"
+      [loading]="loading"
+      (buttonClick)="submit()"
+    ></app-button>
+  </div>
+</app-drawer>

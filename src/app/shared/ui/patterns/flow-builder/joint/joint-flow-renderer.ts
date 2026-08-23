@@ -401,6 +401,13 @@ export function createNodeShape(node: FlowNode, typeDef?: FlowNodeTypeDefinition
     el.position(node.position.x, node.position.y);
   }
 
+  el.attr({
+    root: {
+      'data-testid': `flow-node-${node.id}`,
+      'data-node-id': node.id,
+      'data-node-type': node.type,
+    },
+  });
   el.set('originalStroke', strokeColor);
   el.set('originalStrokeWidth', 1.5);
   el.set('flowNodeShape', shape);
@@ -482,6 +489,10 @@ export function createEdgeShape(edge: FlowEdge, typeDef?: FlowEdgeTypeDefinition
 
   const link = new joint.shapes.standard.Link({
     attrs: {
+      root: {
+        'data-testid': `flow-edge-${edge.id}`,
+        'data-edge-id': edge.id,
+      },
       line: {
         stroke: color,
         strokeWidth: 2,
