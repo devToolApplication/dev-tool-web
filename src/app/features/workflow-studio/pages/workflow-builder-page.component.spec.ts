@@ -100,6 +100,7 @@ describe('WorkflowBuilderPageComponent', () => {
     expect(store.workflow()?.definition.id).toBe('');
     expect(store.nodes().map((node) => node.type)).toEqual(['START', 'END']);
     expect(component.hasUnsavedChanges()).toBe(false);
+    expect(component.generalInfoCollapsed()).toBe(false);
   });
 
   it('loads workflow detail on the edit route', async () => {
@@ -110,6 +111,7 @@ describe('WorkflowBuilderPageComponent', () => {
 
     expect(api.getWorkflowDetail).toHaveBeenCalledWith('wf-1');
     expect(store.workflow()?.definition.id).toBe('wf-1');
+    expect(component.generalInfoCollapsed()).toBe(true);
   });
 
   it('saves a new workflow then moves the URL to edit mode without reloading the page', async () => {
@@ -279,10 +281,10 @@ describe('WorkflowBuilderPageComponent', () => {
     component.handleShortcut(keyboardEvent('y', { ctrlKey: true }));
     expect(store.nodes().map((node) => node.id)).toEqual(['start-1', 'end-1', 'logic']);
 
-    const canvas = { fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn(), resetView: vi.fn() };
+    const canvas = { executeCommand: vi.fn(), fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn(), resetView: vi.fn() };
     component.workflowCanvas = canvas as never;
     component.handleShortcut(keyboardEvent('0', { ctrlKey: true }));
-    expect(canvas.fitView).toHaveBeenCalledTimes(1);
+    expect(canvas.executeCommand).toHaveBeenCalledWith('fit');
 
     component.versionsOpen.set(true);
     component.runDialogOpen.set(true);
@@ -317,24 +319,247 @@ describe('WorkflowBuilderPageComponent', () => {
     await component.applyAutoLayout();
     expect(store.positions()['end-1']).toEqual({ x: 280, y: 120 });
 
-    const canvas = { fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn(), resetView: vi.fn() };
+    const canvas = { executeCommand: vi.fn(), fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn(), resetView: vi.fn() };
     component.workflowCanvas = canvas as never;
     component.fitView();
     component.zoomIn();
     component.zoomOut();
     component.resetView();
-    expect(canvas).toMatchObject({
-      fitView: expect.any(Function),
-      zoomIn: expect.any(Function),
-      zoomOut: expect.any(Function),
-      resetView: expect.any(Function),
-    });
-    expect(canvas.fitView).toHaveBeenCalledTimes(1);
-    expect(canvas.zoomIn).toHaveBeenCalledTimes(1);
-    expect(canvas.zoomOut).toHaveBeenCalledTimes(1);
-    expect(canvas.resetView).toHaveBeenCalledTimes(1);
+    expect(canvas.executeCommand).toHaveBeenCalledWith('fit');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('zoomIn');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('zoomOut');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('resetZoom');
   });
 
+  it('executes editor commands through the single executeEditorCommand entry point', async () => {
+    configure(null);
+    fixture.detectChanges();
+    const canvas = {
+      executeCommand: vi.fn(),
+      fitView: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      resetView: vi.fn(),
+    };
+    component.workflowCanvas = canvas as never;
+
+    // View commands delegate to canvas executeCommand
+    component.executeEditorCommand('fit');
+    component.executeEditorCommand('zoomIn');
+    component.executeEditorCommand('zoomOut');
+    component.executeEditorCommand('resetZoom');
+    component.executeEditorCommand('toggleNavigator');
+    component.executeEditorCommand('fullscreen');
+
+    expect(canvas.executeCommand).toHaveBeenCalledWith('fit');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('zoomIn');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('zoomOut');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('resetZoom');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('toggleNavigator');
+    expect(canvas.executeCommand).toHaveBeenCalledWith('fullscreen');
+
+    // Duplicate node command
+    store.selectNode('start-1');
+    component.executeEditorCommand('duplicate');
+    expect(store.nodes().map((node) => node.id)).toContain('start-2');
+
+    // Undo and redo commands
+    component.executeEditorCommand('undo');
+    expect(store.nodes().map((node) => node.id)).not.toContain('start-2');
+    component.executeEditorCommand('redo');
+    expect(store.nodes().map((node) => node.id)).toContain('start-2');
+
+    // Delete node command
+    store.selectNode('start-2');
+    component.executeEditorCommand('delete');
+    expect(store.nodes().map((node) => node.id)).not.toContain('start-2');
+
+    // Delete edge command
+    store.selectEdge('start-1__end-1');
+    component.executeEditorCommand('delete');
+    expect(store.edges()).toEqual([]);
+  });
+
+  it('controls command availability with canExecuteEditorCommand helper', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    // Initially without history or selection
+    expect(component.canExecuteEditorCommand('undo')).toBe(false);
+    expect(component.canExecuteEditorCommand('redo')).toBe(false);
+    expect(component.canExecuteEditorCommand('autoLayout')).toBe(true);
+    expect(component.canExecuteEditorCommand('duplicate')).toBe(false);
+    expect(component.canExecuteEditorCommand('delete')).toBe(false);
+    expect(component.canExecuteEditorCommand('fit')).toBe(true);
+    expect(component.canExecuteEditorCommand('zoomIn')).toBe(true);
+    expect(component.canExecuteEditorCommand('zoomOut')).toBe(true);
+    expect(component.canExecuteEditorCommand('resetZoom')).toBe(true);
+    expect(component.canExecuteEditorCommand('toggleNavigator')).toBe(true);
+    expect(component.canExecuteEditorCommand('fullscreen')).toBe(true);
+
+    // When node selected
+    store.selectNode('start-1');
+    expect(component.canExecuteEditorCommand('duplicate')).toBe(true);
+    expect(component.canExecuteEditorCommand('delete')).toBe(true);
+
+    // When edge selected
+    store.selectEdge('start-1__end-1');
+    expect(component.canExecuteEditorCommand('duplicate')).toBe(false);
+    expect(component.canExecuteEditorCommand('delete')).toBe(true);
+
+    // In readonly mode
+    store.setMode('readonly');
+    expect(component.canExecuteEditorCommand('undo')).toBe(false);
+    expect(component.canExecuteEditorCommand('redo')).toBe(false);
+    expect(component.canExecuteEditorCommand('autoLayout')).toBe(false);
+    expect(component.canExecuteEditorCommand('duplicate')).toBe(false);
+    expect(component.canExecuteEditorCommand('delete')).toBe(false);
+    expect(component.canExecuteEditorCommand('fit')).toBe(true);
+    expect(component.canExecuteEditorCommand('zoomIn')).toBe(true);
+    expect(component.canExecuteEditorCommand('zoomOut')).toBe(true);
+    expect(component.canExecuteEditorCommand('resetZoom')).toBe(true);
+    expect(component.canExecuteEditorCommand('toggleNavigator')).toBe(true);
+    expect(component.canExecuteEditorCommand('fullscreen')).toBe(true);
+  });
+
+  it('computes dynamic node drawer title from selected node type', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.staticTitle');
+
+    store.selectNode('start-1');
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.START');
+
+    store.selectNode('end-1');
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.END');
+
+    store.addNode({
+      id: 'ai-node',
+      type: 'AI_GATE',
+      instruction: '',
+      criteria: {},
+      inputMapping: { mapping: {} },
+      provider: 'claude',
+      agentCode: 'test-agent',
+      workingDirectory: '',
+      outputSchema: 'gate-result-v1',
+      retryPolicy: { maxAttempts: 1 },
+      timeoutPolicy: { timeoutSeconds: 30 },
+    }, { x: 0, y: 0 });
+    store.selectNode('ai-node');
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.AI_GATE');
+
+    store.addNode({
+      id: 'code-node',
+      type: 'CODE_GATE',
+      handler: 'STRING_COMPARE',
+      config: {},
+      inputMapping: { mapping: {} },
+      retryPolicy: { maxAttempts: 1 },
+      timeoutPolicy: { timeoutSeconds: 30 },
+    }, { x: 0, y: 0 });
+    store.selectNode('code-node');
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.CODE_GATE');
+
+    store.addNode({
+      id: 'logic-node',
+      type: 'LOGIC',
+      operator: 'AND',
+      config: {},
+    }, { x: 0, y: 0 });
+    store.selectNode('logic-node');
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.LOGIC');
+  });
+
+  it('selects an edge, opens edge inspector title/subtitle and allows deleting connection', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    store.selectEdge('start-1__end-1');
+
+    expect(component.selectedElement()).toEqual({
+      kind: 'edge',
+      value: { source: 'start-1', target: 'end-1' },
+    });
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.nodeDrawerTitle()).toBe('workflowStudio.inspector.title.CONNECTION');
+    expect(component.elementDrawerSubtitle()).toBe('start-1 -> end-1');
+
+    component.executeEditorCommand('delete');
+
+    expect(store.edges()).toEqual([]);
+    expect(component.selectedElement()).toBeNull();
+    expect(component.nodeDrawerOpen()).toBe(false);
+  });
+
+  it('swaps selection seamlessly when switching between node and edge', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    store.selectNode('start-1');
+    expect(component.selectedElement()?.kind).toBe('node');
+    expect(component.nodeDrawerOpen()).toBe(true);
+
+    store.selectEdge('start-1__end-1');
+    expect(component.selectedElement()?.kind).toBe('edge');
+    expect(component.nodeDrawerOpen()).toBe(true);
+
+    store.selectNode('end-1');
+    expect(component.selectedElement()?.kind).toBe('node');
+    expect(component.nodeDrawerOpen()).toBe(true);
+  });
+
+  it('clears selection and closes drawer on Escape or blank click', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    store.selectEdge('start-1__end-1');
+    expect(component.nodeDrawerOpen()).toBe(true);
+
+    component.handleShortcut(keyboardEvent('Escape'));
+    expect(component.nodeDrawerOpen()).toBe(false);
+    expect(component.selectedElement()).toBeNull();
+
+    store.selectNode('start-1');
+    expect(component.nodeDrawerOpen()).toBe(true);
+
+    component.closeTransientState();
+    expect(component.nodeDrawerOpen()).toBe(false);
+    expect(component.selectedElement()).toBeNull();
+  });
+
+  it('handles problem selection by selecting issue, revealing element on canvas, and opening inspector', () => {
+    configure(null);
+    fixture.detectChanges();
+
+    const revealElement = vi.fn();
+    component.workflowCanvas = { revealElement } as never;
+
+    component.onProblemSelected({
+      code: 'START_INVALID',
+      severity: 'error',
+      nodeId: 'start-1',
+      message: 'Start is invalid',
+    });
+
+    expect(store.selectedNodeId()).toBe('start-1');
+    expect(revealElement).toHaveBeenCalledWith('start-1');
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.selectedElement()?.kind).toBe('node');
+
+    component.onProblemSelected({
+      code: 'EDGE_INVALID',
+      severity: 'error',
+      edgeId: 'start-1__end-1',
+      message: 'Edge is invalid',
+    });
+
+    expect(store.selectedEdgeId()).toBe('start-1__end-1');
+    expect(revealElement).toHaveBeenCalledWith('start-1__end-1');
+    expect(component.nodeDrawerOpen()).toBe(true);
+    expect(component.selectedElement()?.kind).toBe('edge');
+  });
   function keyboardEvent(
     key: string,
     options: {

@@ -420,6 +420,33 @@ export class JointFlowEngine {
     }
   }
 
+
+  revealElement(elementId: string): void {
+    const elId = this.nodeMap.get(elementId);
+    if (elId) {
+      const el = this.graph.getCell(elId);
+      if (el?.isElement()) {
+        const bbox = (el as joint.dia.Element).getBBox();
+        this.panToLocalCenter(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+        this.highlightNode(elementId);
+        return;
+      }
+    }
+
+    const linkId = this.edgeMap.get(elementId);
+    if (linkId) {
+      const link = this.graph.getCell(linkId);
+      if (link?.isLink()) {
+        const linkView = link.findView(this.paper) as joint.dia.LinkView | null;
+        const bbox = linkView?.getBBox() ?? (link as joint.dia.Link).getBBox();
+        if (bbox) {
+          this.panToLocalCenter(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+        }
+        this.highlightEdge(elementId);
+      }
+    }
+  }
+
   highlightEdge(edgeId: string): void {
     this.clearHighlights();
     const linkId = this.edgeMap.get(edgeId);

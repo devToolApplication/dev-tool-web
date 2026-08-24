@@ -13,7 +13,7 @@
 
   <div class="form-workspace" [class.form-workspace--with-nav]="showSectionNav()">
     @if (showSectionNav()) {
-      <app-form-section-nav
+      <app-form-section-nav [mode]="layout().sectionNavigation ?? 'sidebar'"
         [sections]="renderSections()"
         (sectionSelect)="onSectionSelect($event)"
       ></app-form-section-nav>

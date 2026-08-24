@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Component, EventEmitter, Input, NO_ERRORS_SCHEMA, Output, Pipe, PipeTransform } from '@angular/core';
 import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
-import { WorkflowDetail } from '../model/workflow-studio.model';
+import { InputMapping, WorkflowDetail } from '../model/workflow-studio.model';
 import { AiGateInspectorComponent } from './ai-gate-inspector.component';
 import { CodeGateInspectorComponent } from './code-gate-inspector.component';
 import { EndInspectorComponent } from './end-inspector.component';
@@ -32,6 +32,17 @@ class FormInputStubComponent {
   @Input() initialValue: Record<string, unknown> = {};
 
   @Output() readonly valueChange = new EventEmitter<Record<string, unknown>>();
+}
+
+@Component({
+  selector: 'app-workflow-input-mapping-editor',
+  standalone: false,
+  template: '',
+})
+class InputMappingEditorStubComponent {
+  @Input() value: InputMapping = { mapping: {} };
+  @Input() readonly = false;
+  @Output() readonly valueChange = new EventEmitter<InputMapping>();
 }
 
 describe('WorkflowNodeInspectorComponent', () => {
@@ -85,6 +96,7 @@ describe('WorkflowNodeInspectorComponent', () => {
         EndInspectorComponent,
         TranslateContentPipeStub,
         FormInputStubComponent,
+        InputMappingEditorStubComponent,
       ],
       providers: [
         WorkflowEditorStore,
@@ -143,25 +155,21 @@ describe('WorkflowNodeInspectorComponent', () => {
 
     form.valueChange.emit({
       ...initialValue,
-      instruction: 'Draft profile review',
+      instruction: 'Draft prompt',
     });
     fixture.detectChanges();
 
-    const formAfterStoreUpdate = fixture.debugElement.query(By.directive(FormInputStubComponent))
-      .componentInstance as FormInputStubComponent;
-
+    expect(form.initialValue).toBe(initialValue);
     expect(store.nodes().find((node) => node.id === 'ai')).toMatchObject({
       id: 'ai',
       type: 'AI_GATE',
-      instruction: 'Draft profile review',
+      instruction: 'Draft prompt',
     });
-    expect(formAfterStoreUpdate.initialValue).toBe(initialValue);
+    expect(store.dirty()).toBe(true);
   });
 
-  it('feeds AI gate catalog options and defaults provider when agent changes', async () => {
+  it('populates agent, provider and output schema options into form context', () => {
     store.selectNode('ai');
-    fixture.detectChanges();
-    await fixture.whenStable();
     fixture.detectChanges();
 
     const form = fixture.debugElement.query(By.directive(FormInputStubComponent))
@@ -174,9 +182,11 @@ describe('WorkflowNodeInspectorComponent', () => {
         { label: 'KOC Rule Evaluator', value: 'koc-rule-evaluator' },
         { label: 'Facebook Candidate Discovery', value: 'facebook-candidate-discovery' },
       ],
-      providerOptions: [{ label: 'workflowStudio.ai.provider.codex', value: 'codex' }],
       outputSchemaOptions: [{ label: 'Gate result v1', value: 'gate-result-v1' }],
     });
+
+    const extra = form.context.extra as { providerOptions: Array<{ value: unknown; label: string }> };
+    expect(extra.providerOptions.some((p) => p.value === 'claude')).toBe(true);
 
     form.valueChange.emit({
       ...form.initialValue,
@@ -191,6 +201,54 @@ describe('WorkflowNodeInspectorComponent', () => {
       agentCode: 'facebook-candidate-discovery',
       provider: 'claude',
     });
+  });
+
+  it('handles agent API error state and retry without collapsing to empty', () => {
+    api.getAgents.mockReturnValue(throwError(() => new Error('Network error')));
+    store.selectNode('ai');
+    fixture.detectChanges();
+
+    const inspector = fixture.debugElement.query(By.directive(AiGateInspectorComponent))
+      .componentInstance as AiGateInspectorComponent;
+
+    expect(inspector.agentState()).toBe('error');
+
+    api.getAgents.mockReturnValue(of([
+      {
+        agentCode: 'koc-rule-evaluator',
+        displayName: 'KOC Rule Evaluator',
+        defaultProvider: 'codex',
+        supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+        requiredDependencies: [],
+        health: 'HEALTHY',
+      },
+    ]));
+
+    inspector.retryAgents();
+    expect(inspector.agentState()).toBe('ready');
+    expect(inspector.agents().length).toBe(1);
+  });
+
+  it('marks unhealthy agents and unavailable providers as disabled with labels', () => {
+    api.getAgents.mockReturnValue(of([
+      {
+        agentCode: 'unhealthy-agent',
+        displayName: 'Unhealthy Agent',
+        defaultProvider: 'codex',
+        supportedProviders: [{ provider: 'codex', available: false, health: 'UNHEALTHY' }],
+        requiredDependencies: [],
+        health: 'UNHEALTHY',
+      },
+    ]));
+
+    store.selectNode('ai');
+    fixture.detectChanges();
+
+    const form = fixture.debugElement.query(By.directive(FormInputStubComponent))
+      .componentInstance as FormInputStubComponent;
+
+    const extra = form.context.extra as { agentOptions: Array<{ disabled?: boolean; label: string }> };
+    expect(extra.agentOptions.find((a) => a.label.includes('Unhealthy Agent'))?.disabled).toBe(true);
   });
 
   it('ignores invalid form payloads so advanced JSON cannot corrupt editor state', () => {
@@ -215,6 +273,53 @@ describe('WorkflowNodeInspectorComponent', () => {
       config: { operator: 'LT' },
     });
     expect(store.dirty()).toBe(false);
+  });
+
+  it('switches form initial value and reference when selecting another node of same type', () => {
+    store.addNode({
+      id: 'ai-2',
+      type: 'AI_GATE',
+      instruction: 'Second AI instruction',
+      criteria: {},
+      inputMapping: { mapping: {} },
+      provider: 'codex',
+      agentCode: 'facebook-candidate-discovery',
+      workingDirectory: 'D:\\Code',
+      outputSchema: 'gate-result-v1',
+      retryPolicy: { maxAttempts: 1 },
+      timeoutPolicy: { timeoutSeconds: 60 },
+    }, { x: 100, y: 100 });
+
+    store.selectNode('ai');
+    fixture.detectChanges();
+
+    const formFirstNode = fixture.debugElement.query(By.directive(FormInputStubComponent))
+      .componentInstance as FormInputStubComponent;
+    const initialFirstNode = formFirstNode.initialValue;
+    expect(initialFirstNode['id']).toBe('ai');
+    expect(initialFirstNode['instruction']).toBe('Review profile');
+
+    store.selectNode('ai-2');
+    fixture.detectChanges();
+
+    const formSecondNode = fixture.debugElement.query(By.directive(FormInputStubComponent))
+      .componentInstance as FormInputStubComponent;
+    const initialSecondNode = formSecondNode.initialValue;
+
+    expect(initialSecondNode).not.toBe(initialFirstNode);
+    expect(initialSecondNode['id']).toBe('ai-2');
+    expect(initialSecondNode['instruction']).toBe('Second AI instruction');
+  });
+
+  it('provides readonly view context to form input when editor is in readonly mode', () => {
+    store.setMode('readonly');
+    store.selectNode('ai');
+    fixture.detectChanges();
+
+    const form = fixture.debugElement.query(By.directive(FormInputStubComponent))
+      .componentInstance as FormInputStubComponent;
+
+    expect(form.context.mode).toBe('view');
   });
 });
 

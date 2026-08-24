@@ -53,6 +53,10 @@
   width: min(100vw, 28rem);
 }
 
+.app-drawer__panel--comfortable {
+  width: min(100vw, 32.5rem);
+}
+
 .app-drawer__panel--md {
   width: min(100vw, 42rem);
 }

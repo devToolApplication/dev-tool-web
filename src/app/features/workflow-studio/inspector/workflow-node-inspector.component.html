@@ -6,6 +6,7 @@
       <app-ai-gate-inspector
         [node]="asAiGateNode(node)"
         [readonly]="readonlyMode()"
+        [focusedIssue]="focusedIssue()"
         (nodePatch)="applyNodePatch($event)"
       ></app-ai-gate-inspector>
     }

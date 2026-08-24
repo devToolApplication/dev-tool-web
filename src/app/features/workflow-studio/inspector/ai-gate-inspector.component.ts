@@ -4,8 +4,11 @@ import type { FormConfig, FormContext, SelectOption } from '@shared/ui/patterns/
 import { WorkflowApiService } from '../api/workflow-api.service';
 import {
   AiGateWorkflowNode,
+  InputMapping,
+  JsonValue,
   WorkflowAgentCatalogItem,
   WorkflowOutputSchemaCatalogItem,
+  WorkflowValidationIssue,
 } from '../model/workflow-studio.model';
 import {
   WORKFLOW_NODE_INSPECTOR_CONTEXT,
@@ -13,15 +16,24 @@ import {
 } from './workflow-node-inspector.model';
 import { WorkflowNodeFormInspector } from './workflow-node-form-inspector.base';
 
+export type CatalogLoadState = 'loading' | 'ready' | 'empty' | 'error';
+
 @Component({
   selector: 'app-ai-gate-inspector',
   standalone: false,
-  templateUrl: './workflow-node-form-inspector.component.html',
+  templateUrl: './ai-gate-inspector.component.html',
+  styleUrl: './ai-gate-inspector.component.css',
 })
 export class AiGateInspectorComponent extends WorkflowNodeFormInspector<AiGateWorkflowNode> implements OnInit {
   private readonly api = inject(WorkflowApiService);
-  private readonly agents = signal<WorkflowAgentCatalogItem[]>([]);
-  private readonly outputSchemas = signal<WorkflowOutputSchemaCatalogItem[]>([]);
+
+  readonly agents = signal<WorkflowAgentCatalogItem[]>([]);
+  readonly outputSchemas = signal<WorkflowOutputSchemaCatalogItem[]>([]);
+
+  readonly agentState = signal<CatalogLoadState>('loading');
+  readonly outputSchemaState = signal<CatalogLoadState>('loading');
+
+  private defaultSchemaApplied = false;
 
   @Input({ required: true }) node!: AiGateWorkflowNode;
   @Input() override readonly = false;
@@ -31,68 +43,209 @@ export class AiGateInspectorComponent extends WorkflowNodeFormInspector<AiGateWo
   override readonly config: FormConfig = workflowNodeInspectorConfig('AI_GATE');
 
   override get formContext(): FormContext {
-    const selectedAgent = this.selectedAgent(textValue(this.initialValue['agentCode'] ?? this.node?.agentCode));
+    const currentAgentCode = textValue(this.initialValue['agentCode'] ?? this.node?.agentCode);
+    const selectedAgent = this.selectedAgent(currentAgentCode);
+
     return {
       ...WORKFLOW_NODE_INSPECTOR_CONTEXT,
       mode: this.readonly ? 'view' : 'edit',
       extra: {
-        agentOptions: this.agents().map(agentOption),
-        providerOptions: providerOptions(selectedAgent),
-        outputSchemaOptions: this.outputSchemas().map(outputSchemaOption),
+        agentOptions: this.buildAgentOptions(currentAgentCode),
+        providerOptions: this.buildProviderOptions(selectedAgent, textValue(this.initialValue['provider'] ?? this.node?.provider)),
+        outputSchemaOptions: this.buildOutputSchemaOptions(textValue(this.initialValue['outputSchema'] ?? this.node?.outputSchema)),
       },
     };
   }
 
+  // ponytail: section scroll/focus jumps directly to decision or input containers; exact DOM element focus skipped for custom row controls.
+  @Input() focusedIssue: WorkflowValidationIssue | null = null;
+
+  get criteriaValue(): JsonValue {
+    return this.node?.criteria ?? {};
+  }
+
+  get inputMappingValue(): InputMapping {
+    return this.node?.inputMapping ?? { mapping: {} };
+  }
+
+  onCriteriaChange(criteria: JsonValue): void {
+    if (this.readonly) return;
+    this.nodePatch.emit({ criteria });
+  }
+
   ngOnInit(): void {
+    this.loadAgents();
+    this.loadOutputSchemas();
+  }
+
+  loadAgents(): void {
+    this.agentState.set('loading');
     this.api.getAgents().subscribe({
-      next: (agents) => this.agents.set(agents ?? []),
-      error: () => this.agents.set([]),
+      next: (agents) => {
+        const items = agents ?? [];
+        this.agents.set(items);
+        this.agentState.set(items.length > 0 ? 'ready' : 'empty');
+      },
+      error: () => {
+        this.agents.set([]);
+        this.agentState.set('error');
+      },
     });
+  }
+
+  loadOutputSchemas(): void {
+    this.outputSchemaState.set('loading');
     this.api.getAiGateOutputSchemas().subscribe({
-      next: (schemas) => this.outputSchemas.set(schemas ?? []),
-      error: () => this.outputSchemas.set([]),
+      next: (schemas) => {
+        const items = schemas ?? [];
+        this.outputSchemas.set(items);
+        this.outputSchemaState.set(items.length > 0 ? 'ready' : 'empty');
+
+        if (!this.defaultSchemaApplied && !this.node?.outputSchema && items.length > 0) {
+          this.defaultSchemaApplied = true;
+          const defaultSchema = defaultOutputSchema(items);
+          this.formValueChange({
+            ...this.initialValue,
+            outputSchema: defaultSchema,
+          });
+        }
+      },
+      error: () => {
+        this.outputSchemas.set([]);
+        this.outputSchemaState.set('error');
+      },
     });
+  }
+
+  retryAgents(): void {
+    this.loadAgents();
+  }
+
+  retryOutputSchemas(): void {
+    this.loadOutputSchemas();
   }
 
   override formValueChange(value: Record<string, unknown>): void {
     const next = { ...value };
     const selectedAgent = this.selectedAgent(textValue(next['agentCode']));
     const provider = textValue(next['provider']);
-    if (selectedAgent && !providerSupported(selectedAgent, provider)) {
+
+    if (this.agentState() === 'ready' && selectedAgent && (!provider || !providerSupported(selectedAgent, provider))) {
       next['provider'] = defaultProvider(selectedAgent);
     }
-    if (!textValue(next['outputSchema'])) {
-      next['outputSchema'] = defaultOutputSchema(this.outputSchemas());
-    }
+
     super.formValueChange(next);
+  }
+
+  onInputMappingChange(mapping: InputMapping): void {
+    if (this.readonly) return;
+    this.nodePatch.emit({ inputMapping: mapping });
   }
 
   private selectedAgent(agentCode: string): WorkflowAgentCatalogItem | undefined {
     return this.agents().find((agent) => agent.agentCode === agentCode);
   }
-}
 
-function agentOption(agent: WorkflowAgentCatalogItem): SelectOption {
-  return {
-    label: agent.displayName || agent.agentCode,
-    value: agent.agentCode,
-    disabled: agent.health === 'UNHEALTHY',
-  };
-}
+  private buildAgentOptions(currentAgentCode: string): SelectOption[] {
+    const state = this.agentState();
+    if (state === 'loading') {
+      return [{ label: 'workflowStudio.inspector.loadingAgents', value: currentAgentCode || null, disabled: true }];
+    }
+    if (state === 'empty') {
+      return [{ label: 'workflowStudio.inspector.emptyAgents', value: currentAgentCode || null, disabled: true }];
+    }
+    if (state === 'error') {
+      return [{ label: 'workflowStudio.inspector.errorAgents', value: currentAgentCode || null, disabled: true }];
+    }
 
-function providerOptions(agent: WorkflowAgentCatalogItem | undefined): SelectOption[] {
-  return (agent?.supportedProviders ?? []).map((provider) => ({
-    label: `workflowStudio.ai.provider.${provider.provider}`,
-    value: provider.provider,
-    disabled: provider.available === false,
-  }));
-}
+    const options: SelectOption[] = this.agents().map((agent) => ({
+      label: agent.health === 'UNHEALTHY'
+        ? `${agent.displayName || agent.agentCode} (${this.unhealthyLabel()})`
+        : (agent.displayName || agent.agentCode),
+      value: agent.agentCode,
+      disabled: agent.health === 'UNHEALTHY',
+    }));
 
-function outputSchemaOption(schema: WorkflowOutputSchemaCatalogItem): SelectOption {
-  return {
-    label: schema.label || schema.value,
-    value: schema.value,
-  };
+    if (currentAgentCode && !this.agents().some((a) => a.agentCode === currentAgentCode)) {
+      options.unshift({
+        label: `${currentAgentCode} (${this.unavailableLabel()})`,
+        value: currentAgentCode,
+        disabled: true,
+      });
+    }
+
+    return options;
+  }
+
+  private buildProviderOptions(agent: WorkflowAgentCatalogItem | undefined, currentProvider: string): SelectOption[] {
+    if (!agent) {
+      if (currentProvider) {
+        return [{
+          label: `${currentProvider} (${this.unavailableLabel()})`,
+          value: currentProvider,
+          disabled: true,
+        }];
+      }
+      return [{ label: 'workflowStudio.inspector.noAgentSelected', value: null, disabled: true }];
+    }
+
+    const supported = agent.supportedProviders ?? [];
+    if (supported.length === 0) {
+      return [{ label: 'workflowStudio.inspector.noAvailableProvider', value: null, disabled: true }];
+    }
+
+    const options: SelectOption[] = supported.map((p) => ({
+      label: `workflowStudio.ai.provider.${p.provider}`,
+      value: p.provider,
+      disabled: p.available === false,
+    }));
+
+    if (currentProvider && !supported.some((p) => p.provider === currentProvider)) {
+      options.unshift({
+        label: `${currentProvider} (${this.unavailableLabel()})`,
+        value: currentProvider,
+        disabled: true,
+      });
+    }
+
+    return options;
+  }
+
+  private buildOutputSchemaOptions(currentSchema: string): SelectOption[] {
+    const state = this.outputSchemaState();
+    if (state === 'loading') {
+      return [{ label: 'workflowStudio.inspector.loadingOutputSchemas', value: currentSchema || null, disabled: true }];
+    }
+    if (state === 'empty') {
+      return [{ label: 'workflowStudio.inspector.emptyOutputSchemas', value: currentSchema || null, disabled: true }];
+    }
+    if (state === 'error') {
+      return [{ label: 'workflowStudio.inspector.errorOutputSchemas', value: currentSchema || null, disabled: true }];
+    }
+
+    const options: SelectOption[] = this.outputSchemas().map((schema) => ({
+      label: schema.label || schema.value,
+      value: schema.value,
+    }));
+
+    if (currentSchema && !this.outputSchemas().some((s) => s.value === currentSchema)) {
+      options.unshift({
+        label: `${currentSchema} (${this.unavailableLabel()})`,
+        value: currentSchema,
+        disabled: true,
+      });
+    }
+
+    return options;
+  }
+
+  private unhealthyLabel(): string {
+    return 'workflowStudio.inspector.unhealthy';
+  }
+
+  private unavailableLabel(): string {
+    return 'workflowStudio.inspector.unavailable';
+  }
 }
 
 function defaultProvider(agent: WorkflowAgentCatalogItem): string {

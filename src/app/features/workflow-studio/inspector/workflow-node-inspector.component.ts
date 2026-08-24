@@ -24,6 +24,7 @@ export class WorkflowNodeInspectorComponent {
     return this.editorStore.nodes().find((node) => node.id === selectedNodeId) ?? null;
   });
   readonly readonlyMode = computed(() => this.editorStore.mode() !== 'design');
+  readonly focusedIssue = computed(() => this.editorStore.focusedValidationIssue());
 
   applyNodePatch(patch: Partial<WorkflowNode>): void {
     const node = this.selectedNode();

@@ -1,0 +1,133 @@
+<div class="workflow-json-object-editor">
+  @if (validationError()) {
+    <app-alert
+      variant="danger"
+      [message]="validationError()!"
+      class="workflow-json-object-editor__alert"
+    ></app-alert>
+  }
+
+  @if (rows().length > 0) {
+    <div class="workflow-json-object-editor__header">
+      <span>{{ 'workflowStudio.inspector.criteriaKey' | translateContent }}</span>
+      <span>{{ 'workflowStudio.inspector.criteriaType' | translateContent }}</span>
+      <span>{{ 'workflowStudio.inspector.criteriaValue' | translateContent }}</span>
+      <span class="w-8"></span>
+    </div>
+  }
+
+  <div class="workflow-json-object-editor__rows">
+    @for (row of rows(); track row.id; let index = $index) {
+      <div class="workflow-json-object-editor__row">
+        <app-input-text
+          [value]="row.key"
+          [disabled]="readonly"
+          [placeholder]="'workflowStudio.inspector.criteriaKeyPlaceholder' | translateContent"
+          (valueChange)="onKeyChange(row.id, $event ?? '')"
+        ></app-input-text>
+
+        <app-select
+          [value]="row.type"
+          [disabled]="readonly"
+          [options]="typeOptions"
+          (valueChange)="onTypeChange(row.id, $any($event))"
+        ></app-select>
+
+        @switch (row.type) {
+          @case ('string') {
+            <app-input-text
+              [value]="row.stringValue"
+              [disabled]="readonly"
+              [placeholder]="'workflowStudio.inspector.criteriaValuePlaceholder' | translateContent"
+              (valueChange)="onStringValueChange(row.id, $event ?? '')"
+            ></app-input-text>
+          }
+          @case ('number') {
+            <app-input-number
+              [value]="row.numberValue"
+              [disabled]="readonly"
+              [placeholder]="'workflowStudio.inspector.criteriaValuePlaceholder' | translateContent"
+              (valueChange)="onNumberValueChange(row.id, $event)"
+            ></app-input-number>
+          }
+          @case ('boolean') {
+            <app-select
+              [value]="row.booleanValue"
+              [disabled]="readonly"
+              [options]="booleanOptions"
+              (valueChange)="onBooleanValueChange(row.id, !!$event)"
+            ></app-select>
+          }
+          @case ('null') {
+            <span class="workflow-json-object-editor__null-value">null</span>
+          }
+          @case ('json') {
+            <app-input-text
+              [value]="row.rawJsonValue"
+              [disabled]="readonly"
+              placeholder="{}"
+              (valueChange)="onRawJsonValueChange(row.id, $event ?? '')"
+            ></app-input-text>
+          }
+        }
+
+        @if (!readonly) {
+          <app-button
+            size="sm"
+            variant="ghost"
+            icon="pi pi-trash"
+            [iconOnly]="true"
+            [ariaLabel]="'workflowStudio.inspector.removeCriteria' | translateContent"
+            (buttonClick)="removeRow(row.id)"
+          ></app-button>
+        } @else {
+          <span class="w-8"></span>
+        }
+      </div>
+    } @empty {
+      <div class="workflow-json-object-editor__empty">
+        {{ 'workflowStudio.inspector.noCriteria' | translateContent }}
+      </div>
+    }
+  </div>
+
+  @if (!readonly) {
+    <div class="workflow-json-object-editor__actions">
+      <app-button
+        size="sm"
+        variant="secondary"
+        icon="pi pi-plus"
+        [label]="'workflowStudio.inspector.addCriteria' | translateContent"
+        (buttonClick)="addRow()"
+      ></app-button>
+    </div>
+  }
+
+  <div class="workflow-json-object-editor__advanced">
+    <button
+      type="button"
+      class="workflow-json-object-editor__advanced-toggle"
+      (click)="toggleAdvanced()"
+    >
+      <i
+        class="pi"
+        [class.pi-chevron-right]="!advancedOpen()"
+        [class.pi-chevron-down]="advancedOpen()"
+      ></i>
+      <span>{{ 'workflowStudio.inspector.advancedRawJson' | translateContent }}</span>
+    </button>
+
+    @if (advancedOpen()) {
+      <div class="workflow-json-object-editor__advanced-content">
+        <app-input-area
+          contentType="json"
+          [rows]="4"
+          [maxRows]="10"
+          [disabled]="readonly"
+          [value]="rawJsonText()"
+          (valueChange)="onRawJsonChange($event ?? '')"
+        ></app-input-area>
+      </div>
+    }
+  </div>
+</div>

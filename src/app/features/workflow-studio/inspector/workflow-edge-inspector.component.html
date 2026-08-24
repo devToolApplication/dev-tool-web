@@ -1,0 +1,31 @@
+<div class="workflow-edge-inspector">
+  <section class="workflow-edge-inspector__section">
+    <h3 class="workflow-edge-inspector__heading">
+      {{ 'workflowStudio.inspector.section.general' | translateContent }}
+    </h3>
+    <div class="workflow-edge-inspector__fields">
+      <app-input-text
+        label="workflowStudio.inspector.source"
+        [value]="edge.source"
+        [readonly]="true"
+      ></app-input-text>
+      <app-input-text
+        label="workflowStudio.inspector.target"
+        [value]="edge.target"
+        [readonly]="true"
+      ></app-input-text>
+    </div>
+  </section>
+
+  @if (!readonly) {
+    <section class="workflow-edge-inspector__actions">
+      <app-button
+        variant="destructive"
+        icon="pi pi-trash"
+        label="workflowStudio.inspector.deleteConnection"
+        (buttonClick)="requestDelete()"
+      ></app-button>
+    </section>
+  }
+</div>
+

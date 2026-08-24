@@ -273,6 +273,27 @@ export class WorkflowEditorStore {
     }
   }
 
+  duplicateSelectedNode(): void {
+    if (!this.canMutate()) return;
+    const selectedId = this.selectedNodeId();
+    if (!selectedId) return;
+    const originalNode = this.nodes().find((node) => node.id === selectedId);
+    if (!originalNode) return;
+
+    this.captureHistory();
+    const newId = createWorkflowNodeId(
+      originalNode.type,
+      this.nodes().map((item) => item.id),
+    );
+    const cloned = { ...cloneNode(originalNode), id: newId };
+    const currentPos = this.positions()[selectedId] ?? { x: 0, y: 0 };
+    const newPosition: WorkflowNodePosition = { x: currentPos.x + 32, y: currentPos.y + 32 };
+    this.nodes.update((nodes) => [...nodes, cloned]);
+    this.positions.update((positions) => ({ ...positions, [newId]: newPosition }));
+    this.selectNode(newId);
+    this.markDirty();
+  }
+
   undo(): void {
     if (!this.canMutate()) return;
     const previous = this.undoStack().at(-1);

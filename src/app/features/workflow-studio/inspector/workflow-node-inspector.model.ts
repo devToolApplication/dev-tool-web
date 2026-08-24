@@ -62,7 +62,6 @@ export function workflowNodeToInspectorValue(node: WorkflowNode): WorkflowNodeIn
         workingDirectory: node.workingDirectory,
         instruction: node.instruction,
         criteria: stringifyJson(node.criteria),
-        inputMapping: stringifyJson(node.inputMapping),
         outputSchema: node.outputSchema,
         maxAttempts: node.retryPolicy.maxAttempts,
         timeoutSeconds: node.timeoutPolicy.timeoutSeconds,
@@ -107,16 +106,72 @@ export function workflowNodePatchFromInspectorValue(
   }
 }
 
+export function workflowFieldToSectionId(nodeType: WorkflowNodeType, fieldName?: string): string | null {
+  if (!fieldName) return null;
+  const normalizedField = fieldName.startsWith('config.') ? fieldName.slice(7) : fieldName;
+
+  switch (nodeType) {
+    case 'AI_GATE':
+      switch (normalizedField) {
+        case 'agentCode':
+        case 'provider':
+        case 'workingDirectory':
+          return 'agent';
+        case 'instruction':
+          return 'prompt';
+        case 'criteria':
+          return 'decision';
+        case 'inputMapping':
+          return 'input';
+        case 'outputSchema':
+          return 'output';
+        case 'maxAttempts':
+        case 'timeoutSeconds':
+          return 'execution';
+        default:
+          return 'general';
+      }
+    case 'CODE_GATE':
+      switch (normalizedField) {
+        case 'handler':
+        case 'config':
+          return 'configuration';
+        case 'inputMapping':
+          return 'input';
+        case 'maxAttempts':
+        case 'timeoutSeconds':
+          return 'execution';
+        default:
+          return 'general';
+      }
+    case 'LOGIC':
+      switch (normalizedField) {
+        case 'operator':
+          return 'logic';
+        case 'required':
+        case 'cases':
+        case 'casePassTarget':
+        case 'caseFailTarget':
+        case 'caseBlockedTarget':
+        case 'defaultTarget':
+        case 'config':
+          return 'routing';
+        default:
+          return 'general';
+      }
+    default:
+      return 'general';
+  }
+}
+
 function aiGateConfig(): FormConfig {
   return compactConfig(
     [
       section('general'),
       section('agent'),
       section('prompt'),
-      section('decision', true),
-      section('input', true),
-      section('output'),
-      section('execution'),
+      section('output', true),
+      section('execution', true),
     ],
     [
       idField(),
@@ -150,8 +205,6 @@ function aiGateConfig(): FormConfig {
         maxRows: 14,
         showZoomButton: true,
       },
-      jsonField('criteria', 'workflowStudio.inspector.criteria', 'decision'),
-      jsonField('inputMapping', 'workflowStudio.inspector.inputMapping', 'input'),
       {
         name: 'outputSchema',
         type: 'auto-complete',
@@ -172,23 +225,11 @@ function codeGateConfig(): FormConfig {
       section('general'),
       section('configuration', true),
       section('input', true),
-      section('execution'),
+      section('execution', true),
     ],
     [
       idField(),
-      {
-        name: 'handler',
-        type: 'select',
-        label: 'workflowStudio.inspector.handler',
-        sectionId: 'general',
-        required: true,
-        showClear: true,
-        options: [
-          { label: 'NUMBER_COMPARE', value: 'NUMBER_COMPARE' },
-          { label: 'STRING_COMPARE', value: 'STRING_COMPARE' },
-          { label: 'EXISTS', value: 'EXISTS' },
-        ],
-      },
+      textField('handler', 'workflowStudio.inspector.handler', 'configuration', 'full'),
       jsonField('config', 'workflowStudio.inspector.config', 'configuration'),
       jsonField('inputMapping', 'workflowStudio.inspector.inputMapping', 'input'),
       numberField('maxAttempts', 'workflowStudio.inspector.maxAttempts', 'execution'),
@@ -212,8 +253,8 @@ function logicConfig(): FormConfig {
         type: 'select',
         label: 'workflowStudio.inspector.operator',
         sectionId: 'logic',
-        options: LOGIC_OPERATOR_OPTIONS,
         required: true,
+        options: LOGIC_OPERATOR_OPTIONS,
       },
       {
         name: 'required',
@@ -221,25 +262,30 @@ function logicConfig(): FormConfig {
         label: 'workflowStudio.inspector.minimumSuccess',
         sectionId: 'logic',
         visibleWhen: "model.operator === 'N_OF_M'",
-        validation: [{ type: 'min', value: 1, message: 'workflowStudio.validation.minimumSuccess' }],
       },
-      switchTargetField('casePassTarget', 'workflowStudio.inspector.casePassTarget'),
-      switchTargetField('caseFailTarget', 'workflowStudio.inspector.caseFailTarget'),
-      switchTargetField('caseBlockedTarget', 'workflowStudio.inspector.caseBlockedTarget'),
-      switchTargetField('defaultTarget', 'workflowStudio.inspector.defaultTarget'),
+      switchCaseField('casePassTarget', 'workflowStudio.inspector.casePassTarget'),
+      switchCaseField('caseFailTarget', 'workflowStudio.inspector.caseFailTarget'),
+      switchCaseField('caseBlockedTarget', 'workflowStudio.inspector.caseBlockedTarget'),
+      {
+        name: 'defaultTarget',
+        type: 'text',
+        label: 'workflowStudio.inspector.defaultTarget',
+        sectionId: 'routing',
+        visibleWhen: "model.operator === 'SWITCH'",
+      },
       jsonField('config', 'workflowStudio.inspector.config', 'advanced'),
     ],
   );
 }
 
 function readonlyNodeConfig(): FormConfig {
-  return compactConfig([section('general')], [
-    idField(),
-    textField('type', 'workflowStudio.inspector.type', 'general'),
-  ]);
+  return compactConfig([section('general')], [idField()]);
 }
 
-function compactConfig(sections: NonNullable<FormConfig['sections']>, fields: FieldConfig[]): FormConfig {
+function compactConfig(
+  sections: FormConfig['sections'],
+  fields: FieldConfig[],
+): FormConfig {
   return {
     sections,
     fields,
@@ -247,27 +293,20 @@ function compactConfig(sections: NonNullable<FormConfig['sections']>, fields: Fi
       mode: 'sectioned',
       density: 'compact',
       labelPlacement: 'top',
-      sectionNavigation: 'tabs',
-      showStatusPanel: false,
+      sectionNavigation: 'none',
+      showValidationSummary: true,
       stickyFooter: false,
       autoScrollToError: false,
-      showValidationSummary: true,
-      readonlyMode: 'disabled-controls',
-    },
-    actions: {
-      showCancel: false,
-      showReset: false,
-      disableSubmitWhenInvalid: false,
     },
   };
 }
 
-function section(id: string, collapsed = false): NonNullable<FormConfig['sections']>[number] {
+function section(id: string, collapsible = false) {
   return {
     id,
     title: `workflowStudio.inspector.section.${id}`,
-    collapsible: collapsed,
-    collapsed,
+    collapsible,
+    collapsed: collapsible,
   };
 }
 
@@ -278,6 +317,7 @@ function idField(): FieldConfig {
     label: 'workflowStudio.inspector.nodeId',
     sectionId: 'general',
     disabledWhen: 'true',
+    width: 'full',
   };
 }
 
@@ -286,7 +326,7 @@ function textField(
   label: string,
   sectionId: string,
   width: FieldConfig['width'] = 'full',
-  required = false,
+  disabled = false,
 ): FieldConfig {
   return {
     name,
@@ -294,7 +334,19 @@ function textField(
     label,
     sectionId,
     width,
-    required,
+    disabledWhen: disabled ? 'true' : undefined,
+  };
+}
+
+function jsonField(name: string, label: string, sectionId: string): FieldConfig {
+  return {
+    name,
+    type: 'json',
+    label,
+    sectionId,
+    rows: 4,
+    maxRows: 10,
+    showZoomButton: true,
   };
 }
 
@@ -309,21 +361,7 @@ function numberField(name: string, label: string, sectionId: string): FieldConfi
   };
 }
 
-function jsonField(name: string, label: string, sectionId: string): FieldConfig {
-  return {
-    name,
-    type: 'json',
-    label,
-    sectionId,
-    rows: 8,
-    maxRows: 18,
-    showZoomButton: true,
-    contentType: 'json',
-    jsonValidationMessage: 'shared.json.invalid',
-  };
-}
-
-function switchTargetField(name: string, label: string): FieldConfig {
+function switchCaseField(name: string, label: string): FieldConfig {
   return {
     name,
     type: 'text',
@@ -335,15 +373,14 @@ function switchTargetField(name: string, label: string): FieldConfig {
 
 function aiGatePatch(value: WorkflowNodeInspectorValue): Partial<AiGateWorkflowNode> | null {
   const criteria = parseJsonField(value['criteria']);
-  const inputMapping = parseInputMappingField(value['inputMapping']);
-  if (criteria === undefined || inputMapping === undefined) {
+  const inputMapping = value['inputMapping'] !== undefined ? parseInputMappingField(value['inputMapping']) : undefined;
+  if (criteria === undefined || (value['inputMapping'] !== undefined && inputMapping === undefined)) {
     return null;
   }
 
-  return {
+  const patch: Partial<AiGateWorkflowNode> = {
     instruction: textValue(value['instruction']),
     criteria,
-    inputMapping,
     provider: textValue(value['provider']),
     agentCode: textValue(value['agentCode']),
     workingDirectory: textValue(value['workingDirectory']),
@@ -351,6 +388,12 @@ function aiGatePatch(value: WorkflowNodeInspectorValue): Partial<AiGateWorkflowN
     retryPolicy: { maxAttempts: positiveInteger(value['maxAttempts'], 1) },
     timeoutPolicy: { timeoutSeconds: positiveInteger(value['timeoutSeconds'], 30) },
   };
+
+  if (inputMapping !== undefined) {
+    patch.inputMapping = inputMapping;
+  }
+
+  return patch;
 }
 
 function codeGatePatch(value: WorkflowNodeInspectorValue): Partial<CodeGateWorkflowNode> | null {

@@ -5,23 +5,21 @@ import {
   LogicWorkflowNode,
 } from '../model/workflow-studio.model';
 import {
+  workflowFieldToSectionId,
   workflowNodeInspectorConfig,
   workflowNodePatchFromInspectorValue,
   workflowNodeToInspectorValue,
 } from './workflow-node-inspector.model';
 
 describe('workflow node inspector model', () => {
-  it('builds typed AI gate fields with JSON fields in advanced sections', () => {
+  it('builds typed AI gate fields without raw criteria in form-input config and maps field to section', () => {
     const config = workflowNodeInspectorConfig('AI_GATE');
     const fieldNames = config.fields.map((field) => field.name);
-    const criteriaField = config.fields.find((field) => field.name === 'criteria');
 
     expect(config.sections?.map((section) => section.id)).toEqual([
       'general',
       'agent',
       'prompt',
-      'decision',
-      'input',
       'output',
       'execution',
     ]);
@@ -31,8 +29,6 @@ describe('workflow node inspector model', () => {
       'provider',
       'workingDirectory',
       'instruction',
-      'criteria',
-      'inputMapping',
       'outputSchema',
       'maxAttempts',
       'timeoutSeconds',
@@ -51,10 +47,10 @@ describe('workflow node inspector model', () => {
       optionsExpression: 'context.extra.outputSchemaOptions',
       required: true,
     });
-    expect(criteriaField).toMatchObject({
-      type: 'json',
-      showZoomButton: true,
-    });
+
+    expect(workflowFieldToSectionId('AI_GATE', 'criteria')).toBe('decision');
+    expect(workflowFieldToSectionId('AI_GATE', 'inputMapping')).toBe('input');
+    expect(workflowFieldToSectionId('AI_GATE', 'instruction')).toBe('prompt');
   });
 
   it('maps AI gate form values into contract fields and rejects invalid advanced JSON', () => {
@@ -76,7 +72,6 @@ describe('workflow node inspector model', () => {
       ...value,
       instruction: 'Updated review',
       criteria: '{"minScore":90}',
-      inputMapping: '{"mapping":{"candidate":"${input.profile}"}}',
       maxAttempts: 3,
       timeoutSeconds: 1800,
     });
@@ -87,12 +82,10 @@ describe('workflow node inspector model', () => {
       provider: 'claude',
       workingDirectory: 'D:\\Code\\ai-agent-mcrs',
       criteria: JSON.stringify({ minScore: 80 }, null, 2),
-      inputMapping: JSON.stringify({ mapping: { candidate: '${input.candidate}' } }, null, 2),
     });
     expect(patch).toEqual({
       instruction: 'Updated review',
       criteria: { minScore: 90 },
-      inputMapping: { mapping: { candidate: '${input.profile}' } },
       provider: 'claude',
       agentCode: 'koc-rule-evaluator',
       workingDirectory: 'D:\\Code\\ai-agent-mcrs',
@@ -177,5 +170,43 @@ describe('workflow node inspector model', () => {
       operator: 'AND',
       config: {},
     });
+  });
+
+  it('configures vertical layout with compact density, sectionNavigation none, and expected section collapsed states', () => {
+    const aiConfig = workflowNodeInspectorConfig('AI_GATE');
+    expect(aiConfig.layout).toMatchObject({
+      mode: 'sectioned',
+      density: 'compact',
+      labelPlacement: 'top',
+      sectionNavigation: 'none',
+      showValidationSummary: true,
+      stickyFooter: false,
+      autoScrollToError: false,
+    });
+    expect(aiConfig.sections).toEqual([
+      { id: 'general', title: 'workflowStudio.inspector.section.general', collapsible: false, collapsed: false },
+      { id: 'agent', title: 'workflowStudio.inspector.section.agent', collapsible: false, collapsed: false },
+      { id: 'prompt', title: 'workflowStudio.inspector.section.prompt', collapsible: false, collapsed: false },
+      { id: 'output', title: 'workflowStudio.inspector.section.output', collapsible: true, collapsed: true },
+      { id: 'execution', title: 'workflowStudio.inspector.section.execution', collapsible: true, collapsed: true },
+    ]);
+
+    const codeConfig = workflowNodeInspectorConfig('CODE_GATE');
+    expect(codeConfig.layout?.sectionNavigation).toBe('none');
+    expect(codeConfig.sections).toEqual([
+      { id: 'general', title: 'workflowStudio.inspector.section.general', collapsible: false, collapsed: false },
+      { id: 'configuration', title: 'workflowStudio.inspector.section.configuration', collapsible: true, collapsed: true },
+      { id: 'input', title: 'workflowStudio.inspector.section.input', collapsible: true, collapsed: true },
+      { id: 'execution', title: 'workflowStudio.inspector.section.execution', collapsible: true, collapsed: true },
+    ]);
+
+    const logicConfig = workflowNodeInspectorConfig('LOGIC');
+    expect(logicConfig.layout?.sectionNavigation).toBe('none');
+    expect(logicConfig.sections).toEqual([
+      { id: 'general', title: 'workflowStudio.inspector.section.general', collapsible: false, collapsed: false },
+      { id: 'logic', title: 'workflowStudio.inspector.section.logic', collapsible: false, collapsed: false },
+      { id: 'routing', title: 'workflowStudio.inspector.section.routing', collapsible: true, collapsed: true },
+      { id: 'advanced', title: 'workflowStudio.inspector.section.advanced', collapsible: true, collapsed: true },
+    ]);
   });
 });

@@ -165,6 +165,11 @@ describe('FlowCanvasComponent', () => {
     expect(engine.applyViewportState).toHaveBeenLastCalledWith({ x: 200, y: 300, zoom: 1.2 });
     expect(engine.fitContent).not.toHaveBeenCalled();
   });
+  it('delegates revealElement to engine', () => {
+    component.revealElement('r1');
+    expect(engine.revealElement).toHaveBeenCalledWith('r1');
+  });
+
 
   function flushFrames(count: number): void {
     for (let i = 0; i < count; i += 1) {
@@ -183,6 +188,7 @@ class FakeFlowEngine {
   clearHighlights = vi.fn();
   highlightNode = vi.fn();
   highlightEdge = vi.fn();
+  revealElement = vi.fn();
 
   getViewportSnapshot(): ReturnType<FlowCanvasComponent['engineInstance']['getViewportSnapshot']> {
     return {
@@ -205,6 +211,7 @@ class FakeFlowEngine {
     this.clearHighlights.mockClear();
     this.highlightNode.mockClear();
     this.highlightEdge.mockClear();
+    this.revealElement.mockClear();
   }
 }
 

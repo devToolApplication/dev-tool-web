@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.workflow-json-object-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-3, 0.75rem);
+}
+
+.workflow-json-object-editor__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-2, 0.5rem);
+}
+
+.workflow-json-object-editor__row {
+  display: grid;
+  grid-template-columns: 1fr 110px 1.5fr auto;
+  gap: var(--app-spacing-2, 0.5rem);
+  align-items: center;
+}
+
+.workflow-json-object-editor__header {
+  display: grid;
+  grid-template-columns: 1fr 110px 1.5fr auto;
+  gap: var(--app-spacing-2, 0.5rem);
+  font-size: var(--app-font-size-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: var(--app-spacing-1, 0.25rem);
+}
+
+.workflow-json-object-editor__null-value {
+  font-size: var(--app-font-size-sm, 0.875rem);
+  color: var(--app-text-muted);
+  font-style: italic;
+  padding-left: var(--app-spacing-2, 0.5rem);
+}
+
+.workflow-json-object-editor__empty {
+  font-size: var(--app-font-size-sm, 0.875rem);
+  color: var(--app-text-muted);
+  font-style: italic;
+  padding: var(--app-spacing-2, 0.5rem) 0;
+}
+
+.workflow-json-object-editor__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-spacing-2, 0.5rem);
+}
+
+.workflow-json-object-editor__advanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-2, 0.5rem);
+  padding-top: var(--app-spacing-2, 0.5rem);
+  border-top: 1px dashed var(--app-border, rgba(133, 156, 221, 0.2));
+}
+
+.workflow-json-object-editor__advanced-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-spacing-1, 0.25rem);
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--app-text-muted);
+  font-size: var(--app-font-size-xs, 0.75rem);
+  cursor: pointer;
+}
+
+.workflow-json-object-editor__advanced-toggle:hover {
+  color: var(--app-text);
+}
+
+.workflow-json-object-editor__advanced-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-2, 0.5rem);
+}

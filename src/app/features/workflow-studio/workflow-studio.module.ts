@@ -9,7 +9,11 @@ import { CodeGateInspectorComponent } from './inspector/code-gate-inspector.comp
 import { EndInspectorComponent } from './inspector/end-inspector.component';
 import { LogicInspectorComponent } from './inspector/logic-inspector.component';
 import { StartInspectorComponent } from './inspector/start-inspector.component';
+import { WorkflowEdgeInspectorComponent } from './inspector/workflow-edge-inspector.component';
+import { WorkflowElementInspectorComponent } from './inspector/workflow-element-inspector.component';
 import { WorkflowNodeInspectorComponent } from './inspector/workflow-node-inspector.component';
+import { WorkflowInputMappingEditorComponent } from './inspector/fields/workflow-input-mapping-editor/workflow-input-mapping-editor.component';
+import { WorkflowJsonObjectEditorComponent } from './inspector/fields/workflow-json-object-editor/workflow-json-object-editor.component';
 import { AiGateNodeComponent } from './nodes/ai-gate-node.component';
 import { CodeGateNodeComponent } from './nodes/code-gate-node.component';
 import { EndNodeComponent } from './nodes/end-node.component';
@@ -34,11 +38,15 @@ const DECLARATIONS = [
   LogicNodeComponent,
   EndNodeComponent,
   WorkflowNodeInspectorComponent,
+  WorkflowEdgeInspectorComponent,
+  WorkflowElementInspectorComponent,
   AiGateInspectorComponent,
   CodeGateInspectorComponent,
   LogicInspectorComponent,
   StartInspectorComponent,
   EndInspectorComponent,
+  WorkflowInputMappingEditorComponent,
+  WorkflowJsonObjectEditorComponent,
   WorkflowProblemsPanelComponent,
   WorkflowListPageComponent,
   WorkflowBuilderPageComponent,

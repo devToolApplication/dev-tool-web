@@ -609,6 +609,27 @@ describe('FormInput', () => {
     expect(fixture.nativeElement.querySelectorAll('app-form-section-card').length).toBe(3);
   });
 
+  it('hides section nav when layout sectionNavigation is none even with multiple sections', () => {
+    applyConfig(
+      {
+        sections: [
+          { id: 'sec1', title: 'Section 1' },
+          { id: 'sec2', title: 'Section 2' },
+        ],
+        layout: {
+          sectionNavigation: 'none',
+        },
+        fields: [
+          { type: 'text', name: 'field1', label: 'Field 1', sectionId: 'sec1' },
+          { type: 'text', name: 'field2', label: 'Field 2', sectionId: 'sec2' },
+        ],
+      },
+      { field1: 'A', field2: 'B' },
+    );
+
+    expect(component.showSectionNav()).toBe(false);
+    expect(fixture.nativeElement.querySelector('app-form-section-nav')).toBeNull();
+  });
   function applyConfig(
     config: FormConfig,
     initialValue: unknown,

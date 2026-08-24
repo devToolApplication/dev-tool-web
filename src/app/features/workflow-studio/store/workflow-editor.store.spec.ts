@@ -334,6 +334,39 @@ describe('WorkflowEditorStore', () => {
     expect(store.dirty()).toBe(false);
   });
 
+  it('duplicates the selected node with offset and new id, and no-ops for edge or readonly selection', () => {
+    store.loadWorkflow(sampleDetail());
+
+    store.selectNode('start');
+    store.duplicateSelectedNode();
+
+    expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end', 'start-1']);
+    expect(store.nodes().find((node) => node.id === 'start-1')).toMatchObject({
+      id: 'start-1',
+      type: 'START',
+    });
+    expect(store.positions()['start-1']).toEqual({ x: 32, y: 32 });
+    expect(store.selectedNodeId()).toBe('start-1');
+    expect(store.dirty()).toBe(true);
+    expect(store.canUndo()).toBe(true);
+
+    store.undo();
+    expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end']);
+    expect(store.positions()['start-1']).toBeUndefined();
+
+    // No-op when edge is selected
+    store.selectEdge('start__end');
+    store.duplicateSelectedNode();
+    expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end']);
+
+    // No-op in readonly mode
+    store.loadWorkflow(sampleDetail(), { mode: 'readonly' });
+    store.selectNode('start');
+    store.duplicateSelectedNode();
+    expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end']);
+    expect(store.dirty()).toBe(false);
+  });
+
   it('blocks graph mutations in runtime and readonly modes', () => {
     store.loadWorkflow(sampleDetail(), { mode: 'runtime' });
 

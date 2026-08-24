@@ -77,14 +77,15 @@ describe('DrawerComponent', () => {
   });
 
   it('renders size and side variants', () => {
-    component.open = true;
-    component.size = 'xl';
-    component.side = 'left';
-    fixture.detectChanges();
+    render({ open: true, size: 'xl', side: 'left' });
 
     expect(document.body.querySelector('.app-drawer--left')).toBeTruthy();
     expect(document.body.querySelector('.app-drawer__panel--xl')).toBeTruthy();
     expect(document.body.querySelector('.app-drawer__panel--left')).toBeTruthy();
+
+    render({ open: true, size: 'comfortable', side: 'right' });
+    expect(document.body.querySelector('.app-drawer__panel--comfortable')).toBeTruthy();
+    expect(document.body.querySelector('.app-drawer--right')).toBeTruthy();
   });
 
   it('renders loading, error and empty states', () => {

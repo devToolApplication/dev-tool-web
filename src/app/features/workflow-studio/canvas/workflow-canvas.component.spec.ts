@@ -128,13 +128,25 @@ describe('WorkflowCanvasComponent', () => {
     component.zoomIn();
     component.zoomOut();
     component.resetView();
+    component.executeCommand('toggleNavigator');
+    component.executeCommand('fullscreen');
 
     expect(executeCommand.mock.calls.map(([command]) => command)).toEqual([
       'fit',
       'zoomIn',
       'zoomOut',
       'resetZoom',
+      'toggleNavigator',
+      'fullscreen',
     ]);
+  });
+
+  it('delegates revealElement to flowBuilder', () => {
+    const revealElement = vi.fn();
+    component.flowBuilder = { revealElement } as never;
+
+    component.revealElement('start');
+    expect(revealElement).toHaveBeenCalledWith('start');
   });
 
   it('maps shared viewport snapshots back to the workflow editor viewport', () => {

@@ -19,7 +19,7 @@ import type { OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import type { Subscription } from 'rxjs';
 
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type DrawerSize = 'sm' | 'md' | 'comfortable' | 'lg' | 'xl' | 'full';
 export type DrawerSide = 'left' | 'right';
 
 export interface DrawerConfig {

@@ -252,7 +252,7 @@ export class FormInput implements OnInit, OnChanges {
   }
 
   showSectionNav(): boolean {
-    return this.renderSections().length >= 2;
+    return this.layout().sectionNavigation !== 'none' && this.renderSections().length >= 2;
   }
 
   onSubmit(): void {

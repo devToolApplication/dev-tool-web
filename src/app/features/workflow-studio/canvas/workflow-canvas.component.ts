@@ -11,6 +11,7 @@ import {
   FlowPaletteConfig,
   FlowValidationIssue,
   FlowViewportSnapshot,
+  FlowCommand,
 } from '@shared/ui/patterns/flow-builder';
 
 import {
@@ -122,20 +123,29 @@ export class WorkflowCanvasComponent {
     });
   }
 
+
+  revealElement(elementId: string): void {
+    this.flowBuilder?.revealElement(elementId);
+  }
+
+  executeCommand(command: FlowCommand): void {
+    this.flowBuilder?.executeCommand(command);
+  }
+
   fitView(): void {
-    this.flowBuilder?.executeCommand('fit');
+    this.executeCommand('fit');
   }
 
   zoomIn(): void {
-    this.flowBuilder?.executeCommand('zoomIn');
+    this.executeCommand('zoomIn');
   }
 
   zoomOut(): void {
-    this.flowBuilder?.executeCommand('zoomOut');
+    this.executeCommand('zoomOut');
   }
 
   resetView(): void {
-    this.flowBuilder?.executeCommand('resetZoom');
+    this.executeCommand('resetZoom');
   }
 
   onNodeClick(node: FlowNode): void {

@@ -392,6 +392,11 @@ export class FlowBuilderComponent implements OnChanges {
     this.addNodeFromType(event.nodeType, event.x, event.y);
   }
 
+
+  revealElement(elementId: string): void {
+    this.canvas?.revealElement(elementId);
+  }
+
   executeCommand(cmd: FlowCommand): void {
     if (!this.isCommandEnabled(cmd)) {
       return;

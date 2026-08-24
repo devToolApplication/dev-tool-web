@@ -20,17 +20,35 @@ import {
 } from '../model/workflow-lifecycle.config';
 import {
   JsonValue,
+  WorkflowEdge,
   WorkflowGraph,
+  WorkflowNode,
   WorkflowNodePosition,
   WorkflowValidationIssue,
   WorkflowVersion,
 } from '../model/workflow-studio.model';
+import { workflowEdgeId } from '../model/workflow-graph.utils';
 import { validateWorkflowGraph } from '../model/workflow-validator';
+import type { FlowCommand } from '@shared/ui/patterns/flow-builder';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowCanvasComponent } from '../canvas/workflow-canvas.component';
 import { WorkflowLayoutService } from '../services/workflow-layout.service';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
+import { WorkflowSelectedElement } from '../inspector/workflow-element-inspector.component';
+
+export type WorkflowEditorCommand =
+  | 'undo'
+  | 'redo'
+  | 'autoLayout'
+  | 'fit'
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'resetZoom'
+  | 'toggleNavigator'
+  | 'fullscreen'
+  | 'duplicate'
+  | 'delete';
 
 @Component({
   selector: 'app-workflow-builder-page',
@@ -65,7 +83,45 @@ export class WorkflowBuilderPageComponent implements OnInit {
     }
     return this.store.nodes().find((node) => node.id === nodeId) ?? null;
   });
-  readonly nodeDrawerOpen = computed(() => !!this.selectedNode());
+  readonly selectedEdge = computed(() => {
+    const edgeId = this.store.selectedEdgeId();
+    if (!edgeId) {
+      return null;
+    }
+    return this.store.edges().find((edge) => workflowEdgeId(edge) === edgeId) ?? null;
+  });
+  readonly selectedElement = computed<WorkflowSelectedElement>(() => {
+    const node = this.selectedNode();
+    if (node) {
+      return { kind: 'node', value: node };
+    }
+    const edge = this.selectedEdge();
+    if (edge) {
+      return { kind: 'edge', value: edge };
+    }
+    return null;
+  });
+  readonly nodeDrawerOpen = computed(() => !!this.selectedElement());
+  readonly nodeDrawerTitle = computed(() => {
+    const element = this.selectedElement();
+    if (element?.kind === 'node') {
+      return `workflowStudio.inspector.title.${element.value.type}`;
+    }
+    if (element?.kind === 'edge') {
+      return 'workflowStudio.inspector.title.CONNECTION';
+    }
+    return 'workflowStudio.inspector.staticTitle';
+  });
+  readonly elementDrawerSubtitle = computed(() => {
+    const element = this.selectedElement();
+    if (element?.kind === 'node') {
+      return element.value.id;
+    }
+    if (element?.kind === 'edge') {
+      return `${element.value.source} -> ${element.value.target}`;
+    }
+    return undefined;
+  });
   readonly readonlyMode = computed(() => this.store.mode() !== 'design');
   readonly actions = computed(() =>
     buildWorkflowBuilderActions({
@@ -96,6 +152,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
 
   ngOnInit(): void {
     const workflowId = this.route.snapshot.paramMap.get('workflowId');
+    this.generalInfoCollapsed.set(!!workflowId);
     if (workflowId) {
       void this.loadWorkflow(workflowId);
       return;
@@ -126,31 +183,31 @@ export class WorkflowBuilderPageComponent implements OnInit {
 
     if (commandKey && key === 'z' && event.shiftKey) {
       event.preventDefault();
-      this.store.redo();
+      this.executeEditorCommand('redo');
       return;
     }
 
     if (commandKey && key === 'y') {
       event.preventDefault();
-      this.store.redo();
+      this.executeEditorCommand('redo');
       return;
     }
 
     if (commandKey && key === 'z') {
       event.preventDefault();
-      this.store.undo();
+      this.executeEditorCommand('undo');
       return;
     }
 
     if (commandKey && key === '0') {
       event.preventDefault();
-      this.fitView();
+      this.executeEditorCommand('fit');
       return;
     }
 
     if (key === 'delete' || key === 'backspace') {
       event.preventDefault();
-      this.store.deleteSelection();
+      this.executeEditorCommand('delete');
       return;
     }
 
@@ -214,6 +271,66 @@ export class WorkflowBuilderPageComponent implements OnInit {
     }
   }
 
+  executeEditorCommand(command: WorkflowEditorCommand): void {
+    switch (command) {
+      case 'undo':
+        this.store.undo();
+        return;
+      case 'redo':
+        this.store.redo();
+        return;
+      case 'autoLayout':
+        void this.applyAutoLayout();
+        return;
+      case 'fit':
+        this.workflowCanvas?.executeCommand('fit');
+        return;
+      case 'zoomIn':
+        this.workflowCanvas?.executeCommand('zoomIn');
+        return;
+      case 'zoomOut':
+        this.workflowCanvas?.executeCommand('zoomOut');
+        return;
+      case 'resetZoom':
+        this.workflowCanvas?.executeCommand('resetZoom');
+        return;
+      case 'toggleNavigator':
+        this.workflowCanvas?.executeCommand('toggleNavigator');
+        return;
+      case 'fullscreen':
+        this.workflowCanvas?.executeCommand('fullscreen');
+        return;
+      case 'duplicate':
+        this.store.duplicateSelectedNode();
+        return;
+      case 'delete':
+        this.store.deleteSelection();
+        return;
+    }
+  }
+
+  canExecuteEditorCommand(command: WorkflowEditorCommand): boolean {
+    switch (command) {
+      case 'undo':
+        return this.store.canUndo();
+      case 'redo':
+        return this.store.canRedo();
+      case 'autoLayout':
+        return !this.readonlyMode();
+      case 'duplicate':
+        return !this.readonlyMode() && !!this.store.selectedNodeId();
+      case 'delete':
+        return !this.readonlyMode() && (!!this.store.selectedNodeId() || !!this.store.selectedEdgeId());
+      case 'fit':
+      case 'zoomIn':
+      case 'zoomOut':
+      case 'resetZoom':
+      case 'toggleNavigator':
+      case 'fullscreen':
+        return true;
+    }
+  }
+
   async applyAutoLayout(): Promise<void> {
     if (this.readonlyMode()) {
       return;
@@ -224,19 +341,19 @@ export class WorkflowBuilderPageComponent implements OnInit {
   }
 
   fitView(): void {
-    this.workflowCanvas?.fitView();
+    this.executeEditorCommand('fit');
   }
 
   resetView(): void {
-    this.workflowCanvas?.resetView();
+    this.executeEditorCommand('resetZoom');
   }
 
   zoomIn(): void {
-    this.workflowCanvas?.zoomIn();
+    this.executeEditorCommand('zoomIn');
   }
 
   zoomOut(): void {
-    this.workflowCanvas?.zoomOut();
+    this.executeEditorCommand('zoomOut');
   }
 
   async save(): Promise<void> {
@@ -305,8 +422,21 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.versionsOpen.set(false);
   }
 
-  closeNodeDrawer(): void {
+  closeElementDrawer(): void {
     this.store.selectNode(null);
+    this.store.selectEdge(null);
+  }
+
+  closeNodeDrawer(): void {
+    this.closeElementDrawer();
+  }
+
+  onProblemSelected(issue: WorkflowValidationIssue): void {
+    this.store.selectValidationIssue(issue);
+    const elementId = issue.nodeId ?? issue.edgeId;
+    if (elementId) {
+      this.workflowCanvas?.revealElement(elementId);
+    }
   }
 
   toggleGeneralInfo(): void {
@@ -316,8 +446,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
   closeTransientState(): void {
     this.versionsOpen.set(false);
     this.runDialogOpen.set(false);
-    this.closeNodeDrawer();
-    this.store.selectEdge(null);
+    this.closeElementDrawer();
   }
 
   selectVersion(versionId: string): void {

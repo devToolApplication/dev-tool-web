@@ -1,0 +1,17 @@
+@if (selectedNode) {
+  <app-workflow-node-inspector></app-workflow-node-inspector>
+} @else if (selectedEdge) {
+  <app-workflow-edge-inspector
+    [edge]="selectedEdge"
+    [readonly]="readonly"
+    (deleteRequested)="deleteRequested.emit()"
+  ></app-workflow-edge-inspector>
+} @else {
+  <app-empty-state
+    size="compact"
+    align="start"
+    title="workflowStudio.inspector.emptyTitle"
+    description="workflowStudio.inspector.emptyDescription"
+    icon="pi pi-sliders-h"
+  ></app-empty-state>
+}

@@ -63,6 +63,11 @@ export class FlowCanvasComponent implements AfterViewInit, OnChanges, OnDestroy 
   private pendingViewportSnapshot: FlowViewportSnapshot | null = null;
   viewportSnapshot: FlowViewportSnapshot | null = null;
 
+
+  revealElement(elementId: string): void {
+    this.engine?.revealElement(elementId);
+  }
+
   get engineInstance(): JointFlowEngine {
     return this.engine;
   }
