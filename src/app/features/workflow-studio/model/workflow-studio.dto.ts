@@ -188,6 +188,7 @@ export interface WorkflowUpsertDto {
   description: string | null;
   definition: WorkflowGraphDto;
   runtime: WorkflowRuntimeConfigDto | null;
+  engineType?: WorkflowEngineType;
   editor?: WorkflowEditorMetadataDto | null;
 }
 

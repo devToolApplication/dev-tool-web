@@ -5,7 +5,11 @@ import { TestBed } from '@angular/core/testing';
 import { BaseResponse } from '@core/http/base-response.model';
 import { environment } from '../../../../enviroment/environment';
 import { WorkflowApiService } from './workflow-api.service';
-import { WorkflowDetailDto, WorkflowDefinitionDto, WorkflowRunDto } from '../model/workflow-studio.dto';
+import {
+  WorkflowDetailDto,
+  WorkflowDefinitionDto,
+  WorkflowRunDto,
+} from '../model/workflow-studio.dto';
 
 describe('WorkflowApiService', () => {
   let service: WorkflowApiService;
@@ -13,11 +17,7 @@ describe('WorkflowApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        WorkflowApiService,
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), WorkflowApiService],
     });
 
     service = TestBed.inject(WorkflowApiService);
@@ -70,7 +70,9 @@ describe('WorkflowApiService', () => {
       ]);
     });
 
-    const request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/ai-gate-output-schemas`);
+    const request = httpMock.expectOne(
+      `${environment.apiUrl.adminAiGenerator}/ai-gate-output-schemas`,
+    );
     expect(request.request.method).toBe('GET');
     request.flush({
       data: [
@@ -85,7 +87,10 @@ describe('WorkflowApiService', () => {
   });
 
   it('loads workflow page from the admin workflow endpoint', () => {
-    const response: BaseResponse<{ data: WorkflowDefinitionDto[]; metadata: { totalElements: number } }> = {
+    const response: BaseResponse<{
+      data: WorkflowDefinitionDto[];
+      metadata: { totalElements: number };
+    }> = {
       data: {
         data: [
           {
@@ -149,8 +154,12 @@ describe('WorkflowApiService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({ data: detail });
 
-    service.getRunPage({ page: 0, size: 10, workflowId: 'wf-1', status: 'RUNNING' }).subscribe((page) => expect(page.data[0].id).toBe('run-1'));
-    request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/workflows/runs/page?page=0&size=10&workflowId=wf-1&status=RUNNING`);
+    service
+      .getRunPage({ page: 0, size: 10, workflowId: 'wf-1', status: 'RUNNING' })
+      .subscribe((page) => expect(page.data[0].id).toBe('run-1'));
+    request = httpMock.expectOne(
+      `${environment.apiUrl.adminAiGenerator}/workflows/runs/page?page=0&size=10&workflowId=wf-1&status=RUNNING`,
+    );
     expect(request.request.method).toBe('GET');
     request.flush(runPage);
 
@@ -189,6 +198,7 @@ describe('WorkflowApiService', () => {
       description: null,
       definition: { nodes: [{ id: 'start', type: 'START' as const }], edges: [] },
       runtime: { maxParallel: 1 },
+      engineType: 'LEGACY' as const,
       editor: {
         viewport: { x: 1, y: 2, zoom: 0.9 },
         nodes: { start: { x: 10, y: 20 } },
@@ -225,7 +235,9 @@ describe('WorkflowApiService', () => {
       },
     });
 
-    service.updateWorkflow('wf-1', payload).subscribe((item) => expect(item.definition.id).toBe('wf-1'));
+    service
+      .updateWorkflow('wf-1', payload)
+      .subscribe((item) => expect(item.definition.id).toBe('wf-1'));
     request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/workflows/wf-1`);
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(payload);
@@ -236,14 +248,18 @@ describe('WorkflowApiService', () => {
     expect(request.request.method).toBe('POST');
     request.flush({ data: detail });
 
-    service.startWorkflow('wf-1', { profile: { id: 'koc-1' } }).subscribe((item) => expect(item.id).toBe('run-1'));
+    service
+      .startWorkflow('wf-1', { profile: { id: 'koc-1' } })
+      .subscribe((item) => expect(item.id).toBe('run-1'));
     request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/workflows/wf-1/start`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ input: { profile: { id: 'koc-1' } } });
     request.flush({ data: run });
 
     service.retryRun('run-1').subscribe((item) => expect(item.id).toBe('run-1'));
-    request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/workflows/runs/run-1/retry`);
+    request = httpMock.expectOne(
+      `${environment.apiUrl.adminAiGenerator}/workflows/runs/run-1/retry`,
+    );
     expect(request.request.method).toBe('POST');
     request.flush({ data: run });
   });

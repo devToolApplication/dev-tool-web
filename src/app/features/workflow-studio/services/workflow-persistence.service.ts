@@ -2,7 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { WorkflowApiService } from '../api/workflow-api.service';
-import { WorkflowDetail, WorkflowUpsertPayload, WorkflowValidationIssue, WorkflowVersion } from '../model/workflow-studio.model';
+import {
+  WorkflowDetail,
+  WorkflowUpsertPayload,
+  WorkflowValidationIssue,
+  WorkflowVersion,
+} from '../model/workflow-studio.model';
 import { validateWorkflowGraph } from '../model/workflow-validator';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 
@@ -56,6 +61,10 @@ export class WorkflowPersistenceService {
 
   private localValidPayload(store: WorkflowEditorStore): WorkflowUpsertPayload {
     const payload = store.toUpsertPayload();
+    if (payload.engineType === 'FLOWABLE') {
+      store.setValidationIssues([]);
+      return payload;
+    }
     const issues = validateWorkflowGraph(payload.definition);
     if (issues.length) {
       store.setValidationIssues(issues);
@@ -65,7 +74,10 @@ export class WorkflowPersistenceService {
     return payload;
   }
 
-  private async validateBackend(payload: WorkflowUpsertPayload, store?: WorkflowEditorStore): Promise<void> {
+  private async validateBackend(
+    payload: WorkflowUpsertPayload,
+    store?: WorkflowEditorStore,
+  ): Promise<void> {
     const result = await firstValueFrom(this.api.validateWorkflow(payload));
     if (!result.valid) {
       store?.setValidationIssues(result.issues);
@@ -82,8 +94,12 @@ function validPayloadFromDetail(detail: WorkflowDetail): WorkflowUpsertPayload {
     description: detail.definition.description,
     definition: cloneJson(version.definition),
     runtime: version.runtime ? { ...version.runtime } : null,
+    engineType: version.engineType ?? 'LEGACY',
     editor: version.editor ? cloneJson(version.editor) : null,
   };
+  if (payload.engineType === 'FLOWABLE') {
+    return payload;
+  }
   const issues = validateWorkflowGraph(payload.definition);
   if (issues.length) {
     throw new Error(firstErrorMessage(issues));
@@ -92,9 +108,10 @@ function validPayloadFromDetail(detail: WorkflowDetail): WorkflowUpsertPayload {
 }
 
 function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
-  const version = detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId)
-    ?? detail.versions.find((item) => item.status === 'DRAFT')
-    ?? detail.versions[0];
+  const version =
+    detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId) ??
+    detail.versions.find((item) => item.status === 'DRAFT') ??
+    detail.versions[0];
   if (!version) {
     throw new Error('Workflow detail has no version to publish');
   }
@@ -106,7 +123,9 @@ function cloneJson<T>(value: T): T {
 }
 
 function firstErrorMessage(issues: WorkflowValidationIssue[]): string {
-  return issues.find((issue) => issue.severity === 'error')?.message
-    ?? issues[0]?.message
-    ?? 'Workflow validation failed';
+  return (
+    issues.find((issue) => issue.severity === 'error')?.message ??
+    issues[0]?.message ??
+    'Workflow validation failed'
+  );
 }

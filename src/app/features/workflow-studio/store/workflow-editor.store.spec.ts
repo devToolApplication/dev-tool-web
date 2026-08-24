@@ -199,10 +199,14 @@ describe('WorkflowEditorStore', () => {
       name: 'Updated screening',
       description: 'Updated description',
       definition: {
-        nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
+        nodes: [
+          { id: 'start', type: 'START' },
+          { id: 'end', type: 'END' },
+        ],
         edges: [{ source: 'start', target: 'end' }],
       },
       runtime: { maxParallel: 4 },
+      engineType: 'LEGACY',
       editor: {
         viewport: { x: 4, y: 8, zoom: 0.8 },
         nodes: {

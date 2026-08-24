@@ -289,6 +289,7 @@ export interface WorkflowUpsertPayload {
   description: string | null;
   definition: WorkflowGraph;
   runtime: WorkflowRuntimeConfig | null;
+  engineType?: WorkflowEngineType;
   editor?: WorkflowEditorMetadata | null;
 }
 

@@ -1,13 +1,20 @@
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
 import type { TableAction, TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 import {
+  WorkflowEditorMetadata,
+  WorkflowEngineType,
   WorkflowDefinition,
   WorkflowDetail,
+  WorkflowGraph,
+  WorkflowNodePosition,
   WorkflowRun,
   WorkflowVersion,
 } from './workflow-studio.model';
 
-export function createDraftWorkflowDetail(workflowId = ''): WorkflowDetail {
+export function createDraftWorkflowDetail(
+  workflowId = '',
+  engineType: WorkflowEngineType = 'LEGACY',
+): WorkflowDetail {
   return {
     definition: {
       id: workflowId,
@@ -23,24 +30,57 @@ export function createDraftWorkflowDetail(workflowId = ''): WorkflowDetail {
         workflowDefinitionId: workflowId,
         version: 1,
         status: 'DRAFT',
-        definition: {
-          nodes: [
-            { id: 'start-1', type: 'START' },
-            { id: 'end-1', type: 'END' },
-          ],
-          edges: [{ source: 'start-1', target: 'end-1' }],
-        },
+        definition: defaultWorkflowGraphForEngine(engineType),
         runtime: { maxParallel: 1 },
         compiledPlan: null,
+        engineType,
         editor: {
           viewport: { x: 0, y: 0, zoom: 1 },
-          nodes: {
-            'start-1': { x: 80, y: 120 },
-            'end-1': { x: 360, y: 120 },
-          },
+          nodes: defaultWorkflowPositionsForEngine(engineType),
         },
       },
     ],
+  };
+}
+
+export function defaultWorkflowGraphForEngine(engineType: WorkflowEngineType): WorkflowGraph {
+  if (engineType === 'FLOWABLE') {
+    return {
+      nodes: [
+        { id: 'start-event-1', type: 'START_EVENT', name: 'Start' },
+        { id: 'end-event-1', type: 'END_EVENT', name: 'End' },
+      ],
+      edges: [
+        {
+          id: 'flow-start-end',
+          source: 'start-event-1',
+          target: 'end-event-1',
+          defaultFlow: false,
+        },
+      ],
+    };
+  }
+  return {
+    nodes: [
+      { id: 'start-1', type: 'START' },
+      { id: 'end-1', type: 'END' },
+    ],
+    edges: [{ source: 'start-1', target: 'end-1' }],
+  };
+}
+
+export function defaultWorkflowPositionsForEngine(
+  engineType: WorkflowEngineType,
+): NonNullable<WorkflowEditorMetadata['nodes']> {
+  if (engineType === 'FLOWABLE') {
+    return {
+      'start-event-1': { x: 120, y: 140 },
+      'end-event-1': { x: 360, y: 140 },
+    };
+  }
+  return {
+    'start-1': { x: 80, y: 120 },
+    'end-1': { x: 360, y: 120 },
   };
 }
 
@@ -63,9 +103,11 @@ export function buildWorkflowListActions(): ActionToolbarAction[] {
   ];
 }
 
-export function buildWorkflowBuilderActions(
-  options: { saving: boolean; readonlyMode: boolean; hasWorkflow: boolean },
-): ActionToolbarAction[] {
+export function buildWorkflowBuilderActions(options: {
+  saving: boolean;
+  readonlyMode: boolean;
+  hasWorkflow: boolean;
+}): ActionToolbarAction[] {
   const disabled = options.saving || !options.hasWorkflow;
   return [
     {
@@ -137,7 +179,13 @@ export function buildWorkflowListTable(): TableConfig<WorkflowDefinition> {
       density: { visible: true },
     },
     columns: [
-      { field: 'name', header: 'workflowStudio.lifecycle.workflow', type: 'text', minWidth: '16rem', sortable: true },
+      {
+        field: 'name',
+        header: 'workflowStudio.lifecycle.workflow',
+        type: 'text',
+        minWidth: '16rem',
+        sortable: true,
+      },
       {
         field: 'status',
         header: 'workflowStudio.lifecycle.status',
@@ -156,7 +204,12 @@ export function buildWorkflowListTable(): TableConfig<WorkflowDefinition> {
         width: '10rem',
         formatter: (row: WorkflowDefinition) => versionCell(row),
       },
-      { field: 'description', header: 'workflowStudio.lifecycle.description', type: 'text', minWidth: '18rem' },
+      {
+        field: 'description',
+        header: 'workflowStudio.lifecycle.description',
+        type: 'text',
+        minWidth: '18rem',
+      },
       {
         field: 'actions',
         header: 'actions',
@@ -195,8 +248,18 @@ export function buildWorkflowRunListTable(): TableConfig<WorkflowRun> {
       density: { visible: true },
     },
     columns: [
-      { field: 'id', header: 'workflowStudio.lifecycle.runId', type: 'copyable', minWidth: '12rem' },
-      { field: 'workflowDefinitionId', header: 'workflowStudio.lifecycle.workflow', type: 'copyable', minWidth: '12rem' },
+      {
+        field: 'id',
+        header: 'workflowStudio.lifecycle.runId',
+        type: 'copyable',
+        minWidth: '12rem',
+      },
+      {
+        field: 'workflowDefinitionId',
+        header: 'workflowStudio.lifecycle.workflow',
+        type: 'copyable',
+        minWidth: '12rem',
+      },
       {
         field: 'status',
         header: 'workflowStudio.lifecycle.status',
@@ -212,9 +275,24 @@ export function buildWorkflowRunListTable(): TableConfig<WorkflowRun> {
           CANCELLED: 'muted',
         },
       },
-      { field: 'startedAt', header: 'workflowStudio.lifecycle.startedAt', type: 'datetime', width: '12rem' },
-      { field: 'completedAt', header: 'workflowStudio.lifecycle.completedAt', type: 'datetime', width: '12rem' },
-      { field: 'finalOutcome', header: 'workflowStudio.lifecycle.outcome', type: 'text', width: '9rem' },
+      {
+        field: 'startedAt',
+        header: 'workflowStudio.lifecycle.startedAt',
+        type: 'datetime',
+        width: '12rem',
+      },
+      {
+        field: 'completedAt',
+        header: 'workflowStudio.lifecycle.completedAt',
+        type: 'datetime',
+        width: '12rem',
+      },
+      {
+        field: 'finalOutcome',
+        header: 'workflowStudio.lifecycle.outcome',
+        type: 'text',
+        width: '9rem',
+      },
       {
         field: 'actions',
         header: 'actions',
@@ -229,7 +307,10 @@ export function buildWorkflowRunListTable(): TableConfig<WorkflowRun> {
   };
 }
 
-export function buildWorkflowRunDetailActions(options: { loading: boolean; hasRun: boolean }): ActionToolbarAction[] {
+export function buildWorkflowRunDetailActions(options: {
+  loading: boolean;
+  hasRun: boolean;
+}): ActionToolbarAction[] {
   return [
     {
       id: 'retry',
@@ -254,16 +335,40 @@ export function readonlyModeForVersion(version: WorkflowVersion): boolean {
 function workflowRowActions(): TableAction<WorkflowDefinition>[] {
   return [
     { id: 'edit', label: 'edit', icon: 'pi pi-pencil', variant: 'ghost', onClick: () => undefined },
-    { id: 'run', label: 'workflowStudio.lifecycle.run', icon: 'pi pi-play', variant: 'ghost', onClick: () => undefined },
-    { id: 'publish', label: 'workflowStudio.lifecycle.publish', icon: 'pi pi-send', variant: 'ghost', onClick: () => undefined },
-    { id: 'runs', label: 'workflowStudio.lifecycle.viewRuns', icon: 'pi pi-list', variant: 'ghost', onClick: () => undefined },
+    {
+      id: 'run',
+      label: 'workflowStudio.lifecycle.run',
+      icon: 'pi pi-play',
+      variant: 'ghost',
+      onClick: () => undefined,
+    },
+    {
+      id: 'publish',
+      label: 'workflowStudio.lifecycle.publish',
+      icon: 'pi pi-send',
+      variant: 'ghost',
+      onClick: () => undefined,
+    },
+    {
+      id: 'runs',
+      label: 'workflowStudio.lifecycle.viewRuns',
+      icon: 'pi pi-list',
+      variant: 'ghost',
+      onClick: () => undefined,
+    },
   ];
 }
 
 function workflowRunRowActions(): TableAction<WorkflowRun>[] {
   return [
     { id: 'detail', label: 'view', icon: 'pi pi-eye', variant: 'ghost', onClick: () => undefined },
-    { id: 'retry', label: 'workflowStudio.lifecycle.retryRun', icon: 'pi pi-refresh', variant: 'ghost', onClick: () => undefined },
+    {
+      id: 'retry',
+      label: 'workflowStudio.lifecycle.retryRun',
+      icon: 'pi pi-refresh',
+      variant: 'ghost',
+      onClick: () => undefined,
+    },
   ];
 }
 

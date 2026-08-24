@@ -1,7 +1,4 @@
-import {
-  mapWorkflowDetailDto,
-  mapWorkflowDetailToUpsertDto,
-} from './workflow-studio.mapper';
+import { mapWorkflowDetailDto, mapWorkflowDetailToUpsertDto } from './workflow-studio.mapper';
 import { WorkflowDetailDto } from './workflow-studio.dto';
 import { WorkflowDetail } from './workflow-studio.model';
 
@@ -154,6 +151,7 @@ describe('workflow studio mapper', () => {
         ],
       },
       runtime: { maxParallel: 2 },
+      engineType: 'LEGACY',
       editor: {
         viewport: { x: 12, y: 24, zoom: 0.85 },
         nodes: {

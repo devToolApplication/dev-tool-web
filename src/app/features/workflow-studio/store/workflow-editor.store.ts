@@ -5,6 +5,7 @@ import {
   WorkflowEdge,
   WorkflowEditorMode,
   WorkflowEditorViewport,
+  WorkflowEngineType,
   WorkflowGraph,
   WorkflowNode,
   WorkflowNodePosition,
@@ -24,6 +25,7 @@ interface WorkflowEditorSnapshot {
     description: string | null;
   } | null;
   runtime: WorkflowRuntimeConfig | null;
+  engineType: WorkflowEngineType;
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   positions: Record<string, WorkflowNodePosition>;
@@ -57,7 +59,10 @@ export class WorkflowEditorStore {
   private readonly undoStack = signal<WorkflowEditorSnapshot[]>([]);
   private readonly redoStack = signal<WorkflowEditorSnapshot[]>([]);
 
-  loadWorkflow(detail: WorkflowDetail, options: { versionId?: string; mode?: WorkflowEditorMode } = {}): void {
+  loadWorkflow(
+    detail: WorkflowDetail,
+    options: { versionId?: string; mode?: WorkflowEditorMode } = {},
+  ): void {
     const version = selectEditorVersion(detail, options.versionId);
     const snapshot: WorkflowEditorSnapshot = {
       definition: {
@@ -65,6 +70,7 @@ export class WorkflowEditorStore {
         description: detail.definition.description,
       },
       runtime: version.runtime ? { ...version.runtime } : null,
+      engineType: version.engineType ?? 'LEGACY',
       nodes: cloneNodes(version.definition.nodes),
       edges: cloneEdges(version.definition.edges),
       positions: clonePositions(version.editor?.nodes ?? {}),
@@ -99,7 +105,13 @@ export class WorkflowEditorStore {
   }
 
   addNodeByType(type: WorkflowNodeType, position: WorkflowNodePosition): WorkflowNode {
-    const node = createWorkflowNode(type, createWorkflowNodeId(type, this.nodes().map((item) => item.id)));
+    const node = createWorkflowNode(
+      type,
+      createWorkflowNodeId(
+        type,
+        this.nodes().map((item) => item.id),
+      ),
+    );
     this.addNode(node, position);
     return cloneNode(node);
   }
@@ -109,7 +121,9 @@ export class WorkflowEditorStore {
     if (!this.nodes().some((node) => node.id === nodeId)) return;
     this.captureHistory();
     this.nodes.update((nodes) => nodes.filter((node) => node.id !== nodeId));
-    this.edges.update((edges) => edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+    this.edges.update((edges) =>
+      edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+    );
     this.positions.update((positions) => {
       const next = { ...positions };
       delete next[nodeId];
@@ -160,15 +174,17 @@ export class WorkflowEditorStore {
       nodes: this.nodes(),
       edges: this.edges().filter((item) => workflowEdgeId(item) !== edgeId),
     };
-    const issues = validateWorkflowConnection(graphWithoutCurrentEdge, edge, { existingEdgeId: edgeId });
+    const issues = validateWorkflowConnection(graphWithoutCurrentEdge, edge, {
+      existingEdgeId: edgeId,
+    });
     if (issues.length) {
       this.validationIssues.set(issues);
       return;
     }
     this.captureHistory();
-    this.edges.update((edges) => edges.map((item) => (
-      workflowEdgeId(item) === edgeId ? { ...edge } : item
-    )));
+    this.edges.update((edges) =>
+      edges.map((item) => (workflowEdgeId(item) === edgeId ? { ...edge } : item)),
+    );
     this.selectedEdgeId.set(workflowEdgeId(edge));
     this.validationIssues.set([]);
     this.markDirty();
@@ -203,7 +219,9 @@ export class WorkflowEditorStore {
     if (!this.canMutate()) return;
     if (!this.nodes().some((item) => item.id === nodeId)) return;
     this.captureHistory();
-    this.nodes.update((nodes) => nodes.map((item) => item.id === nodeId ? cloneNode(node) : item));
+    this.nodes.update((nodes) =>
+      nodes.map((item) => (item.id === nodeId ? cloneNode(node) : item)),
+    );
     this.markDirty();
   }
 
@@ -214,7 +232,51 @@ export class WorkflowEditorStore {
     const next = mergeNodePatch(current, patch);
     if (sameJson(current, next)) return;
     this.captureHistory();
-    this.nodes.update((nodes) => nodes.map((node) => node.id === nodeId ? next : node));
+    this.nodes.update((nodes) => nodes.map((node) => (node.id === nodeId ? next : node)));
+    this.markDirty();
+  }
+
+  updateEdge(edgeId: string, edge: WorkflowEdge): void {
+    if (!this.canMutate()) return;
+    if (!this.edges().some((item) => workflowEdgeId(item) === edgeId)) return;
+    this.captureHistory();
+    this.edges.update((edges) =>
+      edges.map((item) => (workflowEdgeId(item) === edgeId ? cloneEdge(edge) : item)),
+    );
+    this.selectedEdgeId.set(workflowEdgeId(edge));
+    this.markDirty();
+  }
+
+  replaceGraph(graph: WorkflowGraph): void {
+    if (!this.canMutate()) return;
+    if (sameJson(this.graph(), graph)) return;
+    this.captureHistory();
+    this.nodes.set(cloneNodes(graph.nodes));
+    this.edges.set(cloneEdges(graph.edges));
+    this.markDirty();
+  }
+
+  replaceGraphForEngine(
+    engineType: WorkflowEngineType,
+    graph: WorkflowGraph,
+    positions: Record<string, WorkflowNodePosition>,
+  ): void {
+    if (!this.canMutate()) return;
+    const workflow = this.workflow();
+    if (!workflow) return;
+    const version = selectEditorVersion(workflow);
+    this.captureHistory();
+    this.workflow.set({
+      ...cloneWorkflowDetail(workflow),
+      versions: workflow.versions.map((item) =>
+        item.id === version.id ? { ...item, engineType } : item,
+      ),
+    });
+    this.nodes.set(cloneNodes(graph.nodes));
+    this.edges.set(cloneEdges(graph.edges));
+    this.positions.set(clonePositions(positions));
+    this.selectedNodeId.set(null);
+    this.selectedEdgeId.set(null);
     this.markDirty();
   }
 
@@ -322,7 +384,8 @@ export class WorkflowEditorStore {
     if (!this.canMutate()) return;
     const workflow = this.workflow();
     if (!workflow) return;
-    if (workflow.definition.name === name && workflow.definition.description === description) return;
+    if (workflow.definition.name === name && workflow.definition.description === description)
+      return;
     this.captureHistory();
     this.workflow.set({
       ...cloneWorkflowDetail(workflow),
@@ -344,9 +407,25 @@ export class WorkflowEditorStore {
     this.captureHistory();
     this.workflow.set({
       ...cloneWorkflowDetail(workflow),
-      versions: workflow.versions.map((item) => item.id === version.id
-        ? { ...item, runtime: runtime ? { ...runtime } : null }
-        : item),
+      versions: workflow.versions.map((item) =>
+        item.id === version.id ? { ...item, runtime: runtime ? { ...runtime } : null } : item,
+      ),
+    });
+    this.markDirty();
+  }
+
+  updateEngineType(engineType: WorkflowEngineType): void {
+    if (!this.canMutate()) return;
+    const workflow = this.workflow();
+    if (!workflow) return;
+    const version = selectEditorVersion(workflow);
+    if ((version.engineType ?? 'LEGACY') === engineType) return;
+    this.captureHistory();
+    this.workflow.set({
+      ...cloneWorkflowDetail(workflow),
+      versions: workflow.versions.map((item) =>
+        item.id === version.id ? { ...item, engineType } : item,
+      ),
     });
     this.markDirty();
   }
@@ -365,6 +444,7 @@ export class WorkflowEditorStore {
         edges: cloneEdges(this.edges()),
       },
       runtime: version.runtime ? { ...version.runtime } : null,
+      engineType: version.engineType ?? 'LEGACY',
       editor: {
         viewport: { ...this.viewport() },
         nodes: clonePositions(this.positions()),
@@ -401,6 +481,7 @@ export class WorkflowEditorStore {
           }
         : null,
       runtime: version?.runtime ? { ...version.runtime } : null,
+      engineType: version?.engineType ?? 'LEGACY',
       nodes: cloneNodes(this.nodes()),
       edges: cloneEdges(this.edges()),
       positions: clonePositions(this.positions()),
@@ -420,11 +501,15 @@ export class WorkflowEditorStore {
           name: copy.definition.name,
           description: copy.definition.description,
         },
-        versions: workflow.versions.map((item) => (
+        versions: workflow.versions.map((item) =>
           item.id === version.id
-            ? { ...item, runtime: copy.runtime ? { ...copy.runtime } : null }
-            : item
-        )),
+            ? {
+                ...item,
+                runtime: copy.runtime ? { ...copy.runtime } : null,
+                engineType: copy.engineType,
+              }
+            : item,
+        ),
       });
     }
     this.nodes.set(copy.nodes);
@@ -435,10 +520,11 @@ export class WorkflowEditorStore {
 }
 
 function selectEditorVersion(detail: WorkflowDetail, versionId?: string): WorkflowVersion {
-  const version = detail.versions.find((item) => item.id === versionId)
-    ?? detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId)
-    ?? detail.versions.find((item) => item.status === 'DRAFT')
-    ?? detail.versions[0];
+  const version =
+    detail.versions.find((item) => item.id === versionId) ??
+    detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId) ??
+    detail.versions.find((item) => item.status === 'DRAFT') ??
+    detail.versions[0];
 
   if (!version) {
     throw new Error('Workflow detail has no version to edit');
@@ -451,6 +537,7 @@ function cloneSnapshot(snapshot: WorkflowEditorSnapshot): WorkflowEditorSnapshot
   return {
     definition: snapshot.definition ? { ...snapshot.definition } : null,
     runtime: snapshot.runtime ? { ...snapshot.runtime } : null,
+    engineType: snapshot.engineType,
     nodes: cloneNodes(snapshot.nodes),
     edges: cloneEdges(snapshot.edges),
     positions: clonePositions(snapshot.positions),
@@ -458,11 +545,15 @@ function cloneSnapshot(snapshot: WorkflowEditorSnapshot): WorkflowEditorSnapshot
   };
 }
 
-function sameEditableSnapshot(left: WorkflowEditorSnapshot, right: WorkflowEditorSnapshot): boolean {
+function sameEditableSnapshot(
+  left: WorkflowEditorSnapshot,
+  right: WorkflowEditorSnapshot,
+): boolean {
   return sameJson(
     {
       definition: left.definition,
       runtime: left.runtime,
+      engineType: left.engineType,
       nodes: left.nodes,
       edges: left.edges,
       positions: left.positions,
@@ -470,6 +561,7 @@ function sameEditableSnapshot(left: WorkflowEditorSnapshot, right: WorkflowEdito
     {
       definition: right.definition,
       runtime: right.runtime,
+      engineType: right.engineType,
       nodes: right.nodes,
       edges: right.edges,
       positions: right.positions,
@@ -500,7 +592,11 @@ function mergeNodePatch<T extends WorkflowNode>(node: T, patch: Partial<Workflow
 }
 
 function cloneEdges(edges: WorkflowEdge[]): WorkflowEdge[] {
-  return edges.map((edge) => ({ ...edge }));
+  return cloneJson(edges);
+}
+
+function cloneEdge(edge: WorkflowEdge): WorkflowEdge {
+  return cloneJson(edge);
 }
 
 function clonePositions(

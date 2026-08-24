@@ -167,9 +167,16 @@ const WORKFLOW_NODE_CATALOG: Record<WorkflowNodeType, WorkflowNodeCatalogItem> =
     allowConnectTo: true,
   },
 };
+const LEGACY_WORKFLOW_NODE_TYPES: WorkflowNodeType[] = [
+  'START',
+  'CODE_GATE',
+  'AI_GATE',
+  'LOGIC',
+  'END',
+];
 
 export function workflowNodeCatalogItems(): WorkflowNodeCatalogItem[] {
-  return Object.values(WORKFLOW_NODE_CATALOG).map(cloneCatalogItem);
+  return LEGACY_WORKFLOW_NODE_TYPES.map((type) => cloneCatalogItem(WORKFLOW_NODE_CATALOG[type]));
 }
 
 export function workflowNodeCatalogItem(type: WorkflowNodeType): WorkflowNodeCatalogItem {
@@ -240,7 +247,10 @@ export function createWorkflowNodeId(type: WorkflowNodeType, existingIds: string
   return `${prefix}-${nextIndex}`;
 }
 
-export function workflowNodeView(node: WorkflowNode, options: WorkflowNodeViewOptions = {}): WorkflowNodeView {
+export function workflowNodeView(
+  node: WorkflowNode,
+  options: WorkflowNodeViewOptions = {},
+): WorkflowNodeView {
   const catalogItem = WORKFLOW_NODE_CATALOG[node.type];
   return {
     id: node.id,
@@ -264,7 +274,11 @@ function nodeSubtitle(node: WorkflowNode): string {
     case 'CODE_GATE':
       return node.handler || 'Code handler';
     case 'AI_GATE':
-      return node.instruction || [node.provider, node.agentCode].filter(Boolean).join(' / ') || 'AI evaluation';
+      return (
+        node.instruction ||
+        [node.provider, node.agentCode].filter(Boolean).join(' / ') ||
+        'AI evaluation'
+      );
     case 'LOGIC':
       return logicLabel(node.operator);
     case 'START_EVENT':

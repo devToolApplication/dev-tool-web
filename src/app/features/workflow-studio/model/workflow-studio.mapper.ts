@@ -62,6 +62,7 @@ export function mapWorkflowDetailToUpsertDto(detail: WorkflowDetail): WorkflowUp
     description: detail.definition.description,
     definition: mapWorkflowGraphToDto(version.definition),
     runtime: version.runtime ? { ...version.runtime } : null,
+    engineType: version.engineType ?? 'LEGACY',
     editor: version.editor ? mapWorkflowEditorMetadataToDto(version.editor) : null,
   };
 }
@@ -72,6 +73,7 @@ export function mapWorkflowUpsertPayloadToDto(payload: WorkflowUpsertPayload): W
     description: payload.description,
     definition: mapWorkflowGraphToDto(payload.definition),
     runtime: payload.runtime ? { ...payload.runtime } : null,
+    engineType: payload.engineType ?? 'LEGACY',
     editor: payload.editor ? mapWorkflowEditorMetadataToDto(payload.editor) : null,
   };
 }
@@ -95,18 +97,22 @@ function mapWorkflowVersionDto(dto: WorkflowVersionDto): WorkflowVersion {
     engineType: dto.engineType ?? 'LEGACY',
     definition: mapWorkflowGraphDto(dto.definition),
     runtime: dto.runtime ? { ...dto.runtime } : null,
-    compiledPlan: dto.compiledPlan ? {
-      ...dto.compiledPlan,
-      nodes: cloneRecord(dto.compiledPlan.nodes),
-      dependencies: cloneStringArrayRecord(dto.compiledPlan.dependencies),
-      dependents: cloneStringArrayRecord(dto.compiledPlan.dependents),
-      entryNodes: [...dto.compiledPlan.entryNodes],
-      terminalNodes: [...dto.compiledPlan.terminalNodes],
-    } : null,
-    editor: dto.editor ? {
-      viewport: dto.editor.viewport ? { ...dto.editor.viewport } : undefined,
-      nodes: dto.editor.nodes ? cloneEditorNodePositions(dto.editor.nodes) : undefined,
-    } : undefined,
+    compiledPlan: dto.compiledPlan
+      ? {
+          ...dto.compiledPlan,
+          nodes: cloneRecord(dto.compiledPlan.nodes),
+          dependencies: cloneStringArrayRecord(dto.compiledPlan.dependencies),
+          dependents: cloneStringArrayRecord(dto.compiledPlan.dependents),
+          entryNodes: [...dto.compiledPlan.entryNodes],
+          terminalNodes: [...dto.compiledPlan.terminalNodes],
+        }
+      : null,
+    editor: dto.editor
+      ? {
+          viewport: dto.editor.viewport ? { ...dto.editor.viewport } : undefined,
+          nodes: dto.editor.nodes ? cloneEditorNodePositions(dto.editor.nodes) : undefined,
+        }
+      : undefined,
   };
 }
 
@@ -275,7 +281,7 @@ function mapBpmnNodeToDto(node: BpmnWorkflowNode): BpmnWorkflowNodeDto {
 }
 
 function cloneJson(value: JsonValue): JsonValue {
-  return value === null ? null : JSON.parse(JSON.stringify(value)) as JsonValue;
+  return value === null ? null : (JSON.parse(JSON.stringify(value)) as JsonValue);
 }
 
 function cloneOptionalJson(value: JsonValue | undefined): JsonValue | undefined {
@@ -288,21 +294,19 @@ function cloneWorkflowEdge<T extends WorkflowEdge>(edge: T): T {
 
 function cloneRecord<T extends JsonValue>(record: Record<string, T>): Record<string, T> {
   return Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, cloneJson(value) as T])
+    Object.entries(record).map(([key, value]) => [key, cloneJson(value) as T]),
   );
 }
 
 function cloneStringArrayRecord(record: Record<string, string[]>): Record<string, string[]> {
-  return Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, [...value]])
-  );
+  return Object.fromEntries(Object.entries(record).map(([key, value]) => [key, [...value]]));
 }
 
 function cloneEditorNodePositions(
   nodes: NonNullable<WorkflowVersion['editor']>['nodes'],
 ): NonNullable<WorkflowVersion['editor']>['nodes'] {
   return Object.fromEntries(
-    Object.entries(nodes ?? {}).map(([id, position]) => [id, { ...position }])
+    Object.entries(nodes ?? {}).map(([id, position]) => [id, { ...position }]),
   );
 }
 
@@ -316,9 +320,10 @@ function mapWorkflowEditorMetadataToDto(
 }
 
 function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
-  const version = detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId)
-    ?? detail.versions.find((item) => item.status === 'DRAFT')
-    ?? detail.versions[0];
+  const version =
+    detail.versions.find((item) => item.id === detail.definition.currentDraftVersionId) ??
+    detail.versions.find((item) => item.status === 'DRAFT') ??
+    detail.versions[0];
 
   if (!version) {
     throw new Error('Workflow detail has no version to save');
