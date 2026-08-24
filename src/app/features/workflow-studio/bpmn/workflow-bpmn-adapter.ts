@@ -2,6 +2,7 @@ import type {
   BpmnWorkflowNode,
   BpmnWorkflowNodeType,
   JsonValue,
+  WorkflowNodePosition,
   WorkflowCompareCondition,
   WorkflowCondition,
   WorkflowEdge,
@@ -13,6 +14,9 @@ const BPMN_NS = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
 const XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance';
 const FLOWABLE_NS = 'http://flowable.org/bpmn';
 const DEVTOOL_NS = 'http://devtool.vn/workflow/ui';
+const BPMNDI_NS = 'http://www.omg.org/spec/BPMN/20100524/DI';
+const DI_NS = 'http://www.omg.org/spec/DD/20100524/DI';
+const DC_NS = 'http://www.omg.org/spec/DD/20100524/DC';
 
 const TAG_BY_TYPE: Record<BpmnWorkflowNodeType, string> = {
   START_EVENT: 'startEvent',
@@ -55,6 +59,7 @@ export interface WorkflowBpmnAdapterResult {
 export interface WorkflowBpmnXmlOptions {
   processId?: string;
   processName?: string | null;
+  positions?: Record<string, WorkflowNodePosition>;
 }
 
 export function workflowGraphToBpmnXml(
@@ -67,11 +72,12 @@ export function workflowGraphToBpmnXml(
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    `<definitions xmlns="${BPMN_NS}" xmlns:xsi="${XSI_NS}" xmlns:flowable="${FLOWABLE_NS}" xmlns:devtool="${DEVTOOL_NS}" targetNamespace="http://devtool.vn/workflow">`,
+    `<definitions xmlns="${BPMN_NS}" xmlns:xsi="${XSI_NS}" xmlns:flowable="${FLOWABLE_NS}" xmlns:devtool="${DEVTOOL_NS}" xmlns:bpmndi="${BPMNDI_NS}" xmlns:di="${DI_NS}" xmlns:dc="${DC_NS}" targetNamespace="http://devtool.vn/workflow">`,
     `  <process id="${processId}"${processName} isExecutable="true">`,
     ...graph.nodes.map((node) => renderNode(node as BpmnWorkflowNode, outgoing.get(node.id) ?? [])),
     ...graph.edges.map(renderSequenceFlow),
     '  </process>',
+    ...renderDiagram(processId, graph, options.positions ?? {}),
     '</definitions>',
     '',
   ].join('\n');
@@ -188,6 +194,56 @@ function renderSequenceFlow(edge: WorkflowEdge): string {
     `      <conditionExpression xsi:type="tFormalExpression">${escapeText(expression)}</conditionExpression>`,
     '    </sequenceFlow>',
   ].join('\n');
+}
+
+function renderDiagram(
+  processId: string,
+  graph: WorkflowGraph,
+  positions: Record<string, WorkflowNodePosition>,
+): string[] {
+  const nodePosition = (nodeId: string, index: number): WorkflowNodePosition =>
+    positions[nodeId] ?? { x: 120 + index * 220, y: 120 };
+  const indexedNodes = new Map(graph.nodes.map((node, index) => [node.id, { node, index }]));
+
+  return [
+    `  <bpmndi:BPMNDiagram id="${processId}_diagram">`,
+    `    <bpmndi:BPMNPlane id="${processId}_plane" bpmnElement="${processId}">`,
+    ...graph.nodes.map((node, index) => {
+      const bounds = boundsForNode(node as BpmnWorkflowNode, nodePosition(node.id, index));
+      return [
+        `      <bpmndi:BPMNShape id="${escapeAttr(node.id)}_di" bpmnElement="${escapeAttr(node.id)}">`,
+        `        <dc:Bounds x="${bounds.x}" y="${bounds.y}" width="${bounds.width}" height="${bounds.height}" />`,
+        '      </bpmndi:BPMNShape>',
+      ].join('\n');
+    }),
+    ...graph.edges.map((edge) => {
+      const source = indexedNodes.get(edge.source);
+      const target = indexedNodes.get(edge.target);
+      const sourceBounds = boundsForNode(source?.node as BpmnWorkflowNode, nodePosition(edge.source, source?.index ?? 0));
+      const targetBounds = boundsForNode(target?.node as BpmnWorkflowNode, nodePosition(edge.target, target?.index ?? 0));
+      return [
+        `      <bpmndi:BPMNEdge id="${escapeAttr(edgeXmlId(edge))}_di" bpmnElement="${escapeAttr(edgeXmlId(edge))}">`,
+        `        <di:waypoint x="${sourceBounds.x + sourceBounds.width}" y="${sourceBounds.y + sourceBounds.height / 2}" />`,
+        `        <di:waypoint x="${targetBounds.x}" y="${targetBounds.y + targetBounds.height / 2}" />`,
+        '      </bpmndi:BPMNEdge>',
+      ].join('\n');
+    }),
+    '    </bpmndi:BPMNPlane>',
+    '  </bpmndi:BPMNDiagram>',
+  ];
+}
+
+function boundsForNode(
+  node: BpmnWorkflowNode | undefined,
+  position: WorkflowNodePosition,
+): WorkflowNodePosition & { width: number; height: number } {
+  if (node?.type === 'START_EVENT' || node?.type === 'END_EVENT') {
+    return { ...position, width: 36, height: 36 };
+  }
+  if (node?.type === 'EXCLUSIVE_GATEWAY' || node?.type === 'PARALLEL_GATEWAY') {
+    return { ...position, width: 50, height: 50 };
+  }
+  return { ...position, width: 160, height: 80 };
 }
 
 function parseNode(element: Element, issues: WorkflowValidationIssue[]): BpmnWorkflowNode | null {

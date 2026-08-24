@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { SharedModule } from '@shared/shared.module';
 import { FlowBuilderModule } from '@shared/ui/patterns/flow-builder/flow-builder.module';
 
+import { WorkflowBpmnCanvasComponent } from './bpmn/workflow-bpmn-canvas.component';
 import { WorkflowCanvasComponent } from './canvas/workflow-canvas.component';
 import { AiGateInspectorComponent } from './inspector/ai-gate-inspector.component';
 import { CodeGateInspectorComponent } from './inspector/code-gate-inspector.component';
@@ -31,6 +32,7 @@ import { WorkflowEditorStore } from './store/workflow-editor.store';
 
 const DECLARATIONS = [
   WorkflowCanvasComponent,
+  WorkflowBpmnCanvasComponent,
   WorkflowNodeShellComponent,
   StartNodeComponent,
   CodeGateNodeComponent,

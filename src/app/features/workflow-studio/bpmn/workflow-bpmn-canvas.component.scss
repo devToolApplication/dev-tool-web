@@ -1,0 +1,89 @@
+.workflow-bpmn-canvas {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 34rem;
+  height: 100%;
+  background: var(--app-surface);
+}
+
+.workflow-bpmn-canvas__surface {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.workflow-bpmn-canvas__palette {
+  position: absolute;
+  z-index: 2;
+  top: var(--app-spacing-3, 0.75rem);
+  left: var(--app-spacing-3, 0.75rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-spacing-1, 0.25rem);
+  max-width: min(34rem, calc(100% - 1.5rem));
+  padding: var(--app-spacing-2, 0.5rem);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md, 0.5rem);
+  background: var(--app-card-surface);
+  box-shadow: var(--app-shadow-sm, 0 1px 2px rgb(0 0 0 / 0.08));
+}
+
+.workflow-bpmn-canvas__palette-button {
+  min-height: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm, 0.375rem);
+  padding: 0 var(--app-spacing-2, 0.5rem);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  font-size: var(--app-font-size-sm, 0.875rem);
+  cursor: pointer;
+}
+
+.workflow-bpmn-canvas__palette-button:hover,
+.workflow-bpmn-canvas__palette-button:focus-visible {
+  border-color: var(--app-primary);
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.workflow-bpmn-canvas .djs-palette,
+.workflow-bpmn-canvas .djs-context-pad {
+  display: none;
+}
+
+.workflow-bpmn-canvas__marker--selected .djs-visual > :first-child {
+  stroke: var(--app-primary) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-bpmn-canvas__marker--invalid .djs-visual > :first-child,
+.workflow-bpmn-canvas__marker--failed .djs-visual > :first-child {
+  stroke: var(--app-danger, #dc2626) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-bpmn-canvas__marker--running .djs-visual > :first-child {
+  stroke: var(--app-warning, #d97706) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-bpmn-canvas__marker--completed .djs-visual > :first-child {
+  stroke: var(--app-success, #16a34a) !important;
+  stroke-width: 3px !important;
+}
+
+@media (max-width: 48rem) {
+  .workflow-bpmn-canvas {
+    min-height: 28rem;
+  }
+
+  .workflow-bpmn-canvas__palette {
+    position: static;
+    max-width: none;
+    border-width: 0 0 1px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
