@@ -59,6 +59,8 @@
     "@spartan-ng/brain": "^0.0.1-alpha.698",
     "@stomp/stompjs": "^7.3.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "bpmn-js": "^18.25.1",
+    "bpmn-moddle": "^10.1.0",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
     "echarts": "^6.0.0",
