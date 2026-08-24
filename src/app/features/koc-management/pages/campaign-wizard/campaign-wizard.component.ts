@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, forkJoin, of } from 'rxjs';
 
 import { PermissionService } from '@core/auth/permission.service';
+import { ToastService } from '@core/notifications/toast.service';
 import type { KocAgentCatalogItem } from '../../model/koc-agent.model';
 import type { KocCampaignDetail } from '../../model/koc-campaign.model';
 import type { KocAiExecutionConfig } from '../../model/koc-common.model';
@@ -49,8 +57,11 @@ export class CampaignWizardComponent implements OnInit {
   private readonly campaignApi = inject(KocCampaignApiService);
   private readonly agentApi = inject(KocAgentApiService);
   private readonly permissionService = inject(PermissionService);
+  private readonly toastService = inject(ToastService);
 
-  readonly mode = signal<KocCampaignWizardMode>(this.route.snapshot.data['mode'] === 'edit' ? 'edit' : 'create');
+  readonly mode = signal<KocCampaignWizardMode>(
+    this.route.snapshot.data['mode'] === 'edit' ? 'edit' : 'create',
+  );
   readonly campaignId = signal(this.route.snapshot.paramMap.get('campaignId'));
   readonly draft = signal<KocCampaignWizardDraft>(createDefaultCampaignWizardDraft());
   readonly agents = signal<KocAgentCatalogItem[]>([]);
@@ -78,14 +89,26 @@ export class CampaignWizardComponent implements OnInit {
     { label: 'koc.rule.missing.review', value: 'REVIEW' },
     { label: 'koc.rule.missing.rejectWithPolicy', value: 'REJECT_WITH_POLICY' },
   ];
-  readonly activeStepIndex = computed(() => this.steps.findIndex((step) => step.id === this.activeStepId()));
+  readonly activeStepIndex = computed(() =>
+    this.steps.findIndex((step) => step.id === this.activeStepId()),
+  );
   readonly activeStep = computed(() => this.steps[this.activeStepIndex()] ?? this.steps[0]);
   readonly isFirstStep = computed(() => this.activeStepIndex() <= 0);
   readonly isLastStep = computed(() => this.activeStepIndex() === this.steps.length - 1);
-  readonly pageTitle = computed(() => this.mode() === 'edit' ? 'koc.campaigns.edit.title' : 'koc.campaigns.create.title');
-  readonly pageSubtitle = computed(() => this.mode() === 'edit' ? 'koc.campaigns.edit.subtitle' : 'koc.campaigns.create.subtitle');
+  readonly pageTitle = computed(() =>
+    this.mode() === 'edit' ? 'koc.campaigns.edit.title' : 'koc.campaigns.create.title',
+  );
+  readonly pageSubtitle = computed(() =>
+    this.mode() === 'edit' ? 'koc.campaigns.edit.subtitle' : 'koc.campaigns.create.subtitle',
+  );
   readonly hasBlockingProvider = computed(() => this.selectedProviderBlocked());
-  readonly startDisabled = computed(() => !this.canMutate() || validateCampaignWizardDraft(this.draft()).length > 0 || this.hasBlockingProvider() || this.saving());
+  readonly startDisabled = computed(
+    () =>
+      !this.canMutate() ||
+      validateCampaignWizardDraft(this.draft()).length > 0 ||
+      this.hasBlockingProvider() ||
+      this.saving(),
+  );
 
   ngOnInit(): void {
     this.loading.set(true);
@@ -93,7 +116,9 @@ export class CampaignWizardComponent implements OnInit {
     const campaignId = this.campaignId();
     forkJoin({
       agents: this.agentApi.getAgents(),
-      campaign: campaignId ? this.campaignApi.getCampaign(campaignId) : of<KocCampaignDetail | null>(null),
+      campaign: campaignId
+        ? this.campaignApi.getCampaign(campaignId)
+        : of<KocCampaignDetail | null>(null),
     }).subscribe({
       next: ({ agents, campaign }) => {
         this.agents.set(agents);
@@ -134,7 +159,9 @@ export class CampaignWizardComponent implements OnInit {
   removeSearchStrategy(index: number): void {
     this.draft.update((current) => ({
       ...current,
-      searchStrategies: current.searchStrategies.filter((_strat, stratIndex) => stratIndex !== index),
+      searchStrategies: current.searchStrategies.filter(
+        (_strat, stratIndex) => stratIndex !== index,
+      ),
     }));
     this.markDirty();
   }
@@ -142,7 +169,9 @@ export class CampaignWizardComponent implements OnInit {
   updateSearchStrategy(index: number, partial: Partial<KocSearchStrategy>): void {
     this.draft.update((current) => ({
       ...current,
-      searchStrategies: current.searchStrategies.map((strategy, strategyIndex) => (strategyIndex === index ? { ...strategy, ...partial } : strategy)),
+      searchStrategies: current.searchStrategies.map((strategy, strategyIndex) =>
+        strategyIndex === index ? { ...strategy, ...partial } : strategy,
+      ),
     }));
     this.markDirty();
   }
@@ -150,7 +179,9 @@ export class CampaignWizardComponent implements OnInit {
   updateSignal(index: number, partial: { enabled?: boolean; weight?: number }): void {
     this.draft.update((current) => ({
       ...current,
-      discoverySignals: current.discoverySignals.map((sig, sigIndex) => (sigIndex === index ? { ...sig, ...partial } : sig)),
+      discoverySignals: current.discoverySignals.map((sig, sigIndex) =>
+        sigIndex === index ? { ...sig, ...partial } : sig,
+      ),
     }));
     this.markDirty();
   }
@@ -212,7 +243,9 @@ export class CampaignWizardComponent implements OnInit {
   addScreeningRuleFromTemplate(templateId: KocRuleTemplateId, group: KocRuleGroup): void {
     const priority = this.nextRulePriority(group);
     const template = this.ruleTemplates.find((t) => t.templateId === templateId);
-    const isAi = template ? template.kind === 'AI' : templateId === 'custom-ai' || templateId === 'comment-quality';
+    const isAi = template
+      ? template.kind === 'AI'
+      : templateId === 'custom-ai' || templateId === 'comment-quality';
     const rule = isAi
       ? createDefaultAiScreeningRule(group, priority)
       : createDefaultCodeScreeningRule(group, priority);
@@ -239,7 +272,9 @@ export class CampaignWizardComponent implements OnInit {
   updateScreeningRule(index: number, partial: KocScreeningRulePatch): void {
     this.draft.update((current) => ({
       ...current,
-      screeningRules: current.screeningRules.map((rule, ruleIndex) => ruleIndex === index ? this.mergeScreeningRule(rule, partial) : rule),
+      screeningRules: current.screeningRules.map((rule, ruleIndex) =>
+        ruleIndex === index ? this.mergeScreeningRule(rule, partial) : rule,
+      ),
     }));
     this.markDirty();
   }
@@ -248,7 +283,11 @@ export class CampaignWizardComponent implements OnInit {
     this.updateScreeningRule(index, { execution: value } as Partial<KocScreeningRule>);
   }
 
-  updateAiRuleParameter(index: number, key: keyof KocAiRule['parameters'], value: string | number | boolean | null): void {
+  updateAiRuleParameter(
+    index: number,
+    key: keyof KocAiRule['parameters'],
+    value: string | number | boolean | null,
+  ): void {
     const rule = this.draft().screeningRules[index];
     if (!rule || rule.kind !== 'AI') {
       return;
@@ -315,7 +354,7 @@ export class CampaignWizardComponent implements OnInit {
       this.dirty.set(false);
       return saved;
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.toastService.error(errorMessage(error));
       return null;
     } finally {
       this.saving.set(false);
@@ -354,7 +393,9 @@ export class CampaignWizardComponent implements OnInit {
     if (!selectedAgent || !execution.provider) {
       return false;
     }
-    const provider = selectedAgent.supportedProviders.find((option) => option.provider === execution.provider);
+    const provider = selectedAgent.supportedProviders.find(
+      (option) => option.provider === execution.provider,
+    );
     return !provider?.available || provider.health === 'UNHEALTHY';
   }
 
@@ -366,7 +407,10 @@ export class CampaignWizardComponent implements OnInit {
     return this.draft().screeningRules.filter((rule) => rule.group === group).length + 1;
   }
 
-  private mergeScreeningRule(rule: KocScreeningRule, partial: KocScreeningRulePatch): KocScreeningRule {
+  private mergeScreeningRule(
+    rule: KocScreeningRule,
+    partial: KocScreeningRulePatch,
+  ): KocScreeningRule {
     if (rule.kind === 'AI') {
       return {
         ...rule,
