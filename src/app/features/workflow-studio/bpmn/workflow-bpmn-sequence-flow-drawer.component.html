@@ -1,0 +1,66 @@
+@if (edge) {
+  <form class="workflow-bpmn-drawer" aria-label="BPMN sequence flow configuration">
+    <section class="workflow-bpmn-drawer__section">
+      <h3>{{ 'workflowStudio.inspector.section.general' | translateContent }}</h3>
+      <app-input-text
+        label="workflowStudio.bpmn.drawer.name"
+        [value]="name"
+        [readonly]="readonly"
+        (valueChange)="updateName($event)"
+      ></app-input-text>
+      <app-input-text
+        label="workflowStudio.inspector.source"
+        [value]="edge.source"
+        [readonly]="true"
+      ></app-input-text>
+      <app-input-text
+        label="workflowStudio.inspector.target"
+        [value]="edge.target"
+        [readonly]="true"
+      ></app-input-text>
+      <app-toggle-switch
+        label="workflowStudio.bpmn.drawer.defaultFlow"
+        [value]="defaultFlow"
+        [disabled]="readonly"
+        (valueChange)="updateDefaultFlow($event)"
+      ></app-toggle-switch>
+    </section>
+
+    <section class="workflow-bpmn-drawer__section">
+      <h3>{{ 'workflowStudio.bpmn.drawer.condition' | translateContent }}</h3>
+      <div class="workflow-bpmn-drawer__condition-grid">
+        <app-input-text
+          label="workflowStudio.bpmn.condition.leftPath"
+          [value]="leftPath"
+          [readonly]="readonly"
+          (valueChange)="updateLeftPath($event)"
+        ></app-input-text>
+        <app-select
+          label="workflowStudio.bpmn.condition.operator"
+          [options]="operatorOptions"
+          [value]="operator"
+          [disabled]="readonly"
+          (valueChange)="updateOperator($event)"
+        ></app-select>
+        <app-input-area
+          label="workflowStudio.bpmn.condition.rightLiteral"
+          contentType="json"
+          [rows]="2"
+          [maxRows]="6"
+          [value]="rightLiteral"
+          [readonly]="readonly"
+          [invalid]="!!jsonError"
+          [errorMessage]="jsonError ?? undefined"
+          (valueChange)="updateRightLiteral($event)"
+        ></app-input-area>
+      </div>
+      <app-button
+        label="workflowStudio.bpmn.condition.clear"
+        variant="ghost"
+        size="sm"
+        [disabled]="readonly"
+        (buttonClick)="clearCondition()"
+      ></app-button>
+    </section>
+  </form>
+}
