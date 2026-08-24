@@ -19,9 +19,9 @@ describe('workflow node catalog', () => {
       criteria: {},
       inputMapping: { mapping: {} },
       provider: '',
-      modelProfile: '',
-      toolProfile: '',
-      outputSchema: '',
+      agentCode: '',
+      workingDirectory: '',
+      outputSchema: 'gate-result-v1',
       retryPolicy: { maxAttempts: 1 },
       timeoutPolicy: { timeoutSeconds: 30 },
     });
@@ -56,8 +56,8 @@ describe('workflow node catalog', () => {
     const view = workflowNodeView({
       ...aiGate,
       instruction: 'Review profile',
-      provider: 'openai',
-      modelProfile: 'fast',
+      provider: 'codex',
+      agentCode: 'koc-rule-evaluator',
     }, {
       selected: true,
       runtimeStatus: 'RUNNING',

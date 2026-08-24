@@ -10,8 +10,9 @@ import { AiGateWorkflowNode } from '../model/workflow-studio.model';
 const defaultNode: AiGateWorkflowNode = {
   ...createWorkflowNode('AI_GATE', 'ai-gate-1'),
   instruction: 'Evaluate customer risk profile',
-  provider: 'openai',
-  modelProfile: 'gpt-4o',
+  provider: 'codex',
+  agentCode: 'koc-rule-evaluator',
+  workingDirectory: 'D:\\Code\\ai-agent-mcrs',
 };
 
 const meta: Meta<AiGateNodeComponent> = {

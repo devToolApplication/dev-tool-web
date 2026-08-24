@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Component, EventEmitter, Input, NO_ERRORS_SCHEMA, Output, Pipe, PipeTransform } from '@angular/core';
 import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
+import { of } from 'rxjs';
 
+import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 import { WorkflowDetail } from '../model/workflow-studio.model';
 import { AiGateInspectorComponent } from './ai-gate-inspector.component';
@@ -35,8 +37,44 @@ class FormInputStubComponent {
 describe('WorkflowNodeInspectorComponent', () => {
   let fixture: ComponentFixture<WorkflowNodeInspectorComponent>;
   let store: WorkflowEditorStore;
+  let api: {
+    getAgents: ReturnType<typeof vi.fn>;
+    getAiGateOutputSchemas: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
+    api = {
+      getAgents: vi.fn(() => of([
+        {
+          agentCode: 'koc-rule-evaluator',
+          displayName: 'KOC Rule Evaluator',
+          defaultProvider: 'codex',
+          supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+          requiredDependencies: [],
+          health: 'HEALTHY',
+        },
+        {
+          agentCode: 'facebook-candidate-discovery',
+          displayName: 'Facebook Candidate Discovery',
+          defaultProvider: 'claude',
+          supportedProviders: [
+            { provider: 'codex', available: true, health: 'HEALTHY' },
+            { provider: 'claude', available: true, health: 'HEALTHY' },
+          ],
+          requiredDependencies: ['FACEBOOK_MCP'],
+          health: 'HEALTHY',
+        },
+      ])),
+      getAiGateOutputSchemas: vi.fn(() => of([
+        {
+          value: 'gate-result-v1',
+          label: 'Gate result v1',
+          description: 'Standard PASS/FAIL/BLOCKED gate output.',
+          isDefault: true,
+        },
+      ])),
+    };
+
     TestBed.configureTestingModule({
       declarations: [
         WorkflowNodeInspectorComponent,
@@ -48,7 +86,10 @@ describe('WorkflowNodeInspectorComponent', () => {
         TranslateContentPipeStub,
         FormInputStubComponent,
       ],
-      providers: [WorkflowEditorStore],
+      providers: [
+        WorkflowEditorStore,
+        { provide: WorkflowApiService, useValue: api },
+      ],
       schemas: [NO_ERRORS_SCHEMA],
     });
 
@@ -117,6 +158,41 @@ describe('WorkflowNodeInspectorComponent', () => {
     expect(formAfterStoreUpdate.initialValue).toBe(initialValue);
   });
 
+  it('feeds AI gate catalog options and defaults provider when agent changes', async () => {
+    store.selectNode('ai');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const form = fixture.debugElement.query(By.directive(FormInputStubComponent))
+      .componentInstance as FormInputStubComponent;
+
+    expect(api.getAgents).toHaveBeenCalledTimes(1);
+    expect(api.getAiGateOutputSchemas).toHaveBeenCalledTimes(1);
+    expect(form.context.extra).toMatchObject({
+      agentOptions: [
+        { label: 'KOC Rule Evaluator', value: 'koc-rule-evaluator' },
+        { label: 'Facebook Candidate Discovery', value: 'facebook-candidate-discovery' },
+      ],
+      providerOptions: [{ label: 'workflowStudio.ai.provider.codex', value: 'codex' }],
+      outputSchemaOptions: [{ label: 'Gate result v1', value: 'gate-result-v1' }],
+    });
+
+    form.valueChange.emit({
+      ...form.initialValue,
+      agentCode: 'facebook-candidate-discovery',
+      provider: '',
+    });
+    fixture.detectChanges();
+
+    expect(store.nodes().find((node) => node.id === 'ai')).toMatchObject({
+      id: 'ai',
+      type: 'AI_GATE',
+      agentCode: 'facebook-candidate-discovery',
+      provider: 'claude',
+    });
+  });
+
   it('ignores invalid form payloads so advanced JSON cannot corrupt editor state', () => {
     store.selectNode('code');
     fixture.detectChanges();
@@ -177,9 +253,9 @@ function sampleDetail(): WorkflowDetail {
               criteria: {},
               inputMapping: { mapping: { candidate: '${input.candidate}' } },
               provider: 'claude',
-              modelProfile: 'gpt-5.2',
-              toolProfile: 'facebook-readonly',
-              outputSchema: 'koc-review-v1',
+              agentCode: 'koc-rule-evaluator',
+              workingDirectory: 'D:\\Code\\ai-agent-mcrs',
+              outputSchema: 'gate-result-v1',
               retryPolicy: { maxAttempts: 2 },
               timeoutPolicy: { timeoutSeconds: 3600 },
             },

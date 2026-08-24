@@ -128,9 +128,9 @@ describe('WorkflowEditorStore', () => {
       criteria: { minScore: 80 },
       inputMapping: { mapping: { candidate: '${input.candidate}' } },
       provider: 'claude',
-      modelProfile: 'gpt-5.2',
-      toolProfile: 'facebook-readonly',
-      outputSchema: 'koc-review-v1',
+      agentCode: 'koc-rule-evaluator',
+      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
+      outputSchema: 'gate-result-v1',
       retryPolicy: { maxAttempts: 2 },
       timeoutPolicy: { timeoutSeconds: 3600 },
     };

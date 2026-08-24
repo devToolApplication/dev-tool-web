@@ -49,8 +49,8 @@ export interface AiGateWorkflowNodeDto {
   criteria: JsonValue;
   inputMapping: InputMappingDto;
   provider: string;
-  modelProfile: string;
-  toolProfile: string;
+  agentCode: string;
+  workingDirectory: string;
   outputSchema: string;
   retryPolicy: RetryPolicyDto;
   timeoutPolicy: TimeoutPolicyDto;

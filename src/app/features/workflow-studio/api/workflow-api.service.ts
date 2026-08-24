@@ -12,8 +12,10 @@ import {
 } from '../model/workflow-studio.dto';
 import {
   WorkflowBackendValidationResult,
+  WorkflowAgentCatalogItem,
   WorkflowDefinition,
   WorkflowDetail,
+  WorkflowOutputSchemaCatalogItem,
   WorkflowPageQuery,
   WorkflowRun,
   WorkflowUpsertPayload,
@@ -27,9 +29,22 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class WorkflowApiService {
-  private readonly baseUrl = `${environment.apiUrl.adminAiGenerator}/workflows`;
+  private readonly adminBaseUrl = environment.apiUrl.adminAiGenerator;
+  private readonly baseUrl = `${this.adminBaseUrl}/workflows`;
 
   constructor(private readonly http: HttpClient) {}
+
+  getAgents(): Observable<WorkflowAgentCatalogItem[]> {
+    return this.http
+      .get<BaseResponse<WorkflowAgentCatalogItem[]>>(`${this.adminBaseUrl}/ai-agents`)
+      .pipe(map((response) => response.data ?? []));
+  }
+
+  getAiGateOutputSchemas(): Observable<WorkflowOutputSchemaCatalogItem[]> {
+    return this.http
+      .get<BaseResponse<WorkflowOutputSchemaCatalogItem[]>>(`${this.adminBaseUrl}/ai-gate-output-schemas`)
+      .pipe(map((response) => response.data ?? []));
+  }
 
   getWorkflowPage(query: WorkflowPageQuery = {}): Observable<BasePageResponse<WorkflowDefinition>> {
     return this.http

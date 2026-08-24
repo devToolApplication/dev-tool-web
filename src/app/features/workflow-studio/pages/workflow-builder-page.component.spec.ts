@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, Pipe, PipeTransform } from '@angular/core';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
+import { ToastService } from '@core/notifications/toast.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { createDraftWorkflowDetail } from '../model/workflow-lifecycle.config';
 import { WorkflowDetail } from '../model/workflow-studio.model';
@@ -31,6 +32,7 @@ describe('WorkflowBuilderPageComponent', () => {
     publish: ReturnType<typeof vi.fn>;
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let toastService: { error: ReturnType<typeof vi.fn> };
   let store: WorkflowEditorStore;
 
   function configure(routeWorkflowId: string | null): void {
@@ -57,6 +59,7 @@ describe('WorkflowBuilderPageComponent', () => {
       publish: vi.fn(() => Promise.resolve(savedWorkflow())),
     };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
+    toastService = { error: vi.fn() };
 
     TestBed.configureTestingModule({
       declarations: [WorkflowBuilderPageComponent, TranslateContentPipeStub],
@@ -65,6 +68,7 @@ describe('WorkflowBuilderPageComponent', () => {
         WorkflowLayoutService,
         { provide: WorkflowApiService, useValue: api },
         { provide: WorkflowPersistenceService, useValue: persistence },
+        { provide: ToastService, useValue: toastService },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -118,6 +122,19 @@ describe('WorkflowBuilderPageComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/workflows', 'wf-1', 'edit'], {
       replaceUrl: true,
     });
+  });
+
+  it('keeps the builder editable and shows a toast when saving fails', async () => {
+    configure(null);
+    fixture.detectChanges();
+    persistence.save.mockRejectedValue(new Error('AI_GATE agentCode is required'));
+    store.updateWorkflowMetadata('Needs agent', null);
+
+    await component.save();
+
+    expect(component.error()).toBeNull();
+    expect(component.hasUnsavedChanges()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith('AI_GATE agentCode is required');
   });
 
   it('protects the route when the builder is dirty', () => {

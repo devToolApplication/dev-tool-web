@@ -40,7 +40,7 @@ describe('WorkflowValidator', () => {
     const issues = validateWorkflowGraph({
       nodes: [
         { id: 'start', type: 'START' },
-        aiGate({ id: 'ai', instruction: '', outputSchema: '', modelProfile: '', toolProfile: '' }),
+        aiGate({ id: 'ai', instruction: '', outputSchema: '', agentCode: '' }),
         codeGate({ id: 'code', handler: '' }),
         { id: 'logic', type: 'LOGIC', operator: 'N_OF_M', config: { required: 3 } },
         { id: 'end', type: 'END' },
@@ -56,10 +56,48 @@ describe('WorkflowValidator', () => {
     expect(issues).toEqual(expect.arrayContaining([
       expect.objectContaining({ code: 'AI_GATE_INSTRUCTION_REQUIRED', nodeId: 'ai', field: 'instruction' }),
       expect.objectContaining({ code: 'AI_GATE_OUTPUT_SCHEMA_REQUIRED', nodeId: 'ai', field: 'outputSchema' }),
-      expect.objectContaining({ code: 'AI_GATE_MODEL_PROFILE_REQUIRED', nodeId: 'ai', field: 'modelProfile' }),
-      expect.objectContaining({ code: 'AI_GATE_TOOL_PROFILE_REQUIRED', nodeId: 'ai', field: 'toolProfile' }),
+      expect.objectContaining({ code: 'AI_GATE_AGENT_CODE_REQUIRED', nodeId: 'ai', field: 'agentCode' }),
       expect.objectContaining({ code: 'CODE_GATE_HANDLER_REQUIRED', nodeId: 'code', field: 'handler' }),
       expect.objectContaining({ code: 'N_OF_M_REQUIRED_OUT_OF_RANGE', nodeId: 'logic', field: 'config.required' }),
+    ]));
+  });
+
+  it('handles undefined or null required string fields safely without throwing', () => {
+    const issues = validateWorkflowGraph({
+      nodes: [
+        { id: 'start', type: 'START' },
+        {
+          id: 'ai-raw',
+          type: 'AI_GATE',
+          criteria: {},
+          inputMapping: { mapping: {} },
+          provider: 'claude',
+          retryPolicy: { maxAttempts: 1 },
+          timeoutPolicy: { timeoutSeconds: 30 },
+        } as unknown as WorkflowNode,
+        {
+          id: 'code-raw',
+          type: 'CODE_GATE',
+          config: {},
+          inputMapping: { mapping: {} },
+          retryPolicy: { maxAttempts: 1 },
+          timeoutPolicy: { timeoutSeconds: 30 },
+        } as unknown as WorkflowNode,
+        { id: 'end', type: 'END' },
+      ],
+      edges: [
+        { source: 'start', target: 'ai-raw' },
+        { source: 'ai-raw', target: 'code-raw' },
+        { source: 'code-raw', target: 'end' },
+      ],
+    });
+
+    expect(issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'AI_GATE_INSTRUCTION_REQUIRED', nodeId: 'ai-raw', field: 'instruction' }),
+      expect.objectContaining({ code: 'AI_GATE_OUTPUT_SCHEMA_REQUIRED', nodeId: 'ai-raw', field: 'outputSchema' }),
+      expect.objectContaining({ code: 'AI_GATE_AGENT_CODE_REQUIRED', nodeId: 'ai-raw', field: 'agentCode' }),
+      expect.objectContaining({ code: 'AI_GATE_WORKING_DIRECTORY_REQUIRED', nodeId: 'ai-raw', field: 'workingDirectory' }),
+      expect.objectContaining({ code: 'CODE_GATE_HANDLER_REQUIRED', nodeId: 'code-raw', field: 'handler' }),
     ]));
   });
 
@@ -112,8 +150,8 @@ function aiGate(overrides: Partial<Extract<WorkflowNode, { type: 'AI_GATE' }>> =
     criteria: {},
     inputMapping: { mapping: {} },
     provider: 'codex',
-    modelProfile: 'default',
-    toolProfile: 'facebook-readonly',
+    agentCode: 'koc-rule-evaluator',
+    workingDirectory: 'D:\\Code\\ai-agent-mcrs',
     outputSchema: 'gate-result-v1',
     retryPolicy: { maxAttempts: 1 },
     timeoutPolicy: { timeoutSeconds: 30 },

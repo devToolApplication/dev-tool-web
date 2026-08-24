@@ -11,6 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
+import { ToastService } from '@core/notifications/toast.service';
 import {
   buildWorkflowBuilderActions,
   createDraftWorkflowDetail,
@@ -45,6 +46,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
   private readonly api = inject(WorkflowApiService);
   private readonly persistence = inject(WorkflowPersistenceService);
   private readonly layout = inject(WorkflowLayoutService);
+  private readonly toastService = inject(ToastService);
 
   readonly store = inject(WorkflowEditorStore);
   readonly loading = signal(false);
@@ -251,7 +253,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
         });
       }
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.toastService.error(errorMessage(error));
     }
   }
 

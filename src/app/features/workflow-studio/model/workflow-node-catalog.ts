@@ -157,9 +157,9 @@ export function createWorkflowNode(type: WorkflowNodeType, id: string): Workflow
         criteria: {},
         inputMapping: { mapping: {} },
         provider: '',
-        modelProfile: '',
-        toolProfile: '',
-        outputSchema: '',
+        agentCode: '',
+        workingDirectory: '',
+        outputSchema: 'gate-result-v1',
         retryPolicy: { maxAttempts: 1 },
         timeoutPolicy: { timeoutSeconds: 30 },
       };
@@ -202,7 +202,7 @@ function nodeSubtitle(node: WorkflowNode): string {
     case 'CODE_GATE':
       return node.handler || 'Code handler';
     case 'AI_GATE':
-      return node.instruction || [node.provider, node.modelProfile].filter(Boolean).join(' / ') || 'AI evaluation';
+      return node.instruction || [node.provider, node.agentCode].filter(Boolean).join(' / ') || 'AI evaluation';
     case 'LOGIC':
       return logicLabel(node.operator);
   }

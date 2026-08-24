@@ -1,6 +1,6 @@
 export const environment = {
   applicationName: 'Hệ thống hỗ trợ dev',
-  production: true,
+  production: false,
   dangerouslySkipPermissions: true,
   keycloak: {
     enabled: true,
@@ -15,9 +15,9 @@ export const environment = {
     },
   },
   apiUrl: {
-    adminAiGenerator: 'https://api.169.58.153.62.nip.io/ai-agent-mcrs/v1/admin',
-    aiGenerator: 'https://api.169.58.153.62.nip.io/ai-agent-mcrs/v1',
-    adminFileServiceUrl: 'https://api.169.58.153.62.nip.io/file-mcrs/v1/admin',
+    adminAiGenerator: 'http://localhost:31001/ai-agent-mcrs/v1/admin',
+    aiGenerator: 'http://localhost:31001/ai-agent-mcrs/v1',
+    adminFileServiceUrl: 'http://localhost:31005/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'http://localhost:31002/trade-bot-mcrs/v1/admin',
     tradeBotUrl: 'http://localhost:31002/trade-bot-mcrs/v1',
     jobSchedulerAdminUrl: 'https://api.169.58.153.62.nip.io/job-service/v1/admin',
@@ -25,6 +25,6 @@ export const environment = {
     bpmEngineUrl: 'https://api.169.58.153.62.nip.io/bpm-engine/v1',
   },
   ws: {
-    tradeBotWs: 'wss://api.169.58.153.62.nip.io/trade-bot-mcrs/ws',
+    tradeBotWs: 'ws://localhost:31002/trade-bot-mcrs/ws',
   },
 };

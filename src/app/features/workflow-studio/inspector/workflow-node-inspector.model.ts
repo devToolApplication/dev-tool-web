@@ -32,11 +32,6 @@ const LOGIC_OPERATOR_OPTIONS: SelectOption[] = [
   { label: 'workflowStudio.logic.operator.switch', value: 'SWITCH' },
 ];
 
-const PROVIDER_OPTIONS: SelectOption[] = [
-  { label: 'workflowStudio.ai.provider.claude', value: 'claude' },
-  { label: 'workflowStudio.ai.provider.codex', value: 'codex' },
-];
-
 export function workflowNodeInspectorConfig(type: WorkflowNodeType): FormConfig {
   switch (type) {
     case 'AI_GATE':
@@ -62,9 +57,9 @@ export function workflowNodeToInspectorValue(node: WorkflowNode): WorkflowNodeIn
     case 'AI_GATE':
       return {
         id: node.id,
+        agentCode: node.agentCode,
         provider: node.provider,
-        modelProfile: node.modelProfile,
-        toolProfile: node.toolProfile,
+        workingDirectory: node.workingDirectory,
         instruction: node.instruction,
         criteria: stringifyJson(node.criteria),
         inputMapping: stringifyJson(node.inputMapping),
@@ -126,16 +121,25 @@ function aiGateConfig(): FormConfig {
     [
       idField(),
       {
+        name: 'agentCode',
+        type: 'select',
+        label: 'workflowStudio.inspector.agentCode',
+        sectionId: 'agent',
+        required: true,
+        optionsExpression: 'context.extra.agentOptions',
+        showClear: true,
+        width: '1/2',
+      },
+      {
         name: 'provider',
         type: 'select',
         label: 'workflowStudio.inspector.provider',
         sectionId: 'agent',
-        options: PROVIDER_OPTIONS,
+        optionsExpression: 'context.extra.providerOptions',
         showClear: true,
         width: '1/2',
       },
-      textField('modelProfile', 'workflowStudio.inspector.modelProfile', 'agent', '1/2', true),
-      textField('toolProfile', 'workflowStudio.inspector.toolProfile', 'agent', '1/2', true),
+      textField('workingDirectory', 'workflowStudio.inspector.workingDirectory', 'agent', 'full', true),
       {
         name: 'instruction',
         type: 'textarea',
@@ -148,7 +152,14 @@ function aiGateConfig(): FormConfig {
       },
       jsonField('criteria', 'workflowStudio.inspector.criteria', 'decision'),
       jsonField('inputMapping', 'workflowStudio.inspector.inputMapping', 'input'),
-      textField('outputSchema', 'workflowStudio.inspector.outputSchema', 'output', 'full', true),
+      {
+        name: 'outputSchema',
+        type: 'auto-complete',
+        label: 'workflowStudio.inspector.outputSchema',
+        sectionId: 'output',
+        required: true,
+        optionsExpression: 'context.extra.outputSchemaOptions',
+      },
       numberField('maxAttempts', 'workflowStudio.inspector.maxAttempts', 'execution'),
       numberField('timeoutSeconds', 'workflowStudio.inspector.timeoutSeconds', 'execution'),
     ],
@@ -334,8 +345,8 @@ function aiGatePatch(value: WorkflowNodeInspectorValue): Partial<AiGateWorkflowN
     criteria,
     inputMapping,
     provider: textValue(value['provider']),
-    modelProfile: textValue(value['modelProfile']),
-    toolProfile: textValue(value['toolProfile']),
+    agentCode: textValue(value['agentCode']),
+    workingDirectory: textValue(value['workingDirectory']),
     outputSchema: textValue(value['outputSchema']),
     retryPolicy: { maxAttempts: positiveInteger(value['maxAttempts'], 1) },
     timeoutPolicy: { timeoutSeconds: positiveInteger(value['timeoutSeconds'], 30) },

@@ -105,8 +105,8 @@ function validateNodeConfig(
 function validateAiGate(node: AiGateWorkflowNode, issues: WorkflowValidationIssue[]): void {
   requiredText(node.instruction, 'AI_GATE_INSTRUCTION_REQUIRED', 'AI_GATE instruction is required', node.id, 'instruction', issues);
   requiredText(node.outputSchema, 'AI_GATE_OUTPUT_SCHEMA_REQUIRED', 'AI_GATE output schema is required', node.id, 'outputSchema', issues);
-  requiredText(node.modelProfile, 'AI_GATE_MODEL_PROFILE_REQUIRED', 'AI_GATE model profile is required', node.id, 'modelProfile', issues);
-  requiredText(node.toolProfile, 'AI_GATE_TOOL_PROFILE_REQUIRED', 'AI_GATE tool profile is required', node.id, 'toolProfile', issues);
+  requiredText(node.agentCode, 'AI_GATE_AGENT_CODE_REQUIRED', 'AI_GATE agent code is required', node.id, 'agentCode', issues);
+  requiredText(node.workingDirectory, 'AI_GATE_WORKING_DIRECTORY_REQUIRED', 'AI_GATE working directory is required', node.id, 'workingDirectory', issues);
 }
 
 function validateCodeGate(node: CodeGateWorkflowNode, issues: WorkflowValidationIssue[]): void {
@@ -237,14 +237,14 @@ function traverse(startNodeId: string, outgoingEdges: Map<string, string[]>): Se
 }
 
 function requiredText(
-  value: string,
+  value: string | undefined | null,
   code: string,
   message: string,
   nodeId: string,
   field: string,
   issues: WorkflowValidationIssue[],
 ): void {
-  if (!value.trim()) {
+  if (typeof value !== 'string' || !value.trim()) {
     issues.push(issue(code, message, { nodeId, field }));
   }
 }

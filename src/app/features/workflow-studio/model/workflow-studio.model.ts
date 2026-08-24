@@ -80,11 +80,33 @@ export interface AiGateWorkflowNode {
   criteria: JsonValue;
   inputMapping: InputMapping;
   provider: string;
-  modelProfile: string;
-  toolProfile: string;
+  agentCode: string;
+  workingDirectory: string;
   outputSchema: string;
   retryPolicy: RetryPolicy;
   timeoutPolicy: TimeoutPolicy;
+}
+
+export interface WorkflowAgentProviderOption {
+  provider: string;
+  available: boolean;
+  health?: string;
+}
+
+export interface WorkflowAgentCatalogItem {
+  agentCode: string;
+  displayName: string;
+  defaultProvider?: string;
+  supportedProviders: WorkflowAgentProviderOption[];
+  requiredDependencies: string[];
+  health?: string;
+}
+
+export interface WorkflowOutputSchemaCatalogItem {
+  value: string;
+  label: string;
+  description?: string;
+  isDefault: boolean;
 }
 
 export interface LogicWorkflowNode {

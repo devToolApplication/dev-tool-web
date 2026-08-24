@@ -14,7 +14,7 @@ describe('workflow runtime mapper', () => {
     expect(workflowRunToRuntimeVisualState(run, {
       nodes: [
         { id: 'start', type: 'START' },
-        { id: 'gate', type: 'AI_GATE', instruction: '', criteria: {}, inputMapping: { mapping: {} }, provider: 'codex', modelProfile: 'fast', toolProfile: 'web-lite', outputSchema: '', retryPolicy: { maxAttempts: 1 }, timeoutPolicy: { timeoutSeconds: 60 } },
+        { id: 'gate', type: 'AI_GATE', instruction: '', criteria: {}, inputMapping: { mapping: {} }, provider: 'codex', agentCode: 'koc-rule-evaluator', workingDirectory: 'D:\\Code\\ai-agent-mcrs', outputSchema: 'gate-result-v1', retryPolicy: { maxAttempts: 1 }, timeoutPolicy: { timeoutSeconds: 60 } },
         { id: 'end', type: 'END' },
       ],
       edges: [

@@ -1,8 +1,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
+import { ToastService } from '@core/notifications/toast.service';
 import { PermissionService } from '@core/auth/permission.service';
 import type { KocAgentCatalogItem } from '../../model/koc-agent.model';
 import type { KocCampaignDetail } from '../../model/koc-campaign.model';
@@ -24,6 +25,7 @@ describe('CampaignWizardComponent', () => {
   let agentApi: { getAgents: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let permissionService: { has: ReturnType<typeof vi.fn> };
+  let toastService: { error: ReturnType<typeof vi.fn> };
   let route: { snapshot: { paramMap: ReturnType<typeof convertToParamMap>; data: Record<string, string> } };
 
   const agents: KocAgentCatalogItem[] = [
@@ -74,6 +76,7 @@ describe('CampaignWizardComponent', () => {
     agentApi = { getAgents: vi.fn(() => of(agents)) };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
     permissionService = { has: vi.fn((perm: string) => perm === 'AI_AGENT_WORKFLOW_WRITE') };
+    toastService = { error: vi.fn() };
     route = {
       snapshot: {
         paramMap: convertToParamMap({}),
@@ -87,6 +90,7 @@ describe('CampaignWizardComponent', () => {
         { provide: KocCampaignApiService, useValue: campaignApi },
         { provide: KocAgentApiService, useValue: agentApi },
         { provide: PermissionService, useValue: permissionService },
+        { provide: ToastService, useValue: toastService },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: route },
       ],
@@ -121,6 +125,24 @@ describe('CampaignWizardComponent', () => {
       discoveryExecution: { agentCode: 'facebook-discovery', provider: 'codex' },
     }));
     expect(component.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('keeps the wizard editable and shows a toast when saving fails', async () => {
+    campaignApi.createCampaign.mockReturnValue(
+      throwError(() => new Error('Missing AI_GATE agentCode')),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.updateDraft({ name: 'Back to school', code: 'BTS', targetAccepted: 10, maximumDiscovered: 30, maximumScreened: 20 });
+    component.updateDiscoveryExecution({ agentCode: 'facebook-discovery', provider: 'codex' });
+
+    const result = await component.saveDraft();
+
+    expect(result).toBeNull();
+    expect(component.error()).toBeNull();
+    expect(component.hasUnsavedChanges()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith('Missing AI_GATE agentCode');
   });
 
   it('starts a valid campaign after saving the draft', async () => {

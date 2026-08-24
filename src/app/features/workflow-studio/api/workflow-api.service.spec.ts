@@ -28,6 +28,62 @@ describe('WorkflowApiService', () => {
     httpMock.verify();
   });
 
+  it('loads AI agent catalog from the admin agent endpoint', () => {
+    service.getAgents().subscribe((agents) => {
+      expect(agents).toEqual([
+        {
+          agentCode: 'koc-rule-evaluator',
+          displayName: 'KOC Rule Evaluator',
+          defaultProvider: 'codex',
+          supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+          requiredDependencies: [],
+          health: 'HEALTHY',
+        },
+      ]);
+    });
+
+    const request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/ai-agents`);
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      data: [
+        {
+          agentCode: 'koc-rule-evaluator',
+          displayName: 'KOC Rule Evaluator',
+          defaultProvider: 'codex',
+          supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+          requiredDependencies: [],
+          health: 'HEALTHY',
+        },
+      ],
+    });
+  });
+
+  it('loads AI gate output schemas from the admin schema endpoint', () => {
+    service.getAiGateOutputSchemas().subscribe((schemas) => {
+      expect(schemas).toEqual([
+        {
+          value: 'gate-result-v1',
+          label: 'Gate result v1',
+          description: 'Standard PASS/FAIL/BLOCKED gate output.',
+          isDefault: true,
+        },
+      ]);
+    });
+
+    const request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/ai-gate-output-schemas`);
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      data: [
+        {
+          value: 'gate-result-v1',
+          label: 'Gate result v1',
+          description: 'Standard PASS/FAIL/BLOCKED gate output.',
+          isDefault: true,
+        },
+      ],
+    });
+  });
+
   it('loads workflow page from the admin workflow endpoint', () => {
     const response: BaseResponse<{ data: WorkflowDefinitionDto[]; metadata: { totalElements: number } }> = {
       data: {

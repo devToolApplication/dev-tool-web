@@ -27,9 +27,9 @@ describe('workflow node inspector model', () => {
     ]);
     expect(fieldNames).toEqual([
       'id',
+      'agentCode',
       'provider',
-      'modelProfile',
-      'toolProfile',
+      'workingDirectory',
       'instruction',
       'criteria',
       'inputMapping',
@@ -40,6 +40,16 @@ describe('workflow node inspector model', () => {
     expect(config.fields.find((field) => field.name === 'id')).toMatchObject({
       type: 'text',
       disabledWhen: 'true',
+    });
+    expect(config.fields.find((field) => field.name === 'agentCode')).toMatchObject({
+      type: 'select',
+      optionsExpression: 'context.extra.agentOptions',
+      required: true,
+    });
+    expect(config.fields.find((field) => field.name === 'outputSchema')).toMatchObject({
+      type: 'auto-complete',
+      optionsExpression: 'context.extra.outputSchemaOptions',
+      required: true,
     });
     expect(criteriaField).toMatchObject({
       type: 'json',
@@ -54,9 +64,9 @@ describe('workflow node inspector model', () => {
       criteria: { minScore: 80 },
       inputMapping: { mapping: { candidate: '${input.candidate}' } },
       provider: 'claude',
-      modelProfile: 'gpt-5.2',
-      toolProfile: 'facebook-readonly',
-      outputSchema: 'koc-review-v1',
+      agentCode: 'koc-rule-evaluator',
+      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
+      outputSchema: 'gate-result-v1',
       retryPolicy: { maxAttempts: 2 },
       timeoutPolicy: { timeoutSeconds: 3600 },
     };
@@ -73,7 +83,9 @@ describe('workflow node inspector model', () => {
 
     expect(value).toMatchObject({
       id: 'ai-1',
+      agentCode: 'koc-rule-evaluator',
       provider: 'claude',
+      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
       criteria: JSON.stringify({ minScore: 80 }, null, 2),
       inputMapping: JSON.stringify({ mapping: { candidate: '${input.candidate}' } }, null, 2),
     });
@@ -82,9 +94,9 @@ describe('workflow node inspector model', () => {
       criteria: { minScore: 90 },
       inputMapping: { mapping: { candidate: '${input.profile}' } },
       provider: 'claude',
-      modelProfile: 'gpt-5.2',
-      toolProfile: 'facebook-readonly',
-      outputSchema: 'koc-review-v1',
+      agentCode: 'koc-rule-evaluator',
+      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
+      outputSchema: 'gate-result-v1',
       retryPolicy: { maxAttempts: 3 },
       timeoutPolicy: { timeoutSeconds: 1800 },
     });
