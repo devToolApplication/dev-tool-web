@@ -69,6 +69,14 @@ const NODE_LABELS: Record<WorkflowNodeType, string> = {
   AI_GATE: 'AI Gate',
   LOGIC: 'Logic',
   END: 'End',
+  START_EVENT: 'Start Event',
+  END_EVENT: 'End Event',
+  AI_TASK: 'AI Task',
+  MCP_TASK: 'MCP Task',
+  CODE_TASK: 'Code Task',
+  HTTP_TASK: 'HTTP Task',
+  EXCLUSIVE_GATEWAY: 'Exclusive Gateway',
+  PARALLEL_GATEWAY: 'Parallel Gateway',
 };
 
 export function workflowGraphToFlowDefinition(
@@ -192,10 +200,10 @@ export function workflowNodeFromFlowNode(node: FlowNode): WorkflowNode {
 }
 
 function flowPortsForNodeType(type: WorkflowNodeType): FlowNode['ports'] {
-  if (type === 'START') {
+  if (type === 'START' || type === 'START_EVENT') {
     return [{ id: 'out', group: 'out', position: 'right' }];
   }
-  if (type === 'END') {
+  if (type === 'END' || type === 'END_EVENT') {
     return [{ id: 'in', group: 'in', position: 'left' }];
   }
   return [
@@ -219,7 +227,21 @@ function isWorkflowNode(value: unknown): value is WorkflowNode {
 }
 
 function isWorkflowNodeType(value: string): value is WorkflowNodeType {
-  return ['START', 'CODE_GATE', 'AI_GATE', 'LOGIC', 'END'].includes(value);
+  return [
+    'START',
+    'CODE_GATE',
+    'AI_GATE',
+    'LOGIC',
+    'END',
+    'START_EVENT',
+    'END_EVENT',
+    'AI_TASK',
+    'MCP_TASK',
+    'CODE_TASK',
+    'HTTP_TASK',
+    'EXCLUSIVE_GATEWAY',
+    'PARALLEL_GATEWAY',
+  ].includes(value);
 }
 
 function statusToTone(status?: FlowStatus) {

@@ -43,6 +43,8 @@ export function workflowNodeInspectorConfig(type: WorkflowNodeType): FormConfig 
     case 'START':
     case 'END':
       return readonlyNodeConfig();
+    default:
+      return readonlyNodeConfig();
   }
 }
 
@@ -86,6 +88,13 @@ export function workflowNodeToInspectorValue(node: WorkflowNode): WorkflowNodeIn
         defaultTarget: readStringConfig(node.config, 'default'),
         config: stringifyJson(node.config),
       };
+    default:
+      return {
+        id: node.id,
+        type: node.type,
+        name: node.name ?? '',
+        config: stringifyJson(node.config ?? {}),
+      };
   }
 }
 
@@ -103,6 +112,8 @@ export function workflowNodePatchFromInspectorValue(
       return codeGatePatch(value);
     case 'LOGIC':
       return logicPatch(value);
+    default:
+      return {};
   }
 }
 

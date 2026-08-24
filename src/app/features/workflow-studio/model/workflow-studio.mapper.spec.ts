@@ -352,4 +352,84 @@ describe('workflow studio mapper', () => {
 
     expect(detail.versions[0].editor?.nodes?.['start']).toEqual({ x: 10, y: 20 });
   });
+
+  it('keeps Flowable engine metadata, BPMN nodes and sequence flow conditions', () => {
+    const dto: WorkflowDetailDto = {
+      definition: {
+        id: 'wf-flowable',
+        name: 'Flowable evaluation',
+        description: null,
+        status: 'ACTIVE',
+        currentDraftVersionId: null,
+        currentPublishedVersionId: 'ver-flowable',
+      },
+      versions: [
+        {
+          id: 'ver-flowable',
+          workflowDefinitionId: 'wf-flowable',
+          version: 1,
+          status: 'PUBLISHED',
+          engineType: 'FLOWABLE',
+          engineDeploymentId: 'dep-1',
+          engineDefinitionId: 'proc-1',
+          engineDefinitionKey: 'workflow_ver-flowable',
+          compiledBpmnXml: '<definitions />',
+          definition: {
+            nodes: [
+              { id: 'start', type: 'START_EVENT', name: 'Start' },
+              { id: 'xor', type: 'EXCLUSIVE_GATEWAY', name: 'Score branch' },
+              {
+                id: 'ai',
+                type: 'AI_TASK',
+                name: 'AI review',
+                config: { agentCode: 'koc-rule-evaluator' },
+                retryPolicy: { maxAttempts: 2 },
+              },
+              { id: 'end', type: 'END_EVENT', name: 'End' },
+            ],
+            edges: [
+              {
+                id: 'flow-pass',
+                source: 'xor',
+                target: 'ai',
+                name: 'Pass',
+                defaultFlow: false,
+                condition: {
+                  type: 'COMPARE',
+                  left: { path: 'input.candidate.followers' },
+                  operator: 'GTE',
+                  right: { literal: 1000 },
+                },
+              },
+              { id: 'flow-default', source: 'xor', target: 'end', defaultFlow: true },
+            ],
+          },
+          runtime: null,
+          compiledPlan: null,
+        },
+      ],
+    };
+
+    const detail = mapWorkflowDetailDto(dto);
+    const payload = mapWorkflowDetailToUpsertDto(detail);
+
+    expect(detail.versions[0]).toMatchObject({
+      engineType: 'FLOWABLE',
+      engineDeploymentId: 'dep-1',
+      engineDefinitionId: 'proc-1',
+      engineDefinitionKey: 'workflow_ver-flowable',
+      compiledBpmnXml: '<definitions />',
+    });
+    expect(payload.definition.nodes[2]).toMatchObject({
+      id: 'ai',
+      type: 'AI_TASK',
+      config: { agentCode: 'koc-rule-evaluator' },
+      retryPolicy: { maxAttempts: 2 },
+    });
+    expect(payload.definition.edges[0]).toMatchObject({
+      id: 'flow-pass',
+      condition: { type: 'COMPARE', operator: 'GTE' },
+      defaultFlow: false,
+    });
+  });
 });

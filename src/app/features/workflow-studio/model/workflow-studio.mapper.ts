@@ -1,5 +1,6 @@
 import {
   AiGateWorkflowNodeDto,
+  BpmnWorkflowNodeDto,
   CodeGateWorkflowNodeDto,
   EndWorkflowNodeDto,
   StartWorkflowNodeDto,
@@ -13,12 +14,15 @@ import {
 } from './workflow-studio.dto';
 import {
   AiGateWorkflowNode,
+  BpmnWorkflowNode,
+  BpmnWorkflowNodeType,
   CodeGateWorkflowNode,
   EndWorkflowNode,
   JsonValue,
   LogicWorkflowNode,
   StartWorkflowNode,
   WorkflowDetail,
+  WorkflowEdge,
   WorkflowGraph,
   WorkflowNode,
   WorkflowRun,
@@ -38,6 +42,7 @@ export function mapWorkflowDetailDto(dto: WorkflowDetailDto): WorkflowDetail {
 export function mapWorkflowRunDto(dto: WorkflowRunDto): WorkflowRun {
   return {
     ...dto,
+    engineType: dto.engineType ?? 'LEGACY',
     input: cloneJson(dto.input),
     finalOutput: cloneJson(dto.finalOutput),
     nodes: dto.nodes.map((node) => ({
@@ -87,6 +92,7 @@ export function mapWorkflowValidationResponseDto(dto: WorkflowValidationResponse
 function mapWorkflowVersionDto(dto: WorkflowVersionDto): WorkflowVersion {
   return {
     ...dto,
+    engineType: dto.engineType ?? 'LEGACY',
     definition: mapWorkflowGraphDto(dto.definition),
     runtime: dto.runtime ? { ...dto.runtime } : null,
     compiledPlan: dto.compiledPlan ? {
@@ -107,14 +113,14 @@ function mapWorkflowVersionDto(dto: WorkflowVersionDto): WorkflowVersion {
 function mapWorkflowGraphDto(dto: WorkflowGraphDto): WorkflowGraph {
   return {
     nodes: dto.nodes.map(mapWorkflowNodeDto),
-    edges: dto.edges.map((edge) => ({ ...edge })),
+    edges: dto.edges.map(cloneWorkflowEdge),
   };
 }
 
 function mapWorkflowGraphToDto(graph: WorkflowGraph): WorkflowGraphDto {
   return {
     nodes: graph.nodes.map(mapWorkflowNodeToDto),
-    edges: graph.edges.map((edge) => ({ ...edge })),
+    edges: graph.edges.map(cloneWorkflowEdge),
   };
 }
 
@@ -130,6 +136,8 @@ function mapWorkflowNodeDto(dto: WorkflowNodeDto): WorkflowNode {
       return mapAiGateNode(dto);
     case 'LOGIC':
       return mapLogicNode(dto);
+    default:
+      return mapBpmnNode(dto);
   }
 }
 
@@ -145,6 +153,8 @@ function mapWorkflowNodeToDto(node: WorkflowNode): WorkflowNodeDto {
       return mapAiGateNodeToDto(node);
     case 'LOGIC':
       return mapLogicNodeToDto(node);
+    default:
+      return mapBpmnNodeToDto(node);
   }
 }
 
@@ -238,8 +248,42 @@ function mapLogicNodeToDto(node: LogicWorkflowNode): LogicWorkflowNodeDto {
   };
 }
 
+function mapBpmnNode(dto: BpmnWorkflowNodeDto): BpmnWorkflowNode {
+  return {
+    id: dto.id,
+    type: dto.type,
+    name: dto.name ?? null,
+    config: cloneOptionalJson(dto.config),
+    inputMapping: cloneOptionalJson(dto.inputMapping),
+    outputMapping: cloneOptionalJson(dto.outputMapping),
+    retryPolicy: cloneOptionalJson(dto.retryPolicy),
+    timeoutPolicy: cloneOptionalJson(dto.timeoutPolicy),
+  };
+}
+
+function mapBpmnNodeToDto(node: BpmnWorkflowNode): BpmnWorkflowNodeDto {
+  return {
+    id: node.id,
+    type: node.type,
+    name: node.name ?? null,
+    config: cloneOptionalJson(node.config),
+    inputMapping: cloneOptionalJson(node.inputMapping),
+    outputMapping: cloneOptionalJson(node.outputMapping),
+    retryPolicy: cloneOptionalJson(node.retryPolicy),
+    timeoutPolicy: cloneOptionalJson(node.timeoutPolicy),
+  };
+}
+
 function cloneJson(value: JsonValue): JsonValue {
   return value === null ? null : JSON.parse(JSON.stringify(value)) as JsonValue;
+}
+
+function cloneOptionalJson(value: JsonValue | undefined): JsonValue | undefined {
+  return value === undefined ? undefined : cloneJson(value);
+}
+
+function cloneWorkflowEdge<T extends WorkflowEdge>(edge: T): T {
+  return cloneJson(edge as unknown as JsonValue) as unknown as T;
 }
 
 function cloneRecord<T extends JsonValue>(record: Record<string, T>): Record<string, T> {

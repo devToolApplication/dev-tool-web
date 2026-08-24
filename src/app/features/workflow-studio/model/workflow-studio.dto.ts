@@ -1,6 +1,9 @@
 import type {
   GateOutcome,
+  BpmnWorkflowNodeType,
   JsonValue,
+  WorkflowCondition,
+  WorkflowEngineType,
   LogicOperator,
   WorkflowDefinitionStatus,
   WorkflowNodeExecutionStatus,
@@ -63,16 +66,32 @@ export interface LogicWorkflowNodeDto {
   config: JsonValue;
 }
 
+export interface BpmnWorkflowNodeDto {
+  id: string;
+  type: BpmnWorkflowNodeType;
+  name?: string | null;
+  config?: JsonValue;
+  inputMapping?: JsonValue;
+  outputMapping?: JsonValue;
+  retryPolicy?: JsonValue;
+  timeoutPolicy?: JsonValue;
+}
+
 export type WorkflowNodeDto =
   | StartWorkflowNodeDto
   | CodeGateWorkflowNodeDto
   | AiGateWorkflowNodeDto
   | LogicWorkflowNodeDto
-  | EndWorkflowNodeDto;
+  | EndWorkflowNodeDto
+  | BpmnWorkflowNodeDto;
 
 export interface WorkflowEdgeDto {
+  id?: string | null;
   source: string;
   target: string;
+  name?: string | null;
+  condition?: WorkflowCondition | null;
+  defaultFlow?: boolean;
 }
 
 export interface WorkflowGraphDto {
@@ -118,6 +137,11 @@ export interface WorkflowVersionDto {
   definition: WorkflowGraphDto;
   runtime: WorkflowRuntimeConfigDto | null;
   compiledPlan: ExecutableWorkflowPlanDto | null;
+  engineType?: WorkflowEngineType | null;
+  engineDeploymentId?: string | null;
+  engineDefinitionId?: string | null;
+  engineDefinitionKey?: string | null;
+  compiledBpmnXml?: string | null;
   editor?: WorkflowEditorMetadataDto;
 }
 
@@ -150,6 +174,8 @@ export interface WorkflowRunDto {
   completedAt: string | null;
   finalOutcome: GateOutcome | null;
   finalOutput: JsonValue;
+  engineType?: WorkflowEngineType | null;
+  engineInstanceId?: string | null;
   nodes: WorkflowNodeExecutionDto[];
 }
 

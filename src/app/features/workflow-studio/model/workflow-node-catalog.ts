@@ -2,6 +2,7 @@ import {
   AiGateWorkflowNode,
   CodeGateWorkflowNode,
   EndWorkflowNode,
+  BpmnWorkflowNode,
   LogicWorkflowNode,
   LogicOperator,
   StartWorkflowNode,
@@ -113,6 +114,58 @@ const WORKFLOW_NODE_CATALOG: Record<WorkflowNodeType, WorkflowNodeCatalogItem> =
     allowConnectFrom: false,
     allowConnectTo: true,
   },
+  START_EVENT: {
+    type: 'START_EVENT',
+    title: 'Start Event',
+    description: 'BPMN workflow entry point',
+    iconLabel: 'ST',
+    shape: 'capsule',
+    tone: 'success',
+    defaultSize: { width: 180, height: 64 },
+    ports: [{ id: 'out', direction: 'out', label: 'Out' }],
+    allowConnectFrom: true,
+    allowConnectTo: false,
+  },
+  END_EVENT: {
+    type: 'END_EVENT',
+    title: 'End Event',
+    description: 'BPMN workflow terminal point',
+    iconLabel: 'EN',
+    shape: 'capsule',
+    tone: 'muted',
+    defaultSize: { width: 180, height: 64 },
+    ports: [{ id: 'in', direction: 'in', label: 'In' }],
+    allowConnectFrom: false,
+    allowConnectTo: true,
+  },
+  AI_TASK: bpmnTask('AI_TASK', 'AI Task', 'AI'),
+  MCP_TASK: bpmnTask('MCP_TASK', 'MCP Task', 'MC'),
+  CODE_TASK: bpmnTask('CODE_TASK', 'Code Task', 'CT'),
+  HTTP_TASK: bpmnTask('HTTP_TASK', 'HTTP Task', 'HT'),
+  EXCLUSIVE_GATEWAY: {
+    type: 'EXCLUSIVE_GATEWAY',
+    title: 'Exclusive Gateway',
+    description: 'BPMN conditional branch',
+    iconLabel: 'X',
+    shape: 'diamond',
+    tone: 'warning',
+    defaultSize: { width: 190, height: 90 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  },
+  PARALLEL_GATEWAY: {
+    type: 'PARALLEL_GATEWAY',
+    title: 'Parallel Gateway',
+    description: 'BPMN parallel split or join',
+    iconLabel: '+',
+    shape: 'diamond',
+    tone: 'info',
+    defaultSize: { width: 190, height: 90 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  },
 };
 
 export function workflowNodeCatalogItems(): WorkflowNodeCatalogItem[] {
@@ -165,6 +218,15 @@ export function createWorkflowNode(type: WorkflowNodeType, id: string): Workflow
       };
     case 'LOGIC':
       return { id, type: 'LOGIC', operator: 'AND', config: {} };
+    case 'START_EVENT':
+    case 'END_EVENT':
+    case 'AI_TASK':
+    case 'MCP_TASK':
+    case 'CODE_TASK':
+    case 'HTTP_TASK':
+    case 'EXCLUSIVE_GATEWAY':
+    case 'PARALLEL_GATEWAY':
+      return createBpmnNode(type, id);
   }
 }
 
@@ -205,6 +267,15 @@ function nodeSubtitle(node: WorkflowNode): string {
       return node.instruction || [node.provider, node.agentCode].filter(Boolean).join(' / ') || 'AI evaluation';
     case 'LOGIC':
       return logicLabel(node.operator);
+    case 'START_EVENT':
+    case 'END_EVENT':
+    case 'AI_TASK':
+    case 'MCP_TASK':
+    case 'CODE_TASK':
+    case 'HTTP_TASK':
+    case 'EXCLUSIVE_GATEWAY':
+    case 'PARALLEL_GATEWAY':
+      return node.name || WORKFLOW_NODE_CATALOG[node.type].description;
   }
 }
 
@@ -217,6 +288,38 @@ function defaultMiddlePorts(): WorkflowNodePort[] {
     { id: 'in', direction: 'in', label: 'In' },
     { id: 'out', direction: 'out', label: 'Out' },
   ];
+}
+
+function bpmnTask(
+  type: WorkflowNodeType,
+  title: string,
+  iconLabel: string,
+): WorkflowNodeCatalogItem {
+  return {
+    type,
+    title,
+    description: `${title} external worker`,
+    iconLabel,
+    shape: 'rectangle',
+    tone: type === 'AI_TASK' ? 'primary' : 'info',
+    defaultSize: { width: 220, height: 76 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  };
+}
+
+function createBpmnNode(type: BpmnWorkflowNode['type'], id: string): BpmnWorkflowNode {
+  return {
+    id,
+    type,
+    name: WORKFLOW_NODE_CATALOG[type].title,
+    config: {},
+    inputMapping: {},
+    outputMapping: {},
+    retryPolicy: { maxAttempts: 1 },
+    timeoutPolicy: { timeoutSeconds: 30 },
+  };
 }
 
 function cloneCatalogItem(item: WorkflowNodeCatalogItem): WorkflowNodeCatalogItem {
