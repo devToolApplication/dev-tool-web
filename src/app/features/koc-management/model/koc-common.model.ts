@@ -8,6 +8,13 @@ export interface KocAiExecutionConfig {
 export type KocHealthStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';
 
 export type KocExecutionStatus =
+  | 'DISCOVERED'
+  | 'ENRICHING'
+  | 'READY_FOR_SCREENING'
+  | 'SCREENING_QUEUED'
+  | 'SCREENING_RUNNING'
+  | 'MANUAL_REVIEW'
+  | 'ERROR'
   | 'PENDING'
   | 'RUNNING'
   | 'WAITING'

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 
+import { environment } from '../../../../enviroment/environment';
+
 export type KocRealtimeEventType =
   | 'campaign.counters'
   | 'candidate.status'
@@ -33,7 +35,7 @@ const VALID_EVENT_TYPES = new Set<string>([
 @Injectable({ providedIn: 'root' })
 export class KocRealtimeService {
   connect(options?: KocRealtimeConnectOptions): Observable<KocRealtimeEvent> {
-    const streamUrl = options?.streamUrl?.trim();
+    const streamUrl = (options?.streamUrl ?? environment.ws.kocWs).trim();
     if (!streamUrl) {
       return EMPTY;
     }

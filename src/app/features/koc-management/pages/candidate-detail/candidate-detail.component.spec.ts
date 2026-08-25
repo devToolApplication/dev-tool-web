@@ -1,12 +1,14 @@
-﻿import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
+import { TranslateContentPipe } from '../../../../shared/pipes/translate-content.pipe';
 import type { KocCandidateDetail } from '../../model/koc-candidate.model';
 import type { KocEvidenceItem } from '../../model/koc-evidence.model';
 import { KocCandidateApiService } from '../../services/koc-candidate-api.service';
-import { TranslateContentPipe } from '../../../../shared/pipes/translate-content.pipe';
+import type { KocRealtimeEvent } from '../../services/koc-realtime.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 import { CandidateDetailComponent } from './candidate-detail.component';
 
 describe('CandidateDetailComponent', () => {
@@ -16,6 +18,8 @@ describe('CandidateDetailComponent', () => {
     getCandidate: ReturnType<typeof vi.fn>;
     getEvidence: ReturnType<typeof vi.fn>;
   };
+  let realtimeApi: { connect: ReturnType<typeof vi.fn> };
+  let realtimeEvents: Subject<KocRealtimeEvent>;
 
   const candidate: KocCandidateDetail = {
     candidateId: 'candidate-1',
@@ -53,15 +57,18 @@ describe('CandidateDetailComponent', () => {
   ];
 
   beforeEach(() => {
+    realtimeEvents = new Subject<KocRealtimeEvent>();
     api = {
       getCandidate: vi.fn(() => of(candidate)),
       getEvidence: vi.fn(() => of(evidence)),
     };
+    realtimeApi = { connect: vi.fn(() => realtimeEvents.asObservable()) };
 
     TestBed.configureTestingModule({
       declarations: [CandidateDetailComponent, TranslateContentPipe],
       providers: [
         { provide: KocCandidateApiService, useValue: api },
+        { provide: KocRealtimeService, useValue: realtimeApi },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -126,8 +133,23 @@ describe('CandidateDetailComponent', () => {
       'koc.workflow.step.engagementResearch',
       'koc.workflow.step.finalize',
     ]);
-    expect(JSON.stringify(component.workflowTimeline())).not.toMatch(/model|reasoningEffort|systemPrompt|mcpConfig/);
+    expect(JSON.stringify(component.workflowTimeline())).not.toMatch(
+      /model|reasoningEffort|systemPrompt|mcpConfig/,
+    );
   });
+
+  it('refreshes candidate detail when realtime event targets this candidate', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    realtimeEvents.next({ type: 'candidate.status', aggregateId: 'candidate-1', version: 2 });
+    await fixture.whenStable();
+
+    expect(realtimeApi.connect).toHaveBeenCalledWith({ reconnect: true });
+    expect(api.getCandidate).toHaveBeenCalledTimes(2);
+    expect(api.getEvidence).toHaveBeenCalledTimes(2);
+  });
+
   it('generates accessible evidenceAriaLabel including state, coverage, and excerpt', async () => {
     fixture.detectChanges();
     await fixture.whenStable();

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, forkJoin } from 'rxjs';
 
@@ -10,9 +19,17 @@ import type { KocDiscoveryStrategySummary } from '../../model/koc-discovery.mode
 import { KocCampaignApiService } from '../../services/koc-campaign-api.service';
 import { KocCandidateApiService } from '../../services/koc-candidate-api.service';
 import { KocDiscoveryApiService } from '../../services/koc-discovery-api.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 
 type KocCampaignDetailTab = 'overview' | 'discovery' | 'candidates' | 'rules' | 'activity';
-type KocCampaignFunnelKey = 'discovered' | 'unique' | 'screened' | 'rejected' | 'review' | 'accepted' | 'waiting';
+type KocCampaignFunnelKey =
+  | 'discovered'
+  | 'unique'
+  | 'screened'
+  | 'rejected'
+  | 'review'
+  | 'accepted'
+  | 'waiting';
 
 interface KocCampaignFunnelItem {
   key: KocCampaignFunnelKey;
@@ -34,6 +51,8 @@ export class CampaignDetailComponent implements OnInit {
   private readonly campaignApi = inject(KocCampaignApiService);
   private readonly discoveryApi = inject(KocDiscoveryApiService);
   private readonly candidateApi = inject(KocCandidateApiService);
+  private readonly realtime = inject(KocRealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly permissionService = inject(PermissionService);
 
   readonly campaignId = signal(this.route.snapshot.paramMap.get('campaignId') ?? '');
@@ -41,8 +60,11 @@ export class CampaignDetailComponent implements OnInit {
   readonly strategies = signal<KocDiscoveryStrategySummary[]>([]);
   readonly candidates = signal<KocCandidateSummary[]>([]);
   readonly loading = signal(false);
+  readonly startingStrategyId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
-  readonly activeTab = signal<KocCampaignDetailTab>(normalizeTab(this.route.snapshot.queryParamMap.get('tab')));
+  readonly activeTab = signal<KocCampaignDetailTab>(
+    normalizeTab(this.route.snapshot.queryParamMap.get('tab')),
+  );
 
   readonly canEdit = computed(() => this.permissionService.has('AI_AGENT_WORKFLOW_WRITE'));
 
@@ -66,15 +88,22 @@ export class CampaignDetailComponent implements OnInit {
       funnelItem('screened', counters.screened, max),
       funnelItem('rejected', counters.rejected, max),
       funnelItem('review', counters.review, max),
-      funnelItem('accepted', counters.accepted, Math.max(1, this.campaign()?.acceptedTarget ?? max)),
+      funnelItem(
+        'accepted',
+        counters.accepted,
+        Math.max(1, this.campaign()?.acceptedTarget ?? max),
+      ),
       funnelItem('waiting', counters.waiting, max),
     ];
   });
 
-  readonly topRejectionReasons = computed<KocRejectionReasonSummary[]>(() => this.campaign()?.topRejectionReasons ?? []);
+  readonly topRejectionReasons = computed<KocRejectionReasonSummary[]>(
+    () => this.campaign()?.topRejectionReasons ?? [],
+  );
 
   ngOnInit(): void {
     void this.loadCampaignRuntime();
+    this.connectRealtime();
   }
 
   async loadCampaignRuntime(): Promise<void> {
@@ -87,11 +116,13 @@ export class CampaignDetailComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const response = await firstValueFrom(forkJoin({
-        campaign: this.campaignApi.getCampaign(campaignId),
-        strategies: this.discoveryApi.getCampaignStrategies(campaignId),
-        candidates: this.candidateApi.getCandidatePage({ campaignId, page: 0, size: 5 }),
-      }));
+      const response = await firstValueFrom(
+        forkJoin({
+          campaign: this.campaignApi.getCampaign(campaignId),
+          strategies: this.discoveryApi.getCampaignStrategies(campaignId),
+          candidates: this.candidateApi.getCandidatePage({ campaignId, page: 0, size: 5 }),
+        }),
+      );
       this.campaign.set(response.campaign);
       this.strategies.set(response.strategies);
       this.candidates.set(response.candidates.data);
@@ -134,6 +165,24 @@ export class CampaignDetailComponent implements OnInit {
     void this.router.navigate(['/ai-agent-mcrs/koc/candidates', candidate.candidateId]);
   }
 
+  async startDiscoveryStrategy(strategy: KocDiscoveryStrategySummary): Promise<void> {
+    if (!this.canEdit() || this.startingStrategyId()) {
+      return;
+    }
+    this.startingStrategyId.set(strategy.strategyId);
+    this.error.set(null);
+    try {
+      await firstValueFrom(
+        this.discoveryApi.startDiscoveryRun(this.campaignId(), strategy.strategyId),
+      );
+      await this.loadCampaignRuntime();
+    } catch (error) {
+      this.error.set(errorMessage(error));
+    } finally {
+      this.startingStrategyId.set(null);
+    }
+  }
+
   openCandidates(): void {
     void this.router.navigate(['/ai-agent-mcrs/koc/candidates'], {
       queryParams: { campaignId: this.campaignId() },
@@ -148,7 +197,10 @@ export class CampaignDetailComponent implements OnInit {
   }
 
   isLowYield(strategy: KocDiscoveryStrategySummary): boolean {
-    return strategy.yieldRate < 0.2 || strategy.duplicateCandidates > Math.max(1, strategy.newCandidates * 2);
+    return (
+      strategy.yieldRate < 0.2 ||
+      strategy.duplicateCandidates > Math.max(1, strategy.newCandidates * 2)
+    );
   }
 
   formatYield(value: number): string {
@@ -165,7 +217,21 @@ export class CampaignDetailComponent implements OnInit {
     if (!campaign) {
       return 0;
     }
-    return Math.min(100, Math.round((campaign.counters.accepted / Math.max(1, campaign.acceptedTarget)) * 100));
+    return Math.min(
+      100,
+      Math.round((campaign.counters.accepted / Math.max(1, campaign.acceptedTarget)) * 100),
+    );
+  }
+
+  private connectRealtime(): void {
+    this.realtime
+      .connect({ reconnect: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (event.aggregateId === this.campaignId()) {
+          void this.loadCampaignRuntime();
+        }
+      });
   }
 }
 
@@ -178,7 +244,10 @@ function funnelItem(key: KocCampaignFunnelKey, value: number, max: number): KocC
   };
 }
 
-function funnelFilter(key: KocCampaignFunnelKey): { decision?: string; executionStatus?: KocExecutionStatus } {
+function funnelFilter(key: KocCampaignFunnelKey): {
+  decision?: string;
+  executionStatus?: KocExecutionStatus;
+} {
   switch (key) {
     case 'accepted':
       return { decision: 'ACCEPTED' };
@@ -195,7 +264,7 @@ function funnelFilter(key: KocCampaignFunnelKey): { decision?: string; execution
 
 function normalizeTab(tab: string | null): KocCampaignDetailTab {
   return ['overview', 'discovery', 'candidates', 'rules', 'activity'].includes(tab ?? '')
-    ? tab as KocCampaignDetailTab
+    ? (tab as KocCampaignDetailTab)
     : 'overview';
 }
 

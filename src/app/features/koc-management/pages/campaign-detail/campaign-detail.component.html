@@ -48,7 +48,11 @@
         </div>
       </app-section-panel>
 
-      <nav class="campaign-detail__tabs" role="tablist" [attr.aria-label]="'koc.campaignDetail.tabs' | translateContent">
+      <nav
+        class="campaign-detail__tabs"
+        role="tablist"
+        [attr.aria-label]="'koc.campaignDetail.tabs' | translateContent"
+      >
         @for (tab of tabs; track tab.id) {
           <button
             type="button"
@@ -77,7 +81,11 @@
               <app-section-panel title="koc.campaignDetail.overview.metricsTitle">
                 <div class="campaign-detail__metrics">
                   @for (item of funnelItems(); track item.key) {
-                    <button type="button" class="campaign-detail__metric" (click)="openFunnelFilter(item.key)">
+                    <button
+                      type="button"
+                      class="campaign-detail__metric"
+                      (click)="openFunnelFilter(item.key)"
+                    >
                       <span>{{ item.label | translateContent }}</span>
                       <strong>{{ item.value }}</strong>
                     </button>
@@ -102,10 +110,17 @@
               </app-section-panel>
             </div>
 
-            <app-section-panel title="koc.campaignDetail.funnel.title" subtitle="koc.campaignDetail.funnel.subtitle">
+            <app-section-panel
+              title="koc.campaignDetail.funnel.title"
+              subtitle="koc.campaignDetail.funnel.subtitle"
+            >
               <div class="campaign-detail__funnel">
                 @for (item of funnelItems(); track item.key) {
-                  <button type="button" class="campaign-detail__funnel-row" (click)="openFunnelFilter(item.key)">
+                  <button
+                    type="button"
+                    class="campaign-detail__funnel-row"
+                    (click)="openFunnelFilter(item.key)"
+                  >
                     <span>{{ item.label | translateContent }}</span>
                     <div class="campaign-detail__funnel-track" aria-hidden="true">
                       <span [style.width.%]="item.percent"></span>
@@ -118,16 +133,36 @@
           }
 
           @case ('discovery') {
-            <app-section-panel title="koc.campaignDetail.discovery.title" subtitle="koc.campaignDetail.discovery.subtitle">
+            <app-section-panel
+              title="koc.campaignDetail.discovery.title"
+              subtitle="koc.campaignDetail.discovery.subtitle"
+            >
               <div class="campaign-detail__table" role="table">
                 <div class="campaign-detail__table-header" role="row">
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.strategy' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.runs' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.found' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.new' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.duplicate' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.yield' | translateContent }}</span>
-                  <span role="columnheader">{{ 'koc.campaignDetail.discovery.status' | translateContent }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.strategy' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.runs' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.found' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.new' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.duplicate' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.yield' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.status' | translateContent
+                  }}</span>
+                  <span role="columnheader">{{
+                    'koc.campaignDetail.discovery.actions' | translateContent
+                  }}</span>
                 </div>
                 @for (strategy of strategies(); track strategy.strategyId) {
                   <div class="campaign-detail__table-row" role="row">
@@ -147,7 +182,24 @@
                     <span role="cell">{{ strategy.newCandidates }}</span>
                     <span role="cell">{{ strategy.duplicateCandidates }}</span>
                     <span role="cell">{{ formatYield(strategy.yieldRate) }}</span>
-                    <span role="cell"><app-koc-status-badge [status]="strategy.status" size="sm"></app-koc-status-badge></span>
+                    <span role="cell"
+                      ><app-koc-status-badge
+                        [status]="strategy.status"
+                        size="sm"
+                      ></app-koc-status-badge
+                    ></span>
+                    <span role="cell">
+                      <app-button
+                        icon="pi pi-play"
+                        [iconOnly]="true"
+                        size="sm"
+                        variant="secondary"
+                        ariaLabel="koc.campaignDetail.discovery.runStrategy"
+                        [disabled]="!canEdit()"
+                        [loading]="startingStrategyId() === strategy.strategyId"
+                        (buttonClick)="startDiscoveryStrategy(strategy)"
+                      ></app-button>
+                    </span>
                   </div>
                 }
               </div>
@@ -164,12 +216,19 @@
             >
               <div class="campaign-detail__candidate-list">
                 @for (candidate of candidates(); track candidate.candidateId) {
-                  <button type="button" class="campaign-detail__candidate" (click)="openCandidate(candidate)">
+                  <button
+                    type="button"
+                    class="campaign-detail__candidate"
+                    (click)="openCandidate(candidate)"
+                  >
                     <span>
                       <strong>{{ candidate.displayName }}</strong>
                       <small>{{ candidate.reason || ('notAvailable' | translateContent) }}</small>
                     </span>
-                    <app-koc-status-badge [status]="candidate.decision" size="sm"></app-koc-status-badge>
+                    <app-koc-status-badge
+                      [status]="candidate.decision"
+                      size="sm"
+                    ></app-koc-status-badge>
                   </button>
                 }
               </div>
@@ -193,7 +252,9 @@
                       size="sm"
                     ></app-badge>
                     <span>{{ rule.name | translateContent }}</span>
-                    <small>{{ 'koc.campaignWizard.screening.infrastructureWait' | translateContent }}</small>
+                    <small>{{
+                      'koc.campaignWizard.screening.infrastructureWait' | translateContent
+                    }}</small>
                   </div>
                 }
               </div>
@@ -201,7 +262,10 @@
           }
 
           @case ('activity') {
-            <app-section-panel title="koc.campaignDetail.activity.title" subtitle="koc.campaignDetail.activity.subtitle">
+            <app-section-panel
+              title="koc.campaignDetail.activity.title"
+              subtitle="koc.campaignDetail.activity.subtitle"
+            >
               <dl class="campaign-detail__activity">
                 <div>
                   <dt>{{ 'koc.campaignDetail.activity.created' | translateContent }}</dt>

@@ -33,15 +33,47 @@ export function statusBadgeForKocStatus(
 ): KocStatusBadgeConfig {
   switch (status) {
     case 'ACCEPTED':
-      return { label: 'koc.candidate.status.accepted', variant: 'success', icon: 'pi pi-check-circle' };
+      return {
+        label: 'koc.candidate.status.accepted',
+        variant: 'success',
+        icon: 'pi pi-check-circle',
+      };
     case 'REJECTED':
-      return { label: 'koc.candidate.status.rejected', variant: 'danger', icon: 'pi pi-times-circle' };
+      return {
+        label: 'koc.candidate.status.rejected',
+        variant: 'danger',
+        icon: 'pi pi-times-circle',
+      };
     case 'REVIEW':
       return { label: 'koc.candidate.status.review', variant: 'warning', icon: 'pi pi-flag' };
     case 'SCREENING':
       return { label: 'koc.candidate.status.screening', variant: 'info', icon: 'pi pi-sync' };
     case 'WAITING':
       return { label: 'koc.candidate.status.waiting', variant: 'muted', icon: 'pi pi-clock' };
+    case 'DISCOVERED':
+      return { label: 'koc.execution.status.discovered', variant: 'info', icon: 'pi pi-search' };
+    case 'ENRICHING':
+      return { label: 'koc.execution.status.enriching', variant: 'info', icon: 'pi pi-sync' };
+    case 'READY_FOR_SCREENING':
+      return {
+        label: 'koc.execution.status.readyForScreening',
+        variant: 'muted',
+        icon: 'pi pi-inbox',
+      };
+    case 'SCREENING_QUEUED':
+      return {
+        label: 'koc.execution.status.screeningQueued',
+        variant: 'warning',
+        icon: 'pi pi-clock',
+      };
+    case 'SCREENING_RUNNING':
+      return {
+        label: 'koc.execution.status.screeningRunning',
+        variant: 'info',
+        icon: 'pi pi-sync',
+      };
+    case 'MANUAL_REVIEW':
+      return { label: 'koc.execution.status.manualReview', variant: 'warning', icon: 'pi pi-flag' };
     case 'WAITING_DEPENDENCY':
       return {
         label: 'koc.execution.status.waitingDependency',
@@ -58,8 +90,13 @@ export function statusBadgeForKocStatus(
     case 'DEGRADED':
     case 'RECOVERING':
     case 'PENDING':
-      return { label: 'koc.status.needsAttention', variant: 'warning', icon: 'pi pi-exclamation-triangle' };
+      return {
+        label: 'koc.status.needsAttention',
+        variant: 'warning',
+        icon: 'pi pi-exclamation-triangle',
+      };
     case 'UNHEALTHY':
+    case 'ERROR':
     case 'FAILED':
     case 'BLOCKED':
     case 'OPEN':
@@ -77,9 +114,17 @@ export function statusBadgeForKocStatus(
     case 'NOT_FOUND':
       return { label: 'koc.evidence.state.notFound', variant: 'muted', icon: 'pi pi-minus-circle' };
     case 'INSUFFICIENT':
-      return { label: 'koc.evidence.state.insufficient', variant: 'warning', icon: 'pi pi-question-circle' };
+      return {
+        label: 'koc.evidence.state.insufficient',
+        variant: 'warning',
+        icon: 'pi pi-question-circle',
+      };
     case 'FETCH_ERROR':
-      return { label: 'koc.evidence.state.fetchError', variant: 'danger', icon: 'pi pi-cloud-download' };
+      return {
+        label: 'koc.evidence.state.fetchError',
+        variant: 'danger',
+        icon: 'pi pi-cloud-download',
+      };
     case 'UNSUPPORTED':
       return { label: 'koc.evidence.state.unsupported', variant: 'muted', icon: 'pi pi-ban' };
     default:

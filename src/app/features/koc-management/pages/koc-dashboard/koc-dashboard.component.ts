@@ -1,4 +1,13 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -7,7 +16,11 @@ import {
   buildKocDashboardMetrics,
   deriveKocDashboardState,
 } from '../../model/koc-dashboard-view.model';
-import { KocDashboardApiService, type KocDashboardData } from '../../services/koc-dashboard-api.service';
+import {
+  KocDashboardApiService,
+  type KocDashboardData,
+} from '../../services/koc-dashboard-api.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 
 @Component({
   selector: 'app-koc-dashboard',
@@ -18,6 +31,8 @@ import { KocDashboardApiService, type KocDashboardData } from '../../services/ko
 })
 export class KocDashboardComponent implements OnInit {
   private readonly api = inject(KocDashboardApiService);
+  private readonly realtime = inject(KocRealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
   readonly dashboard = signal<KocDashboardData | null>(null);
@@ -25,12 +40,14 @@ export class KocDashboardComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly realtimeConnected = signal(true);
   readonly metrics = computed(() => buildKocDashboardMetrics(this.dashboard()));
-  readonly state = computed(() => deriveKocDashboardState({
-    data: this.dashboard(),
-    loading: this.loading(),
-    error: this.error(),
-    realtimeConnected: this.realtimeConnected(),
-  }));
+  readonly state = computed(() =>
+    deriveKocDashboardState({
+      data: this.dashboard(),
+      loading: this.loading(),
+      error: this.error(),
+      realtimeConnected: this.realtimeConnected(),
+    }),
+  );
   readonly dependencyHealth = computed(() => this.dashboard()?.dependencyHealth ?? []);
   readonly attentionItems = computed(() => this.dashboard()?.attentionItems ?? []);
   readonly campaignProgress = computed(() => this.dashboard()?.campaignProgress ?? []);
@@ -38,6 +55,7 @@ export class KocDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     void this.loadDashboard();
+    this.connectRealtime();
   }
 
   async loadDashboard(): Promise<void> {
@@ -56,16 +74,38 @@ export class KocDashboardComponent implements OnInit {
     void this.router.navigate(['/ai-agent-mcrs/koc/campaigns/create']);
   }
 
+  private connectRealtime(): void {
+    this.realtime
+      .connect({ reconnect: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.realtimeConnected.set(true);
+          void this.loadDashboard();
+        },
+        error: () => this.realtimeConnected.set(false),
+        complete: () => this.realtimeConnected.set(false),
+      });
+  }
+
   private pageStatus(): { label: string; variant: BadgeVariant; icon: string } {
     const state = this.state();
     if (state.activeIncident) {
-      return { label: 'koc.dashboard.status.incident', variant: 'danger', icon: 'pi pi-exclamation-triangle' };
+      return {
+        label: 'koc.dashboard.status.incident',
+        variant: 'danger',
+        icon: 'pi pi-exclamation-triangle',
+      };
     }
     if (state.realtimeDisconnected || state.partialMetrics) {
       return { label: 'koc.dashboard.status.attention', variant: 'warning', icon: 'pi pi-wifi' };
     }
     if (state.healthy) {
-      return { label: 'koc.dashboard.status.healthy', variant: 'success', icon: 'pi pi-check-circle' };
+      return {
+        label: 'koc.dashboard.status.healthy',
+        variant: 'success',
+        icon: 'pi pi-check-circle',
+      };
     }
     return { label: 'koc.dashboard.status.ready', variant: 'info', icon: 'pi pi-chart-line' };
   }

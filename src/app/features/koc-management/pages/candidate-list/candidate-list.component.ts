@@ -10,11 +10,18 @@ import { KocCandidateApiService } from '../../services/koc-candidate-api.service
 
 const DECISIONS: KocBusinessDecision[] = ['ACCEPTED', 'REJECTED', 'REVIEW', 'SCREENING', 'WAITING'];
 const EXECUTION_STATUSES: KocExecutionStatus[] = [
+  'DISCOVERED',
+  'ENRICHING',
+  'READY_FOR_SCREENING',
+  'SCREENING_QUEUED',
+  'SCREENING_RUNNING',
+  'MANUAL_REVIEW',
   'PENDING',
   'RUNNING',
   'WAITING',
   'WAITING_DEPENDENCY',
   'COMPLETED',
+  'ERROR',
   'FAILED',
   'CANCELLED',
 ];
@@ -152,9 +159,20 @@ function normalizeExecutionStatus(value: SelectValue): KocExecutionStatus | unde
 }
 
 function executionStatusLabel(status: KocExecutionStatus): string {
-  return status === 'WAITING_DEPENDENCY'
-    ? 'koc.execution.status.waitingDependency'
-    : `koc.execution.status.${status.toLowerCase()}`;
+  switch (status) {
+    case 'READY_FOR_SCREENING':
+      return 'koc.execution.status.readyForScreening';
+    case 'SCREENING_QUEUED':
+      return 'koc.execution.status.screeningQueued';
+    case 'SCREENING_RUNNING':
+      return 'koc.execution.status.screeningRunning';
+    case 'MANUAL_REVIEW':
+      return 'koc.execution.status.manualReview';
+    case 'WAITING_DEPENDENCY':
+      return 'koc.execution.status.waitingDependency';
+    default:
+      return `koc.execution.status.${status.toLowerCase()}`;
+  }
 }
 
 function cleanString(value: string | null | undefined): string | undefined {

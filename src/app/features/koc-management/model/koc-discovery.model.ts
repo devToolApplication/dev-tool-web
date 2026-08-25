@@ -1,4 +1,12 @@
-﻿import type { KocExecutionStatus } from './koc-common.model';
+import type { KocExecutionStatus } from './koc-common.model';
+
+export type KocWorkflowRunStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'COMPLETED'
+  | 'ERROR'
+  | 'TIMED_OUT'
+  | 'CANCELLED';
 
 export interface KocDiscoverySignal {
   key: string;
@@ -39,4 +47,12 @@ export interface KocDiscoveryRun {
   newCandidates: number;
   duplicateCandidates: number;
   durationMs?: number;
+}
+
+export interface KocDiscoveryRunStartResult {
+  workflowRunId: string;
+  workflowId: string;
+  strategyId: string;
+  status: KocWorkflowRunStatus;
+  message?: string;
 }

@@ -1,11 +1,13 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
 import { PermissionService } from '@core/auth/permission.service';
 import type { KocIncidentDetail, KocRecoveryProgress } from '../../model/koc-incident.model';
 import { KocIncidentApiService } from '../../services/koc-incident-api.service';
+import type { KocRealtimeEvent } from '../../services/koc-realtime.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 import { IncidentDetailComponent } from './incident-detail.component';
 
 describe('IncidentDetailComponent', () => {
@@ -16,6 +18,8 @@ describe('IncidentDetailComponent', () => {
     testDependency: ReturnType<typeof vi.fn>;
     markIssueFixed: ReturnType<typeof vi.fn>;
   };
+  let realtimeApi: { connect: ReturnType<typeof vi.fn> };
+  let realtimeEvents: Subject<KocRealtimeEvent>;
   let permissionService: { hasAny: ReturnType<typeof vi.fn> };
 
   const incident: KocIncidentDetail = {
@@ -39,19 +43,25 @@ describe('IncidentDetailComponent', () => {
   };
 
   beforeEach(() => {
+    realtimeEvents = new Subject<KocRealtimeEvent>();
     api = {
       getIncident: vi.fn(() => of(incident)),
       testDependency: vi.fn(() => of({ ...incident, status: 'RECOVERING', health: 'DEGRADED' })),
       markIssueFixed: vi.fn(() => of(progress)),
     };
+    realtimeApi = { connect: vi.fn(() => realtimeEvents.asObservable()) };
     permissionService = { hasAny: vi.fn(() => true) };
 
     TestBed.configureTestingModule({
       declarations: [IncidentDetailComponent],
       providers: [
         { provide: KocIncidentApiService, useValue: api },
+        { provide: KocRealtimeService, useValue: realtimeApi },
         { provide: PermissionService, useValue: permissionService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ incidentId: 'incident-1' }) } } },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: convertToParamMap({ incidentId: 'incident-1' }) } },
+        },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     });
@@ -83,6 +93,31 @@ describe('IncidentDetailComponent', () => {
     expect(api.markIssueFixed).toHaveBeenCalledWith('incident-1');
     expect(component.recoveryProgress()).toEqual(progress);
     expect(component.recoveryItems().map((item) => item.value)).toEqual([10, 5, 113, 0]);
+  });
+
+  it('refreshes incident detail when realtime event targets this incident', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    realtimeEvents.next({ type: 'incident.status', aggregateId: 'incident-1', version: 2 });
+    await fixture.whenStable();
+
+    expect(realtimeApi.connect).toHaveBeenCalledWith({ reconnect: true });
+    expect(api.getIncident).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes incident detail when recovery event targets its dependency', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    realtimeEvents.next({
+      type: 'dependency.recovery',
+      aggregateId: 'facebook-mcp-auth',
+      version: 2,
+    });
+    await fixture.whenStable();
+
+    expect(api.getIncident).toHaveBeenCalledTimes(2);
   });
 
   it('disables and no-ops testDependency and markIssueFixed when operator permissions are missing', async () => {

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, forkJoin } from 'rxjs';
 
@@ -8,6 +17,7 @@ import type { TimelineItem } from '@shared/ui/data-display/timeline/timeline.com
 import type { KocCandidateDetail } from '../../model/koc-candidate.model';
 import type { KocEvidenceItem } from '../../model/koc-evidence.model';
 import { KocCandidateApiService } from '../../services/koc-candidate-api.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 
 @Component({
   selector: 'app-koc-candidate-detail',
@@ -19,6 +29,8 @@ import { KocCandidateApiService } from '../../services/koc-candidate-api.service
 export class CandidateDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(KocCandidateApiService);
+  private readonly realtime = inject(KocRealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly candidateId = signal(this.route.snapshot.paramMap.get('candidateId') ?? '');
   readonly candidate = signal<KocCandidateDetail | null>(null);
@@ -34,7 +46,10 @@ export class CandidateDetailComponent implements OnInit {
       return [];
     }
     return [
-      { label: 'koc.evidence.drawer.businessFact', value: item.excerpt ?? item.coverage ?? 'notAvailable' },
+      {
+        label: 'koc.evidence.drawer.businessFact',
+        value: item.excerpt ?? item.coverage ?? 'notAvailable',
+      },
       { label: 'koc.evidence.drawer.sourceType', value: item.sourceType },
       { label: 'koc.evidence.drawer.observedAt', value: item.observedAt, type: 'datetime' },
       { label: 'koc.evidence.drawer.coverage', value: item.coverage ?? 'notAvailable' },
@@ -51,7 +66,10 @@ export class CandidateDetailComponent implements OnInit {
     return [
       { label: 'koc.evidence.drawer.agent', value: item.agentCode ?? 'notAvailable' },
       { label: 'koc.evidence.drawer.provider', value: item.provider ?? 'notAvailable' },
-      { label: 'koc.evidence.drawer.executionPolicy', value: 'koc.campaignWizard.screening.infrastructureWait' },
+      {
+        label: 'koc.evidence.drawer.executionPolicy',
+        value: 'koc.campaignWizard.screening.infrastructureWait',
+      },
     ];
   });
 
@@ -60,12 +78,16 @@ export class CandidateDetailComponent implements OnInit {
     timelineItem('cheapFilter', 'completed'),
     timelineItem('basicResearch', this.evidence().length ? 'completed' : 'queued'),
     timelineItem('rules', this.candidate()?.screeningProgress === 100 ? 'completed' : 'running'),
-    timelineItem('engagementResearch', this.candidate()?.executionStatus === 'RUNNING' ? 'running' : 'queued'),
+    timelineItem(
+      'engagementResearch',
+      this.candidate()?.executionStatus === 'RUNNING' ? 'running' : 'queued',
+    ),
     timelineItem('finalize', this.candidate()?.decision === 'SCREENING' ? 'queued' : 'completed'),
   ]);
 
   ngOnInit(): void {
     void this.loadCandidate();
+    this.connectRealtime();
   }
 
   async loadCandidate(): Promise<void> {
@@ -78,10 +100,12 @@ export class CandidateDetailComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const response = await firstValueFrom(forkJoin({
-        candidate: this.api.getCandidate(candidateId),
-        evidence: this.api.getEvidence(candidateId),
-      }));
+      const response = await firstValueFrom(
+        forkJoin({
+          candidate: this.api.getCandidate(candidateId),
+          evidence: this.api.getEvidence(candidateId),
+        }),
+      );
       this.candidate.set(response.candidate);
       this.evidence.set(response.evidence);
     } catch (error) {
@@ -139,6 +163,17 @@ export class CandidateDetailComponent implements OnInit {
     }
     return item.coverage ?? 'notAvailable';
   }
+
+  private connectRealtime(): void {
+    this.realtime
+      .connect({ reconnect: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (event.aggregateId === this.candidateId()) {
+          void this.loadCandidate();
+        }
+      });
+  }
 }
 
 function evidenceStateKey(state: KocEvidenceItem['state']): string {
@@ -161,7 +196,12 @@ function timelineItem(
     title: `koc.workflow.step.${id}`,
     description: `koc.workflow.status.${status}`,
     variant: status === 'completed' ? 'success' : status === 'running' ? 'warning' : 'muted',
-    icon: status === 'completed' ? 'pi pi-check-circle' : status === 'running' ? 'pi pi-sync' : 'pi pi-clock',
+    icon:
+      status === 'completed'
+        ? 'pi pi-check-circle'
+        : status === 'running'
+          ? 'pi pi-sync'
+          : 'pi pi-clock',
   };
 }
 

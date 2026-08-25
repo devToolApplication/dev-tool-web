@@ -1,16 +1,22 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { PermissionService } from '@core/auth/permission.service';
 import type { KeyValueItem } from '@shared/ui/data-display/key-value-list/key-value-list.component';
-import type {
-  KocIncidentDetail,
-  KocRecoveryProgress,
-} from '../../model/koc-incident.model';
+import type { KocIncidentDetail, KocRecoveryProgress } from '../../model/koc-incident.model';
 import { KocIncidentApiService } from '../../services/koc-incident-api.service';
+import { KocRealtimeService } from '../../services/koc-realtime.service';
 
-/* ponytail: recovery tracking uses bounded counts; upgrade to SSE stream when live batch tracking is requested. */
 @Component({
   selector: 'app-koc-incident-detail',
   standalone: false,
@@ -21,6 +27,8 @@ import { KocIncidentApiService } from '../../services/koc-incident-api.service';
 export class IncidentDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(KocIncidentApiService);
+  private readonly realtime = inject(KocRealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly permissionService = inject(PermissionService);
 
   readonly incidentId = signal(this.route.snapshot.paramMap.get('incidentId') ?? '');
@@ -31,7 +39,9 @@ export class IncidentDetailComponent implements OnInit {
   readonly fixing = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly canOperate = computed(() => this.permissionService.hasAny(['AI_AGENT_EXECUTE', 'AI_AGENT_WORKFLOW_WRITE']));
+  readonly canOperate = computed(() =>
+    this.permissionService.hasAny(['AI_AGENT_EXECUTE', 'AI_AGENT_WORKFLOW_WRITE']),
+  );
 
   readonly impactItems = computed<KeyValueItem[]>(() => {
     const item = this.incident();
@@ -46,13 +56,19 @@ export class IncidentDetailComponent implements OnInit {
     ];
   });
 
-  readonly recoveryItems = computed<{ key: keyof KocRecoveryProgress; label: string; value: number }[]>(() => {
+  readonly recoveryItems = computed<
+    { key: keyof KocRecoveryProgress; label: string; value: number }[]
+  >(() => {
     const progress = this.recoveryProgress();
     if (!progress) {
       return [];
     }
     return [
-      { key: 'recovered', label: 'koc.incidentDetail.recovery.recovered', value: progress.recovered },
+      {
+        key: 'recovered',
+        label: 'koc.incidentDetail.recovery.recovered',
+        value: progress.recovered,
+      },
       { key: 'running', label: 'koc.incidentDetail.recovery.running', value: progress.running },
       { key: 'queued', label: 'koc.incidentDetail.recovery.queued', value: progress.queued },
       { key: 'failed', label: 'koc.incidentDetail.recovery.failed', value: progress.failed },
@@ -61,6 +77,7 @@ export class IncidentDetailComponent implements OnInit {
 
   ngOnInit(): void {
     void this.loadIncident();
+    this.connectRealtime();
   }
 
   async loadIncident(): Promise<void> {
@@ -120,6 +137,20 @@ export class IncidentDetailComponent implements OnInit {
     } finally {
       this.fixing.set(false);
     }
+  }
+
+  private connectRealtime(): void {
+    this.realtime
+      .connect({ reconnect: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (
+          event.aggregateId === this.incidentId() ||
+          event.aggregateId === this.incident()?.dependencyKey
+        ) {
+          void this.loadIncident();
+        }
+      });
   }
 }
 

@@ -4,7 +4,11 @@ import { map, Observable } from 'rxjs';
 
 import { BaseResponse } from '@core/http/base-response.model';
 import { environment } from '../../../../enviroment/environment';
-import type { KocDiscoveryRun, KocDiscoveryStrategySummary } from '../model/koc-discovery.model';
+import type {
+  KocDiscoveryRun,
+  KocDiscoveryRunStartResult,
+  KocDiscoveryStrategySummary,
+} from '../model/koc-discovery.model';
 
 @Injectable({ providedIn: 'root' })
 export class KocDiscoveryApiService {
@@ -14,13 +18,26 @@ export class KocDiscoveryApiService {
 
   getCampaignStrategies(campaignId: string): Observable<KocDiscoveryStrategySummary[]> {
     return this.http
-      .get<BaseResponse<KocDiscoveryStrategySummary[]>>(`${this.baseUrl}/campaigns/${campaignId}/strategies`)
+      .get<
+        BaseResponse<KocDiscoveryStrategySummary[]>
+      >(`${this.baseUrl}/campaigns/${campaignId}/strategies`)
       .pipe(map((response) => response.data));
   }
 
   getDiscoveryRun(runId: string): Observable<KocDiscoveryRun> {
     return this.http
       .get<BaseResponse<KocDiscoveryRun>>(`${this.baseUrl}/runs/${runId}`)
+      .pipe(map((response) => response.data));
+  }
+
+  startDiscoveryRun(
+    campaignId: string,
+    strategyId: string,
+  ): Observable<KocDiscoveryRunStartResult> {
+    return this.http
+      .post<
+        BaseResponse<KocDiscoveryRunStartResult>
+      >(`${this.baseUrl}/campaigns/${campaignId}/strategies/${strategyId}/runs`, null)
       .pipe(map((response) => response.data));
   }
 }

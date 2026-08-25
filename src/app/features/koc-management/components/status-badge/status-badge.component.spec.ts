@@ -16,5 +16,12 @@ describe('statusBadgeForKocStatus', () => {
         icon: 'pi pi-link',
       }),
     );
+    expect(statusBadgeForKocStatus('SCREENING_RUNNING')).toEqual(
+      expect.objectContaining({
+        label: 'koc.execution.status.screeningRunning',
+        variant: 'info',
+        icon: 'pi pi-sync',
+      }),
+    );
   });
 });

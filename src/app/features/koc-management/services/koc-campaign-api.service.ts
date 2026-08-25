@@ -5,6 +5,8 @@ import { map, Observable } from 'rxjs';
 import { BasePageResponse, BaseResponse } from '@core/http/base-response.model';
 import { environment } from '../../../../enviroment/environment';
 import type {
+  KocCandidateEvaluationStartPayload,
+  KocCandidateEvaluationStartResult,
   KocCampaignDetail,
   KocCampaignListQuery,
   KocCampaignSummary,
@@ -17,7 +19,9 @@ export class KocCampaignApiService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getCampaignPage(query: KocCampaignListQuery = {}): Observable<BasePageResponse<KocCampaignSummary>> {
+  getCampaignPage(
+    query: KocCampaignListQuery = {},
+  ): Observable<BasePageResponse<KocCampaignSummary>> {
     return this.http
       .get<BaseResponse<BasePageResponse<KocCampaignSummary>>>(`${this.baseUrl}/page`, {
         params: this.pageParams(query),
@@ -73,6 +77,17 @@ export class KocCampaignApiService {
   stopCampaign(campaignId: string): Observable<KocCampaignDetail> {
     return this.http
       .post<BaseResponse<KocCampaignDetail>>(`${this.baseUrl}/${campaignId}/stop`, null)
+      .pipe(map((response) => response.data));
+  }
+
+  startCandidateEvaluation(
+    campaignId: string,
+    payload: KocCandidateEvaluationStartPayload,
+  ): Observable<KocCandidateEvaluationStartResult> {
+    return this.http
+      .post<
+        BaseResponse<KocCandidateEvaluationStartResult>
+      >(`${this.baseUrl}/${campaignId}/candidate-evaluations`, payload)
       .pipe(map((response) => response.data));
   }
 

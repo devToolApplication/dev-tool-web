@@ -26,5 +26,6 @@ export const environment = {
   },
   ws: {
     tradeBotWs: 'ws://localhost:31002/trade-bot-mcrs/ws',
+    kocWs: 'ws://localhost:31001/ai-agent-mcrs/ws/koc',
   },
 };

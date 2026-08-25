@@ -26,5 +26,6 @@ export const environment = {
   },
   ws: {
     tradeBotWs: 'wss://api.169.58.153.62.nip.io/trade-bot-mcrs/ws',
+    kocWs: 'wss://api.169.58.153.62.nip.io/ai-agent-mcrs/ws/koc',
   },
 };

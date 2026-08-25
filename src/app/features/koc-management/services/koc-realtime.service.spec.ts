@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
-import { KocRealtimeEvent, KocRealtimeService } from './koc-realtime.service';
+import type { KocRealtimeEvent } from './koc-realtime.service';
+import { KocRealtimeService } from './koc-realtime.service';
 
 class MockWebSocket {
   url: string;
@@ -44,19 +45,19 @@ describe('KocRealtimeService', () => {
   });
 
   describe('connect()', () => {
-    it('returns EMPTY when no streamUrl is provided', () => {
-      const nextSpy = vi.fn();
-      let completed = false;
+    it('uses the KOC WebSocket endpoint when no streamUrl is provided', () => {
+      let createdSocket: MockWebSocket | null = null;
+      const socketFactory = (url: string) => {
+        createdSocket = new MockWebSocket(url);
+        return createdSocket as unknown as WebSocket;
+      };
 
-      service.connect().subscribe({
-        next: nextSpy,
-        complete: () => {
-          completed = true;
-        },
-      });
+      const sub = service.connect({ socketFactory }).subscribe();
 
-      expect(nextSpy).not.toHaveBeenCalled();
-      expect(completed).toBe(true);
+      expect(createdSocket).toBeTruthy();
+      expect(createdSocket!.url).toBe('ws://localhost:31001/ai-agent-mcrs/ws/koc');
+
+      sub.unsubscribe();
     });
 
     it('returns EMPTY when streamUrl is empty whitespace', () => {
@@ -324,7 +325,10 @@ describe('KocRealtimeService', () => {
 
       const parsed = service.parseMessage('{not valid json');
       expect(parsed).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith('Failed to parse KOC realtime message:', expect.any(Error));
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Failed to parse KOC realtime message:',
+        expect.any(Error),
+      );
       warnSpy.mockRestore();
     });
   });

@@ -61,6 +61,25 @@ export interface KocCampaignUpsertPayload {
   screeningRules?: KocScreeningRule[];
 }
 
+export type KocCandidateEvaluationStartStatus =
+  | 'STARTED'
+  | 'SKIPPED_ALREADY_COMPLETED'
+  | 'START_FAILED';
+
+export interface KocCandidateEvaluationStartPayload {
+  candidateId: string;
+  workflowId?: string;
+}
+
+export interface KocCandidateEvaluationStartResult {
+  campaignId: string;
+  candidateId: string;
+  workflowId?: string;
+  workflowRunId?: string;
+  status: KocCandidateEvaluationStartStatus;
+  reason?: string;
+}
+
 export interface KocCampaignListQuery extends KocPageQuery {
   status?: KocCampaignStatus;
 }
