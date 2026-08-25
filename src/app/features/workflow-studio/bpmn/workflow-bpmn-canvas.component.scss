@@ -48,9 +48,10 @@
   outline-offset: 2px;
 }
 
-.workflow-bpmn-canvas .djs-palette,
-.workflow-bpmn-canvas .djs-context-pad {
-  display: none;
+.workflow-bpmn-canvas--readonly .djs-palette,
+.workflow-bpmn-canvas--readonly .djs-context-pad {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .workflow-bpmn-canvas__marker--selected .djs-visual > :first-child {

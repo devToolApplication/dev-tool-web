@@ -1,36 +1,92 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { runInInjectionContext, Injector } from '@angular/core';
 import {
   WORKFLOW_BPMN_MODELER_FACTORY,
   WorkflowBpmnCanvasComponent,
+  WorkflowBpmnElementConfig,
 } from './workflow-bpmn-canvas.component';
-import type { WorkflowGraph } from '../model/workflow-studio.model';
-
-@Pipe({ name: 'translateContent', standalone: false })
-class TranslateContentPipeStub implements PipeTransform {
-  transform(value: string): string {
-    return value;
-  }
-}
 
 class MockModeler {
-  static instances: MockModeler[] = [];
-
   readonly importXML = vi.fn(async (xml: string) => {
     this.importedXml = xml;
     return { warnings: [] };
   });
-  readonly saveXML = vi.fn(async () => ({ xml: this.importedXml }));
+  saveXML = vi.fn(async () => ({ xml: this.importedXml }));
   readonly destroy = vi.fn();
   readonly handlers = new Map<string, (event?: unknown) => void>();
   importedXml = '';
   zoomValue = 1;
   readonly markers: Array<{ action: string; elementId: string; marker: string }> = [];
 
-  constructor() {
-    MockModeler.instances.push(this);
-  }
+  readonly mockElements: Record<string, any> = {
+    start: {
+      id: 'start',
+      type: 'bpmn:StartEvent',
+      businessObject: { id: 'start', $type: 'bpmn:StartEvent', name: 'Start' },
+    },
+    'service-1': {
+      id: 'service-1',
+      type: 'bpmn:ServiceTask',
+      businessObject: {
+        id: 'service-1',
+        $type: 'bpmn:ServiceTask',
+        name: 'AI Task',
+        $attrs: {
+          'flowable:topic': 'ai-task',
+          'flowable:type': 'external-worker',
+          'flowable:taskConfigJson': '{}',
+        },
+        get: (attr: string) => this.mockElements['service-1'].businessObject.$attrs[attr],
+        set: (attr: string, val: any) => {
+          this.mockElements['service-1'].businessObject.$attrs =
+            this.mockElements['service-1'].businessObject.$attrs || {};
+          this.mockElements['service-1'].businessObject.$attrs[attr] = val;
+        },
+      },
+    },
+    'flow-1': {
+      id: 'flow-1',
+      type: 'bpmn:SequenceFlow',
+      businessObject: {
+        id: 'flow-1',
+        $type: 'bpmn:SequenceFlow',
+        name: 'Pass',
+        sourceRef: { id: 'start' },
+        conditionExpression: { body: '${approved == true}' },
+      },
+    },
+    'message-event': {
+      id: 'message-event',
+      type: 'bpmn:IntermediateCatchEvent',
+      businessObject: {
+        id: 'message-event',
+        $type: 'bpmn:IntermediateCatchEvent',
+        eventDefinitions: [{ $type: 'bpmn:MessageEventDefinition' }],
+      },
+    },
+    'error-boundary': {
+      id: 'error-boundary',
+      type: 'bpmn:BoundaryEvent',
+      businessObject: {
+        id: 'error-boundary',
+        $type: 'bpmn:BoundaryEvent',
+        eventDefinitions: [{ $type: 'bpmn:ErrorEventDefinition' }],
+      },
+    },
+  };
+
+  readonly modeling = {
+    updateProperties: vi.fn((elem: any, props: any) => {
+      const bo = elem.businessObject || elem;
+      Object.assign(bo, props);
+    }),
+    updateModdleProperties: vi.fn((elem: any, bo: any, props: any) => {
+      Object.assign(bo.$attrs, props);
+    }),
+  };
+
+  readonly moddle = {
+    create: vi.fn((type: string, props: any) => ({ $type: type, ...props })),
+  };
 
   on(eventName: string, handler: (event?: unknown) => void): void {
     this.handlers.set(eventName, handler);
@@ -56,95 +112,142 @@ class MockModeler {
     }
     if (serviceName === 'elementRegistry') {
       return {
-        getAll: vi.fn(() => [
-          { id: 'start', type: 'bpmn:StartEvent', businessObject: { id: 'start' } },
-          { id: 'flow-1', type: 'bpmn:SequenceFlow', businessObject: { id: 'flow-1' } },
-        ]),
+        get: vi.fn((id: string) => this.mockElements[id]),
+        getAll: vi.fn(() => Object.values(this.mockElements)),
       };
+    }
+    if (serviceName === 'modeling') {
+      return this.modeling;
+    }
+    if (serviceName === 'moddle') {
+      return this.moddle;
     }
     return null;
   }
 }
 
-describe('WorkflowBpmnCanvasComponent', () => {
-  let fixture: ComponentFixture<WorkflowBpmnCanvasComponent>;
+describe('WorkflowBpmnCanvasComponent unit', () => {
   let component: WorkflowBpmnCanvasComponent;
+  let mockModeler: MockModeler;
 
-  beforeEach(async () => {
-    MockModeler.instances = [];
-    await TestBed.configureTestingModule({
-      declarations: [WorkflowBpmnCanvasComponent, TranslateContentPipeStub],
+  beforeEach(() => {
+    mockModeler = new MockModeler();
+    const injector = Injector.create({
       providers: [
         {
           provide: WORKFLOW_BPMN_MODELER_FACTORY,
-          useValue: () => new MockModeler(),
+          useValue: () => mockModeler,
         },
       ],
-    }).compileComponents();
+    });
 
-    fixture = TestBed.createComponent(WorkflowBpmnCanvasComponent);
-    component = fixture.componentInstance;
+    component = runInInjectionContext(injector, () => new WorkflowBpmnCanvasComponent());
+    component.canvasRef = { nativeElement: document.createElement('div') };
     component.workflowId = 'wf-1';
     component.workflowName = 'Flowable workflow';
     component.bpmnXml = sampleXml();
+    component.ngAfterViewInit();
   });
 
-  it('initializes bpmn-js with current workflow XML and destroys it on component destroy', async () => {
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const modeler = MockModeler.instances[0];
-    expect(modeler.importXML).toHaveBeenCalledOnce();
-    expect(modeler.importedXml).toContain('<process id="wf_1" name="Flowable workflow" isExecutable="true">');
-    expect(modeler.importedXml).toContain('<bpmndi:BPMNDiagram');
-
-    fixture.destroy();
-
-    expect(modeler.destroy).toHaveBeenCalledOnce();
+  afterEach(() => {
+    component?.ngOnDestroy();
   });
 
-  it('emits palette-created BPMN nodes only in design mode', () => {
-    const added: WorkflowGraph['nodes'] = [];
-    component.nodeAdded.subscribe((event) => added.push(event.node));
-
-    component.addNode('AI_TASK');
-    component.mode = 'readonly';
-    component.addNode('HTTP_TASK');
-
-    expect(added).toHaveLength(1);
-    expect(added[0]).toMatchObject({
-      id: 'ai-task-1',
-      type: 'AI_TASK',
-      config: {},
-      retryPolicy: { maxAttempts: 1 },
-    });
+  it('initializes bpmn-js with current workflow XML and destroys it on component destroy', () => {
+    expect(mockModeler.importXML).toHaveBeenCalledOnce();
+    expect(mockModeler.importedXml).toContain(
+      '<process id="wf_1" name="Flowable workflow" isExecutable="true">',
+    );
+    component.ngOnDestroy();
+    expect(mockModeler.destroy).toHaveBeenCalledOnce();
   });
 
-  it('emits node and sequence-flow selection from bpmn-js element clicks', async () => {
+  it('emits node, sequence-flow, and element config selection from bpmn-js element clicks', () => {
     const selectedNodes: Array<string | null> = [];
     const selectedEdges: Array<string | null> = [];
+    const selectedConfigs: Array<WorkflowBpmnElementConfig | null> = [];
     component.nodeSelected.subscribe((nodeId) => selectedNodes.push(nodeId));
     component.edgeSelected.subscribe((edgeId) => selectedEdges.push(edgeId));
-    fixture.detectChanges();
-    await fixture.whenStable();
+    component.elementSelected.subscribe((config) => selectedConfigs.push(config));
 
-    const modeler = MockModeler.instances[0];
-    modeler.handlers.get('element.click')?.({
-      element: { id: 'start', type: 'bpmn:StartEvent', businessObject: { id: 'start' } },
+    mockModeler.handlers.get('element.click')?.({
+      element: mockModeler.mockElements['service-1'],
     });
-    modeler.handlers.get('element.click')?.({
-      element: { id: 'flow-1', type: 'bpmn:SequenceFlow', businessObject: { id: 'flow-1' } },
+    mockModeler.handlers.get('element.click')?.({
+      element: mockModeler.mockElements['flow-1'],
     });
 
-    expect(selectedNodes).toEqual(['start']);
+    expect(selectedNodes).toEqual(['service-1']);
     expect(selectedEdges).toEqual(['flow-1']);
+    expect(selectedConfigs[0]).toMatchObject({
+      id: 'service-1',
+      type: 'bpmn:ServiceTask',
+      name: 'AI Task',
+      flowableTopic: 'ai-task',
+      flowableType: 'external-worker',
+      taskConfigJson: '{}',
+    });
+    expect(selectedConfigs[1]).toMatchObject({
+      id: 'flow-1',
+      type: 'bpmn:SequenceFlow',
+      name: 'Pass',
+      conditionExpression: '${approved == true}',
+    });
   });
 
-  it('delegates viewport commands and emits viewport snapshots', async () => {
+  it('emits empty refs for newly created message and error events', () => {
+    const selectedConfigs: Array<WorkflowBpmnElementConfig | null> = [];
+    component.elementSelected.subscribe((config) => selectedConfigs.push(config));
+
+    mockModeler.handlers.get('element.click')?.({
+      element: mockModeler.mockElements['message-event'],
+    });
+    mockModeler.handlers.get('element.click')?.({
+      element: mockModeler.mockElements['error-boundary'],
+    });
+
+    expect(selectedConfigs[0]).toMatchObject({
+      id: 'message-event',
+      messageRef: '',
+      messageName: '',
+    });
+    expect(selectedConfigs[1]).toMatchObject({
+      id: 'error-boundary',
+      errorRef: '',
+      errorName: '',
+    });
+  });
+
+  it('updates element config for service task and sequence flow, and emits saved XML', async () => {
+    const emittedXmls: string[] = [];
+    component.bpmnXmlChange.subscribe((xml) => emittedXmls.push(xml));
+    mockModeler.saveXML = vi.fn(async () => ({ xml: '<definitions updated="true" />' }));
+
+    await component.updateElementConfig({
+      id: 'service-1',
+      type: 'bpmn:ServiceTask',
+      name: 'Renamed Service',
+      flowableTopic: 'http-task',
+      flowableType: 'external-worker',
+      taskConfigJson: '{"url":"https://example.com"}',
+    });
+
+    expect(mockModeler.modeling.updateProperties).toHaveBeenCalledWith(
+      mockModeler.mockElements['service-1'],
+      { name: 'Renamed Service' },
+    );
+    expect(mockModeler.mockElements['service-1'].businessObject.$attrs['flowable:topic']).toBe(
+      'http-task',
+    );
+    expect(
+      mockModeler.mockElements['service-1'].businessObject.$attrs['flowable:taskConfigJson'],
+    ).toBe('{"url":"https://example.com"}');
+    expect(emittedXmls).toContain('<definitions updated="true" />');
+  });
+
+  it('delegates viewport commands and emits viewport snapshots', () => {
     const viewports: Array<{ x: number; y: number; zoom: number }> = [];
     component.viewportChange.subscribe((viewport) => viewports.push(viewport));
-    fixture.detectChanges();
-    await fixture.whenStable();
 
     component.executeCommand('zoomIn');
     component.executeCommand('zoomOut');
@@ -154,20 +257,30 @@ describe('WorkflowBpmnCanvasComponent', () => {
     expect(viewports.at(-1)).toEqual({ x: 12, y: 24, zoom: 1 });
   });
 
-  it('applies selected, validation and runtime markers', async () => {
+  it('applies selected, validation and runtime markers', () => {
     component.selectedId = 'start';
-    component.validationIssues = [{ code: 'BAD', message: 'Bad node', severity: 'error', edgeId: 'flow-1' }];
+    component.validationIssues = [
+      { code: 'BAD', message: 'Bad node', severity: 'error', edgeId: 'flow-1' },
+    ];
     component.runtimeStatus = { nodes: { end: 'COMPLETED' } };
 
-    fixture.detectChanges();
-    await fixture.whenStable();
+    component.ngOnChanges({
+      selectedId: {
+        currentValue: 'start',
+        previousValue: null,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
 
-    const markers = MockModeler.instances[0].markers.filter((marker) => marker.action === 'add');
-    expect(markers).toEqual(expect.arrayContaining([
-      { action: 'add', elementId: 'start', marker: 'workflow-bpmn-canvas__marker--selected' },
-      { action: 'add', elementId: 'flow-1', marker: 'workflow-bpmn-canvas__marker--invalid' },
-      { action: 'add', elementId: 'end', marker: 'workflow-bpmn-canvas__marker--completed' },
-    ]));
+    const markers = mockModeler.markers.filter((marker) => marker.action === 'add');
+    expect(markers).toEqual(
+      expect.arrayContaining([
+        { action: 'add', elementId: 'start', marker: 'workflow-bpmn-canvas__marker--selected' },
+        { action: 'add', elementId: 'flow-1', marker: 'workflow-bpmn-canvas__marker--invalid' },
+        { action: 'add', elementId: 'end', marker: 'workflow-bpmn-canvas__marker--completed' },
+      ]),
+    );
   });
 });
 

@@ -17,6 +17,12 @@
   font-weight: 700;
 }
 
+.workflow-bpmn-drawer__unsupported-text {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--app-font-size-sm, 0.875rem);
+}
+
 .workflow-bpmn-drawer__section--grid,
 .workflow-bpmn-drawer__condition-grid {
   grid-template-columns: 1fr;

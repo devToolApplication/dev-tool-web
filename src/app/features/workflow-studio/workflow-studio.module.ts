@@ -5,6 +5,7 @@ import { SharedModule } from '@shared/shared.module';
 import { WorkflowBpmnCanvasComponent } from './bpmn/workflow-bpmn-canvas.component';
 import { WorkflowBpmnGatewayDrawerComponent } from './bpmn/workflow-bpmn-gateway-drawer.component';
 import { WorkflowBpmnNodeDrawerComponent } from './bpmn/workflow-bpmn-node-drawer.component';
+import { WorkflowBpmnPropertiesDrawerComponent } from './bpmn/workflow-bpmn-properties-drawer.component';
 import { WorkflowBpmnSequenceFlowDrawerComponent } from './bpmn/workflow-bpmn-sequence-flow-drawer.component';
 import { AiGateInspectorComponent } from './inspector/ai-gate-inspector.component';
 import { CodeGateInspectorComponent } from './inspector/code-gate-inspector.component';
@@ -33,6 +34,7 @@ import { WorkflowEditorStore } from './store/workflow-editor.store';
 
 const DECLARATIONS = [
   WorkflowBpmnCanvasComponent,
+  WorkflowBpmnPropertiesDrawerComponent,
   WorkflowBpmnNodeDrawerComponent,
   WorkflowBpmnGatewayDrawerComponent,
   WorkflowBpmnSequenceFlowDrawerComponent,

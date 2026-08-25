@@ -24,7 +24,10 @@ import {
   WorkflowVersion,
 } from '../model/workflow-studio.model';
 import { WorkflowApiService } from '../api/workflow-api.service';
-import { WorkflowBpmnCanvasComponent } from '../bpmn/workflow-bpmn-canvas.component';
+import {
+  WorkflowBpmnCanvasComponent,
+  WorkflowBpmnElementConfig,
+} from '../bpmn/workflow-bpmn-canvas.component';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 
@@ -64,6 +67,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
   readonly runDialogOpen = signal(false);
   readonly running = signal(false);
   readonly generalInfoCollapsed = signal(false);
+  readonly selectedBpmnElement = signal<WorkflowBpmnElementConfig | null>(null);
 
   readonly selectedId = computed(() => this.store.selectedNodeId() ?? this.store.selectedEdgeId());
   readonly readonlyMode = computed(() => this.store.mode() !== 'design');
@@ -324,6 +328,16 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.runDialogOpen.set(false);
     this.store.selectNode(null);
     this.store.selectEdge(null);
+    this.selectedBpmnElement.set(null);
+  }
+
+  onElementSelected(config: WorkflowBpmnElementConfig | null): void {
+    this.selectedBpmnElement.set(config);
+  }
+
+  onElementConfigChange(config: WorkflowBpmnElementConfig): void {
+    this.selectedBpmnElement.set(config);
+    void this.workflowBpmnCanvas?.updateElementConfig(config);
   }
 
   selectVersion(versionId: string): void {
