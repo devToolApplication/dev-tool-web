@@ -1,19 +1,16 @@
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
 import type { TableAction, TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 import {
-  WorkflowEditorMetadata,
-  WorkflowEngineType,
   WorkflowDefinition,
   WorkflowDetail,
-  WorkflowGraph,
-  WorkflowNodePosition,
   WorkflowRun,
   WorkflowVersion,
 } from './workflow-studio.model';
 
+export const DEFAULT_BPMN_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:flowable=\"http://flowable.org/bpmn\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" targetNamespace=\"http://devtool.vn/workflow\">\n  <process id=\"workflow_draft\" name=\"workflowStudio.lifecycle.untitled\" isExecutable=\"true\">\n    <startEvent id=\"start-event-1\" name=\"Start\" />\n    <sequenceFlow id=\"flow-start-end\" sourceRef=\"start-event-1\" targetRef=\"end-event-1\" />\n    <endEvent id=\"end-event-1\" name=\"End\" />\n  </process>\n  <bpmndi:BPMNDiagram id=\"workflow_draft_diagram\">\n    <bpmndi:BPMNPlane id=\"workflow_draft_plane\" bpmnElement=\"workflow_draft\">\n      <bpmndi:BPMNShape id=\"start-event-1_shape\" bpmnElement=\"start-event-1\">\n        <dc:Bounds x=\"120\" y=\"140\" width=\"36\" height=\"36\" />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"end-event-1_shape\" bpmnElement=\"end-event-1\">\n        <dc:Bounds x=\"360\" y=\"140\" width=\"36\" height=\"36\" />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id=\"flow-start-end_di\" bpmnElement=\"flow-start-end\">\n        <di:waypoint x=\"156\" y=\"158\" />\n        <di:waypoint x=\"360\" y=\"158\" />\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</definitions>";
+
 export function createDraftWorkflowDetail(
   workflowId = '',
-  engineType: WorkflowEngineType = 'LEGACY',
 ): WorkflowDetail {
   return {
     definition: {
@@ -30,57 +27,10 @@ export function createDraftWorkflowDetail(
         workflowDefinitionId: workflowId,
         version: 1,
         status: 'DRAFT',
-        definition: defaultWorkflowGraphForEngine(engineType),
+        bpmnXml: DEFAULT_BPMN_XML,
         runtime: { maxParallel: 1 },
-        compiledPlan: null,
-        engineType,
-        editor: {
-          viewport: { x: 0, y: 0, zoom: 1 },
-          nodes: defaultWorkflowPositionsForEngine(engineType),
-        },
       },
     ],
-  };
-}
-
-export function defaultWorkflowGraphForEngine(engineType: WorkflowEngineType): WorkflowGraph {
-  if (engineType === 'FLOWABLE') {
-    return {
-      nodes: [
-        { id: 'start-event-1', type: 'START_EVENT', name: 'Start' },
-        { id: 'end-event-1', type: 'END_EVENT', name: 'End' },
-      ],
-      edges: [
-        {
-          id: 'flow-start-end',
-          source: 'start-event-1',
-          target: 'end-event-1',
-          defaultFlow: false,
-        },
-      ],
-    };
-  }
-  return {
-    nodes: [
-      { id: 'start-1', type: 'START' },
-      { id: 'end-1', type: 'END' },
-    ],
-    edges: [{ source: 'start-1', target: 'end-1' }],
-  };
-}
-
-export function defaultWorkflowPositionsForEngine(
-  engineType: WorkflowEngineType,
-): NonNullable<WorkflowEditorMetadata['nodes']> {
-  if (engineType === 'FLOWABLE') {
-    return {
-      'start-event-1': { x: 120, y: 140 },
-      'end-event-1': { x: 360, y: 140 },
-    };
-  }
-  return {
-    'start-1': { x: 80, y: 120 },
-    'end-1': { x: 360, y: 120 },
   };
 }
 

@@ -14,23 +14,14 @@ describe('WorkflowEditorStore', () => {
     store = TestBed.inject(WorkflowEditorStore);
   });
 
-  it('loads the draft workflow graph and editor metadata as a clean snapshot', () => {
+  it('loads the draft workflow XML as a clean snapshot', () => {
     const detail = sampleDetail();
 
     store.loadWorkflow(detail);
 
     expect(store.workflow()?.definition.id).toBe('wf-1');
-    expect(store.nodes()).toEqual(detail.versions[0].definition.nodes);
-    expect(store.edges()).toEqual(detail.versions[0].definition.edges);
-    expect(store.positions()).toEqual({
-      start: { x: 0, y: 0 },
-      end: { x: 280, y: 0 },
-    });
-    expect(store.viewport()).toEqual({ x: 10, y: 20, zoom: 0.75 });
+    expect(store.bpmnXml()).toBe('<definitions />');
     expect(store.dirty()).toBe(false);
-
-    detail.versions[0].definition.nodes[0] = { id: 'mutated', type: 'START' };
-    expect(store.nodes()[0]).toEqual({ id: 'start', type: 'START' });
   });
 
   it('adds, updates, moves and removes nodes through immutable store actions', () => {
@@ -198,22 +189,8 @@ describe('WorkflowEditorStore', () => {
     expect(payload).toEqual({
       name: 'Updated screening',
       description: 'Updated description',
-      definition: {
-        nodes: [
-          { id: 'start', type: 'START' },
-          { id: 'end', type: 'END' },
-        ],
-        edges: [{ source: 'start', target: 'end' }],
-      },
+      bpmnXml: '<definitions />',
       runtime: { maxParallel: 4 },
-      engineType: 'LEGACY',
-      editor: {
-        viewport: { x: 4, y: 8, zoom: 0.8 },
-        nodes: {
-          start: { x: 0, y: 0 },
-          end: { x: 320, y: 40 },
-        },
-      },
     });
     expect(store.dirty()).toBe(true);
   });
@@ -407,22 +384,8 @@ function sampleDetail(): WorkflowDetail {
         workflowDefinitionId: 'wf-1',
         version: 1,
         status: 'DRAFT',
-        definition: {
-          nodes: [
-            { id: 'start', type: 'START' },
-            { id: 'end', type: 'END' },
-          ],
-          edges: [{ source: 'start', target: 'end' }],
-        },
+        bpmnXml: '<definitions />',
         runtime: { maxParallel: 1 },
-        compiledPlan: null,
-        editor: {
-          viewport: { x: 10, y: 20, zoom: 0.75 },
-          nodes: {
-            start: { x: 0, y: 0 },
-            end: { x: 280, y: 0 },
-          },
-        },
       },
     ],
   };

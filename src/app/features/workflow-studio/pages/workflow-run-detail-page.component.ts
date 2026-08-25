@@ -7,7 +7,6 @@ import { WorkflowApiService } from '../api/workflow-api.service';
 import { buildWorkflowRunDetailActions } from '../model/workflow-lifecycle.config';
 import {
   WorkflowDetail,
-  WorkflowGraph,
   WorkflowNodeExecution,
   WorkflowRun,
 } from '../model/workflow-studio.model';
@@ -54,10 +53,8 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
     this.workflowDetail(),
     this.run()?.workflowVersionId,
   ));
-  readonly runtimeGraph = computed<WorkflowGraph | null>(() => this.runtimeVersion()?.definition ?? null);
-  readonly runtimePositions = computed(() => this.runtimeVersion()?.editor?.nodes ?? {});
-  readonly runtimeViewport = computed(() => this.runtimeVersion()?.editor?.viewport);
-  readonly runtimeStatus = computed(() => workflowRunToRuntimeVisualState(this.run(), this.runtimeGraph()));
+  readonly runtimeBpmnXml = computed(() => this.runtimeVersion()?.bpmnXml ?? '');
+  readonly runtimeStatus = computed(() => workflowRunToRuntimeVisualState(this.run()));
   readonly selectedNodeExecution = computed<WorkflowNodeExecution | null>(() => {
     const nodeId = this.selectedNodeId();
     return this.run()?.nodes.find((node) => node.nodeId === nodeId) ?? null;

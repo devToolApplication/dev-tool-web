@@ -86,11 +86,7 @@ describe('WorkflowBpmnCanvasComponent', () => {
     component = fixture.componentInstance;
     component.workflowId = 'wf-1';
     component.workflowName = 'Flowable workflow';
-    component.graph = sampleGraph();
-    component.positions = {
-      start: { x: 100, y: 120 },
-      end: { x: 360, y: 120 },
-    };
+    component.bpmnXml = sampleXml();
   });
 
   it('initializes bpmn-js with current workflow XML and destroys it on component destroy', async () => {
@@ -175,12 +171,6 @@ describe('WorkflowBpmnCanvasComponent', () => {
   });
 });
 
-function sampleGraph(): WorkflowGraph {
-  return {
-    nodes: [
-      { id: 'start', type: 'START_EVENT', name: 'Start' },
-      { id: 'end', type: 'END_EVENT', name: 'End' },
-    ],
-    edges: [{ id: 'flow-1', source: 'start', target: 'end', defaultFlow: false }],
-  };
+function sampleXml(): string {
+  return '<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"><process id="wf_1" name="Flowable workflow" isExecutable="true"><startEvent id="start" /><sequenceFlow id="flow-1" sourceRef="start" targetRef="end" /><endEvent id="end" /></process><bpmndi:BPMNDiagram id="diag"><bpmndi:BPMNPlane id="plane" bpmnElement="wf_1" /></bpmndi:BPMNDiagram></definitions>';
 }

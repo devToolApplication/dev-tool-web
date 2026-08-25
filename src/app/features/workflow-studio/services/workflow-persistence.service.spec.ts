@@ -37,28 +37,18 @@ describe('WorkflowPersistenceService', () => {
     store.loadWorkflow(sampleDetail());
   });
 
-  it('saves the current semantic graph and editor metadata then clears dirty state', async () => {
-    store.moveNode('end', { x: 320, y: 40 });
-    store.setViewport({ x: 4, y: 8, zoom: 0.8 });
+  it('saves the current BPMN XML and runtime then clears dirty state', async () => {
+    store.updateBpmnXml('<definitions id="updated" />');
     api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.updateWorkflow.mockReturnValue(of(savedDetail()));
 
     await service.save(store);
 
     expect(api.validateWorkflow).toHaveBeenCalledWith(expect.objectContaining({
-      editor: {
-        viewport: { x: 4, y: 8, zoom: 0.8 },
-        nodes: {
-          start: { x: 0, y: 0 },
-          end: { x: 320, y: 40 },
-        },
-      },
+      bpmnXml: '<definitions id="updated" />',
     }));
     expect(api.updateWorkflow).toHaveBeenCalledWith('wf-1', expect.objectContaining({
-      definition: {
-        nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
-        edges: [{ source: 'start', target: 'end' }],
-      },
+      bpmnXml: '<definitions id="updated" />',
       runtime: { maxParallel: 1 },
     }));
     expect(store.dirty()).toBe(false);
@@ -70,7 +60,7 @@ describe('WorkflowPersistenceService', () => {
     draft.definition.id = '';
     draft.definition.name = 'New screening workflow';
     store.loadWorkflow(draft);
-    store.moveNode('end', { x: 320, y: 40 });
+    store.updateBpmnXml('<definitions id="updated" />');
     api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.createWorkflow.mockReturnValue(of(savedDetail()));
 
@@ -85,7 +75,7 @@ describe('WorkflowPersistenceService', () => {
   });
 
   it('keeps dirty state when save request fails', async () => {
-    store.moveNode('end', { x: 320, y: 40 });
+    store.updateBpmnXml('<definitions id="updated" />');
     api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.updateWorkflow.mockReturnValue(throwError(() => new Error('network')));
 
@@ -109,7 +99,7 @@ describe('WorkflowPersistenceService', () => {
     ]);
   });
 
-  it('publishes an existing workflow detail through local and backend validation', async () => {
+  it('publishes an existing workflow detail through backend validation', async () => {
     api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.updateWorkflow.mockReturnValue(of(savedDetail()));
     api.publishWorkflow.mockReturnValue(of(savedDetail()));
@@ -118,10 +108,7 @@ describe('WorkflowPersistenceService', () => {
 
     expect(api.validateWorkflow).toHaveBeenCalled();
     expect(api.updateWorkflow).toHaveBeenCalledWith('wf-1', expect.objectContaining({
-      definition: {
-        nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
-        edges: [{ source: 'start', target: 'end' }],
-      },
+      bpmnXml: '<definitions />',
     }));
     expect(api.publishWorkflow).toHaveBeenCalledWith('wf-1');
   });
@@ -143,19 +130,8 @@ function sampleDetail(): WorkflowDetail {
         workflowDefinitionId: 'wf-1',
         version: 1,
         status: 'DRAFT',
-        definition: {
-          nodes: [{ id: 'start', type: 'START' }, { id: 'end', type: 'END' }],
-          edges: [{ source: 'start', target: 'end' }],
-        },
+        bpmnXml: '<definitions />',
         runtime: { maxParallel: 1 },
-        compiledPlan: null,
-        editor: {
-          viewport: { x: 0, y: 0, zoom: 1 },
-          nodes: {
-            start: { x: 0, y: 0 },
-            end: { x: 280, y: 0 },
-          },
-        },
       },
     ],
   };
@@ -163,12 +139,6 @@ function sampleDetail(): WorkflowDetail {
 
 function savedDetail(): WorkflowDetail {
   const detail = sampleDetail();
-  detail.versions[0].editor = {
-    viewport: { x: 4, y: 8, zoom: 0.8 },
-    nodes: {
-      start: { x: 0, y: 0 },
-      end: { x: 320, y: 40 },
-    },
-  };
+  detail.versions[0].bpmnXml = '<definitions id="updated" />';
   return detail;
 }

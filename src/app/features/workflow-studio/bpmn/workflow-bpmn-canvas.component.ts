@@ -16,18 +16,11 @@ import {
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
 import type {
-  BpmnWorkflowNodeType,
   WorkflowEditorMode,
   WorkflowEditorViewport,
-  WorkflowGraph,
-  WorkflowNodePosition,
   WorkflowRuntimeVisualState,
   WorkflowValidationIssue,
 } from '../model/workflow-studio.model';
-import {
-  workflowGraphFromBpmnXml,
-  workflowGraphToBpmnXml,
-} from './workflow-bpmn-adapter';
 
 type BpmnCommand = 'fit' | 'zoomIn' | 'zoomOut' | 'resetZoom' | 'toggleNavigator' | 'fullscreen';
 
@@ -63,17 +56,6 @@ export const WORKFLOW_BPMN_MODELER_FACTORY = new InjectionToken<
   factory: () => (container) => new BpmnModeler({ container }) as unknown as WorkflowBpmnModeler,
 });
 
-const PALETTE_ITEMS: Array<{ type: BpmnWorkflowNodeType; label: string }> = [
-  { type: 'START_EVENT', label: 'workflowStudio.bpmn.palette.start' },
-  { type: 'END_EVENT', label: 'workflowStudio.bpmn.palette.end' },
-  { type: 'AI_TASK', label: 'workflowStudio.bpmn.palette.ai' },
-  { type: 'MCP_TASK', label: 'workflowStudio.bpmn.palette.mcp' },
-  { type: 'CODE_TASK', label: 'workflowStudio.bpmn.palette.code' },
-  { type: 'HTTP_TASK', label: 'workflowStudio.bpmn.palette.http' },
-  { type: 'EXCLUSIVE_GATEWAY', label: 'workflowStudio.bpmn.palette.exclusive' },
-  { type: 'PARALLEL_GATEWAY', label: 'workflowStudio.bpmn.palette.parallel' },
-];
-
 @Component({
   selector: 'app-workflow-bpmn-canvas',
   standalone: false,
@@ -85,32 +67,20 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLElement>;
   private readonly createModeler = inject(WORKFLOW_BPMN_MODELER_FACTORY);
 
+  @Input({ required: true }) bpmnXml!: string;
   @Input() workflowId = 'workflow-draft';
   @Input() workflowName: string | undefined;
-  @Input({ required: true }) graph!: WorkflowGraph;
-  @Input() positions: Record<string, WorkflowNodePosition> = {};
   @Input() viewport: WorkflowEditorViewport | undefined;
   @Input() mode: WorkflowEditorMode = 'design';
   @Input() selectedId: string | null = null;
   @Input() validationIssues: WorkflowValidationIssue[] = [];
   @Input() runtimeStatus: WorkflowRuntimeVisualState = {};
 
-  @Output() readonly graphChange = new EventEmitter<WorkflowGraph>();
-  @Output() readonly positionsChange = new EventEmitter<Record<string, WorkflowNodePosition>>();
+  @Output() readonly bpmnXmlChange = new EventEmitter<string>();
   @Output() readonly viewportChange = new EventEmitter<WorkflowEditorViewport>();
   @Output() readonly nodeSelected = new EventEmitter<string | null>();
   @Output() readonly edgeSelected = new EventEmitter<string | null>();
-  @Output() readonly nodeAdded = new EventEmitter<{
-    node: WorkflowGraph['nodes'][number];
-    position: WorkflowNodePosition;
-  }>();
-  @Output() readonly nodeMoved = new EventEmitter<{
-    nodeId: string;
-    position: WorkflowNodePosition;
-  }>();
-  @Output() readonly connected = new EventEmitter<{ source: string; target: string }>();
 
-  readonly paletteItems = PALETTE_ITEMS;
   private modeler: WorkflowBpmnModeler | null = null;
   private lastImportedXml = '';
   private importing = false;
@@ -118,16 +88,16 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
   ngAfterViewInit(): void {
     this.modeler = this.createModeler(this.canvasRef.nativeElement);
     this.modeler.on('element.click', (event: BpmnClickEvent) => this.handleElementClick(event));
-    this.modeler.on('commandStack.changed', () => void this.emitGraphFromModeler());
-    void this.importCurrentGraph();
+    this.modeler.on('commandStack.changed', () => void this.emitXmlFromModeler());
+    void this.importCurrentXml();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.modeler) {
       return;
     }
-    if (changes['graph'] || changes['positions'] || changes['workflowId'] || changes['workflowName']) {
-      void this.importCurrentGraph();
+    if (changes['bpmnXml']) {
+      void this.importCurrentXml();
     }
     if (changes['selectedId'] || changes['validationIssues'] || changes['runtimeStatus']) {
       this.applyMarkers();
@@ -141,27 +111,6 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
 
   readonlyMode(): boolean {
     return this.mode !== 'design';
-  }
-
-  addNode(type: BpmnWorkflowNodeType): void {
-    if (this.readonlyMode()) {
-      return;
-    }
-    const id = createNodeId(type, this.graph.nodes.map((node) => node.id));
-    const position = { x: 120 + this.graph.nodes.length * 180, y: 140 };
-    this.nodeAdded.emit({
-      node: {
-        id,
-        type,
-        name: PALETTE_ITEMS.find((item) => item.type === type)?.label ?? type,
-        config: {},
-        inputMapping: {},
-        outputMapping: {},
-        retryPolicy: { maxAttempts: 1 },
-        timeoutPolicy: { timeoutSeconds: 30 },
-      },
-      position,
-    });
   }
 
   revealElement(elementId: string): void {
@@ -195,24 +144,19 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
     this.emitViewport();
   }
 
-  private async importCurrentGraph(): Promise<void> {
-    if (!this.modeler || !this.graph) {
+  private async importCurrentXml(): Promise<void> {
+    if (!this.modeler) {
       return;
     }
 
-    const xml = workflowGraphToBpmnXml(this.graph, {
-      processId: this.workflowId || 'workflow-draft',
-      processName: this.workflowName,
-      positions: this.positions,
-    });
-    if (xml === this.lastImportedXml) {
+    if (!this.bpmnXml || this.bpmnXml === this.lastImportedXml) {
       return;
     }
 
     this.importing = true;
     try {
-      await this.modeler.importXML(xml);
-      this.lastImportedXml = xml;
+      await this.modeler.importXML(this.bpmnXml);
+      this.lastImportedXml = this.bpmnXml;
       this.applyMarkers();
       this.emitViewport();
     } finally {
@@ -220,7 +164,7 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
     }
   }
 
-  private async emitGraphFromModeler(): Promise<void> {
+  private async emitXmlFromModeler(): Promise<void> {
     if (!this.modeler || this.importing || this.readonlyMode()) {
       return;
     }
@@ -230,10 +174,8 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
       return;
     }
 
-    const result = workflowGraphFromBpmnXml(xml);
-    if (!result.issues.length) {
-      this.graphChange.emit(result.graph);
-    }
+    this.lastImportedXml = xml;
+    this.bpmnXmlChange.emit(xml);
   }
 
   private handleElementClick(event: BpmnClickEvent): void {
@@ -302,15 +244,6 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
   private elementRegistry(): BpmnElementRegistry | null {
     return this.modeler?.get('elementRegistry') as BpmnElementRegistry | null;
   }
-}
-
-function createNodeId(type: BpmnWorkflowNodeType, existingIds: string[]): string {
-  const prefix = type.toLowerCase().replaceAll('_', '-');
-  let index = 1;
-  while (existingIds.includes(`${prefix}-${index}`)) {
-    index += 1;
-  }
-  return `${prefix}-${index}`;
 }
 
 function markerForStatus(status: string): string {

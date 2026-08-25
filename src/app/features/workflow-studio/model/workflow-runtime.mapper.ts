@@ -11,7 +11,7 @@ import {
 
 export function workflowRunToRuntimeVisualState(
   run: WorkflowRun | null | undefined,
-  graph: WorkflowGraph | null | undefined,
+  graph?: WorkflowGraph | null | undefined,
 ): WorkflowRuntimeVisualState {
   const nodes = Object.fromEntries(
     (run?.nodes ?? []).map((execution) => [execution.nodeId, execution.executionStatus]),

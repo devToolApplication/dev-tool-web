@@ -1,9 +1,11 @@
-import { mapWorkflowDetailDto, mapWorkflowDetailToUpsertDto } from './workflow-studio.mapper';
-import { WorkflowDetailDto } from './workflow-studio.dto';
-import { WorkflowDetail } from './workflow-studio.model';
+import { mapWorkflowDetailDto, mapWorkflowDetailToUpsertDto, mapWorkflowRunDto, mapWorkflowUpsertPayloadToDto, mapWorkflowValidationResponseDto } from './workflow-studio.mapper';
+import { WorkflowDetailDto, WorkflowRunDto, WorkflowValidationResponseDto } from './workflow-studio.dto';
+import { WorkflowDetail, WorkflowUpsertPayload } from './workflow-studio.model';
 
 describe('workflow studio mapper', () => {
-  it('maps workflow detail DTO to domain and keeps AI gate contract fields', () => {
+  const sampleBpmnXml = "<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"><process id=\"wf_1\" /></definitions>";
+
+  it('maps workflow detail DTO to domain with bpmnXml', () => {
     const dto: WorkflowDetailDto = {
       definition: {
         id: 'wf-1',
@@ -19,66 +21,25 @@ describe('workflow studio mapper', () => {
           workflowDefinitionId: 'wf-1',
           version: 1,
           status: 'DRAFT',
-          definition: {
-            nodes: [
-              { id: 'start', type: 'START' },
-              {
-                id: 'ai-gate',
-                type: 'AI_GATE',
-                instruction: 'Check profile safety',
-                criteria: { minFollowers: 1000 },
-                inputMapping: { mapping: { profile: '${input.profile}' } },
-                provider: 'codex',
-                agentCode: 'koc-rule-evaluator',
-                workingDirectory: 'D:\\Code\\ai-agent-mcrs',
-                outputSchema: 'gate-result-v1',
-                retryPolicy: { maxAttempts: 2 },
-                timeoutPolicy: { timeoutSeconds: 3600 },
-              },
-              { id: 'end', type: 'END' },
-            ],
-            edges: [
-              { source: 'start', target: 'ai-gate' },
-              { source: 'ai-gate', target: 'end' },
-            ],
-          },
+          bpmnXml: sampleBpmnXml,
           runtime: { maxParallel: 3 },
-          compiledPlan: {
-            nodes: {},
-            dependencies: {},
-            dependents: {},
-            entryNodes: ['start'],
-            terminalNodes: ['end'],
-          },
+          engineDeploymentId: 'dep-1',
+          engineDefinitionId: 'def-1',
+          engineDefinitionKey: 'key-1',
         },
       ],
     };
 
     const detail = mapWorkflowDetailDto(dto);
     const draft = detail.versions[0];
-    const aiGate = draft.definition.nodes.find((node) => node.id === 'ai-gate');
 
     expect(detail.definition.name).toBe('KOC screening');
-    expect(draft.definition.edges).toEqual([
-      { source: 'start', target: 'ai-gate' },
-      { source: 'ai-gate', target: 'end' },
-    ]);
-    expect(aiGate).toMatchObject({
-      id: 'ai-gate',
-      type: 'AI_GATE',
-      instruction: 'Check profile safety',
-      criteria: { minFollowers: 1000 },
-      inputMapping: { mapping: { profile: '${input.profile}' } },
-      provider: 'codex',
-      agentCode: 'koc-rule-evaluator',
-      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
-      outputSchema: 'gate-result-v1',
-      retryPolicy: { maxAttempts: 2 },
-      timeoutPolicy: { timeoutSeconds: 3600 },
-    });
+    expect(draft.bpmnXml).toBe(sampleBpmnXml);
+    expect(draft.runtime).toEqual({ maxParallel: 3 });
+    expect(draft.engineDeploymentId).toBe('dep-1');
   });
 
-  it('maps domain detail to upsert DTO with editor metadata', () => {
+  it('maps domain detail to upsert DTO sending bpmnXml and runtime', () => {
     const detail: WorkflowDetail = {
       definition: {
         id: 'wf-1',
@@ -94,34 +55,8 @@ describe('workflow studio mapper', () => {
           workflowDefinitionId: 'wf-1',
           version: 1,
           status: 'DRAFT',
-          definition: {
-            nodes: [
-              { id: 'start', type: 'START' },
-              {
-                id: 'code-gate',
-                type: 'CODE_GATE',
-                handler: 'NUMBER_COMPARE',
-                config: { operator: 'LT' },
-                inputMapping: { mapping: { left: '${input.followers}', right: 50000 } },
-                retryPolicy: { maxAttempts: 1 },
-                timeoutPolicy: { timeoutSeconds: 5 },
-              },
-              { id: 'end', type: 'END' },
-            ],
-            edges: [
-              { source: 'start', target: 'code-gate' },
-              { source: 'code-gate', target: 'end' },
-            ],
-          },
+          bpmnXml: sampleBpmnXml,
           runtime: { maxParallel: 2 },
-          editor: {
-            viewport: { x: 12, y: 24, zoom: 0.85 },
-            nodes: {
-              start: { x: 0, y: 0 },
-              'code-gate': { x: 240, y: 0 },
-            },
-          },
-          compiledPlan: null,
         },
       ],
     };
@@ -131,303 +66,85 @@ describe('workflow studio mapper', () => {
     expect(payload).toEqual({
       name: 'KOC screening',
       description: 'Screen KOC profiles',
-      definition: {
-        nodes: [
-          { id: 'start', type: 'START' },
-          {
-            id: 'code-gate',
-            type: 'CODE_GATE',
-            handler: 'NUMBER_COMPARE',
-            config: { operator: 'LT' },
-            inputMapping: { mapping: { left: '${input.followers}', right: 50000 } },
-            retryPolicy: { maxAttempts: 1 },
-            timeoutPolicy: { timeoutSeconds: 5 },
-          },
-          { id: 'end', type: 'END' },
-        ],
-        edges: [
-          { source: 'start', target: 'code-gate' },
-          { source: 'code-gate', target: 'end' },
-        ],
-      },
+      bpmnXml: sampleBpmnXml,
       runtime: { maxParallel: 2 },
-      engineType: 'LEGACY',
-      editor: {
-        viewport: { x: 12, y: 24, zoom: 0.85 },
-        nodes: {
-          start: { x: 0, y: 0 },
-          'code-gate': { x: 240, y: 0 },
-        },
-      },
     });
   });
 
-  it('keeps AI_GATE configuration fields when mapping a draft back to an upsert DTO', () => {
-    const detail: WorkflowDetail = {
-      definition: {
-        id: 'wf-1',
-        name: 'AI workflow',
-        description: null,
-        status: 'DRAFT',
-        currentDraftVersionId: 'ver-1',
-        currentPublishedVersionId: null,
-      },
-      versions: [
+  it('maps upsert payload to DTO directly', () => {
+    const payload: WorkflowUpsertPayload = {
+      name: 'KOC screening',
+      description: 'Screen KOC profiles',
+      bpmnXml: sampleBpmnXml,
+      runtime: { maxParallel: 2 },
+    };
+
+    const dto = mapWorkflowUpsertPayloadToDto(payload);
+
+    expect(dto).toEqual({
+      name: 'KOC screening',
+      description: 'Screen KOC profiles',
+      bpmnXml: sampleBpmnXml,
+      runtime: { maxParallel: 2 },
+    });
+  });
+
+  it('maps workflow validation response and normalizes elementId to nodeId', () => {
+    const response: WorkflowValidationResponseDto = {
+      valid: false,
+      issues: [
         {
-          id: 'ver-1',
-          workflowDefinitionId: 'wf-1',
-          version: 1,
-          status: 'DRAFT',
-          definition: {
-            nodes: [
-              { id: 'start', type: 'START' },
-              {
-                id: 'ai',
-                type: 'AI_GATE',
-                instruction: 'Review profile',
-                criteria: { minScore: 80 },
-                inputMapping: { mapping: { candidate: '${input.candidate}' } },
-                provider: 'claude',
-                agentCode: 'koc-rule-evaluator',
-                workingDirectory: 'D:\\Code\\ai-agent-mcrs',
-                outputSchema: 'gate-result-v1',
-                retryPolicy: { maxAttempts: 2 },
-                timeoutPolicy: { timeoutSeconds: 3600 },
-              },
-              { id: 'end', type: 'END' },
-            ],
-            edges: [
-              { source: 'start', target: 'ai' },
-              { source: 'ai', target: 'end' },
-            ],
-          },
-          runtime: null,
-          compiledPlan: null,
+          code: 'ELEMENT_ERROR',
+          severity: 'ERROR',
+          message: 'Element failed',
+          elementId: 'task-1',
         },
       ],
     };
 
-    const payload = mapWorkflowDetailToUpsertDto(detail);
+    const mapped = mapWorkflowValidationResponseDto(response);
 
-    expect(payload.definition.nodes[1]).toEqual({
-      id: 'ai',
-      type: 'AI_GATE',
-      instruction: 'Review profile',
-      criteria: { minScore: 80 },
-      inputMapping: { mapping: { candidate: '${input.candidate}' } },
-      provider: 'claude',
-      agentCode: 'koc-rule-evaluator',
-      workingDirectory: 'D:\\Code\\ai-agent-mcrs',
-      outputSchema: 'gate-result-v1',
-      retryPolicy: { maxAttempts: 2 },
-      timeoutPolicy: { timeoutSeconds: 3600 },
+    expect(mapped.valid).toBe(false);
+    expect(mapped.issues[0]).toEqual({
+      code: 'ELEMENT_ERROR',
+      severity: 'error',
+      message: 'Element failed',
+      elementId: 'task-1',
+      nodeId: 'task-1',
     });
-    expect(JSON.stringify(payload.definition.nodes[1])).not.toMatch(/modelProfile|toolProfile/);
   });
 
-  it('uses the current draft version when mapping an existing workflow to an upsert DTO', () => {
-    const detail: WorkflowDetail = {
-      definition: {
-        id: 'wf-1',
-        name: 'Versioned workflow',
-        description: null,
-        status: 'ACTIVE',
-        currentDraftVersionId: 'ver-draft',
-        currentPublishedVersionId: 'ver-published',
-      },
-      versions: [
+  it('maps workflow run dto without engineType and clones snapshots', () => {
+    const runDto: WorkflowRunDto = {
+      id: 'run-1',
+      workflowDefinitionId: 'wf-1',
+      workflowVersionId: 'ver-1',
+      status: 'RUNNING',
+      input: { profile: 'koc' },
+      startedAt: '2026-08-25T00:00:00Z',
+      completedAt: null,
+      finalOutcome: null,
+      finalOutput: null,
+      nodes: [
         {
-          id: 'ver-published',
-          workflowDefinitionId: 'wf-1',
-          version: 1,
-          status: 'PUBLISHED',
-          definition: {
-            nodes: [{ id: 'published-start', type: 'START' }],
-            edges: [],
-          },
-          runtime: { maxParallel: 1 },
-          compiledPlan: null,
-        },
-        {
-          id: 'ver-draft',
-          workflowDefinitionId: 'wf-1',
-          version: 2,
-          status: 'DRAFT',
-          definition: {
-            nodes: [{ id: 'draft-start', type: 'START' }],
-            edges: [],
-          },
-          runtime: { maxParallel: 3 },
-          compiledPlan: null,
+          nodeId: 'task-1',
+          nodeType: 'AI_TASK',
+          executionStatus: 'COMPLETED',
+          outcome: 'PASS',
+          attempt: 1,
+          inputSnapshot: { in: 1 },
+          output: { out: 2 },
+          evidence: null,
+          reason: null,
+          errorCode: null,
+          errorMessage: null,
         },
       ],
     };
 
-    const payload = mapWorkflowDetailToUpsertDto(detail);
+    const run = mapWorkflowRunDto(runDto);
 
-    expect(payload.definition.nodes).toEqual([{ id: 'draft-start', type: 'START' }]);
-    expect(payload.runtime).toEqual({ maxParallel: 3 });
-  });
-
-  it('falls back to the draft version before the first version when current draft id is missing', () => {
-    const detail: WorkflowDetail = {
-      definition: {
-        id: 'wf-1',
-        name: 'Versioned workflow',
-        description: null,
-        status: 'ACTIVE',
-        currentDraftVersionId: null,
-        currentPublishedVersionId: 'ver-published',
-      },
-      versions: [
-        {
-          id: 'ver-published',
-          workflowDefinitionId: 'wf-1',
-          version: 1,
-          status: 'PUBLISHED',
-          definition: {
-            nodes: [{ id: 'published-start', type: 'START' }],
-            edges: [],
-          },
-          runtime: { maxParallel: 1 },
-          compiledPlan: null,
-        },
-        {
-          id: 'ver-draft',
-          workflowDefinitionId: 'wf-1',
-          version: 2,
-          status: 'DRAFT',
-          definition: {
-            nodes: [{ id: 'draft-start', type: 'START' }],
-            edges: [],
-          },
-          runtime: { maxParallel: 3 },
-          compiledPlan: null,
-        },
-      ],
-    };
-
-    const payload = mapWorkflowDetailToUpsertDto(detail);
-
-    expect(payload.definition.nodes).toEqual([{ id: 'draft-start', type: 'START' }]);
-  });
-
-  it('deep clones editor node positions when mapping detail DTOs', () => {
-    const dto: WorkflowDetailDto = {
-      definition: {
-        id: 'wf-1',
-        name: 'Editable workflow',
-        description: null,
-        status: 'DRAFT',
-        currentDraftVersionId: 'ver-1',
-        currentPublishedVersionId: null,
-      },
-      versions: [
-        {
-          id: 'ver-1',
-          workflowDefinitionId: 'wf-1',
-          version: 1,
-          status: 'DRAFT',
-          definition: {
-            nodes: [{ id: 'start', type: 'START' }],
-            edges: [],
-          },
-          runtime: null,
-          compiledPlan: null,
-          editor: {
-            viewport: { x: 0, y: 0, zoom: 1 },
-            nodes: {
-              start: { x: 10, y: 20 },
-            },
-          },
-        },
-      ],
-    };
-
-    const detail = mapWorkflowDetailDto(dto);
-
-    dto.versions[0].editor!.nodes!['start'].x = 99;
-
-    expect(detail.versions[0].editor?.nodes?.['start']).toEqual({ x: 10, y: 20 });
-  });
-
-  it('keeps Flowable engine metadata, BPMN nodes and sequence flow conditions', () => {
-    const dto: WorkflowDetailDto = {
-      definition: {
-        id: 'wf-flowable',
-        name: 'Flowable evaluation',
-        description: null,
-        status: 'ACTIVE',
-        currentDraftVersionId: null,
-        currentPublishedVersionId: 'ver-flowable',
-      },
-      versions: [
-        {
-          id: 'ver-flowable',
-          workflowDefinitionId: 'wf-flowable',
-          version: 1,
-          status: 'PUBLISHED',
-          engineType: 'FLOWABLE',
-          engineDeploymentId: 'dep-1',
-          engineDefinitionId: 'proc-1',
-          engineDefinitionKey: 'workflow_ver-flowable',
-          compiledBpmnXml: '<definitions />',
-          definition: {
-            nodes: [
-              { id: 'start', type: 'START_EVENT', name: 'Start' },
-              { id: 'xor', type: 'EXCLUSIVE_GATEWAY', name: 'Score branch' },
-              {
-                id: 'ai',
-                type: 'AI_TASK',
-                name: 'AI review',
-                config: { agentCode: 'koc-rule-evaluator' },
-                retryPolicy: { maxAttempts: 2 },
-              },
-              { id: 'end', type: 'END_EVENT', name: 'End' },
-            ],
-            edges: [
-              {
-                id: 'flow-pass',
-                source: 'xor',
-                target: 'ai',
-                name: 'Pass',
-                defaultFlow: false,
-                condition: {
-                  type: 'COMPARE',
-                  left: { path: 'input.candidate.followers' },
-                  operator: 'GTE',
-                  right: { literal: 1000 },
-                },
-              },
-              { id: 'flow-default', source: 'xor', target: 'end', defaultFlow: true },
-            ],
-          },
-          runtime: null,
-          compiledPlan: null,
-        },
-      ],
-    };
-
-    const detail = mapWorkflowDetailDto(dto);
-    const payload = mapWorkflowDetailToUpsertDto(detail);
-
-    expect(detail.versions[0]).toMatchObject({
-      engineType: 'FLOWABLE',
-      engineDeploymentId: 'dep-1',
-      engineDefinitionId: 'proc-1',
-      engineDefinitionKey: 'workflow_ver-flowable',
-      compiledBpmnXml: '<definitions />',
-    });
-    expect(payload.definition.nodes[2]).toMatchObject({
-      id: 'ai',
-      type: 'AI_TASK',
-      config: { agentCode: 'koc-rule-evaluator' },
-      retryPolicy: { maxAttempts: 2 },
-    });
-    expect(payload.definition.edges[0]).toMatchObject({
-      id: 'flow-pass',
-      condition: { type: 'COMPARE', operator: 'GTE' },
-      defaultFlow: false,
-    });
+    expect(run.id).toBe('run-1');
+    expect(run.nodes[0].output).toEqual({ out: 2 });
   });
 });

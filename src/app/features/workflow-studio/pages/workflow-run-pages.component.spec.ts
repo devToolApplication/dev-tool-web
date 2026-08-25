@@ -30,50 +30,7 @@ describe('workflow run pages', () => {
     nodes: [],
   };
   const workflowDetail: WorkflowDetail = {
-    definition: {
-      id: 'wf-1',
-      name: 'KOC screening',
-      description: null,
-      status: 'ACTIVE',
-      currentDraftVersionId: 'ver-2',
-      currentPublishedVersionId: 'ver-1',
-    },
-    versions: [
-      {
-        id: 'ver-1',
-        workflowDefinitionId: 'wf-1',
-        version: 1,
-        status: 'PUBLISHED',
-        definition: {
-          nodes: [
-            { id: 'start', type: 'START' },
-            {
-              id: 'gate',
-              type: 'AI_GATE',
-              instruction: 'Check profile safety',
-              criteria: {},
-              inputMapping: { mapping: {} },
-              provider: 'codex',
-              agentCode: 'koc-rule-evaluator',
-              workingDirectory: 'D:\\Code\\ai-agent-mcrs',
-              outputSchema: 'gate-result-v1',
-              retryPolicy: { maxAttempts: 2 },
-              timeoutPolicy: { timeoutSeconds: 60 },
-            },
-            { id: 'end', type: 'END' },
-          ],
-          edges: [
-            { source: 'start', target: 'gate' },
-            { source: 'gate', target: 'end' },
-          ],
-        },
-        runtime: { maxParallel: 1 },
-        compiledPlan: null,
-        editor: {
-          viewport: { x: 1, y: 2, zoom: 0.9 },
-          nodes: {
-            start: { x: 10, y: 20 },
-            gate: { x: 300, y: 20 },
+    bpmnXml: '<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"><process id="wf_1"><startEvent id="start" /><serviceTask id="gate" /><endEvent id="end" /></process></definitions>',
             end: { x: 580, y: 20 },
           },
         },
@@ -182,11 +139,10 @@ describe('workflow run pages', () => {
     expect(api.getRun).toHaveBeenCalledWith('run-1');
     expect(api.getWorkflowDetail).toHaveBeenCalledWith('wf-1');
     expect(component.run()?.id).toBe('run-1');
-    expect(component.runtimeGraph()?.nodes.map((node) => node.id)).toEqual(['start', 'gate', 'end']);
-    expect(component.runtimePositions()).toEqual(workflowDetail.versions[0].editor?.nodes);
+    expect(component.runtimeBpmnXml()).toContain('<definitions');
     expect(component.runtimeStatus()).toEqual({
       nodes: { start: 'COMPLETED', gate: 'ERROR' },
-      edges: { start__gate: 'ERROR', gate__end: 'ERROR' },
+      
     });
 
     component.onNodeSelected('gate');

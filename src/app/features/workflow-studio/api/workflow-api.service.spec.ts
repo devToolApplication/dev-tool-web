@@ -196,13 +196,8 @@ describe('WorkflowApiService', () => {
     const payload = {
       name: 'KOC screening',
       description: null,
-      definition: { nodes: [{ id: 'start', type: 'START' as const }], edges: [] },
+      bpmnXml: '<definitions />',
       runtime: { maxParallel: 1 },
-      engineType: 'LEGACY' as const,
-      editor: {
-        viewport: { x: 1, y: 2, zoom: 0.9 },
-        nodes: { start: { x: 10, y: 20 } },
-      },
     };
 
     service.createWorkflow(payload).subscribe((item) => expect(item.definition.id).toBe('wf-1'));

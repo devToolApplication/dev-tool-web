@@ -1,15 +1,14 @@
 import { buildWorkflowListTable, createDraftWorkflowDetail, workflowVersionLabel } from './workflow-lifecycle.config';
 
 describe('workflow lifecycle config', () => {
-  it('creates a new workflow with a valid starter graph', () => {
+  it('creates a new workflow with starter BPMN XML', () => {
     const detail = createDraftWorkflowDetail();
     const version = detail.versions[0];
 
     expect(detail.definition.id).toBe('');
     expect(detail.definition.name).toBe('workflowStudio.lifecycle.untitled');
-    expect(version.definition.nodes.map((node) => node.type)).toEqual(['START', 'END']);
-    expect(version.definition.edges).toEqual([{ source: 'start-1', target: 'end-1' }]);
-    expect(version.editor?.nodes?.['start-1']).toEqual({ x: 80, y: 120 });
+    expect(version.bpmnXml).toContain('<definitions');
+    expect(version.bpmnXml).toContain('<process id="workflow_draft"');
   });
 
   it('builds list row actions for edit, run, publish and runs', () => {

@@ -42,7 +42,6 @@ export function mapWorkflowDetailDto(dto: WorkflowDetailDto): WorkflowDetail {
 export function mapWorkflowRunDto(dto: WorkflowRunDto): WorkflowRun {
   return {
     ...dto,
-    engineType: dto.engineType ?? 'LEGACY',
     input: cloneJson(dto.input),
     finalOutput: cloneJson(dto.finalOutput),
     nodes: dto.nodes.map((node) => ({
@@ -60,10 +59,8 @@ export function mapWorkflowDetailToUpsertDto(detail: WorkflowDetail): WorkflowUp
   return {
     name: detail.definition.name,
     description: detail.definition.description,
-    definition: mapWorkflowGraphToDto(version.definition),
+    bpmnXml: version.bpmnXml,
     runtime: version.runtime ? { ...version.runtime } : null,
-    engineType: version.engineType ?? 'LEGACY',
-    editor: version.editor ? mapWorkflowEditorMetadataToDto(version.editor) : null,
   };
 }
 
@@ -71,10 +68,8 @@ export function mapWorkflowUpsertPayloadToDto(payload: WorkflowUpsertPayload): W
   return {
     name: payload.name,
     description: payload.description,
-    definition: mapWorkflowGraphToDto(payload.definition),
+    bpmnXml: payload.bpmnXml,
     runtime: payload.runtime ? { ...payload.runtime } : null,
-    engineType: payload.engineType ?? 'LEGACY',
-    editor: payload.editor ? mapWorkflowEditorMetadataToDto(payload.editor) : null,
   };
 }
 
@@ -85,8 +80,13 @@ export function mapWorkflowValidationResponseDto(dto: WorkflowValidationResponse
   return {
     valid: dto.valid,
     issues: dto.issues.map((issue) => ({
-      ...issue,
+      code: issue.code ?? 'BPMN_VALIDATION_ERROR',
       severity: issue.severity.toLowerCase() as WorkflowValidationIssue['severity'],
+      message: issue.message,
+      elementId: issue.elementId ?? undefined,
+      nodeId: issue.nodeId ?? issue.elementId ?? undefined,
+      edgeId: issue.edgeId ?? undefined,
+      field: issue.field ?? undefined,
     })),
   };
 }
@@ -94,36 +94,18 @@ export function mapWorkflowValidationResponseDto(dto: WorkflowValidationResponse
 function mapWorkflowVersionDto(dto: WorkflowVersionDto): WorkflowVersion {
   return {
     ...dto,
-    engineType: dto.engineType ?? 'LEGACY',
-    definition: mapWorkflowGraphDto(dto.definition),
     runtime: dto.runtime ? { ...dto.runtime } : null,
-    compiledPlan: dto.compiledPlan
-      ? {
-          ...dto.compiledPlan,
-          nodes: cloneRecord(dto.compiledPlan.nodes),
-          dependencies: cloneStringArrayRecord(dto.compiledPlan.dependencies),
-          dependents: cloneStringArrayRecord(dto.compiledPlan.dependents),
-          entryNodes: [...dto.compiledPlan.entryNodes],
-          terminalNodes: [...dto.compiledPlan.terminalNodes],
-        }
-      : null,
-    editor: dto.editor
-      ? {
-          viewport: dto.editor.viewport ? { ...dto.editor.viewport } : undefined,
-          nodes: dto.editor.nodes ? cloneEditorNodePositions(dto.editor.nodes) : undefined,
-        }
-      : undefined,
   };
 }
 
-function mapWorkflowGraphDto(dto: WorkflowGraphDto): WorkflowGraph {
+export function mapWorkflowGraphDto(dto: WorkflowGraphDto): WorkflowGraph {
   return {
     nodes: dto.nodes.map(mapWorkflowNodeDto),
     edges: dto.edges.map(cloneWorkflowEdge),
   };
 }
 
-function mapWorkflowGraphToDto(graph: WorkflowGraph): WorkflowGraphDto {
+export function mapWorkflowGraphToDto(graph: WorkflowGraph): WorkflowGraphDto {
   return {
     nodes: graph.nodes.map(mapWorkflowNodeToDto),
     edges: graph.edges.map(cloneWorkflowEdge),
@@ -290,33 +272,6 @@ function cloneOptionalJson(value: JsonValue | undefined): JsonValue | undefined 
 
 function cloneWorkflowEdge<T extends WorkflowEdge>(edge: T): T {
   return cloneJson(edge as unknown as JsonValue) as unknown as T;
-}
-
-function cloneRecord<T extends JsonValue>(record: Record<string, T>): Record<string, T> {
-  return Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, cloneJson(value) as T]),
-  );
-}
-
-function cloneStringArrayRecord(record: Record<string, string[]>): Record<string, string[]> {
-  return Object.fromEntries(Object.entries(record).map(([key, value]) => [key, [...value]]));
-}
-
-function cloneEditorNodePositions(
-  nodes: NonNullable<WorkflowVersion['editor']>['nodes'],
-): NonNullable<WorkflowVersion['editor']>['nodes'] {
-  return Object.fromEntries(
-    Object.entries(nodes ?? {}).map(([id, position]) => [id, { ...position }]),
-  );
-}
-
-function mapWorkflowEditorMetadataToDto(
-  editor: NonNullable<WorkflowVersion['editor']>,
-): NonNullable<WorkflowUpsertDto['editor']> {
-  return {
-    viewport: editor.viewport ? { ...editor.viewport } : undefined,
-    nodes: editor.nodes ? cloneEditorNodePositions(editor.nodes) : undefined,
-  };
 }
 
 function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {

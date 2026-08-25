@@ -54,18 +54,16 @@
 
       <div class="workflow-run-detail__workspace">
         <section class="workflow-run-detail__canvas" aria-label="Workflow runtime canvas">
-          @if (runtimeGraph(); as graph) {
-            <app-workflow-canvas
+          @if (runtimeBpmnXml()) {
+            <app-workflow-bpmn-canvas
+              [bpmnXml]="runtimeBpmnXml()"
               [workflowId]="item.workflowDefinitionId"
               [workflowName]="workflowDetail()?.definition?.name ?? undefined"
-              [graph]="graph"
-              [positions]="runtimePositions()"
-              [viewport]="runtimeViewport()"
               mode="runtime"
               [selectedId]="selectedNodeId()"
               [runtimeStatus]="runtimeStatus()"
               (nodeSelected)="onNodeSelected($event)"
-            ></app-workflow-canvas>
+            ></app-workflow-bpmn-canvas>
           } @else {
             <app-alert
               variant="warning"

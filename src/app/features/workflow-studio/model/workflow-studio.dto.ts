@@ -3,7 +3,6 @@ import type {
   BpmnWorkflowNodeType,
   JsonValue,
   WorkflowCondition,
-  WorkflowEngineType,
   LogicOperator,
   WorkflowDefinitionStatus,
   WorkflowNodeExecutionStatus,
@@ -112,14 +111,6 @@ export interface WorkflowDefinitionDto {
   currentPublishedVersionId: string | null;
 }
 
-export interface ExecutableWorkflowPlanDto {
-  nodes: Record<string, JsonValue>;
-  dependencies: Record<string, string[]>;
-  dependents: Record<string, string[]>;
-  entryNodes: string[];
-  terminalNodes: string[];
-}
-
 export interface WorkflowEditorMetadataDto {
   viewport?: {
     x: number;
@@ -134,15 +125,11 @@ export interface WorkflowVersionDto {
   workflowDefinitionId: string;
   version: number;
   status: WorkflowVersionStatus;
-  definition: WorkflowGraphDto;
+  bpmnXml: string;
   runtime: WorkflowRuntimeConfigDto | null;
-  compiledPlan: ExecutableWorkflowPlanDto | null;
-  engineType?: WorkflowEngineType | null;
   engineDeploymentId?: string | null;
   engineDefinitionId?: string | null;
   engineDefinitionKey?: string | null;
-  compiledBpmnXml?: string | null;
-  editor?: WorkflowEditorMetadataDto;
 }
 
 export interface WorkflowDetailDto {
@@ -174,7 +161,6 @@ export interface WorkflowRunDto {
   completedAt: string | null;
   finalOutcome: GateOutcome | null;
   finalOutput: JsonValue;
-  engineType?: WorkflowEngineType | null;
   engineInstanceId?: string | null;
   nodes: WorkflowNodeExecutionDto[];
 }
@@ -186,19 +172,18 @@ export interface WorkflowStartDto {
 export interface WorkflowUpsertDto {
   name: string;
   description: string | null;
-  definition: WorkflowGraphDto;
+  bpmnXml: string;
   runtime: WorkflowRuntimeConfigDto | null;
-  engineType?: WorkflowEngineType;
-  editor?: WorkflowEditorMetadataDto | null;
 }
 
 export interface WorkflowValidationIssueDto {
-  code: string;
+  code?: string | null;
   severity: Uppercase<WorkflowValidationSeverity>;
   message: string;
-  nodeId?: string;
-  edgeId?: string;
-  field?: string;
+  elementId?: string | null;
+  nodeId?: string | null;
+  edgeId?: string | null;
+  field?: string | null;
 }
 
 export interface WorkflowValidationResponseDto {

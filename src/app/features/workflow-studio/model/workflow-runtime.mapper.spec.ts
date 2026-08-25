@@ -56,8 +56,8 @@ describe('workflow runtime mapper', () => {
         currentPublishedVersionId: 'ver-published',
       },
       versions: [
-        { id: 'ver-draft', workflowDefinitionId: 'wf-1', version: 2, status: 'DRAFT', definition: { nodes: [], edges: [] }, runtime: null, compiledPlan: null },
-        { id: 'ver-published', workflowDefinitionId: 'wf-1', version: 1, status: 'PUBLISHED', definition: { nodes: [], edges: [] }, runtime: null, compiledPlan: null },
+        { id: 'ver-draft', workflowDefinitionId: 'wf-1', version: 2, status: 'DRAFT', bpmnXml: '', runtime: null },
+        { id: 'ver-published', workflowDefinitionId: 'wf-1', version: 1, status: 'PUBLISHED', bpmnXml: '', runtime: null },
       ],
     };
 

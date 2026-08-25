@@ -15,32 +15,18 @@ import { ToastService } from '@core/notifications/toast.service';
 import {
   buildWorkflowBuilderActions,
   createDraftWorkflowDetail,
-  defaultWorkflowGraphForEngine,
-  defaultWorkflowPositionsForEngine,
   readonlyModeForVersion,
   workflowVersionLabel,
 } from '../model/workflow-lifecycle.config';
 import {
-  BpmnWorkflowNode,
   JsonValue,
-  WorkflowEdge,
-  WorkflowEngineType,
-  WorkflowGraph,
-  WorkflowNode,
-  WorkflowNodePosition,
   WorkflowValidationIssue,
   WorkflowVersion,
 } from '../model/workflow-studio.model';
-import { workflowEdgeId } from '../model/workflow-graph.utils';
-import { validateWorkflowGraph } from '../model/workflow-validator';
-import type { FlowCommand } from '@shared/ui/patterns/flow-builder';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowBpmnCanvasComponent } from '../bpmn/workflow-bpmn-canvas.component';
-import { WorkflowCanvasComponent } from '../canvas/workflow-canvas.component';
-import { WorkflowLayoutService } from '../services/workflow-layout.service';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
-import { WorkflowSelectedElement } from '../inspector/workflow-element-inspector.component';
 
 export type WorkflowEditorCommand =
   | 'undo'
@@ -62,14 +48,12 @@ export type WorkflowEditorCommand =
   styleUrl: './workflow-builder-page.component.css',
 })
 export class WorkflowBuilderPageComponent implements OnInit {
-  @ViewChild(WorkflowCanvasComponent) workflowCanvas?: WorkflowCanvasComponent;
   @ViewChild(WorkflowBpmnCanvasComponent) workflowBpmnCanvas?: WorkflowBpmnCanvasComponent;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(WorkflowApiService);
   private readonly persistence = inject(WorkflowPersistenceService);
-  private readonly layout = inject(WorkflowLayoutService);
   private readonly toastService = inject(ToastService);
 
   readonly store = inject(WorkflowEditorStore);
@@ -80,67 +64,8 @@ export class WorkflowBuilderPageComponent implements OnInit {
   readonly runDialogOpen = signal(false);
   readonly running = signal(false);
   readonly generalInfoCollapsed = signal(false);
-  readonly engineOptions = [
-    { label: 'workflowStudio.engine.legacy', value: 'LEGACY' },
-    { label: 'workflowStudio.engine.flowable', value: 'FLOWABLE' },
-  ];
 
   readonly selectedId = computed(() => this.store.selectedNodeId() ?? this.store.selectedEdgeId());
-  readonly selectedNode = computed(() => {
-    const nodeId = this.store.selectedNodeId();
-    if (!nodeId) {
-      return null;
-    }
-    return this.store.nodes().find((node) => node.id === nodeId) ?? null;
-  });
-  readonly selectedEdge = computed(() => {
-    const edgeId = this.store.selectedEdgeId();
-    if (!edgeId) {
-      return null;
-    }
-    return this.store.edges().find((edge) => workflowEdgeId(edge) === edgeId) ?? null;
-  });
-  readonly selectedBpmnTask = computed(() => {
-    const node = this.selectedNode();
-    return this.isBpmnTask(node) ? node : null;
-  });
-  readonly selectedBpmnGateway = computed(() => {
-    const node = this.selectedNode();
-    return this.isBpmnGateway(node) ? node : null;
-  });
-  readonly selectedBpmnEdge = computed(() => (this.flowableEditor() ? this.selectedEdge() : null));
-  readonly selectedElement = computed<WorkflowSelectedElement>(() => {
-    const node = this.selectedNode();
-    if (node) {
-      return { kind: 'node', value: node };
-    }
-    const edge = this.selectedEdge();
-    if (edge) {
-      return { kind: 'edge', value: edge };
-    }
-    return null;
-  });
-  readonly nodeDrawerOpen = computed(() => !!this.selectedElement());
-  readonly nodeDrawerTitle = computed(() => {
-    const element = this.selectedElement();
-    if (element?.kind === 'node') {
-      return `workflowStudio.inspector.title.${element.value.type}`;
-    }
-    if (element?.kind === 'edge') {
-      return 'workflowStudio.inspector.title.CONNECTION';
-    }
-    return 'workflowStudio.inspector.staticTitle';
-  });
-  readonly elementDrawerSubtitle = computed(() => {
-    const element = this.selectedElement();
-    if (element?.kind === 'node') {
-      return element.value.id;
-    }
-    if (element?.kind === 'edge') {
-      return `${element.value.source} -> ${element.value.target}`;
-    }
-    return undefined;
-  });
   readonly readonlyMode = computed(() => this.store.mode() !== 'design');
   readonly actions = computed(() =>
     buildWorkflowBuilderActions({
@@ -163,10 +88,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
     );
   });
   readonly activeRuntime = computed(() => this.activeVersion()?.runtime ?? null);
-  readonly activeEngineType = computed<WorkflowEngineType>(
-    () => this.activeVersion()?.engineType ?? 'LEGACY',
-  );
-  readonly flowableEditor = computed(() => this.activeEngineType() === 'FLOWABLE');
   readonly generalInfoSummary = computed(() => ({
     name: this.store.workflow()?.definition.name || 'workflowStudio.lifecycle.untitled',
     maxParallel: this.activeRuntime()?.maxParallel ?? null,
@@ -212,12 +133,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
       return;
     }
 
-    if (commandKey && key === 'y') {
-      event.preventDefault();
-      this.executeEditorCommand('redo');
-      return;
-    }
-
     if (commandKey && key === 'z') {
       event.preventDefault();
       this.executeEditorCommand('undo');
@@ -227,12 +142,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
     if (commandKey && key === '0') {
       event.preventDefault();
       this.executeEditorCommand('fit');
-      return;
-    }
-
-    if (key === 'delete' || key === 'backspace') {
-      event.preventDefault();
-      this.executeEditorCommand('delete');
       return;
     }
 
@@ -279,14 +188,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
   }
 
   async validate(): Promise<boolean> {
-    if (!this.flowableEditor()) {
-      const localIssues = validateWorkflowGraph(this.store.graph());
-      if (localIssues.length) {
-        this.setValidationIssues(localIssues);
-        return false;
-      }
-    }
-
     try {
       const result = await firstValueFrom(this.api.validateWorkflow(this.store.toUpsertPayload()));
       this.setValidationIssues(result.issues);
@@ -306,32 +207,17 @@ export class WorkflowBuilderPageComponent implements OnInit {
       case 'redo':
         this.store.redo();
         return;
-      case 'autoLayout':
-        void this.applyAutoLayout();
-        return;
       case 'fit':
-        this.activeCanvas()?.executeCommand('fit');
-        return;
       case 'zoomIn':
-        this.activeCanvas()?.executeCommand('zoomIn');
-        return;
       case 'zoomOut':
-        this.activeCanvas()?.executeCommand('zoomOut');
-        return;
       case 'resetZoom':
-        this.activeCanvas()?.executeCommand('resetZoom');
-        return;
       case 'toggleNavigator':
-        this.activeCanvas()?.executeCommand('toggleNavigator');
-        return;
       case 'fullscreen':
-        this.activeCanvas()?.executeCommand('fullscreen');
+        this.workflowBpmnCanvas?.executeCommand(command);
         return;
+      case 'autoLayout':
       case 'duplicate':
-        this.store.duplicateSelectedNode();
-        return;
       case 'delete':
-        this.store.deleteSelection();
         return;
     }
   }
@@ -343,13 +229,9 @@ export class WorkflowBuilderPageComponent implements OnInit {
       case 'redo':
         return this.store.canRedo();
       case 'autoLayout':
-        return !this.readonlyMode();
       case 'duplicate':
-        return !this.readonlyMode() && !!this.store.selectedNodeId();
       case 'delete':
-        return (
-          !this.readonlyMode() && (!!this.store.selectedNodeId() || !!this.store.selectedEdgeId())
-        );
+        return false;
       case 'fit':
       case 'zoomIn':
       case 'zoomOut':
@@ -358,31 +240,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
       case 'fullscreen':
         return true;
     }
-  }
-
-  async applyAutoLayout(): Promise<void> {
-    if (this.readonlyMode()) {
-      return;
-    }
-    const positions = await this.layout.layout(this.store.graph(), {});
-    this.store.applyLayout(positions);
-    this.statusMessage.set('workflowStudio.productivity.autoLayoutApplied');
-  }
-
-  fitView(): void {
-    this.executeEditorCommand('fit');
-  }
-
-  resetView(): void {
-    this.executeEditorCommand('resetZoom');
-  }
-
-  zoomIn(): void {
-    this.executeEditorCommand('zoomIn');
-  }
-
-  zoomOut(): void {
-    this.executeEditorCommand('zoomOut');
   }
 
   async save(): Promise<void> {
@@ -451,20 +308,10 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.versionsOpen.set(false);
   }
 
-  closeElementDrawer(): void {
-    this.store.selectNode(null);
-    this.store.selectEdge(null);
-  }
-
-  closeNodeDrawer(): void {
-    this.closeElementDrawer();
-  }
-
   onProblemSelected(issue: WorkflowValidationIssue): void {
-    this.store.selectValidationIssue(issue);
-    const elementId = issue.nodeId ?? issue.edgeId;
+    const elementId = issue.nodeId ?? issue.edgeId ?? issue.elementId;
     if (elementId) {
-      this.activeCanvas()?.revealElement(elementId);
+      this.workflowBpmnCanvas?.revealElement(elementId);
     }
   }
 
@@ -475,7 +322,8 @@ export class WorkflowBuilderPageComponent implements OnInit {
   closeTransientState(): void {
     this.versionsOpen.set(false);
     this.runDialogOpen.set(false);
-    this.closeElementDrawer();
+    this.store.selectNode(null);
+    this.store.selectEdge(null);
   }
 
   selectVersion(versionId: string): void {
@@ -509,49 +357,8 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.store.updateRuntime({ maxParallel: value });
   }
 
-  updateEngineType(value: string | number | boolean | null): void {
-    const engineType: WorkflowEngineType = value === 'FLOWABLE' ? 'FLOWABLE' : 'LEGACY';
-    if (engineType === this.activeEngineType()) {
-      return;
-    }
-    this.store.replaceGraphForEngine(
-      engineType,
-      defaultWorkflowGraphForEngine(engineType),
-      defaultWorkflowPositionsForEngine(engineType),
-    );
-  }
-
-  addNode(event: { node: WorkflowGraph['nodes'][number]; position: WorkflowNodePosition }): void {
-    this.store.addNode(event.node, event.position);
-  }
-
-  moveNode(event: { nodeId: string; position: WorkflowNodePosition }): void {
-    this.store.moveNode(event.nodeId, event.position);
-  }
-
-  updateGraph(graph: WorkflowGraph): void {
-    if (this.flowableEditor()) {
-      this.store.replaceGraph(graph);
-    }
-  }
-
-  updateBpmnNode(node: BpmnWorkflowNode): void {
-    this.store.updateNode(node.id, node);
-  }
-
-  updateBpmnEdge(edge: WorkflowEdge): void {
-    const edgeId = this.store.selectedEdgeId();
-    if (edgeId) {
-      this.store.updateEdge(edgeId, edge);
-    }
-  }
-
-  isBpmnTask(node: WorkflowNode | null): node is BpmnWorkflowNode {
-    return !!node && ['AI_TASK', 'MCP_TASK', 'CODE_TASK', 'HTTP_TASK'].includes(node.type);
-  }
-
-  isBpmnGateway(node: WorkflowNode | null): node is BpmnWorkflowNode {
-    return !!node && ['EXCLUSIVE_GATEWAY', 'PARALLEL_GATEWAY'].includes(node.type);
+  updateBpmnXml(value: string): void {
+    this.store.updateBpmnXml(value);
   }
 
   versionLabel(version: WorkflowVersion): string {
@@ -565,13 +372,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
 
   private isNewWorkflow(): boolean {
     return !this.store.workflow()?.definition.id;
-  }
-
-  private activeCanvas():
-    | Pick<WorkflowCanvasComponent, 'executeCommand' | 'revealElement'>
-    | Pick<WorkflowBpmnCanvasComponent, 'executeCommand' | 'revealElement'>
-    | undefined {
-    return this.flowableEditor() ? this.workflowBpmnCanvas : this.workflowCanvas;
   }
 }
 

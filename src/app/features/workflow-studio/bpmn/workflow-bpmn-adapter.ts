@@ -476,7 +476,8 @@ function edgeXmlId(edge: WorkflowEdge): string {
 }
 
 function safeXmlId(value: string): string {
-  return value.replace(/[^A-Za-z0-9_]/g, '_');
+  const sanitized = value.replace(/[^A-Za-z0-9_]/g, '_');
+  return /^[A-Za-z_]/.test(sanitized) ? sanitized : `wf_${sanitized || 'workflow'}`;
 }
 
 function isJsonObject(value: unknown): value is Record<string, JsonValue> {

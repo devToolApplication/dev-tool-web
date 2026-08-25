@@ -1,17 +1,3 @@
 <div class="workflow-bpmn-canvas">
-  @if (!readonlyMode()) {
-    <div class="workflow-bpmn-canvas__palette" aria-label="BPMN palette">
-      @for (item of paletteItems; track item.type) {
-        <button
-          type="button"
-          class="workflow-bpmn-canvas__palette-button"
-          (click)="addNode(item.type)"
-        >
-          {{ item.label | translateContent }}
-        </button>
-      }
-    </div>
-  }
-
   <div #canvas class="workflow-bpmn-canvas__surface" aria-label="Flowable BPMN canvas"></div>
 </div>

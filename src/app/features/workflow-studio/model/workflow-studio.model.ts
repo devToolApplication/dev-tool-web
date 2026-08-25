@@ -1,7 +1,6 @@
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
-export type WorkflowEngineType = 'LEGACY' | 'FLOWABLE';
 export type LegacyWorkflowNodeType = 'START' | 'CODE_GATE' | 'AI_GATE' | 'LOGIC' | 'END';
 export type BpmnWorkflowNodeType =
   | 'START_EVENT'
@@ -79,6 +78,7 @@ export interface WorkflowValidationIssue {
   code: string;
   severity: WorkflowValidationSeverity;
   message: string;
+  elementId?: string;
   nodeId?: string;
   edgeId?: string;
   field?: string;
@@ -210,14 +210,6 @@ export interface WorkflowDefinition {
   currentPublishedVersionId: string | null;
 }
 
-export interface ExecutableWorkflowPlan {
-  nodes: Record<string, JsonValue>;
-  dependencies: Record<string, string[]>;
-  dependents: Record<string, string[]>;
-  entryNodes: string[];
-  terminalNodes: string[];
-}
-
 export interface WorkflowNodePosition {
   x: number;
   y: number;
@@ -239,15 +231,11 @@ export interface WorkflowVersion {
   workflowDefinitionId: string;
   version: number;
   status: WorkflowVersionStatus;
-  definition: WorkflowGraph;
+  bpmnXml: string;
   runtime: WorkflowRuntimeConfig | null;
-  compiledPlan: ExecutableWorkflowPlan | null;
-  engineType?: WorkflowEngineType;
   engineDeploymentId?: string | null;
   engineDefinitionId?: string | null;
   engineDefinitionKey?: string | null;
-  compiledBpmnXml?: string | null;
-  editor?: WorkflowEditorMetadata;
 }
 
 export interface WorkflowDetail {
@@ -279,7 +267,6 @@ export interface WorkflowRun {
   completedAt: string | null;
   finalOutcome: GateOutcome | null;
   finalOutput: JsonValue;
-  engineType?: WorkflowEngineType;
   engineInstanceId?: string | null;
   nodes: WorkflowNodeExecution[];
 }
@@ -287,10 +274,8 @@ export interface WorkflowRun {
 export interface WorkflowUpsertPayload {
   name: string;
   description: string | null;
-  definition: WorkflowGraph;
+  bpmnXml: string;
   runtime: WorkflowRuntimeConfig | null;
-  engineType?: WorkflowEngineType;
-  editor?: WorkflowEditorMetadata | null;
 }
 
 export interface WorkflowBackendValidationResult {

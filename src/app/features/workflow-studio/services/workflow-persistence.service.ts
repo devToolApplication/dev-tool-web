@@ -8,7 +8,6 @@ import {
   WorkflowValidationIssue,
   WorkflowVersion,
 } from '../model/workflow-studio.model';
-import { validateWorkflowGraph } from '../model/workflow-validator';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 
 @Injectable({ providedIn: 'root' })
@@ -61,15 +60,6 @@ export class WorkflowPersistenceService {
 
   private localValidPayload(store: WorkflowEditorStore): WorkflowUpsertPayload {
     const payload = store.toUpsertPayload();
-    if (payload.engineType === 'FLOWABLE') {
-      store.setValidationIssues([]);
-      return payload;
-    }
-    const issues = validateWorkflowGraph(payload.definition);
-    if (issues.length) {
-      store.setValidationIssues(issues);
-      throw new Error(firstErrorMessage(issues));
-    }
     store.setValidationIssues([]);
     return payload;
   }
@@ -89,22 +79,12 @@ export class WorkflowPersistenceService {
 
 function validPayloadFromDetail(detail: WorkflowDetail): WorkflowUpsertPayload {
   const version = draftVersionForUpsert(detail);
-  const payload: WorkflowUpsertPayload = {
+  return {
     name: detail.definition.name,
     description: detail.definition.description,
-    definition: cloneJson(version.definition),
+    bpmnXml: version.bpmnXml,
     runtime: version.runtime ? { ...version.runtime } : null,
-    engineType: version.engineType ?? 'LEGACY',
-    editor: version.editor ? cloneJson(version.editor) : null,
   };
-  if (payload.engineType === 'FLOWABLE') {
-    return payload;
-  }
-  const issues = validateWorkflowGraph(payload.definition);
-  if (issues.length) {
-    throw new Error(firstErrorMessage(issues));
-  }
-  return payload;
 }
 
 function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
@@ -116,10 +96,6 @@ function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
     throw new Error('Workflow detail has no version to publish');
   }
   return version;
-}
-
-function cloneJson<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 function firstErrorMessage(issues: WorkflowValidationIssue[]): string {

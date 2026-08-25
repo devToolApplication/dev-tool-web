@@ -86,13 +86,7 @@
               [readonly]="readonlyMode()"
               (valueChange)="updateMaxParallel($event)"
             ></app-input-number>
-            <app-select
-              label="workflowStudio.engine.type"
-              [options]="engineOptions"
-              [value]="activeEngineType()"
-              [disabled]="readonlyMode()"
-              (valueChange)="updateEngineType($event)"
-            ></app-select>
+            
           </div>
 
           @if (statusMessage()) {
@@ -219,42 +213,19 @@
             ></app-button>
           </div>
         </div>
-        @if (flowableEditor()) {
-          <app-workflow-bpmn-canvas
-            [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
-            [workflowName]="store.workflow()?.definition?.name ?? undefined"
-            [graph]="store.graph()"
-            [positions]="store.positions()"
-            [viewport]="store.viewport()"
-            [mode]="store.mode()"
-            [selectedId]="selectedId()"
-            [validationIssues]="store.validationIssues()"
-            (graphChange)="updateGraph($event)"
-            (nodeSelected)="store.selectNode($event)"
-            (edgeSelected)="store.selectEdge($event)"
-            (nodeAdded)="addNode($event)"
-            (nodeMoved)="moveNode($event)"
-            (connected)="store.connect($event)"
-            (viewportChange)="store.setViewport($event)"
-          ></app-workflow-bpmn-canvas>
-        } @else {
-          <app-workflow-canvas
-            [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
-            [workflowName]="store.workflow()?.definition?.name ?? undefined"
-            [graph]="store.graph()"
-            [positions]="store.positions()"
-            [viewport]="store.viewport()"
-            [mode]="store.mode()"
-            [selectedId]="selectedId()"
-            [validationIssues]="store.validationIssues()"
-            (nodeSelected)="store.selectNode($event)"
-            (edgeSelected)="store.selectEdge($event)"
-            (nodeAdded)="addNode($event)"
-            (nodeMoved)="moveNode($event)"
-            (connected)="store.connect($event)"
-            (viewportChange)="store.setViewport($event)"
-          ></app-workflow-canvas>
-        }
+        <app-workflow-bpmn-canvas
+          [bpmnXml]="store.bpmnXml()"
+          [workflowId]="store.workflow()?.definition?.id || 'new-workflow'"
+          [workflowName]="store.workflow()?.definition?.name ?? undefined"
+          [viewport]="store.viewport()"
+          [mode]="store.mode()"
+          [selectedId]="selectedId()"
+          [validationIssues]="store.validationIssues()"
+          (bpmnXmlChange)="updateBpmnXml($event)"
+          (nodeSelected)="store.selectNode($event)"
+          (edgeSelected)="store.selectEdge($event)"
+          (viewportChange)="store.setViewport($event)"
+        ></app-workflow-bpmn-canvas>
       </section>
     </section>
   </div>
@@ -264,48 +235,6 @@
     (issueSelected)="onProblemSelected($event)"
   ></app-workflow-problems-panel>
 </app-page-shell>
-
-<app-drawer
-  [open]="nodeDrawerOpen()"
-  [title]="nodeDrawerTitle()"
-  [subtitle]="elementDrawerSubtitle()"
-  size="comfortable"
-  (closed)="closeElementDrawer()"
->
-  @if (flowableEditor()) {
-    @if (selectedBpmnTask(); as taskNode) {
-      <app-workflow-bpmn-node-drawer
-        [node]="taskNode"
-        [readonly]="readonlyMode()"
-        (nodeChange)="updateBpmnNode($event)"
-      ></app-workflow-bpmn-node-drawer>
-    } @else if (selectedBpmnGateway(); as gatewayNode) {
-      <app-workflow-bpmn-gateway-drawer
-        [node]="gatewayNode"
-        [readonly]="readonlyMode()"
-        (nodeChange)="updateBpmnNode($event)"
-      ></app-workflow-bpmn-gateway-drawer>
-    } @else if (selectedBpmnEdge(); as sequenceFlow) {
-      <app-workflow-bpmn-sequence-flow-drawer
-        [edge]="sequenceFlow"
-        [readonly]="readonlyMode()"
-        (edgeChange)="updateBpmnEdge($event)"
-      ></app-workflow-bpmn-sequence-flow-drawer>
-    } @else {
-      <app-workflow-element-inspector
-        [selectedElement]="selectedElement()"
-        [readonly]="readonlyMode()"
-        (deleteRequested)="executeEditorCommand('delete')"
-      ></app-workflow-element-inspector>
-    }
-  } @else {
-    <app-workflow-element-inspector
-      [selectedElement]="selectedElement()"
-      [readonly]="readonlyMode()"
-      (deleteRequested)="executeEditorCommand('delete')"
-    ></app-workflow-element-inspector>
-  }
-</app-drawer>
 
 <app-drawer
   [open]="versionsOpen()"

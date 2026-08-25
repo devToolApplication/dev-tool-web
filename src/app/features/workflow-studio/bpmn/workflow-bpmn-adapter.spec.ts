@@ -22,6 +22,16 @@ describe('workflow bpmn adapter', () => {
     expect(xml).toContain('<conditionExpression xsi:type="tFormalExpression">${input.candidate.followers &gt;= 1000}</conditionExpression>');
   });
 
+  it('prefixes persisted numeric workflow ids so bpmn-js can display the diagram', () => {
+    const xml = workflowGraphToBpmnXml(sampleGraph(), {
+      processId: '68af7e4f8c8b6d1c2a5e9f01',
+    });
+
+    expect(xml).toContain('<process id="wf_68af7e4f8c8b6d1c2a5e9f01"');
+    expect(xml).toContain('id="wf_68af7e4f8c8b6d1c2a5e9f01_diagram"');
+    expect(xml).toContain('bpmnElement="wf_68af7e4f8c8b6d1c2a5e9f01"');
+  });
+
   it('maps BPMN XML back to backend DTO graph and preserves structured condition metadata', () => {
     const result = workflowGraphFromBpmnXml(workflowGraphToBpmnXml(sampleGraph(), {
       processId: 'wf-1_v1',
