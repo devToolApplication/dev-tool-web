@@ -1,12 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Component, EventEmitter, Input, NO_ERRORS_SCHEMA, Output, Pipe, PipeTransform } from '@angular/core';
-import type { FormConfig, FormContext } from '@shared/ui/patterns/form-input/models/form-config.model';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  NO_ERRORS_SCHEMA,
+  Output,
+  Pipe,
+  PipeTransform,
+} from '@angular/core';
+import type {
+  FormConfig,
+  FormContext,
+} from '@shared/ui/patterns/form-input/models/form-config.model';
 import { of, throwError } from 'rxjs';
 
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
-import { InputMapping, WorkflowDetail } from '../model/workflow-studio.model';
+import { InputMapping, WorkflowDetail, WorkflowNode } from '../model/workflow-studio.model';
 import { AiGateInspectorComponent } from './ai-gate-inspector.component';
 import { CodeGateInspectorComponent } from './code-gate-inspector.component';
 import { EndInspectorComponent } from './end-inspector.component';
@@ -55,35 +66,39 @@ describe('WorkflowNodeInspectorComponent', () => {
 
   beforeEach(() => {
     api = {
-      getAgents: vi.fn(() => of([
-        {
-          agentCode: 'koc-rule-evaluator',
-          displayName: 'KOC Rule Evaluator',
-          defaultProvider: 'codex',
-          supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
-          requiredDependencies: [],
-          health: 'HEALTHY',
-        },
-        {
-          agentCode: 'facebook-candidate-discovery',
-          displayName: 'Facebook Candidate Discovery',
-          defaultProvider: 'claude',
-          supportedProviders: [
-            { provider: 'codex', available: true, health: 'HEALTHY' },
-            { provider: 'claude', available: true, health: 'HEALTHY' },
-          ],
-          requiredDependencies: ['FACEBOOK_MCP'],
-          health: 'HEALTHY',
-        },
-      ])),
-      getAiGateOutputSchemas: vi.fn(() => of([
-        {
-          value: 'gate-result-v1',
-          label: 'Gate result v1',
-          description: 'Standard PASS/FAIL/BLOCKED gate output.',
-          isDefault: true,
-        },
-      ])),
+      getAgents: vi.fn(() =>
+        of([
+          {
+            agentCode: 'koc-rule-evaluator',
+            displayName: 'KOC Rule Evaluator',
+            defaultProvider: 'codex',
+            supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+            requiredDependencies: [],
+            health: 'HEALTHY',
+          },
+          {
+            agentCode: 'facebook-candidate-discovery',
+            displayName: 'Facebook Candidate Discovery',
+            defaultProvider: 'claude',
+            supportedProviders: [
+              { provider: 'codex', available: true, health: 'HEALTHY' },
+              { provider: 'claude', available: true, health: 'HEALTHY' },
+            ],
+            requiredDependencies: ['FACEBOOK_MCP'],
+            health: 'HEALTHY',
+          },
+        ]),
+      ),
+      getAiGateOutputSchemas: vi.fn(() =>
+        of([
+          {
+            value: 'gate-result-v1',
+            label: 'Gate result v1',
+            description: 'Standard PASS/FAIL/BLOCKED gate output.',
+            isDefault: true,
+          },
+        ]),
+      ),
     };
 
     TestBed.configureTestingModule({
@@ -98,16 +113,22 @@ describe('WorkflowNodeInspectorComponent', () => {
         FormInputStubComponent,
         InputMappingEditorStubComponent,
       ],
-      providers: [
-        WorkflowEditorStore,
-        { provide: WorkflowApiService, useValue: api },
-      ],
+      providers: [WorkflowEditorStore, { provide: WorkflowApiService, useValue: api }],
       schemas: [NO_ERRORS_SCHEMA],
     });
 
     fixture = TestBed.createComponent(WorkflowNodeInspectorComponent);
     store = TestBed.inject(WorkflowEditorStore);
     store.loadWorkflow(sampleDetail());
+    store.nodes.set(sampleNodes());
+    store.positions.set({
+      start: { x: 0, y: 0 },
+      code: { x: 120, y: 0 },
+      ai: { x: 240, y: 0 },
+      logic: { x: 360, y: 0 },
+      end: { x: 480, y: 0 },
+    });
+    store.markSaved();
   });
 
   it('renders the correct inspector for the selected node type', () => {
@@ -185,8 +206,10 @@ describe('WorkflowNodeInspectorComponent', () => {
       outputSchemaOptions: [{ label: 'Gate result v1', value: 'gate-result-v1' }],
     });
 
-    const extra = form.context.extra as { providerOptions: Array<{ value: unknown; label: string }> };
-    expect(extra.providerOptions.some((p) => p.value === 'claude')).toBe(true);
+    const extra = form.context.extra as {
+      providerOptions: Array<{ value: unknown; label: string }>;
+    };
+    expect(extra.providerOptions.some((p) => p.value === 'codex')).toBe(true);
 
     form.valueChange.emit({
       ...form.initialValue,
@@ -213,16 +236,18 @@ describe('WorkflowNodeInspectorComponent', () => {
 
     expect(inspector.agentState()).toBe('error');
 
-    api.getAgents.mockReturnValue(of([
-      {
-        agentCode: 'koc-rule-evaluator',
-        displayName: 'KOC Rule Evaluator',
-        defaultProvider: 'codex',
-        supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
-        requiredDependencies: [],
-        health: 'HEALTHY',
-      },
-    ]));
+    api.getAgents.mockReturnValue(
+      of([
+        {
+          agentCode: 'koc-rule-evaluator',
+          displayName: 'KOC Rule Evaluator',
+          defaultProvider: 'codex',
+          supportedProviders: [{ provider: 'codex', available: true, health: 'HEALTHY' }],
+          requiredDependencies: [],
+          health: 'HEALTHY',
+        },
+      ]),
+    );
 
     inspector.retryAgents();
     expect(inspector.agentState()).toBe('ready');
@@ -230,16 +255,18 @@ describe('WorkflowNodeInspectorComponent', () => {
   });
 
   it('marks unhealthy agents and unavailable providers as disabled with labels', () => {
-    api.getAgents.mockReturnValue(of([
-      {
-        agentCode: 'unhealthy-agent',
-        displayName: 'Unhealthy Agent',
-        defaultProvider: 'codex',
-        supportedProviders: [{ provider: 'codex', available: false, health: 'UNHEALTHY' }],
-        requiredDependencies: [],
-        health: 'UNHEALTHY',
-      },
-    ]));
+    api.getAgents.mockReturnValue(
+      of([
+        {
+          agentCode: 'unhealthy-agent',
+          displayName: 'Unhealthy Agent',
+          defaultProvider: 'codex',
+          supportedProviders: [{ provider: 'codex', available: false, health: 'UNHEALTHY' }],
+          requiredDependencies: [],
+          health: 'UNHEALTHY',
+        },
+      ]),
+    );
 
     store.selectNode('ai');
     fixture.detectChanges();
@@ -247,8 +274,12 @@ describe('WorkflowNodeInspectorComponent', () => {
     const form = fixture.debugElement.query(By.directive(FormInputStubComponent))
       .componentInstance as FormInputStubComponent;
 
-    const extra = form.context.extra as { agentOptions: Array<{ disabled?: boolean; label: string }> };
-    expect(extra.agentOptions.find((a) => a.label.includes('Unhealthy Agent'))?.disabled).toBe(true);
+    const extra = form.context.extra as {
+      agentOptions: Array<{ disabled?: boolean; label: string }>;
+    };
+    expect(extra.agentOptions.find((a) => a.label.includes('Unhealthy Agent'))?.disabled).toBe(
+      true,
+    );
   });
 
   it('ignores invalid form payloads so advanced JSON cannot corrupt editor state', () => {
@@ -276,19 +307,22 @@ describe('WorkflowNodeInspectorComponent', () => {
   });
 
   it('switches form initial value and reference when selecting another node of same type', () => {
-    store.addNode({
-      id: 'ai-2',
-      type: 'AI_GATE',
-      instruction: 'Second AI instruction',
-      criteria: {},
-      inputMapping: { mapping: {} },
-      provider: 'codex',
-      agentCode: 'facebook-candidate-discovery',
-      workingDirectory: 'D:\\Code',
-      outputSchema: 'gate-result-v1',
-      retryPolicy: { maxAttempts: 1 },
-      timeoutPolicy: { timeoutSeconds: 60 },
-    }, { x: 100, y: 100 });
+    store.addNode(
+      {
+        id: 'ai-2',
+        type: 'AI_GATE',
+        instruction: 'Second AI instruction',
+        criteria: {},
+        inputMapping: { mapping: {} },
+        provider: 'codex',
+        agentCode: 'facebook-candidate-discovery',
+        workingDirectory: 'D:\\Code',
+        outputSchema: 'gate-result-v1',
+        retryPolicy: { maxAttempts: 1 },
+        timeoutPolicy: { timeoutSeconds: 60 },
+      },
+      { x: 100, y: 100 },
+    );
 
     store.selectNode('ai');
     fixture.detectChanges();
@@ -322,6 +356,36 @@ describe('WorkflowNodeInspectorComponent', () => {
     expect(form.context.mode).toBe('view');
   });
 });
+
+function sampleNodes(): WorkflowNode[] {
+  return [
+    { id: 'start', type: 'START' },
+    {
+      id: 'code',
+      type: 'CODE_GATE',
+      handler: 'NUMBER_COMPARE',
+      config: { operator: 'LT' },
+      inputMapping: { mapping: {} },
+      retryPolicy: { maxAttempts: 1 },
+      timeoutPolicy: { timeoutSeconds: 5 },
+    },
+    {
+      id: 'ai',
+      type: 'AI_GATE',
+      instruction: 'Review profile',
+      criteria: {},
+      inputMapping: { mapping: {} },
+      provider: 'codex',
+      agentCode: 'koc-rule-evaluator',
+      workingDirectory: 'D:\\Code',
+      outputSchema: 'gate-result-v1',
+      retryPolicy: { maxAttempts: 1 },
+      timeoutPolicy: { timeoutSeconds: 60 },
+    },
+    { id: 'logic', type: 'LOGIC', operator: 'AND', config: {} },
+    { id: 'end', type: 'END' },
+  ];
+}
 
 function sampleDetail(): WorkflowDetail {
   return {

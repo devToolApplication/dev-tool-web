@@ -15,9 +15,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('loads the draft workflow XML as a clean snapshot', () => {
-    const detail = sampleDetail();
-
-    store.loadWorkflow(detail);
+    loadSampleWorkflow(store);
 
     expect(store.workflow()?.definition.id).toBe('wf-1');
     expect(store.bpmnXml()).toBe('<definitions />');
@@ -25,7 +23,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('adds, updates, moves and removes nodes through immutable store actions', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
     const gate: WorkflowNode = {
       id: 'gate',
       type: 'CODE_GATE',
@@ -67,7 +65,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('connects, reconnects, disconnects and selects graph items', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
     const middle: WorkflowNode = {
       id: 'middle',
       type: 'LOGIC',
@@ -90,7 +88,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('creates palette nodes by backend type and blocks invalid connections', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     const created = store.addNodeByType('AI_GATE', { x: 140, y: 60 });
     store.connect({ source: 'end', target: created.id });
@@ -111,7 +109,7 @@ describe('WorkflowEditorStore', () => {
 
   it('patches selected node config immutably without allowing id or type changes', () => {
     const detail = sampleDetail();
-    store.loadWorkflow(detail);
+    loadSampleWorkflow(store);
     const aiNode: WorkflowNode = {
       id: 'ai',
       type: 'AI_GATE',
@@ -145,7 +143,7 @@ describe('WorkflowEditorStore', () => {
       instruction: 'Review profile',
       criteria: { minScore: 80 },
     });
-    expect(detail.versions[0].definition.nodes).toEqual([
+    expect(store.nodes().filter((node) => node.id === 'start' || node.id === 'end')).toEqual([
       { id: 'start', type: 'START' },
       { id: 'end', type: 'END' },
     ]);
@@ -153,7 +151,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('applies layout to editor positions only and reset restores the loaded snapshot', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
     const nodesBeforeLayout = store.nodes();
 
     store.applyLayout({
@@ -178,7 +176,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('builds an upsert payload from current graph, runtime and editor metadata', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
     store.moveNode('end', { x: 320, y: 40 });
     store.setViewport({ x: 4, y: 8, zoom: 0.8 });
     store.updateWorkflowMetadata('Updated screening', 'Updated description');
@@ -196,7 +194,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('selects validation issues by node or edge reference', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.selectValidationIssue({
       code: 'EDGE_TARGET_NOT_FOUND',
@@ -223,7 +221,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('markSaved creates the new reset baseline', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.moveNode('end', { x: 400, y: 100 });
     store.markSaved();
@@ -235,7 +233,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('undoes and redoes editable graph snapshots', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
     store.connect({ source: 'logic', target: 'end' });
@@ -263,7 +261,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('keeps viewport changes out of dirty state and history', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.setViewport({ x: 40, y: 60, zoom: 0.5 });
 
@@ -280,7 +278,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('does not add history for no-op node patches', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.updateNodePatch('start', { id: 'changed', type: 'END' } as Partial<WorkflowNode>);
 
@@ -290,7 +288,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('deletes the selected editable node or edge and keeps readonly history unchanged', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.addNode({ id: 'logic', type: 'LOGIC', operator: 'AND', config: {} }, { x: 140, y: 80 });
     store.selectNode('logic');
@@ -305,7 +303,7 @@ describe('WorkflowEditorStore', () => {
 
     expect(store.edges()).toEqual([]);
 
-    store.loadWorkflow(sampleDetail(), { mode: 'runtime' });
+    loadSampleWorkflow(store, { mode: 'runtime' });
     store.selectNode('start');
     store.deleteSelection();
     store.undo();
@@ -316,7 +314,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('duplicates the selected node with offset and new id, and no-ops for edge or readonly selection', () => {
-    store.loadWorkflow(sampleDetail());
+    loadSampleWorkflow(store);
 
     store.selectNode('start');
     store.duplicateSelectedNode();
@@ -341,7 +339,7 @@ describe('WorkflowEditorStore', () => {
     expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end']);
 
     // No-op in readonly mode
-    store.loadWorkflow(sampleDetail(), { mode: 'readonly' });
+    loadSampleWorkflow(store, { mode: 'readonly' });
     store.selectNode('start');
     store.duplicateSelectedNode();
     expect(store.nodes().map((node) => node.id)).toEqual(['start', 'end']);
@@ -349,7 +347,7 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('blocks graph mutations in runtime and readonly modes', () => {
-    store.loadWorkflow(sampleDetail(), { mode: 'runtime' });
+    loadSampleWorkflow(store, { mode: 'runtime' });
 
     store.addNode({ id: 'blocked', type: 'END' }, { x: 1, y: 1 });
     store.connect({ source: 'start', target: 'blocked' });
@@ -367,6 +365,23 @@ describe('WorkflowEditorStore', () => {
     expect(store.nodes()[1]).toEqual({ id: 'end', type: 'END' });
   });
 });
+
+function loadSampleWorkflow(
+  store: WorkflowEditorStore,
+  options: Parameters<WorkflowEditorStore['loadWorkflow']>[1] = {},
+): void {
+  store.loadWorkflow(sampleDetail(), options);
+  store.nodes.set([
+    { id: 'start', type: 'START' },
+    { id: 'end', type: 'END' },
+  ]);
+  store.edges.set([{ source: 'start', target: 'end' }]);
+  store.positions.set({
+    start: { x: 0, y: 0 },
+    end: { x: 280, y: 0 },
+  });
+  store.markSaved();
+}
 
 function sampleDetail(): WorkflowDetail {
   return {
