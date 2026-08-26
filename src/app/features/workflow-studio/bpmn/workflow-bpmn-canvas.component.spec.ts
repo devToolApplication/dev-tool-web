@@ -204,15 +204,29 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
       'utf8',
     );
     const globalStyles = readFileSync('src/styles.css', 'utf8');
+    const angularConfig = JSON.parse(readFileSync('angular.json', 'utf8'));
+    const buildAssets = angularConfig.projects['dev-tool-web'].architect.build.options.assets;
 
     expect(componentSource).toContain('bpmn-js-properties-panel');
     expect(componentSource).toContain('propertiesPanel: {');
+    expect(componentSource).toContain('bpmnRenderer: {');
+    expect(componentSource).toContain("defaultFillColor: 'var(--workflow-bpmn-shape-fill)'");
+    expect(componentSource).toContain("defaultStrokeColor: 'var(--workflow-bpmn-shape-stroke)'");
     expect(componentSource).not.toContain('WorkflowBpmnElementConfig');
     expect(componentSource).not.toContain('updateElementConfig');
     expect(template).toContain('#propertiesPanel');
-    expect(globalStyles).toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css');
+    expect(globalStyles).not.toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css');
+    expect(globalStyles).toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css');
+    expect(globalStyles).toContain('/assets/bpmn-font/bpmn.woff2');
+    expect(buildAssets).toContainEqual({
+      glob: '**/*',
+      input: 'node_modules/bpmn-js/dist/assets/bpmn-font/font',
+      output: '/assets/bpmn-font',
+    });
     expect(globalStyles).toContain('@bpmn-io/properties-panel/dist/assets/properties-panel.css');
     expect(stylesheet).toContain('html[data-theme=');
+    expect(stylesheet).toContain('--workflow-bpmn-shape-fill');
+    expect(stylesheet).toContain('--workflow-bpmn-shape-stroke');
     expect(stylesheet).toContain('.djs-palette');
     expect(stylesheet).toContain('.djs-context-pad');
     expect(globalStyles).toContain('.workflow-bpmn-canvas .bio-properties-panel');

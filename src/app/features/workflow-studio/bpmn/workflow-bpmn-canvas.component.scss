@@ -6,6 +6,8 @@
   --workflow-bpmn-text: var(--app-text);
   --workflow-bpmn-muted: var(--app-text-muted);
   --workflow-bpmn-grid: color-mix(in srgb, var(--app-border) 38%, transparent);
+  --workflow-bpmn-shape-fill: var(--app-surface-overlay, #ffffff);
+  --workflow-bpmn-shape-stroke: var(--app-text, #1f2937);
 
   position: relative;
   display: grid;
@@ -20,11 +22,15 @@
 html[data-theme='light'] .workflow-bpmn-canvas {
   --workflow-bpmn-bg: var(--app-surface);
   --workflow-bpmn-panel: var(--app-card-surface);
+  --workflow-bpmn-shape-fill: #ffffff;
+  --workflow-bpmn-shape-stroke: #1f2937;
 }
 
 html[data-theme='dark'] .workflow-bpmn-canvas {
   --workflow-bpmn-bg: var(--app-bg);
   --workflow-bpmn-panel: var(--app-card-surface);
+  --workflow-bpmn-shape-fill: var(--app-surface-overlay);
+  --workflow-bpmn-shape-stroke: var(--app-text);
 }
 
 .workflow-bpmn-canvas__surface {

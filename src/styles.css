@@ -1,13 +1,41 @@
 @import 'tailwindcss';
 @import 'bpmn-js/dist/assets/bpmn-js.css';
 @import 'bpmn-js/dist/assets/diagram-js.css';
-@import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+@import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css';
 @import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 
 @import './styles/tokens/generated/_variables.css';
 @import './theme/tokens.css';
 @import './theme/dark.css';
 @import './theme/layout.css';
+
+@font-face {
+  font-family: 'bpmn';
+  src:
+    url('/assets/bpmn-font/bpmn.woff2') format('woff2'),
+    url('/assets/bpmn-font/bpmn.woff') format('woff'),
+    url('/assets/bpmn-font/bpmn.ttf') format('truetype');
+  font-display: block;
+  font-style: normal;
+  font-weight: normal;
+}
+
+[class^='bpmn-icon-']::before,
+[class*=' bpmn-icon-']::before {
+  display: inline-block;
+  width: 1em;
+  font-family: 'bpmn';
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  line-height: 1em;
+  text-align: center;
+  text-decoration: inherit;
+  text-transform: none;
+  speak: never;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 html[data-theme='light'] .workflow-bpmn-canvas .bio-properties-panel,
 html[data-theme='dark'] .workflow-bpmn-canvas .bio-properties-panel {

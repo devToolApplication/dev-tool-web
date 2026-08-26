@@ -58,6 +58,11 @@ export const WORKFLOW_BPMN_MODELER_FACTORY = new InjectionToken<
       propertiesPanel: {
         parent: propertiesPanel,
       },
+      bpmnRenderer: {
+        defaultFillColor: 'var(--workflow-bpmn-shape-fill)',
+        defaultStrokeColor: 'var(--workflow-bpmn-shape-stroke)',
+        defaultLabelColor: 'var(--workflow-bpmn-text)',
+      },
       additionalModules: [BpmnPropertiesPanelModule, BpmnPropertiesProviderModule],
     }) as unknown as WorkflowBpmnModeler,
 });
