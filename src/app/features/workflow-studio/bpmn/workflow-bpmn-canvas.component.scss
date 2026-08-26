@@ -5,12 +5,11 @@
   --workflow-bpmn-border: var(--app-border);
   --workflow-bpmn-text: var(--app-text);
   --workflow-bpmn-muted: var(--app-text-muted);
-  --workflow-bpmn-shape-fill: var(--app-card-surface);
-  --workflow-bpmn-shape-stroke: var(--app-text);
   --workflow-bpmn-grid: color-mix(in srgb, var(--app-border) 38%, transparent);
 
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
   min-width: 0;
   min-height: 34rem;
   height: 100%;
@@ -21,15 +20,11 @@
 html[data-theme='light'] .workflow-bpmn-canvas {
   --workflow-bpmn-bg: var(--app-surface);
   --workflow-bpmn-panel: var(--app-card-surface);
-  --workflow-bpmn-shape-fill: var(--app-card-surface);
-  --workflow-bpmn-shape-stroke: var(--app-text);
 }
 
 html[data-theme='dark'] .workflow-bpmn-canvas {
   --workflow-bpmn-bg: var(--app-bg);
   --workflow-bpmn-panel: var(--app-card-surface);
-  --workflow-bpmn-shape-fill: var(--app-surface);
-  --workflow-bpmn-shape-stroke: var(--app-text);
 }
 
 .workflow-bpmn-canvas__surface {
@@ -42,6 +37,14 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
   background-size: 24px 24px;
 }
 
+.workflow-bpmn-canvas__properties {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  border-left: 1px solid var(--workflow-bpmn-border);
+  background: var(--workflow-bpmn-panel);
+}
+
 .workflow-bpmn-canvas .djs-container,
 .workflow-bpmn-canvas .bjs-container,
 .workflow-bpmn-canvas svg {
@@ -49,63 +52,44 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
   color: var(--workflow-bpmn-text);
 }
 
-.workflow-bpmn-canvas .djs-palette,
-.workflow-bpmn-canvas .djs-context-pad,
-.workflow-bpmn-canvas .djs-popup,
-.workflow-bpmn-canvas .djs-search-container {
-  border: 1px solid var(--workflow-bpmn-border);
-  border-radius: var(--app-radius-sm, 0.375rem);
-  background: var(--workflow-bpmn-panel);
-  color: var(--workflow-bpmn-text);
-  box-shadow: var(--app-shadow-sm, 0 1px 2px rgb(0 0 0 / 0.08));
-}
-
-.workflow-bpmn-canvas .djs-palette .entry,
-.workflow-bpmn-canvas .djs-context-pad .entry,
-.workflow-bpmn-canvas .djs-popup .entry {
-  color: var(--workflow-bpmn-text);
-}
-
-.workflow-bpmn-canvas .djs-palette .entry:hover,
-.workflow-bpmn-canvas .djs-palette .entry:focus-visible,
-.workflow-bpmn-canvas .djs-context-pad .entry:hover,
-.workflow-bpmn-canvas .djs-context-pad .entry:focus-visible,
-.workflow-bpmn-canvas .djs-popup .entry:hover,
-.workflow-bpmn-canvas .djs-popup .entry:focus-visible {
-  background: var(--workflow-bpmn-panel-hover);
-  color: var(--app-primary);
-}
-
-.workflow-bpmn-canvas .djs-palette .entry.disabled,
-.workflow-bpmn-canvas .djs-context-pad .entry.disabled,
-.workflow-bpmn-canvas .djs-popup .entry.disabled {
-  color: var(--workflow-bpmn-muted);
-  opacity: 0.55;
-}
-
-.workflow-bpmn-canvas .djs-popup-header,
-.workflow-bpmn-canvas .djs-popup-body,
-.workflow-bpmn-canvas .djs-search-input input,
-.workflow-bpmn-canvas .djs-search-results {
-  background: var(--workflow-bpmn-panel);
-  color: var(--workflow-bpmn-text);
-}
-
-.workflow-bpmn-canvas .djs-search-input input {
-  border-color: var(--workflow-bpmn-border);
-}
-
-.workflow-bpmn-canvas .djs-visual > :is(rect, polygon, circle, ellipse) {
-  fill: var(--workflow-bpmn-shape-fill) !important;
-  stroke: var(--workflow-bpmn-shape-stroke) !important;
-}
-
-.workflow-bpmn-canvas .djs-visual > path {
-  stroke: var(--workflow-bpmn-shape-stroke) !important;
-}
-
-.workflow-bpmn-canvas .djs-connection .djs-visual > path {
-  fill: none !important;
+.workflow-bpmn-canvas .bjs-container,
+.workflow-bpmn-canvas .djs-parent {
+  --canvas-fill-color: transparent;
+  --context-pad-entry-background-color: var(--workflow-bpmn-panel);
+  --context-pad-entry-hover-background-color: var(--workflow-bpmn-panel-hover);
+  --palette-entry-color: var(--workflow-bpmn-text);
+  --palette-entry-hover-color: var(--app-primary);
+  --palette-entry-selected-color: var(--app-primary);
+  --palette-separator-color: var(--workflow-bpmn-border);
+  --palette-toggle-hover-background-color: var(--workflow-bpmn-panel-hover);
+  --palette-background-color: var(--workflow-bpmn-panel);
+  --palette-border-color: var(--workflow-bpmn-border);
+  --popup-header-entry-selected-color: var(--app-primary);
+  --popup-header-group-divider-color: var(--workflow-bpmn-border);
+  --popup-background-color: var(--workflow-bpmn-panel);
+  --popup-border-color: var(--workflow-bpmn-border);
+  --popup-disabled-color: var(--workflow-bpmn-muted);
+  --popup-description-color: var(--workflow-bpmn-muted);
+  --popup-no-results-color: var(--workflow-bpmn-muted);
+  --popup-entry-title-color: var(--workflow-bpmn-muted);
+  --popup-entry-hover-color: var(--workflow-bpmn-panel-hover);
+  --popup-search-border-color: var(--workflow-bpmn-border);
+  --popup-search-focus-border-color: var(--app-primary);
+  --popup-search-focus-background-color: var(--workflow-bpmn-panel-hover);
+  --popup-tab-color: var(--workflow-bpmn-muted);
+  --popup-tab-hover-color: var(--workflow-bpmn-text);
+  --popup-tab-active-color: var(--workflow-bpmn-text);
+  --popup-tab-active-border-color: var(--app-primary);
+  --popup-tab-strip-border-color: var(--workflow-bpmn-border);
+  --popup-tab-focus-border-color: var(--app-primary);
+  --search-container-background-color: var(--workflow-bpmn-panel);
+  --search-shadow-color: rgb(0 0 0 / 0.24);
+  --search-input-border-color: var(--workflow-bpmn-border);
+  --search-input-focus-border-color: var(--app-primary);
+  --search-input-focus-background-color: var(--workflow-bpmn-panel-hover);
+  --search-result-hover-background-color: var(--workflow-bpmn-panel-hover);
+  --search-result-secondary-color: var(--workflow-bpmn-muted);
+  --search-preselected-background-color: color-mix(in srgb, var(--app-primary) 16%, transparent);
 }
 
 .workflow-bpmn-canvas .djs-label text,
@@ -119,6 +103,14 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
 .workflow-bpmn-canvas--readonly .djs-context-pad {
   pointer-events: none;
   opacity: 0.5;
+}
+
+.workflow-bpmn-canvas--readonly {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties {
+  display: none;
 }
 
 .workflow-bpmn-canvas__marker--selected .djs-visual > :first-child {
@@ -144,6 +136,13 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
 
 @media (max-width: 48rem) {
   .workflow-bpmn-canvas {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(28rem, 1fr) minmax(18rem, auto);
     min-height: 28rem;
+  }
+
+  .workflow-bpmn-canvas__properties {
+    border-top: 1px solid var(--workflow-bpmn-border);
+    border-left: 0;
   }
 }

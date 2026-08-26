@@ -110,40 +110,6 @@
   background: var(--app-surface);
 }
 
-.workflow-builder__drawer {
-  display: flex;
-  flex-direction: column;
-  width: 24rem;
-  max-width: 100%;
-  flex-shrink: 0;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-md, 0.5rem);
-  background: var(--app-card-surface);
-  overflow: hidden;
-}
-
-.workflow-builder__drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--app-spacing-2, 0.5rem);
-  padding: var(--app-spacing-3, 0.75rem);
-  border-bottom: 1px solid var(--app-border);
-}
-
-.workflow-builder__drawer-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--app-text);
-}
-
-.workflow-builder__drawer-body {
-  padding: var(--app-spacing-3, 0.75rem);
-  overflow-y: auto;
-  flex: 1 1 auto;
-}
-
 .workflow-versions {
   display: grid;
   gap: var(--app-spacing-2, 0.5rem);
@@ -183,10 +149,6 @@
 
   .workflow-builder__canvas {
     min-height: 32rem;
-  }
-
-  .workflow-builder__drawer {
-    width: 100%;
   }
 }
 

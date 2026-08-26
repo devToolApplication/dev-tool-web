@@ -1,8 +1,53 @@
 @import 'tailwindcss';
 @import 'bpmn-js/dist/assets/bpmn-js.css';
 @import 'bpmn-js/dist/assets/diagram-js.css';
+@import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+@import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 
 @import './styles/tokens/generated/_variables.css';
 @import './theme/tokens.css';
 @import './theme/dark.css';
 @import './theme/layout.css';
+
+html[data-theme='light'] .workflow-bpmn-canvas .bio-properties-panel,
+html[data-theme='dark'] .workflow-bpmn-canvas .bio-properties-panel {
+  --text-base-color: var(--workflow-bpmn-text);
+  --text-error-color: var(--app-danger, #dc2626);
+  --link-color: var(--app-primary);
+  --description-color: var(--workflow-bpmn-muted);
+  --placeholder-color: var(--workflow-bpmn-muted);
+  --placeholder-background-color: var(--workflow-bpmn-panel);
+  --header-background-color: var(--workflow-bpmn-panel);
+  --header-icon-fill-color: var(--workflow-bpmn-text);
+  --header-bottom-border-color: var(--workflow-bpmn-border);
+  --group-background-color: var(--workflow-bpmn-panel);
+  --group-bottom-border-color: var(--workflow-bpmn-border);
+  --sticky-group-background-color: var(--workflow-bpmn-panel);
+  --sticky-group-bottom-border-color: var(--workflow-bpmn-border);
+  --input-background-color: var(--app-surface);
+  --input-border-color: var(--workflow-bpmn-border);
+  --input-focus-background-color: var(--workflow-bpmn-panel-hover);
+  --input-focus-border-color: var(--app-primary);
+  --focus-outline-color: var(--app-primary);
+  --input-error-background-color: color-mix(
+    in srgb,
+    var(--app-danger, #dc2626) 10%,
+    var(--app-surface)
+  );
+  --input-error-border-color: var(--app-danger, #dc2626);
+  --input-error-focus-border-color: var(--app-danger, #dc2626);
+  --input-disabled-color: var(--workflow-bpmn-muted);
+  --input-disabled-background-color: color-mix(
+    in srgb,
+    var(--workflow-bpmn-panel) 82%,
+    transparent
+  );
+  --input-disabled-border-color: var(--workflow-bpmn-border);
+  --toggle-switch-on-background-color: var(--app-primary);
+  --toggle-switch-off-background-color: var(--workflow-bpmn-border);
+  --toggle-switch-switcher-background-color: var(--workflow-bpmn-panel);
+  --dropdown-item-background-color: var(--workflow-bpmn-panel);
+  --dropdown-item-hover-background-color: var(--workflow-bpmn-panel-hover);
+  --dropdown-separator-background-color: var(--workflow-bpmn-border);
+  --font-family: var(--app-font-family, sans-serif);
+}

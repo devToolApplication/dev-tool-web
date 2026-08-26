@@ -36,7 +36,7 @@
               }
             ],
             "styles": ["src/styles.css", "node_modules/primeicons/primeicons.css"],
-            "allowedCommonJsDependencies": ["@stomp/stompjs", "@joint/core"]
+            "allowedCommonJsDependencies": ["@stomp/stompjs", "@joint/core", "classnames"]
           },
           "configurations": {
             "production": {

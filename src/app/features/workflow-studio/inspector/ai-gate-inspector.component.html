@@ -31,9 +31,9 @@
   ></app-form-input>
 
   <div id="ai-gate-section-decision" class="mt-4 border-t border-[var(--app-border)] pt-4">
-    <label class="mb-2 block text-sm font-semibold text-[var(--app-text)]">
+    <div class="mb-2 block text-sm font-semibold text-[var(--app-text)]">
       {{ 'workflowStudio.inspector.criteria' | translateContent }}
-    </label>
+    </div>
     <app-workflow-json-object-editor
       [value]="criteriaValue"
       [readonly]="readonly"
@@ -42,9 +42,9 @@
   </div>
 
   <div id="ai-gate-section-input" class="mt-4 border-t border-[var(--app-border)] pt-4">
-    <label class="mb-2 block text-sm font-semibold text-[var(--app-text)]">
+    <div class="mb-2 block text-sm font-semibold text-[var(--app-text)]">
       {{ 'workflowStudio.inspector.inputMapping' | translateContent }}
-    </label>
+    </div>
     <app-workflow-input-mapping-editor
       [value]="inputMappingValue"
       [readonly]="readonly"

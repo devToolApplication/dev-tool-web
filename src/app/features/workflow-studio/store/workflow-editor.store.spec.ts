@@ -108,7 +108,6 @@ describe('WorkflowEditorStore', () => {
   });
 
   it('patches selected node config immutably without allowing id or type changes', () => {
-    const detail = sampleDetail();
     loadSampleWorkflow(store);
     const aiNode: WorkflowNode = {
       id: 'ai',

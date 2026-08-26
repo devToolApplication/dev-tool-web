@@ -15,7 +15,6 @@ import {
 import {
   AiGateWorkflowNode,
   BpmnWorkflowNode,
-  BpmnWorkflowNodeType,
   CodeGateWorkflowNode,
   EndWorkflowNode,
   JsonValue,

@@ -4,6 +4,12 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 
 import { createBasePageResponse } from '@core/http/base-response.model';
+
+vi.mock('bpmn-js-properties-panel', () => ({
+  BpmnPropertiesPanelModule: {},
+  BpmnPropertiesProviderModule: {},
+}));
+
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowDetail, WorkflowRun } from '../model/workflow-studio.model';
 import { WorkflowRunDetailPageComponent } from './workflow-run-detail-page.component';

@@ -1,9 +1,12 @@
 import { runInInjectionContext, Injector } from '@angular/core';
 import { readFileSync } from 'node:fs';
+vi.mock('bpmn-js-properties-panel', () => ({
+  BpmnPropertiesPanelModule: {},
+  BpmnPropertiesProviderModule: {},
+}));
 import {
   WORKFLOW_BPMN_MODELER_FACTORY,
   WorkflowBpmnCanvasComponent,
-  WorkflowBpmnElementConfig,
 } from './workflow-bpmn-canvas.component';
 
 class MockModeler {
@@ -130,20 +133,23 @@ class MockModeler {
 describe('WorkflowBpmnCanvasComponent unit', () => {
   let component: WorkflowBpmnCanvasComponent;
   let mockModeler: MockModeler;
+  let createModeler: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockModeler = new MockModeler();
+    createModeler = vi.fn(() => mockModeler);
     const injector = Injector.create({
       providers: [
         {
           provide: WORKFLOW_BPMN_MODELER_FACTORY,
-          useValue: () => mockModeler,
+          useValue: createModeler,
         },
       ],
     });
 
     component = runInInjectionContext(injector, () => new WorkflowBpmnCanvasComponent());
     component.canvasRef = { nativeElement: document.createElement('div') };
+    component.propertiesPanelRef = { nativeElement: document.createElement('div') };
     component.workflowId = 'wf-1';
     component.workflowName = 'Flowable workflow';
     component.bpmnXml = sampleXml();
@@ -155,6 +161,10 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
   });
 
   it('initializes bpmn-js with current workflow XML and destroys it on component destroy', () => {
+    expect(createModeler).toHaveBeenCalledWith(
+      component.canvasRef.nativeElement,
+      component.propertiesPanelRef.nativeElement,
+    );
     expect(mockModeler.importXML).toHaveBeenCalledOnce();
     expect(mockModeler.importedXml).toContain(
       '<process id="wf_1" name="Flowable workflow" isExecutable="true">',
@@ -163,13 +173,11 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
     expect(mockModeler.destroy).toHaveBeenCalledOnce();
   });
 
-  it('emits node, sequence-flow, and element config selection from bpmn-js element clicks', () => {
+  it('emits node and sequence-flow selection from bpmn-js element clicks', () => {
     const selectedNodes: Array<string | null> = [];
     const selectedEdges: Array<string | null> = [];
-    const selectedConfigs: Array<WorkflowBpmnElementConfig | null> = [];
     component.nodeSelected.subscribe((nodeId) => selectedNodes.push(nodeId));
     component.edgeSelected.subscribe((edgeId) => selectedEdges.push(edgeId));
-    component.elementSelected.subscribe((config) => selectedConfigs.push(config));
 
     mockModeler.handlers.get('element.click')?.({
       element: mockModeler.mockElements['service-1'],
@@ -178,85 +186,41 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
       element: mockModeler.mockElements['flow-1'],
     });
 
-    expect(selectedNodes).toEqual(['service-1']);
-    expect(selectedEdges).toEqual(['flow-1']);
-    expect(selectedConfigs[0]).toMatchObject({
-      id: 'service-1',
-      type: 'bpmn:ServiceTask',
-      name: 'AI Task',
-      flowableTopic: 'ai-task',
-      flowableType: 'external-worker',
-      taskConfigJson: '{}',
-    });
-    expect(selectedConfigs[1]).toMatchObject({
-      id: 'flow-1',
-      type: 'bpmn:SequenceFlow',
-      name: 'Pass',
-      conditionExpression: '${approved == true}',
-    });
-  });
-
-  it('emits empty refs for newly created message and error events', () => {
-    const selectedConfigs: Array<WorkflowBpmnElementConfig | null> = [];
-    component.elementSelected.subscribe((config) => selectedConfigs.push(config));
-
-    mockModeler.handlers.get('element.click')?.({
-      element: mockModeler.mockElements['message-event'],
-    });
-    mockModeler.handlers.get('element.click')?.({
-      element: mockModeler.mockElements['error-boundary'],
-    });
-
-    expect(selectedConfigs[0]).toMatchObject({
-      id: 'message-event',
-      messageRef: '',
-      messageName: '',
-    });
-    expect(selectedConfigs[1]).toMatchObject({
-      id: 'error-boundary',
-      errorRef: '',
-      errorName: '',
-    });
-  });
-
-  it('updates element config for service task and sequence flow, and emits saved XML', async () => {
-    const emittedXmls: string[] = [];
-    component.bpmnXmlChange.subscribe((xml) => emittedXmls.push(xml));
-    mockModeler.saveXML = vi.fn(async () => ({ xml: '<definitions updated="true" />' }));
-
-    await component.updateElementConfig({
-      id: 'service-1',
-      type: 'bpmn:ServiceTask',
-      name: 'Renamed Service',
-      flowableTopic: 'http-task',
-      flowableType: 'external-worker',
-      taskConfigJson: '{"url":"https://example.com"}',
-    });
-
-    expect(mockModeler.modeling.updateProperties).toHaveBeenCalledWith(
-      mockModeler.mockElements['service-1'],
-      { name: 'Renamed Service' },
-    );
-    expect(mockModeler.mockElements['service-1'].businessObject.$attrs['flowable:topic']).toBe(
-      'http-task',
-    );
-    expect(
-      mockModeler.mockElements['service-1'].businessObject.$attrs['flowable:taskConfigJson'],
-    ).toBe('{"url":"https://example.com"}');
-    expect(emittedXmls).toContain('<definitions updated="true" />');
+    expect(selectedNodes).toEqual(['service-1', null]);
+    expect(selectedEdges).toEqual([null, 'flow-1']);
   });
 
   it('themes only bpmn-js native editor chrome', () => {
+    const componentSource = readFileSync(
+      'src/app/features/workflow-studio/bpmn/workflow-bpmn-canvas.component.ts',
+      'utf8',
+    );
+    const template = readFileSync(
+      'src/app/features/workflow-studio/bpmn/workflow-bpmn-canvas.component.html',
+      'utf8',
+    );
     const stylesheet = readFileSync(
       'src/app/features/workflow-studio/bpmn/workflow-bpmn-canvas.component.scss',
       'utf8',
     );
+    const globalStyles = readFileSync('src/styles.css', 'utf8');
 
+    expect(componentSource).toContain('bpmn-js-properties-panel');
+    expect(componentSource).toContain('propertiesPanel: {');
+    expect(componentSource).not.toContain('WorkflowBpmnElementConfig');
+    expect(componentSource).not.toContain('updateElementConfig');
+    expect(template).toContain('#propertiesPanel');
+    expect(globalStyles).toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css');
+    expect(globalStyles).toContain('@bpmn-io/properties-panel/dist/assets/properties-panel.css');
     expect(stylesheet).toContain('html[data-theme=');
     expect(stylesheet).toContain('.djs-palette');
     expect(stylesheet).toContain('.djs-context-pad');
+    expect(globalStyles).toContain('.workflow-bpmn-canvas .bio-properties-panel');
     expect(stylesheet).not.toContain('workflow-bpmn-canvas__palette');
     expect(stylesheet).not.toContain('workflow-bpmn-canvas__palette-button');
+    expect(stylesheet).not.toContain('.djs-visual > :is(');
+    expect(stylesheet).not.toContain('fill: var(--workflow-bpmn-shape-fill) !important');
+    expect(stylesheet).not.toContain('stroke: var(--workflow-bpmn-shape-stroke) !important');
   });
 
   it('applies selected, validation and runtime markers', () => {

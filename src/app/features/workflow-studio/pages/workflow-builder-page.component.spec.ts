@@ -4,6 +4,11 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { readFileSync } from 'node:fs';
 import { of } from 'rxjs';
 
+vi.mock('bpmn-js-properties-panel', () => ({
+  BpmnPropertiesPanelModule: {},
+  BpmnPropertiesProviderModule: {},
+}));
+
 import { ToastService } from '../../../core/notifications/toast.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { createDraftWorkflowDetail } from '../model/workflow-lifecycle.config';
@@ -72,46 +77,6 @@ describe('WorkflowBuilderPageComponent unit', () => {
     });
   });
 
-  it('sets and clears selectedBpmnElement on canvas elementSelected and closeTransientState', () => {
-    expect(component.selectedBpmnElement()).toBeNull();
-
-    component.onElementSelected({
-      id: 'service-1',
-      type: 'bpmn:ServiceTask',
-      name: 'AI Task',
-      flowableTopic: 'ai-task',
-    });
-
-    expect(component.selectedBpmnElement()).toMatchObject({
-      id: 'service-1',
-      name: 'AI Task',
-      flowableTopic: 'ai-task',
-    });
-
-    component.closeTransientState();
-    expect(component.selectedBpmnElement()).toBeNull();
-  });
-
-  it('calls canvas updateElementConfig on elementConfigChange', () => {
-    const updateSpy = vi.fn(async () => {});
-    component.workflowBpmnCanvas = {
-      updateElementConfig: updateSpy,
-    } as any;
-
-    component.onElementConfigChange({
-      id: 'service-1',
-      type: 'bpmn:ServiceTask',
-      name: 'Updated Name',
-    });
-
-    expect(updateSpy).toHaveBeenCalledWith({
-      id: 'service-1',
-      type: 'bpmn:ServiceTask',
-      name: 'Updated Name',
-    });
-    expect(component.selectedBpmnElement()?.name).toBe('Updated Name');
-  });
-
   it('leaves non-save keyboard shortcuts to bpmn-js', async () => {
     const undoEvent = new KeyboardEvent('keydown', {
       key: 'z',
@@ -141,13 +106,21 @@ describe('WorkflowBuilderPageComponent unit', () => {
       'src/app/features/workflow-studio/pages/workflow-builder-page.component.css',
       'utf8',
     );
+    const moduleSource = readFileSync(
+      'src/app/features/workflow-studio/workflow-studio.module.ts',
+      'utf8',
+    );
 
     expect(template).not.toContain('workflow-builder__canvas-toolbar');
     expect(template).not.toContain('executeEditorCommand(');
     expect(template).not.toContain('canExecuteEditorCommand(');
+    expect(template).not.toContain('app-workflow-bpmn-properties-drawer');
+    expect(template).not.toContain('workflow-builder__drawer');
     expect(stylesheet).not.toContain('workflow-builder__canvas-toolbar');
     expect(stylesheet).not.toContain('workflow-builder__toolbar-group');
     expect(stylesheet).not.toContain('workflow-builder__toolbar-separator');
+    expect(stylesheet).not.toContain('workflow-builder__drawer');
+    expect(moduleSource).not.toContain('WorkflowBpmnPropertiesDrawerComponent');
   });
 
   function savedWorkflow(): WorkflowDetail {

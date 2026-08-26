@@ -108,34 +108,9 @@
           (bpmnXmlChange)="updateBpmnXml($event)"
           (nodeSelected)="store.selectNode($event)"
           (edgeSelected)="store.selectEdge($event)"
-          (elementSelected)="onElementSelected($event)"
           (viewportChange)="store.setViewport($event)"
         ></app-workflow-bpmn-canvas>
       </section>
-
-      @if (selectedBpmnElement()) {
-        <aside class="workflow-builder__drawer" aria-label="Element properties">
-          <header class="workflow-builder__drawer-header">
-            <h3 class="workflow-builder__drawer-title">
-              {{ 'workflowStudio.bpmn.drawer.properties' | translateContent }}
-            </h3>
-            <app-button
-              icon="pi pi-times"
-              variant="ghost"
-              size="sm"
-              [iconOnly]="true"
-              (buttonClick)="closeTransientState()"
-            ></app-button>
-          </header>
-          <div class="workflow-builder__drawer-body">
-            <app-workflow-bpmn-properties-drawer
-              [config]="selectedBpmnElement()"
-              [readonly]="readonlyMode()"
-              (configChange)="onElementConfigChange($event)"
-            ></app-workflow-bpmn-properties-drawer>
-          </div>
-        </aside>
-      }
     </section>
   </div>
 
