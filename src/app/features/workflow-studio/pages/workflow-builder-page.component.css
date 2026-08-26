@@ -100,7 +100,7 @@
 
 .workflow-builder__canvas {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
@@ -108,35 +108,6 @@
   border-radius: var(--app-radius-md, 0.5rem);
   overflow: hidden;
   background: var(--app-surface);
-}
-
-.workflow-builder__canvas-toolbar {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--app-spacing-1, 0.25rem);
-  align-items: center;
-  justify-content: flex-end;
-  padding: var(--app-spacing-2, 0.5rem);
-  border-bottom: 1px solid var(--app-border);
-  background: var(--app-card-surface);
-  overflow-x: auto;
-  min-width: 0;
-}
-
-.workflow-builder__toolbar-group {
-  display: inline-flex;
-  gap: var(--app-spacing-1, 0.25rem);
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.workflow-builder__toolbar-separator {
-  display: inline-block;
-  width: 1px;
-  height: 1.25rem;
-  background: var(--app-border);
-  margin: 0 var(--app-spacing-1, 0.25rem);
-  flex-shrink: 0;
 }
 
 .workflow-builder__drawer {

@@ -1,6 +1,7 @@
 import '@angular/compiler';
 import { runInInjectionContext, Injector } from '@angular/core';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { readFileSync } from 'node:fs';
 import { of } from 'rxjs';
 
 import { ToastService } from '../../../core/notifications/toast.service';
@@ -109,6 +110,44 @@ describe('WorkflowBuilderPageComponent unit', () => {
       name: 'Updated Name',
     });
     expect(component.selectedBpmnElement()?.name).toBe('Updated Name');
+  });
+
+  it('leaves non-save keyboard shortcuts to bpmn-js', async () => {
+    const undoEvent = new KeyboardEvent('keydown', {
+      key: 'z',
+      ctrlKey: true,
+      cancelable: true,
+    });
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      cancelable: true,
+    });
+    const undoPreventDefault = vi.spyOn(undoEvent, 'preventDefault');
+    const escapePreventDefault = vi.spyOn(escapeEvent, 'preventDefault');
+
+    await component.handleShortcut(undoEvent);
+    await component.handleShortcut(escapeEvent);
+
+    expect(undoPreventDefault).not.toHaveBeenCalled();
+    expect(escapePreventDefault).not.toHaveBeenCalled();
+  });
+
+  it('keeps the builder page free of custom BPMN editor controls', () => {
+    const template = readFileSync(
+      'src/app/features/workflow-studio/pages/workflow-builder-page.component.html',
+      'utf8',
+    );
+    const stylesheet = readFileSync(
+      'src/app/features/workflow-studio/pages/workflow-builder-page.component.css',
+      'utf8',
+    );
+
+    expect(template).not.toContain('workflow-builder__canvas-toolbar');
+    expect(template).not.toContain('executeEditorCommand(');
+    expect(template).not.toContain('canExecuteEditorCommand(');
+    expect(stylesheet).not.toContain('workflow-builder__canvas-toolbar');
+    expect(stylesheet).not.toContain('workflow-builder__toolbar-group');
+    expect(stylesheet).not.toContain('workflow-builder__toolbar-separator');
   });
 
   function savedWorkflow(): WorkflowDetail {

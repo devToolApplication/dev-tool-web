@@ -1,4 +1,5 @@
 import { runInInjectionContext, Injector } from '@angular/core';
+import { readFileSync } from 'node:fs';
 import {
   WORKFLOW_BPMN_MODELER_FACTORY,
   WorkflowBpmnCanvasComponent,
@@ -245,16 +246,17 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
     expect(emittedXmls).toContain('<definitions updated="true" />');
   });
 
-  it('delegates viewport commands and emits viewport snapshots', () => {
-    const viewports: Array<{ x: number; y: number; zoom: number }> = [];
-    component.viewportChange.subscribe((viewport) => viewports.push(viewport));
+  it('themes only bpmn-js native editor chrome', () => {
+    const stylesheet = readFileSync(
+      'src/app/features/workflow-studio/bpmn/workflow-bpmn-canvas.component.scss',
+      'utf8',
+    );
 
-    component.executeCommand('zoomIn');
-    component.executeCommand('zoomOut');
-    component.executeCommand('resetZoom');
-    component.executeCommand('fit');
-
-    expect(viewports.at(-1)).toEqual({ x: 12, y: 24, zoom: 1 });
+    expect(stylesheet).toContain('html[data-theme=');
+    expect(stylesheet).toContain('.djs-palette');
+    expect(stylesheet).toContain('.djs-context-pad');
+    expect(stylesheet).not.toContain('workflow-bpmn-canvas__palette');
+    expect(stylesheet).not.toContain('workflow-bpmn-canvas__palette-button');
   });
 
   it('applies selected, validation and runtime markers', () => {

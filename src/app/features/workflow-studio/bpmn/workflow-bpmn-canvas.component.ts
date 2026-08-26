@@ -41,10 +41,7 @@ export interface WorkflowBpmnElementConfig {
   triggeredByEvent?: boolean;
 }
 
-type BpmnCommand = 'fit' | 'zoomIn' | 'zoomOut' | 'resetZoom' | 'toggleNavigator' | 'fullscreen';
-
 interface BpmnCanvasService {
-  zoom(value?: number | 'fit-viewport', center?: 'auto'): number;
   viewbox(): { x: number; y: number; scale: number };
   addMarker(elementId: string, marker: string): void;
   removeMarker(elementId: string, marker: string): void;
@@ -137,32 +134,6 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
   revealElement(elementId: string): void {
     const canvas = this.canvasService();
     canvas?.addMarker(elementId, 'workflow-bpmn-canvas__marker--focused');
-  }
-
-  executeCommand(command: BpmnCommand): void {
-    const canvas = this.canvasService();
-    if (!canvas) {
-      return;
-    }
-
-    switch (command) {
-      case 'fit':
-        canvas.zoom('fit-viewport', 'auto');
-        break;
-      case 'zoomIn':
-        canvas.zoom(canvas.zoom() + 0.1, 'auto');
-        break;
-      case 'zoomOut':
-        canvas.zoom(canvas.zoom() - 0.1, 'auto');
-        break;
-      case 'resetZoom':
-        canvas.zoom(1, 'auto');
-        break;
-      case 'toggleNavigator':
-      case 'fullscreen':
-        break;
-    }
-    this.emitViewport();
   }
 
   async updateElementConfig(config: WorkflowBpmnElementConfig): Promise<void> {

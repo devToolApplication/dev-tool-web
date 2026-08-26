@@ -31,19 +31,6 @@ import {
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 
-export type WorkflowEditorCommand =
-  | 'undo'
-  | 'redo'
-  | 'autoLayout'
-  | 'fit'
-  | 'zoomIn'
-  | 'zoomOut'
-  | 'resetZoom'
-  | 'toggleNavigator'
-  | 'fullscreen'
-  | 'duplicate'
-  | 'delete';
-
 @Component({
   selector: 'app-workflow-builder-page',
   standalone: false,
@@ -130,29 +117,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
       await this.save();
       return;
     }
-
-    if (commandKey && key === 'z' && event.shiftKey) {
-      event.preventDefault();
-      this.executeEditorCommand('redo');
-      return;
-    }
-
-    if (commandKey && key === 'z') {
-      event.preventDefault();
-      this.executeEditorCommand('undo');
-      return;
-    }
-
-    if (commandKey && key === '0') {
-      event.preventDefault();
-      this.executeEditorCommand('fit');
-      return;
-    }
-
-    if (key === 'escape') {
-      event.preventDefault();
-      this.closeTransientState();
-    }
   }
 
   async loadWorkflow(workflowId: string): Promise<void> {
@@ -200,49 +164,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
     } catch (error) {
       this.error.set(errorMessage(error));
       return false;
-    }
-  }
-
-  executeEditorCommand(command: WorkflowEditorCommand): void {
-    switch (command) {
-      case 'undo':
-        this.store.undo();
-        return;
-      case 'redo':
-        this.store.redo();
-        return;
-      case 'fit':
-      case 'zoomIn':
-      case 'zoomOut':
-      case 'resetZoom':
-      case 'toggleNavigator':
-      case 'fullscreen':
-        this.workflowBpmnCanvas?.executeCommand(command);
-        return;
-      case 'autoLayout':
-      case 'duplicate':
-      case 'delete':
-        return;
-    }
-  }
-
-  canExecuteEditorCommand(command: WorkflowEditorCommand): boolean {
-    switch (command) {
-      case 'undo':
-        return this.store.canUndo();
-      case 'redo':
-        return this.store.canRedo();
-      case 'autoLayout':
-      case 'duplicate':
-      case 'delete':
-        return false;
-      case 'fit':
-      case 'zoomIn':
-      case 'zoomOut':
-      case 'resetZoom':
-      case 'toggleNavigator':
-      case 'fullscreen':
-        return true;
     }
   }
 
