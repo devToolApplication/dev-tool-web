@@ -68,7 +68,7 @@ export class CandidateDetailComponent implements OnInit {
       { label: 'koc.evidence.drawer.provider', value: item.provider ?? 'notAvailable' },
       {
         label: 'koc.evidence.drawer.executionPolicy',
-        value: 'koc.campaignWizard.screening.infrastructureWait',
+        value: 'koc.campaignDetail.infrastructureWait',
       },
     ];
   });

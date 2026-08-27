@@ -119,6 +119,9 @@ describe('CandidateDetailComponent', () => {
       'koc.evidence.drawer.provider',
       'koc.evidence.drawer.executionPolicy',
     ]);
+    expect(component.selectedEvidenceExecutionDetails()[2]?.value).toBe(
+      'koc.campaignDetail.infrastructureWait',
+    );
   });
 
   it('builds a simple workflow timeline without exposing model or reasoning settings', async () => {

@@ -1,0 +1,4 @@
+.campaign-review {
+  display: grid;
+  gap: var(--app-space-2);
+}

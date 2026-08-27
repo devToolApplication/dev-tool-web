@@ -2,8 +2,9 @@
 import { permissionGuard } from '@core/auth/permission.guard';
 import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { CampaignDetailComponent } from './pages/campaign-detail/campaign-detail.component';
+import { CampaignEditorComponent } from './pages/campaign-editor/campaign-editor.component';
 import { CampaignListComponent } from './pages/campaign-list/campaign-list.component';
-import { CampaignWizardComponent } from './pages/campaign-wizard/campaign-wizard.component';
+import { CampaignReviewComponent } from './pages/campaign-review/campaign-review.component';
 import { CandidateDetailComponent } from './pages/candidate-detail/candidate-detail.component';
 import { CandidateListComponent } from './pages/candidate-list/candidate-list.component';
 import { ReviewDetailComponent } from './pages/review-detail/review-detail.component';
@@ -39,7 +40,7 @@ export const kocManagementRoutes: Routes = [
   },
   {
     path: 'ai-agent-mcrs/koc/campaigns/create',
-    component: CampaignWizardComponent,
+    component: CampaignEditorComponent,
     canActivate: [permissionGuard],
     canDeactivate: [serviceManagementUnsavedChangesGuard],
     data: {
@@ -51,19 +52,8 @@ export const kocManagementRoutes: Routes = [
     },
   },
   {
-    path: 'ai-agent-mcrs/koc/campaigns/:campaignId',
-    component: CampaignDetailComponent,
-    canActivate: [permissionGuard],
-    data: {
-      permissions: ['AI_AGENT_READ'],
-      title: 'koc.campaigns.detail.title',
-      subtitle: 'koc.campaigns.detail.subtitle',
-      sectionTitle: 'koc.campaigns.detail.sectionTitle',
-    },
-  },
-  {
     path: 'ai-agent-mcrs/koc/campaigns/:campaignId/edit',
-    component: CampaignWizardComponent,
+    component: CampaignEditorComponent,
     canActivate: [permissionGuard],
     canDeactivate: [serviceManagementUnsavedChangesGuard],
     data: {
@@ -72,6 +62,39 @@ export const kocManagementRoutes: Routes = [
       title: 'koc.campaigns.edit.title',
       subtitle: 'koc.campaigns.edit.subtitle',
       sectionTitle: 'koc.campaigns.edit.sectionTitle',
+    },
+  },
+  {
+    path: 'ai-agent-mcrs/koc/campaigns/:campaignId/review',
+    component: CampaignReviewComponent,
+    canActivate: [permissionGuard],
+    data: {
+      permissions: ['AI_AGENT_READ'],
+      title: 'koc.campaignReview.title',
+      subtitle: 'koc.campaignReview.subtitle',
+      sectionTitle: 'koc.campaignReview.sectionTitle',
+    },
+  },
+  {
+    path: 'ai-agent-mcrs/koc/campaigns/:campaignId/review/:candidateId',
+    component: CampaignReviewComponent,
+    canActivate: [permissionGuard],
+    data: {
+      permissions: ['AI_AGENT_READ'],
+      title: 'koc.campaignReview.title',
+      subtitle: 'koc.campaignReview.subtitle',
+      sectionTitle: 'koc.campaignReview.sectionTitle',
+    },
+  },
+  {
+    path: 'ai-agent-mcrs/koc/campaigns/:campaignId',
+    component: CampaignDetailComponent,
+    canActivate: [permissionGuard],
+    data: {
+      permissions: ['AI_AGENT_READ'],
+      title: 'koc.campaigns.detail.title',
+      subtitle: 'koc.campaigns.detail.subtitle',
+      sectionTitle: 'koc.campaigns.detail.sectionTitle',
     },
   },
   {

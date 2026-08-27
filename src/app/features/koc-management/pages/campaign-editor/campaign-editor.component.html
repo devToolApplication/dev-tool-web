@@ -1,0 +1,303 @@
+<app-koc-page-frame [title]="pageTitle" [subtitle]="pageSubtitle">
+  @if (store.loading()) {
+    <app-loading-skeleton type="form" [rows]="6"></app-loading-skeleton>
+  } @else {
+    @if (store.error()) {
+      <app-error-state
+        title="koc.campaignEditor.error.title"
+        [message]="store.error() ?? 'koc.campaignEditor.error.loadFailed'"
+      ></app-error-state>
+    }
+
+    @if (store.validationIssues().length) {
+      <app-alert
+        variant="warning"
+        title="koc.campaignEditor.alert.title"
+        message="koc.campaignEditor.alert.description"
+      ></app-alert>
+    }
+
+    <section class="campaign-editor" [attr.aria-label]="'koc.campaignEditor.aria.title' | translateContent">
+      <nav
+        class="campaign-editor__steps"
+        role="tablist"
+        [attr.aria-label]="'koc.campaignEditor.stepsLabel' | translateContent"
+      >
+        @for (step of steps; track step.id; let index = $index) {
+          <button
+            type="button"
+            role="tab"
+            class="campaign-editor__step"
+            [class.campaign-editor__step--active]="store.activeStepId() === step.id"
+            [attr.aria-selected]="store.activeStepId() === step.id"
+            [attr.aria-current]="store.activeStepId() === step.id ? 'step' : null"
+            (click)="setStep(step.id)"
+          >
+            <span>{{ index + 1 }}</span>
+            {{ step.label | translateContent }}
+          </button>
+        }
+      </nav>
+
+      <p class="campaign-editor__mobile-step">
+        {{ activeStepIndex() + 1 }}/{{ steps.length }} {{ activeStep().label | translateContent }}
+      </p>
+
+      @switch (store.activeStepId()) {
+        @case ('campaign') {
+          <app-section-panel title="koc.campaignEditor.section.campaign">
+            <div class="campaign-editor__form-grid">
+              <app-input-text
+                label="koc.campaignEditor.field.name"
+                [value]="store.draft().name"
+                [invalid]="!!issueFor('name')"
+                [errorMessage]="issueFor('name') ?? undefined"
+                [required]="true"
+                [disabled]="store.saving()"
+                (valueChange)="updateDraft({ name: $event ?? '' })"
+              ></app-input-text>
+              <app-input-number
+                label="koc.campaignEditor.field.targetApproved"
+                [value]="store.draft().goal.targetApproved"
+                [min]="1"
+                [invalid]="!!issueFor('goal.targetApproved')"
+                [errorMessage]="issueFor('goal.targetApproved') ?? undefined"
+                [disabled]="store.saving()"
+                (valueChange)="updateGoal({ targetApproved: $event ?? 0 })"
+              ></app-input-number>
+              <app-input-number
+                label="koc.campaignEditor.field.candidateLimit"
+                [value]="store.draft().goal.candidateLimit"
+                [min]="store.draft().goal.targetApproved"
+                [invalid]="!!issueFor('goal.candidateLimit')"
+                [errorMessage]="issueFor('goal.candidateLimit') ?? undefined"
+                [disabled]="store.saving()"
+                (valueChange)="updateGoal({ candidateLimit: $event ?? 0 })"
+              ></app-input-number>
+              <app-input-area
+                class="campaign-editor__wide"
+                label="koc.campaignEditor.field.description"
+                [value]="store.draft().description"
+                [rows]="4"
+                [maxRows]="8"
+                [disabled]="store.saving()"
+                (valueChange)="updateDraft({ description: $event ?? '' })"
+              ></app-input-area>
+            </div>
+          </app-section-panel>
+        }
+        @case ('searchRequirements') {
+          <div class="campaign-editor__stack">
+            <app-section-panel title="koc.campaignEditor.section.searchRequirements">
+              <div class="campaign-editor__form-grid">
+                <app-input-area
+                  class="campaign-editor__wide"
+                  label="koc.campaignEditor.field.instructions"
+                  [value]="store.draft().search.instructions"
+                  [rows]="5"
+                  [maxRows]="10"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateInstructions($event)"
+                ></app-input-area>
+                <app-input-text
+                  label="koc.campaignEditor.field.platforms"
+                  [value]="csv(store.draft().search.scope.platforms)"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScopeList('platforms', $event)"
+                ></app-input-text>
+                <app-input-text
+                  label="koc.campaignEditor.field.locations"
+                  [value]="csv(store.draft().search.scope.locations)"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScopeList('locations', $event)"
+                ></app-input-text>
+                <app-input-text
+                  label="koc.campaignEditor.field.languages"
+                  [value]="csv(store.draft().search.scope.languages)"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScopeList('languages', $event)"
+                ></app-input-text>
+                <app-input-number
+                  label="koc.campaignEditor.field.minimumFollowers"
+                  [value]="store.draft().search.scope.minFollowers"
+                  [min]="0"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScope({ minFollowers: $event })"
+                ></app-input-number>
+                <app-input-number
+                  label="koc.campaignEditor.field.maximumFollowers"
+                  [value]="store.draft().search.scope.maxFollowers"
+                  [min]="0"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScope({ maxFollowers: $event })"
+                ></app-input-number>
+                <app-input-number
+                  label="koc.campaignEditor.field.recentActivityDays"
+                  [value]="store.draft().search.scope.recentActivityDays"
+                  [min]="1"
+                  [disabled]="store.saving()"
+                  (valueChange)="updateScope({ recentActivityDays: $event })"
+                ></app-input-number>
+              </div>
+            </app-section-panel>
+
+            <app-section-panel title="koc.campaignEditor.section.creatorRequirements">
+              <div section-actions>
+                <app-button
+                  type="button"
+                  variant="secondary"
+                  icon="pi pi-plus"
+                  label="koc.campaignEditor.action.addRequirement"
+                  [disabled]="store.saving()"
+                  (buttonClick)="addRequirement()"
+                ></app-button>
+              </div>
+
+              @if (store.draft().search.requirements.length === 0) {
+                <app-empty-state
+                  title="koc.campaignEditor.empty.requirements.title"
+                  description="koc.campaignEditor.empty.requirements.description"
+                ></app-empty-state>
+              } @else {
+                <div class="campaign-editor__requirements" role="list">
+                  @for (requirement of store.draft().search.requirements; track requirement.id; let index = $index) {
+                    <article class="campaign-editor__requirement" role="listitem">
+                      <header class="campaign-editor__requirement-header">
+                        <strong>{{
+                          requirement.title ||
+                            ('koc.campaignEditor.requirement.defaultName' | translateContent) +
+                              ' ' +
+                              (index + 1)
+                        }}</strong>
+                        <app-button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          icon="pi pi-trash"
+                          label="koc.campaignEditor.action.removeRequirement"
+                          [disabled]="store.saving()"
+                          (buttonClick)="removeRequirement(requirement.id)"
+                        ></app-button>
+                      </header>
+                      <div class="campaign-editor__form-grid">
+                        <app-input-text
+                          label="koc.campaignEditor.requirement.title"
+                          [value]="requirement.title"
+                          [disabled]="store.saving()"
+                          (valueChange)="updateRequirement(requirement.id, { title: $event ?? '' })"
+                        ></app-input-text>
+                        <app-select
+                          label="koc.campaignEditor.requirement.importance"
+                          [options]="importanceOptions"
+                          [value]="requirement.importance"
+                          [disabled]="store.saving()"
+                          (valueChange)="updateRequirement(requirement.id, { importance: normalizeImportance($event) })"
+                        ></app-select>
+                        <app-input-number
+                          label="koc.campaignEditor.requirement.minimumConfidence"
+                          [value]="requirement.minimumConfidence"
+                          [min]="0"
+                          [max]="1"
+                          [step]="0.05"
+                          [disabled]="store.saving()"
+                          (valueChange)="updateRequirement(requirement.id, { minimumConfidence: $event })"
+                        ></app-input-number>
+                        <app-input-number
+                          label="koc.campaignEditor.requirement.minimumEvidence"
+                          [value]="requirement.minimumEvidence"
+                          [min]="0"
+                          [disabled]="store.saving()"
+                          (valueChange)="updateRequirement(requirement.id, { minimumEvidence: $event })"
+                        ></app-input-number>
+                        <app-input-area
+                          class="campaign-editor__wide"
+                          label="koc.campaignEditor.requirement.description"
+                          [value]="requirement.description"
+                          [rows]="3"
+                          [maxRows]="8"
+                          [disabled]="store.saving()"
+                          (valueChange)="updateRequirement(requirement.id, { description: $event ?? '' })"
+                        ></app-input-area>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+            </app-section-panel>
+          </div>
+        }
+        @case ('reviewStart') {
+          <app-section-panel title="koc.campaignEditor.section.reviewStart">
+            <dl class="campaign-editor__summary">
+              <div>
+                <dt>{{ 'koc.campaignEditor.summary.name' | translateContent }}</dt>
+                <dd>{{ store.draft().name || ('koc.campaignEditor.summary.notSet' | translateContent) }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'koc.campaignEditor.summary.targetApproved' | translateContent }}</dt>
+                <dd>{{ store.draft().goal.targetApproved }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'koc.campaignEditor.summary.candidateLimit' | translateContent }}</dt>
+                <dd>{{ store.draft().goal.candidateLimit }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'koc.campaignEditor.summary.requirements' | translateContent }}</dt>
+                <dd>{{ store.draft().search.requirements.length }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'koc.campaignEditor.summary.aiReview' | translateContent }}</dt>
+                <dd>{{ store.draft().workflow.workflowName || ('koc.campaignEditor.summary.pinnedVersion' | translateContent) }}</dd>
+              </div>
+            </dl>
+          </app-section-panel>
+        }
+      }
+
+      <footer class="campaign-editor__footer">
+        <app-button
+          type="button"
+          variant="secondary"
+          label="koc.campaignEditor.action.cancel"
+          [disabled]="store.saving()"
+          (buttonClick)="cancel()"
+        ></app-button>
+        <div class="campaign-editor__footer-actions">
+          <app-button
+            type="button"
+            variant="secondary"
+            label="koc.campaignEditor.action.back"
+            [disabled]="isFirstStep() || store.saving()"
+            (buttonClick)="back()"
+          ></app-button>
+          <app-button
+            type="button"
+            variant="secondary"
+            label="koc.campaignEditor.action.saveDraft"
+            [loading]="store.saving()"
+            [disabled]="!canMutate() || store.saving()"
+            (buttonClick)="saveDraft()"
+          ></app-button>
+          @if (isLastStep()) {
+            <app-button
+              type="button"
+              icon="pi pi-play"
+              label="koc.campaignEditor.action.start"
+              [loading]="store.saving()"
+              [disabled]="startDisabled()"
+              (buttonClick)="startCampaign()"
+            ></app-button>
+          } @else {
+            <app-button
+              type="button"
+              icon="pi pi-arrow-right"
+              label="koc.campaignEditor.action.continue"
+              [disabled]="!canContinue()"
+              (buttonClick)="continue()"
+            ></app-button>
+          }
+        </div>
+      </footer>
+    </section>
+  }
+</app-koc-page-frame>
