@@ -119,6 +119,9 @@ export function validateCampaignEditorDraft(draft: CampaignEditorDraft): Campaig
   if (!Number.isFinite(draft.goal.candidateLimit) || draft.goal.candidateLimit < draft.goal.targetApproved) {
     issues.push(issue('goal.candidateLimit', 'candidateLimitGteTargetApproved'));
   }
+  if (!draft.search.instructions.trim()) {
+    issues.push(issue('search.instructions', 'instructionsRequired'));
+  }
   if (!draft.search.requirements.length) {
     issues.push(issue('search.requirements', 'requirementsRequired'));
   }
@@ -128,7 +131,11 @@ export function validateCampaignEditorDraft(draft: CampaignEditorDraft): Campaig
   if (!draft.workflow.workflowVersionId.trim()) {
     issues.push(issue('workflow.workflowVersionId', 'workflowVersionRequired'));
   }
-  if (draft.workflow.workflowVersion == null || !Number.isFinite(draft.workflow.workflowVersion)) {
+  if (
+    draft.workflow.workflowVersion == null ||
+    !Number.isFinite(draft.workflow.workflowVersion) ||
+    draft.workflow.workflowVersion <= 0
+  ) {
     issues.push(issue('workflow.workflowVersion', 'workflowVersionNumberRequired'));
   }
 

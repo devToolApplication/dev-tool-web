@@ -94,8 +94,11 @@
                   class="campaign-editor__wide"
                   label="koc.campaignEditor.field.instructions"
                   [value]="store.draft().search.instructions"
+                  [required]="true"
                   [rows]="5"
                   [maxRows]="10"
+                  [invalid]="!!issueFor('search.instructions')"
+                  [errorMessage]="issueFor('search.instructions') ?? undefined"
                   [disabled]="store.saving()"
                   (valueChange)="updateInstructions($event)"
                 ></app-input-area>

@@ -1,12 +1,13 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
+import { environment } from '../../../../enviroment/environment';
 import type { CampaignEditorPayload } from '../model/koc-campaign-editor.model';
-import {
-  KocCampaignEditorApiService,
-  type CampaignEditorSavedCampaign,
-} from './koc-campaign-editor-api.service';
+import { KocCampaignEditorApiService } from './koc-campaign-editor-api.service';
 
-type SavedCampaign = CampaignEditorSavedCampaign;
+const baseUrl = `${environment.apiUrl.adminAiGenerator}/koc/campaigns`;
 
 function createPayload(overrides: Partial<CampaignEditorPayload> = {}): CampaignEditorPayload {
   return {
@@ -48,102 +49,153 @@ function createPayload(overrides: Partial<CampaignEditorPayload> = {}): Campaign
 }
 
 describe('KocCampaignEditorApiService', () => {
-  it('saves a new draft and assigns an id', async () => {
-    const service = new KocCampaignEditorApiService();
+  let service: KocCampaignEditorApiService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), KocCampaignEditorApiService],
+    });
+
+    service = TestBed.inject(KocCampaignEditorApiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('creates a draft through the backend campaign endpoint', async () => {
     const payload = createPayload();
 
-    const saved = await firstValueFrom(service.createCampaign(payload));
+    const pending = firstValueFrom(service.createCampaign(payload));
+    const request = httpMock.expectOne(baseUrl);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ data: response(payload) });
 
-    expect(saved).toEqual({
+    await expect(pending).resolves.toEqual({
       campaignId: 'campaign-1',
       status: 'DRAFT',
       payload,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: '2026-08-27T00:00:00.000Z',
+      updatedAt: '2026-08-27T00:00:00.000Z',
     });
   });
 
-  it('loads a saved draft by id', async () => {
-    const service = new KocCampaignEditorApiService();
+  it('loads an existing campaign from the backend campaign endpoint', async () => {
     const payload = createPayload();
 
-    const created = await firstValueFrom(service.createCampaign(payload)) as SavedCampaign;
-    const loaded = await firstValueFrom(service.getCampaign(created.campaignId));
+    const pending = firstValueFrom(service.getCampaign('campaign-1'));
+    const request = httpMock.expectOne(`${baseUrl}/campaign-1`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ data: response(payload) });
 
-    expect(loaded).toEqual(created);
-  });
-
-  it('updates an existing draft', async () => {
-    const service = new KocCampaignEditorApiService();
-    const created = await firstValueFrom(service.createCampaign(createPayload())) as SavedCampaign;
-    const updatedPayload = createPayload({
-      name: 'Updated creator campaign',
-      description: 'A tighter brief for the same campaign.',
-    });
-
-    const updated = await firstValueFrom(service.updateCampaign(created.campaignId, updatedPayload));
-
-    expect(updated).toEqual({
-      campaignId: created.campaignId,
+    await expect(pending).resolves.toMatchObject({
+      campaignId: 'campaign-1',
       status: 'DRAFT',
-      payload: updatedPayload,
-      createdAt: created.createdAt,
-      updatedAt: expect.any(String),
+      payload,
     });
   });
 
-  it('starts a saved campaign and returns RUNNING status', async () => {
-    const service = new KocCampaignEditorApiService();
-    const created = await firstValueFrom(service.createCampaign(createPayload())) as SavedCampaign;
+  it('updates a draft through the backend campaign endpoint', async () => {
+    const payload = createPayload({ name: 'Updated creator campaign' });
 
-    const started = await firstValueFrom(service.startCampaign(created.campaignId));
-    const reloaded = await firstValueFrom(service.getCampaign(created.campaignId)) as SavedCampaign;
+    const pending = firstValueFrom(service.updateCampaign('campaign-1', payload));
+    const request = httpMock.expectOne(`${baseUrl}/campaign-1`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ data: response(payload) });
 
-    expect(started).toEqual({
-      campaignId: created.campaignId,
+    await expect(pending).resolves.toMatchObject({
+      campaignId: 'campaign-1',
+      status: 'DRAFT',
+      payload,
+    });
+  });
+
+  it('starts a saved campaign through the backend campaign endpoint', async () => {
+    const payload = createPayload();
+
+    const pending = firstValueFrom(service.startCampaign('campaign-1'));
+    const request = httpMock.expectOne(`${baseUrl}/campaign-1/start`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeNull();
+    request.flush({ data: response(payload, 'RUNNING') });
+
+    await expect(pending).resolves.toMatchObject({
+      campaignId: 'campaign-1',
       status: 'RUNNING',
-      payload: created.payload,
-      createdAt: created.createdAt,
-      updatedAt: expect.any(String),
+      payload,
     });
-    expect(reloaded.status).toBe('RUNNING');
   });
 
-  it('returns an error when loading a missing campaign', async () => {
-    const service = new KocCampaignEditorApiService();
+  it('propagates backend errors when loading a missing campaign', async () => {
+    const pending = firstValueFrom(service.getCampaign('missing'));
+    const request = httpMock.expectOne(`${baseUrl}/missing`);
+    request.flush({ errorMessage: 'Campaign not found' }, { status: 404, statusText: 'Not Found' });
 
-    await expect(firstValueFrom(service.getCampaign('missing'))).rejects.toThrow(
-      'Campaign missing was not found',
-    );
+    await expect(pending).rejects.toMatchObject({ status: 404 });
   });
 
-  it('returns an error when updating or starting a missing campaign', async () => {
-    const service = new KocCampaignEditorApiService();
+  it('maps legacy backend fields when structured campaign fields are absent', async () => {
+    const pending = firstValueFrom(service.getCampaign('legacy-1'));
+    const request = httpMock.expectOne(`${baseUrl}/legacy-1`);
+    request.flush({
+      data: {
+        campaignId: 'legacy-1',
+        name: 'Legacy campaign',
+        description: 'Legacy description',
+        requirement: 'Legacy requirement',
+        status: 'READY',
+        acceptedTarget: 10,
+        maximumDiscovered: 50,
+        maximumScreened: 25,
+        workflowDefinitionId: 'wf-def',
+        workflowVersionId: 'wf-ver',
+      },
+    });
 
-    await expect(firstValueFrom(service.updateCampaign('missing', createPayload()))).rejects.toThrow(
-      'Campaign missing was not found',
-    );
-    await expect(firstValueFrom(service.startCampaign('missing'))).rejects.toThrow(
-      'Campaign missing was not found',
-    );
-  });
-
-  it('does not accept reviewedBy or reviewedAt fields on save payload', async () => {
-    const service = new KocCampaignEditorApiService();
-    const payloadWithExtras = {
-      ...createPayload(),
-      reviewedBy: 'alice',
-      reviewedAt: '2026-08-27T00:00:00.000Z',
-    } as CampaignEditorPayload & {
-      reviewedBy: string;
-      reviewedAt: string;
-    };
-
-    const saved = await firstValueFrom(
-      service.createCampaign(payloadWithExtras as CampaignEditorPayload),
-    ) as SavedCampaign;
-
-    expect(saved.payload).not.toHaveProperty('reviewedBy');
-    expect(saved.payload).not.toHaveProperty('reviewedAt');
+    await expect(pending).resolves.toMatchObject({
+      campaignId: 'legacy-1',
+      status: 'READY',
+      payload: {
+        name: 'Legacy campaign',
+        description: 'Legacy description',
+        goal: {
+          targetApproved: 10,
+          candidateLimit: 50,
+        },
+        search: {
+          instructions: 'Legacy requirement',
+          scope: {
+            platforms: [],
+            locations: [],
+            languages: [],
+          },
+          requirements: [],
+        },
+        workflow: {
+          workflowDefinitionId: 'wf-def',
+          workflowVersionId: 'wf-ver',
+          workflowVersion: 1,
+        },
+      },
+    });
   });
 });
+
+function response(payload: CampaignEditorPayload, status: 'DRAFT' | 'RUNNING' = 'DRAFT') {
+  return {
+    campaignId: 'campaign-1',
+    name: payload.name,
+    description: payload.description,
+    status,
+    acceptedTarget: payload.goal.targetApproved,
+    goal: payload.goal,
+    search: payload.search,
+    workflow: payload.workflow,
+    createdAt: '2026-08-27T00:00:00.000Z',
+    updatedAt: '2026-08-27T00:00:00.000Z',
+  };
+}

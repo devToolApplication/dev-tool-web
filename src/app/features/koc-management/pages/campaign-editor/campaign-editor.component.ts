@@ -209,7 +209,7 @@ function isCampaignStepComplete(draft: CampaignEditorDraft): boolean {
 }
 
 function isSearchRequirementsComplete(draft: CampaignEditorDraft): boolean {
-  return draft.search.requirements.length > 0;
+  return draft.search.instructions.trim().length > 0 && draft.search.requirements.length > 0;
 }
 
 function isDraftReadyToStart(draft: CampaignEditorDraft): boolean {

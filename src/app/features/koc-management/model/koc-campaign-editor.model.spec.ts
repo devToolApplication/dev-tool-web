@@ -134,11 +134,15 @@ describe('campaign editor model', () => {
         workflowDefinitionId: '',
         workflowVersionId: '',
         workflowVersion: null,
-        workflowName: '',
+      workflowName: '',
       },
     }));
 
     expect(issues).toEqual(expect.arrayContaining([
+      {
+        path: 'search.instructions',
+        key: 'koc.campaignEditor.validation.instructionsRequired',
+      },
       {
         path: 'search.requirements',
         key: 'koc.campaignEditor.validation.requirementsRequired',
@@ -156,7 +160,7 @@ describe('campaign editor model', () => {
         key: 'koc.campaignEditor.validation.workflowVersionNumberRequired',
       },
     ]));
-    expect(issues).toHaveLength(4);
+    expect(issues).toHaveLength(5);
   });
 
   it('preserves arbitrary natural-language requirement content', () => {
@@ -259,5 +263,21 @@ describe('campaign editor model', () => {
         },
       })),
     ).toThrow('workflowVersion is required before serialization');
+  });
+
+  it('requires a positive workflow version number before start', () => {
+    const issues = validateCampaignEditorDraft(readyDraft({
+      workflow: {
+        workflowDefinitionId: 'workflow-def-1',
+        workflowVersionId: 'workflow-ver-1',
+        workflowVersion: 0,
+        workflowName: 'Campaign review flow',
+      },
+    }));
+
+    expect(issues).toContainEqual({
+      path: 'workflow.workflowVersion',
+      key: 'koc.campaignEditor.validation.workflowVersionNumberRequired',
+    });
   });
 });

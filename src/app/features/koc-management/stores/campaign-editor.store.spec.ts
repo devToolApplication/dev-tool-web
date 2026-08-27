@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import {
   createCampaignRequirement,
@@ -12,6 +12,9 @@ import {
   type CampaignEditorSavedCampaign,
 } from '../services/koc-campaign-editor-api.service';
 import { CampaignEditorStore } from './campaign-editor.store';
+
+const savedCampaigns = new Map<string, CampaignEditorSavedCampaign>();
+let nextCampaignNumber = 1;
 
 function createValidDraft(): CampaignEditorDraft {
   return {
@@ -53,14 +56,52 @@ function createValidDraft(): CampaignEditorDraft {
 
 describe('CampaignEditorStore', () => {
   let store: CampaignEditorStore;
-  let apiService: KocCampaignEditorApiService;
+  let apiService: {
+    getCampaign: ReturnType<typeof vi.fn>;
+    createCampaign: ReturnType<typeof vi.fn>;
+    updateCampaign: ReturnType<typeof vi.fn>;
+    startCampaign: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
+    savedCampaigns.clear();
+    nextCampaignNumber = 1;
+    apiService = {
+      getCampaign: vi.fn((campaignId: string) => {
+        const saved = savedCampaigns.get(campaignId);
+        return saved
+          ? of(cloneSavedCampaign(saved))
+          : throwError(() => new Error(`Campaign ${campaignId} was not found`));
+      }),
+      createCampaign: vi.fn((payload) => {
+        const saved = saveCampaign(`campaign-${nextCampaignNumber++}`, payload);
+        return of(cloneSavedCampaign(saved));
+      }),
+      updateCampaign: vi.fn((campaignId: string, payload) => {
+        const current = savedCampaigns.get(campaignId);
+        if (!current) {
+          return throwError(() => new Error(`Campaign ${campaignId} was not found`));
+        }
+        const saved = saveCampaign(campaignId, payload, current.createdAt);
+        return of(cloneSavedCampaign(saved));
+      }),
+      startCampaign: vi.fn((campaignId: string) => {
+        const current = savedCampaigns.get(campaignId);
+        if (!current) {
+          return throwError(() => new Error(`Campaign ${campaignId} was not found`));
+        }
+        const saved = { ...current, status: 'RUNNING' as const, updatedAt: new Date().toISOString() };
+        savedCampaigns.set(campaignId, saved);
+        return of(cloneSavedCampaign(saved));
+      }),
+    };
     TestBed.configureTestingModule({
-      providers: [CampaignEditorStore, KocCampaignEditorApiService],
+      providers: [
+        CampaignEditorStore,
+        { provide: KocCampaignEditorApiService, useValue: apiService },
+      ],
     });
     store = TestBed.inject(CampaignEditorStore);
-    apiService = TestBed.inject(KocCampaignEditorApiService);
   });
 
   it('initializes create mode with a clean default draft', () => {
@@ -169,19 +210,7 @@ describe('CampaignEditorStore', () => {
 
   it('loads an existing campaign when initialized with a campaignId', async () => {
     const validDraft = createValidDraft();
-    const existing = await firstValueFrom(
-      apiService.createCampaign({
-        name: validDraft.name,
-        description: validDraft.description,
-        goal: validDraft.goal,
-        search: validDraft.search,
-        workflow: {
-          workflowDefinitionId: validDraft.workflow.workflowDefinitionId,
-          workflowVersionId: validDraft.workflow.workflowVersionId,
-          workflowVersion: validDraft.workflow.workflowVersion!,
-        },
-      }),
-    );
+    const existing = saveCampaign('campaign-1', toCampaignEditorPayload(validDraft));
 
     store.initialize(existing.campaignId);
     await Promise.resolve();
@@ -261,3 +290,40 @@ describe('CampaignEditorStore', () => {
     expect(store.dirty()).toBe(true);
   });
 });
+
+function saveCampaign(
+  campaignId: string,
+  payload: ReturnType<typeof toCampaignEditorPayload>,
+  createdAt = new Date().toISOString(),
+): CampaignEditorSavedCampaign {
+  const saved: CampaignEditorSavedCampaign = {
+    campaignId,
+    status: 'DRAFT',
+    payload,
+    createdAt,
+    updatedAt: new Date().toISOString(),
+  };
+  savedCampaigns.set(campaignId, saved);
+  return saved;
+}
+
+function cloneSavedCampaign(saved: CampaignEditorSavedCampaign): CampaignEditorSavedCampaign {
+  return {
+    ...saved,
+    payload: {
+      ...saved.payload,
+      goal: { ...saved.payload.goal },
+      search: {
+        ...saved.payload.search,
+        scope: {
+          ...saved.payload.search.scope,
+          platforms: [...(saved.payload.search.scope.platforms ?? [])],
+          locations: [...(saved.payload.search.scope.locations ?? [])],
+          languages: [...(saved.payload.search.scope.languages ?? [])],
+        },
+        requirements: saved.payload.search.requirements.map((requirement) => ({ ...requirement })),
+      },
+      workflow: { ...saved.payload.workflow },
+    },
+  };
+}

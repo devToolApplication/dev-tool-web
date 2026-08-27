@@ -1,11 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
+import { BaseResponse } from '@core/http/base-response.model';
+import { environment } from '../../../../enviroment/environment';
 import type { CampaignEditorPayload } from '../model/koc-campaign-editor.model';
+import type { KocCampaignStatus } from '../model/koc-campaign.model';
 
 export interface CampaignEditorSavedCampaign {
   campaignId: string;
-  status: 'DRAFT' | 'RUNNING';
+  status: KocCampaignStatus;
   payload: CampaignEditorPayload;
   createdAt: string;
   updatedAt: string;
@@ -13,61 +17,65 @@ export interface CampaignEditorSavedCampaign {
 
 @Injectable({ providedIn: 'root' })
 export class KocCampaignEditorApiService {
-  // ponytail: in-memory FE-first contract; replace the method bodies with HTTP calls when backend endpoints are ready.
-  private readonly campaigns = new Map<string, CampaignEditorSavedCampaign>();
-  private nextCampaignNumber = 1;
+  private readonly baseUrl = `${environment.apiUrl.adminAiGenerator}/koc/campaigns`;
+
+  constructor(private readonly http: HttpClient) {}
 
   getCampaign(campaignId: string): Observable<CampaignEditorSavedCampaign> {
-    const saved = this.campaigns.get(campaignId);
-    return saved ? of(cloneSavedCampaign(saved)) : missingCampaign(campaignId);
+    return this.http
+      .get<BaseResponse<KocCampaignEditorResponse>>(`${this.baseUrl}/${campaignId}`)
+      .pipe(map((response) => toSavedCampaign(response.data)));
   }
 
   createCampaign(payload: CampaignEditorPayload): Observable<CampaignEditorSavedCampaign> {
-    const now = new Date().toISOString();
-    const saved: CampaignEditorSavedCampaign = {
-      campaignId: `campaign-${this.nextCampaignNumber++}`,
-      status: 'DRAFT',
-      payload: sanitizePayload(payload),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.campaigns.set(saved.campaignId, saved);
-    return of(cloneSavedCampaign(saved));
+    return this.http
+      .post<BaseResponse<KocCampaignEditorResponse>>(this.baseUrl, sanitizePayload(payload))
+      .pipe(map((response) => toSavedCampaign(response.data)));
   }
 
   updateCampaign(
     campaignId: string,
     payload: CampaignEditorPayload,
   ): Observable<CampaignEditorSavedCampaign> {
-    const current = this.campaigns.get(campaignId);
-    if (!current) {
-      return missingCampaign(campaignId);
-    }
-
-    const saved: CampaignEditorSavedCampaign = {
-      ...current,
-      status: 'DRAFT',
-      payload: sanitizePayload(payload),
-      updatedAt: new Date().toISOString(),
-    };
-    this.campaigns.set(campaignId, saved);
-    return of(cloneSavedCampaign(saved));
+    return this.http
+      .put<BaseResponse<KocCampaignEditorResponse>>(
+        `${this.baseUrl}/${campaignId}`,
+        sanitizePayload(payload),
+      )
+      .pipe(map((response) => toSavedCampaign(response.data)));
   }
 
   startCampaign(campaignId: string): Observable<CampaignEditorSavedCampaign> {
-    const current = this.campaigns.get(campaignId);
-    if (!current) {
-      return missingCampaign(campaignId);
-    }
-
-    const saved: CampaignEditorSavedCampaign = {
-      ...current,
-      status: 'RUNNING',
-      updatedAt: new Date().toISOString(),
-    };
-    this.campaigns.set(campaignId, saved);
-    return of(cloneSavedCampaign(saved));
+    return this.http
+      .post<BaseResponse<KocCampaignEditorResponse>>(`${this.baseUrl}/${campaignId}/start`, null)
+      .pipe(map((response) => toSavedCampaign(response.data)));
   }
+}
+
+interface KocCampaignEditorResponse {
+  campaignId: string;
+  name: string;
+  description?: string | null;
+  requirement?: string | null;
+  status: KocCampaignStatus;
+  acceptedTarget?: number | null;
+  maximumDiscovered?: number | null;
+  maximumScreened?: number | null;
+  goal?: CampaignEditorPayload['goal'] | null;
+  search?: {
+    instructions?: string | null;
+    scope?: CampaignEditorPayload['search']['scope'] | null;
+    requirements?: CampaignEditorPayload['search']['requirements'] | null;
+  } | null;
+  workflow?: {
+    workflowDefinitionId?: string | null;
+    workflowVersionId?: string | null;
+    workflowVersion?: number | null;
+  } | null;
+  workflowDefinitionId?: string | null;
+  workflowVersionId?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 function sanitizePayload(payload: CampaignEditorPayload): CampaignEditorPayload {
@@ -89,13 +97,36 @@ function sanitizePayload(payload: CampaignEditorPayload): CampaignEditorPayload 
   };
 }
 
-function cloneSavedCampaign(saved: CampaignEditorSavedCampaign): CampaignEditorSavedCampaign {
+function toSavedCampaign(campaign: KocCampaignEditorResponse): CampaignEditorSavedCampaign {
   return {
-    ...saved,
-    payload: sanitizePayload(saved.payload),
+    campaignId: campaign.campaignId,
+    status: campaign.status,
+    payload: toPayload(campaign),
+    createdAt: campaign.createdAt ?? '',
+    updatedAt: campaign.updatedAt ?? campaign.createdAt ?? '',
   };
 }
 
-function missingCampaign(campaignId: string): Observable<never> {
-  return throwError(() => new Error(`Campaign ${campaignId} was not found`));
+function toPayload(campaign: KocCampaignEditorResponse): CampaignEditorPayload {
+  const search = campaign.search;
+  const workflow = campaign.workflow;
+
+  return sanitizePayload({
+    name: campaign.name,
+    ...(campaign.description ? { description: campaign.description } : {}),
+    goal: campaign.goal ?? {
+      targetApproved: campaign.acceptedTarget ?? 0,
+      candidateLimit: campaign.maximumDiscovered ?? campaign.maximumScreened ?? campaign.acceptedTarget ?? 0,
+    },
+    search: {
+      instructions: search?.instructions ?? campaign.requirement ?? campaign.description ?? '',
+      scope: search?.scope ?? {},
+      requirements: search?.requirements ?? [],
+    },
+    workflow: {
+      workflowDefinitionId: workflow?.workflowDefinitionId ?? campaign.workflowDefinitionId ?? '',
+      workflowVersionId: workflow?.workflowVersionId ?? campaign.workflowVersionId ?? '',
+      workflowVersion: workflow?.workflowVersion ?? 1,
+    },
+  });
 }
