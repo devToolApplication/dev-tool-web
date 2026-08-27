@@ -17,7 +17,7 @@ import { of, throwError } from 'rxjs';
 
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
-import { InputMapping, WorkflowDetail, WorkflowNode } from '../model/workflow-studio.model';
+import { InputMapping, WorkflowDetail, WorkflowGraph } from '../model/workflow-studio.model';
 import { AiGateInspectorComponent } from './ai-gate-inspector.component';
 import { CodeGateInspectorComponent } from './code-gate-inspector.component';
 import { EndInspectorComponent } from './end-inspector.component';
@@ -119,16 +119,7 @@ describe('WorkflowNodeInspectorComponent', () => {
 
     fixture = TestBed.createComponent(WorkflowNodeInspectorComponent);
     store = TestBed.inject(WorkflowEditorStore);
-    store.loadWorkflow(sampleDetail());
-    store.nodes.set(sampleNodes());
-    store.positions.set({
-      start: { x: 0, y: 0 },
-      code: { x: 120, y: 0 },
-      ai: { x: 240, y: 0 },
-      logic: { x: 360, y: 0 },
-      end: { x: 480, y: 0 },
-    });
-    store.markSaved();
+    loadInspectorGraph(store);
   });
 
   it('renders the correct inspector for the selected node type', () => {
@@ -209,7 +200,7 @@ describe('WorkflowNodeInspectorComponent', () => {
     const extra = form.context.extra as {
       providerOptions: Array<{ value: unknown; label: string }>;
     };
-    expect(extra.providerOptions.some((p) => p.value === 'codex')).toBe(true);
+    expect(extra.providerOptions.some((p) => p.value === 'claude')).toBe(true);
 
     form.valueChange.emit({
       ...form.initialValue,
@@ -357,36 +348,6 @@ describe('WorkflowNodeInspectorComponent', () => {
   });
 });
 
-function sampleNodes(): WorkflowNode[] {
-  return [
-    { id: 'start', type: 'START' },
-    {
-      id: 'code',
-      type: 'CODE_GATE',
-      handler: 'NUMBER_COMPARE',
-      config: { operator: 'LT' },
-      inputMapping: { mapping: {} },
-      retryPolicy: { maxAttempts: 1 },
-      timeoutPolicy: { timeoutSeconds: 5 },
-    },
-    {
-      id: 'ai',
-      type: 'AI_GATE',
-      instruction: 'Review profile',
-      criteria: {},
-      inputMapping: { mapping: {} },
-      provider: 'codex',
-      agentCode: 'koc-rule-evaluator',
-      workingDirectory: 'D:\\Code',
-      outputSchema: 'gate-result-v1',
-      retryPolicy: { maxAttempts: 1 },
-      timeoutPolicy: { timeoutSeconds: 60 },
-    },
-    { id: 'logic', type: 'LOGIC', operator: 'AND', config: {} },
-    { id: 'end', type: 'END' },
-  ];
-}
-
 function sampleDetail(): WorkflowDetail {
   return {
     definition: {
@@ -407,5 +368,50 @@ function sampleDetail(): WorkflowDetail {
         runtime: { maxParallel: 1 },
       },
     ],
+  };
+}
+
+function loadInspectorGraph(store: WorkflowEditorStore): void {
+  store.loadWorkflow(sampleDetail());
+  store.replaceGraphForEngine('legacy', sampleGraph(), {
+    start: { x: 0, y: 0 },
+    code: { x: 120, y: 0 },
+    ai: { x: 240, y: 0 },
+    logic: { x: 360, y: 0 },
+    end: { x: 480, y: 0 },
+  });
+  store.markSaved();
+}
+
+function sampleGraph(): WorkflowGraph {
+  return {
+    nodes: [
+      { id: 'start', type: 'START' },
+      {
+        id: 'code',
+        type: 'CODE_GATE',
+        handler: 'NUMBER_COMPARE',
+        config: { operator: 'LT' },
+        inputMapping: { mapping: {} },
+        retryPolicy: { maxAttempts: 1 },
+        timeoutPolicy: { timeoutSeconds: 5 },
+      },
+      {
+        id: 'ai',
+        type: 'AI_GATE',
+        instruction: 'Review profile',
+        criteria: {},
+        inputMapping: { mapping: {} },
+        provider: 'codex',
+        agentCode: 'facebook-candidate-discovery',
+        workingDirectory: 'D:\\Code',
+        outputSchema: 'gate-result-v1',
+        retryPolicy: { maxAttempts: 1 },
+        timeoutPolicy: { timeoutSeconds: 60 },
+      },
+      { id: 'logic', type: 'LOGIC', operator: 'AND', config: {} },
+      { id: 'end', type: 'END' },
+    ],
+    edges: [],
   };
 }
