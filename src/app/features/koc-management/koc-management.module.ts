@@ -7,8 +7,9 @@ import { KocNavigationComponent } from './components/koc-navigation/koc-navigati
 import { KocPageFrameComponent } from './components/koc-page-frame/koc-page-frame.component';
 import { StatusBadgeComponent } from './components/status-badge/status-badge.component';
 import { CampaignDetailComponent } from './pages/campaign-detail/campaign-detail.component';
+import { CampaignEditorComponent } from './pages/campaign-editor/campaign-editor.component';
 import { CampaignListComponent } from './pages/campaign-list/campaign-list.component';
-import { CampaignWizardComponent } from './pages/campaign-wizard/campaign-wizard.component';
+import { CampaignReviewComponent } from './pages/campaign-review/campaign-review.component';
 import { CandidateDetailComponent } from './pages/candidate-detail/candidate-detail.component';
 import { CandidateListComponent } from './pages/candidate-list/candidate-list.component';
 import { IncidentDetailComponent } from './pages/incident-detail/incident-detail.component';
@@ -27,8 +28,9 @@ const KOC_MANAGEMENT_COMPONENTS = [
   KocPageFrameComponent,
   StatusBadgeComponent,
   CampaignDetailComponent,
+  CampaignEditorComponent,
   CampaignListComponent,
-  CampaignWizardComponent,
+  CampaignReviewComponent,
   CandidateDetailComponent,
   CandidateListComponent,
   IncidentDetailComponent,
