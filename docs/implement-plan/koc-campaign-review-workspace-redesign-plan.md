@@ -39,6 +39,591 @@ Không làm các việc sau:
 
 # 2. Kiến trúc UX mới
 
+## 2.1. Create Campaign cũng được redesign hoàn toàn
+
+Màn tạo campaign cũ không được giữ lại logic wizard `General -> Discovery -> Screening -> Review`.
+
+Không expose các cấu hình kỹ thuật như:
+
+```text
+agent
+provider
+discovery signal weight
+search strategy
+maxQueries
+AI/CODE rule
+conditionKey
+evidenceKey
+whenEvidenceMatches
+whenEvidenceMissing
+lookbackDays
+```
+
+Màn Create Campaign mới chỉ mô tả **WHAT user muốn tìm**.
+
+Workflow/BPMN chịu trách nhiệm **HOW hệ thống tìm và đánh giá**.
+
+Flow mới:
+
+```text
+Step 1: Campaign
+Step 2: Search Requirements
+Step 3: Review & Start
+```
+
+Không có audience ratio 60/40 hoặc phân bổ nhóm cứng.
+
+---
+
+## 2.2. Step 1 - Campaign
+
+Mục tiêu: nhập thông tin campaign và quota business.
+
+Fields:
+
+```text
+Campaign name *
+Description
+
+Target approved KOCs *
+Maximum candidates to find *
+```
+
+Không yêu cầu user nhập campaign code.
+
+Backend có thể tự sinh code/id.
+
+Data model:
+
+```ts
+interface CampaignGoal {
+  targetApproved: number;
+  candidateLimit: number;
+}
+```
+
+UI gợi ý:
+
+```text
+Create Campaign
+
+Campaign name
+[ Back to School - Parent KOC ]
+
+Description
+[ Tìm KOC phù hợp cho chiến dịch... ]
+
+Target approved KOCs
+[ 100 ]
+
+Maximum candidates to find
+[ 300 ]
+
+[Cancel]                         [Continue]
+```
+
+---
+
+## 2.3. Step 2 - Search Requirements
+
+Đây là phần cấu hình quan trọng nhất.
+
+Thiết kế theo hai lớp:
+
+```text
+Structured Search Scope
++
+Flexible AI Requirements
+```
+
+### Structured Search Scope
+
+Chỉ giữ các filter deterministic, rõ nghĩa và không cần AI suy luận:
+
+```text
+Platforms
+Followers
+Location
+Language
+Recent activity
+```
+
+Ví dụ:
+
+```text
+Platforms
+[Facebook] [TikTok]
+
+Followers
+Min: 5,000
+Max: 200,000
+
+Location
+Vietnam
+
+Language
+Vietnamese
+
+Recent activity
+Last 90 days
+```
+
+Structured filter có thể optional tùy campaign.
+
+### AI Search Instructions
+
+Có một textarea để user mô tả tổng thể đối tượng cần tìm:
+
+```text
+What kind of KOC are you looking for?
+
+[ Tìm các phụ huynh có con từ 3-6 tuổi,
+  thường xuyên chia sẻ nội dung về giáo dục,
+  chăm sóc trẻ hoặc đời sống gia đình.
+  Không ưu tiên tài khoản bán hàng thuần túy. ]
+```
+
+Model:
+
+```ts
+interface CampaignSearchConfig {
+  instructions?: string;
+  scope: CampaignSearchScope;
+  requirements: CampaignRequirement[];
+}
+```
+
+### Flexible AI Requirements
+
+Không hard-code enum kiểu:
+
+```text
+PARENT
+SELLER
+CHILD_AGE
+CONTENT_TOPIC
+```
+
+Requirement là cấu hình generic:
+
+```ts
+interface CampaignRequirement {
+  id: string;
+
+  title: string;
+  description: string;
+
+  importance:
+    | 'REQUIRED'
+    | 'PREFERRED';
+
+  minimumConfidence?: number;
+  minimumEvidence?: number;
+}
+```
+
+Ví dụ:
+
+```text
+Requirement 1
+
+Title
+Phụ huynh có con nhỏ
+
+Description
+Ứng viên là bố/mẹ có con từ 3-6 tuổi.
+
+Importance
+Required
+
+Minimum confidence
+80%
+
+Minimum evidence
+2
+```
+
+Requirement khác:
+
+```text
+Title
+Nội dung giáo dục
+
+Description
+Ứng viên thường xuyên có bài viết liên quan
+đến giáo dục, trường học hoặc phát triển trẻ nhỏ.
+
+Importance
+Required
+```
+
+Requirement khác:
+
+```text
+Title
+Không phải seller thuần túy
+
+Description
+Trang cá nhân không chủ yếu dùng để bán hàng
+hoặc quảng cáo sản phẩm liên tục.
+
+Importance
+Preferred
+```
+
+UI:
+
+```text
+AI Requirements
+
+1. Phụ huynh có con 3-6 tuổi
+   REQUIRED
+   confidence >= 80%
+   evidence >= 2
+
+2. Có nội dung giáo dục / trẻ em
+   REQUIRED
+   confidence >= 70%
+
+3. Không phải seller thuần túy
+   PREFERRED
+   confidence >= 70%
+
+[+ Add requirement]
+```
+
+Không có ratio 6/4, 60/40 hoặc target distribution.
+
+---
+
+## 2.4. AI Requirement Evaluation
+
+Input requirement flexible nhưng output AI phải structured.
+
+Model:
+
+```ts
+interface RequirementEvaluation {
+  requirementId: string;
+
+  result:
+    | 'PASS'
+    | 'FAIL'
+    | 'UNKNOWN';
+
+  confidence: number;
+
+  summary: string;
+
+  evidenceIds: string[];
+}
+```
+
+Ví dụ:
+
+```json
+{
+  "requirementId": "parent-young-child",
+  "result": "PASS",
+  "confidence": 0.91,
+  "summary": "Candidate repeatedly mentions her 5-year-old daughter.",
+  "evidenceIds": [
+    "ev-101",
+    "ev-107"
+  ]
+}
+```
+
+Flow:
+
+```text
+Campaign Requirement
+        ↓
+AI searches / inspects candidate
+        ↓
+Collect profile + posts
+        ↓
+Collect evidence
+        ↓
+Evaluate requirement
+        ↓
+PASS / FAIL / UNKNOWN
+        ↓
+confidence + summary + evidenceIds
+```
+
+Cùng một `requirementId` phải được dùng xuyên suốt:
+
+```text
+Campaign Config
+      ↓
+AI Evaluation
+      ↓
+Evidence
+      ↓
+Candidate Review Workspace
+      ↓
+Human Approval
+```
+
+Không tạo một bộ criteria riêng cho review.
+
+---
+
+## 2.5. Step 3 - Review & Start
+
+Bước cuối chỉ hiển thị business summary.
+
+Ví dụ:
+
+```text
+Review Campaign
+
+Back to School - Parent KOC
+
+Goal
+100 approved KOCs
+
+Candidate limit
+300
+
+Search Scope
+Facebook
+TikTok
+Vietnam
+Vietnamese
+
+AI Search Instructions
+Tìm các phụ huynh có con từ 3-6 tuổi...
+
+Requirements
+✓ Phụ huynh có con 3-6 tuổi
+✓ Nội dung giáo dục / trẻ em
+✓ Không phải seller thuần túy
+
+Workflow
+KOC Search & Evaluation
+
+[Back]
+
+[Save Draft]                 [Start Campaign]
+```
+
+Không show:
+
+```text
+agent
+provider
+conditionKey
+evidenceKey
+retry
+timeout
+node
+gateway
+```
+
+Sau khi Start:
+
+```text
+POST /koc/campaigns/{campaignId}/start
+```
+
+Navigate:
+
+```text
+/koc/campaigns/:campaignId/review
+```
+
+---
+
+## 2.6. Campaign domain mới
+
+Campaign model:
+
+```ts
+interface KocCampaign {
+  id: string;
+
+  name: string;
+  description?: string;
+
+  status:
+    | 'DRAFT'
+    | 'RUNNING'
+    | 'PAUSED'
+    | 'COMPLETED'
+    | 'STOPPED';
+
+  goal: CampaignGoal;
+
+  search: CampaignSearchConfig;
+
+  workflow: CampaignWorkflowRef;
+
+  createdAt?: string;
+  updatedAt?: string;
+}
+```
+
+Search scope:
+
+```ts
+interface CampaignSearchScope {
+  platforms?: string[];
+
+  minFollowers?: number;
+  maxFollowers?: number;
+
+  locations?: string[];
+  languages?: string[];
+
+  recentActivityDays?: number;
+}
+```
+
+Workflow reference:
+
+```ts
+interface CampaignWorkflowRef {
+  workflowTemplateId: string;
+  workflowVersion?: number;
+}
+```
+
+Campaign không chứa technical workflow config chi tiết.
+
+---
+
+## 2.7. Create Campaign API
+
+Create/update payload:
+
+```http
+POST /koc/campaigns
+PUT /koc/campaigns/{campaignId}
+```
+
+Example:
+
+```json
+{
+  "name": "Back to School",
+  "description": "Tìm KOC phụ huynh",
+  "goal": {
+    "targetApproved": 100,
+    "candidateLimit": 300
+  },
+  "search": {
+    "instructions": "Tìm phụ huynh có con từ 3-6 tuổi...",
+    "scope": {
+      "platforms": ["FACEBOOK", "TIKTOK"],
+      "minFollowers": 5000,
+      "maxFollowers": 200000,
+      "locations": ["VN"],
+      "languages": ["vi"],
+      "recentActivityDays": 90
+    },
+    "requirements": [
+      {
+        "id": "parent-young-child",
+        "title": "Phụ huynh có con nhỏ",
+        "description": "Ứng viên là bố/mẹ có con từ 3-6 tuổi.",
+        "importance": "REQUIRED",
+        "minimumConfidence": 0.8,
+        "minimumEvidence": 2
+      }
+    ]
+  },
+  "workflow": {
+    "workflowTemplateId": "koc-search-evaluation-v1"
+  }
+}
+```
+
+Start:
+
+```http
+POST /koc/campaigns/{campaignId}/start
+```
+
+---
+
+## 2.8. Workflow responsibility
+
+Campaign cung cấp:
+
+```text
+goal
+search scope
+search instructions
+AI requirements
+```
+
+BPMN/workflow chịu trách nhiệm:
+
+```text
+Find candidate
+↓
+Upsert candidate
+↓
+Check duplicate
+↓
+Collect profile
+↓
+Collect posts
+↓
+Generate evidence
+↓
+Evaluate requirements
+↓
+Generate AI recommendation
+↓
+Ready for human review
+```
+
+Thay đổi BPMN không được yêu cầu sửa Create Campaign UI nếu domain campaign không đổi.
+
+---
+
+## 2.9. Frontend structure cho Create Campaign
+
+Xóa `campaign-wizard` cũ và tạo mới:
+
+```text
+pages/
+  campaign-create/
+  campaign-edit/
+
+components/
+  campaign-basic-form/
+  campaign-goal-form/
+  campaign-search-scope/
+  campaign-search-instructions/
+  campaign-requirement-list/
+  campaign-requirement-editor/
+  campaign-workflow-selector/
+  campaign-review-summary/
+
+stores/
+  campaign-editor.store.ts
+```
+
+Model:
+
+```text
+campaign.model.ts
+campaign-goal.model.ts
+campaign-search.model.ts
+campaign-requirement.model.ts
+campaign-workflow.model.ts
+```
+
+Không reuse `koc-campaign-wizard.model.ts`.
+
+Không tạo mapper từ wizard model cũ sang model mới.
+
+---
+
 Giảm toàn bộ luồng business xuống còn 3 màn chính:
 
 ```text
@@ -58,12 +643,11 @@ Bỏ toàn bộ màn business cũ và code mới theo kiến trúc mới:
 
 ```text
 Campaign List
-Campaign Wizard
 Campaign Review Workspace
 Global Review Inbox
 ```
 
-Không giữ `Campaign Detail`, `Candidate List`, `Candidate Detail`, `Review Queue`, `Review Detail` để tương thích ngược.
+Không giữ `Campaign Detail`, `Campaign Wizard`, `Candidate List`, `Candidate Detail`, `Review Queue`, `Review Detail` để tương thích ngược.
 Không tạo adapter, wrapper, redirect hoặc bridge cho logic UI cũ.
 
 Các màn kỹ thuật/debug workflow nếu thực sự cần sẽ tách riêng khỏi business KOC review.
@@ -76,6 +660,8 @@ Các màn kỹ thuật/debug workflow nếu thực sự cần sẽ tách riêng 
 /ai-agent-mcrs/koc/campaigns
 
 /ai-agent-mcrs/koc/campaigns/create
+
+/ai-agent-mcrs/koc/campaigns/:campaignId/edit
 
 /ai-agent-mcrs/koc/campaigns/:campaignId/review
 
@@ -810,7 +1396,8 @@ Example:
 koc-management/
 ├── pages/
 │   ├── campaign-list/
-│   ├── campaign-wizard/
+│   ├── campaign-create/
+│   ├── campaign-edit/
 │   ├── campaign-review/
 │   │   ├── campaign-review.component.ts
 │   │   ├── campaign-review.component.html
@@ -818,8 +1405,15 @@ koc-management/
 │   └── global-review-inbox/
 │
 ├── components/
-│   ├── campaign-review-header/
+│   ├── campaign-basic-form/
+│   ├── campaign-goal-form/
+│   ├── campaign-search-scope/
+│   ├── campaign-search-instructions/
+│   ├── campaign-requirement-list/
+│   ├── campaign-requirement-editor/
+│   ├── campaign-workflow-selector/
 │   ├── campaign-review-summary/
+│   ├── campaign-review-header/
 │   ├── campaign-candidate-filter/
 │   ├── campaign-candidate-list/
 │   ├── candidate-review-panel/
@@ -831,15 +1425,24 @@ koc-management/
 │   └── candidate-review-action-bar/
 │
 ├── model/
+│   ├── campaign.model.ts
+│   ├── campaign-goal.model.ts
+│   ├── campaign-search.model.ts
+│   ├── campaign-requirement.model.ts
+│   ├── campaign-workflow.model.ts
 │   ├── campaign-candidate.model.ts
 │   ├── candidate-ai-evaluation.model.ts
 │   ├── candidate-human-review.model.ts
 │   ├── candidate-post.model.ts
 │   └── candidate-evidence.model.ts
 │
+├── stores/
+│   ├── campaign-editor.store.ts
+│   └── campaign-review.store.ts
+│
 └── services/
-    ├── campaign-review-api.service.ts
-    └── campaign-review-store.service.ts
+    ├── campaign-api.service.ts
+    └── campaign-review-api.service.ts
 ```
 
 ---
@@ -977,19 +1580,22 @@ Không làm migration UI và không giữ backward compatibility với màn cũ.
 
 ## Giữ lại
 
-Chỉ giữ các phần còn đúng nghiệp vụ:
+Chỉ giữ:
 
 ```text
 campaign-list
-campaign-wizard
 ```
 
-Hai phần này được phép refactor nếu cần để khớp domain/API mới.
+`campaign-list` được phép refactor để khớp domain/API mới.
+
+`campaign-wizard` cũ KHÔNG giữ lại.
+Create/Edit Campaign được code mới theo thiết kế `Campaign -> Search Requirements -> Review & Start`.
 
 ## Xóa khỏi kiến trúc mới
 
 ```text
 campaign-detail
+campaign-wizard
 candidate-list
 candidate-detail
 review-detail
@@ -1050,7 +1656,40 @@ Mục tiêu là codebase sau khi hoàn thành chỉ còn một implementation ch
 
 ---
 
-## Phase 1 - Domain + API contract
+## Phase 1 - Campaign domain + Create Campaign
+
+### Backend
+
+- Tạo campaign domain mới: goal + search scope + flexible AI requirements + workflow reference.
+- Bỏ API contract phụ thuộc discovery signals/search strategies/screening rules cũ.
+- Implement create/update/start campaign theo payload mới.
+- Requirement phải có stable `requirementId`.
+- Không hard-code loại AI requirement theo enum business cụ thể.
+
+### Frontend
+
+- Xóa `campaign-wizard` cũ.
+- Implement `CampaignEditorStore`.
+- Implement 3 bước:
+  - Campaign
+  - Search Requirements
+  - Review & Start
+- Implement structured search scope.
+- Implement natural-language search instructions.
+- Implement flexible requirement editor.
+- Start campaign redirect vào Campaign Review Workspace.
+
+### Acceptance
+
+- User tạo campaign mà không thấy agent/provider/rule kỹ thuật.
+- Không có audience ratio.
+- Requirement arbitrary natural language được lưu nguyên vẹn.
+- Structured filter và AI requirement được tách rõ.
+- Start campaign mở `/campaigns/:campaignId/review`.
+
+---
+
+## Phase 2 - Review domain + API contract
 
 ### Backend
 
@@ -1079,7 +1718,7 @@ Mục tiêu là codebase sau khi hoàn thành chỉ còn một implementation ch
 
 ---
 
-## Phase 2 - Campaign Review Workspace shell
+## Phase 3 - Campaign Review Workspace shell
 
 Implement:
 
@@ -1103,7 +1742,7 @@ Chưa cần approve/reject.
 
 ---
 
-## Phase 3 - Candidate review context
+## Phase 4 - Candidate review context
 
 Implement:
 
@@ -1125,7 +1764,7 @@ History
 
 ---
 
-## Phase 4 - Human approval
+## Phase 5 - Human approval
 
 Implement:
 
@@ -1149,7 +1788,7 @@ permission guard
 
 ---
 
-## Phase 5 - Bulk review
+## Phase 6 - Bulk review
 
 Implement:
 
@@ -1170,7 +1809,7 @@ AI mismatch warning
 
 ---
 
-## Phase 6 - Global Review Inbox
+## Phase 7 - Global Review Inbox
 
 Implement cross-campaign inbox.
 
@@ -1196,7 +1835,7 @@ Không tạo review detail riêng.
 
 ---
 
-## Phase 7 - Realtime + hard removal
+## Phase 8 - Realtime + hard removal
 
 - Subscribe campaign events.
 - Update list incrementally.
@@ -1294,7 +1933,22 @@ reject(reasonCode: string, note?: string) {
 
 # 23. Tests
 
-## Unit test - Store
+## Unit test - Campaign Editor Store
+
+Test:
+
+```text
+create draft
+update campaign goal
+update structured search scope
+add/remove/edit arbitrary AI requirement
+preserve natural-language requirement content
+save draft
+start campaign
+redirect to review workspace
+```
+
+## Unit test - Review Store
 
 Test:
 
@@ -1328,6 +1982,8 @@ reject OTHER with note -> valid
 ## Component test
 
 ```text
+create campaign does not expose technical workflow fields
+requirement editor accepts arbitrary natural-language input
 summary card changes filter
 candidate click opens detail
 profile URL opens external link
@@ -1345,6 +2001,7 @@ reviewedAt generated by backend
 campaign/candidate mismatch rejected
 duplicate review behavior defined
 unauthorized user gets 403
+requirement id remains stable across create/read/evaluation
 ```
 
 ## E2E
@@ -1353,11 +2010,14 @@ Scenario:
 
 ```text
 create campaign
+configure structured scope
+add arbitrary AI requirements
+review campaign
 start campaign
 redirect to review workspace
 wait/load candidates
 open candidate
-view AI assessment
+view AI assessment by requirement
 open post
 view evidence
 approve
@@ -1414,6 +2074,8 @@ Không render blank panel.
 - Dùng theme token hiện tại, không hard-code color.
 - Tách business view và technical/debug view.
 - Không dùng raw backend enum làm label trực tiếp.
+- Create Campaign không chứa technical workflow configuration.
+- Không hard-code enum cho các semantic AI requirement.
 
 ---
 
@@ -1421,13 +2083,20 @@ Không render blank panel.
 
 Feature chỉ hoàn thành khi:
 
+- [ ] `campaign-wizard` cũ đã bị xóa.
+- [ ] Create Campaign chỉ còn 3 bước: Campaign / Search Requirements / Review & Start.
+- [ ] Không còn audience ratio.
+- [ ] Không expose agent/provider/CODE rule/AI rule/conditionKey/evidenceKey trên Create Campaign.
+- [ ] User có thể nhập natural-language AI requirements tùy ý.
+- [ ] Structured search scope tách khỏi AI requirements.
+- [ ] Requirement có stable ID dùng xuyên suốt AI evaluation/evidence/review.
 - [ ] Start campaign mở Campaign Review Workspace.
 - [ ] User xem toàn bộ candidate của campaign.
 - [ ] User phân biệt rõ AI recommendation và human decision.
 - [ ] User xem profile URL.
 - [ ] User xem posts.
-- [ ] User xem evidence theo criterion.
-- [ ] User xem AI summary/confidence/criteria.
+- [ ] User xem evidence theo criterion/requirement.
+- [ ] User xem AI summary/confidence/requirement result.
 - [ ] User approve candidate.
 - [ ] User reject candidate với reason.
 - [ ] Hệ thống lưu reviewer từ authentication context.
@@ -1442,7 +2111,7 @@ Feature chỉ hoàn thành khi:
 - [ ] Có unit/integration/E2E test.
 - [ ] Không còn route legacy.
 - [ ] Không còn page/component/service legacy đã được thay thế.
-- [ ] Không còn model compatibility layer cho review/candidate cũ.
+- [ ] Không còn model compatibility layer cho review/candidate/campaign wizard cũ.
 - [ ] Không còn duplicate Candidate Detail / Review Detail logic.
 - [ ] Codebase chỉ còn một flow chính cho KOC review.
 
@@ -1455,24 +2124,28 @@ Không nên code UI toàn bộ một lần.
 Recommended sequence:
 
 ```text
-1. Chốt domain mới
-2. Chốt API contract
-3. Làm Workspace shell
-4. Làm Candidate Review Detail
-5. Làm Approve / Reject
-6. Làm Bulk Review
-7. Làm Global Inbox
-8. Realtime
-9. Hard-delete code cũ + dead-code cleanup
+1. Chốt Campaign domain mới + flexible AI requirements
+2. Chốt Create/Update/Start Campaign API
+3. Làm Create/Edit Campaign mới
+4. Chốt Candidate/Review domain + API
+5. Làm Workspace shell
+6. Làm Candidate Review Detail
+7. Làm Approve / Reject
+8. Làm Bulk Review
+9. Làm Global Inbox
+10. Realtime
+11. Hard-delete code cũ + dead-code cleanup
 ```
 
 Phần quan trọng nhất cần review kỹ trước khi code là:
 
 ```text
+CampaignRequirement model
+RequirementEvaluation model
 AI evaluation model
 Human review model
 Review-context API
 Candidate/Post/Evidence relationship
 ```
 
-Nếu 4 phần này sạch thì UI phía sau sẽ đơn giản và ổn định.
+Nếu các phần này sạch thì UI phía sau sẽ đơn giản và ổn định.
