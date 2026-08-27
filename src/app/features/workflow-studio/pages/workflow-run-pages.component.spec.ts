@@ -5,6 +5,19 @@ import { of } from 'rxjs';
 
 import { createBasePageResponse } from '@core/http/base-response.model';
 
+vi.mock('@bpmn-io/properties-panel', () => ({
+  CheckboxEntry: {},
+  Group: {},
+  ListGroup: {},
+  SelectEntry: {},
+  TextAreaEntry: {},
+  TextFieldEntry: {},
+  isCheckboxEntryEdited: vi.fn(),
+  isSelectEntryEdited: vi.fn(),
+  isTextAreaEntryEdited: vi.fn(),
+  isTextFieldEntryEdited: vi.fn(),
+}));
+
 vi.mock('bpmn-js-properties-panel', () => ({
   BpmnPropertiesPanelModule: {},
   BpmnPropertiesProviderModule: {},

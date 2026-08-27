@@ -16,6 +16,8 @@ import {
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule } from 'bpmn-js-properties-panel';
 
+import { flowableModdle } from './flowable/flowable-moddle';
+import { FlowablePropertiesProviderModule } from './flowable/flowable-properties-provider';
 import type {
   WorkflowEditorMode,
   WorkflowEditorViewport,
@@ -63,7 +65,14 @@ export const WORKFLOW_BPMN_MODELER_FACTORY = new InjectionToken<
         defaultStrokeColor: 'var(--workflow-bpmn-shape-stroke)',
         defaultLabelColor: 'var(--workflow-bpmn-text)',
       },
-      additionalModules: [BpmnPropertiesPanelModule, BpmnPropertiesProviderModule],
+      additionalModules: [
+        BpmnPropertiesPanelModule,
+        BpmnPropertiesProviderModule,
+        FlowablePropertiesProviderModule,
+      ],
+      moddleExtensions: {
+        flowable: flowableModdle,
+      },
     }) as unknown as WorkflowBpmnModeler,
 });
 

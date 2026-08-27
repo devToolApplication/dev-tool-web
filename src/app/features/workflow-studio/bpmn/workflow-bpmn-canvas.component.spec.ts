@@ -1,8 +1,21 @@
 import { runInInjectionContext, Injector } from '@angular/core';
 import { readFileSync } from 'node:fs';
+vi.mock('@bpmn-io/properties-panel', () => ({
+  CheckboxEntry: {},
+  Group: {},
+  ListGroup: {},
+  SelectEntry: {},
+  TextAreaEntry: {},
+  TextFieldEntry: {},
+  isCheckboxEntryEdited: vi.fn(),
+  isSelectEntryEdited: vi.fn(),
+  isTextAreaEntryEdited: vi.fn(),
+  isTextFieldEntryEdited: vi.fn(),
+}));
 vi.mock('bpmn-js-properties-panel', () => ({
   BpmnPropertiesPanelModule: {},
   BpmnPropertiesProviderModule: {},
+  useService: vi.fn(),
 }));
 import {
   WORKFLOW_BPMN_MODELER_FACTORY,
@@ -33,11 +46,10 @@ class MockModeler {
       businessObject: {
         id: 'service-1',
         $type: 'bpmn:ServiceTask',
-        name: 'AI Task',
+        name: 'Service Task',
         $attrs: {
-          'flowable:topic': 'ai-task',
           'flowable:type': 'external-worker',
-          'flowable:taskConfigJson': '{}',
+          'flowable:topic': 'service-worker',
         },
         get: (attr: string) => this.mockElements['service-1'].businessObject.$attrs[attr],
         set: (attr: string, val: any) => {
@@ -208,6 +220,9 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
     const buildAssets = angularConfig.projects['dev-tool-web'].architect.build.options.assets;
 
     expect(componentSource).toContain('bpmn-js-properties-panel');
+    expect(componentSource).toContain('FlowablePropertiesProviderModule');
+    expect(componentSource).toContain('moddleExtensions:');
+    expect(componentSource).toContain('flowable: flowableModdle');
     expect(componentSource).toContain('propertiesPanel: {');
     expect(componentSource).toContain('bpmnRenderer: {');
     expect(componentSource).toContain("defaultFillColor: 'var(--workflow-bpmn-shape-fill)'");

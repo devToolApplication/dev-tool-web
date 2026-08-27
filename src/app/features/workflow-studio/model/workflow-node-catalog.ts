@@ -138,10 +138,7 @@ const WORKFLOW_NODE_CATALOG: Record<WorkflowNodeType, WorkflowNodeCatalogItem> =
     allowConnectFrom: false,
     allowConnectTo: true,
   },
-  AI_TASK: bpmnTask('AI_TASK', 'AI Task', 'AI'),
-  MCP_TASK: bpmnTask('MCP_TASK', 'MCP Task', 'MC'),
-  CODE_TASK: bpmnTask('CODE_TASK', 'Code Task', 'CT'),
-  HTTP_TASK: bpmnTask('HTTP_TASK', 'HTTP Task', 'HT'),
+  SERVICE_TASK: bpmnTask('SERVICE_TASK', 'Service Task', 'SV'),
   EXCLUSIVE_GATEWAY: {
     type: 'EXCLUSIVE_GATEWAY',
     title: 'Exclusive Gateway',
@@ -227,10 +224,7 @@ export function createWorkflowNode(type: WorkflowNodeType, id: string): Workflow
       return { id, type: 'LOGIC', operator: 'AND', config: {} };
     case 'START_EVENT':
     case 'END_EVENT':
-    case 'AI_TASK':
-    case 'MCP_TASK':
-    case 'CODE_TASK':
-    case 'HTTP_TASK':
+    case 'SERVICE_TASK':
     case 'EXCLUSIVE_GATEWAY':
     case 'PARALLEL_GATEWAY':
       return createBpmnNode(type, id);
@@ -283,10 +277,7 @@ function nodeSubtitle(node: WorkflowNode): string {
       return logicLabel(node.operator);
     case 'START_EVENT':
     case 'END_EVENT':
-    case 'AI_TASK':
-    case 'MCP_TASK':
-    case 'CODE_TASK':
-    case 'HTTP_TASK':
+    case 'SERVICE_TASK':
     case 'EXCLUSIVE_GATEWAY':
     case 'PARALLEL_GATEWAY':
       return node.name || WORKFLOW_NODE_CATALOG[node.type].description;
@@ -312,10 +303,10 @@ function bpmnTask(
   return {
     type,
     title,
-    description: `${title} external worker`,
+    description: `${title} Flowable configuration`,
     iconLabel,
     shape: 'rectangle',
-    tone: type === 'AI_TASK' ? 'primary' : 'info',
+    tone: 'info',
     defaultSize: { width: 220, height: 76 },
     ports: defaultMiddlePorts(),
     allowConnectFrom: true,

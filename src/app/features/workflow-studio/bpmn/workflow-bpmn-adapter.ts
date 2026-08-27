@@ -21,10 +21,7 @@ const DC_NS = 'http://www.omg.org/spec/DD/20100524/DC';
 const TAG_BY_TYPE: Record<BpmnWorkflowNodeType, string> = {
   START_EVENT: 'startEvent',
   END_EVENT: 'endEvent',
-  AI_TASK: 'serviceTask',
-  MCP_TASK: 'serviceTask',
-  CODE_TASK: 'serviceTask',
-  HTTP_TASK: 'serviceTask',
+  SERVICE_TASK: 'serviceTask',
   EXCLUSIVE_GATEWAY: 'exclusiveGateway',
   PARALLEL_GATEWAY: 'parallelGateway',
 };
@@ -34,20 +31,6 @@ const TYPE_BY_TAG: Record<string, BpmnWorkflowNodeType | undefined> = {
   endEvent: 'END_EVENT',
   exclusiveGateway: 'EXCLUSIVE_GATEWAY',
   parallelGateway: 'PARALLEL_GATEWAY',
-};
-
-const TOPIC_BY_TYPE: Partial<Record<BpmnWorkflowNodeType, string>> = {
-  AI_TASK: 'ai',
-  MCP_TASK: 'mcp',
-  CODE_TASK: 'code',
-  HTTP_TASK: 'http',
-};
-
-const TYPE_BY_TOPIC: Record<string, BpmnWorkflowNodeType | undefined> = {
-  ai: 'AI_TASK',
-  mcp: 'MCP_TASK',
-  code: 'CODE_TASK',
-  http: 'HTTP_TASK',
 };
 
 export interface WorkflowBpmnAdapterResult {
@@ -145,24 +128,10 @@ function renderNode(node: BpmnWorkflowNode, outgoing: WorkflowEdge[]): string {
   const attrs = [
     `id="${escapeAttr(node.id)}"`,
     node.name ? `name="${escapeAttr(node.name)}"` : null,
-    renderExternalTaskAttrs(node),
     renderDefaultFlowAttr(node, outgoing),
   ].filter(Boolean);
 
   return `    <${tag} ${attrs.join(' ')} />`;
-}
-
-function renderExternalTaskAttrs(node: BpmnWorkflowNode): string | null {
-  const topic = TOPIC_BY_TYPE[node.type];
-  if (!topic) {
-    return null;
-  }
-
-  return [
-    'flowable:type="external-worker"',
-    `flowable:topic="${topic}"`,
-    `flowable:taskConfigJson="${escapeAttr(JSON.stringify(taskConfig(node)))}"`,
-  ].join(' ');
 }
 
 function renderDefaultFlowAttr(node: BpmnWorkflowNode, outgoing: WorkflowEdge[]): string | null {
@@ -301,13 +270,10 @@ function taskTypeFromServiceTask(
   id: string,
   issues: WorkflowValidationIssue[],
 ): BpmnWorkflowNodeType | null {
-  const topic = attr(element, 'flowable:topic') || element.getAttributeNS(FLOWABLE_NS, 'topic') || '';
-  const type = TYPE_BY_TOPIC[topic];
-  if (!type) {
-    issues.push(issue('BPMN_SERVICE_TASK_TOPIC_UNSUPPORTED', `Unsupported service task topic: ${topic || '(blank)'}`, { nodeId: id }));
-    return null;
-  }
-  return type;
+  void element;
+  void id;
+  void issues;
+  return 'SERVICE_TASK';
 }
 
 function taskConfigFromServiceTask(
@@ -319,29 +285,9 @@ function taskConfigFromServiceTask(
     return {};
   }
 
-  const raw = attr(element, 'flowable:taskConfigJson') || element.getAttributeNS(FLOWABLE_NS, 'taskConfigJson');
-  if (!raw) {
-    return { config: {}, inputMapping: {}, outputMapping: {}, retryPolicy: {}, timeoutPolicy: {} };
-  }
-
-  const parsed = parseJsonObject(raw, issues, {
-    code: 'BPMN_TASK_CONFIG_INVALID',
-    message: 'Task configuration JSON is invalid',
-    nodeId,
-  });
-  const config = { ...(parsed ?? {}) };
-  const inputMapping = take(config, 'inputMapping');
-  const outputMapping = take(config, 'outputMapping');
-  const retryPolicy = take(config, 'retryPolicy');
-  const timeoutPolicy = take(config, 'timeoutPolicy');
-
-  return {
-    config,
-    inputMapping,
-    outputMapping,
-    retryPolicy,
-    timeoutPolicy,
-  };
+  void issues;
+  void nodeId;
+  return { config: {}, inputMapping: {}, outputMapping: {}, retryPolicy: {}, timeoutPolicy: {} };
 }
 
 function conditionFromAttribute(
@@ -411,27 +357,6 @@ function compileValue(value: { path?: string | null; literal?: JsonValue }): str
     return value.path.replace(/^\$\{(.+)}$/, '$1');
   }
   return JSON.stringify(value.literal ?? null);
-}
-
-function taskConfig(node: BpmnWorkflowNode): Record<string, JsonValue> {
-  const config = isJsonObject(node.config) ? { ...node.config } : {};
-  setIfDefined(config, 'inputMapping', node.inputMapping);
-  setIfDefined(config, 'outputMapping', node.outputMapping);
-  setIfDefined(config, 'retryPolicy', node.retryPolicy);
-  setIfDefined(config, 'timeoutPolicy', node.timeoutPolicy);
-  return config;
-}
-
-function setIfDefined(target: Record<string, JsonValue>, key: string, value: JsonValue | undefined): void {
-  if (value !== undefined) {
-    target[key] = cloneJson(value);
-  }
-}
-
-function take(target: Record<string, JsonValue>, key: string): JsonValue {
-  const value = target[key] ?? {};
-  delete target[key];
-  return value;
 }
 
 function parseJsonObject(

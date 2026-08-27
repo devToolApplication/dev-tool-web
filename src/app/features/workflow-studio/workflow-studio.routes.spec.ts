@@ -1,6 +1,19 @@
 import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { workflowStudioRoutes } from './workflow-studio.routes';
 
+vi.mock('@bpmn-io/properties-panel', () => ({
+  CheckboxEntry: {},
+  Group: {},
+  ListGroup: {},
+  SelectEntry: {},
+  TextAreaEntry: {},
+  TextFieldEntry: {},
+  isCheckboxEntryEdited: vi.fn(),
+  isSelectEntryEdited: vi.fn(),
+  isTextAreaEntryEdited: vi.fn(),
+  isTextFieldEntryEdited: vi.fn(),
+}));
+
 vi.mock('bpmn-js-properties-panel', () => ({
   BpmnPropertiesPanelModule: {},
   BpmnPropertiesProviderModule: {},

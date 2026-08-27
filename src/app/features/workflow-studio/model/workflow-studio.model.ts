@@ -5,10 +5,7 @@ export type LegacyWorkflowNodeType = 'START' | 'CODE_GATE' | 'AI_GATE' | 'LOGIC'
 export type BpmnWorkflowNodeType =
   | 'START_EVENT'
   | 'END_EVENT'
-  | 'AI_TASK'
-  | 'MCP_TASK'
-  | 'CODE_TASK'
-  | 'HTTP_TASK'
+  | 'SERVICE_TASK'
   | 'EXCLUSIVE_GATEWAY'
   | 'PARALLEL_GATEWAY';
 export type WorkflowNodeType = LegacyWorkflowNodeType | BpmnWorkflowNodeType;

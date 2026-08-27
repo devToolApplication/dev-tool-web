@@ -3,4 +3,5 @@ declare module 'bpmn-js-properties-panel' {
 
   export const BpmnPropertiesPanelModule: ModuleDeclaration;
   export const BpmnPropertiesProviderModule: ModuleDeclaration;
+  export const useService: any;
 }

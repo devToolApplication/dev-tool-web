@@ -128,7 +128,7 @@ describe('workflow studio mapper', () => {
       nodes: [
         {
           nodeId: 'task-1',
-          nodeType: 'AI_TASK',
+          nodeType: 'SERVICE_TASK',
           executionStatus: 'COMPLETED',
           outcome: 'PASS',
           attempt: 1,

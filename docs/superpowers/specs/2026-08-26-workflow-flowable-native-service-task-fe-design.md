@@ -1,7 +1,7 @@
 # Workflow Flowable Native Service Task FE Design
 
 Date: 2026-08-26
-Status: DRAFT FOR USER REVIEW
+Status: IMPLEMENTED
 
 ## 1. Goal
 
@@ -22,6 +22,8 @@ Use Flowable-native Service Task properties as the primary editor contract:
 - `flowable:expression`
 - `flowable:type`
 - `flowable:field`
+- `flowable:externalWorkerInParameter`
+- `flowable:externalWorkerOutParameter`
 - `flowable:resultVariableName`
 - `flowable:useLocalScopeForResultVariable`
 - `flowable:storeResultVariableAsTransient`
@@ -34,6 +36,7 @@ Use Flowable-native Service Task properties as the primary editor contract:
 - `flowable:doNotIncludeVariables`
 - `flowable:mapException`
 - `flowable:failedJobRetryTimeCycle` extension element
+- `flowable:executionListener`
 - `flowable:extensionId`
 - `flowable:formKey`
 
@@ -47,11 +50,8 @@ Flowable-native `external-worker` type.
 `bpmn-js-properties-panel`, but only the core BPMN provider is registered. This
 is why Service Task currently shows only general BPMN fields.
 
-`workflow-bpmn-adapter.ts` currently serializes legacy custom metadata:
-
-- `flowable:type="external-worker"`
-- `flowable:topic="ai|mcp|code|http"`
-- `flowable:taskConfigJson="..."`
+`workflow-bpmn-adapter.ts` now emits plain `bpmn:serviceTask` nodes for the
+generic service-task type and no longer writes DevTool task presets.
 
 Backend `ai-agent-mcrs` currently uses Flowable 7.2.0 and can parse/deploy BPMN
 XML. The current runtime has custom external-worker dispatch code, but this FE
@@ -75,7 +75,7 @@ Out of scope for this FE spec:
 
 - Backend JavaDelegate implementation.
 - Backend validation hardening.
-- Runtime migration from existing custom topic/taskConfig KOC flows.
+- Runtime migration from existing custom topic/task config KOC flows.
 - Backward-compatible round-trip guarantees for DevTool custom Service Task
   metadata.
 - Full Flowable Enterprise palette parity.
@@ -106,18 +106,14 @@ Fields:
 - ID
 - Name
 - Documentation
-- Extension ID
-- Form key
 
 Purpose:
 
 - ID is the BPMN technical identity.
 - Name is diagram display text.
 - Documentation is free-form model documentation.
-- Extension ID identifies a custom task shape or backend catalog item when
-  needed.
-- Form key is kept because the Flowable schema allows it on Service Task; it is
-  metadata only unless backend form resolution is configured.
+- Extension ID and Form key are kept in Advanced because they are optional
+  metadata.
 
 ### 5.2 Implementation
 
@@ -156,15 +152,19 @@ Validation:
 Class fields are edited as rows:
 
 - Name
-- Value type: string value, long string, or expression
+- Value type: string or expression
 - Value
 
 Serialization:
 
 ```xml
 <extensionElements>
-  <flowable:field name="text" stringValue="Hello" />
-  <flowable:field name="rule" expression="${ruleBean.resolve(execution)}" />
+  <flowable:field name="text">
+    <flowable:string>Hello</flowable:string>
+  </flowable:field>
+  <flowable:field name="rule">
+    <flowable:expression>${ruleBean.resolve(execution)}</flowable:expression>
+  </flowable:field>
 </extensionElements>
 ```
 
@@ -176,30 +176,29 @@ Use cases:
 
 UI rule:
 
-- Fields are primary for Java class and delegate expression.
-- Fields are hidden for expression implementation unless Advanced is open,
-  because Flowable does not support field injection for plain expression
-  service tasks.
+- Fields remain visible because Flowable uses the same field extension element
+  for Java class, delegate expression, and built-in type configuration.
 
 ### 5.4 Variables
 
 The variable editor should feel like Camunda input/output mapping, but serialize
-to Flowable-compatible BPMN.
+to Flowable-native external-worker parameters. It is visible only when
+`flowable:type="external-worker"`.
 
 Input mappings:
 
 - Rows: Source, Source type, Target, Transient
 - Source type values: variable, expression
-- Source maps to `flowable:in source`.
-- Expression maps to `flowable:in sourceExpression`.
-- Target maps to `flowable:in target`.
+- Source maps to `flowable:externalWorkerInParameter source`.
+- Expression maps to `flowable:externalWorkerInParameter sourceExpression`.
+- Target maps to `flowable:externalWorkerInParameter target`.
 
 Output mappings:
 
 - Rows: Source, Source type, Target, Transient
-- Source maps to `flowable:out source`.
-- Expression maps to `flowable:out sourceExpression`.
-- Target maps to `flowable:out target`.
+- Source maps to `flowable:externalWorkerOutParameter source`.
+- Expression maps to `flowable:externalWorkerOutParameter sourceExpression`.
+- Target maps to `flowable:externalWorkerOutParameter target`.
 
 Result fields:
 
@@ -216,8 +215,6 @@ Fields:
 - `flowable:exclusive`
 - `flowable:skipExpression`
 - `flowable:triggerable`
-- `flowable:parallelInSameTransaction`, visible only when built-in type is
-  `http`.
 - `flowable:topic`, visible only when built-in type is `external-worker`.
 - `flowable:doNotIncludeVariables`, visible only when built-in type is
   `external-worker`.
@@ -270,7 +267,6 @@ Execution listeners are edited as rows:
 - Implementation value
 - Transaction: none, before-commit, committed, rolled-back
 - Custom properties resolver: class, expression, delegate expression
-- Fields
 
 Serialization target:
 
@@ -287,11 +283,15 @@ Task properties.
 
 Advanced shows:
 
-- Raw Flowable attributes detected on the business object.
-- Raw `extensionElements` summary.
+- `flowable:skipExpression`
+- `flowable:triggerable`
+- `flowable:extensionId`
+- `flowable:formKey`
+- `flowable:failedJobRetryTimeCycle`
 
-Advanced allows inspect and preservation first. Direct raw XML editing is not
-part of V1 because it makes validation and round-trip tests expensive.
+Advanced keeps low-frequency Service Task metadata together. Direct raw XML
+editing is not part of V1 because it makes validation and round-trip tests
+expensive.
 
 ## 6. Architecture
 
@@ -301,14 +301,11 @@ Add one Flowable BPMN support layer under:
 src/app/features/workflow-studio/bpmn/flowable/
 ```
 
-Suggested files:
+Files:
 
-- `flowable-moddle.json`
-- `flowable-service-task.model.ts`
 - `flowable-service-task-mapper.ts`
 - `flowable-properties-provider.ts`
-- `flowable-service-task-properties.component.ts`
-- `flowable-mapping-table.component.ts`
+- `flowable-moddle.ts`
 
 `WorkflowBpmnCanvasComponent` remains the owner of `bpmn-js` modeler internals.
 It registers:
@@ -345,8 +342,7 @@ Frontend validation:
 
 - Missing implementation value blocks local apply.
 - Multiple implementation values are normalized to the selected implementation.
-- Invalid Java class format shows a field error.
-- Mapping rows require either source or source expression, never both.
+- Mapping rows require either source or source expression.
 - Mapping rows require target.
 - Duplicate field names are allowed because Flowable XML allows repeated
   extension rows, but the UI warns because delegates usually expect one value.
@@ -371,7 +367,8 @@ Frontend tests:
 - Service Task mapper writes `flowable:delegateExpression` and clears class and
   expression.
 - Field injection rows serialize to `<flowable:field>`.
-- Input/output rows serialize to `<flowable:in>` and `<flowable:out>`.
+- Input/output rows serialize to `<flowable:externalWorkerInParameter>` and
+  `<flowable:externalWorkerOutParameter>`.
 - Result variable fields serialize and reload.
 - Async/exclusive/asyncLeave fields serialize and reload.
 - Exception mappings serialize and reload.
