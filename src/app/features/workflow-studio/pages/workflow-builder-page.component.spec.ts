@@ -136,6 +136,86 @@ describe('WorkflowBuilderPageComponent unit', () => {
     expect(moduleSource).not.toContain('WorkflowBpmnPropertiesDrawerComponent');
   });
 
+  it('imports a valid BPMN file into the editable draft XML', async () => {
+    const xml = '<definitions id="imported" />';
+
+    await component.importBpmnFile(new File([xml], 'screening.bpmn', { type: 'application/xml' }));
+
+    expect(store.bpmnXml()).toBe(xml);
+    expect(store.dirty()).toBe(true);
+    expect(toastService.error).not.toHaveBeenCalled();
+  });
+
+  it('ignores BPMN imports while the workflow is readonly', async () => {
+    const originalXml = store.bpmnXml();
+    store.setMode('readonly');
+
+    await component.importBpmnFile(
+      new File(['<definitions id="readonly" />'], 'readonly.bpmn', { type: 'application/xml' }),
+    );
+
+    expect(store.bpmnXml()).toBe(originalXml);
+    expect(store.dirty()).toBe(false);
+    expect(toastService.error).not.toHaveBeenCalled();
+  });
+
+  it('rejects empty and unsupported BPMN import files before changing the draft', async () => {
+    const originalXml = store.bpmnXml();
+
+    await component.importBpmnFile(new File([''], 'empty.bpmn', { type: 'application/xml' }));
+    await component.importBpmnFile(
+      new File(['<definitions />'], 'workflow.txt', { type: 'text/plain' }),
+    );
+
+    expect(store.bpmnXml()).toBe(originalXml);
+    expect(store.dirty()).toBe(false);
+    expect(toastService.error).toHaveBeenNthCalledWith(1, 'workflowStudio.bpmn.importEmpty');
+    expect(toastService.error).toHaveBeenNthCalledWith(
+      2,
+      'workflowStudio.bpmn.importInvalidExtension',
+    );
+  });
+
+  it('opens the native BPMN file picker from the toolbar action', () => {
+    const fileInput = { click: vi.fn() } as unknown as HTMLInputElement;
+
+    component.openBpmnImport(fileInput);
+
+    expect(fileInput.click).toHaveBeenCalledOnce();
+  });
+
+  it('exports the current BPMN XML as a sanitized BPMN download', () => {
+    store.updateWorkflowMetadata('KOC Screening / Flow', null);
+    store.updateBpmnXml('<definitions id="exported" />');
+    const anchor = document.createElement('a');
+    const click = vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
+    const createElement = vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+    const appendChild = vi.spyOn(document.body, 'appendChild');
+    const removeChild = vi.spyOn(document.body, 'removeChild');
+    const createObjectURL = vi.fn(() => 'blob:workflow');
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+
+    try {
+      component.exportBpmnFile();
+
+      expect(createElement).toHaveBeenCalledWith('a');
+      expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+      expect(anchor.download).toBe('KOC-Screening-Flow.bpmn');
+      expect(anchor.href).toBe('blob:workflow');
+      expect(click).toHaveBeenCalledOnce();
+      expect(appendChild).toHaveBeenCalledWith(anchor);
+      expect(removeChild).toHaveBeenCalledWith(anchor);
+      expect(revokeObjectURL).toHaveBeenCalledWith('blob:workflow');
+    } finally {
+      createElement.mockRestore();
+      appendChild.mockRestore();
+      removeChild.mockRestore();
+      click.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
   function savedWorkflow(): WorkflowDetail {
     return {
       ...createDraftWorkflowDetail('wf-1'),

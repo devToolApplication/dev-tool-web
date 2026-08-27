@@ -15,6 +15,13 @@
     [actions]="actions()"
     (actionClick)="onToolbarAction($event)"
   ></app-action-toolbar>
+  <input
+    #bpmnImportInput
+    type="file"
+    accept=".bpmn,.xml,application/xml,text/xml"
+    hidden
+    (change)="onBpmnImportSelected($event)"
+  />
 
   <div class="workflow-builder">
     <section

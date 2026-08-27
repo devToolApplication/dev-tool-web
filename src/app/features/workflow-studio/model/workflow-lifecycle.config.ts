@@ -57,9 +57,26 @@ export function buildWorkflowBuilderActions(options: {
   saving: boolean;
   readonlyMode: boolean;
   hasWorkflow: boolean;
+  hasBpmnXml: boolean;
 }): ActionToolbarAction[] {
   const disabled = options.saving || !options.hasWorkflow;
   return [
+    {
+      id: 'importBpmn',
+      label: 'workflowStudio.bpmn.import',
+      icon: 'pi pi-upload',
+      placement: 'secondary',
+      variant: 'ghost',
+      disabled: disabled || options.readonlyMode,
+    },
+    {
+      id: 'exportBpmn',
+      label: 'workflowStudio.bpmn.export',
+      icon: 'pi pi-download',
+      placement: 'secondary',
+      variant: 'ghost',
+      disabled: disabled || !options.hasBpmnXml,
+    },
     {
       id: 'validate',
       label: 'workflowStudio.lifecycle.validate',

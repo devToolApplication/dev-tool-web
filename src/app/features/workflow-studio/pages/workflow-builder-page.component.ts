@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   HostListener,
   OnInit,
   ViewChild,
@@ -36,6 +37,7 @@ import { WorkflowEditorStore } from '../store/workflow-editor.store';
 })
 export class WorkflowBuilderPageComponent implements OnInit {
   @ViewChild(WorkflowBpmnCanvasComponent) workflowBpmnCanvas?: WorkflowBpmnCanvasComponent;
+  @ViewChild('bpmnImportInput') bpmnImportInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -59,6 +61,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
       saving: this.store.saving(),
       readonlyMode: this.readonlyMode(),
       hasWorkflow: !!this.store.workflow(),
+      hasBpmnXml: !!this.store.bpmnXml(),
     }),
   );
   readonly selectedVersionId = signal<string | null>(null);
@@ -145,6 +148,14 @@ export class WorkflowBuilderPageComponent implements OnInit {
         break;
       case 'run':
         this.runDialogOpen.set(true);
+        break;
+      case 'importBpmn':
+        if (this.bpmnImportInput) {
+          this.openBpmnImport(this.bpmnImportInput.nativeElement);
+        }
+        break;
+      case 'exportBpmn':
+        this.exportBpmnFile();
         break;
       default:
         break;
@@ -247,6 +258,64 @@ export class WorkflowBuilderPageComponent implements OnInit {
     this.store.selectEdge(null);
   }
 
+  openBpmnImport(fileInput: HTMLInputElement): void {
+    if (this.readonlyMode()) {
+      return;
+    }
+    fileInput.click();
+  }
+
+  async onBpmnImportSelected(event: Event): Promise<void> {
+    const input = event.target instanceof HTMLInputElement ? event.target : null;
+    const file = input?.files?.[0] ?? null;
+    try {
+      if (file) {
+        await this.importBpmnFile(file);
+      }
+    } finally {
+      if (input) {
+        input.value = '';
+      }
+    }
+  }
+
+  async importBpmnFile(file: File): Promise<void> {
+    if (this.readonlyMode()) {
+      return;
+    }
+    if (!isBpmnImportFile(file)) {
+      this.toastService.error('workflowStudio.bpmn.importInvalidExtension');
+      return;
+    }
+
+    try {
+      const xml = await readFileText(file);
+      if (!xml.trim()) {
+        this.toastService.error('workflowStudio.bpmn.importEmpty');
+        return;
+      }
+      this.updateBpmnXml(xml);
+    } catch (error) {
+      this.toastService.error(errorMessage(error));
+    }
+  }
+
+  exportBpmnFile(): void {
+    const xml = this.store.bpmnXml();
+    if (!xml) {
+      return;
+    }
+
+    const blobUrl = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
+    const anchor = document.createElement('a');
+    anchor.href = blobUrl;
+    anchor.download = bpmnDownloadFileName(this.store.workflow()?.definition.name);
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(blobUrl);
+  }
+
   selectVersion(versionId: string): void {
     const workflow = this.store.workflow();
     if (!workflow) {
@@ -313,4 +382,29 @@ function isEditableShortcutTarget(target: EventTarget | null): boolean {
     tagName === 'select' ||
     !!target.closest('[contenteditable="true"]')
   );
+}
+
+function isBpmnImportFile(file: File): boolean {
+  return /\.(bpmn|xml)$/i.test(file.name);
+}
+
+function bpmnDownloadFileName(name: string | null | undefined): string {
+  const baseName = (name ?? 'workflow')
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `${baseName || 'workflow'}.bpmn`;
+}
+
+async function readFileText(file: File): Promise<string> {
+  if (typeof file.text === 'function') {
+    return await file.text();
+  }
+
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'));
+    reader.readAsText(file);
+  });
 }
