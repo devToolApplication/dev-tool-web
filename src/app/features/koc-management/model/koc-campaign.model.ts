@@ -1,6 +1,31 @@
-﻿import type { KocAiExecutionConfig, KocAuditInfo, KocPageQuery } from './koc-common.model';
+import type { KocAiExecutionConfig, KocAuditInfo, KocPageQuery } from './koc-common.model';
 import type { KocDiscoverySignal, KocSearchStrategy } from './koc-discovery.model';
 import type { KocScreeningRule } from './koc-rule.model';
+import type {
+  CampaignGoal,
+  CampaignRequirement,
+  CampaignSearchScope,
+  CampaignWorkflowRef,
+} from './koc-campaign-editor.model';
+
+export type {
+  CampaignGoal as KocCampaignGoal,
+  CampaignSearchScope as KocCampaignSearchScope,
+  CampaignRequirement as KocCampaignRequirement,
+  CampaignWorkflowRef as KocCampaignWorkflowRef,
+};
+
+export interface KocCampaignSearchConfig {
+  instructions?: string;
+  scope?: Partial<CampaignSearchScope>;
+  requirements?: CampaignRequirement[];
+}
+
+export interface KocCampaignWorkflowConfig {
+  workflowDefinitionId: string;
+  workflowVersionId: string;
+  workflowVersion?: number | null;
+}
 
 export type KocCampaignStatus =
   | 'DRAFT'
@@ -39,7 +64,16 @@ export interface KocCampaignSummary extends KocAuditInfo {
 export interface KocCampaignDetail extends KocCampaignSummary {
   description?: string;
   version: number;
-  discoveryExecution: KocAiExecutionConfig;
+  goal?: CampaignGoal;
+  search?: KocCampaignSearchConfig;
+  workflow?: KocCampaignWorkflowConfig;
+  workflowDefinitionId?: string;
+  workflowVersionId?: string;
+  requirement?: string;
+  note?: string;
+  discoveryWorkflowId?: string;
+  screeningWorkflowId?: string;
+  discoveryExecution?: KocAiExecutionConfig;
   screeningExecution?: KocAiExecutionConfig;
   discoverySignals?: KocDiscoverySignal[];
   searchStrategies?: KocSearchStrategy[];
@@ -49,16 +83,10 @@ export interface KocCampaignDetail extends KocCampaignSummary {
 
 export interface KocCampaignUpsertPayload {
   name: string;
-  code: string;
   description?: string;
-  targetAccepted: number;
-  maximumDiscovered: number;
-  maximumScreened: number;
-  discoveryExecution: KocAiExecutionConfig;
-  screeningExecution?: KocAiExecutionConfig;
-  discoverySignals?: KocDiscoverySignal[];
-  searchStrategies?: KocSearchStrategy[];
-  screeningRules?: KocScreeningRule[];
+  goal: CampaignGoal;
+  search: KocCampaignSearchConfig;
+  workflow: KocCampaignWorkflowConfig;
 }
 
 export type KocCandidateEvaluationStartStatus =

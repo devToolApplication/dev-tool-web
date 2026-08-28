@@ -240,6 +240,11 @@ function mapBpmnNode(dto: BpmnWorkflowNodeDto): BpmnWorkflowNode {
     id: dto.id,
     type: dto.type,
     name: dto.name ?? null,
+    attributes: cloneOptionalStringRecord(dto.attributes),
+    extensionElementsXml: dto.extensionElementsXml,
+    eventDefinitionsXml: dto.eventDefinitionsXml,
+    incoming: cloneOptionalStringArray(dto.incoming),
+    outgoing: cloneOptionalStringArray(dto.outgoing),
     config: cloneOptionalJson(dto.config),
     inputMapping: cloneOptionalJson(dto.inputMapping),
     outputMapping: cloneOptionalJson(dto.outputMapping),
@@ -253,6 +258,11 @@ function mapBpmnNodeToDto(node: BpmnWorkflowNode): BpmnWorkflowNodeDto {
     id: node.id,
     type: node.type,
     name: node.name ?? null,
+    attributes: cloneOptionalStringRecord(node.attributes),
+    extensionElementsXml: node.extensionElementsXml,
+    eventDefinitionsXml: node.eventDefinitionsXml,
+    incoming: cloneOptionalStringArray(node.incoming),
+    outgoing: cloneOptionalStringArray(node.outgoing),
     config: cloneOptionalJson(node.config),
     inputMapping: cloneOptionalJson(node.inputMapping),
     outputMapping: cloneOptionalJson(node.outputMapping),
@@ -284,4 +294,12 @@ function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
   }
 
   return version;
+}
+
+function cloneOptionalStringRecord(value: Record<string, string> | undefined): Record<string, string> | undefined {
+  return value === undefined ? undefined : { ...value };
+}
+
+function cloneOptionalStringArray(value: string[] | undefined): string[] | undefined {
+  return value === undefined ? undefined : [...value];
 }

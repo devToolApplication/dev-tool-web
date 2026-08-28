@@ -6,8 +6,13 @@ export type BpmnWorkflowNodeType =
   | 'START_EVENT'
   | 'END_EVENT'
   | 'SERVICE_TASK'
+  | 'CALL_ACTIVITY'
+  | 'USER_TASK'
   | 'EXCLUSIVE_GATEWAY'
-  | 'PARALLEL_GATEWAY';
+  | 'INCLUSIVE_GATEWAY'
+  | 'PARALLEL_GATEWAY'
+  | 'EVENT_BASED_GATEWAY'
+  | 'INTERMEDIATE_CATCH_EVENT';
 export type WorkflowNodeType = LegacyWorkflowNodeType | BpmnWorkflowNodeType;
 export type WorkflowEditorMode = 'design' | 'runtime' | 'readonly';
 export type WorkflowDefinitionStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
@@ -165,6 +170,11 @@ export interface BpmnWorkflowNode {
   id: string;
   type: BpmnWorkflowNodeType;
   name?: string | null;
+  attributes?: Record<string, string>;
+  extensionElementsXml?: string;
+  eventDefinitionsXml?: string;
+  incoming?: string[];
+  outgoing?: string[];
   config?: JsonValue;
   inputMapping?: JsonValue;
   outputMapping?: JsonValue;
@@ -186,6 +196,7 @@ export interface WorkflowEdge {
   target: string;
   name?: string | null;
   condition?: WorkflowCondition | null;
+  conditionExpression?: string | null;
   defaultFlow?: boolean;
 }
 

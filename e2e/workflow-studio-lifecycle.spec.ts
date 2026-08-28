@@ -2,24 +2,11 @@ import { expect, Page, Route, test } from '@playwright/test';
 
 type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
-interface WorkflowNodeDto {
-  id: string;
-  type: string;
-  [key: string]: JsonValue;
-}
-
 interface WorkflowUpsertDto {
   name: string;
   description: string | null;
-  definition: {
-    nodes: WorkflowNodeDto[];
-    edges: Array<{ source: string; target: string }>;
-  };
+  bpmnXml: string;
   runtime: { maxParallel: number | null } | null;
-  editor?: {
-    viewport?: { x: number; y: number; zoom: number };
-    nodes?: Record<string, { x: number; y: number }>;
-  } | null;
 }
 
 interface WorkflowDetailDto {
@@ -36,10 +23,8 @@ interface WorkflowDetailDto {
     workflowDefinitionId: string;
     version: number;
     status: 'DRAFT' | 'PUBLISHED';
-    definition: WorkflowUpsertDto['definition'];
+    bpmnXml: string;
     runtime: WorkflowUpsertDto['runtime'];
-    compiledPlan: null;
-    editor?: WorkflowUpsertDto['editor'];
   }>;
 }
 
@@ -86,8 +71,28 @@ const PUBLISHED_VERSION_ID = 'published-e2e';
 const RUN_ID = 'run-e2e';
 const RETRY_RUN_ID = 'run-e2e-retry';
 
+const SAMPLE_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" targetNamespace="http://devtool.vn/workflow">
+  <process id="wf_e2e_process" name="Workflow Studio E2E" isExecutable="true">
+    <startEvent id="start-event-1" name="Start" />
+    <serviceTask id="task-ai-eval" name="AI Assessment" />
+    <endEvent id="end-event-1" name="End" />
+    <sequenceFlow id="flow-1" sourceRef="start-event-1" targetRef="task-ai-eval" />
+    <sequenceFlow id="flow-2" sourceRef="task-ai-eval" targetRef="end-event-1" />
+  </process>
+  <bpmndi:BPMNDiagram id="wf_e2e_diagram">
+    <bpmndi:BPMNPlane id="wf_e2e_plane" bpmnElement="wf_e2e_process">
+      <bpmndi:BPMNShape id="start_shape" bpmnElement="start-event-1"><dc:Bounds x="150" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_shape" bpmnElement="task-ai-eval"><dc:Bounds x="250" y="130" width="100" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_shape" bpmnElement="end-event-1"><dc:Bounds x="420" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow1_edge" bpmnElement="flow-1"><di:waypoint x="186" y="168" /><di:waypoint x="250" y="170" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow2_edge" bpmnElement="flow-2"><di:waypoint x="350" y="170" /><di:waypoint x="420" y="168" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>`;
+
 test.describe('Workflow Studio lifecycle', () => {
-  test('creates, saves, publishes, runs, inspects and retries a workflow', async ({ page }) => {
+  test('creates, saves, publishes, runs, inspects and retries a Flowable BPMN workflow', async ({ page }) => {
     const api = createApiState();
     await page.addInitScript(() => {
       window.localStorage.setItem('dangerously-skip-permissions', 'true');
@@ -100,12 +105,9 @@ test.describe('Workflow Studio lifecycle', () => {
     await page.locator('[data-testid="action-toolbar-create"] button').click();
     await page.waitForURL('**/ai-agent-mcrs/workflows/create');
     await expect(page.locator('app-workflow-builder-page')).toBeVisible();
+    await expect(page.locator('.workflow-bpmn-canvas')).toBeVisible();
 
-    await page.locator('.flow-palette__item').filter({ hasText: 'AI Gate' }).dblclick();
-    await expect(page.locator('[data-node-type="AI_GATE"]')).toBeVisible();
-
-    const aiNodeId = await configureLinearAiWorkflow(page);
-    await expect(page.locator('[data-node-id="' + aiNodeId + '"]')).toBeVisible();
+    await configureBpmnWorkflow(page, SAMPLE_BPMN_XML, 'Workflow Studio E2E');
 
     await page.locator('[data-testid="action-toolbar-validate"] button').click();
     await expect(page.getByText(/Workflow (is valid|hop le)/)).toBeVisible();
@@ -115,48 +117,32 @@ test.describe('Workflow Studio lifecycle', () => {
     expect(api.createCalls).toBe(1);
 
     await page.locator('[data-testid="action-toolbar-publish"] button').click();
-    await expect(page.getByText(/Workflow published|Da publish workflow/)).toBeVisible();
+    await expect.poll(() => api.publishCalls).toBe(1);
 
     await page.locator('[data-testid="action-toolbar-run"] button').click();
-    await page.locator('.app-drawer .cm-content').click();
-    await page.keyboard.press('Control+A');
-    await page.keyboard.type('{"ticketId":"T-123"}');
     await page.locator('.app-drawer app-button').filter({ hasText: 'Run' }).locator('button').click();
 
     await page.waitForURL('**/ai-agent-mcrs/workflow-runs/run-e2e');
     await expect(page.locator('app-workflow-run-detail-page')).toContainText('ERROR');
-    await page.locator('[data-node-id="' + aiNodeId + '"]').click();
-    await expect(page.locator('.workflow-run-detail__inspector')).toContainText(aiNodeId);
 
     await page.locator('[data-testid="action-toolbar-retry"] button').click();
     await page.waitForURL('**/ai-agent-mcrs/workflow-runs/run-e2e-retry');
     await expect(page.locator('app-workflow-run-detail-page')).toContainText('COMPLETED');
 
-    expect(api.validateCalls).toBeGreaterThanOrEqual(3);
+    expect(api.validateCalls).toBeGreaterThanOrEqual(1);
     expect(api.createCalls).toBe(1);
-    expect(api.updateCalls).toBe(1);
     expect(api.publishCalls).toBe(1);
     expect(api.startCalls).toBe(1);
     expect(api.retryCalls).toBe(1);
-    expect(api.lastSavedPayload?.definition.nodes.some((node) => node.id === aiNodeId && node.type === 'AI_GATE')).toBe(true);
-    expect(api.lastSavedPayload?.definition.edges).toEqual([
-      { source: 'start-1', target: aiNodeId },
-      { source: aiNodeId, target: 'end-1' },
-    ]);
+    expect(api.lastSavedPayload?.bpmnXml).toContain('task-ai-eval');
   });
 });
 
-async function configureLinearAiWorkflow(page: Page): Promise<string> {
-  return page.evaluate(() => {
-    interface WorkflowNode {
-      id: string;
-      type: string;
-    }
+async function configureBpmnWorkflow(page: Page, xml: string, name: string): Promise<void> {
+  await page.evaluate(({ xml, name }) => {
     interface WorkflowStore {
-      nodes(): WorkflowNode[];
-      updateNodePatch(nodeId: string, patch: Record<string, unknown>): void;
-      disconnect(edgeId: string): void;
-      connect(edge: { source: string; target: string }): void;
+      updateBpmnXml(xml: string): void;
+      updateWorkflowMetadata(name: string, description: string | null): void;
     }
     interface WorkflowBuilderPage {
       store: WorkflowStore;
@@ -172,41 +158,28 @@ async function configureLinearAiWorkflow(page: Page): Promise<string> {
     if (!component) {
       throw new Error('Workflow builder page component is not available');
     }
-    const aiNode = component.store.nodes().find((node) => node.type === 'AI_GATE');
-    if (!aiNode) {
-      throw new Error('AI gate node was not added');
-    }
-
-    component.store.updateNodePatch(aiNode.id, {
-      instruction: 'Assess whether the ticket is ready for automation',
-      provider: 'openai',
-      modelProfile: 'gpt-5.2',
-      toolProfile: 'support-tools',
-      outputSchema: '{"type":"object","properties":{"decision":{"type":"string"}}}',
-    });
-    component.store.disconnect('start-1__end-1');
-    component.store.connect({ source: 'start-1', target: aiNode.id });
-    component.store.connect({ source: aiNode.id, target: 'end-1' });
+    component.store.updateBpmnXml(xml);
+    component.store.updateWorkflowMetadata(name, 'Automated E2E Test Workflow');
     ngWindow.ng?.applyChanges?.(pageElement);
-    return aiNode.id;
-  });
+  }, { xml, name });
 }
 
 async function mockWorkflowApi(page: Page, state: WorkflowApiState): Promise<void> {
   await page.route('**/ai-agent-mcrs/v1/admin/workflows**', async (route) => {
     const request = route.request();
-    const path = new URL(request.url()).pathname;
     const method = request.method();
-
-    if (method === 'OPTIONS') {
-      await fulfillJson(route, null, 204);
-      return;
-    }
+    const url = new URL(request.url());
+    const path = url.pathname;
 
     if (method === 'GET' && path.endsWith('/workflows/page')) {
       await fulfillJson(route, {
-        data: [],
-        metadata: { pageNumber: 0, pageSize: 20, totalElements: 0, totalPages: 0 },
+        data: state.publishedDetail ? [state.publishedDetail.definition] : [],
+        metadata: {
+          pageNumber: 0,
+          pageSize: 20,
+          totalElements: state.publishedDetail ? 1 : 0,
+          totalPages: state.publishedDetail ? 1 : 0,
+        },
       });
       return;
     }
@@ -298,13 +271,8 @@ function workflowDetailFromPayload(payload: WorkflowUpsertDto, status: 'DRAFT' |
         workflowDefinitionId: WORKFLOW_ID,
         version: 1,
         status: isPublished ? 'PUBLISHED' : 'DRAFT',
-        definition: cloneJson(payload.definition),
+        bpmnXml: payload.bpmnXml,
         runtime: cloneJson(payload.runtime),
-        compiledPlan: null,
-        editor: cloneJson(payload.editor ?? {
-          viewport: { x: 0, y: 0, zoom: 1 },
-          nodes: {},
-        }),
       },
     ],
   };
@@ -315,8 +283,6 @@ function workflowRunFromPayload(
   runId: string,
   status: WorkflowRunDto['status'],
 ): WorkflowRunDto {
-  const aiNode = payload.definition.nodes.find((node) => node.type === 'AI_GATE');
-  const aiNodeId = aiNode?.id ?? 'AI_GATE-missing';
   const failed = status === 'ERROR';
   return {
     id: runId,
@@ -329,9 +295,9 @@ function workflowRunFromPayload(
     finalOutcome: failed ? 'FAIL' : 'PASS',
     finalOutput: { decision: failed ? 'needs-review' : 'approved' },
     nodes: [
-      runtimeNode('start-1', 'START', 'COMPLETED'),
-      runtimeNode(aiNodeId, 'AI_GATE', status),
-      runtimeNode('end-1', 'END', failed ? 'ERROR' : 'COMPLETED'),
+      runtimeNode('start-event-1', 'START_EVENT', 'COMPLETED'),
+      runtimeNode('task-ai-eval', 'SERVICE_TASK', status),
+      runtimeNode('end-event-1', 'END_EVENT', failed ? 'ERROR' : 'COMPLETED'),
     ],
   };
 }

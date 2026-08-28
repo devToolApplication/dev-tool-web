@@ -320,6 +320,31 @@ describe('flowable service task mapper', () => {
     expect(xml).toContain('<flowable:in source="legacySource" target="legacyTarget" />');
     expect(xml).toContain('<flowable:out source="legacyResult" target="legacyOutput" />');
   });
+
+  it('round-trips Flowable attributes on callActivity without dropping inheritVariables', async () => {
+    const moddle = new BpmnModdle({ flowable: flowableModdle });
+    const xml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:flowable="http://flowable.org/bpmn">\n' +
+      '  <bpmn:process id="Process_1">\n' +
+      '    <bpmn:callActivity id="CALL_AI" name="Call AI" calledElement="ai_call_with_retry_v1" flowable:inheritVariables="false">\n' +
+      '      <bpmn:extensionElements>\n' +
+      '        <flowable:in sourceExpression="${prompt}" target="prompt" />\n' +
+      '        <flowable:out source="result" target="aiResult" />\n' +
+      '      </bpmn:extensionElements>\n' +
+      '    </bpmn:callActivity>\n' +
+      '  </bpmn:process>\n' +
+      '</bpmn:definitions>';
+
+    const { rootElement, warnings } = await moddle.fromXML(xml);
+    expect(warnings).toEqual([]);
+
+    const { xml: writtenXml } = await moddle.toXML(rootElement, { format: true });
+    expect(writtenXml).toContain('flowable:inheritVariables="false"');
+    expect(writtenXml).toContain('calledElement="ai_call_with_retry_v1"');
+    expect(writtenXml).toContain('<flowable:in sourceExpression="${prompt}" target="prompt" />');
+    expect(writtenXml).toContain('<flowable:out source="result" target="aiResult" />');
+  });
 });
 
 async function parseServiceTask(serviceTaskXml: string): Promise<any> {

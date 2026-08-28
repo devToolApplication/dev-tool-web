@@ -1,5 +1,5 @@
-import { mapWorkflowDetailDto, mapWorkflowDetailToUpsertDto, mapWorkflowRunDto, mapWorkflowUpsertPayloadToDto, mapWorkflowValidationResponseDto } from './workflow-studio.mapper';
-import { WorkflowDetailDto, WorkflowRunDto, WorkflowValidationResponseDto } from './workflow-studio.dto';
+import { mapWorkflowDetailDto, mapWorkflowDetailToUpsertDto, mapWorkflowGraphDto, mapWorkflowGraphToDto, mapWorkflowRunDto, mapWorkflowUpsertPayloadToDto, mapWorkflowValidationResponseDto } from './workflow-studio.mapper';
+import { WorkflowDetailDto, WorkflowGraphDto, WorkflowRunDto, WorkflowValidationResponseDto } from './workflow-studio.dto';
 import { WorkflowDetail, WorkflowUpsertPayload } from './workflow-studio.model';
 
 describe('workflow studio mapper', () => {
@@ -146,5 +146,49 @@ describe('workflow studio mapper', () => {
 
     expect(run.id).toBe('run-1');
     expect(run.nodes[0].output).toEqual({ out: 2 });
+  });
+
+  it('maps BPMN nodes and edges preserving attributes and condition expressions', () => {
+    const graphDto: WorkflowGraphDto = {
+      nodes: [
+        {
+          id: 'call-1',
+          type: 'CALL_ACTIVITY',
+          name: 'AI Call',
+          attributes: { 'flowable:inheritVariables': 'false', calledElement: 'sub_process_v1' },
+          extensionElementsXml: '<extensionElements><flowable:in target="a" sourceExpression="${x}" /></extensionElements>',
+          incoming: ['flow-in'],
+          outgoing: ['flow-out'],
+          config: {},
+        },
+        {
+          id: 'gw-1',
+          type: 'INCLUSIVE_GATEWAY',
+          name: 'Branch',
+        },
+      ],
+      edges: [
+        {
+          id: 'flow-1',
+          source: 'gw-1',
+          target: 'call-1',
+          conditionExpression: '${count > 0}',
+          defaultFlow: false,
+        },
+      ],
+    };
+
+    const domain = mapWorkflowGraphDto(graphDto);
+    expect(domain.nodes[0]).toMatchObject({
+      id: 'call-1',
+      type: 'CALL_ACTIVITY',
+      attributes: { 'flowable:inheritVariables': 'false', calledElement: 'sub_process_v1' },
+      incoming: ['flow-in'],
+      outgoing: ['flow-out'],
+    });
+    expect(domain.edges[0].conditionExpression).toBe('${count > 0}');
+
+    const backToDto = mapWorkflowGraphToDto(domain);
+    expect(backToDto).toEqual(graphDto);
   });
 });

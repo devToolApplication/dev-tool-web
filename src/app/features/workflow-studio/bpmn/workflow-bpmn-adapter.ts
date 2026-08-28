@@ -22,15 +22,26 @@ const TAG_BY_TYPE: Record<BpmnWorkflowNodeType, string> = {
   START_EVENT: 'startEvent',
   END_EVENT: 'endEvent',
   SERVICE_TASK: 'serviceTask',
+  CALL_ACTIVITY: 'callActivity',
+  USER_TASK: 'userTask',
   EXCLUSIVE_GATEWAY: 'exclusiveGateway',
+  INCLUSIVE_GATEWAY: 'inclusiveGateway',
   PARALLEL_GATEWAY: 'parallelGateway',
+  EVENT_BASED_GATEWAY: 'eventBasedGateway',
+  INTERMEDIATE_CATCH_EVENT: 'intermediateCatchEvent',
 };
 
 const TYPE_BY_TAG: Record<string, BpmnWorkflowNodeType | undefined> = {
   startEvent: 'START_EVENT',
   endEvent: 'END_EVENT',
+  serviceTask: 'SERVICE_TASK',
+  callActivity: 'CALL_ACTIVITY',
+  userTask: 'USER_TASK',
   exclusiveGateway: 'EXCLUSIVE_GATEWAY',
+  inclusiveGateway: 'INCLUSIVE_GATEWAY',
   parallelGateway: 'PARALLEL_GATEWAY',
+  eventBasedGateway: 'EVENT_BASED_GATEWAY',
+  intermediateCatchEvent: 'INTERMEDIATE_CATCH_EVENT',
 };
 
 export interface WorkflowBpmnAdapterResult {
@@ -129,13 +140,49 @@ function renderNode(node: BpmnWorkflowNode, outgoing: WorkflowEdge[]): string {
     `id="${escapeAttr(node.id)}"`,
     node.name ? `name="${escapeAttr(node.name)}"` : null,
     renderDefaultFlowAttr(node, outgoing),
+    ...renderAttributePairs(node.attributes),
   ].filter(Boolean);
+  const children = renderNodeChildren(node);
 
-  return `    <${tag} ${attrs.join(' ')} />`;
+  if (!children.length) {
+    return `    <${tag} ${attrs.join(' ')} />`;
+  }
+
+  return [
+    `    <${tag} ${attrs.join(' ')}>`,
+    ...children,
+    `    </${tag}>`,
+  ].join('\n');
+}
+
+function renderNodeChildren(node: BpmnWorkflowNode): string[] {
+  const children: string[] = [];
+  if (node.extensionElementsXml) {
+    children.push(indentXml(node.extensionElementsXml, 6));
+  }
+  if (node.incoming?.length) {
+    children.push(...node.incoming.map((value) => `      <incoming>${escapeText(value)}</incoming>`));
+  }
+  if (node.outgoing?.length) {
+    children.push(...node.outgoing.map((value) => `      <outgoing>${escapeText(value)}</outgoing>`));
+  }
+  if (node.eventDefinitionsXml) {
+    children.push(indentXml(node.eventDefinitionsXml, 6));
+  }
+  return children;
+}
+
+function indentXml(xml: string, spaces: number): string {
+  const indent = ' '.repeat(spaces);
+  return xml
+    .trim()
+    .split('\n')
+    .map((line) => `${indent}${line.trim()}`)
+    .join('\n');
 }
 
 function renderDefaultFlowAttr(node: BpmnWorkflowNode, outgoing: WorkflowEdge[]): string | null {
-  if (node.type !== 'EXCLUSIVE_GATEWAY') {
+  if (node.type !== 'EXCLUSIVE_GATEWAY' && node.type !== 'INCLUSIVE_GATEWAY') {
     return null;
   }
 
@@ -152,7 +199,7 @@ function renderSequenceFlow(edge: WorkflowEdge): string {
     edge.defaultFlow ? 'devtool:defaultFlow="true"' : null,
     edge.condition ? `devtool:conditionJson="${escapeAttr(JSON.stringify(edge.condition))}"` : null,
   ].filter(Boolean);
-  const expression = workflowConditionToExpression(edge.condition);
+  const expression = workflowConditionToExpression(edge.condition) ?? edge.conditionExpression ?? null;
 
   if (!expression) {
     return `    <sequenceFlow ${attrs.join(' ')} />`;
@@ -206,10 +253,15 @@ function boundsForNode(
   node: BpmnWorkflowNode | undefined,
   position: WorkflowNodePosition,
 ): WorkflowNodePosition & { width: number; height: number } {
-  if (node?.type === 'START_EVENT' || node?.type === 'END_EVENT') {
+  if (node?.type === 'START_EVENT' || node?.type === 'END_EVENT' || node?.type === 'INTERMEDIATE_CATCH_EVENT') {
     return { ...position, width: 36, height: 36 };
   }
-  if (node?.type === 'EXCLUSIVE_GATEWAY' || node?.type === 'PARALLEL_GATEWAY') {
+  if (
+    node?.type === 'EXCLUSIVE_GATEWAY' ||
+    node?.type === 'INCLUSIVE_GATEWAY' ||
+    node?.type === 'PARALLEL_GATEWAY' ||
+    node?.type === 'EVENT_BASED_GATEWAY'
+  ) {
     return { ...position, width: 50, height: 50 };
   }
   return { ...position, width: 160, height: 80 };
@@ -217,24 +269,47 @@ function boundsForNode(
 
 function parseNode(element: Element, issues: WorkflowValidationIssue[]): BpmnWorkflowNode | null {
   const id = attr(element, 'id') || element.localName;
-  const type = element.localName === 'serviceTask'
-    ? taskTypeFromServiceTask(element, id, issues)
-    : TYPE_BY_TAG[element.localName];
+  const type = TYPE_BY_TAG[element.localName];
 
   if (!type) {
-    if (element.localName === 'serviceTask') {
-      return null;
-    }
     issues.push(issue('BPMN_ELEMENT_UNSUPPORTED', `Unsupported BPMN element: ${element.localName}`, { nodeId: id }));
     return null;
   }
 
-  return {
+  const node: BpmnWorkflowNode = {
     id,
     type,
     name: attr(element, 'name'),
     ...taskConfigFromServiceTask(element, issues, id),
+    ...nodeMetadata(element),
   };
+
+  return node;
+}
+
+function nodeMetadata(element: Element): Partial<BpmnWorkflowNode> {
+  const metadata: Partial<BpmnWorkflowNode> = {};
+  const attributes = preservedAttributes(element);
+  if (Object.keys(attributes).length) {
+    metadata.attributes = attributes;
+  }
+  const incoming = childTextValues(element, 'incoming');
+  if (incoming.length) {
+    metadata.incoming = incoming;
+  }
+  const outgoing = childTextValues(element, 'outgoing');
+  if (outgoing.length) {
+    metadata.outgoing = outgoing;
+  }
+  const extensionElements = firstByLocalName(element, 'extensionElements');
+  if (extensionElements) {
+    metadata.extensionElementsXml = serializeElement(extensionElements);
+  }
+  const eventDefinitions = elementChildren(element).filter((child) => child.localName.endsWith('EventDefinition'));
+  if (eventDefinitions.length) {
+    metadata.eventDefinitionsXml = eventDefinitions.map((child) => serializeElement(child)).join('\n');
+  }
+  return metadata;
 }
 
 function parseSequenceFlow(
@@ -244,10 +319,8 @@ function parseSequenceFlow(
 ): WorkflowEdge {
   const edgeId = attr(element, 'id') || '';
   const condition = conditionFromAttribute(element, issues, edgeId);
-
-  if (!condition && firstByLocalName(element, 'conditionExpression')) {
-    issues.push(issue('BPMN_CONDITION_EXPRESSION_UNSUPPORTED', 'Use the structured condition builder for sequence flow conditions', { edgeId }));
-  }
+  const conditionExprEl = firstByLocalName(element, 'conditionExpression');
+  const rawConditionExpr = conditionExprEl ? conditionExprEl.textContent?.trim() || null : null;
 
   const edge: WorkflowEdge = {
     id: edgeId || null,
@@ -262,18 +335,10 @@ function parseSequenceFlow(
   if (condition) {
     edge.condition = condition;
   }
+  if (rawConditionExpr && !condition) {
+    edge.conditionExpression = rawConditionExpr;
+  }
   return edge;
-}
-
-function taskTypeFromServiceTask(
-  element: Element,
-  id: string,
-  issues: WorkflowValidationIssue[],
-): BpmnWorkflowNodeType | null {
-  void element;
-  void id;
-  void issues;
-  return 'SERVICE_TASK';
 }
 
 function taskConfigFromServiceTask(
@@ -392,6 +457,23 @@ function elementChildren(element: Element): Element[] {
   return Array.from(element.children);
 }
 
+function childTextValues(element: Element, localName: string): string[] {
+  return elementChildren(element)
+    .filter((child) => child.localName === localName)
+    .map((child) => child.textContent?.trim() ?? '')
+    .filter((value) => !!value);
+}
+
+function preservedAttributes(element: Element): Record<string, string> {
+  return Array.from(element.attributes).reduce<Record<string, string>>((result, attribute) => {
+    if (attribute.name === 'id' || attribute.name === 'name' || attribute.name === 'default') {
+      return result;
+    }
+    result[attribute.name] = attribute.value;
+    return result;
+  }, {});
+}
+
 function attr(element: Element, name: string): string | null {
   return element.getAttribute(name);
 }
@@ -422,6 +504,33 @@ function escapeText(value: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+function renderAttributePairs(attributes?: Record<string, string>): string[] {
+  return Object.entries(attributes ?? {}).map(([name, value]) => `${name}="${escapeAttr(value)}"`);
+}
+
+function serializeElement(element: Element): string {
+  const attrs = Array.from(element.attributes)
+    .map((attribute) => `${attribute.name}="${escapeAttr(attribute.value)}"`)
+    .join(' ');
+  const openTag = attrs ? `<${element.tagName} ${attrs}>` : `<${element.tagName}>`;
+  const children = elementChildren(element);
+  const text = element.textContent?.trim() ?? '';
+
+  if (!children.length && !text) {
+    return attrs ? `<${element.tagName} ${attrs} />` : `<${element.tagName} />`;
+  }
+
+  if (!children.length) {
+    return `${openTag}${escapeText(text)}</${element.tagName}>`;
+  }
+
+  return [
+    openTag,
+    ...children.map((child) => serializeElement(child)),
+    `</${element.tagName}>`,
+  ].join('\n');
 }
 
 function issue(

@@ -29,6 +29,19 @@ export const flowableModdle = {
       ],
     },
     {
+      name: 'CallActivityExtensions',
+      isAbstract: true,
+      extends: ['bpmn:CallActivity'],
+      properties: [
+        { name: 'inheritVariables', isAttr: true, type: 'Boolean' },
+        { name: 'sameDeployment', isAttr: true, type: 'Boolean', default: false },
+        { name: 'fallbackToDefaultTenant', isAttr: true, type: 'Boolean', default: false },
+        { name: 'inheritBusinessKey', isAttr: true, type: 'Boolean', default: false },
+        { name: 'calledElementType', isAttr: true, type: 'String' },
+        { name: 'processInstanceName', isAttr: true, type: 'String' },
+      ],
+    },
+    {
       name: 'AsyncCapable',
       isAbstract: true,
       extends: ['bpmn:Activity', 'bpmn:Gateway', 'bpmn:Event'],

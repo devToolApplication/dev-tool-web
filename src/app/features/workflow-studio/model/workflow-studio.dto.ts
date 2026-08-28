@@ -69,6 +69,11 @@ export interface BpmnWorkflowNodeDto {
   id: string;
   type: BpmnWorkflowNodeType;
   name?: string | null;
+  attributes?: Record<string, string>;
+  extensionElementsXml?: string;
+  eventDefinitionsXml?: string;
+  incoming?: string[];
+  outgoing?: string[];
   config?: JsonValue;
   inputMapping?: JsonValue;
   outputMapping?: JsonValue;
@@ -90,6 +95,7 @@ export interface WorkflowEdgeDto {
   target: string;
   name?: string | null;
   condition?: WorkflowCondition | null;
+  conditionExpression?: string | null;
   defaultFlow?: boolean;
 }
 

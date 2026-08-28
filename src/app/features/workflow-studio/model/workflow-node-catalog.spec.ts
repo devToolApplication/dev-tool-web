@@ -9,7 +9,23 @@ import { WorkflowNodeType } from './workflow-studio.model';
 
 describe('workflow node catalog', () => {
   it('creates strongly typed defaults for every backend workflow node type', () => {
-    const types: WorkflowNodeType[] = ['START', 'CODE_GATE', 'AI_GATE', 'LOGIC', 'END'];
+    const types: WorkflowNodeType[] = [
+      'START',
+      'CODE_GATE',
+      'AI_GATE',
+      'LOGIC',
+      'END',
+      'START_EVENT',
+      'END_EVENT',
+      'SERVICE_TASK',
+      'CALL_ACTIVITY',
+      'USER_TASK',
+      'EXCLUSIVE_GATEWAY',
+      'INCLUSIVE_GATEWAY',
+      'PARALLEL_GATEWAY',
+      'EVENT_BASED_GATEWAY',
+      'INTERMEDIATE_CATCH_EVENT',
+    ];
 
     expect(types.map((type) => createWorkflowNode(type, `${type}-1`).type)).toEqual(types);
     expect(createWorkflowNode('AI_GATE', 'ai-1')).toMatchObject({
@@ -30,6 +46,21 @@ describe('workflow node catalog', () => {
       type: 'LOGIC',
       operator: 'AND',
       config: {},
+    });
+    expect(createWorkflowNode('CALL_ACTIVITY', 'call-1')).toMatchObject({
+      id: 'call-1',
+      type: 'CALL_ACTIVITY',
+      name: 'Call Activity',
+    });
+    expect(createWorkflowNode('INCLUSIVE_GATEWAY', 'inc-1')).toMatchObject({
+      id: 'inc-1',
+      type: 'INCLUSIVE_GATEWAY',
+      name: 'Inclusive Gateway',
+    });
+    expect(createWorkflowNode('INTERMEDIATE_CATCH_EVENT', 'catch-1')).toMatchObject({
+      id: 'catch-1',
+      type: 'INTERMEDIATE_CATCH_EVENT',
+      name: 'Catch Event',
     });
   });
 

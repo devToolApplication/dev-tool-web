@@ -139,11 +139,25 @@ const WORKFLOW_NODE_CATALOG: Record<WorkflowNodeType, WorkflowNodeCatalogItem> =
     allowConnectTo: true,
   },
   SERVICE_TASK: bpmnTask('SERVICE_TASK', 'Service Task', 'SV'),
+  CALL_ACTIVITY: bpmnTask('CALL_ACTIVITY', 'Call Activity', 'CA'),
+  USER_TASK: bpmnTask('USER_TASK', 'User Task', 'US'),
   EXCLUSIVE_GATEWAY: {
     type: 'EXCLUSIVE_GATEWAY',
     title: 'Exclusive Gateway',
     description: 'BPMN conditional branch',
     iconLabel: 'X',
+    shape: 'diamond',
+    tone: 'warning',
+    defaultSize: { width: 190, height: 90 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  },
+  INCLUSIVE_GATEWAY: {
+    type: 'INCLUSIVE_GATEWAY',
+    title: 'Inclusive Gateway',
+    description: 'BPMN inclusive branch or join',
+    iconLabel: 'O',
     shape: 'diamond',
     tone: 'warning',
     defaultSize: { width: 190, height: 90 },
@@ -159,6 +173,30 @@ const WORKFLOW_NODE_CATALOG: Record<WorkflowNodeType, WorkflowNodeCatalogItem> =
     shape: 'diamond',
     tone: 'info',
     defaultSize: { width: 190, height: 90 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  },
+  EVENT_BASED_GATEWAY: {
+    type: 'EVENT_BASED_GATEWAY',
+    title: 'Event Gateway',
+    description: 'BPMN event-based branch',
+    iconLabel: 'EV',
+    shape: 'diamond',
+    tone: 'info',
+    defaultSize: { width: 190, height: 90 },
+    ports: defaultMiddlePorts(),
+    allowConnectFrom: true,
+    allowConnectTo: true,
+  },
+  INTERMEDIATE_CATCH_EVENT: {
+    type: 'INTERMEDIATE_CATCH_EVENT',
+    title: 'Catch Event',
+    description: 'BPMN intermediate catch event',
+    iconLabel: 'CE',
+    shape: 'capsule',
+    tone: 'info',
+    defaultSize: { width: 180, height: 64 },
     ports: defaultMiddlePorts(),
     allowConnectFrom: true,
     allowConnectTo: true,
@@ -225,8 +263,13 @@ export function createWorkflowNode(type: WorkflowNodeType, id: string): Workflow
     case 'START_EVENT':
     case 'END_EVENT':
     case 'SERVICE_TASK':
+    case 'CALL_ACTIVITY':
+    case 'USER_TASK':
     case 'EXCLUSIVE_GATEWAY':
+    case 'INCLUSIVE_GATEWAY':
     case 'PARALLEL_GATEWAY':
+    case 'EVENT_BASED_GATEWAY':
+    case 'INTERMEDIATE_CATCH_EVENT':
       return createBpmnNode(type, id);
   }
 }
@@ -278,8 +321,13 @@ function nodeSubtitle(node: WorkflowNode): string {
     case 'START_EVENT':
     case 'END_EVENT':
     case 'SERVICE_TASK':
+    case 'CALL_ACTIVITY':
+    case 'USER_TASK':
     case 'EXCLUSIVE_GATEWAY':
+    case 'INCLUSIVE_GATEWAY':
     case 'PARALLEL_GATEWAY':
+    case 'EVENT_BASED_GATEWAY':
+    case 'INTERMEDIATE_CATCH_EVENT':
       return node.name || WORKFLOW_NODE_CATALOG[node.type].description;
   }
 }
