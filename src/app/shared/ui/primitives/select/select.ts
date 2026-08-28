@@ -37,6 +37,7 @@ export class Select extends BaseInput<SelectValue> {
 
   @Input() loading = false;
   @Input() showClear = false;
+  @Input() inline = false;
 
   dropdownOpen = false;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);

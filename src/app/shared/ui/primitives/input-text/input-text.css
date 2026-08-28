@@ -1,60 +1,9 @@
 :host {
   display: block;
-  width: 100%;
 }
 
-.app-input-text-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.app-input-icon {
-  position: absolute;
-  left: 0.75rem;
-  pointer-events: none;
+:host small {
+  display: block;
+  margin-top: 0.45rem;
   color: var(--app-text-muted);
-  display: inline-flex;
-  align-items: center;
-}
-
-.app-input-text {
-  width: 100%;
-  height: var(--app-control-height-md, 2.5rem);
-  padding: 0 0.75rem;
-  font-family: inherit;
-  font-size: var(--app-font-size-sm, 0.875rem);
-  color: var(--app-custom-input-text, var(--app-text));
-  background: var(--app-custom-input-bg, rgba(255, 255, 255, 0.8));
-  border: 1px solid var(--app-input-border, rgba(133, 156, 221, 0.25));
-  border-radius: var(--app-radius-md, 0.5rem);
-  outline: none;
-  box-sizing: border-box;
-  transition:
-    border-color var(--app-motion-fast, 120ms) var(--app-ease-standard, ease),
-    box-shadow var(--app-motion-fast, 120ms) var(--app-ease-standard, ease);
-}
-
-.app-input-text:hover:not(:disabled):not([readonly]) {
-  border-color: var(--app-primary);
-}
-
-.app-input-text:focus-visible {
-  border-color: var(--app-primary);
-  box-shadow: 0 0 0 var(--app-focus-width, 2px) var(--app-focus-ring, rgba(111, 108, 255, 0.25));
-}
-
-.app-input-text--with-icon {
-  padding-left: 2.25rem;
-}
-
-.app-input-text:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-  background: var(--app-input-disabled-bg, rgba(241, 245, 255, 0.9));
-}
-
-.app-input-text-wrap--invalid .app-input-text {
-  border-color: var(--app-control-danger-text, #ef4444);
 }

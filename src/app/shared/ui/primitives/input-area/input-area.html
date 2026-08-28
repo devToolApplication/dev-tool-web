@@ -1,6 +1,14 @@
 <div class="input-area">
   @if (contentType === 'json') {
     <div class="input-area__json-shell" [class.input-area__json-shell--invalid]="invalid">
+      @if (label) {
+        <label [attr.for]="inputId" class="input-area__json-label">
+          {{ label | translateContent }}
+          @if (required) {
+            <span class="text-[var(--app-control-danger-text)] ml-0.5">*</span>
+          }
+        </label>
+      }
       <div
         class="input-area__json-editor"
         [class.input-area__json-editor--with-zoom]="showZoomButton"
@@ -27,6 +35,14 @@
   } @else {
     <div class="app-field" [class.app-field--invalid]="invalid">
       <div class="relative">
+        @if (label) {
+          <label
+            [attr.for]="inputId"
+            class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-text-muted)] bg-[var(--app-custom-input-bg)] px-1 pointer-events-none z-1"
+            [class.left-9]="iconClass"
+            >{{ label | translateContent }}</label
+          >
+        }
         @if (showZoomButton) {
           <div class="absolute top-2 right-2 z-10">
             <button
@@ -56,6 +72,7 @@
           [required]="required"
           [attr.autofocus]="autofocus ? true : null"
           [attr.placeholder]="placeholder || null | translateContent"
+          [attr.aria-label]="label || placeholder || inputId | translateContent"
           [attr.aria-invalid]="invalid || null"
           [attr.aria-describedby]="describedBy || null"
           class="peer w-full rounded-lg border bg-[var(--app-custom-input-bg)] px-3 py-2.5 text-sm text-[var(--app-custom-input-text)] outline-none transition-all duration-150 border-[var(--app-input-border)] hover:border-[var(--app-primary)] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60 resize-y overflow-y-auto"
@@ -68,6 +85,18 @@
         ></textarea>
       </div>
     </div>
+  }
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
   }
 </div>
 

@@ -1,9 +1,19 @@
 <div
-  class="app-select-wrap"
+  class="app-field app-select-wrap"
+  [class.app-field--invalid]="invalid"
+  [class.app-field--disabled]="disabled"
   [class.app-select-wrap--invalid]="invalid"
   [class.app-select-wrap--disabled]="disabled"
 >
   <div class="relative">
+    @if (!inline && label) {
+      <label
+        [attr.for]="inputId"
+        class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-text-muted)] bg-[var(--app-custom-input-bg)] px-1 pointer-events-none z-1"
+        [class.left-9]="iconClass"
+        >{{ label | translateContent }}</label
+      >
+    }
     @if (iconClass) {
       <span
         class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-text-muted)] z-1"
@@ -16,6 +26,7 @@
       type="button"
       [id]="inputId"
       [disabled]="disabled"
+      [attr.aria-label]="label || placeholder || inputId | translateContent"
       [attr.aria-invalid]="invalid || null"
       [attr.aria-describedby]="describedBy || null"
       [attr.aria-expanded]="dropdownOpen"
@@ -93,4 +104,16 @@
       </div>
     }
   </div>
+
+  @if (helpText) {
+    <small class="mt-1.5 block text-xs text-[var(--app-text-muted)]">{{
+      helpText | translateContent
+    }}</small>
+  }
+
+  @if (invalid && errorMessage) {
+    <small class="mt-1 block text-xs text-[var(--app-control-danger-text)]">{{
+      errorMessage | translateContent
+    }}</small>
+  }
 </div>
