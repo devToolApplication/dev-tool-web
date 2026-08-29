@@ -257,5 +257,10 @@ describe('WorkflowApiService', () => {
     );
     expect(request.request.method).toBe('POST');
     request.flush({ data: run });
+
+    service.deleteWorkflow('wf-1').subscribe((result) => expect(result).toBeUndefined());
+    request = httpMock.expectOne(`${environment.apiUrl.adminAiGenerator}/workflows/wf-1`);
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ data: undefined });
   });
 });

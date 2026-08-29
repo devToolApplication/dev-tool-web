@@ -323,6 +323,14 @@ function workflowRowActions(): TableAction<WorkflowDefinition>[] {
       variant: 'ghost',
       onClick: () => undefined,
     },
+    {
+      id: 'delete',
+      label: 'workflowStudio.lifecycle.delete',
+      icon: 'pi pi-trash',
+      variant: 'danger',
+      placement: 'more',
+      onClick: () => undefined,
+    },
   ];
 }
 

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { normalizePageMetadata, PageMetadata } from '@core/http/base-response.model';
 import type { TableAction } from '@shared/ui/patterns/table/models/table-config.model';
+import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { buildWorkflowListActions, buildWorkflowListTable } from '../model/workflow-lifecycle.config';
 import { JsonValue, WorkflowDefinition } from '../model/workflow-studio.model';
@@ -20,6 +21,7 @@ export class WorkflowListPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly persistence = inject(WorkflowPersistenceService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly tableConfig = buildWorkflowListTable();
   readonly actions = buildWorkflowListActions();
@@ -118,6 +120,30 @@ export class WorkflowListPageComponent implements OnInit {
     }
   }
 
+  async deleteWorkflow(workflow: WorkflowDefinition): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'workflowStudio.lifecycle.delete',
+      message: 'workflowStudio.lifecycle.deleteConfirmMessage',
+      confirmText: 'workflowStudio.lifecycle.deleteConfirmAction',
+      cancelText: 'cancel',
+      variant: 'danger',
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      await firstValueFrom(this.api.deleteWorkflow(workflow.id));
+      await this.loadWorkflows(this.currentPage(), this.rows());
+    } catch (error) {
+      this.error.set(errorMessage(error));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   onTableAction(event: { action: TableAction<WorkflowDefinition>; row: WorkflowDefinition }): void {
     switch (event.action.id) {
       case 'edit':
@@ -133,6 +159,9 @@ export class WorkflowListPageComponent implements OnInit {
         void this.router.navigate(['/ai-agent-mcrs/workflow-runs'], {
           queryParams: { workflowId: event.row.id },
         });
+        break;
+      case 'delete':
+        void this.deleteWorkflow(event.row);
         break;
       default:
         break;

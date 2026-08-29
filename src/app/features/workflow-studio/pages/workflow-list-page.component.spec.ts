@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 
 import { createBasePageResponse } from '@core/http/base-response.model';
+import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowDefinition } from '../model/workflow-studio.model';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
@@ -17,9 +18,11 @@ describe('WorkflowListPageComponent', () => {
     publishWorkflow: ReturnType<typeof vi.fn>;
     startWorkflow: ReturnType<typeof vi.fn>;
     getWorkflowDetail: ReturnType<typeof vi.fn>;
+    deleteWorkflow: ReturnType<typeof vi.fn>;
   };
   let persistence: { publishDetail: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let confirm: { confirm: ReturnType<typeof vi.fn> };
 
   const workflow: WorkflowDefinition = {
     id: 'wf-1',
@@ -50,17 +53,20 @@ describe('WorkflowListPageComponent', () => {
         definition: workflow,
         versions: [],
       })),
+      deleteWorkflow: vi.fn(() => of(undefined)),
     };
     persistence = {
       publishDetail: vi.fn(() => Promise.resolve({ definition: workflow, versions: [] })),
     };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
+    confirm = { confirm: vi.fn(() => Promise.resolve(true)) };
 
     TestBed.configureTestingModule({
       declarations: [WorkflowListPageComponent],
       providers: [
         { provide: WorkflowApiService, useValue: api },
         { provide: WorkflowPersistenceService, useValue: persistence },
+        { provide: ConfirmDialogService, useValue: confirm },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: {} },
       ],
@@ -104,5 +110,24 @@ describe('WorkflowListPageComponent', () => {
     expect(api.getWorkflowDetail).toHaveBeenCalledWith('wf-1');
     expect(persistence.publishDetail).toHaveBeenCalledWith({ definition: workflow, versions: [] });
     expect(api.publishWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('confirms and deletes a workflow before reloading the current page', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.deleteWorkflow(workflow);
+
+    expect(confirm.confirm).toHaveBeenCalledWith(expect.objectContaining({ variant: 'danger' }));
+    expect(api.deleteWorkflow).toHaveBeenCalledWith('wf-1');
+    expect(api.getWorkflowPage).toHaveBeenLastCalledWith({ page: 0, size: 20, sort: ['name,asc'] });
+  });
+
+  it('does not delete when confirmation is cancelled', async () => {
+    confirm.confirm.mockResolvedValue(false);
+
+    await component.deleteWorkflow(workflow);
+
+    expect(api.deleteWorkflow).not.toHaveBeenCalled();
   });
 });

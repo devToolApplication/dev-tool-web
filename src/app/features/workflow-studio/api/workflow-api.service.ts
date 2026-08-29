@@ -72,6 +72,12 @@ export class WorkflowApiService {
       .pipe(map((response) => mapWorkflowDetailDto(response.data)));
   }
 
+  deleteWorkflow(workflowId: string): Observable<void> {
+    return this.http
+      .delete<BaseResponse<void>>(`${this.baseUrl}/${workflowId}`)
+      .pipe(map((response) => response.data));
+  }
+
   validateWorkflow(payload: WorkflowUpsertPayload): Observable<WorkflowBackendValidationResult> {
     return this.http
       .post<BaseResponse<WorkflowValidationResponseDto>>(`${this.baseUrl}/validate`, mapWorkflowUpsertPayloadToDto(payload))
