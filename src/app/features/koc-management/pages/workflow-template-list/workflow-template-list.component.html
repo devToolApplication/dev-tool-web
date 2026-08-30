@@ -36,16 +36,6 @@
             <div class="workflow-template-list__status">
               <app-koc-status-badge [status]="template.active ? 'ACTIVE' : 'DISABLED'" size="sm"></app-koc-status-badge>
             </div>
-
-            <div class="workflow-template-list__actions">
-              <app-button
-                size="sm"
-                variant="secondary"
-                icon="pi pi-play"
-                [label]="'koc.workflowTemplates.action.useInCampaign'"
-                (buttonClick)="useTemplate(template)"
-              ></app-button>
-            </div>
           </div>
         }
       </div>

@@ -51,7 +51,7 @@
               label="koc.reviewDetail.action.continue"
               [disabled]="!canReview() || saving()"
               [loading]="saving()"
-              (buttonClick)="submitDecision('SCREENING')"
+              (buttonClick)="submitDecision('NEED_MORE_EVIDENCE')"
             ></app-button>
             <app-button
               type="button"
@@ -59,7 +59,7 @@
               [disabled]="!canReview() || saving()"
               icon="pi pi-check"
               [loading]="saving()"
-              (buttonClick)="submitDecision('ACCEPTED')"
+              (buttonClick)="submitDecision('APPROVED')"
             ></app-button>
             <app-button
               type="button"

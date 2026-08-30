@@ -189,13 +189,6 @@ export class CampaignDetailComponent implements OnInit {
     });
   }
 
-  editCampaign(): void {
-    if (!this.canEdit()) {
-      return;
-    }
-    void this.router.navigate(['/ai-agent-mcrs/koc/campaigns', this.campaignId(), 'edit']);
-  }
-
   isLowYield(strategy: KocDiscoveryStrategySummary): boolean {
     return (
       strategy.yieldRate < 0.2 ||

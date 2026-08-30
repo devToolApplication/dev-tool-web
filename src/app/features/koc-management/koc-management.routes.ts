@@ -1,8 +1,6 @@
 ﻿import { Routes } from '@angular/router';
 import { permissionGuard } from '@core/auth/permission.guard';
-import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { CampaignDetailComponent } from './pages/campaign-detail/campaign-detail.component';
-import { CampaignEditorComponent } from './pages/campaign-editor/campaign-editor.component';
 import { CampaignListComponent } from './pages/campaign-list/campaign-list.component';
 import { CampaignReviewComponent } from './pages/campaign-review/campaign-review.component';
 import { CandidateDetailComponent } from './pages/candidate-detail/candidate-detail.component';
@@ -36,32 +34,6 @@ export const kocManagementRoutes: Routes = [
     canActivate: [permissionGuard],
     data: {
       permissions: ['AI_AGENT_READ'],
-    },
-  },
-  {
-    path: 'ai-agent-mcrs/koc/campaigns/create',
-    component: CampaignEditorComponent,
-    canActivate: [permissionGuard],
-    canDeactivate: [serviceManagementUnsavedChangesGuard],
-    data: {
-      permissions: ['AI_AGENT_WORKFLOW_WRITE'],
-      mode: 'create',
-      title: 'koc.campaigns.create.title',
-      subtitle: 'koc.campaigns.create.subtitle',
-      sectionTitle: 'koc.campaigns.create.sectionTitle',
-    },
-  },
-  {
-    path: 'ai-agent-mcrs/koc/campaigns/:campaignId/edit',
-    component: CampaignEditorComponent,
-    canActivate: [permissionGuard],
-    canDeactivate: [serviceManagementUnsavedChangesGuard],
-    data: {
-      permissions: ['AI_AGENT_WORKFLOW_WRITE'],
-      mode: 'edit',
-      title: 'koc.campaigns.edit.title',
-      subtitle: 'koc.campaigns.edit.subtitle',
-      sectionTitle: 'koc.campaigns.edit.sectionTitle',
     },
   },
   {

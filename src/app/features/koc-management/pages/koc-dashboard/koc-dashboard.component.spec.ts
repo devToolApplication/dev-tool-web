@@ -72,4 +72,8 @@ describe('KocDashboardComponent', () => {
     expect(dashboardApi.getDashboard).toHaveBeenCalledTimes(2);
     expect(component.realtimeConnected()).toBe(true);
   });
+
+  it('does not expose campaign editor navigation', () => {
+    expect('createCampaign' in (component as unknown as Record<string, unknown>)).toBe(false);
+  });
 });

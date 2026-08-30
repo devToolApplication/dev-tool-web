@@ -3,14 +3,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 
 import { PermissionService } from '@core/auth/permission.service';
-import type { KocBusinessDecision } from '../../model/koc-common.model';
 import type { KocCandidateDetail } from '../../model/koc-candidate.model';
 import type { KocEvidenceItem } from '../../model/koc-evidence.model';
-import type { KocReviewQueueItem, KocReviewReason } from '../../model/koc-review.model';
+import type { KocReviewDecisionPayload, KocReviewQueueItem, KocReviewReason, KocReviewStatus } from '../../model/koc-review.model';
 import { KocCandidateApiService } from '../../services/koc-candidate-api.service';
 import { KocReviewApiService } from '../../services/koc-review-api.service';
 
-type ReviewDecision = Extract<KocBusinessDecision, 'ACCEPTED' | 'REJECTED' | 'SCREENING'>;
+type ReviewDecision = Extract<KocReviewStatus, 'APPROVED' | 'REJECTED' | 'NEED_MORE_EVIDENCE'>;
 
 @Component({
   selector: 'app-koc-review-detail',

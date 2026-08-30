@@ -49,8 +49,7 @@ describe('KOC campaign list config', () => {
     const byId = Object.fromEntries(actions.map((action) => [action.id, action]));
 
     expect(byId['open']?.placement).toBe('primary');
-    expect(['edit', 'pause', 'resume', 'clone', 'stop'].map((id) => byId[id]?.placement)).toEqual([
-      'more',
+    expect(['pause', 'resume', 'clone', 'stop'].map((id) => byId[id]?.placement)).toEqual([
       'more',
       'more',
       'more',
@@ -81,5 +80,13 @@ describe('KOC campaign list config', () => {
       page: 0,
       size: 20,
     })).toEqual({ page: 0, size: 20 });
+  });
+
+  it('omits campaign editor entry points from the table toolbar and row actions', () => {
+    const config = buildKocCampaignTableConfig();
+
+    expect(config.toolbar?.new).toBeUndefined();
+    expect(config.toolbar?.search).toBeDefined();
+    expect(buildKocCampaignRowActions().some((action) => action.id === 'edit')).toBe(false);
   });
 });

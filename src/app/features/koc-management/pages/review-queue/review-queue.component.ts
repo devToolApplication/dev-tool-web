@@ -6,7 +6,7 @@ import { normalizePageMetadata, type PageMetadata } from '@core/http/base-respon
 import type { KocReviewListQuery, KocReviewQueueItem, KocReviewReason, KocReviewStatus } from '../../model/koc-review.model';
 import { KocReviewApiService } from '../../services/koc-review-api.service';
 
-const REVIEW_STATUSES: KocReviewStatus[] = ['PENDING', 'RESOLVED', 'CANCELLED'];
+const REVIEW_STATUSES: KocReviewStatus[] = ['NOT_REVIEWED', 'APPROVED', 'REJECTED', 'NEED_MORE_EVIDENCE'];
 
 @Component({
   selector: 'app-koc-review-queue',
@@ -20,7 +20,7 @@ export class ReviewQueueComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  readonly query = signal<KocReviewListQuery>({ page: 0, size: 20, status: 'PENDING' });
+  readonly query = signal<KocReviewListQuery>({ page: 0, size: 20, status: 'NOT_REVIEWED' });
   readonly reviews = signal<KocReviewQueueItem[]>([]);
   readonly metadata = signal<PageMetadata>(normalizePageMetadata(undefined, 0, 20));
   readonly loading = signal(false);
@@ -75,7 +75,7 @@ export class ReviewQueueComponent implements OnInit {
 function parseReviewQuery(query: Pick<ParamMap, 'get'>): KocReviewListQuery {
   const status = query.get('status');
   return {
-    status: REVIEW_STATUSES.includes(status as KocReviewStatus) ? status as KocReviewStatus : 'PENDING',
+    status: REVIEW_STATUSES.includes(status as KocReviewStatus) ? status as KocReviewStatus : 'NOT_REVIEWED',
     page: parseNumber(query.get('page')) ?? 0,
     size: parseNumber(query.get('size')) ?? 20,
   };

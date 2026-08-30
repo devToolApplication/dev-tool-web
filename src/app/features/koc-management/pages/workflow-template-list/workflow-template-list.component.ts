@@ -1,5 +1,4 @@
 ﻿import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import type { KocWorkflowTemplateSummary } from '../../model/koc-workflow.model';
 import { KocWorkflowApiService } from '../../services/koc-workflow-api.service';
@@ -13,7 +12,6 @@ import { KocWorkflowApiService } from '../../services/koc-workflow-api.service';
 })
 export class WorkflowTemplateListComponent implements OnInit {
   private readonly workflowApi = inject(KocWorkflowApiService);
-  private readonly router = inject(Router);
 
   readonly templates = signal<KocWorkflowTemplateSummary[]>([]);
   readonly loading = signal(false);
@@ -36,11 +34,6 @@ export class WorkflowTemplateListComponent implements OnInit {
     }
   }
 
-  useTemplate(template: KocWorkflowTemplateSummary): void {
-    void this.router.navigate(['/ai-agent-mcrs/koc/campaigns/create'], {
-      queryParams: { workflowTemplateId: template.templateId },
-    });
-  }
 }
 
 function errorMessage(error: unknown): string {

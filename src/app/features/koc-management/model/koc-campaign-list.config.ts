@@ -42,7 +42,6 @@ export function buildKocCampaignTableConfig(
     rows: 20,
     minWidth: '70rem',
     toolbar: {
-      new: { visible: true, label: 'koc.campaigns.action.new', icon: 'pi pi-plus' },
       refresh: { visible: true, label: 'refresh', icon: 'pi pi-refresh' },
       search: {
         visible: true,
@@ -138,7 +137,6 @@ export function buildKocCampaignRowActions(
 ): TableAction<KocCampaignSummary>[] {
   return [
     action('open', 'koc.campaigns.action.open', 'pi pi-external-link', 'primary', onAction),
-    action('edit', 'koc.campaigns.action.edit', 'pi pi-pencil', 'more', onAction),
     {
       ...action('pause', 'koc.campaigns.action.pause', 'pi pi-pause', 'more', onAction),
       visible: (row) => row.status === 'RUNNING',

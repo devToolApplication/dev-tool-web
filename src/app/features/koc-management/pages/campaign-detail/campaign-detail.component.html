@@ -7,13 +7,6 @@
       label="koc.campaignDetail.action.candidates"
       (buttonClick)="openCandidates()"
     ></app-button>
-    <app-button
-      type="button"
-      icon="pi pi-pencil"
-      label="koc.campaigns.action.edit"
-      [disabled]="!canEdit()"
-      (buttonClick)="editCampaign()"
-    ></app-button>
   </ng-container>
 
   @if (loading()) {

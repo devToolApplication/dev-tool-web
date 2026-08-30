@@ -70,10 +70,6 @@ export class KocDashboardComponent implements OnInit {
     }
   }
 
-  createCampaign(): void {
-    void this.router.navigate(['/ai-agent-mcrs/koc/campaigns/create']);
-  }
-
   private connectRealtime(): void {
     this.realtime
       .connect({ reconnect: true })

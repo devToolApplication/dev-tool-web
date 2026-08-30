@@ -100,10 +100,6 @@ export class CampaignListComponent implements OnInit {
     });
   }
 
-  onCreateCampaign(): void {
-    void this.router.navigate(['/ai-agent-mcrs/koc/campaigns/create']);
-  }
-
   openCampaign(row: KocCampaignSummary): void {
     void this.router.navigate(['/ai-agent-mcrs/koc/campaigns', row.campaignId]);
   }
@@ -127,9 +123,6 @@ export class CampaignListComponent implements OnInit {
     switch (actionId) {
       case 'open':
         this.openCampaign(row);
-        break;
-      case 'edit':
-        void this.router.navigate(['/ai-agent-mcrs/koc/campaigns', row.campaignId, 'edit']);
         break;
       case 'pause':
         void this.runLifecycleAction(this.api.pauseCampaign(row.campaignId));

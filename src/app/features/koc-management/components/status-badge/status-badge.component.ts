@@ -33,6 +33,7 @@ export function statusBadgeForKocStatus(
 ): KocStatusBadgeConfig {
   switch (status) {
     case 'ACCEPTED':
+    case 'APPROVED':
       return {
         label: 'koc.candidate.status.accepted',
         variant: 'success',
@@ -45,7 +46,10 @@ export function statusBadgeForKocStatus(
         icon: 'pi pi-times-circle',
       };
     case 'REVIEW':
+    case 'NEED_MORE_EVIDENCE':
       return { label: 'koc.candidate.status.review', variant: 'warning', icon: 'pi pi-flag' };
+    case 'NOT_REVIEWED':
+      return { label: 'koc.review.status.pending', variant: 'muted', icon: 'pi pi-clock' };
     case 'SCREENING':
       return { label: 'koc.candidate.status.screening', variant: 'info', icon: 'pi pi-sync' };
     case 'WAITING':

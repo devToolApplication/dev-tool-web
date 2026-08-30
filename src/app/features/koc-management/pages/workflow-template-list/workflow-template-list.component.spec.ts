@@ -59,13 +59,9 @@ describe('WorkflowTemplateListComponent', () => {
     expect(component.error()).toBeNull();
   });
 
-  it('navigates to campaign create with workflowTemplateId query param', () => {
-    component.useTemplate(mockTemplates[0]);
-
-    expect(router.navigate).toHaveBeenCalledWith(
-      ['/ai-agent-mcrs/koc/campaigns/create'],
-      { queryParams: { workflowTemplateId: 'standard-discovery-screening' } },
-    );
+  it('does not expose campaign editor navigation', () => {
+    expect('useTemplate' in (component as unknown as Record<string, unknown>)).toBe(false);
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('handles load error gracefully', async () => {

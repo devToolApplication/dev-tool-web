@@ -1,6 +1,6 @@
-﻿import type { KocBusinessDecision, KocPageQuery } from './koc-common.model';
+﻿import type { KocPageQuery } from './koc-common.model';
 
-export type KocReviewStatus = 'PENDING' | 'RESOLVED' | 'CANCELLED';
+export type KocReviewStatus = 'NOT_REVIEWED' | 'APPROVED' | 'REJECTED' | 'NEED_MORE_EVIDENCE';
 export type KocReviewReason = 'EVIDENCE_CONFLICT' | 'BORDERLINE_POLICY' | 'MANUAL_POLICY';
 
 export interface KocReviewQueueItem {
@@ -14,10 +14,25 @@ export interface KocReviewQueueItem {
 }
 
 export interface KocReviewDecisionPayload {
-  decision: Extract<KocBusinessDecision, 'ACCEPTED' | 'REJECTED' | 'SCREENING'>;
+  decision: KocReviewStatus;
   reason: string;
+}
+
+export interface KocReviewHistoryItem {
+  reviewId: string;
+  candidateId: string;
+  campaignId: string;
+  matchType?: string;
+  reason?: KocReviewReason;
+  status: KocReviewStatus;
+  decision: KocReviewStatus;
+  decisionReason?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  updatedAt?: string;
 }
 
 export interface KocReviewListQuery extends KocPageQuery {
   status?: KocReviewStatus;
 }
+

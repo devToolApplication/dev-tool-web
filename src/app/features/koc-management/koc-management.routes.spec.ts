@@ -1,7 +1,5 @@
-import { serviceManagementUnsavedChangesGuard } from '@features/service-management/guards/service-management-unsaved-changes.guard';
 import { permissionGuard } from '@core/auth/permission.guard';
 import { CampaignDetailComponent } from './pages/campaign-detail/campaign-detail.component';
-import { CampaignEditorComponent } from './pages/campaign-editor/campaign-editor.component';
 import { CampaignReviewComponent } from './pages/campaign-review/campaign-review.component';
 import { CandidateDetailComponent } from './pages/candidate-detail/candidate-detail.component';
 import { CandidateListComponent } from './pages/candidate-list/candidate-list.component';
@@ -21,9 +19,7 @@ describe('kocManagementRoutes', () => {
         'ai-agent-mcrs/koc',
         'ai-agent-mcrs/koc/dashboard',
         'ai-agent-mcrs/koc/campaigns',
-        'ai-agent-mcrs/koc/campaigns/create',
         'ai-agent-mcrs/koc/campaigns/:campaignId',
-        'ai-agent-mcrs/koc/campaigns/:campaignId/edit',
         'ai-agent-mcrs/koc/campaigns/:campaignId/review',
         'ai-agent-mcrs/koc/campaigns/:campaignId/review/:candidateId',
         'ai-agent-mcrs/koc/candidates',
@@ -48,32 +44,12 @@ describe('kocManagementRoutes', () => {
     );
   });
 
-  it('keeps dirty campaign form protection inside KOC create and edit routes', () => {
-    const guardedPaths = kocManagementRoutes
-      .filter((route) => route.canDeactivate?.includes(serviceManagementUnsavedChangesGuard))
-      .map((route) => route.path);
+  it('does not register campaign configuration editor routes', () => {
+    const paths = kocManagementRoutes.map((route) => route.path);
 
-    expect(guardedPaths).toEqual(
-      expect.arrayContaining([
-        'ai-agent-mcrs/koc/campaigns/create',
-        'ai-agent-mcrs/koc/campaigns/:campaignId/edit',
-      ]),
-    );
-  });
-
-  it('uses the campaign editor for create and edit routes', () => {
-    expect(kocManagementRoutes.find((route) => route.path === 'ai-agent-mcrs/koc/campaigns/create')).toEqual(
-      expect.objectContaining({
-        component: CampaignEditorComponent,
-        data: expect.objectContaining({ mode: 'create' }),
-      }),
-    );
-    expect(kocManagementRoutes.find((route) => route.path === 'ai-agent-mcrs/koc/campaigns/:campaignId/edit')).toEqual(
-      expect.objectContaining({
-        component: CampaignEditorComponent,
-        data: expect.objectContaining({ mode: 'edit' }),
-      }),
-    );
+    expect(paths).not.toContain('ai-agent-mcrs/koc/campaigns/create');
+    expect(paths).not.toContain('ai-agent-mcrs/koc/campaigns/:campaignId/edit');
+    expect(kocManagementRoutes.some((route) => route.canDeactivate?.length)).toBe(false);
   });
 
   it('uses the campaign review placeholder for review routes', () => {
@@ -155,14 +131,6 @@ describe('kocManagementRoutes', () => {
     const campaignsRoute = kocManagementRoutes.find((r) => r.path === 'ai-agent-mcrs/koc/campaigns');
     expect(campaignsRoute?.canActivate).toContain(permissionGuard);
     expect(campaignsRoute?.data?.['permissions']).toEqual(['AI_AGENT_READ']);
-
-    const createRoute = kocManagementRoutes.find((r) => r.path === 'ai-agent-mcrs/koc/campaigns/create');
-    expect(createRoute?.canActivate).toContain(permissionGuard);
-    expect(createRoute?.data?.['permissions']).toEqual(['AI_AGENT_WORKFLOW_WRITE']);
-
-    const editRoute = kocManagementRoutes.find((r) => r.path === 'ai-agent-mcrs/koc/campaigns/:campaignId/edit');
-    expect(editRoute?.canActivate).toContain(permissionGuard);
-    expect(editRoute?.data?.['permissions']).toEqual(['AI_AGENT_WORKFLOW_WRITE']);
 
     const reviewRoute = kocManagementRoutes.find((r) => r.path === 'ai-agent-mcrs/koc/campaigns/:campaignId/review');
     expect(reviewRoute?.canActivate).toContain(permissionGuard);

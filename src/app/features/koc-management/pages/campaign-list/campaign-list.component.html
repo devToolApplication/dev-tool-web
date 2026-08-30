@@ -2,14 +2,6 @@
   title="koc.campaigns.title"
   subtitle="koc.campaigns.subtitle"
 >
-  <ng-container koc-page-actions>
-    <app-button
-      label="koc.campaigns.action.new"
-      icon="pi pi-plus"
-      (buttonClick)="onCreateCampaign()"
-    ></app-button>
-  </ng-container>
-
   <app-section-panel
     title="koc.campaigns.sectionTitle"
     subtitle="koc.campaigns.sectionSubtitle"
@@ -31,7 +23,6 @@
       [totalRecords]="totalRecords()"
       [currentPage]="currentPage()"
       [rows]="rows()"
-      (create)="onCreateCampaign()"
       (search)="onSearch($event)"
       (pageChange)="onPageChange($event)"
       (refresh)="loadCampaigns()"

@@ -10,6 +10,11 @@ import type {
   KocCandidateSummary,
 } from '../model/koc-candidate.model';
 import type { KocEvidenceItem } from '../model/koc-evidence.model';
+import type {
+  KocReviewDecisionPayload,
+  KocReviewHistoryItem,
+  KocReviewQueueItem,
+} from '../model/koc-review.model';
 
 @Injectable({ providedIn: 'root' })
 export class KocCandidateApiService {
@@ -34,6 +39,21 @@ export class KocCandidateApiService {
   getEvidence(candidateId: string): Observable<KocEvidenceItem[]> {
     return this.http
       .get<BaseResponse<KocEvidenceItem[]>>(`${this.baseUrl}/${candidateId}/evidence`)
+      .pipe(map((response) => response.data));
+  }
+
+  getReviewHistory(candidateId: string): Observable<KocReviewHistoryItem[]> {
+    return this.http
+      .get<BaseResponse<KocReviewHistoryItem[]>>(`${this.baseUrl}/${candidateId}/reviews`)
+      .pipe(map((response) => response.data));
+  }
+
+  decideCandidate(
+    candidateId: string,
+    payload: KocReviewDecisionPayload,
+  ): Observable<KocReviewQueueItem> {
+    return this.http
+      .post<BaseResponse<KocReviewQueueItem>>(`${this.baseUrl}/${candidateId}/reviews`, payload)
       .pipe(map((response) => response.data));
   }
 

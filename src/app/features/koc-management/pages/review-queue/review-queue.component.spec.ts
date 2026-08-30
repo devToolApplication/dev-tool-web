@@ -19,7 +19,7 @@ describe('ReviewQueueComponent', () => {
     candidateId: 'candidate-1',
     campaignId: 'campaign-1',
     reason: 'EVIDENCE_CONFLICT',
-    status: 'PENDING',
+    status: 'NOT_REVIEWED',
     updatedAt: '2026-08-23T08:00:00Z',
   };
 
@@ -32,7 +32,7 @@ describe('ReviewQueueComponent', () => {
       providers: [
         { provide: KocReviewApiService, useValue: api },
         { provide: Router, useValue: router },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ status: 'PENDING' }) } } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ status: 'NOT_REVIEWED' }) } } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     });
@@ -45,7 +45,7 @@ describe('ReviewQueueComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(api.getReviewQueue).toHaveBeenCalledWith({ status: 'PENDING', page: 0, size: 20 });
+    expect(api.getReviewQueue).toHaveBeenCalledWith({ status: 'NOT_REVIEWED', page: 0, size: 20 });
     expect(component.reviews()).toEqual([item]);
     expect(component.reviewReasonLabel(item.reason)).toBe('koc.review.reason.evidenceConflict');
   });

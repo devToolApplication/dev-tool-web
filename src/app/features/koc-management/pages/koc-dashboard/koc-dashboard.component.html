@@ -3,14 +3,6 @@
   subtitle="koc.dashboard.subtitle"
   [status]="status()"
 >
-  <ng-container koc-page-actions>
-    <app-button
-      label="koc.campaigns.action.new"
-      icon="pi pi-plus"
-      (buttonClick)="createCampaign()"
-    ></app-button>
-  </ng-container>
-
   @if (loading() && !dashboard()) {
     <app-loading-skeleton type="card" [rows]="5"></app-loading-skeleton>
   } @else if (error()) {

@@ -1,24 +1,41 @@
 import type { KocAiExecutionConfig, KocAuditInfo, KocPageQuery } from './koc-common.model';
 import type { KocDiscoverySignal, KocSearchStrategy } from './koc-discovery.model';
 import type { KocScreeningRule } from './koc-rule.model';
-import type {
-  CampaignGoal,
-  CampaignRequirement,
-  CampaignSearchScope,
-  CampaignWorkflowRef,
-} from './koc-campaign-editor.model';
 
-export type {
-  CampaignGoal as KocCampaignGoal,
-  CampaignSearchScope as KocCampaignSearchScope,
-  CampaignRequirement as KocCampaignRequirement,
-  CampaignWorkflowRef as KocCampaignWorkflowRef,
-};
+export interface KocCampaignGoal {
+  targetApproved: number;
+  candidateLimit: number;
+}
+
+export interface KocCampaignSearchScope {
+  platforms: string[];
+  minFollowers: number | null;
+  maxFollowers: number | null;
+  locations: string[];
+  languages: string[];
+  recentActivityDays: number | null;
+}
+
+export interface KocCampaignRequirement {
+  id: string;
+  title: string;
+  description: string;
+  importance: 'REQUIRED' | 'PREFERRED';
+  minimumConfidence: number | null;
+  minimumEvidence: number | null;
+}
+
+export interface KocCampaignWorkflowRef {
+  workflowDefinitionId: string;
+  workflowVersionId: string;
+  workflowVersion: number | null;
+  workflowName?: string;
+}
 
 export interface KocCampaignSearchConfig {
   instructions?: string;
-  scope?: Partial<CampaignSearchScope>;
-  requirements?: CampaignRequirement[];
+  scope?: Partial<KocCampaignSearchScope>;
+  requirements?: KocCampaignRequirement[];
 }
 
 export interface KocCampaignWorkflowConfig {
@@ -64,7 +81,7 @@ export interface KocCampaignSummary extends KocAuditInfo {
 export interface KocCampaignDetail extends KocCampaignSummary {
   description?: string;
   version: number;
-  goal?: CampaignGoal;
+  goal?: KocCampaignGoal;
   search?: KocCampaignSearchConfig;
   workflow?: KocCampaignWorkflowConfig;
   workflowDefinitionId?: string;
@@ -84,7 +101,7 @@ export interface KocCampaignDetail extends KocCampaignSummary {
 export interface KocCampaignUpsertPayload {
   name: string;
   description?: string;
-  goal: CampaignGoal;
+  goal: KocCampaignGoal;
   search: KocCampaignSearchConfig;
   workflow: KocCampaignWorkflowConfig;
 }

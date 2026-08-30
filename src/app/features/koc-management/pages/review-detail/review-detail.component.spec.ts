@@ -30,7 +30,7 @@ describe('ReviewDetailComponent', () => {
     candidateId: 'candidate-1',
     campaignId: 'campaign-1',
     reason: 'BORDERLINE_POLICY',
-    status: 'PENDING',
+    status: 'NOT_REVIEWED',
   };
   const candidate: KocCandidateDetail = {
     candidateId: 'candidate-1',
@@ -53,7 +53,7 @@ describe('ReviewDetailComponent', () => {
   beforeEach(() => {
     reviewApi = {
       getReview: vi.fn(() => of(review)),
-      submitDecision: vi.fn(() => of({ ...review, status: 'RESOLVED' })),
+      submitDecision: vi.fn(() => of({ ...review, status: 'APPROVED' })),
     };
     candidateApi = {
       getCandidate: vi.fn(() => of(candidate)),
@@ -113,7 +113,7 @@ describe('ReviewDetailComponent', () => {
     expect(component.canReview()).toBe(false);
 
     component.decisionReason.set('Reason provided');
-    await component.submitDecision('ACCEPTED');
+    await component.submitDecision('APPROVED');
 
     expect(reviewApi.submitDecision).not.toHaveBeenCalled();
   });

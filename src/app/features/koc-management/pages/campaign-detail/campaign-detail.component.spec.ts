@@ -224,21 +224,7 @@ describe('CampaignDetailComponent', () => {
     ).toBe(selectedTab?.id);
   });
 
-  it('navigates to edit when user has AI_AGENT_WORKFLOW_WRITE permission', () => {
-    permissionService.has.mockReturnValue(true);
-    expect(component.canEdit()).toBe(true);
-    component.editCampaign();
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/ai-agent-mcrs/koc/campaigns',
-      'campaign-1',
-      'edit',
-    ]);
-  });
-
-  it('disables and no-ops edit navigation when AI_AGENT_WORKFLOW_WRITE is absent', () => {
-    permissionService.has.mockReturnValue(false);
-    expect(component.canEdit()).toBe(false);
-    component.editCampaign();
-    expect(router.navigate).not.toHaveBeenCalled();
+  it('does not expose edit campaign navigation in the runtime view', () => {
+    expect('editCampaign' in (component as unknown as Record<string, unknown>)).toBe(false);
   });
 });
