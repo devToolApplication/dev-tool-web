@@ -1,4 +1,4 @@
-﻿import type { ParamMap, Params } from '@angular/router';
+import type { ParamMap, Params } from '@angular/router';
 import type {
   TableAction,
   TableConfig,
@@ -138,6 +138,14 @@ export function buildKocCampaignRowActions(
   return [
     action('open', 'koc.campaigns.action.open', 'pi pi-external-link', 'primary', onAction),
     {
+      ...action('edit', 'koc.campaigns.action.edit', 'pi pi-pencil', 'more', onAction),
+      visible: (row) => row.status === 'DRAFT' || row.status === 'READY',
+    },
+    {
+      ...action('start', 'koc.campaigns.action.start', 'pi pi-play', 'more', onAction),
+      visible: (row) => row.status === 'DRAFT' || row.status === 'READY',
+    },
+    {
       ...action('pause', 'koc.campaigns.action.pause', 'pi pi-pause', 'more', onAction),
       visible: (row) => row.status === 'RUNNING',
     },
@@ -146,7 +154,10 @@ export function buildKocCampaignRowActions(
       visible: (row) => row.status === 'PAUSED',
     },
     action('clone', 'koc.campaigns.action.clone', 'pi pi-copy', 'more', onAction),
-    action('stop', 'koc.campaigns.action.stop', 'pi pi-stop', 'more', onAction, 'danger'),
+    {
+      ...action('stop', 'koc.campaigns.action.stop', 'pi pi-stop', 'more', onAction, 'danger'),
+      visible: (row) => row.status === 'READY' || row.status === 'RUNNING' || row.status === 'PAUSED' || row.status === 'BLOCKED',
+    },
   ];
 }
 

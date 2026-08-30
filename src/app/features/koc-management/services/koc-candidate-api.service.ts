@@ -1,10 +1,16 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { BasePageResponse, BaseResponse } from '@core/http/base-response.model';
 import { environment } from '../../../../enviroment/environment';
 import type {
+  KocBulkReviewRequest,
+  KocBulkReviewResponse,
+  KocCandidateBulkActionResponse,
+  KocCandidateBulkApproveRequest,
+  KocCandidateBulkDecisionRequest,
+  KocCandidateBulkRejectRequest,
   KocCandidateDetail,
   KocCandidateListQuery,
   KocCandidateSummary,
@@ -54,6 +60,63 @@ export class KocCandidateApiService {
   ): Observable<KocReviewQueueItem> {
     return this.http
       .post<BaseResponse<KocReviewQueueItem>>(`${this.baseUrl}/${candidateId}/reviews`, payload)
+      .pipe(map((response) => response.data));
+  }
+
+  bulkApproveCandidates(
+    request: KocBulkReviewRequest,
+  ): Observable<KocBulkReviewResponse> {
+    return this.http
+      .post<BaseResponse<KocBulkReviewResponse>>(
+        `${this.baseUrl}/reviews/bulk-approve`,
+        request,
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  bulkRejectCandidates(
+    request: KocBulkReviewRequest,
+  ): Observable<KocBulkReviewResponse> {
+    return this.http
+      .post<BaseResponse<KocBulkReviewResponse>>(
+        `${this.baseUrl}/reviews/bulk-reject`,
+        request,
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  bulkApprove(
+    request: KocCandidateBulkApproveRequest,
+  ): Observable<KocCandidateBulkActionResponse> {
+    const bulkRequest: KocBulkReviewRequest = {
+      candidateIds: request.candidates.map((c) => c.candidateId),
+      reasons: request.candidates
+        .filter((c) => !!c.reason)
+        .map((c) => ({ candidateId: c.candidateId, reason: c.reason })),
+    };
+    return this.bulkApproveCandidates(bulkRequest);
+  }
+
+  bulkReject(
+    request: KocCandidateBulkRejectRequest,
+  ): Observable<KocCandidateBulkActionResponse> {
+    const bulkRequest: KocBulkReviewRequest = {
+      candidateIds: request.candidates.map((c) => c.candidateId),
+      reasons: request.candidates
+        .filter((c) => !!c.reason)
+        .map((c) => ({ candidateId: c.candidateId, reason: c.reason })),
+    };
+    return this.bulkRejectCandidates(bulkRequest);
+  }
+
+  bulkDecide(
+    request: KocCandidateBulkDecisionRequest,
+  ): Observable<KocCandidateBulkActionResponse> {
+    return this.http
+      .post<BaseResponse<KocCandidateBulkActionResponse>>(
+        `${this.baseUrl}/bulk-reviews`,
+        request,
+      )
       .pipe(map((response) => response.data));
   }
 

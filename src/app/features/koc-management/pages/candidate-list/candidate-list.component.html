@@ -1,25 +1,11 @@
-﻿<app-koc-page-frame title="koc.candidates.title" subtitle="koc.candidates.subtitle">
-  <app-section-panel title="koc.candidates.sectionTitle" subtitle="koc.candidates.sectionSubtitle">
-    <div class="candidate-list__filters">
-      <app-input-text
-        label="koc.candidates.filter.search"
-        [value]="query().search ?? ''"
-        (valueChange)="onSearch($event)"
-      ></app-input-text>
-      <app-select
-        label="koc.candidates.filter.decision"
-        [options]="decisionOptions"
-        [value]="query().decision ?? null"
-        (valueChange)="onDecisionFilter($event)"
-      ></app-select>
-      <app-select
-        label="koc.candidates.filter.executionStatus"
-        [options]="executionStatusOptions"
-        [value]="query().executionStatus ?? null"
-        (valueChange)="onExecutionStatusFilter($event)"
-      ></app-select>
-    </div>
-
+<app-koc-page-frame
+  title="koc.candidates.title"
+  subtitle="koc.candidates.subtitle"
+>
+  <app-section-panel
+    title="koc.candidates.sectionTitle"
+    subtitle="koc.candidates.sectionSubtitle"
+  >
     <div class="candidate-list__quick" [attr.aria-label]="'koc.candidates.quick.label' | translateContent">
       @for (item of quickDecisionOptions; track item.label) {
         <app-button
@@ -32,45 +18,81 @@
       }
     </div>
 
-    @if (loading()) {
-      <app-loading-skeleton type="list" [rows]="6"></app-loading-skeleton>
-    } @else if (error()) {
-      <app-error-state
-        title="koc.candidates.error.title"
-        [message]="error() ?? 'koc.candidates.error.loadFailed'"
-        retryLabel="retry"
-        (retry)="loadCandidates()"
-      ></app-error-state>
-    } @else if (candidates().length === 0) {
-      <app-empty-state
-        title="koc.candidates.empty.title"
-        description="koc.candidates.empty.description"
-      ></app-empty-state>
-    } @else {
-      <div class="candidate-list__rows" role="list" [attr.aria-label]="'koc.candidates.sectionTitle' | translateContent">
-        @for (candidate of candidates(); track candidate.candidateId) {
-          <button type="button" class="candidate-list__row" role="listitem" (click)="openCandidate(candidate)">
-            <span class="candidate-list__identity">
-              <strong>{{ candidate.displayName }}</strong>
-              <small>{{ candidate.campaignId }}</small>
-            </span>
-            <span class="candidate-list__status">
-              <app-koc-status-badge [status]="candidate.decision" size="sm"></app-koc-status-badge>
-              <app-koc-status-badge [status]="candidate.executionStatus" size="sm"></app-koc-status-badge>
-            </span>
-            <span class="candidate-list__meta">
-              <span>{{ 'koc.candidates.column.followers' | translateContent }}: {{ candidate.followers ?? ('notAvailable' | translateContent) }}</span>
-              <span>{{ 'koc.candidates.column.progress' | translateContent }}: {{ candidate.screeningProgress ?? 0 }}%</span>
-            </span>
-            <span class="candidate-list__reason">
-              {{ candidate.reason || ('notAvailable' | translateContent) }}
-            </span>
-          </button>
-        }
+    @if (isCrossCampaignSelection()) {
+      <div class="candidate-list__warning-banner" role="alert">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ 'koc.candidates.bulk.crossCampaignWarning' | translateContent }}</span>
       </div>
-      <p class="candidate-list__count">
-        {{ 'koc.candidates.total' | translateContent }}: {{ totalRecords() }}
-      </p>
     }
+
+    <app-table
+      [config]="tableConfig()"
+      [data]="candidates()"
+      [loading]="loading()"
+      [error]="error()"
+      [totalRecords]="totalRecords()"
+      [currentPage]="currentPage()"
+      [rows]="rows()"
+      (search)="onSearch($event)"
+      (pageChange)="onPageChange($event)"
+      (selectionChange)="onSelectionChange($event)"
+      (refresh)="loadCandidates()"
+      (retry)="loadCandidates()"
+      (rowClick)="openCandidate($event)"
+      (actionClick)="onTableAction($event)"
+      (bulkAction)="onBulkAction($event)"
+    ></app-table>
   </app-section-panel>
 </app-koc-page-frame>
+
+<app-dialog
+  [visible]="rejectDialogVisible()"
+  header="koc.candidates.bulk.rejectDialogTitle"
+  [width]="'min(90vw, 36rem)'"
+  (visibleChange)="closeRejectDialog()"
+>
+  <div class="candidate-reject-modal">
+    <p class="candidate-reject-modal__desc">
+      {{ 'koc.candidates.bulk.rejectDialogDescription' | translateContent }}
+    </p>
+
+    <div class="candidate-reject-modal__items">
+      @for (cand of selectedCandidates(); track cand.candidateId) {
+        <div class="candidate-reject-modal__item">
+          <div class="candidate-reject-modal__item-header">
+            <strong>{{ cand.displayName }}</strong>
+            <small>{{ cand.campaignId }}</small>
+          </div>
+          <app-input-text
+            [label]="'koc.candidates.column.reason'"
+            [placeholder]="'koc.candidates.bulk.rejectReasonPlaceholder'"
+            [value]="rejectReasons()[cand.candidateId] || ''"
+            [invalid]="isReasonInvalid(cand.candidateId)"
+            (valueChange)="updateRejectReason(cand.candidateId, $event)"
+          ></app-input-text>
+          @if (isReasonInvalid(cand.candidateId)) {
+            <span class="candidate-reject-modal__error">
+              {{ 'koc.candidates.bulk.reasonMaxLength' | translateContent }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer class="candidate-reject-modal__footer">
+    <app-button
+      type="button"
+      variant="secondary"
+      label="koc.candidates.action.cancel"
+      (buttonClick)="closeRejectDialog()"
+    ></app-button>
+    <app-button
+      type="button"
+      variant="destructive"
+      label="koc.candidates.action.submit"
+      [disabled]="hasInvalidRejectReasons() || rejectSubmitting()"
+      (buttonClick)="submitBulkReject()"
+    ></app-button>
+  </div>
+</app-dialog>

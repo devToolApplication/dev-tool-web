@@ -1,4 +1,4 @@
-﻿import { convertToParamMap } from '@angular/router';
+import { convertToParamMap } from '@angular/router';
 
 import type { KocCampaignSummary } from './koc-campaign.model';
 import {
@@ -49,16 +49,42 @@ describe('KOC campaign list config', () => {
     const byId = Object.fromEntries(actions.map((action) => [action.id, action]));
 
     expect(byId['open']?.placement).toBe('primary');
-    expect(['pause', 'resume', 'clone', 'stop'].map((id) => byId[id]?.placement)).toEqual([
+    expect(['edit', 'start', 'pause', 'resume', 'clone', 'stop'].map((id) => byId[id]?.placement)).toEqual([
+      'more',
+      'more',
       'more',
       'more',
       'more',
       'more',
     ]);
+
+    expect(byId['edit']?.visible?.(campaign('DRAFT'))).toBe(true);
+    expect(byId['edit']?.visible?.(campaign('READY'))).toBe(true);
+    expect(byId['edit']?.visible?.(campaign('RUNNING'))).toBe(false);
+    expect(byId['edit']?.visible?.(campaign('PAUSED'))).toBe(false);
+    expect(byId['edit']?.visible?.(campaign('COMPLETED'))).toBe(false);
+    expect(byId['edit']?.visible?.(campaign('STOPPED'))).toBe(false);
+
+    expect(byId['start']?.visible?.(campaign('DRAFT'))).toBe(true);
+    expect(byId['start']?.visible?.(campaign('READY'))).toBe(true);
+    expect(byId['start']?.visible?.(campaign('RUNNING'))).toBe(false);
+    expect(byId['start']?.visible?.(campaign('PAUSED'))).toBe(false);
+
     expect(byId['pause']?.visible?.(campaign('RUNNING'))).toBe(true);
     expect(byId['pause']?.visible?.(campaign('PAUSED'))).toBe(false);
+
     expect(byId['resume']?.visible?.(campaign('PAUSED'))).toBe(true);
     expect(byId['resume']?.visible?.(campaign('RUNNING'))).toBe(false);
+
+    expect(byId['clone']?.visible?.(campaign('RUNNING')) ?? true).toBe(true);
+
+    expect(byId['stop']?.visible?.(campaign('READY'))).toBe(true);
+    expect(byId['stop']?.visible?.(campaign('RUNNING'))).toBe(true);
+    expect(byId['stop']?.visible?.(campaign('PAUSED'))).toBe(true);
+    expect(byId['stop']?.visible?.(campaign('BLOCKED'))).toBe(true);
+    expect(byId['stop']?.visible?.(campaign('DRAFT'))).toBe(false);
+    expect(byId['stop']?.visible?.(campaign('COMPLETED'))).toBe(false);
+    expect(byId['stop']?.visible?.(campaign('STOPPED'))).toBe(false);
   });
 
   it('parses and serializes URL query values without empty filters', () => {
@@ -82,11 +108,10 @@ describe('KOC campaign list config', () => {
     })).toEqual({ page: 0, size: 20 });
   });
 
-  it('omits campaign editor entry points from the table toolbar and row actions', () => {
+  it('omits campaign editor creation entry point from the table toolbar', () => {
     const config = buildKocCampaignTableConfig();
 
     expect(config.toolbar?.new).toBeUndefined();
     expect(config.toolbar?.search).toBeDefined();
-    expect(buildKocCampaignRowActions().some((action) => action.id === 'edit')).toBe(false);
   });
 });

@@ -1,7 +1,8 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { PermissionService } from '@core/auth/permission.service';
 import { normalizePageMetadata, type PageMetadata } from '@core/http/base-response.model';
 import type { TableAction } from '@shared/ui/patterns/table/models/table-config.model';
 import type { SelectValue } from '@shared/ui/primitives/select/select';
@@ -25,6 +26,7 @@ export class CampaignListComponent implements OnInit {
   private readonly api = inject(KocCampaignApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly permissionService = inject(PermissionService);
 
   readonly query = signal<KocCampaignListQuery>({ page: 0, size: 20 });
   readonly campaigns = signal<KocCampaignSummary[]>([]);
@@ -33,6 +35,8 @@ export class CampaignListComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly statusOptions = KOC_CAMPAIGN_STATUS_OPTIONS;
   readonly tableConfig = buildKocCampaignTableConfig();
+
+  readonly canWrite = computed(() => this.permissionService.has('AI_AGENT_WORKFLOW_WRITE'));
 
   ngOnInit(): void {
     const query = parseKocCampaignListQuery(this.route.snapshot.queryParamMap);
@@ -122,19 +126,33 @@ export class CampaignListComponent implements OnInit {
   private handleRowAction(actionId: string, row: KocCampaignSummary): void {
     switch (actionId) {
       case 'open':
+      case 'edit':
         this.openCampaign(row);
         break;
+      case 'start':
+        if (this.canWrite()) {
+          void this.runLifecycleAction(this.api.startCampaign(row.campaignId));
+        }
+        break;
       case 'pause':
-        void this.runLifecycleAction(this.api.pauseCampaign(row.campaignId));
+        if (this.canWrite()) {
+          void this.runLifecycleAction(this.api.pauseCampaign(row.campaignId));
+        }
         break;
       case 'resume':
-        void this.runLifecycleAction(this.api.resumeCampaign(row.campaignId));
+        if (this.canWrite()) {
+          void this.runLifecycleAction(this.api.resumeCampaign(row.campaignId));
+        }
         break;
       case 'clone':
-        void this.runLifecycleAction(this.api.cloneCampaign(row.campaignId));
+        if (this.canWrite()) {
+          void this.runLifecycleAction(this.api.cloneCampaign(row.campaignId));
+        }
         break;
       case 'stop':
-        void this.runLifecycleAction(this.api.stopCampaign(row.campaignId));
+        if (this.canWrite()) {
+          void this.runLifecycleAction(this.api.stopCampaign(row.campaignId));
+        }
         break;
       default:
         break;

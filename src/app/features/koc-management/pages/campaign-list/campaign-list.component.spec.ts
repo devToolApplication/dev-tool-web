@@ -1,9 +1,10 @@
-﻿import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 
 import { createBasePageResponse } from '@core/http/base-response.model';
+import { PermissionService } from '@core/auth/permission.service';
 import type { KocCampaignSummary } from '../../model/koc-campaign.model';
 import { KocCampaignApiService } from '../../services/koc-campaign-api.service';
 import { CampaignListComponent } from './campaign-list.component';
@@ -13,6 +14,7 @@ describe('CampaignListComponent', () => {
   let component: CampaignListComponent;
   let api: {
     getCampaignPage: ReturnType<typeof vi.fn>;
+    startCampaign: ReturnType<typeof vi.fn>;
     pauseCampaign: ReturnType<typeof vi.fn>;
     resumeCampaign: ReturnType<typeof vi.fn>;
     cloneCampaign: ReturnType<typeof vi.fn>;
@@ -20,6 +22,7 @@ describe('CampaignListComponent', () => {
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let route: { snapshot: { queryParamMap: ReturnType<typeof convertToParamMap> } };
+  let permissionService: { has: ReturnType<typeof vi.fn> };
 
   const row: KocCampaignSummary = {
     campaignId: 'campaign-1',
@@ -42,6 +45,7 @@ describe('CampaignListComponent', () => {
   beforeEach(() => {
     api = {
       getCampaignPage: vi.fn(() => of(createBasePageResponse([row], 2, 25, 1))),
+      startCampaign: vi.fn(() => of(row)),
       pauseCampaign: vi.fn(() => of(row)),
       resumeCampaign: vi.fn(() => of(row)),
       cloneCampaign: vi.fn(() => of(row)),
@@ -58,6 +62,9 @@ describe('CampaignListComponent', () => {
         }),
       },
     };
+    permissionService = {
+      has: vi.fn((perm: string) => perm === 'AI_AGENT_WORKFLOW_WRITE'),
+    };
 
     TestBed.configureTestingModule({
       declarations: [CampaignListComponent],
@@ -65,6 +72,7 @@ describe('CampaignListComponent', () => {
         { provide: KocCampaignApiService, useValue: api },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: route },
+        { provide: PermissionService, useValue: permissionService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     });
@@ -107,5 +115,109 @@ describe('CampaignListComponent', () => {
     component.openCampaign(row);
 
     expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/koc/campaigns', 'campaign-1']);
+  });
+
+  it('handles row actions: open and edit navigate to campaign detail', () => {
+    component.onTableAction({
+      action: { id: 'open', label: 'open', onClick: vi.fn() },
+      row,
+    });
+    expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/koc/campaigns', 'campaign-1']);
+
+    component.onTableAction({
+      action: { id: 'edit', label: 'edit', onClick: vi.fn() },
+      row,
+    });
+    expect(router.navigate).toHaveBeenLastCalledWith(['/ai-agent-mcrs/koc/campaigns', 'campaign-1']);
+  });
+
+  it('runs lifecycle actions (start, pause, resume, clone, stop) and preserves page and filters upon reload', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.query.set({ search: 'school', status: 'RUNNING', page: 2, size: 25 });
+    component.metadata.set({
+      currentPage: 2,
+      pageNumber: 2,
+      size: 25,
+      pageSize: 25,
+      totalElements: 100,
+      totalPages: 4,
+    });
+
+    component.onTableAction({
+      action: { id: 'start', label: 'start', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+    expect(api.startCampaign).toHaveBeenCalledWith('campaign-1');
+    expect(api.getCampaignPage).toHaveBeenLastCalledWith({
+      search: 'school',
+      status: 'RUNNING',
+      page: 2,
+      size: 25,
+    });
+
+    component.onTableAction({
+      action: { id: 'pause', label: 'pause', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+    expect(api.pauseCampaign).toHaveBeenCalledWith('campaign-1');
+
+    component.onTableAction({
+      action: { id: 'resume', label: 'resume', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+    expect(api.resumeCampaign).toHaveBeenCalledWith('campaign-1');
+
+    component.onTableAction({
+      action: { id: 'clone', label: 'clone', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+    expect(api.cloneCampaign).toHaveBeenCalledWith('campaign-1');
+
+    component.onTableAction({
+      action: { id: 'stop', label: 'stop', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+    expect(api.stopCampaign).toHaveBeenCalledWith('campaign-1');
+  });
+
+  it('prevents mutating lifecycle actions if user lacks workflow write permission', async () => {
+    permissionService.has.mockReturnValue(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onTableAction({
+      action: { id: 'start', label: 'start', onClick: vi.fn() },
+      row,
+    });
+    component.onTableAction({
+      action: { id: 'pause', label: 'pause', onClick: vi.fn() },
+      row,
+    });
+    component.onTableAction({
+      action: { id: 'resume', label: 'resume', onClick: vi.fn() },
+      row,
+    });
+    component.onTableAction({
+      action: { id: 'clone', label: 'clone', onClick: vi.fn() },
+      row,
+    });
+    component.onTableAction({
+      action: { id: 'stop', label: 'stop', onClick: vi.fn() },
+      row,
+    });
+    await fixture.whenStable();
+
+    expect(api.startCampaign).not.toHaveBeenCalled();
+    expect(api.pauseCampaign).not.toHaveBeenCalled();
+    expect(api.resumeCampaign).not.toHaveBeenCalled();
+    expect(api.cloneCampaign).not.toHaveBeenCalled();
+    expect(api.stopCampaign).not.toHaveBeenCalled();
   });
 });
