@@ -13,6 +13,7 @@ describe('APP_LAYOUT_MENU', () => {
         '/ai-agent-mcrs/configs',
         '/ai-agent-mcrs/workflows',
         '/ai-agent-mcrs/koc',
+        '/admin/system-management/ai-agent-execution',
         '/job-service/secrets',
         '/job-service/configs',
         '/job-service/jobs',

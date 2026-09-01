@@ -12,11 +12,14 @@ import { WorkflowStudioModule } from './workflow-studio/workflow-studio.module';
 import { workflowStudioRoutes } from './workflow-studio/workflow-studio.routes';
 import { KocManagementModule } from './koc-management/koc-management.module';
 import { kocManagementRoutes } from './koc-management/koc-management.routes';
+import { SystemManagementModule } from './system-management/system-management.module';
+import { systemManagementRoutes } from './system-management/system-management.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...serviceManagementRoutes,
   ...workflowStudioRoutes,
   ...kocManagementRoutes,
+  ...systemManagementRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'ai-agent-mcrs/secrets' },
   { path: '**', redirectTo: '404' },
@@ -33,6 +36,7 @@ const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
     ServiceManagementModule,
     WorkflowStudioModule,
     KocManagementModule,
+    SystemManagementModule,
   ],
 })
 export class AppFeatureModule {}

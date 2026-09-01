@@ -1,121 +1,219 @@
-import { expect, test, Page } from '@playwright/test';
+import { expect, type Page, type Route, test } from '@playwright/test';
 
-const PAGE_URL = '/admin/system-management/ai-agent-execution';
-
-async function navigateToPage(page: Page) {
-  await page.goto(PAGE_URL);
-  await page.waitForSelector('app-page-shell', { timeout: 15000 });
+interface SdkTaskRunRequest {
+  agentCode: string;
+  provider?: 'codex' | 'claude';
+  prompt: string;
+  threadId?: string;
+  workingDirectory?: string;
+  model?: string;
+  reasoningEffort?: string;
+  outputSchema?: Record<string, unknown>;
+  requestContext?: Record<string, unknown>;
+  callbackUrl?: string;
+  callbackAuthSecretCode?: string;
 }
 
-test.describe('AI Agent Execution Page', () => {
-  test.describe('Layout & Render', () => {
-    test('should render page shell with title', async ({ page }) => {
-      await navigateToPage(page);
-      const header = page.locator('app-page-header h1');
-      await expect(header).toContainText('AI Agent Execution');
+interface SdkTaskRunSummary {
+  taskId: string;
+  status: 'RUNNING' | 'COMPLETED';
+  agentCode: string;
+  provider: 'codex' | 'claude';
+  workingDirectory?: string;
+  threadId?: string;
+  model?: string;
+  reasoningEffort?: string;
+  promptPreview: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+}
+
+interface SdkTaskApiState {
+  postCalls: number;
+  lastPayload: SdkTaskRunRequest | null;
+  runs: SdkTaskRunSummary[];
+}
+
+const PAGE_URL = '/admin/system-management/ai-agent-execution?dangerously-skip-permissions';
+const EXISTING_RUN: SdkTaskRunSummary = {
+  taskId: 'task-existing-1',
+  status: 'COMPLETED',
+  agentCode: 'test-qa-agent',
+  provider: 'codex',
+  workingDirectory: 'D:/Code/web/dev-tool-web',
+  threadId: 'thread-existing',
+  model: 'gpt-5.2',
+  reasoningEffort: 'medium',
+  promptPreview: 'Review existing task history',
+  createdAt: '2026-09-01T02:00:00Z',
+  updatedAt: '2026-09-01T02:01:00Z',
+  completedAt: '2026-09-01T02:01:00Z',
+};
+
+test.describe('AI Agent Execution SDK console', () => {
+  test('runs a full SDK prompt request and inspects server history detail', async ({ page }) => {
+    const state: SdkTaskApiState = {
+      postCalls: 0,
+      lastPayload: null,
+      runs: [EXISTING_RUN],
+    };
+
+    await page.addInitScript(() => {
+      window.localStorage.setItem('dangerously-skip-permissions', 'true');
+    });
+    await mockSdkTaskApi(page, state);
+
+    await page.goto(PAGE_URL);
+
+    await expect(page.locator('app-sdk-task-console')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'SDK task console' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /task-existing-1|task-existing/i })).toBeVisible();
+
+    await page.locator('#sdk-task-agent').fill('dev-fe-agent');
+    await page.locator('#sdk-task-prompt').fill('Run a UI audit for the SDK console');
+    await page.locator('#sdk-task-thread').fill('thread-e2e');
+    await page.locator('#sdk-task-working-directory').fill('D:/Code/web/dev-tool-web');
+    await page.locator('#sdk-task-model').fill('gpt-5.2');
+    await page.locator('#sdk-task-reasoning').fill('medium');
+    await fillCodeMirror(page, 'Output schema', '{"type":"object"}');
+    await fillCodeMirror(page, 'Request context', '{"source":"playwright"}');
+    await page.locator('#sdk-task-callback-url').fill('https://callback.internal/sdk');
+    await page.locator('#sdk-task-callback-secret').fill('secret-e2e');
+
+    await page.getByRole('button', { name: 'Run' }).click();
+
+    await expect.poll(() => state.postCalls).toBe(1);
+    expect(state.lastPayload).toMatchObject({
+      agentCode: 'dev-fe-agent',
+      provider: 'codex',
+      prompt: 'Run a UI audit for the SDK console',
+      threadId: 'thread-e2e',
+      workingDirectory: 'D:/Code/web/dev-tool-web',
+      model: 'gpt-5.2',
+      reasoningEffort: 'medium',
+      outputSchema: { type: 'object' },
+      requestContext: { source: 'playwright' },
+      callbackUrl: 'https://callback.internal/sdk',
+      callbackAuthSecretCode: 'secret-e2e',
     });
 
-    test('should render configuration section panel', async ({ page }) => {
-      await navigateToPage(page);
-      const section = page.locator('app-section-panel').first();
-      await expect(section).toBeVisible();
-    });
-
-    test('should render role and agent dropdowns', async ({ page }) => {
-      await navigateToPage(page);
-      await expect(page.locator('#role-select')).toBeVisible();
-      await expect(page.locator('#agent-select')).toBeVisible();
-    });
-
-    test('should render prompt textarea', async ({ page }) => {
-      await navigateToPage(page);
-      await expect(page.locator('#prompt-input')).toBeVisible();
-    });
-
-    test('should render action toolbar with Execute button disabled', async ({ page }) => {
-      await navigateToPage(page);
-      const toolbar = page.locator('app-action-toolbar');
-      await expect(toolbar).toBeVisible();
-      const executeBtn = toolbar.locator('app-button').first();
-      await expect(executeBtn).toBeVisible();
-    });
-  });
-
-  test.describe('Interaction — Form', () => {
-    test('should filter agents when role is selected', async ({ page }) => {
-      await navigateToPage(page);
-      const roleSelect = page.locator('#role-select');
-      const agentSelect = page.locator('#agent-select');
-
-      const optionsBefore = await agentSelect.locator('option').count();
-      await roleSelect.selectOption('DEV');
-      const optionsAfter = await agentSelect.locator('option').count();
-
-      expect(optionsAfter).toBeLessThanOrEqual(optionsBefore);
-    });
-
-    test('should show agent info when agent is selected', async ({ page }) => {
-      await navigateToPage(page);
-      const agentSelect = page.locator('#agent-select');
-
-      const options = agentSelect.locator('option');
-      const count = await options.count();
-      if (count > 1) {
-        await agentSelect.selectOption({ index: 1 });
-        const agentInfo = page.locator('.agent-info');
-        await expect(agentInfo).toBeVisible();
-        await expect(agentInfo.locator('app-badge').first()).toBeVisible();
-      }
-    });
-
-    test('should enable Execute when agent and prompt are filled', async ({ page }) => {
-      await navigateToPage(page);
-      const agentSelect = page.locator('#agent-select');
-      const promptInput = page.locator('#prompt-input');
-
-      const options = agentSelect.locator('option');
-      const count = await options.count();
-      if (count > 1) {
-        await agentSelect.selectOption({ index: 1 });
-        await promptInput.fill('Test prompt');
-
-        const toolbar = page.locator('app-action-toolbar');
-        const executeBtn = toolbar.locator('app-button').first();
-        await expect(executeBtn).not.toBeDisabled();
-      }
-    });
-  });
-
-  test.describe('Output Section', () => {
-    test('should not show output section initially', async ({ page }) => {
-      await navigateToPage(page);
-      const outputSection = page.locator('app-section-panel').nth(1);
-      await expect(outputSection).not.toBeVisible();
-    });
-  });
-
-  test.describe('Status Badge', () => {
-    test('should not show status badge when idle', async ({ page }) => {
-      await navigateToPage(page);
-      const badge = page.locator('app-page-header app-badge');
-      await expect(badge).not.toBeVisible();
-    });
-  });
-
-  test.describe('Responsive', () => {
-    test('should stack form fields on mobile viewport', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 667 });
-      await navigateToPage(page);
-      const formRow = page.locator('.form-row');
-      const box = await formRow.boundingBox();
-      if (box) {
-        const fields = formRow.locator('.form-field');
-        const firstBox = await fields.first().boundingBox();
-        const lastBox = await fields.last().boundingBox();
-        if (firstBox && lastBox) {
-          expect(lastBox.y).toBeGreaterThan(firstBox.y);
-        }
-      }
-    });
+    await expect(page.getByRole('button', { name: /task-e2e-1/i })).toBeVisible();
+    await expect(page.locator('.sdk-task-console__detail-head')).toContainText('task-e2e-1');
+    await page.getByRole('tab', { name: 'Request' }).click();
+    await expect(page.locator('app-json-viewer')).toContainText('callbackAuthSecretConfigured');
   });
 });
+
+async function fillCodeMirror(page: Page, label: string, value: string): Promise<void> {
+  const host = page.locator('app-input-area').filter({ hasText: label }).first();
+  const editor = host.locator('.cm-content');
+  if (await editor.isVisible()) {
+    await editor.click();
+    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
+    await page.keyboard.insertText(value);
+    return;
+  }
+
+  await host.evaluate((element, text) => {
+    const ngWindow = window as Window & {
+      ng?: {
+        getComponent(element: Element | null): { onChange(value: string): void } | undefined;
+        applyChanges?(element: Element | null): void;
+      };
+    };
+    const component = ngWindow.ng?.getComponent(element);
+    if (!component) {
+      throw new Error('Input area component is not available');
+    }
+    component.onChange(text);
+    ngWindow.ng?.applyChanges?.(element);
+  }, value);
+}
+
+async function mockSdkTaskApi(page: Page, state: SdkTaskApiState): Promise<void> {
+  await page.route('**/ai-agent-mcrs/v1/admin/sdk/tasks/runs**', async (route) => {
+    const request = route.request();
+    const method = request.method();
+    const path = new URL(request.url()).pathname;
+
+    if (method === 'GET' && path.endsWith('/sdk/tasks/runs')) {
+      await fulfillJson(route, {
+        items: state.runs,
+        page: 1,
+        size: 20,
+        total: state.runs.length,
+      });
+      return;
+    }
+
+    if (method === 'POST' && path.endsWith('/sdk/tasks/runs')) {
+      state.postCalls += 1;
+      state.lastPayload = request.postDataJSON() as SdkTaskRunRequest;
+      const created: SdkTaskRunSummary = {
+        taskId: 'task-e2e-1',
+        status: 'RUNNING',
+        agentCode: state.lastPayload.agentCode,
+        provider: state.lastPayload.provider ?? 'codex',
+        workingDirectory: state.lastPayload.workingDirectory,
+        threadId: state.lastPayload.threadId,
+        model: state.lastPayload.model,
+        reasoningEffort: state.lastPayload.reasoningEffort,
+        promptPreview: state.lastPayload.prompt,
+        createdAt: '2026-09-01T02:47:24Z',
+        updatedAt: '2026-09-01T02:47:24Z',
+      };
+      state.runs = [created, ...state.runs];
+      await fulfillJson(route, created, 202);
+      return;
+    }
+
+    const match = path.match(/\/sdk\/tasks\/runs\/([^/]+)$/);
+    if (method === 'GET' && match) {
+      const taskId = decodeURIComponent(match[1]);
+      const run = state.runs.find((item) => item.taskId === taskId) ?? EXISTING_RUN;
+      await fulfillJson(route, {
+        ...run,
+        request: {
+          agentCode: run.agentCode,
+          provider: run.provider,
+          prompt: run.promptPreview,
+          threadId: run.threadId,
+          workingDirectory: run.workingDirectory,
+          model: run.model,
+          reasoningEffort: run.reasoningEffort,
+          outputSchema: state.lastPayload?.outputSchema,
+          requestContext: state.lastPayload?.requestContext,
+          callbackUrl: state.lastPayload?.callbackUrl,
+          callbackAuthSecretConfigured: Boolean(state.lastPayload?.callbackAuthSecretCode),
+        },
+        events: [
+          { sequence: 1, at: run.createdAt, type: 'accepted' },
+          { sequence: 2, at: run.updatedAt, type: 'stdout', data: 'started' },
+        ],
+        result: {
+          status: run.status === 'RUNNING' ? 'COMPLETED' : run.status,
+          agentCode: run.agentCode,
+          provider: run.provider,
+          preflight: { status: 'READY' },
+        },
+      });
+      return;
+    }
+
+    await fulfillJson(route, { message: `Unhandled ${method} ${path}` }, 404);
+  });
+}
+
+async function fulfillJson(route: Route, data: unknown, status = 200): Promise<void> {
+  await route.fulfill({
+    status,
+    headers: {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,POST,PUT,OPTIONS',
+      'access-control-allow-headers': 'content-type,authorization',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ data }),
+  });
+}

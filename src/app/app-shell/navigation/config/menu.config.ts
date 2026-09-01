@@ -25,6 +25,11 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-users',
         routerLink: '/ai-agent-mcrs/koc',
       },
+      {
+        label: 'layout.menu.aiAgentExecution',
+        icon: 'pi pi-play',
+        routerLink: '/admin/system-management/ai-agent-execution',
+      },
     ],
   },
   {

@@ -4,6 +4,7 @@ import errorsTranslations from '../i18n/features/errors.i18n.json';
 import kocManagementTranslations from '../i18n/features/koc-management.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
 import serviceManagementTranslations from '../i18n/features/service-management.i18n.json';
+import systemManagementTranslations from '../i18n/features/system-management.i18n.json';
 import workflowStudioTranslations from '../i18n/features/workflow-studio.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
@@ -19,6 +20,7 @@ const TRANSLATIONS: TranslationMap = {
     ...serviceManagementTranslations.vi,
     ...workflowStudioTranslations.vi,
     ...kocManagementTranslations.vi,
+    ...systemManagementTranslations.vi,
   },
   en: {
     ...commonTranslations.en,
@@ -27,6 +29,7 @@ const TRANSLATIONS: TranslationMap = {
     ...serviceManagementTranslations.en,
     ...workflowStudioTranslations.en,
     ...kocManagementTranslations.en,
+    ...systemManagementTranslations.en,
   },
 };
 
