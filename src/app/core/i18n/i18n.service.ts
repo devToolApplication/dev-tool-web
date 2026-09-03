@@ -1,11 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import commonTranslations from '../i18n/common/common.i18n.json';
 import errorsTranslations from '../i18n/features/errors.i18n.json';
-import kocManagementTranslations from '../i18n/features/koc-management.i18n.json';
 import layoutTranslations from '../i18n/features/layout.i18n.json';
 import serviceManagementTranslations from '../i18n/features/service-management.i18n.json';
-import systemManagementTranslations from '../i18n/features/system-management.i18n.json';
-import workflowStudioTranslations from '../i18n/features/workflow-studio.i18n.json';
+import workflowProcessTranslations from '../i18n/features/workflow-process.i18n.json';
+import accountManagementTranslations from '../i18n/features/account-management.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
 type TranslationMap = Record<AppLanguage, Record<string, string>>;
@@ -18,18 +17,16 @@ const TRANSLATIONS: TranslationMap = {
     ...layoutTranslations.vi,
     ...errorsTranslations.vi,
     ...serviceManagementTranslations.vi,
-    ...workflowStudioTranslations.vi,
-    ...kocManagementTranslations.vi,
-    ...systemManagementTranslations.vi,
+    ...workflowProcessTranslations.vi,
+    ...accountManagementTranslations.vi,
   },
   en: {
     ...commonTranslations.en,
     ...layoutTranslations.en,
     ...errorsTranslations.en,
     ...serviceManagementTranslations.en,
-    ...workflowStudioTranslations.en,
-    ...kocManagementTranslations.en,
-    ...systemManagementTranslations.en,
+    ...workflowProcessTranslations.en,
+    ...accountManagementTranslations.en,
   },
 };
 
