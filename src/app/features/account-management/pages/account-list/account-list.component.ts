@@ -72,8 +72,6 @@ export class AccountListComponent implements OnInit, OnDestroy {
   readonly statusOptions = [
     { label: 'accountManagement.status.active', value: 'ACTIVE' },
     { label: 'accountManagement.status.inactive', value: 'INACTIVE' },
-    { label: 'accountManagement.status.locked', value: 'LOCKED' },
-    { label: 'accountManagement.status.expired', value: 'EXPIRED' },
   ];
 
   ngOnInit(): void {

@@ -1,6 +1,6 @@
-﻿export type AccountType = 'OPENAI' | 'GOOGLE' | 'CLAUDE' | 'GITHUB' | 'TWITTER' | 'CUSTOM' | string;
+export type AccountType = 'OPENAI' | 'GOOGLE' | 'CLAUDE' | 'GITHUB' | 'TWITTER' | 'CUSTOM' | string;
 
-export type AccountStatus = 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'EXPIRED';
+export type AccountStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface AccountItem {
   id: string;

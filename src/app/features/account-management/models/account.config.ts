@@ -53,8 +53,6 @@ export function buildAccountFilterFields(): FilterPanelField[] {
         { label: 'accountManagement.filter.allStatuses', value: '' },
         { label: 'accountManagement.status.active', value: 'ACTIVE' },
         { label: 'accountManagement.status.inactive', value: 'INACTIVE' },
-        { label: 'accountManagement.status.locked', value: 'LOCKED' },
-        { label: 'accountManagement.status.expired', value: 'EXPIRED' },
       ],
     },
   ];
@@ -105,8 +103,6 @@ export function buildAccountTableConfig(): TableConfig<AccountItem> {
         badgeMap: {
           ACTIVE: 'success',
           INACTIVE: 'muted',
-          LOCKED: 'danger',
-          EXPIRED: 'warning',
         },
       },
       {
