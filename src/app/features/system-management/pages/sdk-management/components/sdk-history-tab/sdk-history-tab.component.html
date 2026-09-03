@@ -1,0 +1,117 @@
+<div class="sdk-history-tab space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        {{ 'systemManagement.sdkManagement.history.title' | translateContent }}
+      </h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        {{ 'systemManagement.sdkManagement.history.subtitle' | translateContent }}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <app-button
+        variant="outline"
+        size="sm"
+        (click)="loadRuns()"
+        [disabled]="isLoading()"
+      >
+        <i class="pi pi-refresh mr-1.5" [class.pi-spin]="isLoading()"></i>
+        {{ 'systemManagement.sdkManagement.action.refresh' | translateContent }}
+      </app-button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="p-3 text-sm text-red-700 bg-red-50 dark:bg-red-950/40 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <app-table
+    [data]="runs()"
+    [config]="tableConfig"
+    [loading]="isLoading()"
+    [customTemplates]="{
+      status: statusTemplate,
+      promptPreview: promptTemplate,
+      createdAt: dateTemplate
+    }"
+  >
+    <ng-template #statusTemplate let-row="row">
+      <app-badge
+        [variant]="row.status === 'COMPLETED' ? 'success' : (row.status === 'RUNNING' ? 'primary' : 'destructive')"
+        size="sm"
+      >
+        {{ row.status }}
+      </app-badge>
+    </ng-template>
+
+    <ng-template #promptTemplate let-row="row">
+      <div class="max-w-xs truncate text-xs font-mono text-slate-600 dark:text-slate-400" [title]="row.promptPreview">
+        {{ row.promptPreview }}
+      </div>
+    </ng-template>
+
+    <ng-template #dateTemplate let-row="row">
+      <span class="text-xs text-slate-500 font-mono">
+        {{ row.createdAt }}
+      </span>
+    </ng-template>
+  </app-table>
+
+  <app-drawer
+    [open]="isDetailDrawerOpen()"
+    [title]="'systemManagement.sdkManagement.history.drawer.title' | translateContent"
+    (close)="closeDetailDrawer()"
+    size="lg"
+  >
+    @if (isLoadingDetail()) {
+      <div class="flex flex-col items-center justify-center p-8 space-y-3">
+        <i class="pi pi-spin pi-spinner text-3xl text-primary-600"></i>
+        <p class="text-sm text-slate-500">{{ 'systemManagement.sdkManagement.serviceStatus.checking' | translateContent }}</p>
+      </div>
+    } @else if (selectedDetail()) {
+      <div class="space-y-6">
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-xs text-slate-500">Task ID: {{ selectedDetail()?.taskId }}</span>
+            <app-badge [variant]="selectedDetail()?.status === 'COMPLETED' ? 'success' : 'destructive'">
+              {{ selectedDetail()?.status }}
+            </app-badge>
+          </div>
+          <div class="text-sm text-slate-700 dark:text-slate-300">
+            <strong>Agent:</strong> <span class="font-mono text-xs">{{ selectedDetail()?.agentCode }}</span> | 
+            <strong>Provider:</strong> <span class="font-mono text-xs">{{ selectedDetail()?.provider }}</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+            {{ 'systemManagement.sdkManagement.history.drawer.timeline' | translateContent }}
+          </h4>
+          @if (selectedDetail()?.events && (selectedDetail()?.events)!.length > 0) {
+            <div class="space-y-2 border-l-2 border-slate-200 dark:border-slate-800 ml-2 pl-4">
+              @for (evt of selectedDetail()?.events; track evt.sequence) {
+                <div class="relative space-y-1">
+                  <div class="flex items-center gap-2">
+                    <span class="px-1.5 py-0.5 text-xs font-mono rounded bg-slate-100 dark:bg-slate-800 font-semibold">
+                      #{{ evt.sequence }} {{ evt.type }}
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono">{{ evt.at }}</span>
+                  </div>
+                  @if (evt.data) {
+                    <div class="p-2 bg-slate-50 dark:bg-slate-950 rounded text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                      {{ evt.data }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs text-slate-400 italic">No events recorded.</p>
+          }
+        </div>
+      </div>
+    }
+  </app-drawer>
+</div>
