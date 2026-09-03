@@ -1,0 +1,188 @@
+<div class="sdk-execute-tab space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        {{ 'systemManagement.sdkManagement.execute.title' | translateContent }}
+      </h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        {{ 'systemManagement.sdkManagement.execute.subtitle' | translateContent }}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <app-button
+        variant="outline"
+        size="sm"
+        (click)="onLoadSample()"
+        [disabled]="isSubmitting()"
+      >
+        <i class="pi pi-file-edit mr-1.5"></i>
+        {{ 'systemManagement.sdkManagement.execute.loadSample' | translateContent }}
+      </app-button>
+      <app-button
+        variant="outline"
+        size="sm"
+        (click)="onReset()"
+        [disabled]="isSubmitting()"
+      >
+        <i class="pi pi-refresh mr-1.5"></i>
+        {{ 'systemManagement.sdkTask.action.reset' | translateContent }}
+      </app-button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="p-3 text-sm text-red-700 bg-red-50 dark:bg-red-950/40 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.agentCode' | translateContent }} *
+        </label>
+        <app-select
+          [options]="agentOptions"
+          [value]="form().agentCode"
+          (valueChange)="onFieldChange('agentCode', $event)"
+          placeholder="Select Agent"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.provider' | translateContent }} *
+        </label>
+        <app-select
+          [options]="providerOptions"
+          [value]="form().provider"
+          (valueChange)="onFieldChange('provider', $event)"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.model' | translateContent }}
+        </label>
+        <app-input
+          [value]="form().model"
+          (valueChange)="onFieldChange('model', $event)"
+          placeholder="e.g. gpt-5.2"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.reasoningEffort' | translateContent }}
+        </label>
+        <app-input
+          [value]="form().reasoningEffort"
+          (valueChange)="onFieldChange('reasoningEffort', $event)"
+          placeholder="low | medium | high"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.threadId' | translateContent }}
+        </label>
+        <app-input
+          [value]="form().threadId"
+          (valueChange)="onFieldChange('threadId', $event)"
+          placeholder="Optional thread ID"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.workingDirectory' | translateContent }}
+        </label>
+        <app-input
+          [value]="form().workingDirectory"
+          (valueChange)="onFieldChange('workingDirectory', $event)"
+          placeholder="Optional workspace dir"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+        {{ 'systemManagement.sdkTask.field.prompt' | translateContent }} *
+      </label>
+      <app-textarea
+        [value]="form().prompt"
+        (valueChange)="onFieldChange('prompt', $event)"
+        rows="4"
+        placeholder="Enter prompt instructions for the agent..."
+      />
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.outputSchema' | translateContent }} (JSON)
+        </label>
+        <app-textarea
+          [value]="form().outputSchemaText"
+          (valueChange)="onFieldChange('outputSchemaText', $event)"
+          rows="4"
+          placeholder="{ &quot;type&quot;: &quot;object&quot; }"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+          {{ 'systemManagement.sdkTask.field.requestContext' | translateContent }} (JSON)
+        </label>
+        <app-textarea
+          [value]="form().requestContextText"
+          (valueChange)="onFieldChange('requestContextText', $event)"
+          rows="4"
+          placeholder="{ &quot;key&quot;: &quot;value&quot; }"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+      <app-button
+        variant="primary"
+        size="md"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting()"
+      >
+        <i class="pi pi-play mr-1.5" [class.pi-spin]="isSubmitting()"></i>
+        {{ 'systemManagement.sdkTask.action.run' | translateContent }}
+      </app-button>
+    </div>
+  </div>
+
+  @if (executionResult()) {
+    <div class="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+            {{ 'systemManagement.sdkManagement.execute.resultTitle' | translateContent }}
+          </h4>
+          <p class="text-xs text-slate-500">
+            Task ID: <span class="font-mono text-primary-600 dark:text-primary-400 font-semibold">{{ executionResult()?.taskId }}</span>
+          </p>
+        </div>
+        <app-badge
+          [variant]="executionResult()?.status === 'COMPLETED' ? 'success' : (executionResult()?.status === 'RUNNING' ? 'primary' : 'destructive')"
+        >
+          {{ executionResult()?.status }}
+        </app-badge>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {{ 'systemManagement.sdkTask.tab.summary' | translateContent }}
+        </span>
+        <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg text-xs font-mono text-slate-700 dark:text-slate-300">
+          {{ executionResult()?.promptPreview }}
+        </div>
+      </div>
+    </div>
+  }
+</div>
