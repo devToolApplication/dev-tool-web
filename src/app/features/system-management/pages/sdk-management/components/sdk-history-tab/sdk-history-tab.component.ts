@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import type { TableConfig } from '@shared/ui/data-display/table/table';
+import type { TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 import { SdkAdminApiService } from '../../../../api/sdk-admin-api.service';
 import type {
   SdkAgentCatalogItem,
@@ -69,13 +69,13 @@ export class SdkHistoryTabComponent implements OnInit {
         actions: [
           {
             label: 'systemManagement.sdkManagement.history.action.detail',
-            variant: 'outline',
-            onClick: (row) => this.onOpenDetail(row.taskId),
+            variant: 'secondary',
+            onClick: (row: SdkTaskRunSummary) => this.onOpenDetail(row.taskId),
           },
           {
             label: 'systemManagement.sdkManagement.history.action.rerun',
             variant: 'primary',
-            onClick: (row) => this.rerunTask.emit(row),
+            onClick: (row: SdkTaskRunSummary) => this.rerunTask.emit(row),
           },
         ],
       },

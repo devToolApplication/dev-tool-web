@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { SdkAdminApiService } from '../../../../api/sdk-admin-api.service';
 import type {
@@ -7,12 +8,15 @@ import type {
   SdkAgentHealthResponse,
 } from '../../../../model/sdk-management.model';
 import { SdkCatalogTabComponent } from './sdk-catalog-tab.component';
-import { SharedModule } from '@shared/shared.module';
+import { TranslateContentPipe } from '@shared/pipes/translate-content.pipe';
 
 describe('SdkCatalogTabComponent', () => {
   let component: SdkCatalogTabComponent;
   let fixture: ComponentFixture<SdkCatalogTabComponent>;
-  let apiSpy: jasmine.SpyObj<SdkAdminApiService>;
+  let apiService: {
+    listAgents: ReturnType<typeof vi.fn>;
+    checkAgentHealth: ReturnType<typeof vi.fn>;
+  };
 
   const mockAgents: SdkAgentCatalogItem[] = [
     {
@@ -44,14 +48,15 @@ describe('SdkCatalogTabComponent', () => {
   };
 
   beforeEach(async () => {
-    apiSpy = jasmine.createSpyObj('SdkAdminApiService', ['listAgents', 'checkAgentHealth']);
-    apiSpy.listAgents.and.returnValue(of(mockAgents));
-    apiSpy.checkAgentHealth.and.returnValue(of(mockHealth));
+    apiService = {
+      listAgents: vi.fn().mockReturnValue(of(mockAgents)),
+      checkAgentHealth: vi.fn().mockReturnValue(of(mockHealth)),
+    };
 
     await TestBed.configureTestingModule({
-      declarations: [SdkCatalogTabComponent],
-      imports: [SharedModule],
-      providers: [{ provide: SdkAdminApiService, useValue: apiSpy }],
+      declarations: [SdkCatalogTabComponent, TranslateContentPipe],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [{ provide: SdkAdminApiService, useValue: apiService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SdkCatalogTabComponent);
@@ -60,38 +65,38 @@ describe('SdkCatalogTabComponent', () => {
   });
 
   it('should load catalog on init if empty', () => {
-    expect(apiSpy.listAgents).toHaveBeenCalled();
+    expect(apiService.listAgents).toHaveBeenCalled();
     expect(component.agents()).toEqual(mockAgents);
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBeFalsy();
   });
 
   it('should test health and open drawer', async () => {
     await component.onTestHealth('ba-agent');
-    expect(apiSpy.checkAgentHealth).toHaveBeenCalledWith('ba-agent');
+    expect(apiService.checkAgentHealth).toHaveBeenCalledWith('ba-agent');
     expect(component.selectedHealth()).toEqual(mockHealth);
-    expect(component.isHealthDrawerOpen()).toBeTrue();
+    expect(component.isHealthDrawerOpen()).toBeTruthy();
   });
 
   it('should handle test health error gracefully', async () => {
-    apiSpy.checkAgentHealth.and.returnValue(throwError(() => new Error('Server error')));
+    apiService.checkAgentHealth.mockReturnValue(throwError(() => new Error('Server error')));
     await component.onTestHealth('ba-agent');
     expect(component.selectedHealth()?.status).toBe('DEGRADED');
-    expect(component.isHealthDrawerOpen()).toBeTrue();
+    expect(component.isHealthDrawerOpen()).toBeTruthy();
   });
 
   it('should emit runAgent on runTask action', () => {
-    spyOn(component.runAgent, 'emit');
-    const actionsCol = component.tableConfig.columns.find((c) => c.field === 'actions');
-    const runAction = actionsCol?.actions?.find((a) => a.variant === 'primary');
+    const emitSpy = vi.spyOn(component.runAgent, 'emit');
+    const actionsCol = component.tableConfig.columns.find((col) => col.field === 'actions');
+    const runAction = actionsCol?.actions?.find((act) => act.variant === 'primary');
     runAction?.onClick(mockAgents[0]);
-    expect(component.runAgent.emit).toHaveBeenCalledWith('ba-agent');
+    expect(emitSpy).toHaveBeenCalledWith('ba-agent');
   });
 
   it('should close health drawer and reset state', () => {
     component.isHealthDrawerOpen.set(true);
     component.selectedHealth.set(mockHealth);
     component.closeHealthDrawer();
-    expect(component.isHealthDrawerOpen()).toBeFalse();
+    expect(component.isHealthDrawerOpen()).toBeFalsy();
     expect(component.selectedHealth()).toBeNull();
   });
 });

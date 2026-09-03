@@ -10,9 +10,9 @@
     </div>
     <div class="flex items-center gap-2">
       <app-button
-        variant="outline"
+        variant="secondary"
         size="sm"
-        (click)="loadRuns()"
+        (buttonClick)="loadRuns()"
         [disabled]="isLoading()"
       >
         <i class="pi pi-refresh mr-1.5" [class.pi-spin]="isLoading()"></i>
@@ -39,7 +39,7 @@
   >
     <ng-template #statusTemplate let-row="row">
       <app-badge
-        [variant]="row.status === 'COMPLETED' ? 'success' : (row.status === 'RUNNING' ? 'primary' : 'destructive')"
+        [variant]="row.status === 'COMPLETED' ? 'success' : (row.status === 'RUNNING' ? 'info' : 'danger')"
         size="sm"
       >
         {{ row.status }}
@@ -75,7 +75,7 @@
         <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-mono text-xs text-slate-500">Task ID: {{ selectedDetail()?.taskId }}</span>
-            <app-badge [variant]="selectedDetail()?.status === 'COMPLETED' ? 'success' : 'destructive'">
+            <app-badge [variant]="selectedDetail()?.status === 'COMPLETED' ? 'success' : 'danger'">
               {{ selectedDetail()?.status }}
             </app-badge>
           </div>

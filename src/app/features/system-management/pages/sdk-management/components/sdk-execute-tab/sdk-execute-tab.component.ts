@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import type { SelectOption } from '@shared/ui/primitives/select/select';
+import type { SelectOption, SelectValue } from '@shared/ui/primitives/select/select';
 import { SdkAdminApiService } from '../../../../api/sdk-admin-api.service';
 import type {
   SdkAgentCatalogItem,
@@ -58,7 +58,7 @@ export class SdkExecuteTabComponent implements OnInit {
   readonly executionResult = signal<SdkTaskRunSummary | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly providerOptions: SelectOption<string>[] = [
+  readonly providerOptions: SelectOption[] = [
     { label: 'Codex', value: 'codex' },
     { label: 'Claude', value: 'claude' },
   ];
@@ -71,15 +71,21 @@ export class SdkExecuteTabComponent implements OnInit {
     }
   }
 
-  get agentOptions(): SelectOption<string>[] {
+  get agentOptions(): SelectOption[] {
     return this.agents.map((a) => ({
       label: `${a.displayName} (${a.agentCode})`,
       value: a.agentCode,
     }));
   }
 
-  onFieldChange(field: keyof SdkExecuteFormState, value: string): void {
-    this.form.update((f) => ({ ...f, [field]: value }));
+  onFieldChange(field: keyof SdkExecuteFormState, value: string | null): void {
+    this.form.update((f) => ({ ...f, [field]: value ?? '' }));
+  }
+
+  onSelectChange(field: 'agentCode' | 'provider', value: SelectValue): void {
+    if (typeof value === 'string') {
+      this.form.update((f) => ({ ...f, [field]: value }));
+    }
   }
 
   onLoadSample(): void {

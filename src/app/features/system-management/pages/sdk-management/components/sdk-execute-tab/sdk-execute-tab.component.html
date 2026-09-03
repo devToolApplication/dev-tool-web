@@ -10,18 +10,18 @@
     </div>
     <div class="flex items-center gap-2">
       <app-button
-        variant="outline"
+        variant="secondary"
         size="sm"
-        (click)="onLoadSample()"
+        (buttonClick)="onLoadSample()"
         [disabled]="isSubmitting()"
       >
         <i class="pi pi-file-edit mr-1.5"></i>
         {{ 'systemManagement.sdkManagement.execute.loadSample' | translateContent }}
       </app-button>
       <app-button
-        variant="outline"
+        variant="secondary"
         size="sm"
-        (click)="onReset()"
+        (buttonClick)="onReset()"
         [disabled]="isSubmitting()"
       >
         <i class="pi pi-refresh mr-1.5"></i>
@@ -39,33 +39,30 @@
   <div class="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.agentCode' | translateContent }} *
-        </label>
         <app-select
+          inputId="sdk-execute-agent"
+          label="systemManagement.sdkTask.field.agentCode"
           [options]="agentOptions"
           [value]="form().agentCode"
-          (valueChange)="onFieldChange('agentCode', $event)"
+          (valueChange)="onSelectChange('agentCode', $event)"
           placeholder="Select Agent"
         />
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.provider' | translateContent }} *
-        </label>
         <app-select
+          inputId="sdk-execute-provider"
+          label="systemManagement.sdkTask.field.provider"
           [options]="providerOptions"
           [value]="form().provider"
-          (valueChange)="onFieldChange('provider', $event)"
+          (valueChange)="onSelectChange('provider', $event)"
         />
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.model' | translateContent }}
-        </label>
-        <app-input
+        <app-input-text
+          inputId="sdk-execute-model"
+          label="systemManagement.sdkTask.field.model"
           [value]="form().model"
           (valueChange)="onFieldChange('model', $event)"
           placeholder="e.g. gpt-5.2"
@@ -73,10 +70,9 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.reasoningEffort' | translateContent }}
-        </label>
-        <app-input
+        <app-input-text
+          inputId="sdk-execute-reasoning"
+          label="systemManagement.sdkTask.field.reasoningEffort"
           [value]="form().reasoningEffort"
           (valueChange)="onFieldChange('reasoningEffort', $event)"
           placeholder="low | medium | high"
@@ -84,10 +80,9 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.threadId' | translateContent }}
-        </label>
-        <app-input
+        <app-input-text
+          inputId="sdk-execute-thread"
+          label="systemManagement.sdkTask.field.threadId"
           [value]="form().threadId"
           (valueChange)="onFieldChange('threadId', $event)"
           placeholder="Optional thread ID"
@@ -95,10 +90,9 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.workingDirectory' | translateContent }}
-        </label>
-        <app-input
+        <app-input-text
+          inputId="sdk-execute-workdir"
+          label="systemManagement.sdkTask.field.workingDirectory"
           [value]="form().workingDirectory"
           (valueChange)="onFieldChange('workingDirectory', $event)"
           placeholder="Optional workspace dir"
@@ -107,38 +101,36 @@
     </div>
 
     <div>
-      <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-        {{ 'systemManagement.sdkTask.field.prompt' | translateContent }} *
-      </label>
-      <app-textarea
+      <app-input-area
+        inputId="sdk-execute-prompt"
+        label="systemManagement.sdkTask.field.prompt"
+        [required]="true"
         [value]="form().prompt"
         (valueChange)="onFieldChange('prompt', $event)"
-        rows="4"
+        [rows]="4"
         placeholder="Enter prompt instructions for the agent..."
       />
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.outputSchema' | translateContent }} (JSON)
-        </label>
-        <app-textarea
+        <app-input-area
+          inputId="sdk-execute-schema"
+          label="systemManagement.sdkTask.field.outputSchema"
           [value]="form().outputSchemaText"
           (valueChange)="onFieldChange('outputSchemaText', $event)"
-          rows="4"
+          [rows]="4"
           placeholder="{ &quot;type&quot;: &quot;object&quot; }"
         />
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-          {{ 'systemManagement.sdkTask.field.requestContext' | translateContent }} (JSON)
-        </label>
-        <app-textarea
+        <app-input-area
+          inputId="sdk-execute-context"
+          label="systemManagement.sdkTask.field.requestContext"
           [value]="form().requestContextText"
           (valueChange)="onFieldChange('requestContextText', $event)"
-          rows="4"
+          [rows]="4"
           placeholder="{ &quot;key&quot;: &quot;value&quot; }"
         />
       </div>
@@ -148,7 +140,7 @@
       <app-button
         variant="primary"
         size="md"
-        (click)="onSubmit()"
+        (buttonClick)="onSubmit()"
         [disabled]="isSubmitting()"
       >
         <i class="pi pi-play mr-1.5" [class.pi-spin]="isSubmitting()"></i>
@@ -169,7 +161,7 @@
           </p>
         </div>
         <app-badge
-          [variant]="executionResult()?.status === 'COMPLETED' ? 'success' : (executionResult()?.status === 'RUNNING' ? 'primary' : 'destructive')"
+          [variant]="executionResult()?.status === 'COMPLETED' ? 'success' : (executionResult()?.status === 'RUNNING' ? 'info' : 'danger')"
         >
           {{ executionResult()?.status }}
         </app-badge>

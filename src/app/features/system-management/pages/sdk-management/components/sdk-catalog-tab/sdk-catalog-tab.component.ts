@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import type { TableConfig } from '@shared/ui/data-display/table/table';
+import type { TableColumn, TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
 import { SdkAdminApiService } from '../../../../api/sdk-admin-api.service';
 import type {
   SdkAgentCatalogItem,
@@ -53,13 +53,13 @@ export class SdkCatalogTabComponent implements OnInit {
         actions: [
           {
             label: 'systemManagement.sdkManagement.catalog.action.testHealth',
-            variant: 'outline',
-            onClick: (row) => this.onTestHealth(row.agentCode),
+            variant: 'secondary',
+            onClick: (row: SdkAgentCatalogItem) => this.onTestHealth(row.agentCode),
           },
           {
             label: 'systemManagement.sdkManagement.catalog.action.runTask',
             variant: 'primary',
-            onClick: (row) => this.runAgent.emit(row.agentCode),
+            onClick: (row: SdkAgentCatalogItem) => this.runAgent.emit(row.agentCode),
           },
         ],
       },

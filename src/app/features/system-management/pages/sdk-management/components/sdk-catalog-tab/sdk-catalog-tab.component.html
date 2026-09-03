@@ -10,9 +10,9 @@
     </div>
     <div class="flex items-center gap-2">
       <app-button
-        variant="outline"
+        variant="secondary"
         size="sm"
-        (click)="loadCatalog()"
+        (buttonClick)="loadCatalog()"
         [disabled]="isLoading()"
       >
         <i class="pi pi-refresh mr-1.5" [class.pi-spin]="isLoading()"></i>
@@ -41,7 +41,7 @@
       <div class="flex flex-wrap gap-1">
         @for (opt of row.supportedProviders; track opt.provider) {
           <app-badge
-            [variant]="opt.available ? 'outline' : 'secondary'"
+            [variant]="opt.available ? 'default' : 'muted'"
             size="sm"
           >
             {{ opt.provider }}
@@ -66,7 +66,7 @@
 
     <ng-template #healthTemplate let-row="row">
       <app-badge
-        [variant]="row.health === 'HEALTHY' ? 'success' : 'destructive'"
+        [variant]="row.health === 'HEALTHY' ? 'success' : 'danger'"
         size="sm"
       >
         {{ row.health }}
@@ -95,7 +95,7 @@
               {{ 'systemManagement.sdkManagement.healthDrawer.overallStatus' | translateContent }}
             </span>
             <app-badge
-              [variant]="selectedHealth()?.status === 'READY' ? 'success' : (selectedHealth()?.status === 'DEGRADED' ? 'warning' : 'destructive')"
+              [variant]="selectedHealth()?.status === 'READY' ? 'success' : (selectedHealth()?.status === 'DEGRADED' ? 'warning' : 'danger')"
             >
               {{ 'systemManagement.sdkManagement.healthDrawer.status.' + selectedHealth()?.status | translateContent }}
             </app-badge>
@@ -122,7 +122,7 @@
                     </span>
                     <div class="flex items-center gap-2">
                       <span class="text-xs text-slate-500 font-mono">{{ server.latencyMs }}ms</span>
-                      <app-badge [variant]="server.status === 'UP' ? 'success' : 'destructive'" size="sm">
+                      <app-badge [variant]="server.status === 'UP' ? 'success' : 'danger'" size="sm">
                         {{ server.status }}
                       </app-badge>
                     </div>

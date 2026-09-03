@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { SdkAdminApiService } from '../../../../api/sdk-admin-api.service';
 import type {
@@ -7,12 +8,14 @@ import type {
   SdkTaskRunSummary,
 } from '../../../../model/sdk-management.model';
 import { SdkExecuteTabComponent } from './sdk-execute-tab.component';
-import { SharedModule } from '@shared/shared.module';
+import { TranslateContentPipe } from '@shared/pipes/translate-content.pipe';
 
 describe('SdkExecuteTabComponent', () => {
   let component: SdkExecuteTabComponent;
   let fixture: ComponentFixture<SdkExecuteTabComponent>;
-  let apiSpy: jasmine.SpyObj<SdkAdminApiService>;
+  let apiService: {
+    executeTask: ReturnType<typeof vi.fn>;
+  };
 
   const mockAgents: SdkAgentCatalogItem[] = [
     {
@@ -36,13 +39,14 @@ describe('SdkExecuteTabComponent', () => {
   };
 
   beforeEach(async () => {
-    apiSpy = jasmine.createSpyObj('SdkAdminApiService', ['executeTask']);
-    apiSpy.executeTask.and.returnValue(of(mockSummary));
+    apiService = {
+      executeTask: vi.fn().mockReturnValue(of(mockSummary)),
+    };
 
     await TestBed.configureTestingModule({
-      declarations: [SdkExecuteTabComponent],
-      imports: [SharedModule],
-      providers: [{ provide: SdkAdminApiService, useValue: apiSpy }],
+      declarations: [SdkExecuteTabComponent, TranslateContentPipe],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [{ provide: SdkAdminApiService, useValue: apiService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SdkExecuteTabComponent);
@@ -73,28 +77,28 @@ describe('SdkExecuteTabComponent', () => {
     component.form.set({ ...component.form(), agentCode: '', prompt: '' });
     await component.onSubmit();
     expect(component.errorMessage()).toContain('required');
-    expect(apiSpy.executeTask).not.toHaveBeenCalled();
+    expect(apiService.executeTask).not.toHaveBeenCalled();
   });
 
   it('should validate invalid JSON in output schema', async () => {
     component.form.set({ ...component.form(), agentCode: 'ba-agent', prompt: 'test', outputSchemaText: '{ invalid' });
     await component.onSubmit();
     expect(component.errorMessage()).toContain('JSON');
-    expect(apiSpy.executeTask).not.toHaveBeenCalled();
+    expect(apiService.executeTask).not.toHaveBeenCalled();
   });
 
   it('should submit task and emit event', async () => {
-    spyOn(component.taskExecuted, 'emit');
+    const emitSpy = vi.spyOn(component.taskExecuted, 'emit');
     component.form.set({ ...component.form(), agentCode: 'ba-agent', prompt: 'test' });
     await component.onSubmit();
 
-    expect(apiSpy.executeTask).toHaveBeenCalled();
+    expect(apiService.executeTask).toHaveBeenCalled();
     expect(component.executionResult()).toEqual(mockSummary);
-    expect(component.taskExecuted.emit).toHaveBeenCalledWith(mockSummary);
+    expect(emitSpy).toHaveBeenCalledWith(mockSummary);
   });
 
   it('should handle API execution error', async () => {
-    apiSpy.executeTask.and.returnValue(throwError(() => new Error('Execution fail')));
+    apiService.executeTask.mockReturnValue(throwError(() => new Error('Execution fail')));
     component.form.set({ ...component.form(), agentCode: 'ba-agent', prompt: 'test' });
     await component.onSubmit();
 
