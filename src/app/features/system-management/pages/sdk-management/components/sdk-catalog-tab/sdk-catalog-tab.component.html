@@ -1,0 +1,158 @@
+<div class="sdk-catalog-tab space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        {{ 'systemManagement.sdkManagement.catalog.title' | translateContent }}
+      </h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        {{ 'systemManagement.sdkManagement.catalog.subtitle' | translateContent }}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <app-button
+        variant="outline"
+        size="sm"
+        (click)="loadCatalog()"
+        [disabled]="isLoading()"
+      >
+        <i class="pi pi-refresh mr-1.5" [class.pi-spin]="isLoading()"></i>
+        {{ 'systemManagement.sdkManagement.action.refresh' | translateContent }}
+      </app-button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="p-3 text-sm text-red-700 bg-red-50 dark:bg-red-950/40 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <app-table
+    [data]="agents()"
+    [config]="tableConfig"
+    [loading]="isLoading()"
+    [customTemplates]="{
+      supportedProviders: providersTemplate,
+      requiredDependencies: depsTemplate,
+      health: healthTemplate
+    }"
+  >
+    <ng-template #providersTemplate let-row="row">
+      <div class="flex flex-wrap gap-1">
+        @for (opt of row.supportedProviders; track opt.provider) {
+          <app-badge
+            [variant]="opt.available ? 'outline' : 'secondary'"
+            size="sm"
+          >
+            {{ opt.provider }}
+          </app-badge>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #depsTemplate let-row="row">
+      <div class="flex flex-wrap gap-1">
+        @if (row.requiredDependencies && row.requiredDependencies.length > 0) {
+          @for (dep of row.requiredDependencies; track dep) {
+            <span class="inline-block px-1.5 py-0.5 text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
+              {{ dep }}
+            </span>
+          }
+        } @else {
+          <span class="text-xs text-slate-400">-</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #healthTemplate let-row="row">
+      <app-badge
+        [variant]="row.health === 'HEALTHY' ? 'success' : 'destructive'"
+        size="sm"
+      >
+        {{ row.health }}
+      </app-badge>
+    </ng-template>
+  </app-table>
+
+  <app-drawer
+    [open]="isHealthDrawerOpen()"
+    [title]="'systemManagement.sdkManagement.healthDrawer.title' | translateContent"
+    (close)="closeHealthDrawer()"
+    size="lg"
+  >
+    @if (isCheckingHealth()) {
+      <div class="flex flex-col items-center justify-center p-8 space-y-3">
+        <i class="pi pi-spin pi-spinner text-3xl text-primary-600"></i>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          {{ 'systemManagement.sdkManagement.serviceStatus.checking' | translateContent }}
+        </p>
+      </div>
+    } @else if (selectedHealth()) {
+      <div class="space-y-6">
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {{ 'systemManagement.sdkManagement.healthDrawer.overallStatus' | translateContent }}
+            </span>
+            <app-badge
+              [variant]="selectedHealth()?.status === 'READY' ? 'success' : (selectedHealth()?.status === 'DEGRADED' ? 'warning' : 'destructive')"
+            >
+              {{ 'systemManagement.sdkManagement.healthDrawer.status.' + selectedHealth()?.status | translateContent }}
+            </app-badge>
+          </div>
+          <div class="text-sm text-slate-700 dark:text-slate-300">
+            <strong>Agent:</strong> <span class="font-mono text-xs">{{ selectedHealth()?.agentCode }}</span> | 
+            <strong>Provider:</strong> <span class="font-mono text-xs">{{ selectedHealth()?.provider }}</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+            {{ 'systemManagement.sdkManagement.healthDrawer.mcpServers' | translateContent }}
+          </h4>
+
+          @if (selectedHealth()?.mcp && (selectedHealth()?.mcp)!.length > 0) {
+            <div class="space-y-3">
+              @for (server of selectedHealth()?.mcp; track server.name) {
+                <div class="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-semibold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <i class="pi pi-server text-slate-400"></i>
+                      {{ server.name }}
+                    </span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs text-slate-500 font-mono">{{ server.latencyMs }}ms</span>
+                      <app-badge [variant]="server.status === 'UP' ? 'success' : 'destructive'" size="sm">
+                        {{ server.status }}
+                      </app-badge>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
+                    <div><strong>{{ 'systemManagement.sdkManagement.healthDrawer.toolCount' | translateContent }}:</strong> {{ server.toolCount }}</div>
+                    <div><strong>{{ 'systemManagement.sdkManagement.healthDrawer.requiredTools' | translateContent }}:</strong> {{ server.requiredTools.length }}</div>
+                  </div>
+
+                  @if (server.missingTools && server.missingTools.length > 0) {
+                    <div class="text-xs text-red-600 dark:text-red-400">
+                      <strong>{{ 'systemManagement.sdkManagement.healthDrawer.missingTools' | translateContent }}:</strong> {{ server.missingTools.join(', ') }}
+                    </div>
+                  }
+                  @if (server.error) {
+                    <div class="text-xs text-red-600 dark:text-red-400 font-mono bg-red-50 dark:bg-red-950/30 p-2 rounded">
+                      {{ server.error }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-sm text-slate-500 italic p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              {{ 'systemManagement.sdkManagement.healthDrawer.noMcp' | translateContent }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </app-drawer>
+</div>
