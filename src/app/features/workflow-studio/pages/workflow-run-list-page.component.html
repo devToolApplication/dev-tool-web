@@ -1,0 +1,36 @@
+<app-page-shell
+  [title]="'workflowStudio.lifecycle.runsTitle' | translateContent"
+  [subtitle]="'workflowStudio.lifecycle.runsDescription' | translateContent"
+>
+  <div class="flex flex-col gap-4">
+    <app-action-toolbar [actions]="actions" (actionClick)="onToolbarAction($event)"></app-action-toolbar>
+
+    <app-filter-panel
+      [filters]="filterFields()"
+      (apply)="onFilterChange($event)"
+      (reset)="onFilterReset()"
+    ></app-filter-panel>
+
+    <div *ngIf="error()" class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+      {{ error() | translateContent }}
+    </div>
+
+    <app-table
+      [config]="tableConfig"
+      [data]="runs()"
+      [loading]="loading()"
+      [totalRecords]="totalRecords()"
+      [currentPage]="currentPage()"
+      [rows]="rows()"
+      (rowClick)="openDebugger($event)"
+      (actionClick)="onTableAction($event)"
+      (pageChange)="loadRuns($event.page, $event.rows)"
+      (refresh)="loadRuns(currentPage(), rows())"
+    ></app-table>
+  </div>
+</app-page-shell>
+
+<app-workflow-run-trigger-dialog
+  #triggerDialog
+  (runStarted)="onRunStarted($event)"
+></app-workflow-run-trigger-dialog>
