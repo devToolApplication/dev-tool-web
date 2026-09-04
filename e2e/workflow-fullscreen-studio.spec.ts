@@ -4,6 +4,22 @@ test.describe('Workflow Studio Fullscreen Studio E2E', () => {
   test('tests optimized studio canvas: inline title, description modal, properties collapse, import xml and save', async ({ page }) => {
     let savedPayload: any = null;
 
+    await page.route('**/v1/admin/ai-agents**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [] }),
+      });
+    });
+
+    await page.route('**/v1/admin/ai-gate-output-schemas**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [] }),
+      });
+    });
+
     await page.route('**/v1/admin/workflows**', async (route) => {
       const method = route.request().method();
       const url = route.request().url();
@@ -51,7 +67,7 @@ test.describe('Workflow Studio Fullscreen Studio E2E', () => {
     await expect(page.locator('app-workflow-builder-page')).toBeVisible();
 
     // 2. Ch?nh s?a Inline Name trên Top Bar
-    const nameInput = page.locator('.workflow-builder__name-input');
+    const nameInput = page.locator('.workflow-builder__identity input');
     await nameInput.fill('Studio Optimized Workflow');
 
     // 3. Ch?nh s?a Description qua Modal Drawer
@@ -70,7 +86,7 @@ test.describe('Workflow Studio Fullscreen Studio E2E', () => {
     await expect(page.locator('.workflow-bpmn-canvas--properties-collapsed')).toBeHidden();
 
     // 5. Test Import XML qua Drawer
-    await page.locator('app-button[data-testid="action-toolbar-importBpmn"] button').click();
+    await page.locator('[data-testid="action-toolbar-importBpmn"] button').click();
     await expect(page.locator('.workflow-import-drawer')).toBeVisible();
 
     const sampleCallActivityXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -101,7 +117,7 @@ test.describe('Workflow Studio Fullscreen Studio E2E', () => {
     await expect(callActivityElement).toBeVisible();
 
     // 7. Click Luu (Save)
-    const saveButton = page.locator('app-button[data-testid="action-toolbar-save"] button');
+    const saveButton = page.locator('[data-testid="action-toolbar-save"] button');
     await saveButton.click();
 
     await expect.poll(() => savedPayload).not.toBeNull();

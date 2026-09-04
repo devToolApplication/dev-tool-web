@@ -281,7 +281,7 @@ test.describe('Workflow Run Management & Debugger E2E', () => {
 
     // 7. Click ch?n Node 'taskSubmitAi' d? xem Node Inspector
     await page.locator('.djs-element[data-element-id="taskSubmitAi"]').click();
-    await expect(page.locator('app-section-panel').filter({ hasText: 'Chi tiet thuc thi' }).locator('text=taskSubmitAi')).toBeVisible();
+    await expect(page.locator('app-section-panel').nth(1).locator('text=taskSubmitAi')).toBeVisible();
     await expect(page.locator('text=Input Snapshot')).toBeVisible();
     await expect(page.locator('text=Output Payload')).toBeVisible();
     await expect(page.locator('text=Evidence')).toBeVisible();
