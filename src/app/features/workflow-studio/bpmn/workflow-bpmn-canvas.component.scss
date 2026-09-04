@@ -140,6 +140,38 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
   stroke-width: 3px !important;
 }
 
+/* Traversed SequenceFlow styling for arrows and connectors */
+.djs-connection.workflow-bpmn-canvas__marker--completed path {
+  stroke: var(--app-success, #16a34a) !important;
+  stroke-width: 3px !important;
+}
+
+.djs-connection.workflow-bpmn-canvas__marker--completed marker path {
+  fill: var(--app-success, #16a34a) !important;
+  stroke: var(--app-success, #16a34a) !important;
+}
+
+.djs-connection.workflow-bpmn-canvas__marker--running path {
+  stroke: var(--app-primary, #3b82f6) !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 6 3 !important;
+}
+
+.djs-connection.workflow-bpmn-canvas__marker--running marker path {
+  fill: var(--app-primary, #3b82f6) !important;
+  stroke: var(--app-primary, #3b82f6) !important;
+}
+
+.djs-connection.workflow-bpmn-canvas__marker--failed path {
+  stroke: var(--app-danger, #dc2626) !important;
+  stroke-width: 3px !important;
+}
+
+.djs-connection.workflow-bpmn-canvas__marker--failed marker path {
+  fill: var(--app-danger, #dc2626) !important;
+  stroke: var(--app-danger, #dc2626) !important;
+}
+
 @media (max-width: 48rem) {
   .workflow-bpmn-canvas {
     grid-template-columns: 1fr;
@@ -153,7 +185,6 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
   }
 }
 
-
 .workflow-bpmn-canvas--properties-collapsed {
   grid-template-columns: minmax(0, 1fr) !important;
 }
@@ -161,7 +192,6 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
 .workflow-bpmn-canvas--properties-collapsed .workflow-bpmn-canvas__properties {
   display: none !important;
 }
-
 
 .workflow-bpmn-canvas .djs-palette {
   position: absolute !important;
