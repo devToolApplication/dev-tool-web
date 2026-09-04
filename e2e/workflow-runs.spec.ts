@@ -1,86 +1,178 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Workflow Run Management & Debugger E2E', () => {
-  test('lists workflow runs, opens trigger dialog, triggers a run and navigates to debugger view', async ({ page }) => {
-    const sampleBpmnXml = `<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
-             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
-             targetNamespace="http://devtool.vn/workflow">
-  <process id="wf_sample" name="Sample Execution Workflow" isExecutable="true">
-    <startEvent id="start-node" name="Start" />
-    <sequenceFlow id="flow-1" sourceRef="start-node" targetRef="task-node" />
-    <serviceTask id="task-node" name="Execute Logic" />
-    <sequenceFlow id="flow-2" sourceRef="task-node" targetRef="end-node" />
-    <endEvent id="end-node" name="End" />
-  </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="wf_sample">
-      <bpmndi:BPMNShape id="start-node_di" bpmnElement="start-node">
-        <omgdc:Bounds x="150" y="100" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task-node_di" bpmnElement="task-node">
-        <omgdc:Bounds x="240" y="78" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end-node_di" bpmnElement="end-node">
-        <omgdc:Bounds x="390" y="100" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="flow-1_di" bpmnElement="flow-1">
-        <omgdi:waypoint x="186" y="118" />
-        <omgdi:waypoint x="240" y="118" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="flow-2_di" bpmnElement="flow-2">
-        <omgdi:waypoint x="340" y="118" />
-        <omgdi:waypoint x="390" y="118" />
-      </bpmndi:BPMNEdge>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-</definitions>`;
+  test('verifies real AI workflow execution debug screen with green traversal lines and node inspection', async ({ page }) => {
+    const realBpmnXml = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CallAiSdk" targetNamespace="http://flowable.org/bpmn20">',
+      '  <message id="msg_ai_callback" name="AiCallbackMessage" />',
+      '  <process id="callAiSdkSubProcess" name="Call AI SDK Sub Process" isExecutable="true">',
+      '    <startEvent id="startEvent" name="Receive Inputs" />',
+      '    <sequenceFlow id="f_start" sourceRef="startEvent" targetRef="taskSubmitAi" />',
+      '    <serviceTask id="taskSubmitAi" name="Submit AI Task" />',
+      '    <sequenceFlow id="f_to_wait" sourceRef="taskSubmitAi" targetRef="waitAiCallback" />',
+      '    <intermediateCatchEvent id="waitAiCallback" name="Wait AI Callback">',
+      '      <messageEventDefinition messageRef="msg_ai_callback" />',
+      '    </intermediateCatchEvent>',
+      '    <sequenceFlow id="f_to_check" sourceRef="waitAiCallback" targetRef="gwCheckSuccess" />',
+      '    <exclusiveGateway id="gwCheckSuccess" name="AI Succeeded?" default="f_failed" />',
+      '    <sequenceFlow id="f_success" name="Completed" sourceRef="gwCheckSuccess" targetRef="endSuccess" />',
+      '    <sequenceFlow id="f_failed" name="Failed" sourceRef="gwCheckSuccess" targetRef="gwCheckRetry" />',
+      '    <exclusiveGateway id="gwCheckRetry" name="Can Retry?" default="f_max_exceeded" />',
+      '    <sequenceFlow id="f_retry" name="Retry" sourceRef="gwCheckRetry" targetRef="taskSubmitAi" />',
+      '    <sequenceFlow id="f_max_exceeded" name="Out of Retries" sourceRef="gwCheckRetry" targetRef="endFailed" />',
+      '    <endEvent id="endSuccess" name="End Success" />',
+      '    <endEvent id="endFailed" name="End Failed" />',
+      '  </process>',
+      '  <bpmndi:BPMNDiagram id="BPMNDiagram_callAiSdkSubProcess">',
+      '    <bpmndi:BPMNPlane id="BPMNPlane_callAiSdkSubProcess" bpmnElement="callAiSdkSubProcess">',
+      '      <bpmndi:BPMNShape id="startEvent_di" bpmnElement="startEvent">',
+      '        <dc:Bounds x="160" y="142" width="36" height="36" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="taskSubmitAi_di" bpmnElement="taskSubmitAi">',
+      '        <dc:Bounds x="260" y="120" width="120" height="80" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="waitAiCallback_di" bpmnElement="waitAiCallback">',
+      '        <dc:Bounds x="440" y="142" width="36" height="36" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="gwCheckSuccess_di" bpmnElement="gwCheckSuccess" isMarkerVisible="true">',
+      '        <dc:Bounds x="540" y="135" width="50" height="50" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="gwCheckRetry_di" bpmnElement="gwCheckRetry" isMarkerVisible="true">',
+      '        <dc:Bounds x="540" y="265" width="50" height="50" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="endSuccess_di" bpmnElement="endSuccess">',
+      '        <dc:Bounds x="780" y="142" width="36" height="36" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNShape id="endFailed_di" bpmnElement="endFailed">',
+      '        <dc:Bounds x="780" y="272" width="36" height="36" />',
+      '      </bpmndi:BPMNShape>',
+      '      <bpmndi:BPMNEdge id="f_start_di" bpmnElement="f_start">',
+      '        <di:waypoint x="196" y="160" />',
+      '        <di:waypoint x="260" y="160" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_to_wait_di" bpmnElement="f_to_wait">',
+      '        <di:waypoint x="380" y="160" />',
+      '        <di:waypoint x="440" y="160" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_to_check_di" bpmnElement="f_to_check">',
+      '        <di:waypoint x="476" y="160" />',
+      '        <di:waypoint x="540" y="160" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_success_di" bpmnElement="f_success">',
+      '        <di:waypoint x="590" y="160" />',
+      '        <di:waypoint x="780" y="160" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_failed_di" bpmnElement="f_failed">',
+      '        <di:waypoint x="565" y="185" />',
+      '        <di:waypoint x="565" y="265" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_retry_di" bpmnElement="f_retry">',
+      '        <di:waypoint x="540" y="290" />',
+      '        <di:waypoint x="320" y="290" />',
+      '        <di:waypoint x="320" y="200" />',
+      '      </bpmndi:BPMNEdge>',
+      '      <bpmndi:BPMNEdge id="f_max_exceeded_di" bpmnElement="f_max_exceeded">',
+      '        <di:waypoint x="590" y="290" />',
+      '        <di:waypoint x="780" y="290" />',
+      '      </bpmndi:BPMNEdge>',
+      '    </bpmndi:BPMNPlane>',
+      '  </bpmndi:BPMNDiagram>',
+      '</definitions>',
+    ].join('\n');
 
-    const mockRun = {
-      id: 'run-999',
-      workflowDefinitionId: 'wf-1',
-      workflowVersionId: 'ver-1',
+    const realAiWorkflowRun = {
+      id: 'run-ai-task-001',
+      workflowDefinitionId: '6a99a073ce94f6e109d4c338',
+      workflowVersionId: '6a99a073ce94f6e109d4c339',
       status: 'COMPLETED',
-      input: { testKey: 'testVal' },
-      startedAt: '2026-09-04T10:00:00Z',
-      completedAt: '2026-09-04T10:00:05Z',
+      input: {
+        agentCode: 'koc-search-planner',
+        provider: 'codex',
+        prompt: 'Tr? ra danh sách mcp agent dang có'
+      },
+      startedAt: '2026-09-04T10:30:00Z',
+      completedAt: '2026-09-04T10:30:25Z',
       finalOutcome: 'PASS',
-      finalOutput: { success: true },
+      finalOutput: {
+        agents: [
+          'facebook-candidate-discovery',
+          'facebook-evidence-verifier',
+          'koc-search-planner',
+          'koc-rule-evaluator',
+          'koc-adjudicator'
+        ]
+      },
       nodes: [
         {
-          nodeId: 'start-node',
-          nodeType: 'START',
+          nodeId: 'startEvent',
+          nodeType: 'START_EVENT',
           executionStatus: 'COMPLETED',
           outcome: 'PASS',
           attempt: 1,
-          inputSnapshot: {},
-          output: {},
+          inputSnapshot: { agentCode: 'koc-search-planner' },
+          output: { agentCode: 'koc-search-planner' },
           evidence: null,
           reason: null,
           errorCode: null,
           errorMessage: null,
         },
         {
-          nodeId: 'task-node',
+          nodeId: 'taskSubmitAi',
           nodeType: 'SERVICE_TASK',
           executionStatus: 'COMPLETED',
           outcome: 'PASS',
           attempt: 1,
-          inputSnapshot: { testKey: 'testVal' },
-          output: { success: true },
-          evidence: { trace: 'all ok' },
+          inputSnapshot: { prompt: 'Tr? ra danh sách mcp agent dang có' },
+          output: { taskId: 'task-ai-123', status: 'SUBMITTED' },
+          evidence: { codexSessionId: '01a06a75-ca31-7f82' },
           reason: null,
           errorCode: null,
           errorMessage: null,
         },
+        {
+          nodeId: 'waitAiCallback',
+          nodeType: 'INTERMEDIATE_CATCH_EVENT',
+          executionStatus: 'COMPLETED',
+          outcome: 'PASS',
+          attempt: 1,
+          inputSnapshot: { message: 'AiCallbackMessage' },
+          output: { aiStatus: 'COMPLETED' },
+          evidence: null,
+          reason: null,
+          errorCode: null,
+          errorMessage: null,
+        },
+        {
+          nodeId: 'gwCheckSuccess',
+          nodeType: 'EXCLUSIVE_GATEWAY',
+          executionStatus: 'COMPLETED',
+          outcome: 'PASS',
+          attempt: 1,
+          inputSnapshot: { aiStatus: 'COMPLETED' },
+          output: { branch: 'f_success' },
+          evidence: null,
+          reason: null,
+          errorCode: null,
+          errorMessage: null,
+        },
+        {
+          nodeId: 'endSuccess',
+          nodeType: 'END_EVENT',
+          executionStatus: 'COMPLETED',
+          outcome: 'PASS',
+          attempt: 1,
+          inputSnapshot: { success: true },
+          output: { success: true },
+          evidence: null,
+          reason: null,
+          errorCode: null,
+          errorMessage: null,
+        }
       ],
     };
 
     await page.route('**/v1/admin/workflows**', async (route) => {
-      const method = route.request().method();
       const url = route.request().url();
 
       if (url.includes('/workflows/runs/page')) {
@@ -89,7 +181,7 @@ test.describe('Workflow Run Management & Debugger E2E', () => {
           contentType: 'application/json',
           body: JSON.stringify({
             data: {
-              data: [mockRun],
+              data: [realAiWorkflowRun],
               total: 1,
               page: 0,
               size: 20,
@@ -99,32 +191,32 @@ test.describe('Workflow Run Management & Debugger E2E', () => {
         return;
       }
 
-      if (url.includes('/workflows/runs/run-999')) {
+      if (url.includes('/workflows/runs/run-ai-task-001')) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
-            data: mockRun,
+            data: realAiWorkflowRun,
           }),
         });
         return;
       }
 
-      if (url.includes('/workflows/wf-1')) {
+      if (url.includes('/workflows/6a99a073ce94f6e109d4c338')) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
             data: {
               definition: {
-                id: 'wf-1',
-                name: 'Trading Strategy Pipeline',
-                status: 'ACTIVE',
+                id: '6a99a073ce94f6e109d4c338',
+                name: 'WORK_FLOW_AI_PROCESS',
+                status: 'DRAFT',
               },
               versions: [
                 {
-                  id: 'ver-1',
-                  bpmnXml: sampleBpmnXml,
+                  id: '6a99a073ce94f6e109d4c339',
+                  bpmnXml: realBpmnXml,
                 },
               ],
             },
@@ -141,9 +233,9 @@ test.describe('Workflow Run Management & Debugger E2E', () => {
             data: {
               data: [
                 {
-                  id: 'wf-1',
-                  name: 'Trading Strategy Pipeline',
-                  status: 'ACTIVE',
+                  id: '6a99a073ce94f6e109d4c338',
+                  name: 'WORK_FLOW_AI_PROCESS',
+                  status: 'DRAFT',
                 },
               ],
               total: 1,
@@ -162,34 +254,39 @@ test.describe('Workflow Run Management & Debugger E2E', () => {
       window.localStorage.setItem('dangerously-skip-permissions', 'true');
     });
 
-    // 1. Vào trang danh sách runs
+    // 1. M? danh sách Runs
     await page.goto('/ai-agent-mcrs/workflows/runs?dangerously-skip-permissions');
     await expect(page.locator('app-workflow-run-list-page')).toBeVisible();
 
-    // 2. Ki?m tra hàng d? li?u run-999
-    await expect(page.locator('text=run-999')).toBeVisible();
+    // 2. Ki?m tra thông tin Run ID th?c thi trong b?ng
+    await expect(page.locator('text=run-ai-task-001')).toBeVisible();
 
-    // 3. M? Trigger Run Dialog
-    await page.locator('app-action-toolbar app-button button:has-text("Run workflow"), app-action-toolbar app-button button:has-text("Ch?y workflow")').click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    // Ðóng dialog b?ng nút Cancel trong dialog
-    await page.locator('app-workflow-run-trigger-dialog app-button button:has-text("H?y"), app-workflow-run-trigger-dialog app-button button:has-text("Cancel")').click();
-    await expect(page.getByRole('dialog')).toBeHidden();
-
-    // 4. Click row d? vào debugger view
-    await page.locator('tr:has-text("run-999")').click();
+    // 3. Click vào Run d? vào màn Debugger
+    await page.locator('tr:has-text("run-ai-task-001")').click();
     await expect(page.locator('app-workflow-run-detail-page')).toBeVisible();
 
-    // 5. Ki?m tra BPMN canvas render element
-    await expect(page.locator('.djs-element[data-element-id="task-node"]')).toBeVisible();
+    // 4. Verify tên Workflow hi?n th? trên Subtitle
+    await expect(page.locator('text=WORK_FLOW_AI_PROCESS')).toBeVisible();
 
-    // 6. Ki?m tra sequence flow traversal có class marker completed (màu xanh) du?c gán vào element SVG
-    await expect(page.locator('.djs-connection.workflow-bpmn-canvas__marker--completed')).toHaveCount(1);
+    // 5. Verify các Node BPMN trên Canvas du?c render d?y d?
+    await expect(page.locator('.djs-element[data-element-id="taskSubmitAi"]')).toBeVisible();
+    await expect(page.locator('.djs-element[data-element-id="waitAiCallback"]')).toBeVisible();
+    await expect(page.locator('.djs-element[data-element-id="gwCheckSuccess"]')).toBeVisible();
+    await expect(page.locator('.djs-element[data-element-id="endSuccess"]')).toBeVisible();
 
-    // 7. Click ch?n task-node d? xem inspector
-    await page.locator('.djs-element[data-element-id="task-node"]').click();
+    // 6. Verify toàn b? các du?ng Sequence Flow di qua dã du?c highlight màu xanh (completed marker)
+    // f_start, f_to_wait, f_to_check, f_success
+    const greenConnections = page.locator('.djs-connection.workflow-bpmn-canvas__marker--completed');
+    await expect(greenConnections).toHaveCount(4);
+
+    // 7. Click ch?n Node 'taskSubmitAi' d? xem Node Inspector
+    await page.locator('.djs-element[data-element-id="taskSubmitAi"]').click();
+    await expect(page.locator('app-section-panel').filter({ hasText: 'Chi tiet thuc thi' }).locator('text=taskSubmitAi')).toBeVisible();
     await expect(page.locator('text=Input Snapshot')).toBeVisible();
     await expect(page.locator('text=Output Payload')).toBeVisible();
+    await expect(page.locator('text=Evidence')).toBeVisible();
+
+    // 8. Ch?p screenshot làm b?ng ch?ng
+    await page.screenshot({ path: '../../test-results/workflow-run-debug-verified.png', fullPage: true });
   });
 });
