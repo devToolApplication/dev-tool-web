@@ -1,0 +1,61 @@
+<app-dialog
+  [visible]="visible"
+  (visibleChange)="visible = $event"
+  [header]="'workflowStudio.lifecycle.runWorkflow' | translateContent"
+  [width]="'32rem'"
+  [modal]="true"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="workflow-run-dialog flex flex-col gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-medium text-[var(--app-text)]">
+        {{ 'workflowStudio.lifecycle.workflow' | translateContent }} <span class="text-red-500">*</span>
+      </label>
+      <select
+        formControlName="workflowId"
+        class="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] focus:border-[var(--app-primary)] focus:outline-none"
+      >
+        <option value="" disabled>{{ 'workflowStudio.lifecycle.searchPlaceholder' | translateContent }}</option>
+        <option *ngFor="let wf of workflows" [value]="wf.id">
+          {{ wf.name }} ({{ wf.id }})
+        </option>
+      </select>
+      <span
+        *ngIf="form.get('workflowId')?.touched && form.get('workflowId')?.invalid"
+        class="text-xs text-red-500"
+      >
+        {{ 'workflowStudio.lifecycle.workflow' | translateContent }} is required
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-medium text-[var(--app-text)]">
+        {{ 'workflowStudio.lifecycle.runInput' | translateContent }} <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        formControlName="inputPayload"
+        rows="8"
+        class="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] p-3 font-mono text-xs text-[var(--app-text)] focus:border-[var(--app-primary)] focus:outline-none"
+        placeholder="{}"
+      ></textarea>
+      <span *ngIf="jsonError" class="text-xs text-red-500">
+        {{ jsonError | translateContent }}
+      </span>
+    </div>
+
+    <div class="mt-2 flex flex-col-reverse justify-end gap-2 sm:flex-row">
+      <app-button
+        variant="ghost"
+        type="button"
+        (btnClick)="close()"
+        [label]="'common.cancel' | translateContent"
+      ></app-button>
+      <app-button
+        variant="primary"
+        type="submit"
+        [loading]="submitting"
+        [disabled]="submitting"
+        [label]="'workflowStudio.lifecycle.run' | translateContent"
+      ></app-button>
+    </div>
+  </form>
+</app-dialog>
