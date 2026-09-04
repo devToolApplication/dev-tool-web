@@ -22,6 +22,7 @@ import { StartNodeComponent } from './nodes/start-node.component';
 import { WorkflowNodeShellComponent } from './nodes/workflow-node-shell.component';
 import { WorkflowBuilderPageComponent } from './pages/workflow-builder-page.component';
 import { WorkflowListPageComponent } from './pages/workflow-list-page.component';
+import { WorkflowRunDetailPageComponent } from './pages/workflow-run-detail-page.component';
 import { WorkflowRunListPageComponent } from './pages/workflow-run-list-page.component';
 import { WorkflowRunTriggerDialogComponent } from './pages/workflow-run-trigger-dialog.component';
 import { WorkflowProblemsPanelComponent } from './problems/workflow-problems-panel.component';
@@ -50,6 +51,7 @@ const DECLARATIONS = [
   WorkflowListPageComponent,
   WorkflowBuilderPageComponent,
   WorkflowRunListPageComponent,
+  WorkflowRunDetailPageComponent,
   WorkflowRunTriggerDialogComponent,
 ];
 

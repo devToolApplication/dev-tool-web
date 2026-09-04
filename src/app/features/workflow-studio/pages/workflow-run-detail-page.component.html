@@ -1,0 +1,146 @@
+<app-page-shell
+  [title]="('workflowStudio.lifecycle.runDetailTitle' | translateContent) + ' #' + runId()"
+  [subtitle]="workflowDetail()?.definition?.name || ('workflowStudio.lifecycle.runsDescription' | translateContent)"
+>
+  <div class="flex flex-col gap-4">
+    <app-action-toolbar [actions]="actions" (actionClick)="onToolbarAction($event)"></app-action-toolbar>
+
+    <div *ngIf="error()" class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+      {{ error() | translateContent }}
+    </div>
+
+    <!-- Overview Bar -->
+    <div *ngIf="run()" class="grid grid-cols-2 gap-3 rounded-md border border-[var(--app-border)] bg-[var(--app-card-surface)] p-4 sm:grid-cols-4">
+      <div>
+        <span class="text-xs text-[var(--app-text-muted)]">{{ 'workflowStudio.lifecycle.status' | translateContent }}</span>
+        <div class="mt-1">
+          <app-badge
+            [label]="run()!.status"
+            [variant]="run()!.status === 'COMPLETED' ? 'success' : (run()!.status === 'RUNNING' ? 'warning' : 'danger')"
+          ></app-badge>
+        </div>
+      </div>
+      <div>
+        <span class="text-xs text-[var(--app-text-muted)]">{{ 'workflowStudio.lifecycle.outcome' | translateContent }}</span>
+        <div class="mt-1 text-sm font-semibold text-[var(--app-text)]">
+          {{ run()!.finalOutcome || '-' }}
+        </div>
+      </div>
+      <div>
+        <span class="text-xs text-[var(--app-text-muted)]">{{ 'workflowStudio.lifecycle.startedAt' | translateContent }}</span>
+        <div class="mt-1 text-xs text-[var(--app-text)]">
+          {{ run()!.startedAt || '-' }}
+        </div>
+      </div>
+      <div>
+        <span class="text-xs text-[var(--app-text-muted)]">{{ 'workflowStudio.lifecycle.completedAt' | translateContent }}</span>
+        <div class="mt-1 text-xs text-[var(--app-text)]">
+          {{ run()!.completedAt || '-' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workspace (Canvas & Node Inspector) -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 min-h-[38rem]">
+      <!-- Left: BPMN Canvas with Runtime Overlay Highlight -->
+      <div class="lg:col-span-8 flex flex-col rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] overflow-hidden">
+        <div class="flex items-center justify-between border-b border-[var(--app-border)] bg-[var(--app-card-surface)] px-4 py-2.5">
+          <span class="text-sm font-medium text-[var(--app-text)]">
+            {{ 'workflowStudio.engine.flowable' | translateContent }} Runtime Canvas
+          </span>
+          <span class="text-xs text-[var(--app-text-muted)]">
+            * {{ 'workflowStudio.runtime.noNodeSelected' | translateContent }}
+          </span>
+        </div>
+        <div class="flex-1 relative min-h-[32rem]">
+          <app-workflow-bpmn-canvas
+            *ngIf="bpmnXml()"
+            [bpmnXml]="bpmnXml()"
+            [mode]="'runtime'"
+            [selectedId]="selectedNodeId()"
+            [runtimeStatus]="runtimeVisualState()"
+            [propertiesCollapsed]="true"
+            (nodeSelected)="onNodeSelected($event)"
+          ></app-workflow-bpmn-canvas>
+          <div *ngIf="!bpmnXml() && !loading()" class="flex h-full items-center justify-center p-8 text-sm text-[var(--app-text-muted)]">
+            {{ 'workflowStudio.runtime.workflowDefinitionMissing' | translateContent }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Step Execution Timeline & Inspector Panel -->
+      <div class="lg:col-span-4 flex flex-col gap-4">
+        <!-- Executed Steps List -->
+        <app-section-panel [title]="'workflowStudio.lifecycle.nodeExecutions' | translateContent">
+          <div class="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
+            <button
+              *ngFor="let exec of run()?.nodes || []"
+              type="button"
+              (click)="selectExecution(exec)"
+              [class.bg-[var(--app-surface-overlay)]]="selectedNodeId() === exec.nodeId"
+              [class.border-[var(--app-primary)]]="selectedNodeId() === exec.nodeId"
+              class="flex items-center justify-between rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2 text-left text-xs transition-colors hover:border-[var(--app-primary)]"
+            >
+              <div class="flex flex-col truncate">
+                <span class="font-medium text-[var(--app-text)] truncate">{{ exec.nodeId }}</span>
+                <span class="text-[10px] text-[var(--app-text-muted)]">{{ exec.nodeType }}</span>
+              </div>
+              <app-badge
+                [label]="exec.executionStatus"
+                [variant]="exec.executionStatus === 'COMPLETED' ? 'success' : (exec.executionStatus === 'RUNNING' ? 'warning' : 'danger')"
+              ></app-badge>
+            </button>
+            <div *ngIf="!run()?.nodes?.length" class="text-xs text-[var(--app-text-muted)] p-2">
+              {{ 'workflowStudio.lifecycle.runEmptyDescription' | translateContent }}
+            </div>
+          </div>
+        </app-section-panel>
+
+        <!-- Selected Node Inspector -->
+        <app-section-panel [title]="'workflowStudio.runtime.inspectorTitle' | translateContent">
+          <div *ngIf="selectedExecution() as nodeExec" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-[var(--app-text)]">{{ nodeExec.nodeId }}</span>
+              <app-badge
+                [label]="nodeExec.outcome || nodeExec.executionStatus"
+                [variant]="nodeExec.outcome === 'PASS' ? 'success' : (nodeExec.outcome === 'FAIL' ? 'danger' : 'warning')"
+              ></app-badge>
+            </div>
+
+            <div *ngIf="nodeExec.errorMessage" class="rounded bg-red-50 p-2 text-xs text-red-600 dark:bg-red-950/20 dark:text-red-400">
+              <b>Error:</b> {{ nodeExec.errorMessage }}
+            </div>
+
+            <!-- Input Snapshot -->
+            <div>
+              <span class="text-xs font-medium text-[var(--app-text-muted)]">Input Snapshot</span>
+              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+                <app-json-viewer [value]="nodeExec.inputSnapshot"></app-json-viewer>
+              </div>
+            </div>
+
+            <!-- Output Payload -->
+            <div>
+              <span class="text-xs font-medium text-[var(--app-text-muted)]">Output Payload</span>
+              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+                <app-json-viewer [value]="nodeExec.output"></app-json-viewer>
+              </div>
+            </div>
+
+            <!-- Evidence (if present) -->
+            <div *ngIf="nodeExec.evidence">
+              <span class="text-xs font-medium text-[var(--app-text-muted)]">Evidence</span>
+              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+                <app-json-viewer [value]="nodeExec.evidence"></app-json-viewer>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!selectedExecution()" class="p-4 text-center text-xs text-[var(--app-text-muted)]">
+            {{ 'workflowStudio.runtime.noNodeSelected' | translateContent }}
+          </div>
+        </app-section-panel>
+      </div>
+    </div>
+  </div>
+</app-page-shell>
