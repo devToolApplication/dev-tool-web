@@ -20,6 +20,11 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-sitemap',
         routerLink: '/ai-agent-mcrs/workflows',
       },
+      {
+        label: 'layout.menu.workflowRuns',
+        icon: 'pi pi-history',
+        routerLink: '/ai-agent-mcrs/workflows/runs',
+      },
     ],
   },
   {
