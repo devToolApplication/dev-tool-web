@@ -20,12 +20,12 @@ import {
   workflowVersionLabel,
 } from '../model/workflow-lifecycle.config';
 import {
-  JsonValue,
   WorkflowValidationIssue,
   WorkflowVersion,
 } from '../model/workflow-studio.model';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowBpmnCanvasComponent } from '../bpmn/workflow-bpmn-canvas.component';
+import { ensureBpmnDiagramLayout } from '../bpmn/bpmn-auto-layout';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 import { WorkflowEditorStore } from '../store/workflow-editor.store';
 
@@ -50,9 +50,10 @@ export class WorkflowBuilderPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly statusMessage = signal<string | null>(null);
   readonly versionsOpen = signal(false);
-  readonly runDialogOpen = signal(false);
-  readonly running = signal(false);
-  readonly generalInfoCollapsed = signal(false);
+  readonly importDialogOpen = signal(false);
+  readonly descriptionDialogOpen = signal(false);
+  readonly importXmlText = signal('');
+  readonly propertiesPanelCollapsed = signal(false);
 
   readonly selectedId = computed(() => this.store.selectedNodeId() ?? this.store.selectedEdgeId());
   readonly readonlyMode = computed(() => this.store.mode() !== 'design');
@@ -77,18 +78,20 @@ export class WorkflowBuilderPageComponent implements OnInit {
       null
     );
   });
-  readonly activeRuntime = computed(() => this.activeVersion()?.runtime ?? null);
-  readonly generalInfoSummary = computed(() => ({
-    name: this.store.workflow()?.definition.name || 'workflowStudio.lifecycle.untitled',
-    maxParallel: this.activeRuntime()?.maxParallel ?? null,
-    statusLabel: this.store.dirty()
-      ? 'workflowStudio.productivity.unsavedChanges'
-      : 'workflowStudio.lifecycle.saved',
-  }));
+
+  readonly statusBadge = computed<{ label: string; variant: 'success' | 'warning' | 'muted' }>(() => {
+    if (this.store.dirty()) {
+      return { label: 'workflowStudio.productivity.unsavedChanges', variant: 'warning' };
+    }
+    const version = this.activeVersion();
+    if (version?.status === 'PUBLISHED') {
+      return { label: 'workflowStudio.lifecycle.published', variant: 'success' };
+    }
+    return { label: 'workflowStudio.lifecycle.saved', variant: 'muted' };
+  });
 
   ngOnInit(): void {
     const workflowId = this.route.snapshot.paramMap.get('workflowId');
-    this.generalInfoCollapsed.set(!!workflowId);
     if (workflowId) {
       void this.loadWorkflow(workflowId);
       return;
@@ -146,13 +149,8 @@ export class WorkflowBuilderPageComponent implements OnInit {
       case 'publish':
         void this.publish();
         break;
-      case 'run':
-        this.runDialogOpen.set(true);
-        break;
       case 'importBpmn':
-        if (this.bpmnImportInput) {
-          this.openBpmnImport(this.bpmnImportInput.nativeElement);
-        }
+        this.openImportDialog();
         break;
       case 'exportBpmn':
         this.exportBpmnFile();
@@ -210,52 +208,57 @@ export class WorkflowBuilderPageComponent implements OnInit {
     }
   }
 
-  async startRun(input: JsonValue): Promise<void> {
-    const workflowId = this.store.workflow()?.definition.id;
-    if (!workflowId) {
-      await this.save();
-    }
-    const savedWorkflowId = this.store.workflow()?.definition.id;
-    if (!savedWorkflowId) {
-      return;
-    }
-
-    this.running.set(true);
-    try {
-      const run = await firstValueFrom(this.api.startWorkflow(savedWorkflowId, input));
-      this.runDialogOpen.set(false);
-      await this.router.navigate(['/ai-agent-mcrs/workflow-runs', run.id]);
-    } catch (error) {
-      this.error.set(errorMessage(error));
-    } finally {
-      this.running.set(false);
-    }
-  }
-
-  closeRunDialog(): void {
-    this.runDialogOpen.set(false);
-  }
-
   closeVersions(): void {
     this.versionsOpen.set(false);
   }
 
+  openDescriptionDialog(): void {
+    this.descriptionDialogOpen.set(true);
+  }
+
+  closeDescriptionDialog(): void {
+    this.descriptionDialogOpen.set(false);
+  }
+
+  togglePropertiesPanel(): void {
+    this.propertiesPanelCollapsed.update((v) => !v);
+  }
+
   onProblemSelected(issue: WorkflowValidationIssue): void {
-    const elementId = issue.nodeId ?? issue.edgeId ?? issue.elementId;
-    if (elementId) {
-      this.workflowBpmnCanvas?.revealElement(elementId);
+    if (issue.elementId) {
+      this.store.selectNode(issue.elementId);
+      this.workflowBpmnCanvas?.revealElement(issue.elementId);
     }
   }
 
-  toggleGeneralInfo(): void {
-    this.generalInfoCollapsed.update((value) => !value);
+  openImportDialog(): void {
+    if (this.readonlyMode()) {
+      return;
+    }
+    this.importXmlText.set(this.store.bpmnXml());
+    this.importDialogOpen.set(true);
   }
 
-  closeTransientState(): void {
-    this.versionsOpen.set(false);
-    this.runDialogOpen.set(false);
-    this.store.selectNode(null);
-    this.store.selectEdge(null);
+  closeImportDialog(): void {
+    this.importDialogOpen.set(false);
+    this.importXmlText.set('');
+  }
+
+  onImportXmlInput(event: Event): void {
+    const target = event.target as HTMLTextAreaElement;
+    this.importXmlText.set(target.value);
+  }
+
+  applyImportXml(directValue?: string): void {
+    const raw = (directValue !== undefined && directValue !== '' ? directValue : this.importXmlText()) || '';
+    const xml = raw.trim();
+    if (!xml) {
+      this.toastService.error('workflowStudio.bpmn.importEmpty');
+      return;
+    }
+    const formattedXml = ensureBpmnDiagramLayout(xml, this.store.workflow()?.definition?.name);
+    this.updateBpmnXml(formattedXml);
+    this.closeImportDialog();
   }
 
   openBpmnImport(fileInput: HTMLInputElement): void {
@@ -271,6 +274,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
     try {
       if (file) {
         await this.importBpmnFile(file);
+        this.closeImportDialog();
       }
     } finally {
       if (input) {
@@ -294,7 +298,8 @@ export class WorkflowBuilderPageComponent implements OnInit {
         this.toastService.error('workflowStudio.bpmn.importEmpty');
         return;
       }
-      this.updateBpmnXml(xml);
+      const formattedXml = ensureBpmnDiagramLayout(xml, this.store.workflow()?.definition?.name);
+      this.updateBpmnXml(formattedXml);
     } catch (error) {
       this.toastService.error(errorMessage(error));
     }
@@ -332,6 +337,11 @@ export class WorkflowBuilderPageComponent implements OnInit {
     });
   }
 
+  onNameInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.updateName(input.value);
+  }
+
   updateName(value: string | null): void {
     this.store.updateWorkflowMetadata(
       value ?? '',
@@ -341,10 +351,6 @@ export class WorkflowBuilderPageComponent implements OnInit {
 
   updateDescription(value: string | null): void {
     this.store.updateWorkflowMetadata(this.store.workflow()?.definition.name ?? '', value);
-  }
-
-  updateMaxParallel(value: number | null): void {
-    this.store.updateRuntime({ maxParallel: value });
   }
 
   updateBpmnXml(value: string): void {

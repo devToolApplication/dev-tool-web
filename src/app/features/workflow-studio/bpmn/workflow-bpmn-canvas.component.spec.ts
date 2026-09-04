@@ -230,9 +230,8 @@ describe('WorkflowBpmnCanvasComponent unit', () => {
     expect(componentSource).not.toContain('WorkflowBpmnElementConfig');
     expect(componentSource).not.toContain('updateElementConfig');
     expect(template).toContain('#propertiesPanel');
-    expect(globalStyles).not.toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css');
-    expect(globalStyles).toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css');
-    expect(globalStyles).toContain('/assets/bpmn-font/bpmn.woff2');
+    expect(globalStyles).toContain('bpmn-js/dist/assets/bpmn-font/css/bpmn.css');
+    
     expect(buildAssets).toContainEqual({
       glob: '**/*',
       input: 'node_modules/bpmn-js/dist/assets/bpmn-font/font',

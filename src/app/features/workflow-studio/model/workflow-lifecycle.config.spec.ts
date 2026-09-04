@@ -11,12 +11,14 @@ describe('workflow lifecycle config', () => {
     expect(version.bpmnXml).toContain('<process id="workflow_draft"');
   });
 
-  it('builds list row actions for edit, run, publish and runs', () => {
+  it('builds list row actions for edit, publish and delete', () => {
     const actionIds = buildWorkflowListTable().columns
       .flatMap((column) => column.actions ?? [])
       .map((action) => action.id);
 
-    expect(actionIds).toEqual(expect.arrayContaining(['edit', 'run', 'publish', 'runs']));
+    expect(actionIds).toEqual(expect.arrayContaining(['edit', 'publish', 'delete']));
+    expect(actionIds).not.toContain('run');
+    expect(actionIds).not.toContain('runs');
   });
 
   it('labels workflow versions with status and version number', () => {

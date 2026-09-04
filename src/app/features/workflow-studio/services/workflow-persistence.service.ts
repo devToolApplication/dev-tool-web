@@ -19,7 +19,6 @@ export class WorkflowPersistenceService {
     const workflowId = store.workflow()?.definition.id;
     store.setSaving(true);
     try {
-      await this.validateBackend(payload, store);
       const saved = workflowId
         ? await firstValueFrom(this.api.updateWorkflow(workflowId, payload))
         : await firstValueFrom(this.api.createWorkflow(payload));
@@ -35,7 +34,6 @@ export class WorkflowPersistenceService {
     const workflowId = store.workflow()?.definition.id;
     store.setSaving(true);
     try {
-      await this.validateBackend(payload, store);
       const saved = workflowId
         ? await firstValueFrom(this.api.updateWorkflow(workflowId, payload))
         : await firstValueFrom(this.api.createWorkflow(payload));
@@ -50,7 +48,6 @@ export class WorkflowPersistenceService {
 
   async publishDetail(detail: WorkflowDetail): Promise<WorkflowDetail> {
     const payload = validPayloadFromDetail(detail);
-    await this.validateBackend(payload);
     const workflowId = detail.definition.id;
     const saved = workflowId
       ? await firstValueFrom(this.api.updateWorkflow(workflowId, payload))
@@ -62,18 +59,6 @@ export class WorkflowPersistenceService {
     const payload = store.toUpsertPayload();
     store.setValidationIssues([]);
     return payload;
-  }
-
-  private async validateBackend(
-    payload: WorkflowUpsertPayload,
-    store?: WorkflowEditorStore,
-  ): Promise<void> {
-    const result = await firstValueFrom(this.api.validateWorkflow(payload));
-    if (!result.valid) {
-      store?.setValidationIssues(result.issues);
-      throw new Error(firstErrorMessage(result.issues));
-    }
-    store?.setValidationIssues([]);
   }
 }
 
@@ -96,12 +81,4 @@ function draftVersionForUpsert(detail: WorkflowDetail): WorkflowVersion {
     throw new Error('Workflow detail has no version to publish');
   }
   return version;
-}
-
-function firstErrorMessage(issues: WorkflowValidationIssue[]): string {
-  return (
-    issues.find((issue) => issue.severity === 'error')?.message ??
-    issues[0]?.message ??
-    'Workflow validation failed'
-  );
 }

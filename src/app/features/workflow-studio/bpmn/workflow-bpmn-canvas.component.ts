@@ -96,6 +96,7 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
   @Input() selectedId: string | null = null;
   @Input() validationIssues: WorkflowValidationIssue[] = [];
   @Input() runtimeStatus: WorkflowRuntimeVisualState = {};
+  @Input() propertiesCollapsed = false;
 
   @Output() readonly bpmnXmlChange = new EventEmitter<string>();
   @Output() readonly viewportChange = new EventEmitter<WorkflowEditorViewport>();
@@ -157,6 +158,8 @@ export class WorkflowBpmnCanvasComponent implements AfterViewInit, OnChanges, On
       this.lastImportedXml = this.bpmnXml;
       this.applyMarkers();
       this.emitViewport();
+    } catch (error) {
+      console.warn('Failed to import BPMN XML into canvas modeler:', error);
     } finally {
       this.importing = false;
     }

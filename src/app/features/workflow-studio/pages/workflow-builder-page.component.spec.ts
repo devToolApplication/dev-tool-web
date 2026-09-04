@@ -78,7 +78,7 @@ describe('WorkflowBuilderPageComponent unit', () => {
     expect(api.getWorkflowDetail).not.toHaveBeenCalled();
     expect(store.workflow()?.definition.id).toBe('');
     expect(component.hasUnsavedChanges()).toBe(false);
-    expect(component.generalInfoCollapsed()).toBe(false);
+    expect(component.propertiesPanelCollapsed()).toBe(false);
   });
 
   it('saves a new workflow then moves the URL to edit mode without reloading the page', async () => {

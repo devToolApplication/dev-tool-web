@@ -1,4 +1,8 @@
-<div class="workflow-bpmn-canvas" [class.workflow-bpmn-canvas--readonly]="readonlyMode()">
+<div
+  class="workflow-bpmn-canvas"
+  [class.workflow-bpmn-canvas--readonly]="readonlyMode()"
+  [class.workflow-bpmn-canvas--properties-collapsed]="propertiesCollapsed"
+>
   <div #canvas class="workflow-bpmn-canvas__surface" aria-label="Flowable BPMN canvas"></div>
   <div #propertiesPanel class="workflow-bpmn-canvas__properties" aria-label="BPMN properties"></div>
 </div>

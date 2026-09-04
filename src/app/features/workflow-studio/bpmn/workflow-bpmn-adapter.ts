@@ -218,7 +218,7 @@ function renderDiagram(
   positions: Record<string, WorkflowNodePosition>,
 ): string[] {
   const nodePosition = (nodeId: string, index: number): WorkflowNodePosition =>
-    positions[nodeId] ?? { x: 120 + index * 220, y: 120 };
+    positions[nodeId] ?? { x: 160 + index * 200, y: 140 };
   const indexedNodes = new Map(graph.nodes.map((node, index) => [node.id, { node, index }]));
 
   return [
@@ -239,8 +239,8 @@ function renderDiagram(
       const targetBounds = boundsForNode(target?.node as BpmnWorkflowNode, nodePosition(edge.target, target?.index ?? 0));
       return [
         `      <bpmndi:BPMNEdge id="${escapeAttr(edgeXmlId(edge))}_di" bpmnElement="${escapeAttr(edgeXmlId(edge))}">`,
-        `        <di:waypoint x="${sourceBounds.x + sourceBounds.width}" y="${sourceBounds.y + sourceBounds.height / 2}" />`,
-        `        <di:waypoint x="${targetBounds.x}" y="${targetBounds.y + targetBounds.height / 2}" />`,
+        `        <di:waypoint x="${sourceBounds.x + sourceBounds.width}" y="${sourceBounds.y + Math.round(sourceBounds.height / 2)}" />`,
+        `        <di:waypoint x="${targetBounds.x}" y="${targetBounds.y + Math.round(targetBounds.height / 2)}" />`,
         '      </bpmndi:BPMNEdge>',
       ].join('\n');
     }),

@@ -16,7 +16,6 @@ describe('WorkflowListPageComponent', () => {
   let api: {
     getWorkflowPage: ReturnType<typeof vi.fn>;
     publishWorkflow: ReturnType<typeof vi.fn>;
-    startWorkflow: ReturnType<typeof vi.fn>;
     getWorkflowDetail: ReturnType<typeof vi.fn>;
     deleteWorkflow: ReturnType<typeof vi.fn>;
   };
@@ -37,18 +36,6 @@ describe('WorkflowListPageComponent', () => {
     api = {
       getWorkflowPage: vi.fn(() => of(createBasePageResponse([workflow], 0, 20, 1))),
       publishWorkflow: vi.fn(() => of({ definition: workflow, versions: [] })),
-      startWorkflow: vi.fn(() => of({
-        id: 'run-1',
-        workflowDefinitionId: 'wf-1',
-        workflowVersionId: 'ver-1',
-        status: 'PENDING',
-        input: {},
-        startedAt: null,
-        completedAt: null,
-        finalOutcome: null,
-        finalOutput: null,
-        nodes: [],
-      })),
       getWorkflowDetail: vi.fn(() => of({
         definition: workflow,
         versions: [],
@@ -90,15 +77,6 @@ describe('WorkflowListPageComponent', () => {
     component.openBuilder(workflow);
 
     expect(router.navigate).toHaveBeenCalledWith([workflow.id, 'edit'], { relativeTo: TestBed.inject(ActivatedRoute) });
-  });
-
-  it('starts a run and navigates to run detail after JSON input is submitted', async () => {
-    component.openRunDialog(workflow);
-
-    await component.startRun({ profile: { id: 'koc-1' } });
-
-    expect(api.startWorkflow).toHaveBeenCalledWith('wf-1', { profile: { id: 'koc-1' } });
-    expect(router.navigate).toHaveBeenCalledWith(['/ai-agent-mcrs/workflow-runs', 'run-1']);
   });
 
   it('publishes from the list through the validation persistence boundary', async () => {

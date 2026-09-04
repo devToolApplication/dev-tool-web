@@ -93,8 +93,8 @@
     "workflowStudio.productivity.unsavedChanges": "Chua luu",
     "workflowStudio.bpmn.import": "Import BPMN",
     "workflowStudio.bpmn.export": "Export BPMN",
-    "workflowStudio.bpmn.importEmpty": "File BPMN dang trong",
-    "workflowStudio.bpmn.importInvalidExtension": "Chi ho tro file .bpmn va .xml",
+    "workflowStudio.bpmn.importEmpty": "Nội dung BPMN XML đang trống",
+    "workflowStudio.bpmn.importInvalidExtension": "Ch? h? tr? file .bpmn v� .xml",
     "workflowStudio.bpmn.palette.start": "Start",
     "workflowStudio.bpmn.palette.end": "End",
     "workflowStudio.bpmn.palette.service": "Service",
@@ -228,7 +228,13 @@
     "workflowStudio.bpmn.drawer.calledElement": "Called Element",
     "workflowStudio.bpmn.drawer.timer": "Timer Event",
     "workflowStudio.bpmn.drawer.serviceTask": "Service Task (Flowable)",
-    "workflowStudio.bpmn.drawer.messageName": "Message Name"
+    "workflowStudio.bpmn.drawer.messageName": "Message Name",
+    "workflowStudio.bpmn.importXmlTitle": "Nhập nội dung BPMN XML",
+    "workflowStudio.bpmn.importXmlPlaceholder": "Dán mã BPMN XML (bắt đầu bằng <definitions>...)",
+    "workflowStudio.bpmn.importFileBtn": "Chọn file từ máy",
+    "workflowStudio.bpmn.applyXml": "Áp dụng XML",
+    "workflowStudio.bpmn.showProperties": "Hiện thuộc tính",
+    "workflowStudio.bpmn.hideProperties": "Ẩn thuộc tính"
   },
   "en": {
     "workflowStudio.lifecycle.listTitle": "Workflow Studio",
@@ -324,7 +330,7 @@
     "workflowStudio.productivity.unsavedChanges": "Unsaved changes",
     "workflowStudio.bpmn.import": "Import BPMN",
     "workflowStudio.bpmn.export": "Export BPMN",
-    "workflowStudio.bpmn.importEmpty": "BPMN file is empty",
+    "workflowStudio.bpmn.importEmpty": "BPMN XML content is empty",
     "workflowStudio.bpmn.importInvalidExtension": "Only .bpmn and .xml files are supported",
     "workflowStudio.bpmn.palette.start": "Start",
     "workflowStudio.bpmn.palette.end": "End",
@@ -459,6 +465,12 @@
     "workflowStudio.bpmn.drawer.calledElement": "Called Element",
     "workflowStudio.bpmn.drawer.timer": "Timer Event",
     "workflowStudio.bpmn.drawer.serviceTask": "Service Task (Flowable)",
-    "workflowStudio.bpmn.drawer.messageName": "Message Name"
+    "workflowStudio.bpmn.drawer.messageName": "Message Name",
+    "workflowStudio.bpmn.importXmlTitle": "Import BPMN XML content",
+    "workflowStudio.bpmn.importXmlPlaceholder": "Paste BPMN XML markup (starting with <definitions>...)",
+    "workflowStudio.bpmn.importFileBtn": "Choose file from computer",
+    "workflowStudio.bpmn.applyXml": "Apply XML",
+    "workflowStudio.bpmn.showProperties": "Show Properties",
+    "workflowStudio.bpmn.hideProperties": "Hide Properties"
   }
 }

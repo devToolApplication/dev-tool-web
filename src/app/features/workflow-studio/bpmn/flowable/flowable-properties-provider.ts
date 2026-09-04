@@ -1,3 +1,13 @@
+
+function getAttr(bo: any, key: string): any {
+  if (!bo) return undefined;
+  if (typeof bo.get === 'function') {
+    return bo.get(key);
+  }
+  const plain = key.replace(/^flowable:/, '');
+  return bo[key] ?? bo[plain] ?? bo.$attrs?.[key] ?? bo.$attrs?.[plain];
+}
+
 import {
   CheckboxEntry,
   Group,
@@ -59,6 +69,12 @@ interface WriterServices {
   bpmnFactory: any;
 }
 
+const CALL_ACTIVITY_GROUPS: Array<(element: any, injector: Injector) => PanelGroup | null> = [
+  flowableCallActivityGroup,
+  flowableCallActivityInParamsGroup,
+  flowableCallActivityOutParamsGroup,
+];
+
 const SERVICE_TASK_GROUPS: Array<(element: any, injector: Injector) => PanelGroup | null> = [
   flowableImplementationGroup,
   flowableFieldsGroup,
@@ -87,6 +103,15 @@ export class FlowablePropertiesProvider {
         return [
           ...groups,
           ...SERVICE_TASK_GROUPS.map((group) => group(element, this.injector)).filter(
+            (group): group is PanelGroup => group !== null,
+          ),
+        ];
+      }
+
+      if (isCallActivity(element)) {
+        return [
+          ...groups,
+          ...CALL_ACTIVITY_GROUPS.map((group) => group(element, this.injector)).filter(
             (group): group is PanelGroup => group !== null,
           ),
         ];
@@ -1122,3 +1147,298 @@ function writerServices(injector: Injector): WriterServices {
 }
 
 type ArrayItem<T> = T extends Array<infer I> ? I : never;
+
+
+function flowableCallActivityGroup(element: any, injector: Injector): PanelGroup {
+  const translate = injector.get('translate');
+  return {
+    id: 'flowableCallActivity',
+    label: translate('Call Activity (Flowable)'),
+    component: Group,
+    entries: [
+      entry('flowable-calledElement', FlowableCalledElementEntry, isTextFieldEntryEdited),
+      entry('flowable-inheritVariables', FlowableInheritVariablesEntry, isCheckboxEntryEdited),
+      entry('flowable-sameDeployment', FlowableSameDeploymentEntry, isCheckboxEntryEdited),
+      entry('flowable-fallbackToDefaultTenant', FlowableFallbackTenantEntry, isCheckboxEntryEdited),
+      entry('flowable-inheritBusinessKey', FlowableInheritBusinessKeyEntry, isCheckboxEntryEdited),
+    ],
+  };
+}
+
+function FlowableCalledElementEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const { modeling } = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Called Element'),
+    debounce: debounceInput,
+    getValue: () => props.element?.businessObject?.calledElement ?? '',
+    setValue: (value: string) => {
+      modeling.updateProperties(props.element, { calledElement: value?.trim() || undefined });
+    },
+  });
+}
+
+function FlowableInheritVariablesEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const { modeling } = useWriterServices();
+  return CheckboxEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Inherit Variables'),
+    getValue: () => !!(props.element?.businessObject?.get?.('flowable:inheritVariables') ?? props.element?.businessObject?.inheritVariables),
+    setValue: (value: boolean) => {
+      modeling.updateProperties(props.element, { 'flowable:inheritVariables': value });
+    },
+  });
+}
+
+function FlowableSameDeploymentEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const { modeling } = useWriterServices();
+  return CheckboxEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Same Deployment'),
+    getValue: () => !!(props.element?.businessObject?.get?.('flowable:sameDeployment') ?? props.element?.businessObject?.sameDeployment),
+    setValue: (value: boolean) => {
+      modeling.updateProperties(props.element, { 'flowable:sameDeployment': value });
+    },
+  });
+}
+
+function FlowableFallbackTenantEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const { modeling } = useWriterServices();
+  return CheckboxEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Fallback to Default Tenant'),
+    getValue: () => !!(props.element?.businessObject?.get?.('flowable:fallbackToDefaultTenant') ?? props.element?.businessObject?.fallbackToDefaultTenant),
+    setValue: (value: boolean) => {
+      modeling.updateProperties(props.element, { 'flowable:fallbackToDefaultTenant': value });
+    },
+  });
+}
+
+function FlowableInheritBusinessKeyEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const { modeling } = useWriterServices();
+  return CheckboxEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Inherit Business Key'),
+    getValue: () => !!(props.element?.businessObject?.get?.('flowable:inheritBusinessKey') ?? props.element?.businessObject?.inheritBusinessKey),
+    setValue: (value: boolean) => {
+      modeling.updateProperties(props.element, { 'flowable:inheritBusinessKey': value });
+    },
+  });
+}
+
+function flowableCallActivityInParamsGroup(element: any, injector: Injector): PanelGroup {
+  const translate = injector.get('translate');
+  const services = writerServices(injector);
+  const params = readIOParams(element, 'flowable:In');
+  return listGroup(
+    'flowableCallActivityInParams',
+    translate('In Parameters'),
+    element,
+    params,
+    (param, index) => ({
+      id: element.id + '-flowable-in-' + index,
+      label: param.target || translate('<empty>'),
+      entries: [
+        rowEntry('flowable-in-sourceType', index, FlowableInSourceTypeEntry, isSelectEntryEdited),
+        rowEntry('flowable-in-source', index, FlowableInSourceEntry, isTextFieldEntryEdited),
+        rowEntry('flowable-in-target', index, FlowableInTargetEntry, isTextFieldEntryEdited),
+      ],
+      autoFocusEntry: 'flowable-in-target-' + index,
+      remove: removeIOParam(element, 'flowable:In', index, services),
+    }),
+    addIOParam(element, 'flowable:In', { source: '', target: '', sourceType: 'source' }, services),
+  );
+}
+
+function flowableCallActivityOutParamsGroup(element: any, injector: Injector): PanelGroup {
+  const translate = injector.get('translate');
+  const services = writerServices(injector);
+  const params = readIOParams(element, 'flowable:Out');
+  return listGroup(
+    'flowableCallActivityOutParams',
+    translate('Out Parameters'),
+    element,
+    params,
+    (param, index) => ({
+      id: element.id + '-flowable-out-' + index,
+      label: param.target || translate('<empty>'),
+      entries: [
+        rowEntry('flowable-out-sourceType', index, FlowableOutSourceTypeEntry, isSelectEntryEdited),
+        rowEntry('flowable-out-source', index, FlowableOutSourceEntry, isTextFieldEntryEdited),
+        rowEntry('flowable-out-target', index, FlowableOutTargetEntry, isTextFieldEntryEdited),
+      ],
+      autoFocusEntry: 'flowable-out-target-' + index,
+      remove: removeIOParam(element, 'flowable:Out', index, services),
+    }),
+    addIOParam(element, 'flowable:Out', { source: '', target: '', sourceType: 'source' }, services),
+  );
+}
+
+function readIOParams(element: any, type: string): Array<{ source: string; sourceExpression: string; target: string; sourceType: string }> {
+  const values: any[] = element?.businessObject?.extensionElements?.values ?? [];
+  return values
+    .filter((val: any) => val.$type === type)
+    .map((val: any) => ({
+      source: val.source ?? '',
+      sourceExpression: val.sourceExpression ?? '',
+      target: val.target ?? '',
+      sourceType: val.sourceExpression ? 'sourceExpression' : 'source',
+    }));
+}
+
+function FlowableInSourceTypeEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return SelectEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Source Type'),
+    getValue: () => readIOParams(props.element, 'flowable:In')[props.rowIndex]?.sourceType ?? 'source',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, 'sourceType', val, services),
+    getOptions: () => [
+      { label: translateFn('Source Variable'), value: 'source' },
+      { label: translateFn('Source Expression'), value: 'sourceExpression' },
+    ],
+  });
+}
+
+function FlowableInSourceEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  const current = readIOParams(props.element, 'flowable:In')[props.rowIndex];
+  const isExpr = current?.sourceType === 'sourceExpression';
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn(isExpr ? 'Source Expression' : 'Source Variable'),
+    debounce: debounceInput,
+    getValue: () => (isExpr ? current?.sourceExpression : current?.source) ?? '',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, isExpr ? 'sourceExpression' : 'source', val, services),
+  });
+}
+
+function FlowableInTargetEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Target Variable'),
+    debounce: debounceInput,
+    getValue: () => readIOParams(props.element, 'flowable:In')[props.rowIndex]?.target ?? '',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, 'target', val, services),
+  });
+}
+
+function FlowableOutSourceTypeEntry(props: any): any {
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return SelectEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Source Type'),
+    getValue: () => readIOParams(props.element, 'flowable:Out')[props.rowIndex]?.sourceType ?? 'source',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:Out', props.rowIndex, 'sourceType', val, services),
+    getOptions: () => [
+      { label: translateFn('Source Variable'), value: 'source' },
+      { label: translateFn('Source Expression'), value: 'sourceExpression' },
+    ],
+  });
+}
+
+function FlowableOutSourceEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  const current = readIOParams(props.element, 'flowable:Out')[props.rowIndex];
+  const isExpr = current?.sourceType === 'sourceExpression';
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn(isExpr ? 'Source Expression' : 'Source Variable'),
+    debounce: debounceInput,
+    getValue: () => (isExpr ? current?.sourceExpression : current?.source) ?? '',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:Out', props.rowIndex, isExpr ? 'sourceExpression' : 'source', val, services),
+  });
+}
+
+function FlowableOutTargetEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Target Variable'),
+    debounce: debounceInput,
+    getValue: () => readIOParams(props.element, 'flowable:Out')[props.rowIndex]?.target ?? '',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:Out', props.rowIndex, 'target', val, services),
+  });
+}
+
+function addIOParam(element: any, type: string, defaultVal: { source: string; target: string; sourceType: string }, services: WriterServices) {
+  return (event: Event) => {
+    event.stopPropagation();
+    const bo = element.businessObject;
+    let ext = bo.extensionElements;
+    if (!ext) {
+      ext = withParent(services.bpmnFactory.create('bpmn:ExtensionElements', { values: [] }), bo);
+      services.modeling.updateProperties(element, { extensionElements: ext });
+    }
+    const param = withParent(services.bpmnFactory.create(type, { source: defaultVal.source, target: defaultVal.target }), ext);
+    services.modeling.updateModdleProperties(element, ext, { values: [...(ext.values ?? []), param] });
+  };
+}
+
+function removeIOParam(element: any, type: string, index: number, services: WriterServices) {
+  return (event: Event) => {
+    event.stopPropagation();
+    const ext = element.businessObject.extensionElements;
+    if (!ext || !ext.values) return;
+    const filtered = ext.values.filter((v: any) => v.$type === type);
+    const toRemove = filtered[index];
+    if (!toRemove) return;
+    services.modeling.updateModdleProperties(element, ext, { values: ext.values.filter((v: any) => v !== toRemove) });
+  };
+}
+
+function writeIOParamField(element: any, type: string, index: number, field: string, val: string, services: WriterServices) {
+  const bo = element.businessObject;
+  let ext = bo.extensionElements;
+  if (!ext || !ext.values) return;
+  const filtered = ext.values.filter((v: any) => v.$type === type);
+  const targetObj = filtered[index];
+  if (!targetObj) return;
+
+  if (field === 'sourceType') {
+    if (val === 'sourceExpression') {
+      const src = targetObj.source;
+      targetObj.source = undefined;
+      targetObj.sourceExpression = src || '';
+    } else {
+      const expr = targetObj.sourceExpression;
+      targetObj.sourceExpression = undefined;
+      targetObj.source = expr || '';
+    }
+  } else {
+    targetObj[field] = val;
+  }
+  services.modeling.updateModdleProperties(element, targetObj, { [field]: val });
+}
+
+function isCallActivity(element: any): boolean {
+  return element?.type === 'bpmn:CallActivity' || element?.businessObject?.$type === 'bpmn:CallActivity';
+}

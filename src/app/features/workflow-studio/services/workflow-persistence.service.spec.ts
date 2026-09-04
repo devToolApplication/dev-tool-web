@@ -8,7 +8,6 @@ import { WorkflowPersistenceService } from './workflow-persistence.service';
 
 describe('WorkflowPersistenceService', () => {
   let api: {
-    validateWorkflow: ReturnType<typeof vi.fn>;
     createWorkflow: ReturnType<typeof vi.fn>;
     updateWorkflow: ReturnType<typeof vi.fn>;
     publishWorkflow: ReturnType<typeof vi.fn>;
@@ -18,7 +17,6 @@ describe('WorkflowPersistenceService', () => {
 
   beforeEach(() => {
     api = {
-      validateWorkflow: vi.fn(),
       createWorkflow: vi.fn(),
       updateWorkflow: vi.fn(),
       publishWorkflow: vi.fn(),
@@ -39,14 +37,10 @@ describe('WorkflowPersistenceService', () => {
 
   it('saves the current BPMN XML and runtime then clears dirty state', async () => {
     store.updateBpmnXml('<definitions id="updated" />');
-    api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.updateWorkflow.mockReturnValue(of(savedDetail()));
 
     await service.save(store);
 
-    expect(api.validateWorkflow).toHaveBeenCalledWith(expect.objectContaining({
-      bpmnXml: '<definitions id="updated" />',
-    }));
     expect(api.updateWorkflow).toHaveBeenCalledWith('wf-1', expect.objectContaining({
       bpmnXml: '<definitions id="updated" />',
       runtime: { maxParallel: 1 },
@@ -61,7 +55,6 @@ describe('WorkflowPersistenceService', () => {
     draft.definition.name = 'New screening workflow';
     store.loadWorkflow(draft);
     store.updateBpmnXml('<definitions id="updated" />');
-    api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.createWorkflow.mockReturnValue(of(savedDetail()));
 
     await service.save(store);
@@ -76,7 +69,6 @@ describe('WorkflowPersistenceService', () => {
 
   it('keeps dirty state when save request fails', async () => {
     store.updateBpmnXml('<definitions id="updated" />');
-    api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
     api.updateWorkflow.mockReturnValue(throwError(() => new Error('network')));
 
     await expect(service.save(store)).rejects.toThrow('network');
@@ -85,28 +77,12 @@ describe('WorkflowPersistenceService', () => {
     expect(store.saving()).toBe(false);
   });
 
-  it('blocks publish when backend validation fails', async () => {
-    api.validateWorkflow.mockReturnValue(of({
-      valid: false,
-      issues: [{ code: 'BACKEND_VALIDATION_ERROR', severity: 'error', message: 'backend says no' }],
-    }));
-
-    await expect(service.publish(store)).rejects.toThrow('backend says no');
-
-    expect(api.publishWorkflow).not.toHaveBeenCalled();
-    expect(store.validationIssues()).toEqual([
-      { code: 'BACKEND_VALIDATION_ERROR', severity: 'error', message: 'backend says no' },
-    ]);
-  });
-
-  it('publishes an existing workflow detail through backend validation', async () => {
-    api.validateWorkflow.mockReturnValue(of({ valid: true, issues: [] }));
+  it('publishes an existing workflow detail', async () => {
     api.updateWorkflow.mockReturnValue(of(savedDetail()));
     api.publishWorkflow.mockReturnValue(of(savedDetail()));
 
     await service.publishDetail(sampleDetail());
 
-    expect(api.validateWorkflow).toHaveBeenCalled();
     expect(api.updateWorkflow).toHaveBeenCalledWith('wf-1', expect.objectContaining({
       bpmnXml: '<definitions />',
     }));

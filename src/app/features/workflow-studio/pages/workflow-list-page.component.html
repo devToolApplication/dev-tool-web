@@ -29,11 +29,3 @@
     (pageChange)="loadWorkflows($event.page, $event.rows)"
   ></app-table>
 </app-page-shell>
-
-<app-workflow-run-dialog
-  [open]="runDialogOpen()"
-  [loading]="running()"
-  [workflowName]="selectedWorkflow()?.name ?? ''"
-  (closed)="closeRunDialog()"
-  (runRequested)="startRun($event)"
-></app-workflow-run-dialog>

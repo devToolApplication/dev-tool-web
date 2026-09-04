@@ -46,7 +46,7 @@
     "layout.menu.aiAgentMcrs": "AI Agent MCRS",
     "layout.menu.aiAgentMcrsSecrets": "Secret AI Agent MCRS",
     "layout.menu.aiAgentMcrsConfigs": "Config AI Agent MCRS",
-    "layout.menu.workflowStudio": "Workflow Studio",
+    "layout.menu.workflowProcess": "Workflow Process",
     "layout.menu.kocManagement": "Quản lý KOC",
     "layout.menu.tradeBotSystem": "Trade Bot MCRS",
     "layout.menu.jobScheduler": "Lập lịch job",
@@ -200,7 +200,7 @@
     "layout.menu.aiAgentMcrs": "AI Agent MCRS",
     "layout.menu.aiAgentMcrsSecrets": "AI Agent MCRS Secrets",
     "layout.menu.aiAgentMcrsConfigs": "AI Agent MCRS Configs",
-    "layout.menu.workflowStudio": "Workflow Studio",
+    "layout.menu.workflowProcess": "Workflow Process",
     "layout.menu.kocManagement": "KOC Management",
     "layout.menu.tradeBotSystem": "Trade Bot MCRS",
     "layout.menu.jobScheduler": "Job Scheduler",
@@ -308,3 +308,4 @@
     "layout.menu.uploadedFiles": "Uploaded Files"
   }
 }
+

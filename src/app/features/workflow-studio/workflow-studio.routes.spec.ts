@@ -28,8 +28,6 @@ describe('workflowStudioRoutes', () => {
         'ai-agent-mcrs/workflows',
         'ai-agent-mcrs/workflows/create',
         'ai-agent-mcrs/workflows/:workflowId/edit',
-        'ai-agent-mcrs/workflow-runs',
-        'ai-agent-mcrs/workflow-runs/:runId',
       ]),
     );
     expect(

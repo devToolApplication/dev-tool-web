@@ -7,7 +7,7 @@ import type { TableAction } from '@shared/ui/patterns/table/models/table-config.
 import { ConfirmDialogService } from '@shared/ui/overlay/confirm-dialog/confirm-dialog.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { buildWorkflowListActions, buildWorkflowListTable } from '../model/workflow-lifecycle.config';
-import { JsonValue, WorkflowDefinition } from '../model/workflow-studio.model';
+import { WorkflowDefinition } from '../model/workflow-studio.model';
 import { WorkflowPersistenceService } from '../services/workflow-persistence.service';
 
 @Component({
@@ -29,9 +29,6 @@ export class WorkflowListPageComponent implements OnInit {
   readonly metadata = signal<PageMetadata>(normalizePageMetadata(undefined, 0, 20));
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly runDialogOpen = signal(false);
-  readonly running = signal(false);
-  readonly selectedWorkflow = signal<WorkflowDefinition | null>(null);
 
   ngOnInit(): void {
     void this.loadWorkflows();
@@ -80,32 +77,6 @@ export class WorkflowListPageComponent implements OnInit {
     void this.router.navigate([workflow.id, 'edit'], { relativeTo: this.route });
   }
 
-  openRunDialog(workflow: WorkflowDefinition): void {
-    this.selectedWorkflow.set(workflow);
-    this.runDialogOpen.set(true);
-  }
-
-  closeRunDialog(): void {
-    this.runDialogOpen.set(false);
-    this.selectedWorkflow.set(null);
-  }
-
-  async startRun(input: JsonValue): Promise<void> {
-    const workflow = this.selectedWorkflow();
-    if (!workflow) {
-      return;
-    }
-
-    this.running.set(true);
-    try {
-      const run = await firstValueFrom(this.api.startWorkflow(workflow.id, input));
-      this.runDialogOpen.set(false);
-      await this.router.navigate(['/ai-agent-mcrs/workflow-runs', run.id]);
-    } finally {
-      this.running.set(false);
-    }
-  }
-
   async publishWorkflow(workflow: WorkflowDefinition): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
@@ -149,16 +120,8 @@ export class WorkflowListPageComponent implements OnInit {
       case 'edit':
         this.openBuilder(event.row);
         break;
-      case 'run':
-        this.openRunDialog(event.row);
-        break;
       case 'publish':
         void this.publishWorkflow(event.row);
-        break;
-      case 'runs':
-        void this.router.navigate(['/ai-agent-mcrs/workflow-runs'], {
-          queryParams: { workflowId: event.row.id },
-        });
         break;
       case 'delete':
         void this.deleteWorkflow(event.row);

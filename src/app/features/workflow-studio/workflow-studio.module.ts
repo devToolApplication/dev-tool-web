@@ -21,9 +21,6 @@ import { StartNodeComponent } from './nodes/start-node.component';
 import { WorkflowNodeShellComponent } from './nodes/workflow-node-shell.component';
 import { WorkflowBuilderPageComponent } from './pages/workflow-builder-page.component';
 import { WorkflowListPageComponent } from './pages/workflow-list-page.component';
-import { WorkflowRunDialogComponent } from './pages/workflow-run-dialog.component';
-import { WorkflowRunDetailPageComponent } from './pages/workflow-run-detail-page.component';
-import { WorkflowRunListPageComponent } from './pages/workflow-run-list-page.component';
 import { WorkflowProblemsPanelComponent } from './problems/workflow-problems-panel.component';
 import { WorkflowLayoutService } from './services/workflow-layout.service';
 import { WorkflowEditorStore } from './store/workflow-editor.store';
@@ -49,9 +46,6 @@ const DECLARATIONS = [
   WorkflowProblemsPanelComponent,
   WorkflowListPageComponent,
   WorkflowBuilderPageComponent,
-  WorkflowRunDialogComponent,
-  WorkflowRunListPageComponent,
-  WorkflowRunDetailPageComponent,
 ];
 
 @NgModule({
