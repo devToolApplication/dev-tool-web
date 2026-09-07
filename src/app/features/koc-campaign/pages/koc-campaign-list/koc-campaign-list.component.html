@@ -1,0 +1,321 @@
+<app-page-shell
+  title="kocCampaign.title"
+  subtitle="kocCampaign.subtitle"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.brandName' },
+    { label: 'layout.menu.kocManagement', routerLink: '/koc/campaigns' },
+    { label: 'layout.menu.kocCampaignList' }
+  ]"
+  [loading]="loading()"
+  (retry)="loadData()"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="actions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <app-section-panel
+    page-toolbar
+    title="kocCampaign.filter.title"
+    subtitle="kocCampaign.filter.subtitle"
+  >
+    <app-filter-panel
+      [filters]="filterFields"
+      [values]="filterValues()"
+      (valueChange)="onFilterChange($event)"
+      (apply)="onFilterChange($event)"
+      (reset)="onFilterReset()"
+    ></app-filter-panel>
+  </app-section-panel>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="campaigns()"
+    [loading]="loading()"
+    [totalRecords]="totalRecords()"
+    [currentPage]="pageIndex()"
+    [rows]="pageSize()"
+    [customTemplates]="{
+      name: nameCellTpl,
+      targetCount: targetsCellTpl,
+      approvedKocCount: approvedCellTpl
+    }"
+    (rowClick)="openDetail($event)"
+    (actionClick)="onTableAction($event)"
+    (refresh)="loadData()"
+    (pageChange)="onPageChange($event)"
+  >
+  </app-table>
+
+  <!-- Custom Cell Templates -->
+  <ng-template #nameCellTpl let-row="row">
+    <div class="flex flex-col min-w-0 max-w-full">
+      <span class="font-medium text-[var(--app-text)] truncate">{{ row.name }}</span>
+      <div class="flex items-center gap-1 text-xs text-[var(--app-text-muted)] font-mono truncate mt-0.5">
+        <span class="truncate">ID: {{ row.id }}</span>
+        @if (row.workflowRunId) {
+          <span class="mx-1">•</span>
+          <span class="truncate">Run: {{ row.workflowRunId }}</span>
+          <app-copyable-text [value]="row.workflowRunId"></app-copyable-text>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #targetsCellTpl let-row="row">
+    <div class="flex flex-col text-xs font-mono">
+      <span class="font-semibold text-[var(--app-text)]">Mục tiêu: {{ row.targetCount || 0 }} KOC</span>
+      <span class="text-[var(--app-text-muted)]">Điểm sàn: ≥ {{ row.minScore || 0 }}</span>
+    </div>
+  </ng-template>
+
+  <ng-template #approvedCellTpl let-row="row">
+    <div class="flex items-center gap-1.5">
+      <span
+        class="font-mono font-medium text-xs px-2 py-0.5 rounded border"
+        [class]="
+          (row.approvedKocCount || 0) >= (row.targetCount || 0)
+            ? 'bg-[var(--app-control-success-bg)] text-[var(--app-control-success-text)] border-[var(--app-control-success-border)]'
+            : 'bg-[var(--app-surface-subtle)] text-[var(--app-text)] border-[var(--app-border-soft)]'
+        "
+      >
+        {{ row.approvedKocCount || 0 }} / {{ row.targetCount || 0 }} KOC
+      </span>
+    </div>
+  </ng-template>
+</app-page-shell>
+
+<!-- Drawer Detail & Approved KOCs -->
+<app-drawer
+  [open]="drawerOpen()"
+  title="kocCampaign.drawer.title"
+  size="xl"
+  (closed)="closeDrawer()"
+>
+  @if (selectedCampaign(); as camp) {
+    <div class="space-y-5 text-sm">
+      <!-- Campaign Header Summary -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--app-border-soft)]">
+        <div class="min-w-0">
+          <h2 class="text-base font-semibold text-[var(--app-text)] truncate">{{ camp.name }}</h2>
+          <p class="text-xs text-[var(--app-text-muted)] font-mono">Campaign ID: {{ camp.id }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <app-badge
+            [label]="camp.workflowStatus || 'RUNNING'"
+            [variant]="
+              camp.workflowStatus === 'COMPLETED'
+                ? 'success'
+                : camp.workflowStatus === 'USER_TASK'
+                ? 'warning'
+                : camp.workflowStatus === 'FAILED'
+                ? 'danger'
+                : 'info'
+            "
+          ></app-badge>
+        </div>
+      </div>
+
+      <!-- Basic Info -->
+      <app-section-panel title="kocCampaign.drawer.campaignInfo" density="compact">
+        <app-key-value-list [items]="detailItems()"></app-key-value-list>
+      </app-section-panel>
+
+      <!-- Prompts Info -->
+      @if (camp.searchPrompt || camp.reviewPrompt) {
+        <app-section-panel title="kocCampaign.drawer.prompts" density="compact">
+          <div class="space-y-2 text-xs">
+            @if (camp.searchPrompt) {
+              <div>
+                <span class="font-semibold text-[var(--app-text-muted)]">Search Prompt:</span>
+                <p class="mt-0.5 p-2 bg-[var(--app-card-surface-strong)] border border-[var(--app-border-soft)] rounded text-[var(--app-text)]">
+                  {{ camp.searchPrompt }}
+                </p>
+              </div>
+            }
+            @if (camp.reviewPrompt) {
+              <div>
+                <span class="font-semibold text-[var(--app-text-muted)]">Review Prompt:</span>
+                <p class="mt-0.5 p-2 bg-[var(--app-card-surface-strong)] border border-[var(--app-border-soft)] rounded text-[var(--app-text)]">
+                  {{ camp.reviewPrompt }}
+                </p>
+              </div>
+            }
+          </div>
+        </app-section-panel>
+      }
+
+      <!-- Approved KOC Candidates Table (Offical saved in DB) -->
+      <app-section-panel
+        title="kocCampaign.drawer.kocListTitle"
+        subtitle="kocCampaign.drawer.kocListSubtitle"
+        density="compact"
+      >
+        <app-table
+          [config]="candidateTableConfig"
+          [data]="approvedCandidates()"
+          [loading]="candidatesLoading()"
+          [totalRecords]="approvedCandidates().length"
+          [customTemplates]="{
+            fullName: candidateNameTpl,
+            followerCount: candidateFollowersTpl,
+            score: candidateScoreTpl,
+            profileUrl: candidateUrlTpl
+          }"
+        >
+        </app-table>
+      </app-section-panel>
+
+      <ng-template #candidateNameTpl let-row="row">
+        <div class="flex flex-col min-w-0">
+          <span class="font-medium text-[var(--app-text)] truncate">{{ row.fullName || 'N/A' }}</span>
+          <span class="text-xs text-[var(--app-text-muted)] font-mono truncate">ID: {{ row.externalProfileId }}</span>
+        </div>
+      </ng-template>
+
+      <ng-template #candidateFollowersTpl let-row="row">
+        <span class="font-mono text-xs font-medium text-[var(--app-text)]">
+          {{ formatNumber(row.followerCount) }}
+        </span>
+      </ng-template>
+
+      <ng-template #candidateScoreTpl let-row="row">
+        <span
+          class="font-mono font-bold text-xs px-2 py-0.5 rounded border"
+          [class]="
+            (row.score || 0) >= 80
+              ? 'bg-[var(--app-control-success-bg)] text-[var(--app-control-success-text)] border-[var(--app-control-success-border)]'
+              : (row.score || 0) >= 60
+              ? 'bg-[var(--app-control-warn-bg)] text-[var(--app-control-warn-text)] border-[var(--app-control-warn-border)]'
+              : 'bg-[var(--app-surface-subtle)] text-[var(--app-text)] border-[var(--app-border-soft)]'
+          "
+        >
+          {{ row.score || 0 }}
+        </span>
+      </ng-template>
+
+      <ng-template #candidateUrlTpl let-row="row">
+        @if (row.profileUrl) {
+          <div class="flex items-center gap-1 max-w-full">
+            <a
+              [href]="row.profileUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-[var(--app-primary)] hover:underline truncate max-w-[12rem]"
+            >
+              {{ row.profileUrl }}
+            </a>
+            <app-copyable-text [value]="row.profileUrl"></app-copyable-text>
+          </div>
+        } @else {
+          <span class="text-xs text-[var(--app-text-muted)]">-</span>
+        }
+      </ng-template>
+    </div>
+  }
+
+  <div drawer-footer class="flex flex-col sm:flex-row justify-end gap-2">
+    <app-button label="close" variant="secondary" (buttonClick)="closeDrawer()"></app-button>
+    @if (selectedCampaign()?.workflowStatus === 'USER_TASK') {
+      <app-button
+        label="kocCampaign.action.approveTask"
+        icon="pi pi-user-check"
+        variant="primary"
+        (buttonClick)="onApproveTaskFromDrawer()"
+      ></app-button>
+    }
+  </div>
+</app-drawer>
+
+<!-- Dialog Add / Edit Campaign -->
+<app-dialog
+  [(visible)]="formDialogVisible"
+  [modal]="true"
+  width="min(95vw, 42rem)"
+  [header]="isEdit ? 'kocCampaign.dialog.editTitle' : 'kocCampaign.dialog.createTitle'"
+  (hide)="closeFormDialog()"
+>
+  <form [formGroup]="form" (ngSubmit)="submitForm()" class="space-y-4 pt-1">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <!-- Name -->
+      <div class="sm:col-span-2">
+        <app-input-text
+          formControlName="name"
+          label="kocCampaign.form.name"
+          placeholder="kocCampaign.form.namePlaceholder"
+          [required]="true"
+        ></app-input-text>
+      </div>
+
+      <!-- Niche -->
+      <div>
+        <app-select
+          formControlName="niche"
+          label="kocCampaign.form.niche"
+          [options]="nicheOptions"
+          optionLabel="label"
+          optionValue="value"
+        ></app-select>
+      </div>
+
+      <!-- Target Count -->
+      <div>
+        <app-input-number
+          formControlName="targetCount"
+          label="kocCampaign.form.targetCount"
+          [min]="1"
+          [max]="100"
+          [required]="true"
+        ></app-input-number>
+      </div>
+
+      <!-- Min Score -->
+      <div>
+        <app-input-number
+          formControlName="minScore"
+          label="kocCampaign.form.minScore"
+          [min]="0"
+          [max]="100"
+          [required]="true"
+        ></app-input-number>
+      </div>
+    </div>
+
+    <!-- Search Prompt -->
+    <div>
+      <app-input-area
+        formControlName="searchPrompt"
+        label="kocCampaign.form.searchPrompt"
+        placeholder="kocCampaign.form.searchPromptPlaceholder"
+        [rows]="3"
+      ></app-input-area>
+    </div>
+
+    <!-- Review Prompt -->
+    <div>
+      <app-input-area
+        formControlName="reviewPrompt"
+        label="kocCampaign.form.reviewPrompt"
+        placeholder="kocCampaign.form.reviewPromptPlaceholder"
+        [rows]="3"
+      ></app-input-area>
+    </div>
+
+    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-[var(--app-border-soft)]">
+      <app-button
+        label="cancel"
+        variant="secondary"
+        (buttonClick)="closeFormDialog()"
+      ></app-button>
+      <app-button
+        [label]="isEdit ? 'kocCampaign.form.submitUpdate' : 'kocCampaign.form.submitCreate'"
+        icon="pi pi-bolt"
+        variant="primary"
+        [loading]="formSubmitting()"
+        (buttonClick)="submitForm()"
+      ></app-button>
+    </div>
+  </form>
+</app-dialog>

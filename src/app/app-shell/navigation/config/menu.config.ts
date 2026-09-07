@@ -49,6 +49,22 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     ],
   },
   {
+    label: 'layout.menu.kocManagement',
+    icon: 'pi pi-megaphone',
+    items: [
+      {
+        label: 'layout.menu.kocCampaignList',
+        icon: 'pi pi-list',
+        routerLink: '/koc/campaigns',
+      },
+      {
+        label: 'layout.menu.kocCandidateApproval',
+        icon: 'pi pi-user-check',
+        routerLink: '/koc/approval',
+      },
+    ],
+  },
+  {
     label: 'layout.menu.jobService',
     icon: 'pi pi-briefcase',
     items: [

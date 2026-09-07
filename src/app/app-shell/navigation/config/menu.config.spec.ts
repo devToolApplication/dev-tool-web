@@ -6,6 +6,7 @@ describe('APP_LAYOUT_MENU', () => {
 
     expect(groups).toContain('layout.menu.aiAgentMcrs');
     expect(groups).toContain('layout.menu.accountManagement');
+    expect(groups).toContain('layout.menu.kocManagement');
     expect(groups).toContain('layout.menu.jobService');
 
     expect(flattenRoutes()).toEqual(
@@ -14,6 +15,8 @@ describe('APP_LAYOUT_MENU', () => {
         '/ai-agent-mcrs/configs',
         '/ai-agent-mcrs/workflows',
         '/accounts',
+        '/koc/campaigns',
+        '/koc/approval',
         '/job-service/secrets',
         '/job-service/configs',
         '/job-service/jobs',

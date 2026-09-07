@@ -6,6 +6,7 @@ import serviceManagementTranslations from '../i18n/features/service-management.i
 import workflowStudioTranslations from '../i18n/features/workflow-studio.i18n.json';
 import accountManagementTranslations from '../i18n/features/account-management.i18n.json';
 import codexSdkTranslations from '../i18n/features/codex-sdk.i18n.json';
+import kocCampaignTranslations from '../i18n/features/koc-campaign.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
 type TranslationMap = Record<AppLanguage, Record<string, string>>;
@@ -21,6 +22,7 @@ const TRANSLATIONS: TranslationMap = {
     ...workflowStudioTranslations.vi,
     ...accountManagementTranslations.vi,
     ...codexSdkTranslations.vi,
+    ...kocCampaignTranslations.vi,
   },
   en: {
     ...commonTranslations.en,
@@ -30,6 +32,7 @@ const TRANSLATIONS: TranslationMap = {
     ...workflowStudioTranslations.en,
     ...accountManagementTranslations.en,
     ...codexSdkTranslations.en,
+    ...kocCampaignTranslations.en,
   },
 };
 

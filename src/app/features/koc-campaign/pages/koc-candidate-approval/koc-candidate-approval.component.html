@@ -1,0 +1,252 @@
+<app-page-shell
+  title="kocApproval.title"
+  subtitle="kocApproval.subtitle"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.brandName' },
+    { label: 'layout.menu.kocManagement', routerLink: '/koc/campaigns' },
+    { label: 'layout.menu.kocCandidateApproval' }
+  ]"
+  [loading]="loading()"
+  (retry)="loadTasks()"
+>
+  <!-- Task List Section -->
+  <app-section-panel
+    title="kocApproval.taskList.title"
+    subtitle="kocApproval.taskList.subtitle"
+  >
+    @if (tasks().length === 0 && !loading()) {
+      <div class="py-12 text-center text-[var(--app-text-muted)] space-y-2">
+        <i class="pi pi-check-circle text-3xl text-[var(--app-control-success-text)]"></i>
+        <h3 class="text-sm font-semibold text-[var(--app-text)]">{{ 'kocApproval.emptyTasks.title' | translateContent }}</h3>
+        <p class="text-xs max-w-md mx-auto">{{ 'kocApproval.emptyTasks.description' | translateContent }}</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        @for (task of tasks(); track task.id) {
+          <div class="p-4 bg-[var(--app-card-surface)] border border-[var(--app-border-soft)] rounded-lg shadow-sm hover:border-[var(--app-primary)] transition-colors flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="font-medium text-[var(--app-text)] text-sm line-clamp-2">
+                  {{ task.name || 'Phê duyệt Ứng viên KOC' }}
+                </h3>
+                <app-badge
+                  [label]="task.assignee ? 'CLAIMED' : 'UNASSIGNED'"
+                  [variant]="task.assignee ? 'info' : 'warning'"
+                ></app-badge>
+              </div>
+              <div class="text-xs text-[var(--app-text-muted)] font-mono space-y-1 mt-2">
+                <div>Task ID: {{ task.id }}</div>
+                <div>Run ID: {{ task.processInstanceId }}</div>
+                @if (task.assignee) {
+                  <div>Người xử lý: {{ task.assignee }}</div>
+                }
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-[var(--app-border-soft)]">
+              @if (task.assignee === currentUsername) {
+                <app-button
+                  label="kocApproval.task.unclaim"
+                  variant="ghost"
+                  size="sm"
+                  (buttonClick)="unclaimTask(task)"
+                ></app-button>
+              } @else if (!task.assignee) {
+                <app-button
+                  label="kocApproval.task.claim"
+                  variant="ghost"
+                  size="sm"
+                  (buttonClick)="claimTask(task)"
+                ></app-button>
+              } @else {
+                <span class="text-xs text-[var(--app-text-muted)]">Đã giao</span>
+              }
+
+              <app-button
+                label="kocApproval.task.startApproval"
+                icon="pi pi-user-check"
+                variant="primary"
+                size="sm"
+                (buttonClick)="openReview(task)"
+              ></app-button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </app-section-panel>
+</app-page-shell>
+
+<!-- Approval Drawer (Candidate Selection & AI Analysis) -->
+<app-drawer
+  [open]="drawerOpen()"
+  title="kocApproval.drawer.title"
+  size="xl"
+  (closed)="closeDrawer()"
+>
+  @if (selectedTask(); as task) {
+    <div class="space-y-4 text-sm">
+      <!-- Task Header Summary -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--app-border-soft)]">
+        <div>
+          <h2 class="text-base font-semibold text-[var(--app-text)]">{{ task.name || 'Phê duyệt Ứng viên KOC' }}</h2>
+          <p class="text-xs text-[var(--app-text-muted)] font-mono">Process Run: {{ task.processInstanceId }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono px-2.5 py-1 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded text-[var(--app-text)]">
+            Đã chọn: <strong class="text-[var(--app-primary)]">{{ selectedCandidatesCount() }}</strong> / {{ candidates().length }} KOC
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Actions Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-md">
+        <div class="flex items-center gap-2">
+          <app-button
+            label="kocApproval.action.selectAll"
+            variant="ghost"
+            size="sm"
+            (buttonClick)="selectAll()"
+          ></app-button>
+          <app-button
+            label="kocApproval.action.deselectAll"
+            variant="ghost"
+            size="sm"
+            (buttonClick)="deselectAll()"
+          ></app-button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <app-button
+            label="kocApproval.action.rejectAll"
+            icon="pi pi-times"
+            variant="destructive"
+            size="sm"
+            [loading]="completing()"
+            (buttonClick)="rejectAll()"
+          ></app-button>
+          <app-button
+            label="Phê duyệt đã chọn"
+            icon="pi pi-check"
+            variant="primary"
+            size="sm"
+            [disabled]="selectedCandidatesCount() === 0"
+            [loading]="completing()"
+            (buttonClick)="approveSelected()"
+          ></app-button>
+        </div>
+      </div>
+
+      <!-- Candidates Review Table -->
+      <app-table
+        [config]="candidateTableConfig"
+        [data]="candidates()"
+        [loading]="candidatesLoading()"
+        [totalRecords]="candidates().length"
+        [customTemplates]="{
+          selected: candidateSelectTpl,
+          fullName: candidateNameTpl,
+          followerCount: candidateFollowersTpl,
+          score: candidateScoreTpl,
+          profileUrl: candidateUrlTpl,
+          analysis: candidateAnalysisTpl
+        }"
+      >
+      </app-table>
+
+      <!-- Custom Templates -->
+      <ng-template #candidateSelectTpl let-row="row">
+        <div class="flex items-center justify-center">
+          <input
+            type="checkbox"
+            [checked]="row.selected"
+            (change)="toggleCandidate(row)"
+            class="w-4 h-4 cursor-pointer accent-[var(--app-primary)]"
+          />
+        </div>
+      </ng-template>
+
+      <ng-template #candidateNameTpl let-row="row">
+        <div class="flex flex-col min-w-0">
+          <span class="font-medium text-[var(--app-text)] truncate">{{ row.fullName || 'N/A' }}</span>
+          <span class="text-xs text-[var(--app-text-muted)] font-mono truncate">ID: {{ row.externalProfileId }}</span>
+        </div>
+      </ng-template>
+
+      <ng-template #candidateFollowersTpl let-row="row">
+        <span class="font-mono text-xs font-medium text-[var(--app-text)]">
+          {{ formatNumber(row.followerCount) }}
+        </span>
+      </ng-template>
+
+      <ng-template #candidateScoreTpl let-row="row">
+        <span
+          class="font-mono font-bold text-xs px-2 py-0.5 rounded border"
+          [class]="
+            (row.score || 0) >= 80
+              ? 'bg-[var(--app-control-success-bg)] text-[var(--app-control-success-text)] border-[var(--app-control-success-border)]'
+              : (row.score || 0) >= 60
+              ? 'bg-[var(--app-control-warn-bg)] text-[var(--app-control-warn-text)] border-[var(--app-control-warn-border)]'
+              : 'bg-[var(--app-surface-subtle)] text-[var(--app-text)] border-[var(--app-border-soft)]'
+          "
+        >
+          {{ row.score || 0 }}
+        </span>
+      </ng-template>
+
+      <ng-template #candidateUrlTpl let-row="row">
+        @if (row.profileUrl) {
+          <div class="flex items-center gap-1 max-w-full">
+            <a
+              [href]="row.profileUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-[var(--app-primary)] hover:underline truncate max-w-[10rem]"
+            >
+              {{ row.profileUrl }}
+            </a>
+            <app-copyable-text [value]="row.profileUrl"></app-copyable-text>
+          </div>
+        } @else {
+          <span class="text-xs text-[var(--app-text-muted)]">-</span>
+        }
+      </ng-template>
+
+      <ng-template #candidateAnalysisTpl let-row="row">
+        <div class="space-y-1 text-xs max-w-sm">
+          @if (row.analysis?.matchReason) {
+            <p class="text-[var(--app-text)] italic">{{ row.analysis.matchReason }}</p>
+          }
+          @if (row.analysis?.strengths && row.analysis.strengths.length > 0) {
+            <div class="flex flex-wrap gap-1">
+              @for (st of row.analysis.strengths; track st) {
+                <span class="px-1.5 py-0.5 bg-[var(--app-control-success-bg)] text-[var(--app-control-success-text)] border border-[var(--app-control-success-border)] rounded text-[10px] font-mono">
+                  + {{ st }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </ng-template>
+    </div>
+  }
+
+  <div drawer-footer class="flex flex-col sm:flex-row justify-end gap-2">
+    <app-button label="close" variant="secondary" (buttonClick)="closeDrawer()"></app-button>
+    <app-button
+      label="kocApproval.action.rejectAll"
+      variant="destructive"
+      [loading]="completing()"
+      (buttonClick)="rejectAll()"
+    ></app-button>
+    <app-button
+      label="Phê duyệt KOC đã chọn"
+      icon="pi pi-check"
+      variant="primary"
+      [disabled]="selectedCandidatesCount() === 0"
+      [loading]="completing()"
+      (buttonClick)="approveSelected()"
+    ></app-button>
+  </div>
+</app-drawer>

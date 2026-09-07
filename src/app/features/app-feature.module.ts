@@ -14,9 +14,12 @@ import { AccountManagementModule } from './account-management/account-management
 import { accountManagementRoutes } from './account-management/account-management.routes';
 import { CodexSdkModule } from './codex-sdk/codex-sdk.module';
 import { codexSdkRoutes } from './codex-sdk/codex-sdk.routes';
+import { KocCampaignModule } from './koc-campaign/koc-campaign.module';
+import { kocCampaignRoutes } from './koc-campaign/koc-campaign.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...accountManagementRoutes,
+  ...kocCampaignRoutes,
   ...serviceManagementRoutes,
   ...workflowStudioRoutes,
   ...codexSdkRoutes,
@@ -37,6 +40,7 @@ const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
     ServiceManagementModule,
     WorkflowStudioModule,
     CodexSdkModule,
+    KocCampaignModule,
   ],
 })
 export class AppFeatureModule {}
