@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
@@ -21,7 +20,7 @@ import {
   templateUrl: './workflow-run-detail-page.component.html',
   styleUrl: './workflow-run-detail-page.component.css',
 })
-export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
+export class WorkflowRunDetailPageComponent implements OnInit {
   private readonly api = inject(WorkflowApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -44,9 +43,6 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
   readonly loading = signal(false);
   readonly retrying = signal(false);
   readonly error = signal<string | null>(null);
-  readonly autoPolling = signal(true);
-
-  private pollingSub?: Subscription;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('runId');
@@ -56,12 +52,7 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.stopPolling();
-  }
-
   get actions(): ActionToolbarAction[] {
-    const isRunning = this.run()?.status === 'RUNNING' || this.run()?.status === 'PENDING';
     const isError = this.run()?.status === 'ERROR' || this.run()?.status === 'TIMED_OUT';
 
     return [
@@ -85,16 +76,9 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
         label: 'refresh',
         icon: 'pi pi-refresh',
         placement: 'secondary',
-        variant: 'ghost',
-      },
-      {
-        id: 'polling',
-        label: this.autoPolling()
-          ? 'workflowStudio.runtime.pollingActive'
-          : 'workflowStudio.runtime.pollingStopped',
-        icon: this.autoPolling() ? 'pi pi-sync pi-spin' : 'pi pi-pause',
-        placement: 'secondary',
-        variant: this.autoPolling() ? 'secondary' : 'ghost',
+        variant: 'secondary',
+        disabled: this.loading(),
+        loading: this.loading(),
       },
       {
         id: 'retry',
@@ -122,12 +106,6 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
       }
 
       this.updateRuntimeState();
-
-      if (this.autoPolling() && (runData.status === 'RUNNING' || runData.status === 'PENDING')) {
-        this.startPolling();
-      } else {
-        this.stopPolling();
-      }
     } catch (err) {
       this.error.set(errorMessage(err));
     } finally {
@@ -215,32 +193,6 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
     this.runPayloadTab.set(tab);
   }
 
-  togglePolling(): void {
-    this.autoPolling.update((v) => !v);
-    if (this.autoPolling()) {
-      this.startPolling();
-    } else {
-      this.stopPolling();
-    }
-  }
-
-  startPolling(): void {
-    if (this.pollingSub) {
-      return;
-    }
-    this.pollingSub = interval(2500).subscribe(() => {
-      const id = this.runId();
-      if (id) {
-        void this.loadRun(id, false);
-      }
-    });
-  }
-
-  stopPolling(): void {
-    this.pollingSub?.unsubscribe();
-    this.pollingSub = undefined;
-  }
-
   async retryRun(): Promise<void> {
     const id = this.runId();
     if (!id) {
@@ -251,7 +203,6 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
       const retried = await firstValueFrom(this.api.retryRun(id));
       this.run.set(retried);
       this.updateRuntimeState();
-      this.startPolling();
     } catch (err) {
       this.error.set(errorMessage(err));
     } finally {
@@ -266,9 +217,6 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
         break;
       case 'refresh':
         void this.loadRun(this.runId(), true);
-        break;
-      case 'polling':
-        this.togglePolling();
         break;
       case 'retry':
         void this.retryRun();

@@ -164,4 +164,13 @@ describe('WorkflowRunDetailPageComponent', () => {
     component.closeRunPayloads();
     expect(component.runPayloadsDialogVisible()).toBe(false);
   });
+
+  it('reloads run on manual refresh action without auto-polling', () => {
+    component.runId.set('run-1');
+    const spy = vi.spyOn(component, 'loadRun').mockImplementation(() => Promise.resolve());
+    component.onToolbarAction({ id: 'refresh' });
+    expect(spy).toHaveBeenCalledWith('run-1', true);
+    expect(component.actions.some((a) => a.id === 'refresh')).toBe(true);
+    expect(component.actions.some((a) => a.id === 'polling')).toBe(false);
+  });
 });
