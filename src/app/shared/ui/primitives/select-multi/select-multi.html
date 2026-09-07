@@ -45,7 +45,7 @@
 
     @if (dropdownOpen) {
       <div
-        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-60 overflow-y-auto"
+        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-[var(--app-shadow-md)] backdrop-blur-md max-h-60 overflow-y-auto"
       >
         @for (opt of options; track opt.value) {
           <label

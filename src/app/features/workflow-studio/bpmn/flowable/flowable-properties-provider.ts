@@ -87,6 +87,18 @@ const SERVICE_TASK_GROUPS: Array<(element: any, injector: Injector) => PanelGrou
   flowableAdvancedGroup,
 ];
 
+let globalWorkflowOptions: Array<{ label: string; value: string }> = [];
+
+export function setWorkflowCalledElementOptions(
+  options: Array<{ label: string; value: string }>,
+): void {
+  globalWorkflowOptions = options;
+}
+
+export function getWorkflowCalledElementOptions(): Array<{ label: string; value: string }> {
+  return globalWorkflowOptions;
+}
+
 export class FlowablePropertiesProvider {
   static $inject = ['propertiesPanel', 'injector'];
 
@@ -112,6 +124,15 @@ export class FlowablePropertiesProvider {
         return [
           ...groups,
           ...CALL_ACTIVITY_GROUPS.map((group) => group(element, this.injector)).filter(
+            (group): group is PanelGroup => group !== null,
+          ),
+        ];
+      }
+
+      if (isUserTask(element)) {
+        return [
+          ...groups,
+          ...USER_TASK_GROUPS.map((group) => group(element, this.injector)).filter(
             (group): group is PanelGroup => group !== null,
           ),
         ];
@@ -1156,7 +1177,7 @@ function flowableCallActivityGroup(element: any, injector: Injector): PanelGroup
     label: translate('Call Activity (Flowable)'),
     component: Group,
     entries: [
-      entry('flowable-calledElement', FlowableCalledElementEntry, isTextFieldEntryEdited),
+      entry('flowable-calledElement', FlowableCalledElementEntry, isSelectEntryEdited),
       entry('flowable-inheritVariables', FlowableInheritVariablesEntry, isCheckboxEntryEdited),
       entry('flowable-sameDeployment', FlowableSameDeploymentEntry, isCheckboxEntryEdited),
       entry('flowable-fallbackToDefaultTenant', FlowableFallbackTenantEntry, isCheckboxEntryEdited),
@@ -1166,17 +1187,39 @@ function flowableCallActivityGroup(element: any, injector: Injector): PanelGroup
 }
 
 function FlowableCalledElementEntry(props: any): any {
-  const debounceInput = debounce();
   const translateFn = useService('translate', true) ?? ((label: string) => label);
   const { modeling } = useWriterServices();
-  return TextFieldEntry({
+  const rawValue = props.element?.businessObject?.calledElement ?? '';
+  const matchedOption = globalWorkflowOptions.find(
+    (opt) =>
+      opt.value === rawValue ||
+      opt.label.startsWith(rawValue) ||
+      (rawValue === 'callAiSdkSubProcess' && (opt.value === 'AI_WORKFLOW_PROCESS' || opt.label.includes('AI_WORKFLOW_PROCESS'))),
+  );
+  const currentValue = matchedOption ? matchedOption.value : rawValue;
+  if (rawValue && matchedOption && rawValue !== matchedOption.value && props.element?.businessObject) {
+    props.element.businessObject.calledElement = matchedOption.value;
+  }
+  return SelectEntry({
     element: props.element,
     id: props.id,
     label: translateFn('Called Element'),
-    debounce: debounceInput,
-    getValue: () => props.element?.businessObject?.calledElement ?? '',
+    getValue: () => currentValue,
     setValue: (value: string) => {
       modeling.updateProperties(props.element, { calledElement: value?.trim() || undefined });
+    },
+    getOptions: () => {
+      const options = [...globalWorkflowOptions];
+      if (currentValue && !options.some((opt) => opt.value === currentValue)) {
+        options.unshift({
+          label: `${currentValue} (${translateFn('Custom')})`,
+          value: currentValue,
+        });
+      }
+      return [
+        { label: translateFn('-- Select Workflow --'), value: '' },
+        ...options,
+      ];
     },
   });
 }
@@ -1319,13 +1362,27 @@ function FlowableInSourceEntry(props: any): any {
   const services = useWriterServices();
   const current = readIOParams(props.element, 'flowable:In')[props.rowIndex];
   const isExpr = current?.sourceType === 'sourceExpression';
+
+  if (isExpr) {
+    return TextAreaEntry({
+      element: props.element,
+      id: props.id,
+      label: translateFn('Source Expression'),
+      debounce: debounceInput,
+      rows: 4,
+      autoResize: true,
+      getValue: () => current?.sourceExpression ?? '',
+      setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, 'sourceExpression', val, services),
+    });
+  }
+
   return TextFieldEntry({
     element: props.element,
     id: props.id,
-    label: translateFn(isExpr ? 'Source Expression' : 'Source Variable'),
+    label: translateFn('Source Variable'),
     debounce: debounceInput,
-    getValue: () => (isExpr ? current?.sourceExpression : current?.source) ?? '',
-    setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, isExpr ? 'sourceExpression' : 'source', val, services),
+    getValue: () => current?.source ?? '',
+    setValue: (val: string) => writeIOParamField(props.element, 'flowable:In', props.rowIndex, 'source', val, services),
   });
 }
 
@@ -1441,4 +1498,114 @@ function writeIOParamField(element: any, type: string, index: number, field: str
 
 function isCallActivity(element: any): boolean {
   return element?.type === 'bpmn:CallActivity' || element?.businessObject?.$type === 'bpmn:CallActivity';
+}
+
+function isUserTask(element: any): boolean {
+  return element?.type === 'bpmn:UserTask' || element?.businessObject?.$type === 'bpmn:UserTask';
+}
+
+const USER_TASK_GROUPS: Array<(element: any, injector: Injector) => PanelGroup | null> = [
+  flowableUserTaskGroup,
+];
+
+function flowableUserTaskGroup(element: any, injector: Injector): PanelGroup {
+  const translate = injector.get('translate');
+  return {
+    id: 'flowableUserTask',
+    label: translate('User Task (Flowable)'),
+    component: Group,
+    entries: [
+      entry('flowable-formKey', FlowableUserTaskFormKeyEntry, isTextFieldEntryEdited),
+      entry('flowable-assignee', FlowableUserTaskAssigneeEntry, isTextFieldEntryEdited),
+      entry('flowable-candidateGroups', FlowableUserTaskCandidateGroupsEntry, isTextFieldEntryEdited),
+      entry('flowable-dueDate', FlowableUserTaskDueDateEntry, isTextFieldEntryEdited),
+      entry('flowable-priority', FlowableUserTaskPriorityEntry, isTextFieldEntryEdited),
+    ],
+  };
+}
+
+function FlowableUserTaskFormKeyEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Form Key / Route Path'),
+    description: translateFn('Route to navigate when handling task (e.g. /accounts/verification)'),
+    debounce: debounceInput,
+    getValue: () => getAttr(props.element.businessObject, 'flowable:formKey') ?? '',
+    setValue: (val: string) => {
+      const bo = props.element.businessObject;
+      services.modeling.updateModdleProperties(props.element, bo, { 'flowable:formKey': val });
+    },
+  });
+}
+
+function FlowableUserTaskAssigneeEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Assignee'),
+    debounce: debounceInput,
+    getValue: () => getAttr(props.element.businessObject, 'flowable:assignee') ?? '',
+    setValue: (val: string) => {
+      const bo = props.element.businessObject;
+      services.modeling.updateModdleProperties(props.element, bo, { 'flowable:assignee': val });
+    },
+  });
+}
+
+function FlowableUserTaskCandidateGroupsEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Candidate Groups'),
+    debounce: debounceInput,
+    getValue: () => getAttr(props.element.businessObject, 'flowable:candidateGroups') ?? '',
+    setValue: (val: string) => {
+      const bo = props.element.businessObject;
+      services.modeling.updateModdleProperties(props.element, bo, { 'flowable:candidateGroups': val });
+    },
+  });
+}
+
+function FlowableUserTaskDueDateEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Due Date'),
+    debounce: debounceInput,
+    getValue: () => getAttr(props.element.businessObject, 'flowable:dueDate') ?? '',
+    setValue: (val: string) => {
+      const bo = props.element.businessObject;
+      services.modeling.updateModdleProperties(props.element, bo, { 'flowable:dueDate': val });
+    },
+  });
+}
+
+function FlowableUserTaskPriorityEntry(props: any): any {
+  const debounceInput = debounce();
+  const translateFn = useService('translate', true) ?? ((label: string) => label);
+  const services = useWriterServices();
+  return TextFieldEntry({
+    element: props.element,
+    id: props.id,
+    label: translateFn('Priority'),
+    debounce: debounceInput,
+    getValue: () => getAttr(props.element.businessObject, 'flowable:priority') ?? '',
+    setValue: (val: string) => {
+      const bo = props.element.businessObject;
+      services.modeling.updateModdleProperties(props.element, bo, { 'flowable:priority': val });
+    },
+  });
 }

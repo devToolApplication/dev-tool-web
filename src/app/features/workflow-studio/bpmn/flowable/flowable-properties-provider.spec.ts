@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 vi.mock('@bpmn-io/properties-panel', () => ({
   CheckboxEntry: vi.fn(),
   Group: vi.fn(),
@@ -15,9 +17,9 @@ vi.mock('bpmn-js-properties-panel', () => ({
   useService: vi.fn(),
 }));
 
-import { FlowablePropertiesProvider } from './flowable-properties-provider';
+import { FlowablePropertiesProvider, setWorkflowCalledElementOptions } from './flowable-properties-provider';
 import { readFlowableServiceTaskConfig } from './flowable-service-task-mapper';
-import { TextAreaEntry } from '@bpmn-io/properties-panel';
+import { SelectEntry, TextAreaEntry } from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 
 interface TestEntry {
@@ -250,6 +252,63 @@ describe('flowable properties provider', () => {
         .find((group) => group.id === 'condition')
         ?.entries.map((entry) => entry.id),
     ).toEqual(['conditionExpression']);
+  });
+
+  it('provides select options for callActivity calledElement with custom support', () => {
+    setWorkflowCalledElementOptions([
+      { label: 'Sub workflow A (wf_sub_a)', value: 'wf_sub_a' },
+      { label: 'Sub workflow B (wf_sub_b)', value: 'wf_sub_b' },
+    ]);
+
+    const services = writerServicesStub();
+    vi.mocked(useService).mockImplementation((name: string) => {
+      if (name === 'translate') {
+        return (value: string) => value;
+      }
+      if (name === 'modeling') {
+        return services.modeling;
+      }
+      if (name === 'bpmnFactory') {
+        return services.bpmnFactory;
+      }
+      return undefined;
+    });
+
+    const element = {
+      id: 'Call_1',
+      type: 'bpmn:CallActivity',
+      businessObject: {
+        $type: 'bpmn:CallActivity',
+        id: 'Call_1',
+        calledElement: 'custom_process_key',
+      },
+    };
+
+    const provider = new FlowablePropertiesProvider(propertiesPanelStub(), injectorStub(services));
+    const groups = provider.getGroups(element)([]);
+    const callGroup = groups.find((group) => group.id === 'flowableCallActivity');
+    expect(callGroup).toBeDefined();
+
+    const calledElementEntry = callGroup?.entries?.find((entry) => entry.id === 'flowable-calledElement');
+    expect(calledElementEntry).toBeDefined();
+
+    calledElementEntry?.component({ element, id: calledElementEntry.id });
+    const selectProps = vi.mocked(SelectEntry).mock.calls.at(-1)?.[0];
+    expect(selectProps).toBeDefined();
+    expect(selectProps.getValue()).toBe('custom_process_key');
+
+    const options = selectProps.getOptions();
+    expect(options).toEqual([
+      { label: '-- Select Workflow --', value: '' },
+      { label: 'custom_process_key (Custom)', value: 'custom_process_key' },
+      { label: 'Sub workflow A (wf_sub_a)', value: 'wf_sub_a' },
+      { label: 'Sub workflow B (wf_sub_b)', value: 'wf_sub_b' },
+    ]);
+
+    selectProps.setValue('wf_sub_a');
+    expect(services.modeling.updateProperties).toHaveBeenCalledWith(element, {
+      calledElement: 'wf_sub_a',
+    });
   });
 
   it('does not add Flowable groups to start events', () => {

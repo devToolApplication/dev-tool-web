@@ -1,0 +1,292 @@
+<app-drawer
+  [open]="visible()"
+  [title]="'codexSdk.workbench.title' | translateContent"
+  size="comfortable"
+  side="right"
+  [closeOnBackdrop]="true"
+  [closeOnEsc]="true"
+  (closed)="handleClose()"
+>
+  <div class="codex-chat-drawer-body flex flex-col h-full overflow-hidden bg-[var(--app-bg)]">
+    <!-- Header info banner -->
+    <div class="thread-info-bar flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-[var(--app-border)] bg-[var(--app-surface)] backdrop-blur-md">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-xs font-semibold text-[var(--app-text-muted)]">ID:</span>
+        <app-copyable-text
+          [value]="threadId() || 'new-session'"
+        ></app-copyable-text>
+      </div>
+
+      <!-- Provider & Agent Selector -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
+          <label for="provider-select" class="text-[11px] text-[var(--app-text-muted)] font-medium whitespace-nowrap">
+            {{ 'codexSdk.workbench.provider' | translateContent }}:
+          </label>
+          <div class="w-28 sm:w-32">
+            <app-select
+              id="provider-select"
+              [options]="providerOptions()"
+              [ngModel]="selectedProvider()"
+              (ngModelChange)="onProviderChange($event)"
+              [disabled]="isStreaming()"
+              [inline]="true"
+            ></app-select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <label for="agent-select" class="text-[11px] text-[var(--app-text-muted)] font-medium whitespace-nowrap">
+            {{ 'codexSdk.workbench.agent' | translateContent }}:
+          </label>
+          <div class="w-36 sm:w-44">
+            <app-select
+              id="agent-select"
+              [options]="agentOptions()"
+              [ngModel]="selectedAgentCode()"
+              (ngModelChange)="onAgentChange($event)"
+              [disabled]="isStreaming() || loadingAgents()"
+              [loading]="loadingAgents()"
+              [inline]="true"
+            ></app-select>
+          </div>
+        </div>
+
+        <span class="text-xs text-[var(--app-text-muted)] tabular-nums px-2 py-1 rounded bg-[var(--app-surface-soft)] border border-[var(--app-border-soft)] whitespace-nowrap">
+          {{ turns().length }} {{ 'codexSdk.workbench.turns' | translateContent }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Timeline scroll container -->
+    <div
+      #scrollContainer
+      class="drawer-scroll-container flex-1 overflow-y-auto p-4 space-y-4"
+      (scroll)="onContainerScroll($event)"
+    >
+      @if (loading()) {
+        <div class="flex justify-center p-8">
+          <app-progress-spinner></app-progress-spinner>
+        </div>
+      } @else if (turns().length === 0) {
+        <div class="p-6">
+          <app-empty-state
+            [title]="'codexSdk.workbench.empty.title' | translateContent"
+            [description]="'codexSdk.workbench.empty.desc' | translateContent"
+            icon="pi pi-comments"
+            size="compact"
+          ></app-empty-state>
+        </div>
+      } @else {
+        @for (turn of turns(); track turn.id; let i = $index) {
+          <div
+            class="turn-bubble-wrapper flex flex-col w-full"
+            [class.items-end]="turn.role === 'user'"
+            [class.items-start]="turn.role === 'assistant'"
+          >
+            <div
+              class="turn-bubble max-w-[88%] rounded-xl p-3.5 text-sm transition-all shadow-sm"
+              [class.user]="turn.role === 'user'"
+              [class.assistant]="turn.role === 'assistant'"
+            >
+              <div class="turn-header flex items-center justify-between gap-2 mb-1.5 text-xs text-[var(--app-text-muted)]">
+                <span class="font-medium uppercase tracking-wider text-[11px]">
+                  {{ (turn.role === 'user' ? 'codexSdk.workbench.role.user' : 'codexSdk.workbench.role.assistant') | translateContent }}
+                </span>
+                @if (turn.createdAt) {
+                  <span class="tabular-nums text-[10px]">{{ turn.createdAt | slice:11:16 }}</span>
+                }
+              </div>
+
+              <!-- Preflight status chip -->
+              @if (turn.preflight) {
+                <div class="preflight-badge-container mb-2.5 p-2 rounded-lg bg-[var(--app-surface-soft)] border border-[var(--app-border-soft)] text-xs flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-[var(--app-text-muted)]">
+                    <i class="pi pi-server text-xs text-[var(--app-primary)]"></i>
+                    <span>{{ turn.preflight.agentCode }} ({{ turn.preflight.provider }})</span>
+                  </div>
+                  <app-badge
+                    [label]="turn.preflight.status || 'READY'"
+                    variant="success"
+                  ></app-badge>
+                </div>
+              }
+
+              <!-- Reasoning thought process (collapsible) -->
+              @if (turn.reasoning) {
+                <div class="reasoning-container mb-2.5 rounded-lg border border-[var(--app-border)] overflow-hidden bg-[var(--app-surface)]">
+                  <button
+                    type="button"
+                    class="reasoning-header w-full px-2.5 py-1.5 text-left flex items-center justify-between text-xs hover:bg-[var(--app-surface-hover)] transition-colors text-[var(--app-text-muted)]"
+                    (click)="toggleReasoning(turn.id)"
+                  >
+                    <div class="flex items-center gap-2 font-mono">
+                      <i
+                        class="pi text-[10px] transition-transform duration-150"
+                        [class.pi-chevron-down]="isReasoningExpanded(turn.id)"
+                        [class.pi-chevron-right]="!isReasoningExpanded(turn.id)"
+                      ></i>
+                      <i class="pi pi-lightbulb text-amber-500 text-xs"></i>
+                      <span class="font-medium">{{ 'codexSdk.workbench.reasoning' | translateContent }}</span>
+                    </div>
+                  </button>
+                  @if (isReasoningExpanded(turn.id)) {
+                    <div class="reasoning-content p-2.5 border-t border-[var(--app-border-soft)] text-xs font-mono whitespace-pre-wrap break-words leading-relaxed text-[var(--app-text-muted)] bg-[var(--app-surface-soft)]">
+                      {{ turn.reasoning }}
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Content text -->
+              <div class="turn-content whitespace-pre-wrap break-words leading-relaxed text-[var(--app-text)]">
+                {{ turn.content }}
+                @if (isStreaming() && turn.status === 'streaming') {
+                  <span class="streaming-cursor inline-block w-1.5 h-3.5 ml-0.5 bg-[var(--app-primary)] animate-pulse align-middle"></span>
+                }
+              </div>
+
+              <!-- Stderr / Diagnostics (collapsible alert) -->
+              @if (turn.stderrLog && turn.stderrLog.length > 0) {
+                <div class="stderr-container mt-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 overflow-hidden text-xs">
+                  <button
+                    type="button"
+                    class="stderr-header w-full px-2.5 py-1.5 text-left flex items-center justify-between text-amber-600 dark:text-amber-400 font-mono hover:bg-amber-500/20 transition-colors"
+                    (click)="toggleStderr(turn.id)"
+                  >
+                    <div class="flex items-center gap-2">
+                      <i
+                        class="pi text-[10px] transition-transform duration-150"
+                        [class.pi-chevron-down]="isStderrExpanded(turn.id)"
+                        [class.pi-chevron-right]="!isStderrExpanded(turn.id)"
+                      ></i>
+                      <i class="pi pi-exclamation-circle text-xs"></i>
+                      <span>{{ 'codexSdk.workbench.diagnostics' | translateContent }} ({{ turn.stderrLog.length }})</span>
+                    </div>
+                  </button>
+                  @if (isStderrExpanded(turn.id)) {
+                    <div class="stderr-content p-2 border-t border-amber-500/20 font-mono text-[11px] whitespace-pre-wrap break-words text-amber-700 dark:text-amber-300 bg-amber-500/5">
+                      {{ turn.stderrLog.join('\n') }}
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Tool Calls Inspector -->
+              @if (turn.toolCalls && turn.toolCalls.length > 0) {
+                <div class="tool-calls-container mt-3 space-y-2 pt-2 border-t border-[var(--app-border-soft)]">
+                  <div class="text-[11px] font-semibold text-[var(--app-text-muted)] flex items-center gap-1.5">
+                    <i class="pi pi-cog text-xs"></i>
+                    <span>{{ 'codexSdk.workbench.tools' | translateContent }} ({{ turn.toolCalls.length }})</span>
+                  </div>
+
+                  @for (tool of turn.toolCalls; track $index; let toolIdx = $index) {
+                    <div class="tool-call-item rounded-lg border border-[var(--app-border)] overflow-hidden bg-[var(--app-surface)]">
+                      <button
+                        type="button"
+                        class="tool-call-header w-full px-2.5 py-1.5 text-left flex items-center justify-between text-xs hover:bg-[var(--app-surface-hover)] transition-colors"
+                        (click)="toggleToolCall(turn.id, toolIdx)"
+                      >
+                        <div class="flex items-center gap-2 truncate">
+                          <i
+                            class="pi text-[10px] transition-transform duration-150"
+                            [class.pi-chevron-down]="isToolCallExpanded(turn.id, toolIdx)"
+                            [class.pi-chevron-right]="!isToolCallExpanded(turn.id, toolIdx)"
+                          ></i>
+                          <span class="font-mono font-medium truncate text-[var(--app-text)]">{{ tool.name }}</span>
+                        </div>
+                        <app-badge
+                          [label]="tool.status || 'success'"
+                          [variant]="tool.status === 'failed' ? 'danger' : 'success'"
+                        ></app-badge>
+                      </button>
+
+                      @if (isToolCallExpanded(turn.id, toolIdx)) {
+                        <div class="tool-call-details p-2.5 border-t border-[var(--app-border-soft)] text-xs space-y-2 bg-[var(--app-surface-soft)]">
+                          @if (tool.input) {
+                            <div>
+                              <div class="text-[10px] text-[var(--app-text-muted)] font-mono mb-1">Input:</div>
+                              <app-json-viewer [value]="tool.input"></app-json-viewer>
+                            </div>
+                          }
+                          @if (tool.output) {
+                            <div>
+                              <div class="text-[10px] text-[var(--app-text-muted)] font-mono mb-1">Output:</div>
+                              <app-json-viewer [value]="tool.output"></app-json-viewer>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Partial stream error banner -->
+        @if (streamError()) {
+          <div class="stream-error-banner p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs flex items-center justify-between gap-3 text-red-600 dark:text-red-400">
+            <div class="flex items-center gap-2 truncate">
+              <i class="pi pi-exclamation-triangle flex-shrink-0"></i>
+              <span class="truncate">{{ streamError() }}</span>
+            </div>
+            <app-button
+              variant="destructive"
+              size="sm"
+              icon="pi pi-refresh"
+              [label]="'codexSdk.workbench.retry' | translateContent"
+              (buttonClick)="retryLastPrompt()"
+            ></app-button>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Docked bottom bar (~110px) -->
+    <div class="workbench-bottom-bar p-3 border-t border-[var(--app-border)] bg-[var(--app-surface)] backdrop-blur-md">
+      <form (submit)="handleFormSubmit($event)" class="flex flex-col gap-2">
+        <textarea
+          #promptArea
+          class="prompt-textarea w-full p-2.5 text-sm rounded-lg border border-[var(--app-input-border)] bg-[var(--app-input-bg)] text-[var(--app-input-text)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--app-focus-ring)] transition-all"
+          rows="2"
+          [placeholder]="'codexSdk.workbench.promptPlaceholder' | translateContent"
+          [value]="promptInput()"
+          (input)="onInputChange($event)"
+          (keydown)="onTextareaKeydown($event)"
+          [disabled]="isStreaming()"
+        ></textarea>
+
+        <div class="flex items-center justify-between gap-2">
+          <div class="text-[11px] text-[var(--app-text-muted)] flex items-center gap-1.5">
+            <i class="pi pi-bolt text-xs text-[var(--app-primary)]"></i>
+            <span>{{ 'codexSdk.workbench.nativeSse' | translateContent }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            @if (isStreaming()) {
+              <app-button
+                variant="destructive"
+                size="sm"
+                icon="pi pi-stop-circle"
+                [label]="'codexSdk.workbench.stop' | translateContent"
+                (buttonClick)="stopStream()"
+              ></app-button>
+            } @else {
+              <app-button
+                variant="primary"
+                size="sm"
+                icon="pi pi-send"
+                type="submit"
+                [label]="'codexSdk.workbench.send' | translateContent"
+                [disabled]="!promptInput().trim()"
+                (buttonClick)="sendPrompt()"
+              ></app-button>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-drawer>

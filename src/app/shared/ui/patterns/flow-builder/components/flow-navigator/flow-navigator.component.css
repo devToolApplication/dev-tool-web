@@ -7,9 +7,9 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--app-border-soft);
-  border-radius: 8px;
+  border-radius: var(--app-radius-md, 0.5rem);
   background: var(--app-card-surface);
-  box-shadow: var(--app-shadow-sm, 0 1px 2px rgb(15 23 42 / 0.08));
+  box-shadow: var(--app-shadow-sm);
 }
 
 .flow-navigator__header {
@@ -26,8 +26,7 @@
   font-size: 10px;
   font-weight: 600;
   color: var(--app-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .flow-navigator__actions {
@@ -55,7 +54,7 @@
 }
 
 .flow-navigator__action:hover {
-  background: var(--app-chart-primary-fill, rgba(122, 119, 255, 0.08));
+  background: var(--app-chart-primary-fill);
   color: var(--app-primary);
 }
 
@@ -87,7 +86,7 @@
 }
 
 .flow-navigator__edges line {
-  stroke: var(--app-text-muted, #94a3b8);
+  stroke: var(--app-text-muted);
   stroke-width: 1;
   opacity: 0.5;
 }
@@ -143,12 +142,12 @@
 .flow-navigator__node--selected {
   border-color: var(--app-primary);
   background: var(--app-primary);
-  color: var(--app-primary-contrast, #fff);
+  color: var(--app-primary-contrast);
   transform: scale(1.08);
 }
 
 .flow-navigator__node--condition {
-  border-radius: 999px;
+  border-radius: var(--app-radius-xs, 2px);
 }
 
 .flow-navigator__node--tone-primary {
@@ -157,29 +156,29 @@
 }
 
 .flow-navigator__node--tone-info {
-  border-color: var(--app-control-info-border, #3b82f6);
-  background: color-mix(in srgb, var(--app-control-info-bg, #dbeafe) 56%, var(--app-card-surface));
+  border-color: var(--app-control-info-border);
+  background: color-mix(in srgb, var(--app-control-info-bg) 56%, var(--app-card-surface));
 }
 
 .flow-navigator__node--tone-success {
-  border-color: var(--app-control-success-border, #22c55e);
+  border-color: var(--app-control-success-border);
   background: color-mix(
     in srgb,
-    var(--app-control-success-bg, #dcfce7) 56%,
+    var(--app-control-success-bg) 56%,
     var(--app-card-surface)
   );
 }
 
 .flow-navigator__node--tone-warning {
-  border-color: var(--app-control-warn-border, #f97316);
-  background: color-mix(in srgb, var(--app-control-warn-bg, #ffedd5) 56%, var(--app-card-surface));
+  border-color: var(--app-control-warn-border);
+  background: color-mix(in srgb, var(--app-control-warn-bg) 56%, var(--app-card-surface));
 }
 
 .flow-navigator__node--tone-danger {
-  border-color: var(--app-control-danger-border, #ef4444);
+  border-color: var(--app-control-danger-border);
   background: color-mix(
     in srgb,
-    var(--app-control-danger-bg, #fee2e2) 56%,
+    var(--app-control-danger-bg) 56%,
     var(--app-card-surface)
   );
 }
@@ -187,7 +186,7 @@
 .flow-navigator__node--tone-muted,
 .flow-navigator__node--tone-neutral {
   border-color: var(--app-border-strong, var(--app-border));
-  background: color-mix(in srgb, var(--app-surface-soft, #f8fafc) 72%, var(--app-card-surface));
+  background: color-mix(in srgb, var(--app-surface-soft) 72%, var(--app-card-surface));
 }
 
 .flow-navigator__node-label {
@@ -196,7 +195,7 @@
   overflow: hidden;
   text-overflow: clip;
   font-size: 7px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
   letter-spacing: 0;
   pointer-events: none;

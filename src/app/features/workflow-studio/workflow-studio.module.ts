@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { SharedModule } from '@shared/shared.module';
 
 import { WorkflowBpmnCanvasComponent } from './bpmn/workflow-bpmn-canvas.component';
@@ -25,6 +26,7 @@ import { WorkflowListPageComponent } from './pages/workflow-list-page.component'
 import { WorkflowRunDetailPageComponent } from './pages/workflow-run-detail-page.component';
 import { WorkflowRunListPageComponent } from './pages/workflow-run-list-page.component';
 import { WorkflowRunTriggerDialogComponent } from './pages/workflow-run-trigger-dialog.component';
+import { WorkflowTaskListPageComponent } from './pages/workflow-task-list-page.component';
 import { WorkflowProblemsPanelComponent } from './problems/workflow-problems-panel.component';
 import { WorkflowLayoutService } from './services/workflow-layout.service';
 import { WorkflowEditorStore } from './store/workflow-editor.store';
@@ -53,11 +55,12 @@ const DECLARATIONS = [
   WorkflowRunListPageComponent,
   WorkflowRunDetailPageComponent,
   WorkflowRunTriggerDialogComponent,
+  WorkflowTaskListPageComponent,
 ];
 
 @NgModule({
   declarations: DECLARATIONS,
-  imports: [CommonModule, ReactiveFormsModule, SharedModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SharedModule],
   providers: [WorkflowEditorStore, WorkflowLayoutService],
 })
 export class WorkflowStudioModule {}

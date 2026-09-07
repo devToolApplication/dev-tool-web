@@ -25,7 +25,7 @@
 }
 
 .field-block__required {
-  color: var(--app-control-danger-text, #ef4444);
+  color: var(--app-control-danger-text);
 }
 
 .field-block__optional {
@@ -53,7 +53,7 @@
 
 .field-block__error {
   margin: 0;
-  color: var(--app-control-danger-text, #ef4444);
+  color: var(--app-control-danger-text);
   font-size: var(--app-font-size-xs, 0.75rem);
   font-weight: 500;
 }

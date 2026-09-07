@@ -47,6 +47,7 @@
     "layout.menu.aiAgentMcrsSecrets": "Secret AI Agent MCRS",
     "layout.menu.aiAgentMcrsConfigs": "Config AI Agent MCRS",
     "layout.menu.workflowProcess": "Workflow Process",
+    "layout.menu.codexSdkChat": "Lịch sử Chat AI Agent SDK",
     "layout.menu.kocManagement": "Quản lý KOC",
     "layout.menu.tradeBotSystem": "Trade Bot MCRS",
     "layout.menu.jobScheduler": "Lập lịch job",
@@ -152,7 +153,8 @@
     "layout.menu.profile": "Hồ sơ",
     "layout.menu.profileSettings": "Cài đặt",
     "layout.menu.privacy": "Quyền riêng tư",
-    "layout.menu.workflowRuns": "Lịch sử Run Workflow"
+    "layout.menu.workflowRuns": "Lịch sử Run Workflow",
+    "layout.menu.workflowTasks": "Nhiệm vụ chờ xử lý"
   },
   "en": {
     "layout.settings": "Settings",
@@ -202,6 +204,7 @@
     "layout.menu.aiAgentMcrsSecrets": "AI Agent MCRS Secrets",
     "layout.menu.aiAgentMcrsConfigs": "AI Agent MCRS Configs",
     "layout.menu.workflowProcess": "Workflow Process",
+    "layout.menu.codexSdkChat": "AI Agent SDK Chat History",
     "layout.menu.kocManagement": "KOC Management",
     "layout.menu.tradeBotSystem": "Trade Bot MCRS",
     "layout.menu.jobScheduler": "Job Scheduler",
@@ -307,6 +310,7 @@
     "layout.menu.mcpServerManagement": "MCP Server Management",
     "layout.menu.storageRepository": "Storage Repository",
     "layout.menu.uploadedFiles": "Uploaded Files",
-    "layout.menu.workflowRuns": "Workflow Runs & Debugger"
+    "layout.menu.workflowRuns": "Workflow Runs & Debugger",
+    "layout.menu.workflowTasks": "Pending Tasks"
   }
 }

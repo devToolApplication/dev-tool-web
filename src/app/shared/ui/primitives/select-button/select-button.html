@@ -17,7 +17,7 @@
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
         [class]="
           isOptionSelected(opt.value)
-            ? 'bg-[var(--app-primary)] text-white shadow-[0_0_14px_rgba(122,119,255,0.2)]'
+            ? 'bg-[var(--app-primary)] text-[var(--app-control-on-primary)] shadow-sm'
             : 'text-[var(--app-text-soft)] hover:text-[var(--app-text)] hover:bg-[var(--app-chart-primary-fill)]'
         "
         (click)="selectOption(opt.value)"

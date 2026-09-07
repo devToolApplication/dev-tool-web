@@ -27,12 +27,19 @@
   height: 1.75rem;
   flex: 0 0 auto;
   border: 1px solid var(--app-border);
-  border-radius: 0.375rem;
+  border-radius: var(--app-radius-sm, 0.375rem);
   background: var(--app-control-secondary-bg);
   color: var(--app-control-secondary-text);
   cursor: pointer;
+  transition: all 120ms ease;
 }
 
 .copyable-text__button:hover {
   border-color: var(--app-border-strong);
+  background: var(--app-chart-primary-fill);
+  color: var(--app-primary);
+}
+
+.copyable-text__button:active {
+  transform: scale(0.94);
 }

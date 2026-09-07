@@ -10,23 +10,23 @@
   min-width: 180px;
   min-height: 64px;
   padding: var(--app-spacing-3, 12px);
-  border: 1px solid var(--app-border, #d8dee8);
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md, 8px);
-  background: var(--app-card-surface, #fff);
-  color: var(--app-text, #1e293b);
+  background: var(--app-card-surface);
+  color: var(--app-text);
 }
 
 .workflow-node-shell--selected {
-  border-color: var(--app-primary, #7a77ff);
-  box-shadow: 0 0 0 2px var(--app-focus-ring, rgba(122, 119, 255, 0.22));
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 2px var(--app-focus-ring);
 }
 
 .workflow-node-shell--warning {
-  border-color: var(--app-control-warn-border, #f97316);
+  border-color: var(--app-control-warn-border);
 }
 
 .workflow-node-shell--error {
-  border-color: var(--app-control-danger-border, #ef4444);
+  border-color: var(--app-control-danger-border);
 }
 
 .workflow-node-shell__icon {
@@ -34,11 +34,11 @@
   width: 32px;
   height: 32px;
   place-items: center;
-  border-radius: 50%;
-  background: var(--app-chart-primary-fill, #eef2ff);
-  color: var(--app-primary, #7a77ff);
+  border-radius: var(--app-radius-sm, 0.375rem);
+  background: var(--app-chart-primary-fill);
+  color: var(--app-primary);
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .workflow-node-shell__content {
@@ -55,11 +55,12 @@
 
 .workflow-node-shell__content h3 {
   font-size: 0.875rem;
-  font-weight: 650;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .workflow-node-shell__content p {
-  color: var(--app-text-muted, #64748b);
+  color: var(--app-text-muted);
   font-size: 0.75rem;
 }
 
@@ -72,7 +73,7 @@
   display: block;
   width: 10px;
   height: 10px;
-  border: 1px solid var(--app-border-strong, #94a3b8);
+  border: 1px solid var(--app-border-strong);
   border-radius: 50%;
-  background: var(--app-card-surface, #fff);
+  background: var(--app-card-surface);
 }

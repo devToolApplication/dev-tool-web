@@ -1,6 +1,7 @@
 :host {
   display: block;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--app-bg);
   color: var(--app-text);
 }
@@ -31,8 +32,10 @@
 .loading-box {
   width: 88px;
   height: 88px;
-  border-radius: 999px;
-  background: transparent;
+  border-radius: var(--app-radius-lg, 0.75rem);
+  background: var(--app-card-surface);
+  border: 1px solid var(--app-border-soft);
+  box-shadow: var(--app-shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,7 +47,7 @@
   content: '';
   position: absolute;
   inset: 10px;
-  border-radius: 999px;
+  border-radius: var(--app-radius-md, 0.5rem);
   border: 1px solid color-mix(in srgb, var(--app-text) 26%, transparent);
   animation: loadingPulse 1.6s ease-in-out infinite;
 }
@@ -55,14 +58,12 @@
   animation-delay: 0.25s;
 }
 
-:host ::ng-deep .loading-box .p-progressspinner {
+.loading-box app-progress-spinner {
   width: 52px;
   height: 52px;
-}
-
-:host ::ng-deep .loading-box .p-progressspinner-circle {
-  stroke: var(--app-primary);
-  stroke-linecap: round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes loadingPulse {

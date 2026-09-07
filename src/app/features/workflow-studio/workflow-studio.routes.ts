@@ -4,6 +4,7 @@ import { WorkflowBuilderPageComponent } from './pages/workflow-builder-page.comp
 import { WorkflowListPageComponent } from './pages/workflow-list-page.component';
 import { WorkflowRunDetailPageComponent } from './pages/workflow-run-detail-page.component';
 import { WorkflowRunListPageComponent } from './pages/workflow-run-list-page.component';
+import { WorkflowTaskListPageComponent } from './pages/workflow-task-list-page.component';
 
 export const workflowStudioRoutes: Routes = [
   {
@@ -22,6 +23,10 @@ export const workflowStudioRoutes: Routes = [
   {
     path: 'ai-agent-mcrs/workflows/runs/:runId',
     component: WorkflowRunDetailPageComponent,
+  },
+  {
+    path: 'ai-agent-mcrs/workflows/tasks',
+    component: WorkflowTaskListPageComponent,
   },
   {
     path: 'ai-agent-mcrs/workflows/:workflowId/edit',

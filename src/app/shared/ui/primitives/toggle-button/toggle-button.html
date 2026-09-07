@@ -13,7 +13,7 @@
     class="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25 disabled:cursor-not-allowed disabled:opacity-60"
     [class]="
       value
-        ? 'bg-[var(--app-primary)] border-[var(--app-primary)] text-white shadow-[0_0_14px_rgba(122,119,255,0.2)]'
+        ? 'bg-[var(--app-primary)] border-[var(--app-primary)] text-[var(--app-control-on-primary)] shadow-sm'
         : 'bg-[var(--app-custom-input-bg)] border-[var(--app-input-border)] text-[var(--app-custom-input-text)] hover:border-[var(--app-primary)]'
     "
     (click)="onChange(!value)"

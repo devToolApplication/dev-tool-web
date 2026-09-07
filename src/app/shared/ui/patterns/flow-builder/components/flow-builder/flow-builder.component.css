@@ -3,12 +3,15 @@
   width: 100%;
   height: var(--flow-builder-height, 100%);
   min-height: var(--flow-builder-min-height, min(760px, calc(100vh - 3rem)));
+  min-height: var(--flow-builder-min-height, min(760px, calc(100dvh - 3rem)));
 }
 
 :host(:fullscreen) {
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .flow-builder {
@@ -95,7 +98,7 @@
   border: 1px solid var(--app-border-soft);
   border-radius: 8px;
   background: color-mix(in srgb, var(--app-card-surface) 96%, transparent);
-  box-shadow: var(--app-shadow-md, 0 12px 30px rgb(15 23 42 / 0.18));
+  box-shadow: var(--app-shadow-md);
   backdrop-filter: blur(12px);
 }
 
@@ -106,7 +109,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--app-text-muted);
 }
 
@@ -165,7 +168,7 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 8px;
+  border-radius: var(--app-radius-sm, 0.375rem);
   background: var(--app-chart-primary-fill);
   color: var(--app-primary);
 }
@@ -174,7 +177,8 @@
 .flow-builder__inspector-default h4 {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--app-text);
 }
 
@@ -194,9 +198,9 @@
 .flow-builder__inspector-section h5 {
   margin: 0;
   font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--app-text-soft, var(--app-text));
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--app-text-muted);
 }
 
 .flow-builder__inspector-fields {

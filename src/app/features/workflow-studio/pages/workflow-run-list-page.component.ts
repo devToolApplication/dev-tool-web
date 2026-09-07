@@ -26,7 +26,7 @@ export class WorkflowRunListPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  readonly tableConfig = buildWorkflowRunTableConfig();
+  readonly tableConfig = signal(buildWorkflowRunTableConfig([]));
   readonly actions = buildWorkflowRunListActions();
   readonly runs = signal<WorkflowRun[]>([]);
   readonly workflows = signal<WorkflowDefinition[]>([]);
@@ -60,6 +60,7 @@ export class WorkflowRunListPageComponent implements OnInit {
     try {
       const response = await firstValueFrom(this.api.getWorkflowPage({ size: 100 }));
       this.workflows.set(response.data || []);
+      this.tableConfig.set(buildWorkflowRunTableConfig(this.workflows()));
       this.filterFields.set(buildWorkflowRunFilterFields(this.workflows()));
     } catch {
       // ignore

@@ -1,7 +1,7 @@
 <div class="fixed top-4 right-4 z-[2600] flex flex-col gap-2 max-w-sm">
   @for (msg of toastService.messages(); track msg.id) {
     <div
-      class="flex items-start gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-md animate-[slideIn_200ms_ease-out]"
+      class="flex items-start gap-3 rounded-lg border px-4 py-3 shadow-[var(--app-shadow-lg)] backdrop-blur-md animate-[slideIn_200ms_ease-out]"
       [ngClass]="{
         'bg-[var(--app-control-success-bg)] border-[var(--app-control-success-border)] text-[var(--app-control-success-text)]':
           msg.severity === 'success',

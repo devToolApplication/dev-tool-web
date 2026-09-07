@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.turn-bubble {
+  border: 1px solid var(--app-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+.turn-bubble.user {
+  background-color: var(--app-surface-hover);
+  color: var(--app-text);
+  border-color: var(--app-border-strong, var(--app-border));
+}
+
+.turn-bubble.assistant {
+  background-color: var(--app-surface-card, var(--app-surface));
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+.streaming-cursor {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-pulse {
+  animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+

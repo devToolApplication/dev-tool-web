@@ -1,7 +1,7 @@
 .workflow-builder {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-xs);
+  gap: var(--app-space-2, 0.5rem);
   min-height: 0;
   flex: 1;
 }
@@ -10,28 +10,28 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
-  background: var(--dt-color-surface-card);
-  border: 1px solid var(--dt-color-border-subtle);
-  border-radius: var(--dt-radius-md);
+  padding: var(--app-space-2, 0.5rem) var(--app-space-3, 0.75rem);
+  background: var(--app-card-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md, 0.5rem);
 }
 
 .workflow-builder__identity {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm);
+  gap: var(--app-space-3, 0.75rem);
   flex: 1;
   min-width: 0;
 }
 
 .workflow-builder__name-input {
-  font-size: var(--dt-font-size-md);
+  font-size: var(--app-font-size-md, 1rem);
   font-weight: 600;
-  color: var(--dt-color-text-primary);
+  color: var(--app-text);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--dt-radius-sm);
-  padding: var(--dt-spacing-2xs) var(--dt-spacing-xs);
+  border-radius: var(--app-radius-sm, 0.375rem);
+  padding: 0.125rem var(--app-space-2, 0.5rem);
   outline: none;
   min-width: 14rem;
   max-width: 28rem;
@@ -40,25 +40,26 @@
 
 .workflow-builder__name-input:hover,
 .workflow-builder__name-input:focus {
-  background: var(--dt-color-surface-hover);
-  border-color: var(--dt-color-border-subtle);
+  background: var(--app-surface-soft);
+  border-color: var(--app-border);
 }
 
 .workflow-builder__top-controls {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-xs);
+  gap: var(--app-space-2, 0.5rem);
 }
 
 .workflow-builder__workspace {
   display: flex;
   height: calc(100vh - 195px);
+  height: calc(100dvh - 195px);
   min-height: 520px;
-  border: 1px solid var(--dt-color-border-subtle);
-  border-radius: var(--dt-radius-md);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md, 0.5rem);
   overflow: hidden;
   position: relative;
-  background: var(--dt-color-surface-card);
+  background: var(--app-surface);
 }
 
 .workflow-builder__canvas {
@@ -71,54 +72,54 @@
 .workflow-desc-drawer {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-md);
-  padding: var(--dt-spacing-md);
+  gap: var(--app-space-4, 1rem);
+  padding: var(--app-space-4, 1rem);
 }
 
 .workflow-desc-drawer__actions {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-top: var(--dt-spacing-sm);
+  padding-top: var(--app-space-2, 0.5rem);
 }
 
 .workflow-versions {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-xs);
-  padding: var(--dt-spacing-sm);
+  gap: var(--app-space-2, 0.5rem);
+  padding: var(--app-space-3, 0.75rem);
 }
 
 .workflow-versions__item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
-  border-radius: var(--dt-radius-sm);
+  padding: var(--app-space-2, 0.5rem) var(--app-space-3, 0.75rem);
+  border-radius: var(--app-radius-sm, 0.375rem);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--dt-color-text-primary);
+  color: var(--app-text);
   cursor: pointer;
   text-align: left;
-  font-size: var(--dt-font-size-sm);
+  font-size: var(--app-font-size-sm, 0.875rem);
   transition: all 0.15s ease;
 }
 
 .workflow-versions__item:hover {
-  background: var(--dt-color-surface-hover);
+  background: var(--app-surface-soft);
 }
 
 .workflow-versions__item--selected {
-  background: var(--dt-color-surface-selected);
-  border-color: var(--dt-color-border-selected);
+  background: var(--app-surface-overlay);
+  border-color: var(--app-primary);
   font-weight: 600;
 }
 
 .workflow-import-drawer {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-md);
-  padding: var(--dt-spacing-md);
+  gap: var(--app-space-4, 1rem);
+  padding: var(--app-space-4, 1rem);
 }
 
 .workflow-import-drawer__toolbar {
@@ -131,20 +132,20 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: var(--dt-spacing-sm);
-  padding-top: var(--dt-spacing-sm);
+  gap: var(--app-space-2, 0.5rem);
+  padding-top: var(--app-space-2, 0.5rem);
 }
 
 .workflow-import-textarea {
   width: 100%;
   min-height: 280px;
-  border-radius: var(--dt-radius-md);
-  border: 1px solid var(--dt-color-border-subtle);
-  background: var(--dt-color-surface-hover);
-  color: var(--dt-color-text-primary);
-  padding: var(--dt-spacing-sm);
+  border-radius: var(--app-radius-md, 0.5rem);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-soft);
+  color: var(--app-text);
+  padding: var(--app-space-3, 0.75rem);
   font-family: monospace;
-  font-size: var(--dt-font-size-xs);
+  font-size: var(--app-font-size-xs, 0.75rem);
   line-height: 1.4;
   outline: none;
   resize: vertical;

@@ -18,6 +18,13 @@ export class WorkflowRunTriggerDialogComponent {
   jsonError: string | null = null;
   workflows: WorkflowDefinition[] = [];
 
+  get workflowOptions(): { label: string; value: string }[] {
+    return this.workflows.map((wf) => ({
+      label: `${wf.name} (${wf.id})`,
+      value: wf.id,
+    }));
+  }
+
   readonly form: FormGroup;
 
   constructor(

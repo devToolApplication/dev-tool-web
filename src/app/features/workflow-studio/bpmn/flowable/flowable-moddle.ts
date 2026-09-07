@@ -8,6 +8,19 @@ export const flowableModdle = {
   associations: [],
   types: [
     {
+      name: 'UserTaskExtensions',
+      isAbstract: true,
+      extends: ['bpmn:UserTask'],
+      properties: [
+        { name: 'formKey', isAttr: true, type: 'String' },
+        { name: 'assignee', isAttr: true, type: 'String' },
+        { name: 'candidateUsers', isAttr: true, type: 'String' },
+        { name: 'candidateGroups', isAttr: true, type: 'String' },
+        { name: 'dueDate', isAttr: true, type: 'String' },
+        { name: 'priority', isAttr: true, type: 'String' },
+      ],
+    },
+    {
       name: 'ServiceTaskExtensions',
       isAbstract: true,
       extends: ['bpmn:ServiceTask'],

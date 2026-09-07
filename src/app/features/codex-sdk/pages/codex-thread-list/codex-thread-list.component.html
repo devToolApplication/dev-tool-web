@@ -1,0 +1,87 @@
+<app-page-shell
+  title="codexSdk.title"
+  subtitle="codexSdk.subtitle"
+  layout="wide"
+  [breadcrumb]="[
+    { label: 'layout.brandName' },
+    { label: 'layout.menu.codexSdkChat', routerLink: '/codex-sdk/threads' }
+  ]"
+  [loading]="loading()"
+  (retry)="loadThreads()"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="toolbarActions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <app-section-panel
+    page-toolbar
+    title="codexSdk.filter.title"
+    subtitle="codexSdk.filter.subtitle"
+  >
+    <app-filter-panel
+      [filters]="filterFields"
+      [values]="filterValues()"
+      (valueChange)="onFilterChange($event)"
+      (apply)="onFilterChange($event)"
+      (reset)="onFilterReset()"
+    ></app-filter-panel>
+  </app-section-panel>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="threads()"
+    [loading]="loading()"
+    [totalRecords]="threads().length"
+    [customTemplates]="{
+      id: idCellTpl,
+      previewText: previewCellTpl,
+      turnCount: turnCountCellTpl,
+      actions: actionsCellTpl
+    }"
+    (rowClick)="openThread($event.id)"
+    (refresh)="loadThreads()"
+  >
+  </app-table>
+
+  <!-- Cell Templates -->
+  <ng-template #idCellTpl let-row="row">
+    <div class="flex items-center gap-1 min-w-0 max-w-full font-mono text-xs">
+      <span class="truncate">{{ row.id }}</span>
+      <app-copyable-text [value]="row.id"></app-copyable-text>
+    </div>
+  </ng-template>
+
+  <ng-template #previewCellTpl let-row="row">
+    <div class="truncate text-sm text-[var(--app-text)]" [title]="row.previewText || ''">
+      {{ row.previewText || ('codexSdk.table.noPreview' | translateContent) }}
+    </div>
+  </ng-template>
+
+  <ng-template #turnCountCellTpl let-row="row">
+    <span class="tabular-nums text-xs px-2 py-0.5 rounded bg-[var(--app-surface-hover)] border border-[var(--app-border)] text-[var(--app-text-muted)]">
+      {{ row.turnCount || 0 }} {{ 'codexSdk.workbench.turns' | translateContent }}
+    </span>
+  </ng-template>
+
+  <ng-template #actionsCellTpl let-row="row">
+    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+      <app-button
+        variant="ghost"
+        size="sm"
+        icon="pi pi-eye"
+        [label]="'codexSdk.table.viewDetail' | translateContent"
+        (buttonClick)="openThread(row.id)"
+      ></app-button>
+    </div>
+  </ng-template>
+
+  <!-- Chat Drawer Workbench -->
+  <app-codex-chat-drawer
+    [show]="drawerVisible()"
+    [selectedThreadId]="selectedThreadId()"
+    (closed)="onDrawerClosed()"
+    (messageSent)="loadThreads()"
+  ></app-codex-chat-drawer>
+</app-page-shell>

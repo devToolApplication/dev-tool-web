@@ -4,6 +4,7 @@ import { Subscription, interval } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
 import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/action-toolbar.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { computeWorkflowRuntimeVisualState } from '../model/workflow-graph.utils';
 import {
@@ -24,6 +25,7 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
   private readonly api = inject(WorkflowApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
 
   readonly runId = signal<string>('');
   readonly run = signal<WorkflowRun | null>(null);
@@ -32,6 +34,12 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
   readonly runtimeVisualState = signal<WorkflowRuntimeVisualState>({});
   readonly selectedNodeId = signal<string | null>(null);
   readonly selectedExecution = signal<WorkflowNodeExecution | null>(null);
+
+  readonly payloadDialogVisible = signal(false);
+  readonly payloadDialogTitle = signal('');
+  readonly payloadDialogData = signal<unknown>(null);
+  readonly runPayloadsDialogVisible = signal(false);
+  readonly runPayloadTab = signal<'input' | 'output'>('input');
 
   readonly loading = signal(false);
   readonly retrying = signal(false);
@@ -63,6 +71,14 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
         icon: 'pi pi-arrow-left',
         placement: 'secondary',
         variant: 'ghost',
+      },
+      {
+        id: 'payloads',
+        label: 'workflowStudio.lifecycle.runPayloads',
+        icon: 'pi pi-code',
+        placement: 'secondary',
+        variant: 'secondary',
+        disabled: !this.run(),
       },
       {
         id: 'refresh',
@@ -174,6 +190,31 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
     this.selectedExecution.set(exec);
   }
 
+  openNodePayloadDialog(titleKey: string, nodeId: string, data: unknown): void {
+    const label = this.i18n.t(titleKey);
+    this.payloadDialogTitle.set(`${label} (${nodeId})`);
+    this.payloadDialogData.set(data);
+    this.payloadDialogVisible.set(true);
+  }
+
+  closeNodePayloadDialog(): void {
+    this.payloadDialogVisible.set(false);
+    this.payloadDialogData.set(null);
+  }
+
+  openRunPayloads(): void {
+    this.runPayloadTab.set('input');
+    this.runPayloadsDialogVisible.set(true);
+  }
+
+  closeRunPayloads(): void {
+    this.runPayloadsDialogVisible.set(false);
+  }
+
+  setRunPayloadTab(tab: 'input' | 'output'): void {
+    this.runPayloadTab.set(tab);
+  }
+
   togglePolling(): void {
     this.autoPolling.update((v) => !v);
     if (this.autoPolling()) {
@@ -231,6 +272,9 @@ export class WorkflowRunDetailPageComponent implements OnInit, OnDestroy {
         break;
       case 'retry':
         void this.retryRun();
+        break;
+      case 'payloads':
+        this.openRunPayloads();
         break;
       default:
         break;

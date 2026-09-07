@@ -1,7 +1,7 @@
 <div class="relative inline-block">
   <button
     type="button"
-    class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--app-primary)] text-white shadow-lg transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25"
+    class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--app-primary)] text-[var(--app-control-on-primary)] shadow-md transition-all duration-200 hover:brightness-110 active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/25"
     [attr.aria-label]="ariaLabel | translateContent"
     [attr.aria-expanded]="menuOpen"
     (click)="menuOpen = !menuOpen"
@@ -22,7 +22,7 @@
       @for (item of model; track item.label) {
         <button
           type="button"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-control-secondary-bg)] border border-[var(--app-control-secondary-border)] text-[var(--app-text)] shadow-md transition-all duration-150 hover:bg-[var(--app-chart-primary-fill)] hover:text-[var(--app-primary)]"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--app-control-secondary-bg)] border border-[var(--app-control-secondary-border)] text-[var(--app-text)] shadow-sm transition-all duration-150 hover:bg-[var(--app-chart-primary-fill)] hover:text-[var(--app-primary)] active:scale-[0.96]"
           [attr.aria-label]="item.label | translateContent"
           [attr.title]="item.label | translateContent"
           (click)="onItemClick(item)"

@@ -1,7 +1,27 @@
+import '@angular/compiler';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 
+vi.mock('@bpmn-io/properties-panel', () => ({
+  CheckboxEntry: {},
+  Group: {},
+  ListGroup: {},
+  SelectEntry: {},
+  TextAreaEntry: {},
+  TextFieldEntry: {},
+  isCheckboxEntryEdited: vi.fn(),
+  isSelectEntryEdited: vi.fn(),
+  isTextAreaEntryEdited: vi.fn(),
+  isTextFieldEntryEdited: vi.fn(),
+}));
+
+vi.mock('bpmn-js-properties-panel', () => ({
+  BpmnPropertiesPanelModule: {},
+  BpmnPropertiesProviderModule: {},
+}));
+
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { WorkflowApiService } from '../api/workflow-api.service';
 import { WorkflowRun } from '../model/workflow-studio.model';
 import { WorkflowRunDetailPageComponent } from './workflow-run-detail-page.component';
@@ -14,6 +34,7 @@ describe('WorkflowRunDetailPageComponent', () => {
     retryRun: ReturnType<typeof vi.fn>;
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let i18nService: { t: ReturnType<typeof vi.fn> };
 
   const sampleBpmnXml = `<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
     <process id="wf_1">
@@ -55,7 +76,7 @@ describe('WorkflowRunDetailPageComponent', () => {
         attempt: 1,
         inputSnapshot: { key: 'val' },
         output: { result: 'ok' },
-        evidence: null,
+        evidence: { proof: 'yes' },
         reason: null,
         errorCode: null,
         errorMessage: null,
@@ -75,6 +96,7 @@ describe('WorkflowRunDetailPageComponent', () => {
       retryRun: vi.fn(() => of({ ...run, status: 'RUNNING' })),
     };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
+    i18nService = { t: vi.fn((key: string) => key) };
 
     const activatedRoute: any = {
       snapshot: { paramMap: { get: () => 'run-1' } },
@@ -85,6 +107,7 @@ describe('WorkflowRunDetailPageComponent', () => {
         { provide: WorkflowApiService, useValue: api },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: I18nService, useValue: i18nService },
       ],
     });
 
@@ -116,5 +139,29 @@ describe('WorkflowRunDetailPageComponent', () => {
     await component.retryRun();
     expect(api.retryRun).toHaveBeenCalledWith('run-1');
     expect(component.run()?.status).toBe('RUNNING');
+  });
+
+  it('opens and closes node payload modal dialog', () => {
+    component.openNodePayloadDialog('workflowStudio.runtime.viewInputSnapshot', 'task-1', { foo: 'bar' });
+    expect(component.payloadDialogVisible()).toBe(true);
+    expect(component.payloadDialogTitle()).toBe('workflowStudio.runtime.viewInputSnapshot (task-1)');
+    expect(component.payloadDialogData()).toEqual({ foo: 'bar' });
+
+    component.closeNodePayloadDialog();
+    expect(component.payloadDialogVisible()).toBe(false);
+    expect(component.payloadDialogData()).toBeNull();
+  });
+
+  it('opens and switches tabs for run payloads modal dialog', () => {
+    component.run.set(run);
+    component.onToolbarAction({ id: 'payloads' });
+    expect(component.runPayloadsDialogVisible()).toBe(true);
+    expect(component.runPayloadTab()).toBe('input');
+
+    component.setRunPayloadTab('output');
+    expect(component.runPayloadTab()).toBe('output');
+
+    component.closeRunPayloads();
+    expect(component.runPayloadsDialogVisible()).toBe(false);
   });
 });

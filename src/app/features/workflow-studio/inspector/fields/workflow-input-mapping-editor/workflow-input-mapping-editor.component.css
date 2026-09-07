@@ -27,10 +27,9 @@
   grid-template-columns: 1fr 1fr auto;
   gap: var(--app-spacing-2, 0.5rem);
   font-size: var(--app-font-size-xs, 0.75rem);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--app-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.01em;
   padding-bottom: var(--app-spacing-1, 0.25rem);
 }
 
@@ -53,7 +52,7 @@
   flex-direction: column;
   gap: var(--app-spacing-2, 0.5rem);
   padding-top: var(--app-spacing-2, 0.5rem);
-  border-top: 1px dashed var(--app-border, rgba(133, 156, 221, 0.2));
+  border-top: 1px dashed var(--app-border);
 }
 
 .workflow-input-mapping-editor__advanced-toggle {

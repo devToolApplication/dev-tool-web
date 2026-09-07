@@ -7,6 +7,8 @@ html,
 body {
   margin: 0;
   font-family:
+    'Geist',
+    'Outfit',
     Inter,
     -apple-system,
     BlinkMacSystemFont,
@@ -15,6 +17,9 @@ body {
     sans-serif;
   background: var(--app-bg);
   color: var(--app-text);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes app-dialog-in {

@@ -187,9 +187,16 @@ export class SideMenuComponent implements OnInit {
 
   isItemActive(item: AppMenuItem): boolean {
     const itemUrl = this.itemUrl(item);
+    const hasChildren = (item.items?.length ?? 0) > 0;
 
-    if (itemUrl && this.isRoutePrefix(itemUrl, this.currentUrl())) {
-      return true;
+    if (itemUrl) {
+      if (hasChildren) {
+        if (this.isRoutePrefix(itemUrl, this.currentUrl())) {
+          return true;
+        }
+      } else if (this.currentUrl() === itemUrl) {
+        return true;
+      }
     }
 
     return item.items?.some((child) => this.isItemActive(child)) ?? false;

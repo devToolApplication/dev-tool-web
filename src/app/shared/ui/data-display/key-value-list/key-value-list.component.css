@@ -22,14 +22,16 @@
 
 .key-value-list dt {
   color: var(--app-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .key-value-list dd {
   min-width: 0;
   margin: 0;
   color: var(--app-text);
+  font-size: 0.875rem;
 }
 
 .key-value-list__empty {

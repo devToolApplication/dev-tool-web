@@ -25,6 +25,16 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         icon: 'pi pi-history',
         routerLink: '/ai-agent-mcrs/workflows/runs',
       },
+      {
+        label: 'layout.menu.workflowTasks',
+        icon: 'pi pi-list-check',
+        routerLink: '/ai-agent-mcrs/workflows/tasks',
+      },
+      {
+        label: 'layout.menu.codexSdkChat',
+        icon: 'pi pi-comments',
+        routerLink: '/codex-sdk/threads',
+      },
     ],
   },
   {

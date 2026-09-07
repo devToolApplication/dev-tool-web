@@ -8,30 +8,43 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1.125rem;
   border: 1px solid var(--app-border);
-  border-radius: 0.75rem;
+  border-radius: var(--app-radius-lg, 0.75rem);
   background: var(--app-card-surface-strong);
 }
 
 .service-detail__hero h2 {
   margin: 0;
   color: var(--app-text);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .service-detail__hero p {
   margin: 0.25rem 0 0;
   color: var(--app-text-muted);
+  font-size: 0.8125rem;
 }
 
 .service-detail__eyebrow {
   color: var(--app-primary) !important;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: monospace;
+  letter-spacing: 0.02em;
 }
 
 .service-detail__footer {
   display: flex;
+  flex-direction: column-reverse;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .service-detail__footer {
+    flex-direction: row;
+  }
 }

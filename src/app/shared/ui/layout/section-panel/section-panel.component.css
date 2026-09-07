@@ -55,12 +55,14 @@
 
 .section-panel h2 {
   color: var(--app-text);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .section-panel p {
   color: var(--app-text-muted);
+  font-size: 0.8125rem;
 }
 
 .section-panel__actions {

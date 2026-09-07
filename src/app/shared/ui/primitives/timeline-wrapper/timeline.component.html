@@ -27,7 +27,7 @@
             [ngTemplateOutletContext]="{ $implicit: item }"
           ></ng-container>
         } @else {
-          <div class="h-3 w-3 rounded-full bg-[var(--app-primary)]"></div>
+          <div class="h-2.5 w-2.5 rounded-[var(--app-radius-xs,2px)] bg-[var(--app-primary)]"></div>
         }
         @if ($index < value.length - 1) {
           <div class="w-0.5 flex-1 min-h-[2rem] bg-[var(--app-border)]"></div>

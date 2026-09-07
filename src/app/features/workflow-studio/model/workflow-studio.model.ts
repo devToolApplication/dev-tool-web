@@ -298,3 +298,27 @@ export interface WorkflowPageQuery {
   workflowId?: string;
   status?: WorkflowRunStatus;
 }
+
+export interface WorkflowTask {
+  id: string;
+  name: string;
+  processInstanceId: string;
+  executionId?: string;
+  taskDefinitionKey?: string;
+  formKey?: string | null;
+  workflowId?: string | null;
+  workflowName?: string | null;
+  assignee?: string | null;
+  createTime?: string | null;
+  dueDate?: string | null;
+  priority?: number | null;
+  variables?: Record<string, JsonValue>;
+}
+
+export interface WorkflowTaskPageQuery {
+  page?: number;
+  size?: number;
+  workflowId?: string;
+  assignee?: string;
+  unassignedOnly?: boolean;
+}

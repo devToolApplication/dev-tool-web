@@ -1,5 +1,6 @@
 .error-page {
   min-height: calc(100vh - 8rem);
+  min-height: calc(100dvh - 8rem);
   display: grid;
   place-items: center;
 }
@@ -8,30 +9,40 @@
   width: min(560px, 100%);
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 1rem;
-  padding: 2rem 1.5rem;
+  border-radius: var(--app-radius-lg, 0.75rem);
+  padding: 2.25rem 1.75rem;
   text-align: center;
+  box-shadow: var(--app-shadow-md);
 }
 
 .error-code {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 0.75rem;
-  border-radius: 999px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: var(--app-radius-md, 0.5rem);
   background: color-mix(in srgb, var(--app-primary) 15%, var(--app-transparent));
   color: var(--app-primary);
-  font-size: 1.35rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: monospace;
+  letter-spacing: 0.02em;
   display: grid;
   place-items: center;
 }
 
 .error-card h1 {
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--app-text);
 }
 
 .error-card p {
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
+  color: var(--app-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .error-card a {

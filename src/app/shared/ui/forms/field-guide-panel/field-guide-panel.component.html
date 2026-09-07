@@ -24,7 +24,7 @@
         <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           @for (field of fields; track field.key) {
             <div class="rounded-lg border app-border app-bg-soft p-4">
-              <div class="text-xs font-bold uppercase tracking-wide app-text-muted">
+              <div class="text-xs font-medium tracking-normal app-text-muted">
                 {{ field.label | translateContent }}
               </div>
               <div class="mt-2 break-words app-text">
@@ -39,7 +39,7 @@
         <div class="mt-4 grid gap-3 xl:grid-cols-2">
           @for (selection of selections; track selection.title) {
             <div class="rounded-lg border app-border p-4">
-              <div class="text-sm font-bold app-text">{{ selection.title | translateContent }}</div>
+              <div class="text-sm font-semibold app-text">{{ selection.title | translateContent }}</div>
               <div class="mt-2 break-words app-text">
                 {{ selection.description | translateContent }}
               </div>
@@ -60,7 +60,7 @@
                 <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   @for (field of section.fields; track field.key) {
                     <div class="rounded-lg border app-border app-bg-soft p-4">
-                      <div class="text-xs font-bold uppercase tracking-wide app-text-muted">
+                      <div class="text-xs font-medium tracking-normal app-text-muted">
                         {{ field.label | translateContent }}
                       </div>
                       <div class="mt-2 break-words app-text">
@@ -76,7 +76,7 @@
                   @for (example of section.examples; track example.title) {
                     <div class="rounded-lg border app-border p-4">
                       <div class="flex items-start justify-between gap-2">
-                        <div class="text-sm font-bold app-text">
+                        <div class="text-sm font-semibold app-text">
                           {{ example.title | translateContent }}
                         </div>
                         <app-button
@@ -116,7 +116,7 @@
           @for (example of examples; track example.title) {
             <div class="rounded-lg border app-border p-4">
               <div class="flex items-start justify-between gap-2">
-                <div class="text-sm font-bold app-text">{{ example.title | translateContent }}</div>
+                <div class="text-sm font-semibold app-text">{{ example.title | translateContent }}</div>
                 <app-button
                   size="sm"
                   variant="ghost"

@@ -13,13 +13,7 @@ export default defineConfig({
     {
       command: 'npm run start:dev -- --host 127.0.0.1 --port ' + appPort,
       url: appBaseUrl,
-      reuseExistingServer: false,
-      timeout: 120000,
-    },
-    {
-      command: 'ng run dev-tool-web:storybook --host 127.0.0.1 --port ' + storybookPort + ' --ci --open=false',
-      url: storybookBaseUrl,
-      reuseExistingServer: false,
+      reuseExistingServer: true,
       timeout: 120000,
     },
   ],

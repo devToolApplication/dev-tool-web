@@ -3,6 +3,7 @@
   --shell-sidebar-collapsed-width: 72px;
 
   height: 100vh;
+  min-height: 100dvh;
   background: var(--app-layout-background);
   color: var(--app-text);
   position: relative;
@@ -73,6 +74,7 @@
 .content-area {
   margin-left: var(--shell-sidebar-width);
   height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   min-width: 0;

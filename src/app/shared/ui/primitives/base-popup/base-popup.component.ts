@@ -25,7 +25,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
         @if (modal) {
           <button
             type="button"
-            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            class="absolute inset-0 bg-[var(--app-overlay-mask,rgba(0,0,0,0.5))] backdrop-blur-sm"
             [attr.aria-label]="'close' | translateContent"
             (click)="dismissableMask ? onDismiss() : null"
           ></button>
@@ -35,7 +35,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
           role="dialog"
           [attr.aria-label]="resolvedAriaLabel"
           [attr.aria-modal]="modal"
-          class="relative z-10 flex max-h-[90vh] flex-col rounded-2xl border border-[var(--app-border-strong)] bg-[var(--app-overlay-bg)] shadow-2xl backdrop-blur-lg animate-[app-dialog-in_200ms_ease-out]"
+          class="relative z-10 flex max-h-[90vh] flex-col rounded-2xl border border-[var(--app-border-strong)] bg-[var(--app-overlay-bg)] shadow-[var(--app-shadow-lg)] backdrop-blur-lg animate-[app-dialog-in_200ms_ease-out]"
           [class]="resolvedStyleClass"
           [style.width]="popupWidth"
           (keydown.escape)="closeOnEscape ? onDismiss() : null"
@@ -62,7 +62,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
             <div class="flex items-center gap-2">
               @if (loading) {
                 <span
-                  class="inline-flex items-center gap-1 rounded-full bg-[var(--app-control-info-bg)] px-2 py-0.5 text-xs text-[var(--app-control-info-text)] border border-[var(--app-control-info-border)]"
+                  class="inline-flex items-center gap-1 rounded-md bg-[var(--app-control-info-bg)] px-2 py-0.5 text-xs text-[var(--app-control-info-text)] border border-[var(--app-control-info-border)]"
                 >
                   <i class="pi pi-spinner pi-spin text-[0.6rem]"></i> loading
                 </span>
@@ -119,7 +119,7 @@ type PopupSize = 'sm' | 'md' | 'lg' | 'xl';
                 @if (showDefaultConfirm) {
                   <button
                     type="button"
-                    class="rounded-lg bg-[var(--app-primary)] px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition-all disabled:opacity-60"
+                    class="rounded-lg bg-[var(--app-primary)] px-4 py-2 text-sm font-medium text-[var(--app-control-on-primary)] hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-60"
                     [disabled]="loading"
                     (click)="confirm.emit()"
                   >

@@ -8,7 +8,7 @@
   min-width: 0;
   gap: var(--app-space-3, 0.75rem);
   padding-bottom: var(--app-space-4, 1rem);
-  border-bottom: 1px solid var(--app-border, rgba(133, 156, 221, 0.2));
+  border-bottom: 1px solid var(--app-border);
 }
 
 .form-section-card:last-child {

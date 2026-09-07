@@ -25,7 +25,8 @@
   background: var(--app-table-header-bg);
   color: var(--app-text-muted);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .diff-viewer__header span {

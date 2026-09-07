@@ -1,3 +1,4 @@
+import { setWorkflowCalledElementOptions } from '../bpmn/flowable/flowable-properties-provider';
 import {
   Component,
   ElementRef,
@@ -91,6 +92,7 @@ export class WorkflowBuilderPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    void this.loadAvailableWorkflows();
     const workflowId = this.route.snapshot.paramMap.get('workflowId');
     if (workflowId) {
       void this.loadWorkflow(workflowId);
@@ -99,6 +101,20 @@ export class WorkflowBuilderPageComponent implements OnInit {
     const draft = createDraftWorkflowDetail();
     this.store.loadWorkflow(draft);
     this.selectedVersionId.set(draft.definition.currentDraftVersionId);
+  }
+
+  async loadAvailableWorkflows(): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.api.getWorkflowPage({ size: 100 }));
+      const workflows = response?.data ?? [];
+      const options = workflows.map((wf) => ({
+        label: `${wf.name} (${wf.id})`,
+        value: wf.name || wf.id,
+      }));
+      setWorkflowCalledElementOptions(options);
+    } catch {
+      // ignore
+    }
   }
 
   hasUnsavedChanges(): boolean {

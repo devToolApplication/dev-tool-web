@@ -12,7 +12,7 @@
     @if (modal) {
       <button
         type="button"
-        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        class="absolute inset-0 bg-[var(--app-overlay-mask,rgba(0,0,0,0.5))] backdrop-blur-sm"
         [attr.aria-label]="'close' | translateContent"
         (click)="dismissableMask ? close() : null"
       ></button>
@@ -22,7 +22,7 @@
       role="dialog"
       [attr.aria-label]="ariaLabel || header || 'dialog' | translateContent"
       [attr.aria-modal]="modal"
-      class="relative z-10 flex max-h-[90vh] flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-2xl backdrop-blur-md animate-[app-dialog-in_200ms_ease-out]"
+      class="relative z-10 flex max-h-[90vh] flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-[var(--app-shadow-lg)] backdrop-blur-md animate-[app-dialog-in_200ms_ease-out]"
       [class]="styleClass"
       [style.width]="width || 'min(90vw, 32rem)'"
       (keydown.escape)="closeOnEscape ? close() : null"

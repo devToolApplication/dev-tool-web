@@ -48,7 +48,7 @@
 
     @if (suggestions.length > 0 && suggestionsOpen) {
       <div
-        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-48 overflow-y-auto"
+        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-[var(--app-shadow-md)] backdrop-blur-md max-h-48 overflow-y-auto"
       >
         @for (item of suggestions; track item.value) {
           <button

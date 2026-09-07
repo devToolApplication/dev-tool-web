@@ -21,10 +21,11 @@
   display: grid;
   gap: 1rem;
   border: 1px solid var(--app-border);
-  border-radius: 0.5rem;
+  border-radius: var(--app-radius-lg, 0.75rem);
   background: var(--app-card-surface-strong);
   box-shadow: var(--app-shadow-lg);
-  padding: 1rem;
+  backdrop-filter: blur(12px);
+  padding: 1.25rem;
 }
 
 .confirm-dialog__header {
@@ -37,14 +38,16 @@
 .confirm-dialog__header h2 {
   margin: 0;
   color: var(--app-text);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .confirm-dialog__header p {
   margin: 0.35rem 0 0;
   color: var(--app-text-muted);
   line-height: 1.5;
+  font-size: 0.875rem;
 }
 
 .confirm-dialog__icon {
@@ -52,7 +55,7 @@
   height: 2.25rem;
   display: inline-grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--app-radius-md, 0.5rem);
   color: var(--app-text-muted);
   background: var(--app-surface-soft);
 }

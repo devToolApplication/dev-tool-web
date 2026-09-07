@@ -12,11 +12,14 @@ import { WorkflowStudioModule } from './workflow-studio/workflow-studio.module';
 import { workflowStudioRoutes } from './workflow-studio/workflow-studio.routes';
 import { AccountManagementModule } from './account-management/account-management.module';
 import { accountManagementRoutes } from './account-management/account-management.routes';
+import { CodexSdkModule } from './codex-sdk/codex-sdk.module';
+import { codexSdkRoutes } from './codex-sdk/codex-sdk.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...accountManagementRoutes,
   ...serviceManagementRoutes,
   ...workflowStudioRoutes,
+  ...codexSdkRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'accounts' },
   { path: '**', redirectTo: '404' },
@@ -33,6 +36,7 @@ const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
     AccountManagementModule,
     ServiceManagementModule,
     WorkflowStudioModule,
+    CodexSdkModule,
   ],
 })
 export class AppFeatureModule {}

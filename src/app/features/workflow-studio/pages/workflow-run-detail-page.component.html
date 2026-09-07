@@ -5,7 +5,7 @@
   <div class="flex flex-col gap-4">
     <app-action-toolbar [actions]="actions" (actionClick)="onToolbarAction($event)"></app-action-toolbar>
 
-    <div *ngIf="error()" class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+    <div *ngIf="error()" class="rounded-md border border-[var(--app-control-danger-border)] bg-[var(--app-control-danger-bg)] p-4 text-sm text-[var(--app-control-danger-text)]">
       {{ error() | translateContent }}
     </div>
 
@@ -42,7 +42,7 @@
 
     <!-- Main Workspace (Canvas & Node Inspector) -->
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 min-h-[38rem]">
-      <!-- Left: BPMN Canvas with Runtime Overlay Highlight -->
+      <!-- Left: BPMN Canvas with Runtime Overlay Highlight & Built-in Properties Panel -->
       <div class="lg:col-span-8 flex flex-col rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] overflow-hidden">
         <div class="flex items-center justify-between border-b border-[var(--app-border)] bg-[var(--app-card-surface)] px-4 py-2.5">
           <span class="text-sm font-medium text-[var(--app-text)]">
@@ -56,10 +56,10 @@
           <app-workflow-bpmn-canvas
             *ngIf="bpmnXml()"
             [bpmnXml]="bpmnXml()"
-            [mode]="'runtime'"
+            [mode]="'readonly'"
             [selectedId]="selectedNodeId()"
             [runtimeStatus]="runtimeVisualState()"
-            [propertiesCollapsed]="true"
+            [propertiesCollapsed]="false"
             (nodeSelected)="onNodeSelected($event)"
           ></app-workflow-bpmn-canvas>
           <div *ngIf="!bpmnXml() && !loading()" class="flex h-full items-center justify-center p-8 text-sm text-[var(--app-text-muted)]">
@@ -107,32 +107,51 @@
               ></app-badge>
             </div>
 
-            <div *ngIf="nodeExec.errorMessage" class="rounded bg-red-50 p-2 text-xs text-red-600 dark:bg-red-950/20 dark:text-red-400">
+            <div *ngIf="nodeExec.errorMessage" class="rounded border border-[var(--app-control-danger-border)] bg-[var(--app-control-danger-bg)] p-2 text-xs text-[var(--app-control-danger-text)]">
               <b>Error:</b> {{ nodeExec.errorMessage }}
             </div>
 
-            <!-- Input Snapshot -->
-            <div>
-              <span class="text-xs font-medium text-[var(--app-text-muted)]">Input Snapshot</span>
-              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
-                <app-json-viewer [value]="nodeExec.inputSnapshot"></app-json-viewer>
-              </div>
-            </div>
+            <!-- Popup Action Buttons for Node Payloads -->
+            <div class="flex flex-col gap-2 pt-1">
+              <!-- View Input Snapshot Button -->
+              <button
+                type="button"
+                (click)="openNodePayloadDialog('workflowStudio.runtime.viewInputSnapshot', nodeExec.nodeId, nodeExec.inputSnapshot)"
+                class="flex items-center justify-between rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-medium text-[var(--app-text)] transition-colors hover:border-[var(--app-primary)] hover:bg-[var(--app-surface-overlay)]"
+              >
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-sign-in text-[var(--app-primary)]"></i>
+                  <span>{{ 'workflowStudio.runtime.viewInputSnapshot' | translateContent }}</span>
+                </span>
+                <i class="pi pi-external-link text-[10px] text-[var(--app-text-muted)]"></i>
+              </button>
 
-            <!-- Output Payload -->
-            <div>
-              <span class="text-xs font-medium text-[var(--app-text-muted)]">Output Payload</span>
-              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
-                <app-json-viewer [value]="nodeExec.output"></app-json-viewer>
-              </div>
-            </div>
+              <!-- View Output Payload Button -->
+              <button
+                type="button"
+                (click)="openNodePayloadDialog('workflowStudio.runtime.viewOutput', nodeExec.nodeId, nodeExec.output)"
+                class="flex items-center justify-between rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-medium text-[var(--app-text)] transition-colors hover:border-[var(--app-primary)] hover:bg-[var(--app-surface-overlay)]"
+              >
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-sign-out text-[var(--app-control-success-text)]"></i>
+                  <span>{{ 'workflowStudio.runtime.viewOutput' | translateContent }}</span>
+                </span>
+                <i class="pi pi-external-link text-[10px] text-[var(--app-text-muted)]"></i>
+              </button>
 
-            <!-- Evidence (if present) -->
-            <div *ngIf="nodeExec.evidence">
-              <span class="text-xs font-medium text-[var(--app-text-muted)]">Evidence</span>
-              <div class="mt-1 max-h-36 overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
-                <app-json-viewer [value]="nodeExec.evidence"></app-json-viewer>
-              </div>
+              <!-- View Evidence Button (if present) -->
+              <button
+                *ngIf="nodeExec.evidence"
+                type="button"
+                (click)="openNodePayloadDialog('workflowStudio.runtime.viewEvidence', nodeExec.nodeId, nodeExec.evidence)"
+                class="flex items-center justify-between rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-medium text-[var(--app-text)] transition-colors hover:border-[var(--app-primary)] hover:bg-[var(--app-surface-overlay)]"
+              >
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-file text-[var(--app-control-warn-text)]"></i>
+                  <span>{{ 'workflowStudio.runtime.viewEvidence' | translateContent }}</span>
+                </span>
+                <i class="pi pi-external-link text-[10px] text-[var(--app-text-muted)]"></i>
+              </button>
             </div>
           </div>
 
@@ -143,4 +162,87 @@
       </div>
     </div>
   </div>
+
+  <!-- Node Payload Dialog (Modal Popup) -->
+  <app-dialog
+    [visible]="payloadDialogVisible()"
+    (visibleChange)="payloadDialogVisible.set($event)"
+    [header]="payloadDialogTitle()"
+    [width]="'min(90vw, 44rem)'"
+    [modal]="true"
+    [dismissableMask]="true"
+  >
+    <div class="flex flex-col gap-3 py-1">
+      <div class="max-h-[60vh] overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+        <app-json-viewer [value]="payloadDialogData()"></app-json-viewer>
+      </div>
+    </div>
+    <div dialog-footer class="flex justify-end">
+      <app-button
+        variant="ghost"
+        type="button"
+        (buttonClick)="closeNodePayloadDialog()"
+        [label]="'common.close' | translateContent"
+      ></app-button>
+    </div>
+  </app-dialog>
+
+  <!-- Run Payloads Dialog (Modal Popup) -->
+  <app-dialog
+    [visible]="runPayloadsDialogVisible()"
+    (visibleChange)="runPayloadsDialogVisible.set($event)"
+    [header]="('workflowStudio.lifecycle.runPayloads' | translateContent) + ' #' + runId()"
+    [width]="'min(90vw, 48rem)'"
+    [modal]="true"
+    [dismissableMask]="true"
+  >
+    <div class="flex flex-col gap-4 py-1">
+      <!-- Tabs Switcher -->
+      <div class="flex gap-2 border-b border-[var(--app-border)] pb-2">
+        <button
+          type="button"
+          (click)="setRunPayloadTab('input')"
+          [class.font-semibold]="runPayloadTab() === 'input'"
+          [class.text-[var(--app-primary)]]="runPayloadTab() === 'input'"
+          [class.border-b-2]="runPayloadTab() === 'input'"
+          [class.border-[var(--app-primary)]]="runPayloadTab() === 'input'"
+          class="px-3 py-1.5 text-xs text-[var(--app-text)] transition-colors hover:text-[var(--app-primary)]"
+        >
+          <i class="pi pi-sign-in mr-1.5 text-xs"></i>
+          {{ 'workflowStudio.lifecycle.initialInput' | translateContent }}
+        </button>
+        <button
+          type="button"
+          (click)="setRunPayloadTab('output')"
+          [class.font-semibold]="runPayloadTab() === 'output'"
+          [class.text-[var(--app-primary)]]="runPayloadTab() === 'output'"
+          [class.border-b-2]="runPayloadTab() === 'output'"
+          [class.border-[var(--app-primary)]]="runPayloadTab() === 'output'"
+          class="px-3 py-1.5 text-xs text-[var(--app-text)] transition-colors hover:text-[var(--app-primary)]"
+        >
+          <i class="pi pi-sign-out mr-1.5 text-xs"></i>
+          {{ 'workflowStudio.lifecycle.finalOutputPayload' | translateContent }}
+        </button>
+      </div>
+
+      <!-- Tab Content: Input -->
+      <div *ngIf="runPayloadTab() === 'input'" class="max-h-[60vh] overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+        <app-json-viewer [value]="run()?.input"></app-json-viewer>
+      </div>
+
+      <!-- Tab Content: Output -->
+      <div *ngIf="runPayloadTab() === 'output'" class="max-h-[60vh] overflow-auto rounded border border-[var(--app-border)] bg-[var(--app-surface)] p-2">
+        <app-json-viewer [value]="run()?.finalOutput"></app-json-viewer>
+      </div>
+    </div>
+
+    <div dialog-footer class="flex justify-end">
+      <app-button
+        variant="ghost"
+        type="button"
+        (buttonClick)="closeRunPayloads()"
+        [label]="'common.close' | translateContent"
+      ></app-button>
+    </div>
+  </app-dialog>
 </app-page-shell>

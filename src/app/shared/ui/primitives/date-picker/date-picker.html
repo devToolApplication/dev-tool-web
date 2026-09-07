@@ -22,7 +22,7 @@
         @if (labelFrom || label) {
           <label
             [attr.for]="inputId"
-            class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
+            class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-primary)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
             >{{ labelFrom || label || '' | translateContent }}</label
           >
         }
@@ -44,7 +44,7 @@
         @if (labelTo) {
           <label
             [attr.for]="inputIdTo"
-            class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
+            class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-primary)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
             >{{ labelTo | translateContent }}</label
           >
         }
@@ -95,7 +95,7 @@
       @if (label) {
         <label
           [attr.for]="inputId"
-          class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-accent-violet)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
+          class="absolute left-3 top-0 -translate-y-1/2 text-xs text-[var(--app-primary)] bg-[var(--app-custom-input-bg)] px-1 transition-all duration-150 pointer-events-none"
           [class.left-9]="iconClass"
           >{{ label | translateContent }}</label
         >

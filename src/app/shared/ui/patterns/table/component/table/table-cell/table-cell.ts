@@ -68,9 +68,8 @@ export class TableCellComponent<TRow = unknown> {
   }
 
   get customTemplate(): TemplateRef<TableCellTemplateContext<TRow>> | null {
-    return this.column.customTemplateKey
-      ? (this.customTemplates[this.column.customTemplateKey] ?? null)
-      : null;
+    const key = this.column.customTemplateKey ?? this.column.field;
+    return key ? (this.customTemplates[key] ?? null) : null;
   }
 
   get dateValue(): Date | null {

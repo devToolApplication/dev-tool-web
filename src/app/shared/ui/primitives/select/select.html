@@ -65,7 +65,7 @@
 
     @if (dropdownOpen) {
       <div
-        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-lg backdrop-blur-md max-h-60 overflow-y-auto app-scrollbar"
+        class="absolute z-50 mt-1 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-overlay-bg)] shadow-[var(--app-shadow-md)] backdrop-blur-md max-h-60 overflow-y-auto app-scrollbar"
       >
         @if (!group) {
           @for (opt of $any(options); track opt.value) {
@@ -83,7 +83,7 @@
         } @else {
           @for (grp of $any(options); track grp.label) {
             <div
-              class="px-3 py-1.5 text-xs font-semibold text-[var(--app-text-muted)] uppercase tracking-wide"
+              class="px-3 py-1.5 text-xs font-semibold text-[var(--app-text-muted)]"
             >
               {{ grp.label | translateContent }}
             </div>

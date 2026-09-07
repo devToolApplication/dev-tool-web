@@ -26,9 +26,10 @@
   min-width: 12rem;
   padding: 0.5rem;
   border: 1px solid var(--app-border);
-  border-radius: 0.5rem;
+  border-radius: var(--app-radius-md, 0.5rem);
   background: var(--app-overlay-bg);
   box-shadow: var(--app-shadow-overlay);
+  backdrop-filter: blur(12px);
 }
 
 .action-toolbar__menu-item {

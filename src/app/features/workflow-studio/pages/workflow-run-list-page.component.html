@@ -11,12 +11,12 @@
       (reset)="onFilterReset()"
     ></app-filter-panel>
 
-    <div *ngIf="error()" class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+    <div *ngIf="error()" class="rounded-md border border-[var(--app-control-danger-border)] bg-[var(--app-control-danger-bg)] p-4 text-sm text-[var(--app-control-danger-text)]">
       {{ error() | translateContent }}
     </div>
 
     <app-table
-      [config]="tableConfig"
+      [config]="tableConfig()"
       [data]="runs()"
       [loading]="loading()"
       [totalRecords]="totalRecords()"

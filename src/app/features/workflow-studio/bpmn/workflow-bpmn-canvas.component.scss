@@ -6,8 +6,8 @@
   --workflow-bpmn-text: var(--app-text);
   --workflow-bpmn-muted: var(--app-text-muted);
   --workflow-bpmn-grid: color-mix(in srgb, var(--app-border) 38%, transparent);
-  --workflow-bpmn-shape-fill: var(--app-surface-overlay, #ffffff);
-  --workflow-bpmn-shape-stroke: var(--app-text, #1f2937);
+  --workflow-bpmn-shape-fill: var(--app-surface-overlay);
+  --workflow-bpmn-shape-stroke: var(--app-text);
 
   position: relative;
   display: grid;
@@ -22,8 +22,8 @@
 html[data-theme='light'] .workflow-bpmn-canvas {
   --workflow-bpmn-bg: var(--app-surface);
   --workflow-bpmn-panel: var(--app-card-surface);
-  --workflow-bpmn-shape-fill: #ffffff;
-  --workflow-bpmn-shape-stroke: #1f2937;
+  --workflow-bpmn-shape-fill: var(--app-surface-overlay);
+  --workflow-bpmn-shape-stroke: var(--app-text);
 }
 
 html[data-theme='dark'] .workflow-bpmn-canvas {
@@ -89,7 +89,7 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
   --popup-tab-strip-border-color: var(--workflow-bpmn-border);
   --popup-tab-focus-border-color: var(--app-primary);
   --search-container-background-color: var(--workflow-bpmn-panel);
-  --search-shadow-color: rgb(0 0 0 / 0.24);
+  --search-shadow-color: var(--app-shadow-overlay);
   --search-input-border-color: var(--workflow-bpmn-border);
   --search-input-focus-border-color: var(--app-primary);
   --search-input-focus-background-color: var(--workflow-bpmn-panel-hover);
@@ -107,16 +107,16 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
 
 .workflow-bpmn-canvas--readonly .djs-palette,
 .workflow-bpmn-canvas--readonly .djs-context-pad {
-  pointer-events: none;
-  opacity: 0.5;
+  display: none !important;
 }
 
-.workflow-bpmn-canvas--readonly {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties {
-  display: none;
+.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties input,
+.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties textarea,
+.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties select,
+.workflow-bpmn-canvas--readonly .workflow-bpmn-canvas__properties button {
+  pointer-events: none !important;
+  opacity: 0.85 !important;
+  cursor: default !important;
 }
 
 .workflow-bpmn-canvas__marker--selected .djs-visual > :first-child {
@@ -126,7 +126,7 @@ html[data-theme='dark'] .workflow-bpmn-canvas {
 
 .workflow-bpmn-canvas__marker--invalid .djs-visual > :first-child,
 .workflow-bpmn-canvas__marker--failed .djs-visual > :first-child {
-  stroke: var(--app-danger, #dc2626) !important;
+  stroke: var(--app-control-danger-border) !important;
   stroke-width: 3px !important;
 }
 

@@ -18,6 +18,8 @@ import {
   WorkflowOutputSchemaCatalogItem,
   WorkflowPageQuery,
   WorkflowRun,
+  WorkflowTask,
+  WorkflowTaskPageQuery,
   WorkflowUpsertPayload,
 } from '../model/workflow-studio.model';
 import {
@@ -117,6 +119,59 @@ export class WorkflowApiService {
     return this.http
       .post<BaseResponse<WorkflowRunDto>>(`${this.baseUrl}/runs/${runId}/retry`, null)
       .pipe(map((response) => mapWorkflowRunDto(response.data)));
+  }
+
+  getTasksPage(query: WorkflowTaskPageQuery = {}): Observable<BasePageResponse<WorkflowTask>> {
+    let params = new HttpParams();
+    if (query.page !== undefined) {
+      params = params.set('page', query.page);
+    }
+    if (query.size !== undefined) {
+      params = params.set('size', query.size);
+    }
+    if (query.workflowId) {
+      params = params.set('workflowId', query.workflowId);
+    }
+    if (query.assignee) {
+      params = params.set('assignee', query.assignee);
+    }
+    if (query.unassignedOnly !== undefined) {
+      params = params.set('unassignedOnly', query.unassignedOnly);
+    }
+    return this.http
+      .get<BaseResponse<BasePageResponse<WorkflowTask>>>(`${this.baseUrl}/tasks/page`, { params })
+      .pipe(map((response) => response.data));
+  }
+
+  getPendingTasks(runId: string): Observable<WorkflowTask[]> {
+    return this.http
+      .get<BaseResponse<WorkflowTask[]>>(`${this.baseUrl}/runs/${runId}/tasks`)
+      .pipe(map((response) => response.data ?? []));
+  }
+
+  completeTask(taskId: string, variables?: Record<string, unknown>): Observable<boolean> {
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.baseUrl}/tasks/${taskId}/complete`, { variables })
+      .pipe(map((response) => response.data ?? true));
+  }
+
+  claimTask(taskId: string, assignee?: string): Observable<boolean> {
+    const body = assignee ? { assignee } : null;
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.baseUrl}/tasks/${taskId}/claim`, body)
+      .pipe(map((response) => response.data ?? true));
+  }
+
+  unclaimTask(taskId: string): Observable<boolean> {
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.baseUrl}/tasks/${taskId}/unclaim`, null)
+      .pipe(map((response) => response.data ?? true));
+  }
+
+  assignTask(taskId: string, assignee: string): Observable<boolean> {
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.baseUrl}/tasks/${taskId}/assign`, { assignee })
+      .pipe(map((response) => response.data ?? true));
   }
 
   private pageParams(query: WorkflowPageQuery): HttpParams {

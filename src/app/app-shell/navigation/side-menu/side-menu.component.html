@@ -124,6 +124,7 @@
           [class.active]="active"
           [routerLink]="item.routerLink"
           routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
           #routeActive="routerLinkActive"
           [attr.aria-current]="routeActive.isActive || active ? 'page' : null"
           [attr.title]="collapsed ? (item.label | translateContent) : null"

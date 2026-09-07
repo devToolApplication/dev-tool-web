@@ -52,7 +52,14 @@ export function buildWorkflowRunFilterFields(workflows: WorkflowDefinition[] = [
   ];
 }
 
-export function buildWorkflowRunTableConfig(): TableConfig<WorkflowRun> {
+export function buildWorkflowRunTableConfig(workflows: WorkflowDefinition[] = []): TableConfig<WorkflowRun> {
+  const workflowMap = new Map<string, string>();
+  for (const wf of workflows) {
+    if (wf.id) {
+      workflowMap.set(wf.id, wf.name || wf.id);
+    }
+  }
+
   return {
     title: 'workflowStudio.lifecycle.runTableTitle',
     rowClickable: true,
@@ -87,6 +94,13 @@ export function buildWorkflowRunTableConfig(): TableConfig<WorkflowRun> {
         header: 'workflowStudio.lifecycle.workflow',
         type: 'text',
         minWidth: '12rem',
+        formatter: (row, value) => {
+          const id = (value as string) || row.workflowDefinitionId;
+          if (!id) {
+            return '—';
+          }
+          return workflowMap.get(id) || id;
+        },
       },
       {
         field: 'status',

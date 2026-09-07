@@ -79,10 +79,10 @@
   <ng-template #otpCellTpl let-row="row">
     @if (row.twoFactorSecret) {
       <div class="flex items-center gap-1.5 flex-wrap">
-        <span class="font-mono font-bold text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/60 tracking-wider">
+        <span class="font-mono font-medium text-[var(--app-control-success-text)] text-xs px-2 py-0.5 rounded bg-[var(--app-control-success-bg)] border border-[var(--app-control-success-border)] tracking-wider">
           {{ otps()[row.id] || '...' }}
         </span>
-        <span class="text-amber-400 font-mono text-xs">({{ remainingSeconds() }}s)</span>
+        <span class="text-[var(--app-control-warn-text)] font-mono text-xs">({{ remainingSeconds() }}s)</span>
         @if (otps()[row.id]) {
           <app-copyable-text [value]="otps()[row.id]"></app-copyable-text>
         }
@@ -123,7 +123,7 @@
         <app-section-panel title="accountManagement.drawer.backupCodes" density="compact">
           <div class="flex flex-wrap gap-2">
             @for (code of acc.backupCodes; track code) {
-              <span class="px-2 py-1 bg-[var(--app-card-surface-strong)] border border-[var(--app-border-soft)] rounded font-mono text-xs text-amber-300 select-all">
+              <span class="px-2 py-1 bg-[var(--app-card-surface-strong)] border border-[var(--app-border-soft)] rounded font-mono text-xs text-[var(--app-control-warn-text)] select-all">
                 {{ code }}
               </span>
             }
@@ -155,128 +155,107 @@
 >
   <form [formGroup]="form" class="space-y-4 pt-1">
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.name' | translateContent }} <span class="text-rose-500">*</span></label>
-      <input
-        type="text"
+      <app-input-text
         formControlName="name"
-        [placeholder]="'accountManagement.form.namePlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      />
-      @if (form.get('name')?.invalid && form.get('name')?.touched) {
-        <small class="text-rose-400 block mt-1 text-xs">{{ 'accountManagement.form.nameRequired' | translateContent }}</small>
-      }
+        label="accountManagement.form.name"
+        placeholder="accountManagement.form.namePlaceholder"
+        [required]="true"
+        [invalid]="!!(form.get('name')?.invalid && form.get('name')?.touched)"
+        errorMessage="accountManagement.form.nameRequired"
+      ></app-input-text>
     </div>
 
     <!-- Mobile-First Responsive Columns: 1 col on mobile, 2 cols on tablet/desktop -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.type' | translateContent }} <span class="text-rose-500">*</span></label>
-        <select
+        <app-select
           formControlName="type"
-          class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-        >
-          @for (opt of typeOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
+          label="accountManagement.form.type"
+          [options]="typeOptions"
+          [required]="true"
+        ></app-select>
       </div>
       <div>
-        <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.status' | translateContent }}</label>
-        <select
+        <app-select
           formControlName="status"
-          class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-        >
-          @for (opt of statusOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label | translateContent }}</option>
-          }
-        </select>
+          label="accountManagement.form.status"
+          [options]="statusOptions"
+        ></app-select>
       </div>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.username' | translateContent }} <span class="text-rose-500">*</span></label>
-      <input
-        type="text"
+      <app-input-text
         formControlName="username"
-        [placeholder]="'accountManagement.form.usernamePlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      />
-      @if (form.get('username')?.invalid && form.get('username')?.touched) {
-        <small class="text-rose-400 block mt-1 text-xs">{{ 'accountManagement.form.usernameRequired' | translateContent }}</small>
-      }
+        label="accountManagement.form.username"
+        placeholder="accountManagement.form.usernamePlaceholder"
+        [required]="true"
+        [invalid]="!!(form.get('username')?.invalid && form.get('username')?.touched)"
+        errorMessage="accountManagement.form.usernameRequired"
+      ></app-input-text>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">
-        {{ 'accountManagement.form.password' | translateContent }} {{ isEdit ? ('accountManagement.form.passwordEditHint' | translateContent) : '' }} <span *ngIf="!isEdit" class="text-rose-500">*</span>
-      </label>
-      <input
-        type="password"
+      <app-password
         formControlName="password"
-        [placeholder]="'accountManagement.form.passwordPlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      />
-      @if (!isEdit && form.get('password')?.invalid && form.get('password')?.touched) {
-        <small class="text-rose-400 block mt-1 text-xs">{{ 'accountManagement.form.passwordRequired' | translateContent }}</small>
-      }
+        label="accountManagement.form.password"
+        placeholder="accountManagement.form.passwordPlaceholder"
+        [required]="!isEdit"
+        [helpText]="isEdit ? 'accountManagement.form.passwordEditHint' : undefined"
+        [invalid]="!!(!isEdit && form.get('password')?.invalid && form.get('password')?.touched)"
+        errorMessage="accountManagement.form.passwordRequired"
+      ></app-password>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.twoFactorSecret' | translateContent }}</label>
-      <input
-        type="text"
+      <app-input-text
         formControlName="twoFactorSecret"
-        [placeholder]="'accountManagement.form.twoFactorPlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] font-mono text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-        (input)="onSecretChange()"
-      />
+        label="accountManagement.form.twoFactorSecret"
+        placeholder="accountManagement.form.twoFactorPlaceholder"
+        (valueChange)="onSecretChange()"
+      ></app-input-text>
       @if (previewOtp) {
         <div class="mt-2 text-xs flex items-center gap-2 p-2 bg-[var(--app-card-surface-strong)] rounded-lg border border-[var(--app-border-soft)]">
           <span class="text-[var(--app-text-muted)]">{{ 'accountManagement.form.previewOtp' | translateContent }}:</span>
-          <span class="font-bold text-emerald-400 font-mono tracking-widest text-sm">{{ previewOtp }}</span>
-          <span class="text-amber-400 font-mono">({{ previewRemaining }}s)</span>
+          <span class="font-medium text-[var(--app-control-success-text)] font-mono tracking-widest text-sm">{{ previewOtp }}</span>
+          <span class="text-[var(--app-control-warn-text)] font-mono">({{ previewRemaining }}s)</span>
         </div>
       }
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.backupCodes' | translateContent }}</label>
-      <input
-        type="text"
+      <app-input-text
         formControlName="backupCodesStr"
-        [placeholder]="'accountManagement.form.backupCodesPlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] font-mono text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      />
+        label="accountManagement.form.backupCodes"
+        placeholder="accountManagement.form.backupCodesPlaceholder"
+      ></app-input-text>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.note' | translateContent }}</label>
-      <textarea
+      <app-input-area
         formControlName="note"
-        rows="2"
-        [placeholder]="'accountManagement.form.notePlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      ></textarea>
+        label="accountManagement.form.note"
+        placeholder="accountManagement.form.notePlaceholder"
+        [rows]="2"
+      ></app-input-area>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.tags' | translateContent }}</label>
-      <input
-        type="text"
+      <app-input-text
         formControlName="tagsStr"
-        [placeholder]="'accountManagement.form.tagsPlaceholder' | translateContent"
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-[var(--app-text)] text-sm focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      />
+        label="accountManagement.form.tags"
+        placeholder="accountManagement.form.tagsPlaceholder"
+      ></app-input-text>
     </div>
 
     <div>
-      <label class="block text-sm font-medium mb-1 text-[var(--app-text)]">{{ 'accountManagement.form.metadata' | translateContent }}</label>
-      <textarea
+      <app-input-area
         formControlName="metadataStr"
-        rows="2"
+        label="accountManagement.form.metadata"
         placeholder='{ "proxy": "http://127.0.0.1:8080", "recoveryEmail": "backup@gmail.com" }'
-        class="w-full px-3 py-2 bg-[var(--app-table-cell-bg)] border border-[var(--app-border)] rounded-lg text-emerald-400 font-mono text-xs focus:outline-none focus:border-[var(--app-primary)] transition-colors"
-      ></textarea>
+        [rows]="2"
+        contentType="json"
+      ></app-input-area>
     </div>
   </form>
 

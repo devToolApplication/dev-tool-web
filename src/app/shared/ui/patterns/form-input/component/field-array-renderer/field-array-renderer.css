@@ -27,10 +27,10 @@
 }
 
 .array-field__item {
-  border: 1px solid var(--app-border, rgba(133, 156, 221, 0.2));
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md, 0.5rem);
   padding: var(--app-space-3, 0.75rem);
-  background: var(--app-surface-soft, rgba(255, 255, 255, 0.4));
+  background: var(--app-surface-soft);
 }
 
 .array-field__item-header {
