@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 import { BasePageResponse, BaseResponse } from '@core/http/base-response.model';
 import { environment } from '../../../../enviroment/environment';
 import {
+  KocCampaignCloneRequest,
   KocCampaignCreateRequest,
   KocCampaignItem,
   KocCampaignQueryParams,
@@ -53,6 +54,12 @@ export class KocCampaignService {
   createAndStartCampaign(req: KocCampaignCreateRequest): Observable<KocCampaignItem> {
     return this.http
       .post<BaseResponse<KocCampaignItem>>(this.baseUrl, req)
+      .pipe(map((res) => res.data));
+  }
+
+  cloneCampaign(id: string, req?: KocCampaignCloneRequest): Observable<KocCampaignItem> {
+    return this.http
+      .post<BaseResponse<KocCampaignItem>>(`${this.baseUrl}/${id}/clone`, req ?? {})
       .pipe(map((res) => res.data));
   }
 

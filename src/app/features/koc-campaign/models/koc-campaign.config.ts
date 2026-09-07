@@ -151,6 +151,14 @@ export function buildKocCampaignTableConfig(): TableConfig<KocCampaignItem> {
             onClick: () => undefined,
           },
           {
+            id: 'clone',
+            label: 'kocCampaign.action.clone',
+            icon: 'pi pi-copy',
+            variant: 'ghost',
+            placement: 'more',
+            onClick: () => undefined,
+          },
+          {
             id: 'delete',
             label: 'kocCampaign.action.delete',
             icon: 'pi pi-trash',

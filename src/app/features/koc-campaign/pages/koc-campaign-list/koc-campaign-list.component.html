@@ -234,7 +234,7 @@
   [(visible)]="formDialogVisible"
   [modal]="true"
   width="min(95vw, 42rem)"
-  [header]="isEdit ? 'kocCampaign.dialog.editTitle' : 'kocCampaign.dialog.createTitle'"
+  [header]="isClone ? 'kocCampaign.dialog.cloneTitle' : isEdit ? 'kocCampaign.dialog.editTitle' : 'kocCampaign.dialog.createTitle'"
   (hide)="closeFormDialog()"
 >
   <form [formGroup]="form" (ngSubmit)="submitForm()" class="space-y-4 pt-1">
@@ -310,7 +310,7 @@
         (buttonClick)="closeFormDialog()"
       ></app-button>
       <app-button
-        [label]="isEdit ? 'kocCampaign.form.submitUpdate' : 'kocCampaign.form.submitCreate'"
+        [label]="isClone ? 'kocCampaign.form.submitClone' : isEdit ? 'kocCampaign.form.submitUpdate' : 'kocCampaign.form.submitCreate'"
         icon="pi pi-bolt"
         variant="primary"
         [loading]="formSubmitting()"

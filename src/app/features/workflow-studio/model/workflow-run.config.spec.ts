@@ -30,4 +30,18 @@ describe('buildWorkflowRunTableConfig', () => {
     } as any;
     expect(col?.formatter?.(rowWithEmptyWf, '')).toBe('—');
   });
+
+  it('configures startedAt and completedAt as datetime with sortable enabled', () => {
+    const config = buildWorkflowRunTableConfig([]);
+    const startedAtCol = config.columns.find((c) => c.field === 'startedAt');
+    expect(startedAtCol).toBeDefined();
+    expect(startedAtCol?.type).toBe('datetime');
+    expect(startedAtCol?.sortable).toBe(true);
+    expect(startedAtCol?.width).toBe('14rem');
+
+    const completedAtCol = config.columns.find((c) => c.field === 'completedAt');
+    expect(completedAtCol).toBeDefined();
+    expect(completedAtCol?.type).toBe('datetime');
+    expect(completedAtCol?.sortable).toBe(true);
+  });
 });

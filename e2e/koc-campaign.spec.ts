@@ -159,6 +159,30 @@ test.describe('KOC Campaign Management & Candidate Approval E2E', () => {
       }
     });
 
+    // Mock Clone Campaign
+    await page.route('**/v1/admin/koc-campaigns/*/clone', async (route) => {
+      if (route.request().method() === 'POST') {
+        const body = route.request().postDataJSON() || {};
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            status: 200,
+            data: {
+              id: 'camp-cloned',
+              name: body.name || '(Bản sao) Chiến dịch KOC Công Nghệ Q3',
+              niche: body.niche || 'TECH',
+              targetCount: body.targetCount || 5,
+              minScore: body.minScore || 70,
+              workflowStatus: 'RUNNING',
+            },
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
     // Mock Workflow Tasks Page
     await page.route('**/v1/admin/workflows/tasks/page*', async (route) => {
       await route.fulfill({
@@ -299,5 +323,35 @@ test.describe('KOC Campaign Management & Candidate Approval E2E', () => {
 
     const drawer = page.locator('.app-drawer__panel');
     await expect(drawer).toBeVisible();
+  });
+
+  test('6. Clones campaign: opens clone dialog with prefixed name and submits', async ({ page }) => {
+    await page.goto('/koc/campaigns?dangerously-skip-permissions');
+    await page.waitForLoadState('networkidle');
+
+    // Click more action button (pi-ellipsis-h) on first row
+    const moreBtn = page.locator('.table-actions__more-wrap button').first();
+    await moreBtn.click();
+
+    // Click 'Nhân bản' / 'Clone' in menu
+    const cloneMenuItem = page.locator('.table-actions__menu').getByRole('button', { name: /Nhân bản|Clone/i });
+    await expect(cloneMenuItem).toBeVisible();
+    await cloneMenuItem.click();
+
+    // Dialog opens with clone title
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(/Nhân bản Chiến dịch KOC|Clone KOC Campaign/i)).toBeVisible();
+
+    // Verify name has (Bản sao)
+    const nameInput = dialog.locator('input[type="text"]').first();
+    await expect(nameInput).toHaveValue(/\(Bản sao\)/);
+
+    // Submit clone
+    const submitBtn = dialog.getByRole('button', { name: /Nhân bản & Chạy quy trình|Clone & Start Workflow/i });
+    await submitBtn.click();
+
+    // Dialog closes
+    await expect(dialog).toBeHidden({ timeout: 5000 });
   });
 });

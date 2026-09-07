@@ -34,6 +34,9 @@ export class WorkflowRunListPageComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
+  readonly sortField = signal<string | null>('startedAt');
+  readonly sortOrder = signal<1 | -1 | 0>(-1);
+
   selectedWorkflowId: string | null = null;
   selectedStatus: string | null = null;
 
@@ -71,10 +74,15 @@ export class WorkflowRunListPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     try {
+      const sort =
+        this.sortField() && this.sortOrder() !== 0
+          ? [`${this.sortField()},${this.sortOrder() === 1 ? 'asc' : 'desc'}`]
+          : ['startedAt,desc'];
       const response = await firstValueFrom(
         this.api.getRunPage({
           page,
           size,
+          sort,
           workflowId: this.selectedWorkflowId || undefined,
           status: (this.selectedStatus as any) || undefined,
         })
@@ -86,6 +94,12 @@ export class WorkflowRunListPageComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  onSortChange(event: { field?: string; order?: 1 | -1 | 0 }): void {
+    this.sortField.set(event.field ?? null);
+    this.sortOrder.set(event.order ?? 0);
+    void this.loadRuns(0, this.rows());
   }
 
   onFilterChange(filters: Record<string, unknown>): void {

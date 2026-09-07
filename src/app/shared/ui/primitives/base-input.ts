@@ -1,5 +1,5 @@
 import type { Provider } from '@angular/core';
-import { Directive, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Directive, EventEmitter, forwardRef, inject, Input, Output } from '@angular/core';
 import type { ControlValueAccessor } from '@angular/forms';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -13,6 +13,8 @@ export function provideValueAccessor(component: () => unknown): Provider {
 
 @Directive()
 export abstract class BaseInput<T> implements ControlValueAccessor {
+  protected cdr = inject(ChangeDetectorRef, { optional: true });
+
   @Input() inputId: string = crypto.randomUUID();
   @Input() label?: string;
   @Input() placeholder?: string;
@@ -38,6 +40,7 @@ export abstract class BaseInput<T> implements ControlValueAccessor {
 
   writeValue(value: T | null): void {
     this.value = value;
+    this.cdr?.markForCheck();
   }
 
   registerOnChange(fn: (value: T | null) => void): void {
@@ -50,6 +53,7 @@ export abstract class BaseInput<T> implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    this.cdr?.markForCheck();
   }
 
   onChange(value: T | null): void {

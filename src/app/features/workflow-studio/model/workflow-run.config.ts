@@ -88,6 +88,7 @@ export function buildWorkflowRunTableConfig(workflows: WorkflowDefinition[] = []
         header: 'workflowStudio.lifecycle.runId',
         type: 'text',
         width: '14rem',
+        sortable: true,
       },
       {
         field: 'workflowDefinitionId',
@@ -126,14 +127,16 @@ export function buildWorkflowRunTableConfig(workflows: WorkflowDefinition[] = []
       {
         field: 'startedAt',
         header: 'workflowStudio.lifecycle.startedAt',
-        type: 'date',
-        width: '12rem',
+        type: 'datetime',
+        width: '14rem',
+        sortable: true,
       },
       {
         field: 'completedAt',
         header: 'workflowStudio.lifecycle.completedAt',
-        type: 'date',
-        width: '12rem',
+        type: 'datetime',
+        width: '14rem',
+        sortable: true,
       },
       {
         field: 'actions',

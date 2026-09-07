@@ -50,10 +50,12 @@ export class KocCampaignListComponent implements OnInit {
   readonly candidatesLoading = signal(false);
   readonly detailItems = signal<ReturnType<typeof kocCampaignDetailItems>>([]);
 
-  // Create / Edit Dialog
+  // Create / Edit / Clone Dialog
   formDialogVisible = false;
   isEdit = false;
+  isClone = false;
   editCampaignId: string | null = null;
+  cloneSourceId: string | null = null;
   formSubmitting = signal(false);
 
   form: FormGroup = this.fb.group({
@@ -141,6 +143,9 @@ export class KocCampaignListComponent implements OnInit {
       case 'edit':
         this.openEditDialog(event.row);
         break;
+      case 'clone':
+        this.openCloneDialog(event.row);
+        break;
       case 'delete':
         void this.handleDelete(event.row);
         break;
@@ -184,7 +189,9 @@ export class KocCampaignListComponent implements OnInit {
 
   openCreateDialog(): void {
     this.isEdit = false;
+    this.isClone = false;
     this.editCampaignId = null;
+    this.cloneSourceId = null;
     this.form.reset({
       name: '',
       niche: 'TECH',
@@ -198,9 +205,27 @@ export class KocCampaignListComponent implements OnInit {
 
   openEditDialog(campaign: KocCampaignItem): void {
     this.isEdit = true;
+    this.isClone = false;
     this.editCampaignId = campaign.id;
-    this.form.patchValue({
+    this.cloneSourceId = null;
+    this.form.reset({
       name: campaign.name,
+      niche: campaign.niche || 'TECH',
+      targetCount: campaign.targetCount || 5,
+      minScore: campaign.minScore || 70.0,
+      searchPrompt: campaign.searchPrompt || '',
+      reviewPrompt: campaign.reviewPrompt || '',
+    });
+    this.formDialogVisible = true;
+  }
+
+  openCloneDialog(campaign: KocCampaignItem): void {
+    this.isEdit = false;
+    this.isClone = true;
+    this.editCampaignId = null;
+    this.cloneSourceId = campaign.id;
+    this.form.reset({
+      name: `(Bản sao) ${campaign.name}`,
       niche: campaign.niche || 'TECH',
       targetCount: campaign.targetCount || 5,
       minScore: campaign.minScore || 70.0,
@@ -213,6 +238,8 @@ export class KocCampaignListComponent implements OnInit {
   closeFormDialog(): void {
     this.formDialogVisible = false;
     this.editCampaignId = null;
+    this.cloneSourceId = null;
+    this.isClone = false;
   }
 
   async submitForm(): Promise<void> {
@@ -224,7 +251,10 @@ export class KocCampaignListComponent implements OnInit {
     this.formSubmitting.set(true);
     try {
       const val = this.form.value;
-      if (this.isEdit && this.editCampaignId) {
+      if (this.isClone && this.cloneSourceId) {
+        await firstValueFrom(this.campaignService.cloneCampaign(this.cloneSourceId, val));
+        this.toast.success('kocCampaign.toast.cloneSuccess');
+      } else if (this.isEdit && this.editCampaignId) {
         await firstValueFrom(this.campaignService.updateCampaign(this.editCampaignId, val));
         this.toast.success('kocCampaign.toast.updateSuccess');
       } else {

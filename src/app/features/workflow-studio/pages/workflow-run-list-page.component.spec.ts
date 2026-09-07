@@ -60,7 +60,13 @@ describe('WorkflowRunListPageComponent', () => {
     await fixture.whenStable();
 
     expect(api.getWorkflowPage).toHaveBeenCalledWith({ size: 100 });
-    expect(api.getRunPage).toHaveBeenCalledWith({ page: 0, size: 20, workflowId: undefined, status: undefined });
+    expect(api.getRunPage).toHaveBeenCalledWith({
+      page: 0,
+      size: 20,
+      sort: ['startedAt,desc'],
+      workflowId: undefined,
+      status: undefined,
+    });
     expect(component.runs()).toEqual([run]);
     expect(component.workflows().length).toBe(1);
   });
@@ -73,6 +79,7 @@ describe('WorkflowRunListPageComponent', () => {
     expect(api.getRunPage).toHaveBeenCalledWith({
       page: 0,
       size: 20,
+      sort: ['startedAt,desc'],
       workflowId: 'wf-1',
       status: 'COMPLETED',
     });
@@ -86,6 +93,23 @@ describe('WorkflowRunListPageComponent', () => {
     expect(api.getRunPage).toHaveBeenCalledWith({
       page: 0,
       size: 20,
+      sort: ['startedAt,desc'],
+      workflowId: undefined,
+      status: undefined,
+    });
+  });
+
+  it('handles sort change and reloads runs', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onSortChange({ field: 'startedAt', order: 1 });
+    expect(component.sortField()).toBe('startedAt');
+    expect(component.sortOrder()).toBe(1);
+    expect(api.getRunPage).toHaveBeenCalledWith({
+      page: 0,
+      size: 20,
+      sort: ['startedAt,asc'],
       workflowId: undefined,
       status: undefined,
     });

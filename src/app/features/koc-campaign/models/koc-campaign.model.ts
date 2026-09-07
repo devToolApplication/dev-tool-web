@@ -24,6 +24,20 @@ export interface KocCampaignCreateRequest {
   reviewPrompt?: string;
 }
 
+export interface KocCampaignCloneRequest {
+  name?: string;
+  description?: string;
+  niche?: string;
+  targetCount?: number;
+  minScore?: number;
+  searchBatchSize?: number;
+  maxSearchRounds?: number;
+  searchPrompt?: string;
+  reviewPrompt?: string;
+  workflowDefinitionId?: string;
+  approverAssignee?: string;
+}
+
 export interface KocCampaignUpdateRequest {
   name?: string;
   niche?: string;

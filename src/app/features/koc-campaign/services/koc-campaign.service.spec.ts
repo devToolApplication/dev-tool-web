@@ -133,6 +133,26 @@ describe('KocCampaignService', () => {
     req.flush({ success: true, data: { id: 'camp-1' } });
   });
 
+  it('should clone campaign', () => {
+    const cloneReq = { name: '(Bản sao) Summer Tech Review' };
+    const mockCloned: KocCampaignItem = {
+      id: 'camp-cloned',
+      name: '(Bản sao) Summer Tech Review',
+      workflowStatus: 'RUNNING',
+    };
+
+    service.cloneCampaign('camp-1', cloneReq).subscribe((res) => {
+      expect(res.id).toBe('camp-cloned');
+      expect(res.name).toBe('(Bản sao) Summer Tech Review');
+      expect(res.workflowStatus).toBe('RUNNING');
+    });
+
+    const req = httpMock.expectOne(`${baseUrl}/camp-1/clone`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.name).toBe('(Bản sao) Summer Tech Review');
+    req.flush({ success: true, data: mockCloned });
+  });
+
   it('should complete approval task with approved candidates', () => {
     const candidates = [
       { externalProfileId: 'fb-1', fullName: 'KOC 1', score: 90 },

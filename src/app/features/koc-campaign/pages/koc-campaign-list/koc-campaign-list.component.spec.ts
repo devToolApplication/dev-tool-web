@@ -19,6 +19,7 @@ describe('KocCampaignListComponent', () => {
     getCampaignPage: ReturnType<typeof vi.fn>;
     getCampaignCandidates: ReturnType<typeof vi.fn>;
     createAndStartCampaign: ReturnType<typeof vi.fn>;
+    cloneCampaign: ReturnType<typeof vi.fn>;
     updateCampaign: ReturnType<typeof vi.fn>;
     deleteCampaign: ReturnType<typeof vi.fn>;
   };
@@ -45,6 +46,7 @@ describe('KocCampaignListComponent', () => {
       ),
       getCampaignCandidates: vi.fn().mockReturnValue(of([])),
       createAndStartCampaign: vi.fn().mockReturnValue(of(mockCampaign)),
+      cloneCampaign: vi.fn().mockReturnValue(of({ ...mockCampaign, id: 'camp-cloned', name: '(Bản sao) Tech KOC Campaign' })),
       updateCampaign: vi.fn().mockReturnValue(of(mockCampaign)),
       deleteCampaign: vi.fn().mockReturnValue(of({ id: 'camp-1' })),
     };
@@ -119,5 +121,36 @@ describe('KocCampaignListComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/koc/approval'], {
       queryParams: { campaignId: 'camp-1' },
     });
+  });
+
+  it('should open clone dialog with prefilled values when clone action triggered', () => {
+    component.onTableAction({
+      action: { id: 'clone', label: '', onClick: () => undefined },
+      row: mockCampaign,
+    });
+    expect(component.formDialogVisible).toBe(true);
+    expect(component.isClone).toBe(true);
+    expect(component.isEdit).toBe(false);
+    expect(component.cloneSourceId).toBe('camp-1');
+    expect(component.form.value.name).toBe('(Bản sao) Tech KOC Campaign');
+    expect(component.form.value.niche).toBe('TECH');
+    expect(component.form.value.targetCount).toBe(5);
+    expect(component.form.value.minScore).toBe(75.0);
+  });
+
+  it('should submit clone campaign form and show cloneSuccess toast', async () => {
+    component.openCloneDialog(mockCampaign);
+    await component.submitForm();
+
+    expect(campaignService.cloneCampaign).toHaveBeenCalledWith(
+      'camp-1',
+      expect.objectContaining({
+        name: '(Bản sao) Tech KOC Campaign',
+        niche: 'TECH',
+      })
+    );
+    expect(toast.success).toHaveBeenCalledWith('kocCampaign.toast.cloneSuccess');
+    expect(component.formDialogVisible).toBe(false);
+    expect(component.isClone).toBe(false);
   });
 });
