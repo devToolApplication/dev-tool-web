@@ -116,6 +116,7 @@ export class KocCampaignService {
       variables: {
         approved,
         approvedCandidates,
+        selectedCandidates: approvedCandidates,
       },
     };
     return this.http

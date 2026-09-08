@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { ToastService } from '@core/notifications/toast.service';
+import { I18nService } from '@core/i18n/i18n.service';
 import type { TableAction } from '@shared/ui/patterns/table/models/table-config.model';
 import { KocCampaignService } from '../../services/koc-campaign.service';
 import {
@@ -30,6 +31,7 @@ export class KocCampaignListComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   readonly tableConfig = buildKocCampaignTableConfig();
   readonly candidateTableConfig = buildKocCandidateTableConfig();
@@ -61,6 +63,11 @@ export class KocCampaignListComponent implements OnInit {
   cloneSourceId: string | null = null;
   formSubmitting = signal(false);
 
+  // Delete Confirmation Dialog
+  deleteDialogVisible = false;
+  readonly campaignToDelete = signal<KocCampaignItem | null>(null);
+  readonly deleting = signal(false);
+
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
     niche: ['TECH'],
@@ -70,15 +77,17 @@ export class KocCampaignListComponent implements OnInit {
     reviewPrompt: [''],
   });
 
-  nicheOptions = [
-    { label: 'Công nghệ (TECH)', value: 'TECH' },
-    { label: 'Làm đẹp & Mỹ phẩm (BEAUTY)', value: 'BEAUTY' },
-    { label: 'Thời trang (FASHION)', value: 'FASHION' },
-    { label: 'Đời sống (LIFESTYLE)', value: 'LIFESTYLE' },
-    { label: 'Ẩm thực (FOOD)', value: 'FOOD' },
-    { label: 'Sức khỏe (FITNESS)', value: 'FITNESS' },
-    { label: 'Du lịch (TRAVEL)', value: 'TRAVEL' },
-  ];
+  get nicheOptions(): { label: string; value: string }[] {
+    return [
+      { label: this.i18n.t('kocCampaign.niche.tech') || 'Công nghệ (TECH)', value: 'TECH' },
+      { label: this.i18n.t('kocCampaign.niche.beauty') || 'Làm đẹp & Mỹ phẩm (BEAUTY)', value: 'BEAUTY' },
+      { label: this.i18n.t('kocCampaign.niche.fashion') || 'Thời trang (FASHION)', value: 'FASHION' },
+      { label: this.i18n.t('kocCampaign.niche.lifestyle') || 'Đời sống (LIFESTYLE)', value: 'LIFESTYLE' },
+      { label: this.i18n.t('kocCampaign.niche.food') || 'Ẩm thực (FOOD)', value: 'FOOD' },
+      { label: this.i18n.t('kocCampaign.niche.fitness') || 'Sức khỏe (FITNESS)', value: 'FITNESS' },
+      { label: this.i18n.t('kocCampaign.niche.travel') || 'Du lịch (TRAVEL)', value: 'TRAVEL' },
+    ];
+  }
 
   ngOnInit(): void {
     void this.loadData();
@@ -227,8 +236,9 @@ export class KocCampaignListComponent implements OnInit {
     this.isClone = true;
     this.editCampaignId = null;
     this.cloneSourceId = campaign.id;
+    const prefix = this.i18n.t('kocCampaign.clonePrefix') || '(Bản sao)';
     this.form.reset({
-      name: `(Bản sao) ${campaign.name}`,
+      name: `${prefix} ${campaign.name}`,
       niche: campaign.niche || 'TECH',
       targetCount: campaign.targetCount || 5,
       minScore: campaign.minScore || 70.0,
@@ -273,16 +283,31 @@ export class KocCampaignListComponent implements OnInit {
     }
   }
 
-  async handleDelete(campaign: KocCampaignItem): Promise<void> {
-    const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa chiến dịch "${campaign.name}"?`);
-    if (!confirmed) return;
+  handleDelete(campaign: KocCampaignItem): void {
+    this.campaignToDelete.set(campaign);
+    this.deleteDialogVisible = true;
+  }
 
+  cancelDelete(): void {
+    this.deleteDialogVisible = false;
+    this.campaignToDelete.set(null);
+  }
+
+  async executeDelete(): Promise<void> {
+    const campaign = this.campaignToDelete();
+    if (!campaign) return;
+
+    this.deleting.set(true);
     try {
       await firstValueFrom(this.campaignService.deleteCampaign(campaign.id));
       this.toast.success('kocCampaign.toast.deleteSuccess');
+      this.deleteDialogVisible = false;
+      this.campaignToDelete.set(null);
       await this.loadData();
     } catch (err: unknown) {
       this.toast.error(extractErrorMessage(err));
+    } finally {
+      this.deleting.set(false);
     }
   }
 

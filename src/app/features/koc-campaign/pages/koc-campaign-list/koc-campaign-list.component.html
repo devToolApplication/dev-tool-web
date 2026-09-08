@@ -404,3 +404,37 @@
     </div>
   </form>
 </app-dialog>
+
+<!-- Delete Confirmation Dialog -->
+<app-dialog
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  width="min(95vw, 28rem)"
+  header="kocCampaign.action.delete"
+  (hide)="cancelDelete()"
+>
+  <div class="space-y-4 pt-1 text-sm">
+    <p class="text-[var(--app-text)]">
+      {{ 'kocCampaign.confirmDelete' | translateContent }}
+    </p>
+    @if (campaignToDelete(); as camp) {
+      <div class="p-3 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded font-medium text-[var(--app-text)] truncate">
+        {{ camp.name }}
+      </div>
+    }
+    <div class="flex justify-end gap-2 pt-2">
+      <app-button
+        label="cancel"
+        variant="ghost"
+        (buttonClick)="cancelDelete()"
+      ></app-button>
+      <app-button
+        label="kocCampaign.action.delete"
+        variant="destructive"
+        icon="pi pi-trash"
+        [loading]="deleting()"
+        (buttonClick)="executeDelete()"
+      ></app-button>
+    </div>
+  </div>
+</app-dialog>

@@ -150,11 +150,12 @@ describe('KocCandidateApprovalComponent', () => {
     expect(component.selectedCandidatesCount()).toBe(0);
   });
 
-  it('should approve selected candidates and complete task', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('should approve selected candidates and complete task after confirmation', async () => {
     await component.openReview(mockApproveTask);
-    await component.approveSelected();
+    component.approveSelected();
+
+    expect(component.confirmDialogVisible()).toBe(true);
+    await component.executeConfirm();
 
     expect(campaignService.completeApprovalTask).toHaveBeenCalledWith(
       'task-100',
@@ -165,11 +166,12 @@ describe('KocCandidateApprovalComponent', () => {
     expect(component.drawerOpen()).toBe(false);
   });
 
-  it('should reject all candidates and complete task', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('should reject all candidates and complete task after confirmation', async () => {
     await component.openReview(mockApproveTask);
-    await component.rejectAll();
+    component.rejectAll();
+
+    expect(component.confirmDialogVisible()).toBe(true);
+    await component.executeConfirm();
 
     expect(campaignService.completeApprovalTask).toHaveBeenCalledWith(
       'task-100',
@@ -180,13 +182,14 @@ describe('KocCandidateApprovalComponent', () => {
     expect(component.drawerOpen()).toBe(false);
   });
 
-  it('should submit discovery decision FIND_MORE and reload tasks', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('should submit discovery decision FIND_MORE after confirmation', async () => {
     await component.openReview(mockDecisionTask);
     expect(component.currentTaskType()).toBe('DECISION');
 
-    await component.submitDiscoveryDecision('FIND_MORE');
+    component.submitDiscoveryDecision('FIND_MORE');
+
+    expect(component.confirmDialogVisible()).toBe(true);
+    await component.executeConfirm();
 
     expect(campaignService.completeDiscoveryDecisionTask).toHaveBeenCalledWith(
       'task-101',
@@ -196,11 +199,12 @@ describe('KocCandidateApprovalComponent', () => {
     expect(component.drawerOpen()).toBe(false);
   });
 
-  it('should submit discovery decision STOP and reload tasks', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('should submit discovery decision STOP after confirmation', async () => {
     await component.openReview(mockDecisionTask);
-    await component.submitDiscoveryDecision('STOP');
+    component.submitDiscoveryDecision('STOP');
+
+    expect(component.confirmDialogVisible()).toBe(true);
+    await component.executeConfirm();
 
     expect(campaignService.completeDiscoveryDecisionTask).toHaveBeenCalledWith(
       'task-101',
@@ -210,17 +214,28 @@ describe('KocCandidateApprovalComponent', () => {
     expect(component.drawerOpen()).toBe(false);
   });
 
-  it('should confirm manual 2FA verification and reload tasks', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('should confirm manual 2FA verification after confirmation', async () => {
     await component.openReview(mockManual2faTask);
     expect(component.currentTaskType()).toBe('MANUAL_2FA');
 
-    await component.confirmManual2fa();
+    component.confirmManual2fa();
+
+    expect(component.confirmDialogVisible()).toBe(true);
+    await component.executeConfirm();
 
     expect(campaignService.completeManual2faTask).toHaveBeenCalledWith('task-102');
     expect(toast.success).toHaveBeenCalledWith('kocApproval.toast.manual2faSuccess');
     expect(component.drawerOpen()).toBe(false);
+  });
+
+  it('should cancel confirmation without completing task', async () => {
+    await component.openReview(mockApproveTask);
+    component.approveSelected();
+    expect(component.confirmDialogVisible()).toBe(true);
+
+    component.cancelConfirm();
+    expect(component.confirmDialogVisible()).toBe(false);
+    expect(campaignService.completeApprovalTask).not.toHaveBeenCalled();
   });
 
   it('should clear campaign filter and re-navigate', async () => {

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ToastService } from '@core/notifications/toast.service';
 import { KeycloakService } from '@core/auth/keycloak.service';
+import { I18nService } from '@core/i18n/i18n.service';
 import { KocCampaignService } from '../../services/koc-campaign.service';
 import {
   KocCandidateApprovalItem,
@@ -27,6 +28,7 @@ export class KocCandidateApprovalComponent implements OnInit {
   private readonly keycloak = inject(KeycloakService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
 
   readonly candidateTableConfig = buildKocCandidateApprovalTableConfig();
 
@@ -41,6 +43,14 @@ export class KocCandidateApprovalComponent implements OnInit {
   readonly candidates = signal<KocCandidateApprovalItem[]>([]);
   readonly candidatesLoading = signal(false);
   readonly completing = signal(false);
+
+  // Action Confirmation Dialog
+  readonly confirmDialogVisible = signal(false);
+  readonly confirmDialogHeader = signal('');
+  readonly confirmDialogMessage = signal('');
+  readonly confirmDialogBtnLabel = signal('confirm');
+  readonly confirmDialogVariant = signal<'primary' | 'destructive'>('primary');
+  private confirmAction: (() => Promise<void>) | null = null;
 
   readonly currentTaskType = computed<KocTaskType>(() => {
     const task = this.selectedTask();
@@ -168,7 +178,11 @@ export class KocCandidateApprovalComponent implements OnInit {
       const vars = await firstValueFrom(this.campaignService.getTaskVariables(task.id));
       this.taskVariables.set(vars);
 
-      const rawCandidates = (vars['reviewedCandidates'] as any[]) || [];
+      const rawCandidates =
+        (vars['qualifiedCandidates'] as any[]) ||
+        (vars['allReviewedCandidates'] as any[]) ||
+        (vars['reviewedCandidates'] as any[]) ||
+        [];
       const mapped: KocCandidateApprovalItem[] = rawCandidates.map((item) => ({
         externalProfileId: item.externalProfileId || item.profileId || item.id,
         fullName: item.fullName || item.name || 'N/A',
@@ -238,7 +252,35 @@ export class KocCandidateApprovalComponent implements OnInit {
     }
   }
 
-  async approveSelected(): Promise<void> {
+  openConfirm(
+    header: string,
+    message: string,
+    btnLabel: string,
+    variant: 'primary' | 'destructive',
+    action: () => Promise<void>
+  ): void {
+    this.confirmDialogHeader.set(header);
+    this.confirmDialogMessage.set(message);
+    this.confirmDialogBtnLabel.set(btnLabel);
+    this.confirmDialogVariant.set(variant);
+    this.confirmAction = action;
+    this.confirmDialogVisible.set(true);
+  }
+
+  cancelConfirm(): void {
+    this.confirmDialogVisible.set(false);
+    this.confirmAction = null;
+  }
+
+  async executeConfirm(): Promise<void> {
+    if (!this.confirmAction) return;
+    const action = this.confirmAction;
+    this.confirmDialogVisible.set(false);
+    this.confirmAction = null;
+    await action();
+  }
+
+  approveSelected(): void {
     const task = this.selectedTask();
     if (!task) return;
 
@@ -248,90 +290,117 @@ export class KocCandidateApprovalComponent implements OnInit {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn phê duyệt ${selected.length} KOC này để lưu chính thức vào hệ thống?`
-    );
-    if (!confirmed) return;
+    const templateMsg = this.i18n.t('kocApproval.confirmApprove');
+    const msg = templateMsg.replace('{count}', String(selected.length));
 
-    this.completing.set(true);
-    try {
-      await firstValueFrom(
-        this.campaignService.completeApprovalTask(task.id, selected, true)
-      );
-      this.toast.success('kocApproval.toast.approveSuccess');
-      this.closeDrawer();
-      await this.loadTasks();
-    } catch (err: unknown) {
-      this.toast.error(extractErrorMessage(err));
-    } finally {
-      this.completing.set(false);
-    }
+    this.openConfirm(
+      'kocApproval.dialog.approveHeader',
+      msg,
+      'kocApproval.action.approveSelectedSimple',
+      'primary',
+      async () => {
+        this.completing.set(true);
+        try {
+          await firstValueFrom(
+            this.campaignService.completeApprovalTask(task.id, selected, true)
+          );
+          this.toast.success('kocApproval.toast.approveSuccess');
+          this.closeDrawer();
+          await this.loadTasks();
+        } catch (err: unknown) {
+          this.toast.error(extractErrorMessage(err));
+        } finally {
+          this.completing.set(false);
+        }
+      }
+    );
   }
 
-  async rejectAll(): Promise<void> {
+  rejectAll(): void {
     const task = this.selectedTask();
     if (!task) return;
 
-    const confirmed = window.confirm(
-      'Bạn có chắc chắn muốn từ chối toàn bộ ứng viên và kết thúc nhiệm vụ?'
+    const msg = this.i18n.t('kocApproval.confirmReject');
+    this.openConfirm(
+      'kocApproval.dialog.rejectHeader',
+      msg,
+      'kocApproval.action.rejectAll',
+      'destructive',
+      async () => {
+        this.completing.set(true);
+        try {
+          await firstValueFrom(
+            this.campaignService.completeApprovalTask(task.id, [], false)
+          );
+          this.toast.success('kocApproval.toast.rejectSuccess');
+          this.closeDrawer();
+          await this.loadTasks();
+        } catch (err: unknown) {
+          this.toast.error(extractErrorMessage(err));
+        } finally {
+          this.completing.set(false);
+        }
+      }
     );
-    if (!confirmed) return;
-
-    this.completing.set(true);
-    try {
-      await firstValueFrom(
-        this.campaignService.completeApprovalTask(task.id, [], false)
-      );
-      this.toast.success('kocApproval.toast.rejectSuccess');
-      this.closeDrawer();
-      await this.loadTasks();
-    } catch (err: unknown) {
-      this.toast.error(extractErrorMessage(err));
-    } finally {
-      this.completing.set(false);
-    }
   }
 
-  async submitDiscoveryDecision(decision: 'FIND_MORE' | 'STOP'): Promise<void> {
+  submitDiscoveryDecision(decision: 'FIND_MORE' | 'STOP'): void {
     const task = this.selectedTask();
     if (!task) return;
 
-    const message =
+    const msgKey =
       decision === 'FIND_MORE'
-        ? 'Bạn có chắc muốn tiếp tục quét thêm các vòng tiếp theo để tìm thêm ứng viên KOC?'
-        : 'Bạn có chắc muốn dừng tìm kiếm và chuyển sang bước phê duyệt ứng viên đã tìm được?';
-    if (!window.confirm(message)) return;
+        ? 'kocApproval.confirmDecisionFindMore'
+        : 'kocApproval.confirmDecisionStop';
+    const btnLabel =
+      decision === 'FIND_MORE'
+        ? 'kocApproval.decision.findMore'
+        : 'kocApproval.decision.stop';
 
-    this.completing.set(true);
-    try {
-      await firstValueFrom(this.campaignService.completeDiscoveryDecisionTask(task.id, decision));
-      this.toast.success('kocApproval.toast.decisionSuccess');
-      this.closeDrawer();
-      await this.loadTasks();
-    } catch (err: unknown) {
-      this.toast.error(extractErrorMessage(err));
-    } finally {
-      this.completing.set(false);
-    }
+    this.openConfirm(
+      'kocApproval.dialog.decisionHeader',
+      this.i18n.t(msgKey),
+      btnLabel,
+      'primary',
+      async () => {
+        this.completing.set(true);
+        try {
+          await firstValueFrom(this.campaignService.completeDiscoveryDecisionTask(task.id, decision));
+          this.toast.success('kocApproval.toast.decisionSuccess');
+          this.closeDrawer();
+          await this.loadTasks();
+        } catch (err: unknown) {
+          this.toast.error(extractErrorMessage(err));
+        } finally {
+          this.completing.set(false);
+        }
+      }
+    );
   }
 
-  async confirmManual2fa(): Promise<void> {
+  confirmManual2fa(): void {
     const task = this.selectedTask();
     if (!task) return;
 
-    if (!window.confirm('Bạn xác nhận đã phê duyệt / chạm số trên ứng dụng Facebook trên thiết bị tin cậy?')) return;
-
-    this.completing.set(true);
-    try {
-      await firstValueFrom(this.campaignService.completeManual2faTask(task.id));
-      this.toast.success('kocApproval.toast.manual2faSuccess');
-      this.closeDrawer();
-      await this.loadTasks();
-    } catch (err: unknown) {
-      this.toast.error(extractErrorMessage(err));
-    } finally {
-      this.completing.set(false);
-    }
+    this.openConfirm(
+      'kocApproval.dialog.manual2faHeader',
+      this.i18n.t('kocApproval.confirmManual2fa'),
+      'kocApproval.manual2fa.confirm',
+      'primary',
+      async () => {
+        this.completing.set(true);
+        try {
+          await firstValueFrom(this.campaignService.completeManual2faTask(task.id));
+          this.toast.success('kocApproval.toast.manual2faSuccess');
+          this.closeDrawer();
+          await this.loadTasks();
+        } catch (err: unknown) {
+          this.toast.error(extractErrorMessage(err));
+        } finally {
+          this.completing.set(false);
+        }
+      }
+    );
   }
 
   formatNumber(num?: number): string {
