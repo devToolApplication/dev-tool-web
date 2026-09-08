@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -12,6 +12,8 @@ import {
 import {
   buildKocCandidateApprovalTableConfig,
 } from '../../models/koc-campaign.config';
+
+export type KocTaskType = 'APPROVE' | 'DECISION' | 'MANUAL_2FA' | 'GENERAL';
 
 @Component({
   selector: 'app-koc-candidate-approval',
@@ -30,6 +32,7 @@ export class KocCandidateApprovalComponent implements OnInit {
 
   readonly tasks = signal<WorkflowTask[]>([]);
   readonly loading = signal(false);
+  readonly campaignId = signal<string | null>(null);
 
   // Review Drawer State
   readonly drawerOpen = signal(false);
@@ -39,7 +42,16 @@ export class KocCandidateApprovalComponent implements OnInit {
   readonly candidatesLoading = signal(false);
   readonly completing = signal(false);
 
+  readonly currentTaskType = computed<KocTaskType>(() => {
+    const task = this.selectedTask();
+    return task ? this.getTaskType(task) : 'GENERAL';
+  });
+
   ngOnInit(): void {
+    const queryCampaignId = this.route.snapshot.queryParamMap.get('campaignId');
+    if (queryCampaignId) {
+      this.campaignId.set(queryCampaignId);
+    }
     void this.loadTasks();
   }
 
@@ -51,18 +63,85 @@ export class KocCandidateApprovalComponent implements OnInit {
     return this.candidates().filter((c) => c.selected).length;
   }
 
+  getTaskType(task: WorkflowTask): KocTaskType {
+    const key = task.taskDefinitionKey || '';
+    const name = (task.name || '').toLowerCase();
+    if (key === 'userTaskDiscoveryDecision' || name.includes('decision') || name.includes('quyết định')) {
+      return 'DECISION';
+    }
+    if (key === 'userTaskManualApprove' || name.includes('2fa') || name.includes('chạm số')) {
+      return 'MANUAL_2FA';
+    }
+    if (
+      key === 'userTaskApproveCandidates' ||
+      name.includes('koc') ||
+      name.includes('candidate') ||
+      name.includes('phê duyệt')
+    ) {
+      return 'APPROVE';
+    }
+    return 'GENERAL';
+  }
+
+  getTaskTypeLabel(task: WorkflowTask): string {
+    const type = this.getTaskType(task);
+    switch (type) {
+      case 'APPROVE':
+        return 'kocApproval.taskType.approve';
+      case 'DECISION':
+        return 'kocApproval.taskType.decision';
+      case 'MANUAL_2FA':
+        return 'kocApproval.taskType.manual2fa';
+      default:
+        return 'kocApproval.taskType.general';
+    }
+  }
+
+  getTaskTypeVariant(task: WorkflowTask): 'info' | 'warning' | 'success' | 'default' {
+    const type = this.getTaskType(task);
+    switch (type) {
+      case 'APPROVE':
+        return 'success';
+      case 'DECISION':
+        return 'warning';
+      case 'MANUAL_2FA':
+        return 'info';
+      default:
+        return 'default';
+    }
+  }
+
+  isKocTask(task: WorkflowTask): boolean {
+    const key = task.taskDefinitionKey || '';
+    const name = (task.name || '').toLowerCase();
+    return (
+      key === 'userTaskApproveCandidates' ||
+      key === 'userTaskDiscoveryDecision' ||
+      key === 'userTaskManualApprove' ||
+      name.includes('koc') ||
+      name.includes('candidate') ||
+      name.includes('decision') ||
+      name.includes('phê duyệt') ||
+      name.includes('2fa') ||
+      name.includes('tìm kiếm')
+    );
+  }
+
+  clearCampaignFilter(): void {
+    this.campaignId.set(null);
+    void this.router.navigate(['/koc/approval']);
+    void this.loadTasks();
+  }
+
   async loadTasks(): Promise<void> {
     this.loading.set(true);
     try {
-      const res = await firstValueFrom(this.campaignService.getPendingApprovalTasks(0, 50));
-      const allTasks = (res as any)?.data || (res as any)?.content || [];
-      // Filter tasks related to KOC candidate approval
-      const kocTasks = allTasks.filter(
-        (t: WorkflowTask) =>
-          t.taskDefinitionKey === 'userTaskApproveCandidates' ||
-          (t.name && t.name.toLowerCase().includes('koc')) ||
-          (t.name && t.name.toLowerCase().includes('candidate'))
+      const currentCampaignId = this.campaignId();
+      const res = await firstValueFrom(
+        this.campaignService.getPendingApprovalTasks(0, 50, currentCampaignId || undefined)
       );
+      const allTasks = (res as any)?.data || (res as any)?.content || [];
+      const kocTasks = allTasks.filter((t: WorkflowTask) => this.isKocTask(t));
       this.tasks.set(kocTasks.length > 0 ? kocTasks : allTasks);
 
       // If taskId passed via queryParam, auto open
@@ -213,6 +292,48 @@ export class KocCandidateApprovalComponent implements OnInit {
     }
   }
 
+  async submitDiscoveryDecision(decision: 'FIND_MORE' | 'STOP'): Promise<void> {
+    const task = this.selectedTask();
+    if (!task) return;
+
+    const message =
+      decision === 'FIND_MORE'
+        ? 'Bạn có chắc muốn tiếp tục quét thêm các vòng tiếp theo để tìm thêm ứng viên KOC?'
+        : 'Bạn có chắc muốn dừng tìm kiếm và chuyển sang bước phê duyệt ứng viên đã tìm được?';
+    if (!window.confirm(message)) return;
+
+    this.completing.set(true);
+    try {
+      await firstValueFrom(this.campaignService.completeDiscoveryDecisionTask(task.id, decision));
+      this.toast.success('kocApproval.toast.decisionSuccess');
+      this.closeDrawer();
+      await this.loadTasks();
+    } catch (err: unknown) {
+      this.toast.error(extractErrorMessage(err));
+    } finally {
+      this.completing.set(false);
+    }
+  }
+
+  async confirmManual2fa(): Promise<void> {
+    const task = this.selectedTask();
+    if (!task) return;
+
+    if (!window.confirm('Bạn xác nhận đã phê duyệt / chạm số trên ứng dụng Facebook trên thiết bị tin cậy?')) return;
+
+    this.completing.set(true);
+    try {
+      await firstValueFrom(this.campaignService.completeManual2faTask(task.id));
+      this.toast.success('kocApproval.toast.manual2faSuccess');
+      this.closeDrawer();
+      await this.loadTasks();
+    } catch (err: unknown) {
+      this.toast.error(extractErrorMessage(err));
+    } finally {
+      this.completing.set(false);
+    }
+  }
+
   formatNumber(num?: number): string {
     if (num == null) return '0';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -223,7 +344,11 @@ export class KocCandidateApprovalComponent implements OnInit {
 
 function extractErrorMessage(error: unknown): string {
   if (error && typeof error === 'object') {
-    const obj = error as { error?: { errorMessage?: string; message?: string }; errorMessage?: string; message?: string };
+    const obj = error as {
+      error?: { errorMessage?: string; message?: string };
+      errorMessage?: string;
+      message?: string;
+    };
     if (obj.error?.errorMessage) return obj.error.errorMessage;
     if (obj.error?.message) return obj.error.message;
     if (obj.errorMessage) return obj.errorMessage;

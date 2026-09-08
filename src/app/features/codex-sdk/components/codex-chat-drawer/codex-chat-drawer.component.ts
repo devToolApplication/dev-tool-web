@@ -47,6 +47,8 @@ export class CodexChatDrawerComponent implements OnInit, OnDestroy {
   readonly expandedToolCalls = signal<Record<string, boolean>>({});
   readonly expandedReasoning = signal<Record<string, boolean>>({});
   readonly expandedStderr = signal<Record<string, boolean>>({});
+  readonly expandedRequestContext = signal<Record<string, boolean>>({});
+  readonly expandedOutputSchema = signal<Record<string, boolean>>({});
 
   readonly agentOptions = computed<SelectOption[]>(() => {
     const list = this.agents();
@@ -160,6 +162,7 @@ export class CodexChatDrawerComponent implements OnInit, OnDestroy {
   }
 
   loadHistory(id: string): void {
+    this.cleanupStream();
     this.loading.set(true);
     this.codexService.getThreadHistory(id).subscribe({
       next: (detail: CodexThreadDetail) => {
@@ -202,11 +205,92 @@ export class CodexChatDrawerComponent implements OnInit, OnDestroy {
         this.turns.set(parsedTurns);
         this.loading.set(false);
         this.scrollBottomSoon();
+
+        const activeStreamingTurn = parsedTurns.find(
+          (t) => t.role === 'assistant' && t.status === 'streaming'
+        );
+        if (activeStreamingTurn) {
+          this.attachLiveStream(id, activeStreamingTurn.id);
+        }
       },
       error: () => {
         this.loading.set(false);
       },
     });
+  }
+
+  attachLiveStream(threadId: string, assistantTurnId: string): void {
+    this.cleanupStream();
+    this.isStreaming.set(true);
+    this.userScrolledUp = false;
+
+    this.turns.update((turns) =>
+      turns.map((t) =>
+        t.id === assistantTurnId
+          ? {
+              ...t,
+              content: '',
+              reasoning: undefined,
+              stderrLog: undefined,
+              status: 'streaming',
+            }
+          : t
+      )
+    );
+
+    this.activeAbortController = this.codexService.streamLiveThread(
+      threadId,
+      (token: string) => {
+        this.turns.update((turns) =>
+          turns.map((t) => (t.id === assistantTurnId ? { ...t, content: t.content + token } : t))
+        );
+        if (!this.userScrolledUp) {
+          this.scrollBottomSoon();
+        }
+      },
+      (err: unknown) => {
+        this.isStreaming.set(false);
+        const message =
+          (err as { message?: string })?.message || 'Lỗi kết nối SSE live stream.';
+        this.streamError.set(message);
+        this.turns.update((turns) =>
+          turns.map((t) => (t.id === assistantTurnId ? { ...t, status: 'failed' } : t))
+        );
+      },
+      () => {
+        this.isStreaming.set(false);
+        this.turns.update((turns) =>
+          turns.map((t) => (t.id === assistantTurnId ? { ...t, status: 'completed' } : t))
+        );
+        this.messageSent.emit();
+      },
+      (preflight: any) => {
+        this.turns.update((turns) =>
+          turns.map((t) => (t.id === assistantTurnId ? { ...t, preflight } : t))
+        );
+      },
+      (reasoning: string) => {
+        this.turns.update((turns) =>
+          turns.map((t) =>
+            t.id === assistantTurnId
+              ? { ...t, reasoning: (t.reasoning || '') + reasoning }
+              : t
+          )
+        );
+        if (!this.userScrolledUp) {
+          this.scrollBottomSoon();
+        }
+      },
+      (stderr: string) => {
+        this.turns.update((turns) =>
+          turns.map((t) =>
+            t.id === assistantTurnId
+              ? { ...t, stderrLog: [...(t.stderrLog || []), stderr] }
+              : t
+          )
+        );
+      }
+    );
   }
 
   onContainerScroll(event: Event): void {
@@ -247,6 +331,46 @@ export class CodexChatDrawerComponent implements OnInit, OnDestroy {
 
   isStderrExpanded(turnId: string): boolean {
     return !!this.expandedStderr()[turnId];
+  }
+
+  toggleRequestContext(turnId: string): void {
+    this.expandedRequestContext.update((prev) => ({
+      ...prev,
+      [turnId]: !prev[turnId],
+    }));
+  }
+
+  isRequestContextExpanded(turnId: string): boolean {
+    return !!this.expandedRequestContext()[turnId];
+  }
+
+  toggleOutputSchema(turnId: string): void {
+    this.expandedOutputSchema.update((prev) => ({
+      ...prev,
+      [turnId]: !prev[turnId],
+    }));
+  }
+
+  isOutputSchemaExpanded(turnId: string): boolean {
+    return !!this.expandedOutputSchema()[turnId];
+  }
+
+  formatJson(value: unknown): string {
+    if (value === undefined || value === null) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      try {
+        return JSON.stringify(JSON.parse(value), null, 2);
+      } catch {
+        return value;
+      }
+    }
+    return JSON.stringify(value, null, 2);
+  }
+
+  hasKeys(value: unknown): boolean {
+    return !!value && typeof value === 'object' && Object.keys(value).length > 0;
   }
 
   onInputChange(event: Event): void {

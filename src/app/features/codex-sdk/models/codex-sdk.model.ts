@@ -52,6 +52,8 @@ export interface CodexTurn {
   reasoning?: string;
   preflight?: CodexStreamPreflight;
   stderrLog?: string[];
+  requestContext?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface CodexThreadDetail {
@@ -71,6 +73,8 @@ export interface CodexPromptRequest {
   tools?: string[];
   systemPrompt?: string;
   stream?: boolean;
+  requestContext?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface CodexStreamEvent {

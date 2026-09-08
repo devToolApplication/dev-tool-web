@@ -168,4 +168,43 @@ describe('KocCampaignService', () => {
     expect(req.request.body.variables.approvedCandidates.length).toBe(1);
     req.flush({ success: true, data: true });
   });
+
+  it('should get pending approval tasks with campaignId and taskDefinitionKey', () => {
+    service
+      .getPendingApprovalTasks(0, 20, 'camp-123', 'userTaskDiscoveryDecision')
+      .subscribe((res) => {
+        expect(res.data.length).toBe(0);
+      });
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${workflowTasksUrl}/page` &&
+        r.params.get('campaignId') === 'camp-123' &&
+        r.params.get('taskDefinitionKey') === 'userTaskDiscoveryDecision'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ success: true, data: { data: [], metadata: { totalElements: 0, pageNumber: 0, pageSize: 20 } } });
+  });
+
+  it('should complete discovery decision task with decision variable', () => {
+    service.completeDiscoveryDecisionTask('task-124', 'FIND_MORE').subscribe((res) => {
+      expect(res).toBe(true);
+    });
+
+    const req = httpMock.expectOne(`${workflowTasksUrl}/task-124/complete`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.variables.discoveryDecision).toBe('FIND_MORE');
+    req.flush({ success: true, data: true });
+  });
+
+  it('should complete manual 2FA task with manualApproved variable', () => {
+    service.completeManual2faTask('task-125').subscribe((res) => {
+      expect(res).toBe(true);
+    });
+
+    const req = httpMock.expectOne(`${workflowTasksUrl}/task-125/complete`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.variables.manualApproved).toBe(true);
+    req.flush({ success: true, data: true });
+  });
 });

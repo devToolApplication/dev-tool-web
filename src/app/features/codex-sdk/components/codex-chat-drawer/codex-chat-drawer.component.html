@@ -146,6 +146,64 @@
                 }
               </div>
 
+              <!-- Request Context (collapsible) -->
+              @if (turn.requestContext && hasKeys(turn.requestContext)) {
+                <div class="context-container mt-2.5 rounded-lg border border-[var(--app-border)] overflow-hidden bg-[var(--app-surface)]">
+                  <div class="context-header w-full px-2.5 py-1.5 flex items-center justify-between text-xs bg-[var(--app-surface)] text-[var(--app-text-muted)]">
+                    <button
+                      type="button"
+                      class="flex items-center gap-2 font-mono flex-1 text-left hover:text-[var(--app-text)] transition-colors cursor-pointer"
+                      (click)="toggleRequestContext(turn.id)"
+                    >
+                      <i
+                        class="pi text-[10px] transition-transform duration-150"
+                        [class.pi-chevron-down]="isRequestContextExpanded(turn.id)"
+                        [class.pi-chevron-right]="!isRequestContextExpanded(turn.id)"
+                      ></i>
+                      <i class="pi pi-database text-sky-500 text-xs"></i>
+                      <span class="font-medium">{{ 'codexSdk.workbench.requestContext' | translateContent }}</span>
+                    </button>
+                    <app-copyable-text
+                      [value]="formatJson(turn.requestContext)"
+                    ></app-copyable-text>
+                  </div>
+                  @if (isRequestContextExpanded(turn.id)) {
+                    <div class="context-content p-2.5 border-t border-[var(--app-border-soft)] text-xs font-mono whitespace-pre-wrap break-words leading-relaxed text-[var(--app-text-muted)] bg-[var(--app-surface-soft)] max-h-64 overflow-y-auto">
+                      {{ formatJson(turn.requestContext) }}
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Output Schema (collapsible) -->
+              @if (turn.outputSchema && hasKeys(turn.outputSchema)) {
+                <div class="schema-container mt-2.5 rounded-lg border border-[var(--app-border)] overflow-hidden bg-[var(--app-surface)]">
+                  <div class="schema-header w-full px-2.5 py-1.5 flex items-center justify-between text-xs bg-[var(--app-surface)] text-[var(--app-text-muted)]">
+                    <button
+                      type="button"
+                      class="flex items-center gap-2 font-mono flex-1 text-left hover:text-[var(--app-text)] transition-colors cursor-pointer"
+                      (click)="toggleOutputSchema(turn.id)"
+                    >
+                      <i
+                        class="pi text-[10px] transition-transform duration-150"
+                        [class.pi-chevron-down]="isOutputSchemaExpanded(turn.id)"
+                        [class.pi-chevron-right]="!isOutputSchemaExpanded(turn.id)"
+                      ></i>
+                      <i class="pi pi-code text-indigo-500 text-xs"></i>
+                      <span class="font-medium">{{ 'codexSdk.workbench.outputSchema' | translateContent }}</span>
+                    </button>
+                    <app-copyable-text
+                      [value]="formatJson(turn.outputSchema)"
+                    ></app-copyable-text>
+                  </div>
+                  @if (isOutputSchemaExpanded(turn.id)) {
+                    <div class="schema-content p-2.5 border-t border-[var(--app-border-soft)] text-xs font-mono whitespace-pre-wrap break-words leading-relaxed text-[var(--app-text-muted)] bg-[var(--app-surface-soft)] max-h-64 overflow-y-auto">
+                      {{ formatJson(turn.outputSchema) }}
+                    </div>
+                  }
+                </div>
+              }
+
               <!-- Stderr / Diagnostics (collapsible alert) -->
               @if (turn.stderrLog && turn.stderrLog.length > 0) {
                 <div class="stderr-container mt-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 overflow-hidden text-xs">

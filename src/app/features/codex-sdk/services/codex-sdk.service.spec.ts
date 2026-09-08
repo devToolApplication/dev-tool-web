@@ -90,4 +90,35 @@ describe('CodexSdkService', () => {
     expect(controller).toBeInstanceOf(AbortController);
     controller.abort();
   });
+
+  it('TC-FE-CORE-04: should return AbortController from streamLiveThread', () => {
+    const controller = service.streamLiveThread(
+      'thread-run-123',
+      () => {},
+      () => {},
+      () => {}
+    );
+
+    expect(controller).toBeInstanceOf(AbortController);
+    controller.abort();
+  });
+
+  it('TC-FE-CORE-05: processStreamData should emit structuredOutput on result event', () => {
+    let emittedToken = '';
+    const rawResultEvent = JSON.stringify({
+      type: 'result',
+      result: {
+        execution: {
+          structuredOutput: { campaignId: 'c-1', approved: true },
+        },
+      },
+    });
+
+    service.processStreamData(rawResultEvent, (token) => {
+      emittedToken = token;
+    });
+
+    expect(emittedToken).toContain('"campaignId": "c-1"');
+    expect(emittedToken).toContain('"approved": true');
+  });
 });

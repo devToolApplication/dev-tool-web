@@ -75,8 +75,15 @@ export class KocCampaignService {
       .pipe(map((res) => res.data));
   }
 
-  getPendingApprovalTasks(page = 0, size = 50): Observable<BasePageResponse<WorkflowTask>> {
+  getPendingApprovalTasks(
+    page = 0,
+    size = 50,
+    campaignId?: string,
+    taskDefinitionKey?: string
+  ): Observable<BasePageResponse<WorkflowTask>> {
     let httpParams = new HttpParams().set('page', page).set('size', size);
+    if (campaignId) httpParams = httpParams.set('campaignId', campaignId);
+    if (taskDefinitionKey) httpParams = httpParams.set('taskDefinitionKey', taskDefinitionKey);
     return this.http
       .get<BaseResponse<BasePageResponse<WorkflowTask>>>(`${this.workflowTasksUrl}/page`, { params: httpParams })
       .pipe(map((res) => res.data));
@@ -109,6 +116,31 @@ export class KocCampaignService {
       variables: {
         approved,
         approvedCandidates,
+      },
+    };
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/complete`, payload)
+      .pipe(map((res) => res.data));
+  }
+
+  completeDiscoveryDecisionTask(
+    taskId: string,
+    decision: 'FIND_MORE' | 'STOP'
+  ): Observable<boolean> {
+    const payload = {
+      variables: {
+        discoveryDecision: decision,
+      },
+    };
+    return this.http
+      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/complete`, payload)
+      .pipe(map((res) => res.data));
+  }
+
+  completeManual2faTask(taskId: string): Observable<boolean> {
+    const payload = {
+      variables: {
+        manualApproved: true,
       },
     };
     return this.http

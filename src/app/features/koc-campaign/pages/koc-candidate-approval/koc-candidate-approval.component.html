@@ -10,6 +10,23 @@
   [loading]="loading()"
   (retry)="loadTasks()"
 >
+  <!-- Active Campaign Filter Banner -->
+  @if (campaignId()) {
+    <div class="mb-4 p-3 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-md flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 text-sm text-[var(--app-text)]">
+        <i class="pi pi-filter text-[var(--app-primary)]"></i>
+        <span>{{ 'kocApproval.filter.activeCampaign' | translateContent }} <strong class="font-mono text-[var(--app-primary)]">{{ campaignId() }}</strong></span>
+      </div>
+      <app-button
+        label="kocApproval.filter.clear"
+        variant="ghost"
+        size="sm"
+        icon="pi pi-times"
+        (buttonClick)="clearCampaignFilter()"
+      ></app-button>
+    </div>
+  }
+
   <!-- Task List Section -->
   <app-section-panel
     title="kocApproval.taskList.title"
@@ -28,12 +45,18 @@
             <div>
               <div class="flex items-start justify-between gap-2">
                 <h3 class="font-medium text-[var(--app-text)] text-sm line-clamp-2">
-                  {{ task.name || 'Phê duyệt Ứng viên KOC' }}
+                  {{ task.name || 'Nhiệm vụ xử lý KOC' }}
                 </h3>
-                <app-badge
-                  [label]="task.assignee ? 'CLAIMED' : 'UNASSIGNED'"
-                  [variant]="task.assignee ? 'info' : 'warning'"
-                ></app-badge>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <app-badge
+                    [label]="getTaskTypeLabel(task) | translateContent"
+                    [variant]="getTaskTypeVariant(task)"
+                  ></app-badge>
+                  <app-badge
+                    [label]="task.assignee ? 'CLAIMED' : 'UNASSIGNED'"
+                    [variant]="task.assignee ? 'info' : 'warning'"
+                  ></app-badge>
+                </div>
               </div>
               <div class="text-xs text-[var(--app-text-muted)] font-mono space-y-1 mt-2">
                 <div>Task ID: {{ task.id }}</div>
@@ -64,8 +87,8 @@
               }
 
               <app-button
-                label="kocApproval.task.startApproval"
-                icon="pi pi-user-check"
+                [label]="getTaskType(task) === 'DECISION' ? ('kocApproval.decision.title' | translateContent) : (getTaskType(task) === 'MANUAL_2FA' ? ('kocApproval.taskType.manual2fa' | translateContent) : ('kocApproval.task.startApproval' | translateContent))"
+                icon="pi pi-arrow-right"
                 variant="primary"
                 size="sm"
                 (buttonClick)="openReview(task)"
@@ -78,10 +101,10 @@
   </app-section-panel>
 </app-page-shell>
 
-<!-- Approval Drawer (Candidate Selection & AI Analysis) -->
+<!-- Review Drawer -->
 <app-drawer
   [open]="drawerOpen()"
-  title="kocApproval.drawer.title"
+  [title]="getTaskTypeLabel(selectedTask() || { id: '', name: '', processInstanceId: '' })"
   size="xl"
   (closed)="closeDrawer()"
 >
@@ -90,72 +113,190 @@
       <!-- Task Header Summary -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--app-border-soft)]">
         <div>
-          <h2 class="text-base font-semibold text-[var(--app-text)]">{{ task.name || 'Phê duyệt Ứng viên KOC' }}</h2>
-          <p class="text-xs text-[var(--app-text-muted)] font-mono">Process Run: {{ task.processInstanceId }}</p>
+          <h2 class="text-base font-semibold text-[var(--app-text)]">{{ task.name || 'Nhiệm vụ xử lý KOC' }}</h2>
+          <p class="text-xs text-[var(--app-text-muted)] font-mono">Process Run: {{ task.processInstanceId }} | Task ID: {{ task.id }}</p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs font-mono px-2.5 py-1 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded text-[var(--app-text)]">
-            Đã chọn: <strong class="text-[var(--app-primary)]">{{ selectedCandidatesCount() }}</strong> / {{ candidates().length }} KOC
-          </span>
+          <app-badge
+            [label]="getTaskTypeLabel(task) | translateContent"
+            [variant]="getTaskTypeVariant(task)"
+          ></app-badge>
         </div>
       </div>
 
-      <!-- Quick Actions Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-md">
-        <div class="flex items-center gap-2">
-          <app-button
-            label="kocApproval.action.selectAll"
-            variant="ghost"
-            size="sm"
-            (buttonClick)="selectAll()"
-          ></app-button>
-          <app-button
-            label="kocApproval.action.deselectAll"
-            variant="ghost"
-            size="sm"
-            (buttonClick)="deselectAll()"
-          ></app-button>
-        </div>
+      <!-- Content per Task Type -->
+      @switch (currentTaskType()) {
+        <!-- 1) Discovery Decision UserTask -->
+        @case ('DECISION') {
+          <div class="p-4 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-lg space-y-4">
+            <div class="space-y-1">
+              <h3 class="text-sm font-semibold text-[var(--app-text)]">{{ 'kocApproval.decision.title' | translateContent }}</h3>
+              <p class="text-xs text-[var(--app-text-muted)]">{{ 'kocApproval.decision.desc' | translateContent }}</p>
+            </div>
 
-        <div class="flex items-center gap-2">
-          <app-button
-            label="kocApproval.action.rejectAll"
-            icon="pi pi-times"
-            variant="destructive"
-            size="sm"
-            [loading]="completing()"
-            (buttonClick)="rejectAll()"
-          ></app-button>
-          <app-button
-            label="Phê duyệt đã chọn"
-            icon="pi pi-check"
-            variant="primary"
-            size="sm"
-            [disabled]="selectedCandidatesCount() === 0"
-            [loading]="completing()"
-            (buttonClick)="approveSelected()"
-          ></app-button>
-        </div>
-      </div>
+            <!-- Discovery Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div class="p-3 bg-[var(--app-card-surface)] border border-[var(--app-border-soft)] rounded-md">
+                <span class="text-xs text-[var(--app-text-muted)]">{{ 'kocApproval.decision.currentRound' | translateContent }}</span>
+                <div class="text-lg font-bold font-mono text-[var(--app-text)]">
+                  {{ taskVariables()['discoveryRound'] || 1 }} / {{ taskVariables()['roundLimit'] || 3 }}
+                </div>
+              </div>
+              <div class="p-3 bg-[var(--app-card-surface)] border border-[var(--app-border-soft)] rounded-md">
+                <span class="text-xs text-[var(--app-text-muted)]">{{ 'kocApproval.decision.qualifiedCount' | translateContent }}</span>
+                <div class="text-lg font-bold font-mono text-[var(--app-control-success-text)]">
+                  {{ taskVariables()['qualifiedCount'] || candidates().length }}
+                </div>
+              </div>
+              <div class="p-3 bg-[var(--app-card-surface)] border border-[var(--app-border-soft)] rounded-md col-span-2 sm:col-span-1">
+                <span class="text-xs text-[var(--app-text-muted)]">{{ 'kocApproval.decision.targetCount' | translateContent }}</span>
+                <div class="text-lg font-bold font-mono text-[var(--app-primary)]">
+                  {{ taskVariables()['targetCandidates'] || taskVariables()['targetCount'] || '-' }}
+                </div>
+              </div>
+            </div>
 
-      <!-- Candidates Review Table -->
-      <app-table
-        [config]="candidateTableConfig"
-        [data]="candidates()"
-        [loading]="candidatesLoading()"
-        [totalRecords]="candidates().length"
-        [customTemplates]="{
-          selected: candidateSelectTpl,
-          fullName: candidateNameTpl,
-          followerCount: candidateFollowersTpl,
-          score: candidateScoreTpl,
-          profileUrl: candidateUrlTpl,
-          analysis: candidateAnalysisTpl
-        }"
-      >
-      </app-table>
+            <!-- Action Buttons for Decision -->
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              <app-button
+                label="kocApproval.decision.findMore"
+                icon="pi pi-search-plus"
+                variant="primary"
+                [loading]="completing()"
+                (buttonClick)="submitDiscoveryDecision('FIND_MORE')"
+              ></app-button>
+              <app-button
+                label="kocApproval.decision.stop"
+                icon="pi pi-check-circle"
+                variant="secondary"
+                [loading]="completing()"
+                (buttonClick)="submitDiscoveryDecision('STOP')"
+              ></app-button>
+            </div>
+          </div>
 
-      <!-- Custom Templates -->
+          <!-- Preview Candidate Table in Decision Task -->
+          @if (candidates().length > 0) {
+            <div class="space-y-2">
+              <h4 class="text-xs font-semibold text-[var(--app-text)] uppercase tracking-wider">
+                Ứng viên đã chấm điểm sơ bộ ({{ candidates().length }})
+              </h4>
+              <app-table
+                [config]="candidateTableConfig"
+                [data]="candidates()"
+                [loading]="candidatesLoading()"
+                [totalRecords]="candidates().length"
+                [customTemplates]="{
+                  selected: candidateSelectTpl,
+                  fullName: candidateNameTpl,
+                  followerCount: candidateFollowersTpl,
+                  score: candidateScoreTpl,
+                  profileUrl: candidateUrlTpl,
+                  analysis: candidateAnalysisTpl
+                }"
+              >
+              </app-table>
+            </div>
+          }
+        }
+
+        <!-- 2) Manual 2FA Checkpoint UserTask -->
+        @case ('MANUAL_2FA') {
+          <div class="p-6 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-lg text-center space-y-4">
+            <i class="pi pi-shield text-4xl text-[var(--app-control-warn-text)]"></i>
+            <div class="space-y-1">
+              <h3 class="text-base font-semibold text-[var(--app-text)]">{{ 'kocApproval.manual2fa.title' | translateContent }}</h3>
+              <p class="text-xs text-[var(--app-text-muted)] max-w-md mx-auto">
+                {{ 'kocApproval.manual2fa.desc' | translateContent }}
+              </p>
+            </div>
+
+            <div class="py-4">
+              <span class="text-xs text-[var(--app-text-muted)] block mb-1">{{ 'kocApproval.manual2fa.codeLabel' | translateContent }}</span>
+              <div class="text-5xl font-mono font-bold tracking-widest text-[var(--app-primary)]">
+                {{ taskVariables()['twoFactorCode'] || taskVariables()['checkpointCode'] || '88' }}
+              </div>
+            </div>
+
+            <div>
+              <app-button
+                label="kocApproval.manual2fa.confirm"
+                icon="pi pi-check"
+                variant="primary"
+                [loading]="completing()"
+                (buttonClick)="confirmManual2fa()"
+              ></app-button>
+            </div>
+          </div>
+        }
+
+        <!-- 3) Default / Candidate Approval UserTask -->
+        @default {
+          <!-- Selection Counter -->
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-mono px-2.5 py-1 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded text-[var(--app-text)]">
+              Đã chọn: <strong class="text-[var(--app-primary)]">{{ selectedCandidatesCount() }}</strong> / {{ candidates().length }} KOC
+            </span>
+          </div>
+
+          <!-- Quick Actions Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[var(--app-surface-subtle)] border border-[var(--app-border-soft)] rounded-md">
+            <div class="flex items-center gap-2">
+              <app-button
+                label="kocApproval.action.selectAll"
+                variant="ghost"
+                size="sm"
+                (buttonClick)="selectAll()"
+              ></app-button>
+              <app-button
+                label="kocApproval.action.deselectAll"
+                variant="ghost"
+                size="sm"
+                (buttonClick)="deselectAll()"
+              ></app-button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <app-button
+                label="kocApproval.action.rejectAll"
+                icon="pi pi-times"
+                variant="destructive"
+                size="sm"
+                [loading]="completing()"
+                (buttonClick)="rejectAll()"
+              ></app-button>
+              <app-button
+                label="Phê duyệt đã chọn"
+                icon="pi pi-check"
+                variant="primary"
+                size="sm"
+                [disabled]="selectedCandidatesCount() === 0"
+                [loading]="completing()"
+                (buttonClick)="approveSelected()"
+              ></app-button>
+            </div>
+          </div>
+
+          <!-- Candidates Review Table -->
+          <app-table
+            [config]="candidateTableConfig"
+            [data]="candidates()"
+            [loading]="candidatesLoading()"
+            [totalRecords]="candidates().length"
+            [customTemplates]="{
+              selected: candidateSelectTpl,
+              fullName: candidateNameTpl,
+              followerCount: candidateFollowersTpl,
+              score: candidateScoreTpl,
+              profileUrl: candidateUrlTpl,
+              analysis: candidateAnalysisTpl
+            }"
+          >
+          </app-table>
+        }
+      }
+
+      <!-- Custom Templates for Candidate Table -->
       <ng-template #candidateSelectTpl let-row="row">
         <div class="flex items-center justify-center">
           <input
@@ -234,19 +375,47 @@
 
   <div drawer-footer class="flex flex-col sm:flex-row justify-end gap-2">
     <app-button label="close" variant="secondary" (buttonClick)="closeDrawer()"></app-button>
-    <app-button
-      label="kocApproval.action.rejectAll"
-      variant="destructive"
-      [loading]="completing()"
-      (buttonClick)="rejectAll()"
-    ></app-button>
-    <app-button
-      label="Phê duyệt KOC đã chọn"
-      icon="pi pi-check"
-      variant="primary"
-      [disabled]="selectedCandidatesCount() === 0"
-      [loading]="completing()"
-      (buttonClick)="approveSelected()"
-    ></app-button>
+    @switch (currentTaskType()) {
+      @case ('DECISION') {
+        <app-button
+          label="kocApproval.decision.stop"
+          variant="secondary"
+          [loading]="completing()"
+          (buttonClick)="submitDiscoveryDecision('STOP')"
+        ></app-button>
+        <app-button
+          label="kocApproval.decision.findMore"
+          icon="pi pi-search-plus"
+          variant="primary"
+          [loading]="completing()"
+          (buttonClick)="submitDiscoveryDecision('FIND_MORE')"
+        ></app-button>
+      }
+      @case ('MANUAL_2FA') {
+        <app-button
+          label="kocApproval.manual2fa.confirm"
+          icon="pi pi-check"
+          variant="primary"
+          [loading]="completing()"
+          (buttonClick)="confirmManual2fa()"
+        ></app-button>
+      }
+      @default {
+        <app-button
+          label="kocApproval.action.rejectAll"
+          variant="destructive"
+          [loading]="completing()"
+          (buttonClick)="rejectAll()"
+        ></app-button>
+        <app-button
+          label="Phê duyệt KOC đã chọn"
+          icon="pi pi-check"
+          variant="primary"
+          [disabled]="selectedCandidatesCount() === 0"
+          [loading]="completing()"
+          (buttonClick)="approveSelected()"
+        ></app-button>
+      }
+    }
   </div>
 </app-drawer>

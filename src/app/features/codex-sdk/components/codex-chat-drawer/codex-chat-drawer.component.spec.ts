@@ -17,12 +17,15 @@ describe('CodexChatDrawerComponent', () => {
         of({
           id: 't-100',
           turns: [
-            { id: 'turn-1', role: 'user', content: 'Turn 1 prompt' },
+            { id: 'turn-1', role: 'user', content: 'Turn 1 prompt', requestContext: { campaignId: 'c1' } },
             { id: 'turn-2', role: 'assistant', content: 'Turn 1 reply' },
           ],
         } as CodexThreadDetail)
       ),
+      getAgents: vi.fn().mockReturnValue(of([])),
+      processRawCodexLines: vi.fn(),
       streamPrompt: vi.fn(),
+      streamLiveThread: vi.fn().mockReturnValue({ abort: vi.fn() }),
     };
 
     await TestBed.configureTestingModule({
@@ -60,5 +63,53 @@ describe('CodexChatDrawerComponent', () => {
 
     expect(mockAbort).toHaveBeenCalled();
     expect(component.isStreaming()).toBe(false);
+  });
+
+  it('should toggle request context and output schema expansion independently', () => {
+    expect(component.isRequestContextExpanded('turn-1')).toBe(false);
+    component.toggleRequestContext('turn-1');
+    expect(component.isRequestContextExpanded('turn-1')).toBe(true);
+    component.toggleRequestContext('turn-1');
+    expect(component.isRequestContextExpanded('turn-1')).toBe(false);
+
+    expect(component.isOutputSchemaExpanded('turn-1')).toBe(false);
+    component.toggleOutputSchema('turn-1');
+    expect(component.isOutputSchemaExpanded('turn-1')).toBe(true);
+    component.toggleOutputSchema('turn-1');
+    expect(component.isOutputSchemaExpanded('turn-1')).toBe(false);
+  });
+
+  it('should format json and detect keys properly', () => {
+    expect(component.formatJson(null)).toBe('');
+    expect(component.formatJson({ a: 1 })).toContain('"a": 1');
+    expect(component.formatJson('{"b":2}')).toContain('"b": 2');
+    expect(component.hasKeys(null)).toBe(false);
+    expect(component.hasKeys({})).toBe(false);
+    expect(component.hasKeys({ campaignId: '123' })).toBe(true);
+  });
+
+  it('should automatically attach live stream when assistant turn has status streaming', () => {
+    codexServiceMock.getThreadHistory.mockReturnValue(
+      of({
+        id: 't-live-1',
+        turns: [
+          { id: 'turn-u1', role: 'user', content: 'Search KOC prompt' },
+          { id: 'turn-a1', role: 'assistant', content: '', status: 'streaming' },
+        ],
+      } as CodexThreadDetail)
+    );
+
+    component.loadHistory('t-live-1');
+
+    expect(codexServiceMock.streamLiveThread).toHaveBeenCalledWith(
+      't-live-1',
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Function)
+    );
+    expect(component.isStreaming()).toBe(true);
   });
 });

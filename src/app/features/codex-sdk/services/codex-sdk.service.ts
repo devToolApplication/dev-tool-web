@@ -63,6 +63,103 @@ export class CodexSdkService {
       .pipe(map((res) => res.data ?? []));
   }
 
+  streamLiveThread(
+    threadId: string,
+    onToken: (token: string) => void,
+    onError: (err: unknown) => void,
+    onDone: () => void,
+    onPreflight?: (preflight: any) => void,
+    onReasoning?: (reasoning: string) => void,
+    onStderr?: (stderr: string) => void
+  ): AbortController {
+    const controller = new AbortController();
+    const encodedId = encodeURIComponent(threadId);
+
+    (async () => {
+      try {
+        const headers: Record<string, string> = {
+          Accept: 'text/event-stream, application/x-ndjson',
+        };
+        const token = this.keycloak?.token;
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${this.baseUrl}/threads/${encodedId}/live`, {
+          method: 'GET',
+          headers,
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`SSE live streaming failed with status ${response.status}`);
+        }
+
+        if (!response.body) {
+          throw new Error('ReadableStream not supported or empty body in response.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8', { fatal: false });
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() ?? '';
+
+          for (const part of parts) {
+            const lines = part.split('\n');
+            let eventType = 'message';
+            let dataContent = '';
+
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                eventType = line.replace('event:', '').trim();
+              } else if (line.startsWith('data:')) {
+                const rawData = line.slice(5);
+                dataContent = rawData.startsWith(' ') ? rawData.slice(1) : rawData;
+              }
+            }
+
+            if (eventType === 'done') {
+              onDone();
+              return;
+            }
+
+            if (eventType === 'error') {
+              onError(new Error(dataContent || 'Stream error'));
+              return;
+            }
+
+            if (dataContent) {
+              this.processStreamData(
+                dataContent,
+                onToken,
+                onPreflight,
+                onReasoning,
+                onStderr
+              );
+            }
+          }
+        }
+
+        onDone();
+      } catch (error: unknown) {
+        if ((error as { name?: string })?.name !== 'AbortError') {
+          onError(error);
+        }
+      }
+    })();
+
+    return controller;
+  }
+
   streamPrompt(
     request: CodexPromptRequest,
     onToken: (token: string) => void,
@@ -210,8 +307,9 @@ export class CodexSdkService {
           return;
         }
         if (parsed.type === 'result') {
-          if (parsed.result?.execution?.stderr) {
-            onStderr?.(parsed.result.execution.stderr);
+          if (parsed.result?.execution?.structuredOutput) {
+            const out = parsed.result.execution.structuredOutput;
+            onToken(typeof out === 'string' ? out : JSON.stringify(out, null, 2));
           }
           return;
         }
