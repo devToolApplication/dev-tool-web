@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -35,6 +35,9 @@ export class KocCampaignListComponent implements OnInit {
   readonly candidateTableConfig = buildKocCandidateTableConfig();
   readonly actions = buildKocCampaignListActions();
   readonly filterFields = buildKocCampaignFilterFields();
+
+  @ViewChild('workflowStatusCellTpl') workflowStatusCellTpl?: TemplateRef<{ row: KocCampaignItem }>;
+  readonly activeStepDetail = signal<string | null>(null);
 
   readonly campaigns = signal<KocCampaignItem[]>([]);
   readonly loading = signal(false);

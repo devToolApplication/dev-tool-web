@@ -153,4 +153,72 @@ describe('KocCampaignListComponent', () => {
     expect(component.formDialogVisible).toBe(false);
     expect(component.isClone).toBe(false);
   });
+
+  it('should initialize activeStepDetail with null', () => {
+    expect(component.activeStepDetail()).toBeNull();
+  });
+
+  it('should render detailed two-line status with step title and round in workflowStatus template', () => {
+    const testItem: KocCampaignItem = {
+      ...mockCampaign,
+      workflowStatus: 'RUNNING',
+      currentStep: 'AI_SEARCH',
+      currentStepTitle: 'Quét tìm KOC',
+      currentRound: 1,
+      maxRounds: 3,
+      stepDetail: 'Đang quét bài đăng Facebook',
+    };
+
+    expect(component.workflowStatusCellTpl).toBeDefined();
+    const viewRef = component.workflowStatusCellTpl!.createEmbeddedView({ row: testItem });
+    viewRef.detectChanges();
+    const compiled = viewRef.rootNodes[0] as HTMLElement;
+
+    expect(compiled.textContent).toContain('Quét tìm KOC');
+    expect(compiled.textContent).toContain('(1/3)');
+  });
+
+  it('should toggle step detail popover when info button is clicked', () => {
+    const testItem: KocCampaignItem = {
+      ...mockCampaign,
+      id: 'camp-popover-1',
+      workflowStatus: 'RUNNING',
+      currentStep: 'AI_SEARCH',
+      currentStepTitle: 'Quét tìm KOC',
+      currentRound: 2,
+      maxRounds: 3,
+      stepDetail: 'Đang quét bài đăng Facebook theo tiêu chí',
+      workflowRunId: 'run-999',
+      approvedKocCount: 3,
+      targetCount: 10,
+    };
+
+    const viewRef = component.workflowStatusCellTpl!.createEmbeddedView({ row: testItem });
+    viewRef.detectChanges();
+    const compiled = viewRef.rootNodes[0] as HTMLElement;
+
+    // Initially popover is not visible
+    expect(component.activeStepDetail()).toBeNull();
+    expect(compiled.textContent).not.toContain('Đang quét bài đăng Facebook theo tiêu chí');
+
+    // Click info button to open popover
+    const infoBtn = compiled.querySelector('button[aria-label]') as HTMLButtonElement;
+    expect(infoBtn).toBeTruthy();
+    infoBtn.click();
+    fixture.detectChanges();
+    viewRef.detectChanges();
+
+    expect(component.activeStepDetail()).toBe('camp-popover-1');
+    expect(compiled.textContent).toContain('Đang quét bài đăng Facebook theo tiêu chí');
+    expect(compiled.textContent).toContain('3 / 10 KOC');
+
+    // Close button inside popover
+    const closeBtn = compiled.querySelector('button i.pi-times')?.parentElement as HTMLButtonElement;
+    expect(closeBtn).toBeTruthy();
+    closeBtn.click();
+    fixture.detectChanges();
+    viewRef.detectChanges();
+
+    expect(component.activeStepDetail()).toBeNull();
+  });
 });

@@ -40,7 +40,8 @@
     [customTemplates]="{
       name: nameCellTpl,
       targetCount: targetsCellTpl,
-      approvedKocCount: approvedCellTpl
+      approvedKocCount: approvedCellTpl,
+      workflowStatus: workflowStatusCellTpl
     }"
     (rowClick)="openDetail($event)"
     (actionClick)="onTableAction($event)"
@@ -83,6 +84,90 @@
       >
         {{ row.approvedKocCount || 0 }} / {{ row.targetCount || 0 }} KOC
       </span>
+    </div>
+  </ng-template>
+
+  <ng-template #workflowStatusCellTpl let-row="row">
+    <div class="flex flex-col gap-1 min-w-0">
+      <!-- Dòng 1: Badge trạng thái chính -->
+      <div class="flex items-center gap-1.5">
+        <app-badge
+          [label]="row.workflowStatus || 'UNKNOWN'"
+          [variant]="
+            row.workflowStatus === 'RUNNING' ? 'info' :
+            row.workflowStatus === 'USER_TASK' ? 'warning' :
+            row.workflowStatus === 'COMPLETED' ? 'success' :
+            row.workflowStatus === 'FAILED' ? 'danger' : 'muted'
+          "
+          size="sm"
+        ></app-badge>
+
+        <!-- Popover trigger chi tiết bước -->
+        <button
+          type="button"
+          class="text-xs text-[var(--app-text-muted)] hover:text-[var(--app-primary)] p-0.5 rounded transition-colors"
+          [attr.aria-label]="'kocCampaign.step.popoverTitle' | translateContent"
+          (click)="$event.stopPropagation(); activeStepDetail.set(activeStepDetail() === row.id ? null : row.id)"
+          [title]="row.stepDetail || row.currentStepTitle || ''"
+        >
+          <i class="pi pi-info-circle"></i>
+        </button>
+      </div>
+
+      <!-- Dòng 2: Bước nghiệp vụ chi tiết -->
+      <div class="flex items-center gap-1 text-xs text-[var(--app-text-muted)] truncate">
+        @if (row.workflowStatus === 'RUNNING') {
+          <i class="pi pi-spin pi-spinner text-[var(--app-primary)] text-[10px] shrink-0"></i>
+        } @else if (row.workflowStatus === 'USER_TASK') {
+          <i class="pi pi-user-edit text-[var(--app-warning)] text-[10px] shrink-0"></i>
+        } @else if (row.workflowStatus === 'COMPLETED') {
+          <i class="pi pi-check text-[var(--app-success)] text-[10px] shrink-0"></i>
+        } @else if (row.workflowStatus === 'FAILED') {
+          <i class="pi pi-times-circle text-[var(--app-danger)] text-[10px] shrink-0"></i>
+        }
+
+        <span class="font-medium text-[var(--app-text)] truncate">
+          {{ row.currentStepTitle || ('kocCampaign.step.initializing' | translateContent) }}
+        </span>
+
+        @if (row.currentRound) {
+          <span class="text-[var(--app-text-muted)] font-mono shrink-0">
+            ({{ row.currentRound }}/{{ row.maxRounds || 3 }})
+          </span>
+        }
+      </div>
+
+      <!-- Popover thả xuống khi click icon info -->
+      @if (activeStepDetail() === row.id) {
+        <div
+          class="p-2.5 mt-1 rounded-md border border-[var(--app-border-soft)] bg-[var(--app-card-surface-strong)] shadow-lg text-xs space-y-1.5 z-20"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="flex items-center justify-between pb-1 border-b border-[var(--app-border-soft)]">
+            <span class="font-semibold text-[var(--app-text)]">{{ 'kocCampaign.step.popoverTitle' | translateContent }}</span>
+            <button
+              type="button"
+              class="text-[var(--app-text-muted)] hover:text-[var(--app-text)] p-0.5"
+              (click)="activeStepDetail.set(null)"
+            >
+              <i class="pi pi-times text-[10px]"></i>
+            </button>
+          </div>
+          <div>
+            <span class="text-[var(--app-text-muted)]">{{ 'kocCampaign.step.detail' | translateContent }}: </span>
+            <span class="text-[var(--app-text)]">{{ row.stepDetail || row.currentStepTitle || '-' }}</span>
+          </div>
+          <div class="flex items-center justify-between font-mono text-[11px] text-[var(--app-text-muted)] pt-1 border-t border-[var(--app-border-soft)]">
+            <span>{{ row.approvedKocCount || 0 }} / {{ row.targetCount || 0 }} KOC</span>
+            @if (row.workflowRunId) {
+              <div class="flex items-center gap-1">
+                <span class="truncate max-w-[80px]">{{ row.workflowRunId }}</span>
+                <app-copyable-text [value]="row.workflowRunId"></app-copyable-text>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   </ng-template>
 </app-page-shell>

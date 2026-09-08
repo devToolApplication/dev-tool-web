@@ -97,15 +97,8 @@ export function buildKocCampaignTableConfig(): TableConfig<KocCampaignItem> {
       {
         field: 'workflowStatus',
         header: 'kocCampaign.column.workflowStatus',
-        type: 'badge',
-        width: '10rem',
-        badgeMap: {
-          RUNNING: 'info',
-          USER_TASK: 'warning',
-          COMPLETED: 'success',
-          FAILED: 'danger',
-          TERMINATED: 'muted',
-        },
+        type: 'custom',
+        minWidth: '13rem',
       },
       {
         field: 'approvedKocCount',

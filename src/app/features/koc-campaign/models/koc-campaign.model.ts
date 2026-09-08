@@ -9,6 +9,11 @@ export interface KocCampaignItem {
   workflowDefId?: string;
   workflowRunId?: string;
   workflowStatus?: string;
+  currentStep?: string;
+  currentStepTitle?: string;
+  currentRound?: number;
+  maxRounds?: number;
+  stepDetail?: string;
   approvedKocCount?: number;
   status?: string;
   createdAt?: string;
