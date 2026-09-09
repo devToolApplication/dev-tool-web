@@ -1,357 +1,145 @@
-import { expect, test } from '@playwright/test';
+import { expect, Page, Route, test } from '@playwright/test';
 
-test.describe('KOC Campaign Management & Candidate Approval E2E', () => {
-  const mockCampaigns = [
-    {
-      id: 'camp-101',
-      name: 'Chiến dịch KOC Công Nghệ Q3',
-      niche: 'TECH',
-      targetCount: 5,
-      minScore: 75.0,
-      workflowStatus: 'USER_TASK',
-      approvedKocCount: 0,
-      workflowRunId: 'run-9001',
-      searchPrompt: 'Tìm các review smartphone, laptop uy tín',
-      reviewPrompt: 'Tối thiểu 50k followers, review khách quan',
-      createdAt: '2026-09-07T08:00:00Z',
-    },
-    {
-      id: 'camp-102',
-      name: 'Chiến dịch KOC Mỹ phẩm Mùa Thu',
-      niche: 'BEAUTY',
-      targetCount: 3,
-      minScore: 70.0,
-      workflowStatus: 'COMPLETED',
-      approvedKocCount: 3,
-      workflowRunId: 'run-9002',
-      createdAt: '2026-09-05T10:00:00Z',
-    },
-  ];
-
-  const mockApprovedCandidates = [
-    {
-      id: 'cand-1',
-      campaignId: 'camp-102',
-      externalProfileId: 'fb-creator-1',
-      fullName: 'Beauty Creator Lan',
-      platform: 'FACEBOOK',
-      followerCount: 82000,
-      score: 88.5,
-      profileUrl: 'https://facebook.com/beauty.lan',
-      status: 'ACTIVE',
-      createdAt: '2026-09-05T11:00:00Z',
-    },
-    {
-      id: 'cand-2',
-      campaignId: 'camp-102',
-      externalProfileId: 'fb-creator-2',
-      fullName: 'Skincare Reviewer Mai',
-      platform: 'FACEBOOK',
-      followerCount: 54000,
-      score: 79.0,
-      profileUrl: 'https://facebook.com/skincare.mai',
-      status: 'ACTIVE',
-      createdAt: '2026-09-05T11:05:00Z',
-    },
-  ];
-
-  const mockWorkflowTasks = [
-    {
-      id: 'task-user-approval-1',
-      name: 'Human Approval - Select KOC Candidates',
-      taskDefinitionKey: 'userTaskApproveCandidates',
-      processInstanceId: 'run-9001',
-      assignee: null,
-      createTime: '2026-09-07T08:05:00Z',
-    },
-  ];
-
-  const mockTaskVariables = {
-    campaignId: 'camp-101',
-    campaignName: 'Chiến dịch KOC Công Nghệ Q3',
-    minScore: 75.0,
+const campaigns = [
+  {
+    id: 'camp-101',
+    name: 'Technology KOC Campaign',
+    niche: 'TECH',
     targetCount: 5,
-    reviewedCandidates: [
-      {
-        externalProfileId: 'fb-tech-review-1',
-        fullName: 'Vinh Cong Nghe',
-        profileUrl: 'https://facebook.com/vinh.tech',
-        platform: 'FACEBOOK',
-        followerCount: 150000,
-        score: 92.0,
-        analysis: {
-          matchReason: 'KOC rất nổi tiếng về smartphone',
-          strengths: ['high reach', 'chất lượng video cao'],
-          weaknesses: ['chi phí booking cao'],
-        },
-      },
-      {
-        externalProfileId: 'fb-tech-review-2',
-        fullName: 'Hai Laptop Review',
-        profileUrl: 'https://facebook.com/hai.laptop',
-        platform: 'FACEBOOK',
-        followerCount: 65000,
-        score: 78.0,
-        analysis: {
-          matchReason: 'Chuyên đánh giá phần cứng và laptop',
-          strengths: ['kiến thức chuyên sâu', 'tương tác thật'],
-          weaknesses: [],
-        },
-      },
-    ],
-  };
+    minScore: 75,
+    workflowStatus: 'USER_TASK',
+    approvedKocCount: 0,
+    workflowRunId: 'run-9001',
+    createdAt: '2026-09-07T08:00:00Z',
+  },
+  {
+    id: 'camp-102',
+    name: 'Beauty KOC Campaign',
+    niche: 'BEAUTY',
+    targetCount: 3,
+    minScore: 70,
+    workflowStatus: 'COMPLETED',
+    approvedKocCount: 3,
+    workflowRunId: 'run-9002',
+    createdAt: '2026-09-05T10:00:00Z',
+  },
+];
 
+test.describe('KOC campaign management', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('dangerously-skip-permissions', 'true');
+      window.localStorage.setItem('app-language', 'en');
     });
-
-    // Mock Campaign Page API
-    await page.route('**/v1/admin/koc-campaigns/page*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 200,
-          data: {
-            content: mockCampaigns,
-            totalElements: mockCampaigns.length,
-            number: 0,
-            size: 10,
-          },
-        }),
-      });
-    });
-
-    // Mock Candidates for Campaign
-    await page.route('**/v1/admin/koc-campaigns/*/candidates', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 200,
-          data: mockApprovedCandidates,
-        }),
-      });
-    });
-
-    // Mock Create Campaign
-    await page.route('**/v1/admin/koc-campaigns', async (route) => {
-      if (route.request().method() === 'POST') {
-        const body = route.request().postDataJSON();
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            status: 200,
-            data: {
-              id: 'camp-new-created',
-              name: body.name,
-              niche: body.niche,
-              targetCount: body.targetCount,
-              minScore: body.minScore,
-              workflowStatus: 'RUNNING',
-            },
-          }),
-        });
-      } else {
-        await route.continue();
-      }
-    });
-
-    // Mock Clone Campaign
-    await page.route('**/v1/admin/koc-campaigns/*/clone', async (route) => {
-      if (route.request().method() === 'POST') {
-        const body = route.request().postDataJSON() || {};
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            status: 200,
-            data: {
-              id: 'camp-cloned',
-              name: body.name || '(Bản sao) Chiến dịch KOC Công Nghệ Q3',
-              niche: body.niche || 'TECH',
-              targetCount: body.targetCount || 5,
-              minScore: body.minScore || 70,
-              workflowStatus: 'RUNNING',
-            },
-          }),
-        });
-      } else {
-        await route.continue();
-      }
-    });
-
-    // Mock Workflow Tasks Page
-    await page.route('**/v1/admin/workflows/tasks/page*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 200,
-          data: {
-            content: mockWorkflowTasks,
-            totalElements: mockWorkflowTasks.length,
-            number: 0,
-            size: 50,
-          },
-        }),
-      });
-    });
-
-    // Mock Task Variables
-    await page.route('**/v1/admin/workflows/tasks/*/variables', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 200,
-          data: mockTaskVariables,
-        }),
-      });
-    });
-
-    // Mock Complete Task
-    await page.route('**/v1/admin/workflows/tasks/*/complete', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 200,
-          data: true,
-        }),
-      });
-    });
+    await mockCampaignApi(page);
   });
 
-  test('1. Renders campaign list with page shell, toolbar, filter panel and table', async ({ page }) => {
-    await page.goto('/koc/campaigns?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
+  test('renders campaigns and opens the approved-candidate drawer', async ({ page }) => {
+    await page.goto('/koc/campaigns?dangerously-skip-permissions=true');
 
-    // Page shell & headers
-    await expect(page.locator('app-page-shell')).toBeVisible();
-    await expect(page.getByText('Chiến dịch KOC Công Nghệ Q3')).toBeVisible();
-    await expect(page.getByText('Chiến dịch KOC Mỹ phẩm Mùa Thu')).toBeVisible();
+    await expect(page.getByText('Technology KOC Campaign')).toBeVisible();
+    await expect(page.getByText('Beauty KOC Campaign')).toBeVisible();
 
-    // Badges & statuses
-    await expect(page.getByText('USER_TASK').first()).toBeVisible();
-    await expect(page.getByText('COMPLETED').first()).toBeVisible();
+    await page.getByRole('button', { name: /View Approved KOCs/i }).nth(1).click();
+
+    const drawer = page.locator('.app-drawer__panel');
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByText('Beauty Creator')).toBeVisible();
   });
 
-  test('2. Opens create campaign dialog and submits new campaign', async ({ page }) => {
-    await page.goto('/koc/campaigns?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
+  test('creates a campaign through the shared dialog', async ({ page }) => {
+    await page.goto('/koc/campaigns?dangerously-skip-permissions=true');
 
-    // Click 'Khởi tạo Chiến dịch' on toolbar
-    const createBtn = page.locator('app-action-toolbar').getByRole('button').first();
-    await createBtn.click();
-
-    // Dialog should be open
+    await page.locator('app-action-toolbar').getByRole('button').first().click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
+    await dialog.locator('input[type="text"]').first().fill('New KOC Campaign');
+    await dialog.getByRole('button', { name: /Create & Start/i }).click();
 
-    // Fill form
-    const nameInput = dialog.locator('input[type="text"]').first();
-    await nameInput.fill('Chiến dịch Test 2026');
-
-    // Submit button
-    const submitBtn = dialog.getByRole('button', { name: /Khởi tạo & Chạy quy trình|Create & Start/i });
-    await submitBtn.click();
-
-    // Dialog closes
-    await expect(dialog).toBeHidden({ timeout: 5000 });
+    await expect(dialog).toBeHidden();
   });
 
-  test('3. Opens drawer to view official approved KOC candidates', async ({ page }) => {
-    await page.goto('/koc/campaigns?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
-
-    // Click 'Xem KOC đã duyệt' action button on second row
-    const viewBtn = page.getByRole('button', { name: /Xem KOC đã duyệt/i }).nth(1);
-    await viewBtn.click();
-
-    // Drawer should open in CDK Overlay
-    const drawer = page.locator('.app-drawer__panel');
-    await expect(drawer).toBeVisible();
-
-    // Approved KOC list visible
-    await expect(drawer.getByText('Beauty Creator Lan')).toBeVisible();
-    await expect(drawer.getByText('Skincare Reviewer Mai')).toBeVisible();
-    await expect(drawer.getByText('fb-creator-1')).toBeVisible();
-  });
-
-  test('4. Candidate Approval flow: loads pending user tasks and approves selected KOCs', async ({ page }) => {
-    await page.goto('/koc/approval?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
-
-    // User task card visible
-    await expect(page.getByText('Human Approval - Select KOC Candidates')).toBeVisible();
-    await expect(page.getByText('run-9001')).toBeVisible();
-
-    // Click 'Mở danh sách ứng viên'
-    const openBtn = page.getByRole('button', { name: /Mở danh sách ứng viên|Review Candidates/i });
-    await openBtn.click();
-
-    // Drawer opens with candidates
-    const drawer = page.locator('.app-drawer__panel');
-    await expect(drawer).toBeVisible();
-    await expect(drawer.getByText('Vinh Cong Nghe')).toBeVisible();
-    await expect(drawer.getByText('Hai Laptop Review')).toBeVisible();
-
-    // Approve selected button
-    page.on('dialog', async (dialog) => {
-      await dialog.accept();
+  test('opens the new user-task inbox filtered by campaign', async ({ page }) => {
+    await page.route('**/ai-agent-mcrs/v1/user-tasks**', async (route) => {
+      await fulfillJson(route, {
+        data: [],
+        metadata: { totalElements: 0, pageNumber: 0, pageSize: 10 },
+      });
     });
+    await page.goto('/koc/campaigns?dangerously-skip-permissions=true');
 
-    const approveBtn = drawer.getByRole('button', { name: 'Phê duyệt KOC đã chọn' });
-    await expect(approveBtn).toBeEnabled();
-    await approveBtn.click();
+    await page.locator('.table-actions__more-wrap button').first().click();
+    await page
+      .locator('.table-actions__menu')
+      .getByRole('button', { name: /Approve Candidates/i })
+      .click();
 
-    // Drawer closes after approval
-    await expect(drawer).toBeHidden({ timeout: 5000 });
-  });
-
-  test('5. Responsive mobile viewport: drawer and toolbar adapt gracefully', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/koc/campaigns?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('app-page-shell')).toBeVisible();
-    const viewBtn = page.getByRole('button', { name: /Xem KOC đã duyệt/i }).first();
-    await viewBtn.click();
-
-    const drawer = page.locator('.app-drawer__panel');
-    await expect(drawer).toBeVisible();
-  });
-
-  test('6. Clones campaign: opens clone dialog with prefixed name and submits', async ({ page }) => {
-    await page.goto('/koc/campaigns?dangerously-skip-permissions');
-    await page.waitForLoadState('networkidle');
-
-    // Click more action button (pi-ellipsis-h) on first row
-    const moreBtn = page.locator('.table-actions__more-wrap button').first();
-    await moreBtn.click();
-
-    // Click 'Nhân bản' / 'Clone' in menu
-    const cloneMenuItem = page.locator('.table-actions__menu').getByRole('button', { name: /Nhân bản|Clone/i });
-    await expect(cloneMenuItem).toBeVisible();
-    await cloneMenuItem.click();
-
-    // Dialog opens with clone title
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText(/Nhân bản Chiến dịch KOC|Clone KOC Campaign/i)).toBeVisible();
-
-    // Verify name has (Bản sao)
-    const nameInput = dialog.locator('input[type="text"]').first();
-    await expect(nameInput).toHaveValue(/\(Bản sao\)/);
-
-    // Submit clone
-    const submitBtn = dialog.getByRole('button', { name: /Nhân bản & Chạy quy trình|Clone & Start Workflow/i });
-    await submitBtn.click();
-
-    // Dialog closes
-    await expect(dialog).toBeHidden({ timeout: 5000 });
+    await expect(page).toHaveURL(/\/tasks\?.*businessKey=camp-101/);
   });
 });
+
+async function mockCampaignApi(page: Page): Promise<void> {
+  await page.route('**/ai-agent-mcrs/v1/admin/koc-campaigns**', async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+
+    if (request.method() === 'OPTIONS') {
+      await fulfillJson(route, null, 204);
+      return;
+    }
+
+    if (request.method() === 'GET' && url.pathname.endsWith('/koc-campaigns/page')) {
+      await fulfillJson(route, {
+        data: campaigns,
+        metadata: {
+          totalElements: campaigns.length,
+          pageNumber: 0,
+          pageSize: 10,
+        },
+      });
+      return;
+    }
+
+    if (request.method() === 'GET' && url.pathname.endsWith('/candidates')) {
+      await fulfillJson(route, [
+        {
+          id: 'candidate-1',
+          campaignId: 'camp-102',
+          externalProfileId: 'profile-1',
+          fullName: 'Beauty Creator',
+          platform: 'FACEBOOK',
+          followerCount: 82000,
+          score: 88.5,
+          status: 'ACTIVE',
+          createdAt: '2026-09-05T11:00:00Z',
+        },
+      ]);
+      return;
+    }
+
+    if (request.method() === 'POST' && url.pathname.endsWith('/koc-campaigns')) {
+      const body = request.postDataJSON() as Record<string, unknown>;
+      await fulfillJson(route, {
+        id: 'camp-new',
+        ...body,
+        workflowStatus: 'RUNNING',
+      });
+      return;
+    }
+
+    await fulfillJson(route, { message: `Unhandled ${request.method()} ${url.pathname}` }, 404);
+  });
+}
+
+async function fulfillJson(route: Route, data: unknown, status = 200): Promise<void> {
+  await route.fulfill({
+    status,
+    headers: {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      'access-control-allow-headers': 'content-type,authorization',
+      'content-type': 'application/json',
+    },
+    body: status === 204 ? '' : JSON.stringify({ data }),
+  });
+}

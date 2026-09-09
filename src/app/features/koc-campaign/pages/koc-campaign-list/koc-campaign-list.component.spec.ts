@@ -113,14 +113,25 @@ describe('KocCampaignListComponent', () => {
     expect(campaignService.getCampaignCandidates).toHaveBeenCalledWith('camp-1');
   });
 
-  it('should navigate to approval screen on approveTask action', () => {
+  it('should navigate to the filtered task inbox on approveTask action', () => {
     component.onTableAction({
       action: { id: 'approveTask', label: '', onClick: () => undefined },
       row: mockCampaign,
     });
-    expect(router.navigate).toHaveBeenCalledWith(['/koc/approval'], {
-      queryParams: { campaignId: 'camp-1' },
+    expect(router.navigate).toHaveBeenCalledWith(['/tasks'], {
+      queryParams: { businessKey: 'camp-1' },
     });
+  });
+
+  it('should navigate to the filtered task inbox from the drawer', () => {
+    component.selectedCampaign.set(mockCampaign);
+
+    component.onApproveTaskFromDrawer();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/tasks'], {
+      queryParams: { businessKey: 'camp-1' },
+    });
+    expect(component.drawerOpen()).toBe(false);
   });
 
   it('should open clone dialog with prefilled values when clone action triggered', () => {

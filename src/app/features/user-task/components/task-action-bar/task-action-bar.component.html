@@ -1,0 +1,45 @@
+<div class="task-action-bar">
+  <div class="task-action-bar__container">
+    <!-- Common comment section using project Shared UI app-input-area -->
+    <div class="task-action-bar__comment">
+      <div class="flex items-center justify-between mb-1">
+        <label for="task-action-comment-input" class="text-xs font-semibold text-foreground flex items-center gap-1">
+          {{ 'userTask.comment.label' | translateContent }}
+          @if (hasRequiredCommentAction()) {
+            <span class="text-destructive font-bold" [attr.title]="'userTask.comment.requiredForAction' | translateContent">*</span>
+          }
+        </label>
+        <span class="text-xs text-muted-foreground tabular-nums" [class.text-destructive]="store.comment().length > 2000">
+          {{ store.comment().length }}/2000
+        </span>
+      </div>
+
+      <app-input-area
+        inputId="task-action-comment-input"
+        [value]="store.comment()"
+        (valueChange)="onCommentChange($event)"
+        [rows]="2"
+        [maxRows]="4"
+        [placeholder]="'userTask.confirm.commentPlaceholder' | translateContent"
+        [disabled]="store.isSubmitting() || !store.isReady()"
+        [invalid]="!!store.commentError()"
+        [errorMessage]="store.commentError() || ''"
+        [helpText]="hasRequiredCommentAction() ? ('userTask.comment.requiredForAction' | translateContent) : ''"
+      ></app-input-area>
+    </div>
+
+    <!-- Exact allowedActions rendered using Shared UI app-button -->
+    <div class="task-action-bar__buttons">
+      @for (action of store.allowedActions(); track action) {
+        <app-button
+          [label]="actionLabel(action) | translateContent"
+          [variant]="actionVariant(action)"
+          [icon]="actionIcon(action)"
+          [disabled]="store.isSubmitting() || !store.isReady()"
+          [loading]="store.isSubmitting() && store.activeAction() === action"
+          (buttonClick)="onAction(action)"
+        ></app-button>
+      }
+    </div>
+  </div>
+</div>

@@ -148,8 +148,8 @@ export class KocCampaignListComponent implements OnInit {
         void this.openDetail(event.row);
         break;
       case 'approveTask':
-        void this.router.navigate(['/koc/approval'], {
-          queryParams: { campaignId: event.row.id },
+        void this.router.navigate(['/tasks'], {
+          queryParams: { businessKey: event.row.id },
         });
         break;
       case 'edit':
@@ -193,8 +193,8 @@ export class KocCampaignListComponent implements OnInit {
     const campaign = this.selectedCampaign();
     this.closeDrawer();
     if (campaign) {
-      void this.router.navigate(['/koc/approval'], {
-        queryParams: { campaignId: campaign.id },
+      void this.router.navigate(['/tasks'], {
+        queryParams: { businessKey: campaign.id },
       });
     }
   }

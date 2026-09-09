@@ -1,0 +1,53 @@
+.task-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.task-shell__header {
+  border-bottom: 1px solid var(--app-border-color, #e2e8f0);
+  background-color: var(--app-card-bg, #ffffff);
+  padding: 1rem 1.5rem;
+}
+
+.task-shell__header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .task-shell__header-main {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.task-shell__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-shell__banners {
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.task-shell__content {
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+.task-shell__screen-container {
+  background-color: var(--app-card-bg, #ffffff);
+  border: 1px solid var(--app-border-color, #e2e8f0);
+  border-radius: var(--app-radius-lg, 0.5rem);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}

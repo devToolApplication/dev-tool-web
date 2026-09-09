@@ -1,0 +1,182 @@
+<div class="task-shell">
+  <!-- Live region for screen readers -->
+  <div
+    class="sr-only"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    id="task-shell-live-region"
+  >
+    {{ store.liveAnnouncement() | translateContent }}
+  </div>
+
+  <!-- Shell Header Area -->
+  <header class="task-shell__header">
+    <div class="task-shell__header-main">
+      <div class="flex items-center gap-3">
+        <app-button
+          variant="ghost"
+          icon="pi pi-arrow-left"
+          [label]="'userTask.nav.title' | translateContent"
+          (buttonClick)="navigateBack()"
+        ></app-button>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl font-bold tracking-tight text-foreground">
+              {{ store.task()?.taskName || ("userTask.nav.title" | translateContent) }}
+            </h1>
+            @if (store.task()?.formKey) {
+              <app-badge [label]="store.task()!.formKey" variant="info"></app-badge>
+            }
+            @if (store.task()?.completed) {
+              <app-badge [label]="'userTask.taskInfo.completed' | translateContent" variant="success"></app-badge>
+            } @else if (store.state() === "READ_ONLY") {
+              <app-badge [label]="'userTask.taskInfo.readOnly' | translateContent" variant="warning"></app-badge>
+            } @else if (store.state() === "UNSUPPORTED") {
+              <app-badge [label]="'userTask.unsupported.title' | translateContent" variant="danger"></app-badge>
+            } @else if (store.state() === "READY") {
+              <app-badge [label]="'userTask.taskInfo.active' | translateContent" variant="info" [pulse]="true"></app-badge>
+            }
+          </div>
+          @if (store.task()?.processDefinitionName || store.task()?.businessKey) {
+            <p class="text-xs text-muted-foreground mt-0.5">
+              {{ store.task()?.processDefinitionName }}
+              @if (store.task()?.businessKey) {
+                <span class="mx-1" aria-hidden="true">&middot;</span>
+                <span>{{ store.task()?.businessKey }}</span>
+              }
+            </p>
+          }
+        </div>
+      </div>
+
+      <div class="task-shell__header-actions">
+        <app-button
+          variant="secondary"
+          icon="pi pi-history"
+          [label]="'userTask.history.title' | translateContent"
+          [attr.aria-label]="'userTask.history.viewDrawer' | translateContent"
+          (buttonClick)="openHistoryDrawer()"
+        ></app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification & State Banners -->
+  <div class="task-shell__banners space-y-3 px-4 sm:px-6 pt-4">
+    @if (store.state() === "READ_ONLY" || store.state() === "COMPLETED") {
+      <app-alert
+        variant="warning"
+        [title]="'userTask.readOnly.banner' | translateContent"
+      ></app-alert>
+    }
+
+    @if (store.state() === "UNSUPPORTED") {
+      <app-alert
+        variant="danger"
+        [title]="'userTask.unsupported.title' | translateContent"
+        [message]="'userTask.unsupported.description' | translateContent"
+      ></app-alert>
+    }
+
+    @if (store.state() === "FORBIDDEN") {
+      <app-alert
+        variant="danger"
+        [title]="'userTask.error.forbidden' | translateContent"
+      ></app-alert>
+    }
+
+    @if (store.error() && store.state() !== "FORBIDDEN" && store.state() !== "UNSUPPORTED") {
+      <app-alert
+        variant="danger"
+        [title]="store.errorCode() ? '[' + store.errorCode() + ']' : undefined"
+        [message]="store.error()!"
+      ></app-alert>
+    }
+  </div>
+
+  <!-- Main Content Layout (Desktop Main/Sidebar, Mobile 1-Column) -->
+  <main class="task-shell__content p-4 sm:p-6" [class.pb-28]="store.allowedActions().length > 0 && !store.isReadOnly()">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Main Work Area (col-span-8) -->
+      <section
+        class="lg:col-span-8 space-y-6 min-w-0"
+        [attr.aria-label]="'userTask.screen.ariaTaskContent' | translateContent"
+      >
+        @if (store.isLoading()) {
+          <app-loading-skeleton type="detail" [rows]="6"></app-loading-skeleton>
+        } @else if (store.state() === "UNSUPPORTED") {
+          <div class="space-y-4">
+            <app-unsupported-task-screen [formKey]="store.formKey()"></app-unsupported-task-screen>
+            <p class="text-xs text-muted-foreground text-center">
+              {{ "userTask.unsupported.contactAdmin" | translateContent }}
+            </p>
+          </div>
+        } @else if (store.state() === "FORBIDDEN") {
+          <app-empty-state
+            [title]="'userTask.error.forbidden' | translateContent"
+            icon="pi pi-lock"
+            variant="warning"
+          ></app-empty-state>
+        } @else if (screenComponent()) {
+          <div class="task-shell__screen-container">
+            <ng-container
+              *ngComponentOutlet="screenComponent()!; inputs: screenInputs()"
+            ></ng-container>
+          </div>
+        }
+      </section>
+
+      <!-- Sidebar Information Area (col-span-4) -->
+      <aside
+        class="lg:col-span-4 space-y-6 min-w-0"
+        [attr.aria-label]="'userTask.screen.ariaTaskSidebar' | translateContent"
+      >
+        <!-- Task Metadata Panel -->
+        <app-section-panel [title]="'userTask.taskInfo.title' | translateContent">
+          @if (store.isLoading()) {
+            <app-loading-skeleton type="list" [rows]="5"></app-loading-skeleton>
+          } @else {
+            <app-key-value-list
+              [items]="taskInfoItems()"
+              layout="one-column"
+            ></app-key-value-list>
+          }
+        </app-section-panel>
+
+        <!-- Processing History Sidebar Panel -->
+        <app-section-panel [title]="'userTask.history.title' | translateContent">
+          <app-data-timeline
+            [items]="timelineItems()"
+            [loading]="store.historyLoading()"
+            [error]="store.historyErrorCode() ? '[' + store.historyErrorCode() + '] ' + store.historyError() : store.historyError()"
+            [emptyTitle]="'userTask.history.empty'"
+          ></app-data-timeline>
+        </app-section-panel>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Sticky Action Bar (Rendered only when active actions exist and not read-only) -->
+  @if (store.allowedActions().length > 0 && !store.isReadOnly()) {
+    <app-task-action-bar></app-task-action-bar>
+  }
+
+  <!-- History Drawer -->
+  <app-drawer
+    [open]="isHistoryDrawerOpen()"
+    [title]="'userTask.history.title' | translateContent"
+    size="md"
+    (closed)="closeHistoryDrawer()"
+    (openChange)="isHistoryDrawerOpen.set($event)"
+  >
+    <div class="p-4">
+      <app-data-timeline
+        [items]="timelineItems()"
+        [loading]="store.historyLoading()"
+        [error]="store.historyErrorCode() ? '[' + store.historyErrorCode() + '] ' + store.historyError() : store.historyError()"
+        [emptyTitle]="'userTask.history.empty'"
+      ></app-data-timeline>
+    </div>
+  </app-drawer>
+</div>

@@ -6,13 +6,9 @@ import { RouterModule } from '@angular/router';
 import { SharedModule } from '@shared/shared.module';
 import { kocCampaignRoutes } from './koc-campaign.routes';
 import { KocCampaignListComponent } from './pages/koc-campaign-list/koc-campaign-list.component';
-import { KocCandidateApprovalComponent } from './pages/koc-candidate-approval/koc-candidate-approval.component';
 
 @NgModule({
-  declarations: [
-    KocCampaignListComponent,
-    KocCandidateApprovalComponent,
-  ],
+  declarations: [KocCampaignListComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -20,9 +16,6 @@ import { KocCandidateApprovalComponent } from './pages/koc-candidate-approval/ko
     RouterModule.forChild(kocCampaignRoutes),
     SharedModule,
   ],
-  exports: [
-    KocCampaignListComponent,
-    KocCandidateApprovalComponent,
-  ],
+  exports: [KocCampaignListComponent],
 })
 export class KocCampaignModule {}

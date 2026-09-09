@@ -38,6 +38,17 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     ],
   },
   {
+    label: 'userTask.nav.title',
+    icon: 'pi pi-check-square',
+    items: [
+      {
+        label: 'userTask.nav.title',
+        icon: 'pi pi-inbox',
+        routerLink: '/tasks',
+      },
+    ],
+  },
+  {
     label: 'layout.menu.accountManagement',
     icon: 'pi pi-id-card',
     items: [
@@ -56,11 +67,6 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
         label: 'layout.menu.kocCampaignList',
         icon: 'pi pi-list',
         routerLink: '/koc/campaigns',
-      },
-      {
-        label: 'layout.menu.kocCandidateApproval',
-        icon: 'pi pi-user-check',
-        routerLink: '/koc/approval',
       },
     ],
   },

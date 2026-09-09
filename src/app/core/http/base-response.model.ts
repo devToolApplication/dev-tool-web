@@ -2,6 +2,7 @@ export interface BaseResponse<T> {
   traceId?: string;
   path?: string;
   status?: number;
+  errorCode?: string;
   errorMessage?: string;
   data: T;
 }

@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { BaseInput } from './base-input';
 
 class TestInput extends BaseInput<string> {}
@@ -6,7 +7,8 @@ describe('BaseInput', () => {
   let input: TestInput;
 
   beforeEach(() => {
-    input = new TestInput();
+    TestBed.configureTestingModule({});
+    input = TestBed.runInInjectionContext(() => new TestInput());
   });
 
   it('implements the ControlValueAccessor value and disabled contract', () => {

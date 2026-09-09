@@ -15,4 +15,17 @@ describe('I18nService', () => {
 
     expect(service.t('workflowStudio.inspector.emptyTitle')).toBe('Chua chon node');
   });
+
+  it('registers user task translation keys', () => {
+    const service = new I18nService();
+    service.setLanguage('en');
+
+    expect(service.t('userTask.nav.title')).toBe('User Tasks');
+    expect(service.t('userTask.status.active')).toBe('Pending');
+
+    service.setLanguage('vi');
+
+    expect(service.t('userTask.nav.title')).toBe('User Tasks');
+    expect(service.t('userTask.status.active')).toBe('Đang chờ xử lý');
+  });
 });

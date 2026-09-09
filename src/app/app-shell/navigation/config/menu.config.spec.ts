@@ -1,13 +1,14 @@
 import { APP_LAYOUT_MENU } from './menu.config';
 
 describe('APP_LAYOUT_MENU', () => {
-  it('exposes AI Agent MCRS, Account Management and Job Service entries', () => {
+  it('exposes AI Agent MCRS, Account Management, Job Service and User Task entries', () => {
     const groups = APP_LAYOUT_MENU.map((item) => item.label);
 
     expect(groups).toContain('layout.menu.aiAgentMcrs');
     expect(groups).toContain('layout.menu.accountManagement');
     expect(groups).toContain('layout.menu.kocManagement');
     expect(groups).toContain('layout.menu.jobService');
+    expect(groups).toContain('userTask.nav.title');
 
     expect(flattenRoutes()).toEqual(
       expect.arrayContaining([
@@ -16,12 +17,13 @@ describe('APP_LAYOUT_MENU', () => {
         '/ai-agent-mcrs/workflows',
         '/accounts',
         '/koc/campaigns',
-        '/koc/approval',
         '/job-service/secrets',
         '/job-service/configs',
         '/job-service/jobs',
+        '/tasks',
       ]),
     );
+    expect(flattenRoutes()).not.toContain('/koc/approval');
   });
 
   function flattenRoutes(): string[] {

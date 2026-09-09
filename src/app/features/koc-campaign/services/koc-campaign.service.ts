@@ -11,17 +11,14 @@ import {
   KocCampaignItem,
   KocCampaignQueryParams,
   KocCampaignUpdateRequest,
-  KocCandidateApprovalItem,
   KocCandidateItem,
 } from '../models/koc-campaign.model';
-import { WorkflowTask } from '../../workflow-studio/model/workflow-studio.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class KocCampaignService {
   private readonly baseUrl = `${environment.apiUrl.adminAiGenerator}/koc-campaigns`;
-  private readonly workflowTasksUrl = `${environment.apiUrl.adminAiGenerator}/workflows/tasks`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -72,80 +69,6 @@ export class KocCampaignService {
   deleteCampaign(id: string): Observable<KocCampaignItem> {
     return this.http
       .delete<BaseResponse<KocCampaignItem>>(`${this.baseUrl}/${id}`)
-      .pipe(map((res) => res.data));
-  }
-
-  getPendingApprovalTasks(
-    page = 0,
-    size = 50,
-    campaignId?: string,
-    taskDefinitionKey?: string
-  ): Observable<BasePageResponse<WorkflowTask>> {
-    let httpParams = new HttpParams().set('page', page).set('size', size);
-    if (campaignId) httpParams = httpParams.set('campaignId', campaignId);
-    if (taskDefinitionKey) httpParams = httpParams.set('taskDefinitionKey', taskDefinitionKey);
-    return this.http
-      .get<BaseResponse<BasePageResponse<WorkflowTask>>>(`${this.workflowTasksUrl}/page`, { params: httpParams })
-      .pipe(map((res) => res.data));
-  }
-
-  getTaskVariables(taskId: string): Observable<Record<string, unknown>> {
-    return this.http
-      .get<BaseResponse<Record<string, unknown>>>(`${this.workflowTasksUrl}/${taskId}/variables`)
-      .pipe(map((res) => res.data || {}));
-  }
-
-  claimTask(taskId: string, assignee: string): Observable<boolean> {
-    return this.http
-      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/claim`, { assignee })
-      .pipe(map((res) => res.data));
-  }
-
-  unclaimTask(taskId: string): Observable<boolean> {
-    return this.http
-      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/unclaim`, {})
-      .pipe(map((res) => res.data));
-  }
-
-  completeApprovalTask(
-    taskId: string,
-    approvedCandidates: KocCandidateApprovalItem[],
-    approved: boolean
-  ): Observable<boolean> {
-    const payload = {
-      variables: {
-        approved,
-        approvedCandidates,
-        selectedCandidates: approvedCandidates,
-      },
-    };
-    return this.http
-      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/complete`, payload)
-      .pipe(map((res) => res.data));
-  }
-
-  completeDiscoveryDecisionTask(
-    taskId: string,
-    decision: 'FIND_MORE' | 'STOP'
-  ): Observable<boolean> {
-    const payload = {
-      variables: {
-        discoveryDecision: decision,
-      },
-    };
-    return this.http
-      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/complete`, payload)
-      .pipe(map((res) => res.data));
-  }
-
-  completeManual2faTask(taskId: string): Observable<boolean> {
-    const payload = {
-      variables: {
-        manualApproved: true,
-      },
-    };
-    return this.http
-      .post<BaseResponse<boolean>>(`${this.workflowTasksUrl}/${taskId}/complete`, payload)
       .pipe(map((res) => res.data));
   }
 }

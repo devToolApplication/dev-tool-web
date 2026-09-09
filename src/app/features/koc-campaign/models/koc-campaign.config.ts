@@ -2,7 +2,7 @@ import type { ActionToolbarAction } from '@shared/ui/layout/action-toolbar/actio
 import type { FilterPanelField } from '@shared/ui/layout/filter-panel/filter-panel.component';
 import type { KeyValueItem } from '@shared/ui/data-display/key-value-list/key-value-list.component';
 import type { TableConfig } from '@shared/ui/patterns/table/models/table-config.model';
-import { KocCampaignItem, KocCandidateItem, KocCandidateApprovalItem } from './koc-campaign.model';
+import { KocCampaignItem, KocCandidateItem } from './koc-campaign.model';
 
 export function buildKocCampaignListActions(): ActionToolbarAction[] {
   return [
@@ -211,51 +211,6 @@ export function buildKocCandidateTableConfig(): TableConfig<KocCandidateItem> {
         header: 'kocCandidate.column.approvedAt',
         type: 'date',
         width: '9rem',
-      },
-    ],
-  };
-}
-
-export function buildKocCandidateApprovalTableConfig(): TableConfig<KocCandidateApprovalItem> {
-  return {
-    emptyTitle: 'kocApproval.emptyTasks.title',
-    emptyDescription: 'kocApproval.emptyTasks.description',
-    columns: [
-      {
-        field: 'selected',
-        header: 'kocApproval.candidate.select',
-        type: 'custom',
-        width: '4rem',
-      },
-      {
-        field: 'fullName',
-        header: 'kocApproval.candidate.fullName',
-        type: 'custom',
-        minWidth: '13rem',
-      },
-      {
-        field: 'followerCount',
-        header: 'kocApproval.candidate.followers',
-        type: 'custom',
-        width: '8rem',
-      },
-      {
-        field: 'score',
-        header: 'kocApproval.candidate.score',
-        type: 'custom',
-        width: '7rem',
-      },
-      {
-        field: 'profileUrl',
-        header: 'kocApproval.candidate.profileUrl',
-        type: 'custom',
-        minWidth: '12rem',
-      },
-      {
-        field: 'analysis',
-        header: 'kocApproval.candidate.analysis',
-        type: 'custom',
-        minWidth: '16rem',
       },
     ],
   };

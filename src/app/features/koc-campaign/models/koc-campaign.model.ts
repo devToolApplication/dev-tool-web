@@ -79,32 +79,3 @@ export interface KocCandidateItem {
   createdAt?: string;
   updatedAt?: string;
 }
-
-export interface KocCandidateAnalysis {
-  strengths?: string[];
-  weaknesses?: string[];
-  matchReason?: string;
-}
-
-export interface KocCandidateApprovalItem {
-  externalProfileId?: string;
-  fullName?: string;
-  profileUrl?: string;
-  platform?: string;
-  followerCount?: number;
-  engagementRate?: number;
-  score?: number;
-  analysis?: KocCandidateAnalysis;
-  selected?: boolean;
-}
-
-export interface WorkflowTask {
-  id: string;
-  name: string;
-  taskDefinitionKey?: string;
-  processInstanceId: string;
-  processDefinitionId?: string;
-  assignee?: string | null;
-  createTime?: string;
-  variables?: Record<string, unknown>;
-}

@@ -16,6 +16,8 @@ import { CodexSdkModule } from './codex-sdk/codex-sdk.module';
 import { codexSdkRoutes } from './codex-sdk/codex-sdk.routes';
 import { KocCampaignModule } from './koc-campaign/koc-campaign.module';
 import { kocCampaignRoutes } from './koc-campaign/koc-campaign.routes';
+import { UserTaskModule } from './user-task/user-task.module';
+import { userTaskRoutes } from './user-task/user-task.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...accountManagementRoutes,
@@ -23,6 +25,7 @@ const FEATURE_ROUTES: Routes = [
   ...serviceManagementRoutes,
   ...workflowStudioRoutes,
   ...codexSdkRoutes,
+  ...userTaskRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'accounts' },
   { path: '**', redirectTo: '404' },
@@ -41,6 +44,7 @@ const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
     WorkflowStudioModule,
     CodexSdkModule,
     KocCampaignModule,
+    UserTaskModule,
   ],
 })
 export class AppFeatureModule {}
