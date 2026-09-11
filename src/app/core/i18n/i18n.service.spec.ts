@@ -28,4 +28,17 @@ describe('I18nService', () => {
     expect(service.t('userTask.nav.title')).toBe('User Tasks');
     expect(service.t('userTask.status.active')).toBe('Đang chờ xử lý');
   });
+
+  it('registers quant backtest translation keys', () => {
+    const service = new I18nService();
+    service.setLanguage('en');
+
+    expect(service.t('quantBacktest.nav.title')).toBe('Quant Backtest');
+    expect(service.t('quantBacktest.runs.title')).toBe('Quant Backtest Runs');
+
+    service.setLanguage('vi');
+
+    expect(service.t('quantBacktest.nav.title')).toBe('Quant Backtest');
+    expect(service.t('quantBacktest.runs.title')).toBe('Quản lý Lượt Backtest');
+  });
 });

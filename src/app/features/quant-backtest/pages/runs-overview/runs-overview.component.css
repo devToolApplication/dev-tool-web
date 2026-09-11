@@ -1,0 +1,16 @@
+.run-cell__name {
+  color: var(--app-text);
+  font-weight: var(--app-font-weight-medium);
+}
+
+.run-cell__strategy {
+  color: var(--app-text-muted);
+}
+
+.dataset-cell__instrument {
+  color: var(--app-text);
+}
+
+.dataset-cell__version {
+  color: var(--app-text-muted);
+}

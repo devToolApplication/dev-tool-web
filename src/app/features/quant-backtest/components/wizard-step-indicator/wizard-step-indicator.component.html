@@ -1,0 +1,34 @@
+<nav class="wizard-steps" [attr.aria-label]="ariaLabelKey | translateContent">
+  <ol class="wizard-steps__list">
+    @for (s of steps; track s.step) {
+      <li
+        class="wizard-step"
+        [class.wizard-step--active]="s.step === currentStep"
+        [class.wizard-step--completed]="s.step < currentStep"
+        [class.wizard-step--clickable]="isStepClickable(s.step)"
+      >
+        <button
+          type="button"
+          class="wizard-step__btn"
+          [attr.aria-disabled]="!isStepClickable(s.step) ? 'true' : null"
+          [attr.aria-current]="s.step === currentStep ? 'step' : null"
+          [attr.tabindex]="isStepFocusable(s.step) ? 0 : -1"
+          (click)="onStepClick(s.step)"
+          (keydown)="onStepKeydown($event, s.step)"
+        >
+          <span class="wizard-step__badge">
+            @if (s.step < currentStep) {
+              <i class="pi pi-check" aria-hidden="true"></i>
+            } @else {
+              {{ s.step }}
+            }
+          </span>
+          <span class="wizard-step__label">{{ s.labelKey | translateContent }}</span>
+        </button>
+        @if (s.step < steps.length) {
+          <div class="wizard-step__connector" aria-hidden="true"></div>
+        }
+      </li>
+    }
+  </ol>
+</nav>

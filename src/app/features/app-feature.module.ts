@@ -18,6 +18,8 @@ import { KocCampaignModule } from './koc-campaign/koc-campaign.module';
 import { kocCampaignRoutes } from './koc-campaign/koc-campaign.routes';
 import { UserTaskModule } from './user-task/user-task.module';
 import { userTaskRoutes } from './user-task/user-task.routes';
+import { QuantBacktestModule } from './quant-backtest/quant-backtest.module';
+import { quantBacktestRoutes } from './quant-backtest/quant-backtest.routes';
 
 const FEATURE_ROUTES: Routes = [
   ...accountManagementRoutes,
@@ -26,6 +28,7 @@ const FEATURE_ROUTES: Routes = [
   ...workflowStudioRoutes,
   ...codexSdkRoutes,
   ...userTaskRoutes,
+  ...quantBacktestRoutes,
   ...errorRoutes,
   { path: '', pathMatch: 'full', redirectTo: 'accounts' },
   { path: '**', redirectTo: '404' },
@@ -45,6 +48,7 @@ const FEATURE_COMPONENTS = [ForbiddenComponent, NotFoundComponent];
     CodexSdkModule,
     KocCampaignModule,
     UserTaskModule,
+    QuantBacktestModule,
   ],
 })
 export class AppFeatureModule {}

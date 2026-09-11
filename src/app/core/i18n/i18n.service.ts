@@ -8,6 +8,7 @@ import accountManagementTranslations from '../i18n/features/account-management.i
 import codexSdkTranslations from '../i18n/features/codex-sdk.i18n.json';
 import kocCampaignTranslations from '../i18n/features/koc-campaign.i18n.json';
 import userTaskTranslations from '../i18n/features/user-task.i18n.json';
+import quantBacktestTranslations from '../i18n/features/quant-backtest.i18n.json';
 
 export type AppLanguage = 'vi' | 'en';
 type TranslationMap = Record<AppLanguage, Record<string, string>>;
@@ -25,6 +26,7 @@ const TRANSLATIONS: TranslationMap = {
     ...codexSdkTranslations.vi,
     ...kocCampaignTranslations.vi,
     ...userTaskTranslations.vi,
+    ...quantBacktestTranslations.vi,
   },
   en: {
     ...commonTranslations.en,
@@ -36,6 +38,7 @@ const TRANSLATIONS: TranslationMap = {
     ...codexSdkTranslations.en,
     ...kocCampaignTranslations.en,
     ...userTaskTranslations.en,
+    ...quantBacktestTranslations.en,
   },
 };
 

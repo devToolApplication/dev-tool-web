@@ -9,6 +9,7 @@ describe('APP_LAYOUT_MENU', () => {
     expect(groups).toContain('layout.menu.kocManagement');
     expect(groups).toContain('layout.menu.jobService');
     expect(groups).toContain('userTask.nav.title');
+    expect(groups).toContain('quantBacktest.nav.title');
 
     expect(flattenRoutes()).toEqual(
       expect.arrayContaining([
@@ -21,6 +22,8 @@ describe('APP_LAYOUT_MENU', () => {
         '/job-service/configs',
         '/job-service/jobs',
         '/tasks',
+        '/quant-backtest/runs',
+        '/quant-backtest/strategies',
       ]),
     );
     expect(flattenRoutes()).not.toContain('/koc/approval');

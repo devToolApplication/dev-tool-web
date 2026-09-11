@@ -1,0 +1,449 @@
+<app-page-shell
+  [title]="'quantBacktest.create.title' | translateContent"
+  [subtitle]="'quantBacktest.create.subtitle' | translateContent"
+  [breadcrumb]="breadcrumb"
+  layout="wide"
+>
+  <app-wizard-step-indicator
+    [currentStep]="currentStep()"
+    [maxVisitedStep]="maxVisitedStep()"
+    (stepSelect)="goToStep($event)"
+  ></app-wizard-step-indicator>
+
+  @if (serverError()) {
+    <app-alert
+      class="mb-4 block"
+      variant="danger"
+      [title]="serverErrorCode() ?? ('quantBacktest.error.generic' | translateContent)"
+      [message]="serverError()!"
+      [actionLabel]="'quantBacktest.create.action.retry'"
+      (action)="onAlertAction()"
+    ></app-alert>
+  }
+
+  @if (loadingInit()) {
+    <app-loading-skeleton type="form" [rows]="4"></app-loading-skeleton>
+  } @else {
+    @if (currentStep() === 1) {
+      <app-section-panel
+        [title]="'quantBacktest.create.step1' | translateContent"
+        [subtitle]="'quantBacktest.create.step1Subtitle' | translateContent"
+      >
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-input-text
+            class="sm:col-span-2"
+            inputId="runName"
+            label="quantBacktest.create.field.name"
+            placeholder="quantBacktest.create.field.namePlaceholder"
+            [value]="form().name"
+            [invalid]="!!fieldErrors()['name']"
+            [errorMessage]="fieldErrors()['name']"
+            (valueChange)="updateFormField('name', $any($event) ?? '')"
+          ></app-input-text>
+
+          <app-select
+            inputId="executionMode"
+            label="quantBacktest.create.field.executionMode"
+            [options]="executionModeOptions"
+            [value]="form().executionMode"
+            [required]="true"
+            (valueChange)="updateFormField('executionMode', $any($event))"
+          ></app-select>
+
+          @if (form().executionMode === 'SCHEDULE') {
+            <app-select
+              inputId="schedulePreset"
+              label="quantBacktest.create.field.schedulePreset"
+              [options]="schedulePresetOptions"
+              [value]="form().cron"
+              (valueChange)="updateFormField('cron', $any($event) ?? '')"
+            ></app-select>
+            <app-input-text
+              inputId="cronExp"
+              label="quantBacktest.create.field.cron"
+              placeholder="quantBacktest.create.field.cronPlaceholder"
+              [value]="form().cron"
+              [invalid]="!!fieldErrors()['cron']"
+              [errorMessage]="fieldErrors()['cron']"
+              (valueChange)="updateFormField('cron', $any($event) ?? '')"
+            ></app-input-text>
+            <app-input-text
+              inputId="timezone"
+              label="quantBacktest.create.field.timezone"
+              [value]="form().timezone"
+              (valueChange)="updateFormField('timezone', $any($event) ?? 'UTC')"
+            ></app-input-text>
+          }
+
+          <app-input-area
+            class="sm:col-span-2"
+            inputId="runDesc"
+            label="quantBacktest.create.field.description"
+            placeholder="quantBacktest.create.field.descriptionPlaceholder"
+            [value]="form().description"
+            [rows]="2"
+            [maxRows]="4"
+            (valueChange)="updateFormField('description', $any($event) ?? '')"
+          ></app-input-area>
+        </div>
+      </app-section-panel>
+    }
+
+    @if (currentStep() === 2) {
+      <app-section-panel
+        [title]="'quantBacktest.create.step2' | translateContent"
+        [subtitle]="'quantBacktest.create.step2Subtitle' | translateContent"
+      >
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-select
+            inputId="datasetSelect"
+            label="quantBacktest.create.field.dataset"
+            [options]="datasetOptions()"
+            [value]="form().datasetVersion"
+            [invalid]="!!fieldErrors()['datasetVersion']"
+            [errorMessage]="fieldErrors()['datasetVersion']"
+            (valueChange)="onDatasetChange($any($event) ?? '')"
+          ></app-select>
+
+          <div class="dataset-timeframe flex items-center gap-2 rounded-md border p-3">
+            <span class="text-xs text-muted-foreground">
+              {{ 'quantBacktest.create.field.timeframe' | translateContent }}
+            </span>
+            <app-badge [label]="selectedDataset()?.timeframe ?? '—'" variant="info"></app-badge>
+          </div>
+
+          <div class="sm:col-span-2">
+            <span class="form-label" id="instrumentSelectLabel">
+              {{ 'quantBacktest.create.field.instruments' | translateContent }}
+            </span>
+            @if (selectedDataset(); as dataset) {
+              <div
+                class="flex flex-wrap gap-2 pt-1"
+                role="radiogroup"
+                aria-labelledby="instrumentSelectLabel"
+              >
+                @for (instrumentId of dataset.instrumentIds; track instrumentId; let idx = $index) {
+                  <label
+                    [for]="'instrument-choice-' + instrumentId"
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-all duration-150"
+                    [class.border-[var(--app-primary)]]="
+                      form().instrumentIds.includes(instrumentId)
+                    "
+                    [class.bg-[var(--app-primary)]/10]="form().instrumentIds.includes(instrumentId)"
+                    [class.text-[var(--app-primary)]]="form().instrumentIds.includes(instrumentId)"
+                    [class.border-[var(--app-input-border)]]="
+                      !form().instrumentIds.includes(instrumentId)
+                    "
+                    [class.bg-[var(--app-card-bg)]]="!form().instrumentIds.includes(instrumentId)"
+                    [class.text-[var(--app-text)]]="!form().instrumentIds.includes(instrumentId)"
+                  >
+                    <input
+                      type="radio"
+                      [id]="'instrument-choice-' + instrumentId"
+                      name="instrumentChoice"
+                      [value]="instrumentId"
+                      [checked]="form().instrumentIds.includes(instrumentId)"
+                      [attr.aria-checked]="form().instrumentIds.includes(instrumentId)"
+                      (change)="selectInstrument(instrumentId)"
+                      (keydown)="onInstrumentKeydown($event, idx)"
+                      class="h-4 w-4 border-[var(--app-input-border)] text-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/25"
+                    />
+                    <span>{{ instrumentId }}</span>
+                  </label>
+                }
+              </div>
+            } @else {
+              <app-empty-state
+                [title]="'quantBacktest.create.field.datasetRequired' | translateContent"
+                [description]="'quantBacktest.create.field.datasetRequiredDesc' | translateContent"
+                size="compact"
+              ></app-empty-state>
+            }
+            @if (fieldErrors()['instrumentIds']; as error) {
+              <span class="form-error">{{ error | translateContent }}</span>
+            }
+          </div>
+
+          <app-input-text
+            inputId="startDate"
+            label="quantBacktest.create.field.start"
+            [value]="form().start"
+            [invalid]="!!fieldErrors()['start']"
+            [errorMessage]="fieldErrors()['start']"
+            (valueChange)="updateFormField('start', $any($event) ?? '')"
+          ></app-input-text>
+          <app-input-text
+            inputId="endDate"
+            label="quantBacktest.create.field.end"
+            [value]="form().end"
+            [invalid]="!!fieldErrors()['end']"
+            [errorMessage]="fieldErrors()['end']"
+            (valueChange)="updateFormField('end', $any($event) ?? '')"
+          ></app-input-text>
+
+          @if (selectedDataset(); as dataset) {
+            <div class="dataset-meta rounded-md border p-3 text-xs sm:col-span-2">
+              <span class="font-medium">
+                {{ 'quantBacktest.create.dataset.coverage' | translateContent }}
+              </span>
+              {{ dataset.barCount | number }} · {{ dataset.start }} · {{ dataset.end }} ·
+              {{ dataset.venue }} · {{ dataset.assetClass }}
+            </div>
+          }
+        </div>
+      </app-section-panel>
+    }
+
+    @if (currentStep() === 3) {
+      <app-section-panel
+        [title]="'quantBacktest.create.step3' | translateContent"
+        [subtitle]="'quantBacktest.create.step3Subtitle' | translateContent"
+      >
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-select
+            inputId="strategySelect"
+            label="quantBacktest.create.field.strategy"
+            [options]="strategyOptions()"
+            [value]="form().strategyId"
+            [invalid]="!!fieldErrors()['strategyId']"
+            [errorMessage]="fieldErrors()['strategyId']"
+            (valueChange)="onStrategyChange($any($event) ?? '')"
+          ></app-select>
+
+          <app-select
+            inputId="presetSelect"
+            label="quantBacktest.create.field.strategyConfig"
+            [options]="configOptions()"
+            [value]="form().strategyConfigId"
+            [invalid]="!!fieldErrors()['strategyConfigId']"
+            [errorMessage]="fieldErrors()['strategyConfigId']"
+            (valueChange)="onPresetChange($any($event) ?? '')"
+          ></app-select>
+
+          @if (schemaFields().length > 0) {
+            <div class="rounded-md border p-4 sm:col-span-2">
+              <h4 class="mb-3 text-sm font-semibold">
+                {{ 'quantBacktest.create.strategyParameters' | translateContent }}
+              </h4>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                @for (field of schemaFields(); track field.key) {
+                  @if (field.type === 'boolean') {
+                    <app-select
+                      [inputId]="'param_' + field.key"
+                      [label]="field.label"
+                      [options]="booleanOptions"
+                      [value]="$any(form().parameters[field.key])"
+                      [invalid]="!!fieldErrors()[field.key]"
+                      [errorMessage]="fieldErrors()[field.key]"
+                      (valueChange)="updateStrategyParam(field.key, $event)"
+                    ></app-select>
+                  } @else if (field.type === 'integer' || field.type === 'number') {
+                    <app-input-number
+                      [inputId]="'param_' + field.key"
+                      [label]="field.label"
+                      [value]="$any(form().parameters[field.key])"
+                      [min]="field.min"
+                      [max]="field.max"
+                      [step]="field.step"
+                      [invalid]="!!fieldErrors()[field.key]"
+                      [errorMessage]="fieldErrors()[field.key]"
+                      (valueChange)="updateStrategyParam(field.key, $event)"
+                    ></app-input-number>
+                  } @else {
+                    <app-input-text
+                      [inputId]="'param_' + field.key"
+                      [label]="field.label"
+                      [value]="$any(form().parameters[field.key])"
+                      [invalid]="!!fieldErrors()[field.key]"
+                      [errorMessage]="fieldErrors()[field.key]"
+                      (valueChange)="updateStrategyParam(field.key, $event)"
+                    ></app-input-text>
+                  }
+                }
+              </div>
+              <div class="mt-4 flex justify-end">
+                <app-button
+                  label="quantBacktest.create.action.validate"
+                  icon="pi pi-check-circle"
+                  variant="secondary"
+                  size="sm"
+                  [loading]="validating()"
+                  (buttonClick)="validateParametersOnServer()"
+                ></app-button>
+              </div>
+            </div>
+          }
+
+          <app-input-number
+            inputId="initialCapital"
+            label="quantBacktest.create.field.initialCapital"
+            [value]="$any(form().initialCapital)"
+            [min]="1"
+            [step]="1"
+            [invalid]="!!fieldErrors()['initialCapital']"
+            [errorMessage]="fieldErrors()['initialCapital']"
+            (valueChange)="updateNumericFormField('initialCapital', $event)"
+          ></app-input-number>
+
+          @for (
+            simulationField of [
+              {
+                name: 'intrabar_policy',
+                label: 'quantBacktest.create.field.intrabarPolicy',
+                key: 'intrabarPolicy',
+              },
+              { name: 'fee_model', label: 'quantBacktest.create.field.feeModel', key: 'feeModel' },
+              {
+                name: 'slippage_model',
+                label: 'quantBacktest.create.field.slippageModel',
+                key: 'slippageModel',
+              },
+            ];
+            track simulationField.name
+          ) {
+            <app-select
+              [inputId]="simulationField.name"
+              [label]="simulationField.label"
+              [options]="simulationOptions(simulationField.name)"
+              [value]="$any(form())[simulationField.key]"
+              [invalid]="!!fieldErrors()[simulationField.key]"
+              [errorMessage]="fieldErrors()[simulationField.key]"
+              (valueChange)="updateFormField($any(simulationField.key), $any($event) ?? '')"
+            ></app-select>
+          }
+
+          <app-input-number
+            inputId="slippageBps"
+            label="quantBacktest.create.field.slippageBps"
+            [value]="$any(form().slippageBps)"
+            [min]="0"
+            [step]="0.1"
+            [invalid]="!!fieldErrors()['slippageBps']"
+            [errorMessage]="fieldErrors()['slippageBps']"
+            (valueChange)="updateNumericFormField('slippageBps', $event)"
+          ></app-input-number>
+        </div>
+      </app-section-panel>
+    }
+
+    @if (currentStep() === 4) {
+      <app-section-panel
+        [title]="'quantBacktest.create.review.title' | translateContent"
+        [subtitle]="'quantBacktest.create.review.subtitle' | translateContent"
+      >
+        @if (scheduleSuccessResponse(); as response) {
+          <app-alert
+            variant="success"
+            [title]="'quantBacktest.create.scheduleSuccess' | translateContent"
+            [message]="response.jobConfigCode + ' • ' + response.nextRunAt"
+            [actionLabel]="'quantBacktest.create.action.viewJobs' | translateContent"
+            (action)="openJobServiceJobs()"
+          ></app-alert>
+          <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+            <app-button
+              variant="primary"
+              icon="pi pi-external-link"
+              [label]="'quantBacktest.create.action.viewJobs' | translateContent"
+              (buttonClick)="openJobServiceJobs()"
+            ></app-button>
+            <a
+              routerLink="/job-service/jobs"
+              class="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              {{ 'quantBacktest.create.action.viewJobs' | translateContent }}
+              <i class="pi pi-arrow-right text-xs"></i>
+            </a>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <app-section-panel
+              [title]="'quantBacktest.create.review.mode' | translateContent"
+              variant="muted"
+            >
+              <p class="font-medium">{{ form().name }}</p>
+              <p class="text-sm text-muted-foreground">
+                {{ getExecutionModeI18nKey(form().executionMode) | translateContent }}
+                @if (form().executionMode === 'SCHEDULE' && form().cron) {
+                  · {{ form().cron }}
+                }
+              </p>
+            </app-section-panel>
+            <app-section-panel
+              [title]="'quantBacktest.create.review.dataset' | translateContent"
+              variant="muted"
+            >
+              <p class="font-mono text-sm">{{ form().datasetVersion }}</p>
+              <p class="text-sm text-muted-foreground">
+                {{ form().instrumentIds.join(', ') }}
+              </p>
+              <p class="font-mono text-xs text-muted-foreground">
+                {{ form().start }} → {{ form().end }}
+              </p>
+            </app-section-panel>
+            <app-section-panel
+              [title]="'quantBacktest.create.review.strategy' | translateContent"
+              variant="muted"
+            >
+              <p class="font-medium">{{ selectedStrategy()?.name }}</p>
+              <p class="text-sm text-muted-foreground">{{ selectedConfig()?.name }}</p>
+            </app-section-panel>
+            <app-section-panel
+              [title]="'quantBacktest.create.review.simulation' | translateContent"
+              variant="muted"
+            >
+              <p class="font-mono text-sm">{{ form().initialCapital }}</p>
+              <p class="text-sm text-muted-foreground">
+                {{ getSimulationOptionI18nKey(form().intrabarPolicy) | translateContent }} ·
+                {{ getSimulationOptionI18nKey(form().feeModel) | translateContent }} ·
+                {{ getSimulationOptionI18nKey(form().slippageModel) | translateContent }} ·
+                {{ form().slippageBps }}
+              </p>
+            </app-section-panel>
+          </div>
+          <div class="mt-4">
+            <app-json-viewer [value]="form()" [collapsed]="true"></app-json-viewer>
+          </div>
+        }
+      </app-section-panel>
+    }
+
+    <div class="mt-6 flex flex-col-reverse justify-between gap-3 border-t pt-4 sm:flex-row">
+      <app-button
+        label="quantBacktest.create.action.cancel"
+        variant="secondary"
+        (buttonClick)="cancel()"
+      ></app-button>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row">
+        @if (currentStep() > 1) {
+          <app-button
+            label="quantBacktest.create.action.back"
+            icon="pi pi-arrow-left"
+            variant="secondary"
+            (buttonClick)="prevStep()"
+          ></app-button>
+        }
+        @if (currentStep() < 4) {
+          <app-button
+            label="quantBacktest.create.action.next"
+            icon="pi pi-arrow-right"
+            variant="primary"
+            (buttonClick)="nextStep()"
+          ></app-button>
+        } @else if (!scheduleSuccessResponse()) {
+          <app-button
+            [label]="
+              form().executionMode === 'RUN_NOW'
+                ? 'quantBacktest.create.action.runNow'
+                : 'quantBacktest.create.action.schedule'
+            "
+            icon="pi pi-send"
+            variant="primary"
+            [loading]="submitting()"
+            [disabled]="submitting()"
+            (buttonClick)="submitBacktest()"
+          ></app-button>
+        }
+      </div>
+    </div>
+  }
+</app-page-shell>

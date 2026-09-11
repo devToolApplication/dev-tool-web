@@ -1,0 +1,141 @@
+<app-page-shell
+  [title]="'quantBacktest.strategies.title' | translateContent"
+  [subtitle]="'quantBacktest.strategies.subtitle' | translateContent"
+  [breadcrumb]="breadcrumb"
+  layout="wide"
+>
+  @if (loading()) {
+    <app-loading-skeleton type="table" [rows]="3"></app-loading-skeleton>
+  } @else if (error()) {
+    <app-error-state
+      [title]="'quantBacktest.strategies.emptyTitle' | translateContent"
+      [message]="error()!"
+      (retry)="loadStrategies()"
+    ></app-error-state>
+  } @else {
+    <app-table
+      [config]="tableConfig"
+      [data]="strategies()"
+      (rowClick)="openDrawer($event)"
+    ></app-table>
+  }
+</app-page-shell>
+
+<!-- Detail Drawer -->
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="selectedStrategy()?.name ?? ('quantBacktest.strategies.drawer.title' | translateContent)"
+  size="lg"
+  (closed)="closeDrawer()"
+>
+  @if (selectedStrategy(); as st) {
+    <div class="strategy-detail space-y-4">
+      <div class="hero-section pb-3 border-b">
+        <h3 class="text-base font-semibold mb-1">{{ st.name }}</h3>
+        <p class="text-xs text-muted-foreground">{{ st.description }}</p>
+      </div>
+
+      <!-- Presets -->
+      <div>
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          {{ 'quantBacktest.strategies.drawer.presets' | translateContent }}
+        </h4>
+        <div class="space-y-2">
+          @for (cfg of st.configs; track cfg.configId) {
+            <div class="p-3 rounded-md border bg-surface flex items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-medium">{{ cfg.name }}</p>
+                <p class="text-xs text-muted-foreground">{{ cfg.configId }}</p>
+              </div>
+              <app-button
+                [label]="'quantBacktest.strategies.action.loadPreset' | translateContent"
+                variant="ghost"
+                size="sm"
+                (buttonClick)="loadPresetIntoTester(cfg)"
+              ></app-button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          {{ 'quantBacktest.strategies.drawer.parameters' | translateContent }}
+        </h4>
+        <app-table
+          [config]="schemaTableConfig"
+          [data]="st.schemaFields"
+          [customTemplates]="{ schemaDefault: schemaDefaultTpl }"
+        ></app-table>
+      </div>
+
+      <div class="tester-section p-4 rounded-md border bg-muted/20">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+          {{ 'quantBacktest.strategies.drawer.validateTitle' | translateContent }}
+        </h4>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          @for (field of st.schemaFields; track field.key) {
+            <div>
+              <app-input-text
+                [inputId]="'tester_' + field.key"
+                [label]="field.label"
+                [value]="$any(testParameters()[field.key])"
+                (valueChange)="updateParam(field.key, $event)"
+              ></app-input-text>
+            </div>
+          }
+        </div>
+
+        @if (validationResult(); as vr) {
+          <div class="my-3">
+            @if (vr.valid) {
+              <app-alert
+                variant="success"
+                message="quantBacktest.create.validationSuccess"
+              ></app-alert>
+            } @else {
+              <app-alert
+                variant="danger"
+                title="quantBacktest.strategies.validationFailed"
+                [message]="'quantBacktest.strategies.validationErrorCount' | translateContent"
+              ></app-alert>
+              <ul class="list-disc list-inside text-xs text-rose-600 mt-2 space-y-1">
+                @for (e of vr.errors; track e.field) {
+                  <li>
+                    <b>{{ e.field }}:</b> {{ e.message }}
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        <div class="flex justify-end">
+          <app-button
+            [label]="'quantBacktest.strategies.action.validate' | translateContent"
+            icon="pi pi-check"
+            variant="secondary"
+            size="sm"
+            [loading]="validating()"
+            (buttonClick)="validateTesterParameters()"
+          ></app-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div drawer-footer class="flex flex-col-reverse sm:flex-row justify-end gap-2">
+    <app-button label="common.close" variant="secondary" (buttonClick)="closeDrawer()"></app-button>
+    <app-button
+      [label]="'quantBacktest.strategies.action.createWithStrategy' | translateContent"
+      icon="pi pi-bolt"
+      variant="primary"
+      (buttonClick)="launchBacktestWithStrategy()"
+    ></app-button>
+  </div>
+</app-drawer>
+
+<ng-template #schemaDefaultTpl let-row="row">
+  <span class="font-mono">{{ row.defaultValue }}</span>
+</ng-template>

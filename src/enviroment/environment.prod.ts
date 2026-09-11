@@ -20,6 +20,7 @@ export const environment = {
     adminFileServiceUrl: 'https://api.169.58.153.62.nip.io/file-mcrs/v1/admin',
     tradeBotAdminUrl: 'https://api.169.58.153.62.nip.io/trade-bot-mcrs/v1/admin',
     tradeBotUrl: 'https://api.169.58.153.62.nip.io/trade-bot-mcrs/v1',
+    jobSchedulerUrl: 'https://api.169.58.153.62.nip.io/job-service/v1',
     jobSchedulerAdminUrl: 'https://api.169.58.153.62.nip.io/job-service/v1/admin',
     bpmEngineAdminUrl: 'https://api.169.58.153.62.nip.io/bpm-engine/v1/admin',
     bpmEngineUrl: 'https://api.169.58.153.62.nip.io/bpm-engine/v1',

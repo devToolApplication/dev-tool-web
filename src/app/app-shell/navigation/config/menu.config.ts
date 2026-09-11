@@ -71,6 +71,22 @@ export const APP_LAYOUT_MENU: AppMenuItem[] = [
     ],
   },
   {
+    label: 'quantBacktest.nav.title',
+    icon: 'pi pi-chart-line',
+    items: [
+      {
+        label: 'quantBacktest.nav.runs',
+        icon: 'pi pi-history',
+        routerLink: '/quant-backtest/runs',
+      },
+      {
+        label: 'quantBacktest.nav.strategies',
+        icon: 'pi pi-book',
+        routerLink: '/quant-backtest/strategies',
+      },
+    ],
+  },
+  {
     label: 'layout.menu.jobService',
     icon: 'pi pi-briefcase',
     items: [

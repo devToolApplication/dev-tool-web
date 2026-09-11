@@ -1,0 +1,50 @@
+<div
+  class="equity-chart"
+  role="region"
+  [attr.aria-label]="'quantBacktest.detail.chart.regionAria' | translateContent"
+>
+  <div class="equity-chart__header">
+    <div>
+      <h3 class="equity-chart__title">
+        {{ 'quantBacktest.detail.chart.title' | translateContent }}
+      </h3>
+      <p class="equity-chart__summary" aria-live="polite">{{ summaryText }}</p>
+    </div>
+    <app-button
+      [label]="
+        showDataTable()
+          ? ('quantBacktest.detail.chart.hideTable' | translateContent)
+          : ('quantBacktest.detail.chart.showTable' | translateContent)
+      "
+      icon="pi pi-table"
+      variant="ghost"
+      size="sm"
+      (buttonClick)="toggleDataTable()"
+    ></app-button>
+  </div>
+
+  @if (loading) {
+    <app-loading-skeleton type="card" [rows]="1"></app-loading-skeleton>
+  } @else if (error) {
+    <app-alert variant="danger" [message]="error"></app-alert>
+  } @else if (!points.length) {
+    <app-empty-state
+      [title]="'quantBacktest.detail.chart.emptyTitle' | translateContent"
+      [description]="'quantBacktest.detail.chart.emptyDesc' | translateContent"
+      size="compact"
+    ></app-empty-state>
+  }
+
+  <div
+    #chartContainer
+    class="equity-chart__canvas"
+    [class.equity-chart__canvas--hidden]="loading || !!error || !points.length"
+    tabindex="0"
+    role="img"
+    [attr.aria-label]="summaryText"
+  ></div>
+
+  @if (showDataTable() && points.length) {
+    <app-table [config]="tableConfig" [data]="points"></app-table>
+  }
+</div>

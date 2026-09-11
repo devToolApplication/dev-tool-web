@@ -1,0 +1,146 @@
+<app-page-shell
+  [title]="'quantBacktest.runs.title' | translateContent"
+  [subtitle]="'quantBacktest.runs.subtitle' | translateContent"
+  [breadcrumb]="breadcrumb"
+  layout="wide"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="pageActions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  <app-responsive-grid page-summary [columns]="4" gap="md">
+    <app-summary-metric-card
+      [label]="'quantBacktest.runs.metrics.running' | translateContent"
+      [value]="summary().running"
+      trend="'quantBacktest.runs.metrics.active' | translateContent"
+      trendVariant="info"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      [label]="'quantBacktest.runs.metrics.completed' | translateContent"
+      [value]="summary().completed"
+      trend="'quantBacktest.runs.metrics.total' | translateContent"
+      trendVariant="success"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      [label]="'quantBacktest.runs.metrics.winRate' | translateContent"
+      [value]="(summary().winRate * 100 | number: '1.2-2') + '%'"
+      trendVariant="success"
+    ></app-summary-metric-card>
+    <app-summary-metric-card
+      [label]="'quantBacktest.runs.metrics.netReturn' | translateContent"
+      [value]="
+        (summary().netReturn > 0 ? '+' : '') + (summary().netReturn * 100 | number: '1.2-2') + '%'
+      "
+      [trendVariant]="summary().netReturn >= 0 ? 'success' : 'danger'"
+    ></app-summary-metric-card>
+  </app-responsive-grid>
+
+  <app-section-panel
+    page-toolbar
+    [title]="'quantBacktest.runs.filter.title' | translateContent"
+    [subtitle]="'quantBacktest.runs.filter.subtitle' | translateContent"
+  >
+    <app-filter-panel
+      [filters]="filterFields"
+      [values]="filterValues()"
+      (apply)="onFilterApply($event)"
+      (reset)="onFilterReset()"
+    ></app-filter-panel>
+  </app-section-panel>
+
+  <app-table
+    [config]="tableConfig"
+    [data]="runs()"
+    [loading]="loading()"
+    [error]="error()"
+    [currentPage]="page() - 1"
+    [rows]="pageSize()"
+    [totalRecords]="total()"
+    (rowClick)="onRowClick($event)"
+    (actionClick)="onActionClick($event)"
+    (pageChange)="onPageChange($event)"
+    (retry)="loadRuns()"
+    [customTemplates]="{
+      runAndStrategy: runAndStrategyTpl,
+      jobStatus: jobStatusTpl,
+      quantOutcome: quantOutcomeTpl,
+      datasetAndInstrument: datasetAndInstrumentTpl,
+      netReturn: netReturnTpl,
+      maxDrawdown: maxDrawdownTpl,
+    }"
+  ></app-table>
+</app-page-shell>
+
+<ng-template #runAndStrategyTpl let-row="row">
+  <div class="run-cell min-w-0">
+    <span class="run-cell__name font-medium text-sm text-foreground truncate block">{{
+      row.name
+    }}</span>
+    <span class="run-cell__strategy text-xs text-muted-foreground truncate block">{{
+      row.strategyId
+    }}</span>
+  </div>
+</ng-template>
+
+<ng-template #jobStatusTpl let-row="row">
+  <app-badge
+    [label]="getJobStatusI18nKey(row.jobStatus) | translateContent"
+    [variant]="row.jobStatusVariant"
+    size="sm"
+  ></app-badge>
+</ng-template>
+
+<ng-template #quantOutcomeTpl let-row="row">
+  @if (row.quantOutcome) {
+    <app-badge
+      [label]="getQuantOutcomeI18nKey(row.quantOutcome) | translateContent"
+      [variant]="row.quantStatusVariant"
+      size="sm"
+    ></app-badge>
+  } @else {
+    <span class="text-xs text-muted-foreground">
+      {{ 'quantBacktest.common.notAvailable' | translateContent }}
+    </span>
+  }
+</ng-template>
+
+<ng-template #datasetAndInstrumentTpl let-row="row">
+  <div class="dataset-cell min-w-0">
+    <span class="dataset-cell__instrument text-sm font-semibold truncate block">{{
+      row.instrumentId
+    }}</span>
+    <span class="dataset-cell__version text-xs text-muted-foreground truncate block font-mono">{{
+      row.datasetVersion
+    }}</span>
+  </div>
+</ng-template>
+
+<ng-template #netReturnTpl let-row="row">
+  @if (row.netReturn != null) {
+    <span
+      class="tabular-nums font-semibold"
+      [class.text-emerald-600]="row.netReturn > 0"
+      [class.text-rose-600]="row.netReturn < 0"
+    >
+      {{ row.netReturn > 0 ? '+' : '' }}{{ row.netReturn * 100 | number: '1.2-2' }}%
+    </span>
+  } @else {
+    <span class="text-muted-foreground">
+      {{ 'quantBacktest.common.notAvailable' | translateContent }}
+    </span>
+  }
+</ng-template>
+
+<ng-template #maxDrawdownTpl let-row="row">
+  @if (row.maxDrawdown != null) {
+    <span class="tabular-nums text-rose-600 font-medium">
+      {{ row.maxDrawdown * 100 | number: '1.2-2' }}%
+    </span>
+  } @else {
+    <span class="text-muted-foreground">
+      {{ 'quantBacktest.common.notAvailable' | translateContent }}
+    </span>
+  }
+</ng-template>

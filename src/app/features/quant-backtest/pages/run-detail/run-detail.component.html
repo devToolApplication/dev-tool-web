@@ -1,0 +1,350 @@
+<app-page-shell
+  [title]="runDetail()?.name ?? ('quantBacktest.detail.title' | translateContent)"
+  [subtitle]="runDetail()?.strategyId ?? ''"
+  [breadcrumb]="breadcrumb()"
+  layout="wide"
+>
+  <app-action-toolbar
+    page-actions
+    [actions]="pageActions"
+    (actionClick)="onToolbarAction($event)"
+  ></app-action-toolbar>
+
+  @if (loading()) {
+    <app-loading-skeleton type="detail" [rows]="4"></app-loading-skeleton>
+  } @else if (error()) {
+    <app-error-state
+      [title]="'quantBacktest.detail.error.title' | translateContent"
+      [message]="formatErrorMessage(error()!, null, errorCorrelationId())"
+      [errorCode]="errorCode() ?? undefined"
+      (retry)="loadRunDetail(runId())"
+    ></app-error-state>
+  } @else if (runDetail(); as run) {
+    @if (isJobRunning()) {
+      <app-alert
+        class="mb-4 block"
+        variant="info"
+        title="quantBacktest.detail.state.runningTitle"
+        message="quantBacktest.detail.state.running"
+      ></app-alert>
+    }
+    @if (isJobFailed()) {
+      <app-alert
+        class="mb-4 block"
+        variant="danger"
+        title="quantBacktest.detail.state.failedTitle"
+        [message]="run.errorMessage ?? ('quantBacktest.detail.state.failed' | translateContent)"
+      ></app-alert>
+    }
+    @if (isQuantUnavailable()) {
+      <app-alert
+        class="mb-4 block"
+        variant="warning"
+        title="quantBacktest.detail.state.unavailableTitle"
+        message="quantBacktest.detail.state.unavailable"
+      ></app-alert>
+    }
+
+    <div class="hero-card mb-4 rounded-lg border bg-surface p-4">
+      <div class="flex flex-col justify-between gap-4 sm:flex-row">
+        <div class="min-w-0 space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-semibold uppercase text-muted-foreground">
+              {{ 'quantBacktest.detail.meta.jobRunId' | translateContent }}
+            </span>
+            <app-copyable-text [value]="run.runId" class="font-mono text-sm"></app-copyable-text>
+            @if (run.backtestRunId) {
+              <span class="text-xs text-muted-foreground">
+                {{ 'quantBacktest.detail.meta.backtestRunId' | translateContent }}
+              </span>
+              <app-copyable-text
+                [value]="run.backtestRunId"
+                class="font-mono text-xs text-muted-foreground"
+              ></app-copyable-text>
+            }
+          </div>
+          <p class="text-sm text-muted-foreground">
+            {{ 'quantBacktest.detail.meta.dataset' | translateContent }}:
+            <span class="font-mono font-medium text-foreground">{{ run.datasetVersion }}</span>
+            · {{ 'quantBacktest.detail.meta.instruments' | translateContent }}:
+            <span class="font-semibold text-foreground">{{ run.instrumentIds.join(', ') }}</span>
+          </p>
+          <p class="font-mono text-xs text-muted-foreground">{{ run.start }} → {{ run.end }}</p>
+        </div>
+        <div class="flex shrink-0 items-end gap-2 sm:flex-col">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground">
+              {{ 'quantBacktest.detail.meta.jobStatus' | translateContent }}
+            </span>
+            <app-badge
+              [label]="'quantBacktest.status.' + run.jobStatus | translateContent"
+              [variant]="run.jobStatusVariant"
+            ></app-badge>
+          </div>
+          @if (run.quantOutcome) {
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-muted-foreground">
+                {{ 'quantBacktest.detail.meta.quantOutcome' | translateContent }}
+              </span>
+              <app-badge
+                [label]="'quantBacktest.status.' + run.quantOutcome | translateContent"
+                [variant]="run.quantStatusVariant"
+              ></app-badge>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      @if (metricsLoading()) {
+        <app-loading-skeleton type="card" [rows]="1"></app-loading-skeleton>
+      } @else if (metricsError()) {
+        <app-alert
+          variant="warning"
+          title="quantBacktest.detail.metrics.errorTitle"
+          [message]="formatErrorMessage(metricsError(), metricsErrorCode(), metricsCorrelationId())"
+          [actionLabel]="'quantBacktest.detail.action.retry'"
+          (action)="loadMetrics(runId())"
+        ></app-alert>
+      } @else if (metrics(); as metric) {
+        <app-responsive-grid [columns]="6" gap="md">
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.initialCapital' | translateContent"
+            [value]="run.initialCapital"
+          ></app-summary-metric-card>
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.netReturn' | translateContent"
+            [value]="
+              metric.totalReturn != null ? (metric.totalReturn * 100 | number: '1.2-2') + '%' : '—'
+            "
+            [trendVariant]="
+              metric.totalReturn != null && metric.totalReturn >= 0 ? 'success' : 'danger'
+            "
+          ></app-summary-metric-card>
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.maxDrawdown' | translateContent"
+            [value]="
+              metric.maxDrawdown != null ? (metric.maxDrawdown * 100 | number: '1.2-2') + '%' : '—'
+            "
+            trendVariant="danger"
+          ></app-summary-metric-card>
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.sharpeRatio' | translateContent"
+            [value]="metric.sharpe != null ? (metric.sharpe | number: '1.2-2') : '—'"
+          ></app-summary-metric-card>
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.winRate' | translateContent"
+            [value]="metric.winRate != null ? (metric.winRate * 100 | number: '1.1-1') + '%' : '—'"
+          ></app-summary-metric-card>
+          <app-summary-metric-card
+            [label]="'quantBacktest.detail.kpi.totalTrades' | translateContent"
+            [value]="metric.totalTrades != null ? metric.totalTrades : '—'"
+          ></app-summary-metric-card>
+        </app-responsive-grid>
+      }
+    </div>
+
+    <div class="mb-6">
+      @if (equityError() && equityPoints().length > 0) {
+        <app-alert
+          class="mb-3 block"
+          variant="warning"
+          title="quantBacktest.detail.tabs.errorTitle"
+          [message]="formatErrorMessage(equityError(), equityErrorCode(), equityCorrelationId())"
+          [actionLabel]="'quantBacktest.detail.action.retry'"
+          (action)="retryEquity()"
+        ></app-alert>
+      }
+      <app-equity-chart
+        [points]="equityPoints()"
+        [loading]="equityLoading()"
+        [error]="
+          equityPoints().length === 0 && equityError()
+            ? formatErrorMessage(equityError(), equityErrorCode(), equityCorrelationId())
+            : null
+        "
+        [initialCapital]="$any(run.initialCapital)"
+      ></app-equity-chart>
+      @if (equityHasMore()) {
+        <div class="mt-2 flex justify-end">
+          <app-button
+            label="quantBacktest.detail.action.loadMoreEquity"
+            variant="secondary"
+            size="sm"
+            [loading]="equityLoading()"
+            [disabled]="equityLoading()"
+            (buttonClick)="loadMoreEquity()"
+          ></app-button>
+        </div>
+      }
+    </div>
+
+    <div class="drilldown-section">
+      <app-tabs [tabs]="tabs" [value]="activeTab()" (valueChange)="onTabChange($event)"></app-tabs>
+      <div class="mt-3">
+        @if (activeTab() === 'trades') {
+          @if (tradesError() && trades().length > 0) {
+            <app-alert
+              class="mb-3 block"
+              variant="danger"
+              title="quantBacktest.detail.tabs.errorTitle"
+              [message]="
+                formatErrorMessage(tradesError(), tradesErrorCode(), tradesCorrelationId())
+              "
+              [actionLabel]="'quantBacktest.detail.action.retry'"
+              (action)="retryTrades()"
+            ></app-alert>
+          }
+          <app-table
+            [config]="tradesConfig"
+            [data]="trades()"
+            [loading]="tradesLoading()"
+            [error]="
+              trades().length === 0 && tradesError()
+                ? formatErrorMessage(tradesError(), tradesErrorCode(), tradesCorrelationId())
+                : null
+            "
+            [customTemplates]="{ tradeSide: tradeSideTpl, tradePnl: tradePnlTpl }"
+            (retry)="retryTrades()"
+          ></app-table>
+          @if (tradesHasMore()) {
+            <div class="mt-2 flex justify-end">
+              <app-button
+                label="quantBacktest.detail.action.loadMore"
+                variant="secondary"
+                size="sm"
+                [loading]="tradesLoading()"
+                [disabled]="tradesLoading()"
+                (buttonClick)="loadMoreTrades()"
+              ></app-button>
+            </div>
+          }
+        }
+        @if (activeTab() === 'orders') {
+          @if (ordersError() && orders().length > 0) {
+            <app-alert
+              class="mb-3 block"
+              variant="danger"
+              title="quantBacktest.detail.tabs.errorTitle"
+              [message]="
+                formatErrorMessage(ordersError(), ordersErrorCode(), ordersCorrelationId())
+              "
+              [actionLabel]="'quantBacktest.detail.action.retry'"
+              (action)="retryOrders()"
+            ></app-alert>
+          }
+          <app-table
+            [config]="ordersConfig"
+            [data]="orders()"
+            [loading]="ordersLoading()"
+            [error]="
+              orders().length === 0 && ordersError()
+                ? formatErrorMessage(ordersError(), ordersErrorCode(), ordersCorrelationId())
+                : null
+            "
+            [customTemplates]="{ orderSide: orderSideTpl, orderStatus: orderStatusTpl }"
+            (retry)="retryOrders()"
+          ></app-table>
+          @if (ordersHasMore()) {
+            <div class="mt-2 flex justify-end">
+              <app-button
+                label="quantBacktest.detail.action.loadMore"
+                variant="secondary"
+                size="sm"
+                [loading]="ordersLoading()"
+                [disabled]="ordersLoading()"
+                (buttonClick)="loadMoreOrders()"
+              ></app-button>
+            </div>
+          }
+        }
+        @if (activeTab() === 'signals') {
+          @if (signalsError() && signals().length > 0) {
+            <app-alert
+              class="mb-3 block"
+              variant="danger"
+              title="quantBacktest.detail.tabs.errorTitle"
+              [message]="
+                formatErrorMessage(signalsError(), signalsErrorCode(), signalsCorrelationId())
+              "
+              [actionLabel]="'quantBacktest.detail.action.retry'"
+              (action)="retrySignals()"
+            ></app-alert>
+          }
+          <app-table
+            [config]="signalsConfig"
+            [data]="signals()"
+            [loading]="signalsLoading()"
+            [error]="
+              signals().length === 0 && signalsError()
+                ? formatErrorMessage(signalsError(), signalsErrorCode(), signalsCorrelationId())
+                : null
+            "
+            [customTemplates]="{ signalAction: signalActionTpl }"
+            (retry)="retrySignals()"
+          ></app-table>
+          @if (signalsHasMore()) {
+            <div class="mt-2 flex justify-end">
+              <app-button
+                label="quantBacktest.detail.action.loadMore"
+                variant="secondary"
+                size="sm"
+                [loading]="signalsLoading()"
+                [disabled]="signalsLoading()"
+                (buttonClick)="loadMoreSignals()"
+              ></app-button>
+            </div>
+          }
+        }
+        @if (activeTab() === 'config') {
+          <app-section-panel [title]="'quantBacktest.detail.tabs.config' | translateContent">
+            <app-json-viewer [value]="run" [collapsed]="false"></app-json-viewer>
+          </app-section-panel>
+        }
+      </div>
+    </div>
+  }
+</app-page-shell>
+
+<ng-template #tradeSideTpl let-row="row">
+  <app-badge
+    [label]="getTradeSideI18nKey(row.side) | translateContent"
+    [variant]="row.side === 'LONG' ? 'success' : 'danger'"
+    size="sm"
+  ></app-badge>
+</ng-template>
+
+<ng-template #tradePnlTpl let-row="row">
+  <span
+    class="tabular-nums font-semibold"
+    [class.text-emerald-600]="row.pnlNet > 0"
+    [class.text-rose-600]="row.pnlNet < 0"
+  >
+    {{ row.pnlNet == null ? '—' : (row.pnlNet | number: '1.2-2') }}
+  </span>
+</ng-template>
+
+<ng-template #orderSideTpl let-row="row">
+  <app-badge
+    [label]="getOrderSideI18nKey(row.side) | translateContent"
+    [variant]="row.side === 'BUY' ? 'success' : 'danger'"
+    size="sm"
+  ></app-badge>
+</ng-template>
+
+<ng-template #orderStatusTpl let-row="row">
+  <app-badge
+    [label]="getOrderStatusI18nKey(row.status) | translateContent"
+    [variant]="getOrderStatusVariant(row.status)"
+    size="sm"
+  ></app-badge>
+</ng-template>
+
+<ng-template #signalActionTpl let-row="row">
+  <app-badge
+    [label]="getSignalActionI18nKey(row.action) | translateContent"
+    [variant]="getSignalActionVariant(row.action)"
+    size="sm"
+  ></app-badge>
+</ng-template>

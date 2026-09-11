@@ -1,0 +1,15 @@
+.form-input {
+  display: block;
+  height: var(--app-control-height-sm);
+  padding: 0 var(--app-space-2);
+  font-size: var(--app-font-size-xs);
+  color: var(--app-text);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--app-primary, #0284c7);
+}
